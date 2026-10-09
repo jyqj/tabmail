@@ -1,0 +1,168 @@
+{
+  "Dockerfile_SOURCE_byte085_capture_not_coldDocker_runtime_or_shipping_claim": true,
+  "T2_percall_witness": {
+    "actual_two_named_children": [
+      "refusal_and_success",
+      "cancellation_and_success"
+    ],
+    "not_tParallel_pausecont_claim": true,
+    "parallel_flag": 2,
+    "real_component_goroutines_not_synthetic_mock": true,
+    "sourcebound_actual_assertions": "cancel/refusal root0 fails expected withoutEnvelope, root1 independently stays waiting then succeeds equal completelegacyenvelope, both finish defercleanup under1s; e121source and actualPASS",
+    "two_logged_actual_active2_firstRead_rendezvous": true
+  },
+  "UTC_derived": "2026-10-02T18:14:34.183672+00:00",
+  "actual_counts_all_four": {
+    "fail_nodes": 0,
+    "leaf": 154,
+    "pass_nodes": 164,
+    "run_nodes": 164,
+    "skip_nodes": 0,
+    "top": 25
+  },
+  "actual_discovery_and_counts": {
+    "T1-allocation-guard": {
+      "cont": [],
+      "fail_nodes": 0,
+      "leaf": 11,
+      "package_terminals": [
+        {
+          "Action": "pass",
+          "Elapsed": 3.078,
+          "Package": "github.com/jhillyerd/enmime/v2",
+          "Time": "2026-10-03T02:07:59.198518+08:00"
+        }
+      ],
+      "pass_nodes": 13,
+      "pause": [],
+      "run_nodes": 13,
+      "skip_nodes": 0,
+      "top": 6,
+      "unfinished": []
+    },
+    "T2-real-percall-two-overlap": {
+      "cont": [],
+      "fail_nodes": 0,
+      "leaf": 2,
+      "package_terminals": [
+        {
+          "Action": "pass",
+          "Elapsed": 1.417,
+          "Package": "github.com/jhillyerd/enmime/v2",
+          "Time": "2026-10-03T02:08:01.092941+08:00"
+        }
+      ],
+      "pass_nodes": 3,
+      "pause": [],
+      "run_nodes": 3,
+      "skip_nodes": 0,
+      "top": 1,
+      "unfinished": []
+    },
+    "T3-mailcontent-common-admission": {
+      "cont": [],
+      "fail_nodes": 0,
+      "leaf": 130,
+      "package_terminals": [
+        {
+          "Action": "pass",
+          "Elapsed": 10.122,
+          "Package": "tabmail/internal/mailcontent",
+          "Time": "2026-10-03T02:08:12.619555+08:00"
+        }
+      ],
+      "pass_nodes": 137,
+      "pause": [],
+      "run_nodes": 137,
+      "skip_nodes": 0,
+      "top": 7,
+      "unfinished": []
+    },
+    "T4-required-upstream-causal-compatibility": {
+      "cont": [],
+      "fail_nodes": 0,
+      "leaf": 11,
+      "package_terminals": [
+        {
+          "Action": "pass",
+          "Elapsed": 1.421,
+          "Package": "github.com/jhillyerd/enmime/v2",
+          "Time": "2026-10-03T02:08:14.633185+08:00"
+        }
+      ],
+      "pass_nodes": 11,
+      "pause": [],
+      "run_nodes": 11,
+      "skip_nodes": 0,
+      "top": 11,
+      "unfinished": []
+    }
+  },
+  "actual_localfork_mod_sha256": "976135226793cb303993bce4659b3883783db3225d9e5617d1e3a1540e5c5862",
+  "actual_race_compile_input_metadata": {
+    "GoList_exit": 0,
+    "actual_EmbedFiles": 0,
+    "all_selected_owninputs_captured": true,
+    "external_toolchain_cache_versions_checksums_not_freshbytes_hashed_within715": true,
+    "localfork_selected": 52,
+    "own_selected_compile_inputs": 89,
+    "rows": 287
+  },
+  "actual_root_MVS_used_not_nestedmodule": true,
+  "actual_root_module_go_mod_sha256": "a2e87e7f71509440e83df143c1875bb778ac1d2aabaa3fc66f109dcb2f32acc4",
+  "actual_root_module_go_sum_sha256": "5b850553522724f8fa71d36a94de2da91da174270ec4d460bb135dd42f53a33f",
+  "actual_source_closure_sha256": "e180c78fb151ab250b8dbf2e8acf04d618eae5e2e61e3d75c9940f45c453790c",
+  "actual_source_files": 715,
+  "actual_whole_fork_files": 219,
+  "auto_retry": false,
+  "cleanup": {
+    "all_groups_gone": true,
+    "elapsed_original600_seconds": 22.797218799591064,
+    "noPG_Node_SMTP_benchmark_or_Docker_started": true,
+    "old_MIME_V2_fail_messages_alreadygreen_or_old_modulewhole_not_rerun": true,
+    "within600": true
+  },
+  "no_PG_network_Node_benchmark_Docker_or_wholeCI": true,
+  "no_whole_messages_PG_network_benchmark_runtime": true,
+  "not_full_upstream_module_suite_or_P6parent_total_cost_CPUheap_completion": true,
+  "oldMIMEV2_26failedleaves_and_oldmessages_alreadyPASS_not_reexecuted": true,
+  "results": {
+    "T1-allocation-guard": {
+      "elapsed_wall_seconds": 6.103669881820679,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "T2-real-percall-two-overlap": {
+      "elapsed_wall_seconds": 1.8672609329223633,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "T3-mailcontent-common-admission": {
+      "elapsed_wall_seconds": 11.569746017456055,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "T4-required-upstream-causal-compatibility": {
+      "elapsed_wall_seconds": 1.9738848209381104,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "root-MVS-race-compile-input-GoList": {
+      "elapsed_wall_seconds": 0.8356091976165771,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    }
+  },
+  "root_local_replace_readonly_no_tidy_no_sumchanges": true,
+  "scope": "sole new MIMEV5 four target rootmodule/MVS bounded acceptance, not wholemodule/fullCI/parenttask",
+  "source_kind": "canonical_component_input_files_sha1_nonlegacy",
+  "source_policy22overallFAIL_remains_separate": true,
+  "source_sha": "3de31b158fe93dcab40f6b449fe9ce827331ea0d",
+  "source_signed224_match": true,
+  "verdict": "BOUNDED_MIME_FORK_V5_FOUR_TARGETS_ACTUAL_PASS_pending_independent_runtime_review"
+}

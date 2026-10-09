@@ -1,0 +1,108 @@
+{
+  "M_retry": false,
+  "actual_leaf_count": 6,
+  "actual_schema_version": "17",
+  "actual_source_closure_sha256": "95be82d27fad783df5932811d6653deb8afd03cc07de3b2042df1e3fd6bdc9ad",
+  "actual_test_subtest_pass_count": 8,
+  "actual_top_count": 3,
+  "cleanup": {
+    "base_database": "tm_receipt6_fixturefix",
+    "old_resources_untouched": true,
+    "owned_pg_pid": 46336,
+    "owned_pid_observation": "absent",
+    "owned_pid_ps_exit": 1,
+    "owned_root": "/private/tmp/tm-r5receipt6fix.0ndu5l3p",
+    "pg_stop_exit": 0,
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "test_database_query_exit": 0,
+    "test_databases": [],
+    "utc": "2026-10-02T08:47:48.571401+00:00"
+  },
+  "fixture_fix_scope": "test-only invalid input/serialized key substring scan repaired, no production byte changes; original8aea failing raw preserved",
+  "fullCI_green": false,
+  "original_failed_raw": "/private/tmp/tm-r5receiptA.z1dsm2yo",
+  "original_failure_source": "8aea688a87f31f84b74a90ce73b80ed4e76098a9",
+  "original_whole_CLI1_preserved": true,
+  "parent_code_compile0_only_two_new_signed_fixture_deltas_runtime_here": true,
+  "production_fix_claim": false,
+  "results": {
+    "A-five-failed-leaves": {
+      "actual_test_names": [
+        "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay",
+        "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay/owner-live",
+        "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay/send-only-shared",
+        "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay/expired-before-replay",
+        "TestR5OutboundReceiptPrivacyHTTPCommitVersusDisplayFailure",
+        "TestR5OutboundReceiptPrivacyHTTPCommitVersusDisplayFailure/display-fails",
+        "TestR5OutboundReceiptPrivacyHTTPCommitVersusDisplayFailure/commit-fails"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 5,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 3.061,
+          "package": "tabmail/internal/store/postgres"
+        }
+      ],
+      "pass_count": 7,
+      "run_count": 7,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 2
+    },
+    "consumer-one-failed-leaf": {
+      "actual_test_names": [
+        "TestSubmissionUncertaintyMapsToNeedsAttention"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 1,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 1.865,
+          "package": "tabmail/internal/store/postgres"
+        }
+      ],
+      "pass_count": 1,
+      "run_count": 1,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 1
+    },
+    "official-schema17-bootstrap": {
+      "execution": {
+        "absolute_deadline_wall_time": 1790930942.712516,
+        "budget_seconds": 90,
+        "elapsed_wall_seconds": 2.2624149322509766,
+        "final_owned_group_observation": {
+          "members": [],
+          "non_zombie_live_pids": [],
+          "status": "observed"
+        },
+        "observed_wall_time": 1790930854.974931,
+        "owned_process_group": 46348,
+        "process_returncode": 0,
+        "process_returncode_status": "observed_parent_poll",
+        "scope": "absolute wall deadline including host suspension; cleanup is observed after resume, never guaranteed during sleep",
+        "started_wall_time": 1790930852.712516,
+        "timed_out": false
+      },
+      "exit": 0
+    }
+  },
+  "scope": "only_original_six_failed_receipt_leaves_signed_test_only_fixture_repair",
+  "scope_verdict": "PASS_only_six_original_failed_leaves_after_signed_fixture_only_repairs",
+  "source_postcheck_equal": true,
+  "source_sha": "f759eeab43dd9620358495e16419836f66ea0da8",
+  "whole_A_or_consumer9_rerun": false
+}

@@ -1,0 +1,54 @@
+
+> web@0.1.0 test
+> vitest run --reporter=verbose components/company/compose.test.tsx app/(dashboard)/mail/page.test.tsx features/mail/components/receipt-consumer.test.tsx
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 /workspace/tabmail/web
+
+ ✓ features/mail/components/receipt-consumer.test.tsx > shipping ordinary receipt consumers > lists neutral task IDs and full-ledger mixed results without automatic content reads 83ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > shipping ordinary receipt consumers > renders unknown evidence without inventing zero, acceptance or status-based content/retry authority 11ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > shipping ordinary receipt consumers > fails closed on old raw-job response extensions rather than displaying/stripping them 7ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > shipping ordinary receipt consumers > uses the same aggregate DTO on compatibility detail, attempts, recipients and retry transports 36ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > shipping ordinary receipt consumers > fetches live body/BCC lazily with the current tenant/token and then attachments 17ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > shipping ordinary receipt consumers > shows complete BCC semantics only from the live structured marker 14ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > shipping ordinary receipt consumers > shows legacy_unknown BCC semantics only from the live structured marker 14ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > shipping ordinary receipt consumers > does not display custom headers or accept a custom BCC fallback 14ms
+ ✓ app/(dashboard)/mail/page.test.tsx > SubmissionPane sent-content view > reveals the sent body and attachment download on demand 243ms
+ ✓ app/(dashboard)/mail/page.test.tsx > SubmissionPane sent-content view > shows the redaction notice instead of a body when content is redacted 23ms
+ ✓ app/(dashboard)/mail/page.test.tsx > SubmissionPane sent-content view > keeps the content collapsed until requested 31ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > shipping ordinary receipt consumers > renders sent-folder detail from the current live content, not the queue or list sender 35ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > live content lifecycle and epoch-bound ReadableStream responses > clears old private body and attachments after final 401 during live revalidation 20ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > live content lifecycle and epoch-bound ReadableStream responses > clears old private body and attachments after final 403 during live revalidation 7ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > live content lifecycle and epoch-bound ReadableStream responses > clears old private body and attachments after final 404 during live revalidation 7ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > live content lifecycle and epoch-bound ReadableStream responses > capability revocation closes the disclosure, clears private state, and re-grant never auto-opens it 27ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > live content lifecycle and epoch-bound ReadableStream responses > aborts partial old JSON and never admits its late body after Switch company 26ms
+ ✓ app/(dashboard)/mail/page.test.tsx > MessagePane personal-state vs shared-organizing actions > shows personal-state actions but not organizing actions to a read-only member 39ms
+ ✓ app/(dashboard)/mail/page.test.tsx > MessagePane personal-state vs shared-organizing actions > shows both action groups to an organizer 32ms
+ ✓ app/(dashboard)/mail/page.test.tsx > SubmissionPane capabilities > shows content but not retry when the server grants view only 30ms
+ ✓ app/(dashboard)/mail/page.test.tsx > SubmissionPane capabilities > shows retry but not content when the server grants retry only 13ms
+ ✓ app/(dashboard)/mail/page.test.tsx > SubmissionPane capabilities > surfaces the uncertain-outcome notice on a delivery_uncertain conflict 23ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > live content lifecycle and epoch-bound ReadableStream responses > aborts partial old JSON and never admits its late body after Switch account 16ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > live content lifecycle and epoch-bound ReadableStream responses > aborts partial old JSON and never admits its late body after Logout 14ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > live content lifecycle and epoch-bound ReadableStream responses > aborts a collapsed disclosure and discards an otherwise valid late response without caching it 9ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > live content lifecycle and epoch-bound ReadableStream responses > token-only rotation preserves disclosure scope and authorized private content 18ms
+ ✓ features/mail/components/receipt-consumer.test.tsx > live content lifecycle and epoch-bound ReadableStream responses > successful existing refresh retries the live read with a rotated token without inventing a new identity scope 15ms
+ ✓ components/company/compose.test.tsx > Compose template eligibility > shows the revoked notice, blocks sending, and can unpin the template 298ms
+ ✓ components/company/compose.test.tsx > Compose template eligibility > renders a missing pin without an error and leaves sending available 79ms
+ ✓ app/(dashboard)/mail/page.test.tsx > Revocation while a sent message is open > unmounts open content, clears cached bytes and requires an explicit reopen after regrant 93ms
+ ✓ components/company/compose.test.tsx > Pinned template version survives newer publication > edits, previews and submits authorized v1 when the picker only contains v2 92ms
+ ✓ app/(dashboard)/mail/page.test.tsx > Revocation while a sent message is open > does not leave cached attachment metadata visible after a denied revalidation 50ms
+ ✓ app/(dashboard)/mail/page.test.tsx > Template-only fallback sender > sends the reply preparation request with the template-only identity, not the unreadable sender 35ms
+
+ Test Files  3 passed (3)
+      Tests  33 passed (33)
+   Start at  19:10:58
+   Duration  2.19s (transform 631ms, setup 426ms, import 1.04s, tests 1.47s, environment 2.70s)
+
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

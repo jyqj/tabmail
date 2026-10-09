@@ -1,0 +1,165 @@
+{
+  "source_sha": "053414728b359d66fba0f2a02e1229088e505d1a",
+  "formal_batch": false,
+  "cache_probe": "owned create/remove passed",
+  "stages": [
+    {
+      "stage": "pre-default",
+      "status": "pass",
+      "seconds": 9.611
+    },
+    {
+      "stage": "compile-only-handlers",
+      "status": "pass",
+      "seconds": 23.234
+    },
+    {
+      "stage": "post-default-strict-validation",
+      "status": "failed",
+      "error_type": "ValueError",
+      "error_sha256": "c8b8b476a372c65da250c04d4377a228070c7f76a011a7332617b38d8bece4d1",
+      "seconds": 7.514
+    }
+  ],
+  "go_version": "go1.25.7",
+  "go_sha256": "76ac600b41ad2eceee5d39d02af78009516f8b2a29f30bcc80f765c3e4b4f5a8",
+  "compile": {
+    "argv": [
+      "<selected-Go1.25.7>",
+      "test",
+      "-c",
+      "-o",
+      "<private-output>/handlers.test",
+      "./internal/api/handlers"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "receipt_changed_fields": [
+    ".attestation_sha256",
+    ".commands[1].stdout_sha256",
+    ".commands[3].stdout_sha256",
+    ".commands[4].stdout_sha256",
+    ".commands[5].stdout_sha256",
+    ".commands[6].stdout_sha256",
+    ".commands[8].stdout_sha256",
+    ".commands[9].stdout_sha256",
+    ".commands[10].stdout_sha256",
+    ".hydration_diagnostics.stderr",
+    ".hydration_diagnostics.stdout_sha256"
+  ],
+  "raw_changed_commands": [
+    {
+      "index": 0,
+      "stdout_before_sha256": "492292865c6b5cdba826686f6fca7fec1351dcfb81bb607adcd8f492253b04bd",
+      "stdout_after_sha256": "a9ad1043f8d014bbe31a7dd96302b5e8f2ade2c55722a09f839ce47f9dc76cd5",
+      "changed_field_names": [
+        "GOGCCFLAGS"
+      ],
+      "changed_fields_count": 1
+    },
+    {
+      "index": 1,
+      "stdout_before_sha256": "34a951f3da48bc71d491641ca0ee441c5b3ed4c63d82f3ebb302f7c32a501ed5",
+      "stdout_after_sha256": "90f36dde3844573ce4f832a40221450b9db2d5e6676ac5e9231695a10478a5e5",
+      "changed_field_names": [
+        "Stale",
+        "StaleReason"
+      ],
+      "changed_fields_count": 995
+    },
+    {
+      "index": 2,
+      "stdout_before_sha256": "34a951f3da48bc71d491641ca0ee441c5b3ed4c63d82f3ebb302f7c32a501ed5",
+      "stdout_after_sha256": "90f36dde3844573ce4f832a40221450b9db2d5e6676ac5e9231695a10478a5e5",
+      "changed_field_names": [
+        "Stale",
+        "StaleReason"
+      ],
+      "changed_fields_count": 995
+    },
+    {
+      "index": 4,
+      "stdout_before_sha256": "a336980c306964361e533e1559393b93062d17d8701adb11ee0b83671d547a20",
+      "stdout_after_sha256": "3e18d7a60ec8577acd31fbf1dd8ebdc076cb4e2e5c3c3dfe85d6d44d7fbccab3",
+      "changed_field_names": [
+        "Stale",
+        "StaleReason"
+      ],
+      "changed_fields_count": 953
+    },
+    {
+      "index": 5,
+      "stdout_before_sha256": "a0510a9c6a4a6d965b3635ea3fdcbacd76647d489b1eb9ac1e83891fa0e58a51",
+      "stdout_after_sha256": "101dedda9ae8dbe3d431f7a84926a7d8ef792cc474b3faca9e5b7facf0c322ca",
+      "changed_field_names": [
+        "Stale",
+        "StaleReason"
+      ],
+      "changed_fields_count": 953
+    },
+    {
+      "index": 6,
+      "stdout_before_sha256": "4f2c077060b1c9105389dfaa67bfe95e8fac5a0e40c644ed463633dea320cdac",
+      "stdout_after_sha256": "b0ff8025b164a74a9b576b8e2cf45d0a8e8665ed8330618544c80d25f94de432",
+      "changed_field_names": [
+        "Stale",
+        "StaleReason"
+      ],
+      "changed_fields_count": 104
+    },
+    {
+      "index": 7,
+      "stdout_before_sha256": "34a951f3da48bc71d491641ca0ee441c5b3ed4c63d82f3ebb302f7c32a501ed5",
+      "stdout_after_sha256": "90f36dde3844573ce4f832a40221450b9db2d5e6676ac5e9231695a10478a5e5",
+      "changed_field_names": [
+        "Stale",
+        "StaleReason"
+      ],
+      "changed_fields_count": 995
+    },
+    {
+      "index": 9,
+      "stdout_before_sha256": "a336980c306964361e533e1559393b93062d17d8701adb11ee0b83671d547a20",
+      "stdout_after_sha256": "3e18d7a60ec8577acd31fbf1dd8ebdc076cb4e2e5c3c3dfe85d6d44d7fbccab3",
+      "changed_field_names": [
+        "Stale",
+        "StaleReason"
+      ],
+      "changed_fields_count": 953
+    },
+    {
+      "index": 10,
+      "stdout_before_sha256": "a0510a9c6a4a6d965b3635ea3fdcbacd76647d489b1eb9ac1e83891fa0e58a51",
+      "stdout_after_sha256": "101dedda9ae8dbe3d431f7a84926a7d8ef792cc474b3faca9e5b7facf0c322ca",
+      "changed_field_names": [
+        "Stale",
+        "StaleReason"
+      ],
+      "changed_fields_count": 953
+    },
+    {
+      "index": 11,
+      "stdout_before_sha256": "4f2c077060b1c9105389dfaa67bfe95e8fac5a0e40c644ed463633dea320cdac",
+      "stdout_after_sha256": "b0ff8025b164a74a9b576b8e2cf45d0a8e8665ed8330618544c80d25f94de432",
+      "changed_field_names": [
+        "Stale",
+        "StaleReason"
+      ],
+      "changed_fields_count": 104
+    }
+  ],
+  "tracked_clean": true,
+  "strict_identity_changed_fields": [
+    ".commands[1].stdout_sha256",
+    ".commands[3].stdout_sha256",
+    ".commands[4].stdout_sha256",
+    ".commands[5].stdout_sha256",
+    ".commands[6].stdout_sha256",
+    ".commands[8].stdout_sha256",
+    ".commands[9].stdout_sha256",
+    ".commands[10].stdout_sha256"
+  ],
+  "interpretation": "New control only: raw Go-list field changes are exactly Stale/StaleReason; raw go-env GOGCCFLAGS temporary prefix remains in the existing normalization domain. No historical cause or formal qualification is inferred."
+}

@@ -1,0 +1,5 @@
+=== RUN   TestOrdinaryReceiptOpenAPIWireFixtures
+    ordinary_receipt_contract_fixture_test.go:110: typed wire fixtures: 21; output=/workspace/tabmail/docs/company-mail/evidence/R5-INTEGRATION-BATCH2-20261003/ordinary-wire.json
+--- PASS: TestOrdinaryReceiptOpenAPIWireFixtures (0.00s)
+PASS
+ok  	tabmail/internal/api/handlers	0.010s

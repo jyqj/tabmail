@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "suites": {
+    "login-issuance": {
+      "required_tests": [
+        ["tabmail/internal/api/handlers", "TestR5LoginIssuancePostgresRejectsChangedAuthentication"],
+        ["tabmail/internal/api/handlers", "TestR5LoginIssuancePostgresCurrentSessionAndRevocation"],
+        ["tabmail/internal/api/handlers", "TestR5LoginIssuancePostgresOwnsUserUntilTokenInsert"],
+        ["tabmail/internal/api/handlers", "TestR5LoginIssuancePostgresInsertFailureHasNoCookie"],
+        ["tabmail/internal/api/handlers", "TestR5LoginIssuancePostgresCancellationHasNoCookie"]
+      ],
+      "allowed_skips": []
+    }
+  }
+}

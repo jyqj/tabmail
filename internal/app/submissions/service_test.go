@@ -192,6 +192,10 @@ func TestRedactOutboundJobByAuthority(t *testing.T) {
 		InFlightDomain: "pending.test",
 	}
 
+	// Content authority requires a persisted synthetic archive, not a job literal.
+	if err := f.st.CreateOutboundJob(context.Background(), job); err != nil {
+		t.Fatal(err)
+	}
 	ownerView, err := f.svc.RedactOutboundJob(context.Background(), userActor(f.owner), job)
 	if err != nil {
 		t.Fatal(err)

@@ -26,7 +26,7 @@ const MaxTemplateBytes = 256 * 1024
 // loops, functions, includes or dynamic format widths. Variable data is never
 // parsed as template source. Identity variables cannot be supplied by clients.
 func ValidateTemplate(t TemplateDraft) error {
-	if t.Subject == "" || len(t.Subject) > 998 || strings.ContainsAny(t.Subject, "\r\n") {
+	if t.Subject == "" || len(t.Subject) > 998 || !utf8.ValidString(t.Subject) || strings.ContainsAny(t.Subject, "\x00\r\n") {
 		return app.BadRequest("invalid template subject")
 	}
 	if t.TextBody == "" && t.HTMLBody == "" {
@@ -34,6 +34,14 @@ func ValidateTemplate(t TemplateDraft) error {
 	}
 	if len(t.TextBody)+len(t.HTMLBody) > MaxTemplateBytes || len(t.Variables) > 32 {
 		return app.BadRequest("template size limit exceeded")
+	}
+	if !utf8.ValidString(t.TextBody) || !utf8.ValidString(t.HTMLBody) {
+		return app.BadRequest("invalid template body encoding")
+	}
+	// NUL is valid UTF-8 but cannot be stored in PostgreSQL text/jsonb. Reject
+	// it before rendering can silently replace it or publication reaches SQL.
+	if strings.ContainsRune(t.TextBody, '\x00') || strings.ContainsRune(t.HTMLBody, '\x00') {
+		return app.BadRequest("template body contains NUL")
 	}
 	declared := map[string]bool{"employee_name": true, "company_name": true, "sender_address": true}
 	for _, v := range t.Variables {
@@ -49,8 +57,14 @@ func ValidateTemplate(t TemplateDraft) error {
 			return app.BadRequest("too many variable options")
 		}
 		for _, option := range v.Options {
+			if !utf8.ValidString(option) {
+				return app.BadRequest("invalid variable option encoding")
+			}
 			if utf8.RuneCountInString(option) > v.MaxLength {
 				return app.BadRequest("oversized variable option")
+			}
+			if err := validateVariableScalar(v, option); err != nil {
+				return app.BadRequest("invalid variable option: " + v.Name)
 			}
 		}
 		declared[v.Name] = true
@@ -79,6 +93,14 @@ func Render(t TemplateDraft, values map[string]string, employee, companyName, se
 	if err := ValidateTemplate(t); err != nil {
 		return "", "", "", err
 	}
+	// Server-owned identity values are data too: reject malformed bytes before
+	// either renderer can preserve or replace them, even if not referenced.
+	if !utf8.ValidString(employee) || !utf8.ValidString(companyName) || !utf8.ValidString(sender) {
+		return "", "", "", app.BadRequest("invalid template identity encoding")
+	}
+	if strings.ContainsRune(employee, '\x00') || strings.ContainsRune(companyName, '\x00') || strings.ContainsRune(sender, '\x00') {
+		return "", "", "", app.BadRequest("template identity contains NUL")
+	}
 	data := map[string]string{"employee_name": employee, "company_name": companyName, "sender_address": sender}
 	allowed := map[string]Variable{}
 	for _, v := range t.Variables {
@@ -94,28 +116,10 @@ func Render(t TemplateDraft, values map[string]string, employee, companyName, se
 		if !utf8.ValidString(value) || utf8.RuneCountInString(value) > v.MaxLength {
 			return "", "", "", app.BadRequest("oversized variable: " + v.Name)
 		}
-		if v.Required && strings.TrimSpace(value) == "" {
-			return "", "", "", app.BadRequest("required variable: " + v.Name)
+		if err := validateVariableScalar(v, value); err != nil {
+			return "", "", "", err
 		}
 		if value != "" {
-			valid := true
-			switch v.Type {
-			case "email":
-				a, e := mail.ParseAddress(value)
-				valid = e == nil && a.Address == value
-			case "integer":
-				_, e := strconv.ParseInt(value, 10, 64)
-				valid = e == nil
-			case "date":
-				_, e := time.Parse("2006-01-02", value)
-				valid = e == nil
-			case "url":
-				u, e := url.Parse(value)
-				valid = e == nil && u.Host != "" && (u.Scheme == "https" || u.Scheme == "http") && u.User == nil
-			}
-			if !valid {
-				return "", "", "", app.BadRequest("invalid variable type: " + v.Name)
-			}
 			if len(v.Options) > 0 {
 				found := false
 				for _, o := range v.Options {
@@ -131,6 +135,47 @@ func Render(t TemplateDraft, values map[string]string, employee, companyName, se
 		data[v.Name] = value
 	}
 	return renderValidated(t, data)
+}
+
+// Publication choices and supplied values share required/type rules. Their
+// encoding and length checks retain the existing caller-specific errors.
+func validateVariableScalar(v Variable, value string) error {
+	// Used for both publication options and submitted values, including
+	// declared variables that are not referenced by this template version.
+	if strings.ContainsRune(value, '\x00') {
+		return app.BadRequest("variable contains NUL: " + v.Name)
+	}
+	if v.Required && strings.TrimSpace(value) == "" {
+		return app.BadRequest("required variable: " + v.Name)
+	}
+	if value == "" {
+		return nil
+	}
+	valid := true
+	switch v.Type {
+	case "email":
+		// Validate a bare addr-spec while retaining its original quoting as
+		// template data. ParseAddress decodes quoted local parts, so comparing
+		// its Address with value incorrectly rejects legitimate mailboxes.
+		// It also permits whitespace after @; keep that out of a scalar email
+		// while allowing spaces and @ inside a quoted local part.
+		_, e := mail.ParseAddress("<" + value + ">")
+		at := strings.LastIndex(value, "@")
+		valid = e == nil && at >= 0 && strings.TrimSpace(value) == value && !strings.ContainsAny(value[at+1:], " \t\r\n")
+	case "integer":
+		_, e := strconv.ParseInt(value, 10, 64)
+		valid = e == nil
+	case "date":
+		_, e := time.Parse("2006-01-02", value)
+		valid = e == nil
+	case "url":
+		u, e := url.Parse(value)
+		valid = e == nil && u.Host != "" && (u.Scheme == "https" || u.Scheme == "http") && u.User == nil
+	}
+	if !valid {
+		return app.BadRequest("invalid variable type: " + v.Name)
+	}
+	return nil
 }
 
 func renderValidated(t TemplateDraft, data map[string]string) (string, string, string, error) {

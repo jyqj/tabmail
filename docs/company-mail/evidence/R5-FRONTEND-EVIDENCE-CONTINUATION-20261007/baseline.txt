@@ -1,0 +1,24 @@
+test_each_validation_runs_after_an_unrelated_gate_failure (continuation_review.FrontendEvidenceContinuationTests.test_each_validation_runs_after_an_unrelated_gate_failure) ... FAIL
+test_failures_still_fail_the_existing_frontend_job (continuation_review.FrontendEvidenceContinuationTests.test_failures_still_fail_the_existing_frontend_job) ... ok
+test_test_report_and_actual_checkout_identity_are_retained_after_failure (continuation_review.FrontendEvidenceContinuationTests.test_test_report_and_actual_checkout_identity_are_retained_after_failure) ... FAIL
+
+======================================================================
+FAIL: test_each_validation_runs_after_an_unrelated_gate_failure (continuation_review.FrontendEvidenceContinuationTests.test_each_validation_runs_after_an_unrelated_gate_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/458de7991ac3/tabmail-wave-ci/scripts/tests/test_r5_frontend_evidence_continuation.py", line 20, in test_each_validation_runs_after_an_unrelated_gate_failure
+    self.assertIsNotNone(install_id, 'the dependency prerequisite needs an observable outcome')
+AssertionError: unexpectedly None : the dependency prerequisite needs an observable outcome
+
+======================================================================
+FAIL: test_test_report_and_actual_checkout_identity_are_retained_after_failure (continuation_review.FrontendEvidenceContinuationTests.test_test_report_and_actual_checkout_identity_are_retained_after_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/458de7991ac3/tabmail-wave-ci/scripts/tests/test_r5_frontend_evidence_continuation.py", line 51, in test_test_report_and_actual_checkout_identity_are_retained_after_failure
+    self.assertTrue(any('git rev-parse HEAD > frontend-source-sha.txt' in step.get('run', '')
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.081s
+
+FAILED (failures=2)

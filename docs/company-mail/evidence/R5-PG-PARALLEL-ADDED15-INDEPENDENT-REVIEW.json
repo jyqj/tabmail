@@ -1,0 +1,83 @@
+{
+  "verdict": "BOUNDED_PASS",
+  "reviewer": "pg_parallel15_independent_review",
+  "created_utc": "2026-10-02T14:14:09.566550+00:00",
+  "scope": "新增15个PG顶层完整原始子例 + TestR5PGAdmissionExactWhitelist；只读独审，无重跑",
+  "run_root": "/private/tmp/tm-r5pgparallel15-run.s3xi51pg",
+  "blockers": [],
+  "raw_evidence_verified": {
+    "real_top": 15,
+    "real_children": 67,
+    "real_leaf": 73,
+    "real_test_subtest_run_and_pass": 82,
+    "pure_top_run_and_pass": 1,
+    "skip": 0,
+    "fail": 0,
+    "cli_exit_both": 0,
+    "race_enabled_both": true,
+    "count1_timeout180_both": true,
+    "GOMAXPROCS": 2,
+    "package_elapsed_seconds": 21.722,
+    "old4_and_old_other_pure_not_run": true,
+    "actual_whitelist_names_exact": true,
+    "all_run_names_unique_with_exact_pass_terminal": true,
+    "real_pause": 15,
+    "real_cont": 15,
+    "acquire": 15,
+    "release": 15,
+    "observed_admission_peak": 2,
+    "observed_overlap": true,
+    "end_permits": 0
+  },
+  "source_binding": {
+    "identity_kind": "canonical_source_closure_sha1，不是Git commit",
+    "source_sha": "18bde9aab572886cfa95c472377c15b25f5e1792",
+    "closure_sha256_receipt": "a5049ce041a384698977a9411be05f2c3045585b3ae8dde55e5621006c290877",
+    "eight_source_files_byte_equal_source_approved_capsule": true,
+    "eight_receipt_pins_equal_author_packet": true,
+    "testpg_fixture_byte_equal_previously_approved_capsule": true,
+    "whole_tree_rehash_performed": false
+  },
+  "database_observation": {
+    "catalog_current_set_union": 73,
+    "catalog_present_probe_union": 73,
+    "two_unions_equal": true,
+    "schema18_direct_sample_unique_DBs": 15,
+    "schema_sample_gap": "其余58个未直接采得完整schema18，不将静态73或执行成功冒充73次schema目录实测；源码fresh New/Migrate完整seed未缩减且原断言实际通过。",
+    "aggregate_samples_observed": 155,
+    "unknown_aggregate_samples": 0,
+    "fixture_connections_sampled_peak_lower_bound": 8,
+    "terminal_catalog_count": 0,
+    "terminal_fixture_connections": 0,
+    "GC_extra_session": "源码额外dedicated pgx连接保持；实际GC顶层及原NoSession检查通过，不虚构独立逐连接采样记录。"
+  },
+  "cleanup_verified": {
+    "whole_capture_pure_init_real_observe_cleanup_seconds": 35.47019696235657,
+    "budget_seconds": 600,
+    "origin_deadline_difference_seconds": 600,
+    "PG_stop_exit_receipt": 0,
+    "PG_stop_stdout_server_stopped": true,
+    "owned_pid": 42028,
+    "current_pid_absent": true,
+    "current_phase_groups41918_42041_absent": true,
+    "pidfile_absent": true,
+    "socket_directory_empty": true,
+    "terminal_database_file_empty": true
+  },
+  "archive_verified": {
+    "path": "/private/tmp/tm-r5pgparallel15-run.s3xi51pg/PG-PARALLEL-ADDED15-EXACTWHITELIST-ACTUAL-evidence.tar.gz",
+    "bytes": 55139,
+    "sha256": "2cc0889f8133eac384d734e97038cd4eff1fd6a9fc592c1a662d2370a5490cff",
+    "regular_members": 35,
+    "all_members_byte_equal_delivered_raw": true,
+    "no_absolute_traversal_symlink_AppleDouble_members": true
+  },
+  "limitations": [
+    "仅bounded实际通过，不是whole backend通过或180秒预算解决。",
+    "p1及GOMAXPROCS=2为该scope显式归一，不替代官方默认跨包并行。",
+    "PG100预留3、D16业务10、migration SQLMaxOpen0与GC额外1的分类不变；连接采样8只是下界。",
+    "未将旧4结果拼成全19当前执行证明。",
+    "报告旧键actual_parallel_overlap_parser_pending=true及command.outer300_origin是命名残留；本审查已独立从raw重建overlap且核origin/deadline实际差600秒，不影响限定结果。"
+  ],
+  "handoff": "仅交付bounded结论；后续whole-backend由主线程另行授权，本审查不扩大scope。"
+}

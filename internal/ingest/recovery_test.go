@@ -204,7 +204,7 @@ func TestIngressDeliveredTombstoneSurvivesMessageDeletion(t *testing.T) {
 	check(t, err)
 	targets, err := f.st.ListIngressTargets(ctx, j.ID)
 	check(t, err)
-	check(t, f.svc.deliverTarget(ctx, f.st, c, targets[0], []byte("body"), "subject", nil))
+	check(t, f.svc.deliverTarget(ctx, f.st, c, targets[0], []byte("body"), envelopeContent{}))
 	targets, err = f.st.ListIngressTargets(ctx, j.ID)
 	check(t, err)
 	check(t, f.st.DeleteMessage(ctx, *targets[0].MessageID))

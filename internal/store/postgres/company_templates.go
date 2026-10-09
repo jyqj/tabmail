@@ -73,14 +73,16 @@ func (s *PgStore) ListMailTemplates(ctx context.Context, a authz.Actor) ([]compa
 }
 func (s *PgStore) SaveMailTemplate(ctx context.Context, a authz.Actor, v company.Template) (*company.Template, error) {
 	v.Name = strings.TrimSpace(v.Name)
-	if len(v.Name) < 1 || len(v.Name) > 120 {
+	if len(v.Name) < 1 || len(v.Name) > 120 || strings.ContainsRune(v.Name, '\x00') {
 		return nil, app.BadRequest("template name must be 1-120 bytes")
 	}
 	if e := company.ValidateTemplate(v.Draft); e != nil {
 		return nil, e
 	}
 	raw, _ := json.Marshal(v.Draft)
-	e := s.companyReadTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+	// New templates and required audit rows reference the tenant. Acquire its
+	// shared parent-key fence before the actor/template locks in either branch.
+	e := s.companyReferencedTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
 		if v.ID == uuid.Nil {
 			if v.Revision != 0 {
 				return app.Conflict("new template revision must be zero")
@@ -131,7 +133,7 @@ func (s *PgStore) PublishMailTemplate(ctx context.Context, a authz.Actor, id uui
 	return &out, e
 }
 func (s *PgStore) SetMailTemplateRetired(ctx context.Context, a authz.Actor, id uuid.UUID, revision int, retired bool) error {
-	return s.companyReadTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+	return s.companyReferencedTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
 		tag, e := tx.Exec(ctx, `UPDATE mail_templates SET retired=$4,revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND id=$2 AND revision=$3`, a.TenantID, id, revision, retired)
 		if e != nil {
 			return e
@@ -154,7 +156,7 @@ func (s *PgStore) SetMailTemplateRetired(ctx context.Context, a authz.Actor, id 
 // revision CAS — the emergency stop must stay confirmable without a fresh
 // reload. There is no unrevoke.
 func (s *PgStore) RevokeMailTemplateVersion(ctx context.Context, a authz.Actor, id uuid.UUID, version, revision int) error {
-	return s.companyReadTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+	return s.companyReferencedTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
 		var revoked *time.Time
 		e := tx.QueryRow(ctx, `SELECT v.revoked_at FROM mail_template_versions v JOIN mail_templates t ON t.id=v.template_id AND t.tenant_id=v.tenant_id WHERE v.tenant_id=$1 AND v.template_id=$2 AND v.version=$3 FOR UPDATE OF v`, a.TenantID, id, version).Scan(&revoked)
 		if errors.Is(e, pgx.ErrNoRows) {
@@ -226,8 +228,20 @@ func (s *PgStore) SetTemplateGrant(ctx context.Context, a authz.Actor, g company
 		if _, e := s.mailboxAccessTx(ctx, tx, a, g.MailboxID); e != nil {
 			return e
 		}
-		if e := activeCompanyUser(ctx, tx, a.TenantID, g.UserID); e != nil {
-			return e
+		if enabled {
+			if e := activeCompanyUser(ctx, tx, a.TenantID, g.UserID); e != nil {
+				return e
+			}
+		} else {
+			// A frozen employee must still be removable from an existing grant.
+			// Keep the tenant boundary and required audit in this transaction.
+			var exists bool
+			if e := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`, a.TenantID, g.UserID).Scan(&exists); e != nil {
+				return e
+			}
+			if !exists {
+				return app.BadRequest("same-company employee required")
+			}
 		}
 		var valid bool
 		if e := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM mail_templates WHERE tenant_id=$1 AND id=$2)`, a.TenantID, g.TemplateID).Scan(&valid); e != nil {
@@ -366,47 +380,52 @@ func (s *PgStore) TemplateForSend(ctx context.Context, tenant uuid.UUID, user, k
 	var out company.TemplateVersion
 	var employee, companyName string
 	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
-		access, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
-		if e != nil {
-			return e
-		}
-		if !access.CanSend {
-			return authz.ErrForbidden("template sender mailbox permission revoked")
-		}
-		if key != nil {
-			var valid bool
-			e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 AND owner_user_id=$3 AND (expires_at IS NULL OR expires_at>now()))`, *key, tenant, *user).Scan(&valid)
-			if e != nil {
-				return e
-			}
-			if !valid {
-				return authz.ErrForbidden("template sending key revoked")
-			}
-		}
-		status, v, e := templateVersionStatusTx(ctx, tx, tenant, *user, mailbox, version)
-		if e != nil {
-			return e
-		}
-		// Same external contract as the previous single filtered-row query:
-		// every unusable state collapses to one denial, and only a tampered
-		// snapshot is named separately.
-		if status != company.TemplateVersionUsable {
-			if status == company.TemplateVersionCorrupt {
-				return authz.ErrForbidden("published template integrity mismatch")
-			}
-			return authz.ErrForbidden("published template unavailable or not granted")
-		}
-		out = *v
-		if e = tx.QueryRow(ctx, `SELECT display_name FROM users WHERE id=$1`, *user).Scan(&employee); e != nil {
-			return e
-		}
-		e = tx.QueryRow(ctx, `SELECT name FROM company_settings WHERE tenant_id=$1`, tenant).Scan(&companyName)
-		if errors.Is(e, pgx.ErrNoRows) {
-			return authz.ErrForbidden("company settings unavailable")
-		}
-		return e
+		return s.loadTemplateForSendTx(ctx, tx, a, tenant, user, key, mailbox, version, &out, &employee, &companyName)
 	})
 	return &out, employee, companyName, e
+}
+
+// Shared template policy for ordinary reads and the transaction-bound retry.
+func (s *PgStore) loadTemplateForSendTx(ctx context.Context, tx pgx.Tx, a authz.Actor, tenant uuid.UUID, user, key *uuid.UUID, mailbox, version uuid.UUID, out *company.TemplateVersion, employee, companyName *string) error {
+	access, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
+	if e != nil {
+		return e
+	}
+	if !access.CanSend {
+		return authz.ErrForbidden("template sender mailbox permission revoked")
+	}
+	if key != nil {
+		var valid bool
+		e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 AND owner_user_id=$3 AND (expires_at IS NULL OR expires_at>now()))`, *key, tenant, *user).Scan(&valid)
+		if e != nil {
+			return e
+		}
+		if !valid {
+			return authz.ErrForbidden("template sending key revoked")
+		}
+	}
+	status, v, e := templateVersionStatusTx(ctx, tx, tenant, *user, mailbox, version)
+	if e != nil {
+		return e
+	}
+	// Same external contract as the previous single filtered-row query:
+	// every unusable state collapses to one denial, and only a tampered
+	// snapshot is named separately.
+	if status != company.TemplateVersionUsable {
+		if status == company.TemplateVersionCorrupt {
+			return authz.ErrForbidden("published template integrity mismatch")
+		}
+		return authz.ErrForbidden("published template unavailable or not granted")
+	}
+	*out = *v
+	if e = tx.QueryRow(ctx, `SELECT display_name FROM users WHERE id=$1`, *user).Scan(employee); e != nil {
+		return e
+	}
+	e = tx.QueryRow(ctx, `SELECT name FROM company_settings WHERE tenant_id=$1`, tenant).Scan(companyName)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return authz.ErrForbidden("company settings unavailable")
+	}
+	return e
 }
 
 // TemplateContentDigest ties the final queued MIME inputs to the selected

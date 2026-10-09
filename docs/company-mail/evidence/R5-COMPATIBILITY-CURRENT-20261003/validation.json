@@ -1,0 +1,116 @@
+{
+  "base_commit": "4aec142bcffd53c6ab91f2263436aaf980833fab",
+  "remote_base": {
+    "ref": "refs/heads/integration/company-mail-r5-batch5-20261003",
+    "sha": "4aec142bcffd53c6ab91f2263436aaf980833fab"
+  },
+  "remote_main": {
+    "ref": "refs/heads/main",
+    "sha": "d6d512172fb6b874c3283d9df3f4d56758684a13"
+  },
+  "toolchain": {
+    "go": "go1.25.7",
+    "typescript": "5.9.3",
+    "python_requirements": "scripts/requirements-contract.txt",
+    "venv": "/workspace/r5-compatibility/venv",
+    "gocache": "/workspace/r5-compatibility/gocache",
+    "gomodcache": "/workspace/r5-compatibility/gomodcache"
+  },
+  "final_related_suite": {
+    "exit": 0,
+    "tests": 223,
+    "log": "related-suite-final.log",
+    "command": "PYTHONPATH=scripts/tests python3 -B -m unittest scripts.tests.test_r5_compatibility scripts.tests.test_contract_drift scripts.tests.test_http_contract scripts.tests.test_http_response_bindings scripts.tests.test_openapi_contract scripts.tests.test_permission_editor_contract scripts.tests.test_company_admin_events_contract scripts.tests.test_r5_protocol scripts.tests.test_r5_protocol_component_evidence"
+  },
+  "broad_tools_sweep": {
+    "exit": 1,
+    "tests": 652,
+    "skipped": 1,
+    "errors": 3,
+    "log": "full-tools-suite.log",
+    "phase": "Before final immutable wire-summary pin and its extra test; final affected suite separately rerun",
+    "remaining_errors": [
+      {
+        "test": "test_r5_cold_web.ColdWebTests.test_output_refuses_existing_checkout_and_non_temporary_path",
+        "reason": "FileNotFoundError: /Users absent"
+      },
+      {
+        "test": "test_r5_selected_source_binding.ActualRootBindingTests.setUpClass",
+        "reason": "unknown nested module rejected"
+      },
+      {
+        "test": "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.setUpClass",
+        "reason": "symlink/special boundary entry: web/node_modules/.bin/acorn rejected"
+      }
+    ],
+    "qualification": "Not a pass; protections unchanged and failures retained; outside exclusive scope"
+  },
+  "contract_check": {
+    "exit": 0,
+    "log": "contract.log"
+  },
+  "client_ast_tests": {
+    "exit": 0,
+    "log": "client-ast-tests.log",
+    "tests": 27
+  },
+  "baseline_reproduction": {
+    "exit": 1,
+    "errors": 2,
+    "log": "baseline-two-errors.raw.log",
+    "boundary": "Original base checker/tests, ROOT and map path only redirected to retained base map/current source"
+  },
+  "failed_related_invocation": {
+    "exit": 1,
+    "errors": 1,
+    "reason": "test_http_response_bindings imports sibling test_openapi_contract; PYTHONPATH=scripts/tests required",
+    "log": "related-suite-invocation-failure.raw.log"
+  },
+  "versions": {
+    "current_map_schema": 2,
+    "historical_map_schema": 1,
+    "historical_map_sha256": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+    "historical_wire_summary_sha256": "6421a985979e1e61e187d7b51ac30d75c0ac11c1d8082904fa113037bd352e33",
+    "historical_spec_sha256": "2c39ce1a1495af06204cebd12774ecf7fc64aa6bbd5784bb0fb46ac9d451c060",
+    "current_spec_sha256": "9afe1749637dc9cc2f66956f4026a89244735f1242f203a75003390723a0656f",
+    "historical_cases_sha256": "f46d58c45dbf66e48eb1e379fd019aa5c02dc153f004548a69752f45dc52b1b7",
+    "current_cases_sha256": "f46d58c45dbf66e48eb1e379fd019aa5c02dc153f004548a69752f45dc52b1b7"
+  },
+  "routes": 132,
+  "client_branches": 134,
+  "forwarders": 7,
+  "source_files": 94,
+  "actual_current_wire_executed": false,
+  "wire_validation_scope": "not_checked_current_wire_required",
+  "task_complete": false,
+  "product_green": false,
+  "runtime_handoff": "See R5-COMPATIBILITY-GATES.md producer prerequisites; no old receipt re-signing",
+  "reviewed_tool_hashes": {
+    "scripts/check_r5_compatibility.py": "f2fa95ea94f12909e32601ad70340493a80ad431e309b0668cf0f1f616b3c3a4",
+    "scripts/tests/test_r5_compatibility.py": "2fa45da17bdb16c841e2eb63a103e658790c8bd401887be84330c471fab82fa2",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": "cfd20e67cdec8b1c03b4e2f882c5f791f53e28d910af13411e81d777fd621820"
+  },
+  "final_compatibility_suite": {
+    "exit": 0,
+    "tests": 19,
+    "log": "compat-tests-final.log"
+  },
+  "final_current_source_gate": {
+    "exit": 0,
+    "log": "current-source-result.json",
+    "wire_qualified": false
+  },
+  "publication": {
+    "code_commit": "006ff6939edbe5f9fa5732cd1ab1a2efb8ece4cf",
+    "branch": "codex/r5-compatibility-source-boundary",
+    "push_exit": 0,
+    "push_log": "push.raw.txt",
+    "draft_pr_attempts": 1,
+    "draft_pr_exit": 1,
+    "draft_pr_created": false,
+    "draft_pr_error": "Post \"https://api.github.com/graphql\": Forbidden",
+    "draft_pr_log": "draft-pr-once.raw.txt",
+    "draft_base": "integration/company-mail-r5-batch5-20261003",
+    "merge_or_deploy": false
+  }
+}

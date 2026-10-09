@@ -1,0 +1,37 @@
+# Slice 4 batch half — explicit selected-v3 candidate
+
+Tested implementation: `7fea1edeee6bcad3e77edab767997b8757873db1`; frozen integration parent: `03f2f19b5e01f0f033405e7a84cde03794d491ca` (combined tested slices 2/3 implementation `8182e40d3b1f135415e644e122791539ab75fc1b`). Branch: `candidate/r5-slice4-batch-20261004`. This delivery adds evidence and this report after the implementation commit. Independent review remains required; no runtime or physical lifecycle qualification is claimed. Central **10/171** and historical **F52 failures** remain unchanged.
+
+Read repository VERSIONING, TODO and web/AGENTS.md, design `42f49538f7bceb6eb8e698d716c1418f85343413:docs/company-mail/R5-V3-CONSUMER-MIGRATION-DESIGN-20261004.md`, preparation author/independent evidence, runtime author/independent reports and the exact [combined integration interface inventory](R5-CONSUMER-SLICES23-INTEGRATION-20261004.md). No applicable root/scripts/workspace AGENTS.md was found. No web edits require the Next.js guide. The explicit frozen-base authorization selects this isolated worktree instead of main.
+
+## Interface and trust
+
+Only the batch helper, new batch-v2 schema and new non-discovered guarded check file change implementation. The frozen runtime API is consumed unchanged: `selected_binding_version` is strictly integer 2 or 3; omission stays 2. No uncertainty required altering a frozen API. The proposed new batch-v2 fields were reported before implementation: `selected_binding_version=3`, `runtime_manifest_path` and `runtime_manifest_sha256`. New contract schema/policy is 2 / `r5_external_batch_validation_v2`, paired only with explicit selected3 and runtime schema/policy 3 / `r5_external_dependency_runtime_v3`. Batch-v1 retains its original fields and policy, pairing only with runtime-v2. The old schema is byte-identical.
+
+V3 capture requires the existing independently supplied runtime manifest byte pin and authenticates those exact bytes with `runtime.load_pinned(..., selected_binding_version=3)` before catalog recapture or Go-version observation. The authenticated manifest must equal the supplied in-memory object. Its frozen admitted-selection reference delegates bundle/receipt verification to the accepted runtime adapter. Capture does not produce selection evidence or bless arbitrary receipt self-hashes.
+
+The independently pinned outer contract carries that already authenticated runtime manifest reference and admitted bundle transitively. `load` checks the outer serialized-byte pin before parsing, then enforces exact contract fields/schema/policy/selector/fixed budgets and authenticates the referenced runtime manifest and admitted envelope. The embedded canonical `runtime_sha256` is equality evidence only; it cannot replace the serialized manifest pin. A forged manifest with a recomputed canonical self-hash still fails against its unchanged independent runtime pin. Direct API callers and the expected pins they supply remain trusted controller inputs, as in the frozen design.
+
+`validate_contract` applies admission gates and the frozen full runtime validation before recapturing batch equality. CLI capture/load/validate/run all use the explicit selector, with default 2; environment selection cannot silently upgrade the batch CLI. The killable inventory worker receives `--selected-binding-version` under the existing remaining deadline. Owned child environments carry that selector; for v3 they replace inherited runtime manifest/path pins with the contract-authenticated values. No RPC field or Go batch bridge parser change is needed. V1 receipts retain schema/policy 1; v2 receipts carry schema/policy 2 and explicit selector 3. Result invalidation continues through the unchanged finalization barrier.
+
+## Evidence and preservation
+
+Exact-source commands:
+
+```sh
+python3 -B scripts/tests/r5_external_batch_v2_checks.py
+python3 -B docs/company-mail/evidence/R5-BATCH-V2-SLICE4-20261004/static_checks.py
+git diff --check
+```
+
+[Pure stdout](evidence/R5-BATCH-V2-SLICE4-20261004/pure.stdout) and [full test log](evidence/R5-BATCH-V2-SLICE4-20261004/pure.stderr): **14 test methods passed**, zero failures/errors and **zero OS-process audit events**. The guard is installed before consumer imports. The suite AST-loads frozen runtime synthetic fixture plumbing while removing its test methods; producer, filesystem and ordinary process-observation boundaries are mocked. Those fixture captures are synthetic controller-return objects, not physical provenance.
+
+Controls cover omitted/default v1→runtime-v2 behavior and equivalent catalog/argv/context; explicit v3 load/full-validation route; unsupported, bool/string/float selectors; old/new/unknown schema-policy combinations and all runtime 1/2/3 policy pairings; mixed selectors and promotion; exact fields and fixed budgets; absent/bad manifest references; malformed/duplicate/nonfinite JSON; independent contract/manifest byte pins including equal JSON with changed serialization; forged manifest self-hashes; authenticated incompatible admission identity; bundle substitution; **168 receipt-envelope mutation subtests** across both slots and all twelve ordered positions; owned environment/worker propagation, remaining deadline, and worker rejection/cancellation. Failed admissions make no mocked producer, catalog or process-observation call. CLI boundary tests mock Batch.run; they perform no lifecycle execution.
+
+[Static results](evidence/R5-BATCH-V2-SLICE4-20261004/static-results.json) and [full preserved-tree mode/blob manifest](evidence/R5-BATCH-V2-SLICE4-20261004/preserved-tree.json) prove **2,259 existing tracked paths unchanged** from the frozen integration, with only `scripts/preparation/r5_external_batch.py` modified. Seventeen existing function/method definitions remain source-byte identical, including lease, owned process/drain/reap, RPC, acknowledgement, cleanup, primary-error handling, cancellation, staged invalidation and finalization. The inventory worker AST differs only by selector argv; `_run` AST differs only by receipt version/policy and explicit v3 selector. The v1 contract constructor AST remains equivalent after resolving its default policy/schema branch. Worker4, Go120/process180/case75, RPC65536, catalog/argv, lease and remaining-time behavior are preserved. [Artifact identities](evidence/R5-BATCH-V2-SLICE4-20261004/identities.json) pin exact source, check and evidence bytes. Static inspection uses read-only Git metadata processes outside the pure zero-process claim.
+
+The adapter/helpers/runtime sources, old schemas, Go sources/bridges, `check_r5_protocol`, discovery, registry/closure/inventory, catalogs, locks and TODO are unchanged. No existing execution/lifecycle suite was run. No actual producer, child/runtime launch, Go, Node, PostgreSQL, mail, service, CI or formal/lifecycle execution occurred. No PR, merge, deploy or force push.
+
+## Remaining gates
+
+This candidate supplies only the batch half. The separate worker owns Go bridge/check_r5_protocol selector plumbing; that half must be reviewed and integrated separately. Closure integration remains outside this write set. Independent acceptance must evaluate these exact source bytes and transitive trust assumptions before any separately authorized physical qualification. Synthetic controls establish rejection/plumbing and static preservation, not physical lease/kill/drain/reap/ack behavior, atomic executable attestation, capture provenance or hostile concurrent mutation protection.

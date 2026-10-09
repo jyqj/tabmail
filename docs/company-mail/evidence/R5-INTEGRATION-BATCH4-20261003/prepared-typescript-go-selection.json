@@ -1,0 +1,20 @@
+[
+  {
+    "checkout": "current",
+    "head": "aeed47f0e1998d9925acb680992b051463821d69",
+    "go_package_and_all_input_fields_equal": true,
+    "package_records": 604,
+    "before_stdout_sha256": "afb13f764e75caf566fe083f027f64ea93367649894fa6f0a864eec32b8ecaa4",
+    "after_stdout_sha256": "afb13f764e75caf566fe083f027f64ea93367649894fa6f0a864eec32b8ecaa4",
+    "typescript_package_hash": "157973716ed7eea8fef4816c93432cb12febb4c31b02360394d7767304bdb4e5"
+  },
+  {
+    "checkout": "frozen",
+    "head": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+    "go_package_and_all_input_fields_equal": true,
+    "package_records": 630,
+    "before_stdout_sha256": "010d5dda4d36fd695363681a45a723505284424fdc781cd6c68142cf8169c540",
+    "after_stdout_sha256": "010d5dda4d36fd695363681a45a723505284424fdc781cd6c68142cf8169c540",
+    "typescript_package_hash": "157973716ed7eea8fef4816c93432cb12febb4c31b02360394d7767304bdb4e5"
+  }
+]

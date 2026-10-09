@@ -1,0 +1,5 @@
+Integrate both complete approved source-only branch ranges from batch5: compatibility source/history separation and pinned runner dependency/typed fixture preparation. Product/runtime/config, 36 historical artifacts, locks, two replacements, PG180 and audit gates remain preserved.
+
+Default formal replay at a9012118b4fdab630bc0afea349df3759e9efc66 passed 675/675 actual started (current 671 + frozen 4), zero failures/errors/skips, complete partition. The first cold hydration preparation failure is retained separately. Default and race-r5protocol Go selection identities are unchanged before/after; official test2json executed the same-source pinned binary and generated 21 typed fixtures. Related 223/223, contract CLI, client AST 13/13 and scoped Python/static checks passed.
+
+This is bounded source-only progress: current actual wire remains unqualified, task_complete/product_green remain false, and R5 stays 10/171. Local whole PG180, full Web and browser were not run. No merge, deploy or force push. See docs/company-mail/R5-SOURCE-COMBINED-20261003.md and its metadata-only evidence appendix.

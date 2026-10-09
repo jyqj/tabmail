@@ -1,0 +1,21 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "scripts/check_r5_protocol.py",
+    "--run",
+    "shared-db",
+    "--output-dir",
+    "/workspace/r5-receipt-private/shared-db-v2",
+    "--source-policy",
+    "r5_current_local_inputs_archive_boundary_v4",
+    "--source-manifest",
+    "/workspace/r5-receipt-private/manifest-db.json",
+    "--source-manifest-sha256",
+    "829fbc76f259c7fbbbab63964e047d14854dd620a4a6d835ac7e1f0543fdae45"
+  ],
+  "started_at": "2026-10-03T22:05:18.581518+00:00",
+  "ended_at": "2026-10-03T22:06:29.453048+00:00",
+  "exit_code": 0,
+  "source_commit": "6138113c1896cb810db567605154b5023f0340de"
+}

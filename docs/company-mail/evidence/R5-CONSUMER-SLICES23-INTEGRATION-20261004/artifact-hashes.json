@@ -1,0 +1,20 @@
+{
+  "combined_source_commit": "8182e40d3b1f135415e644e122791539ab75fc1b",
+  "files": {
+    "docs/company-mail/R5-CONSUMER-SLICES23-INTEGRATION-20261004.md": "354edea0d3e3e4392fb79d0c23aaa971906a9c1e1dad73fc5f71726be9e6dad5",
+    "docs/company-mail/evidence/R5-CONSUMER-SLICES23-INTEGRATION-20261004/fresh-results.json": "aa3341c6161fa79775806fd4d8e33420972be471584cf671d357cf5799e8b4e1",
+    "docs/company-mail/evidence/R5-CONSUMER-SLICES23-INTEGRATION-20261004/preparation-author.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/company-mail/evidence/R5-CONSUMER-SLICES23-INTEGRATION-20261004/preparation-author.stdout": "747c95cec09aa58a8b4b285a57b0764197b5938e0031e44fc091474c2ad8601c",
+    "docs/company-mail/evidence/R5-CONSUMER-SLICES23-INTEGRATION-20261004/preparation-independent.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/company-mail/evidence/R5-CONSUMER-SLICES23-INTEGRATION-20261004/preparation-independent.stdout": "bf83d51dd008fe1b703f4de2dcb2bbb4240c640cee42b5f732f8ba195094ac75",
+    "docs/company-mail/evidence/R5-CONSUMER-SLICES23-INTEGRATION-20261004/preparation-preserved.stderr": "a0b258e9d41888070f15bc9aacfb9e300889500a062c4aee3069a2fb766783ad",
+    "docs/company-mail/evidence/R5-CONSUMER-SLICES23-INTEGRATION-20261004/preparation-preserved.stdout": "5442098dd9652cc8a894c04c6caf2a8b15eb9fa9293873c779682733aa1d1460",
+    "docs/company-mail/evidence/R5-CONSUMER-SLICES23-INTEGRATION-20261004/preserved-tree.json": "5ac3f261ffc7f7aa8d11a75035e0b6e0fa5dbd1b2d64335568964d3e32d8718c",
+    "docs/company-mail/evidence/R5-CONSUMER-SLICES23-INTEGRATION-20261004/runtime-author.stderr": "0013ac8b232398ed355247dfd3a7ca1a95012860be391911086df7148388fa55",
+    "docs/company-mail/evidence/R5-CONSUMER-SLICES23-INTEGRATION-20261004/runtime-author.stdout": "dd4c6bf0ba128d290dbac417ebb0f3504e5321846a5dcb66e775bd573b371c03",
+    "docs/company-mail/evidence/R5-CONSUMER-SLICES23-INTEGRATION-20261004/runtime-independent.stderr": "6d0390aa3ee82101ed312ffe631f242c8c6ca923f92744e9581ca93382512b95",
+    "docs/company-mail/evidence/R5-CONSUMER-SLICES23-INTEGRATION-20261004/runtime-independent.stdout": "ae27c2617776432ae96856213aed9533edf256a76f4b818605cfd9a24f84dc99",
+    "docs/company-mail/evidence/R5-CONSUMER-SLICES23-INTEGRATION-20261004/static-review.json": "e45347fdfc68c72849364723336fedc41c46a0f761b18687408c884dd408f6a4",
+    "docs/company-mail/evidence/R5-CONSUMER-SLICES23-INTEGRATION-20261004/verify_combined.py": "aff1a5d1c22c1e3c99c5e139b5852c8fb93235988cd68c243746a7a6e86401a6"
+  }
+}

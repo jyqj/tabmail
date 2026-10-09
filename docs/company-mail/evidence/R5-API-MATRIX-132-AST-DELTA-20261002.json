@@ -1,0 +1,127 @@
+{
+  "actual": 132,
+  "documented": 127,
+  "missing": [
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/permissions/{id}/deletion-preview",
+      "handler": "perm.ProfileDeletionPreview",
+      "middleware": [
+        "chimw.RequestID",
+        "chimw.Recoverer",
+        "cors.Handler(cors.Options{\n\tAllowedOrigins:   append([]string(nil), cfg.HTTP.AllowedOrigins...),\n\tAllowedMethods:   []string{\"GET\", \"POST\", \"PUT\", \"PATCH\", \"DELETE\", \"OPTIONS\"},\n\tAllowedHeaders:   append([]string(nil), cfg.HTTP.AllowedHeaders...),\n\tAllowCredentials: cfg.HTTP.AllowCredentials,\n\tMaxAge:           86400,\n})",
+        "middleware.Auth(cached, cfg.JWTSecret, cfg.PublicTenantID)",
+        "middleware.PermissionLoader(cached)",
+        "cfg.RateLimiter.Middleware",
+        "middleware.RequireAdmin"
+      ],
+      "conditions": [],
+      "source": "internal/api/router.go",
+      "line": 237,
+      "authority": "",
+      "resource": "",
+      "version": "",
+      "audit": "",
+      "content": "",
+      "evidence": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/users/{id}/permission-editor",
+      "handler": "perm.PermissionEditor",
+      "middleware": [
+        "chimw.RequestID",
+        "chimw.Recoverer",
+        "cors.Handler(cors.Options{\n\tAllowedOrigins:   append([]string(nil), cfg.HTTP.AllowedOrigins...),\n\tAllowedMethods:   []string{\"GET\", \"POST\", \"PUT\", \"PATCH\", \"DELETE\", \"OPTIONS\"},\n\tAllowedHeaders:   append([]string(nil), cfg.HTTP.AllowedHeaders...),\n\tAllowCredentials: cfg.HTTP.AllowCredentials,\n\tMaxAge:           86400,\n})",
+        "middleware.Auth(cached, cfg.JWTSecret, cfg.PublicTenantID)",
+        "middleware.PermissionLoader(cached)",
+        "cfg.RateLimiter.Middleware",
+        "middleware.RequireAdmin"
+      ],
+      "conditions": [],
+      "source": "internal/api/router.go",
+      "line": 244,
+      "authority": "",
+      "resource": "",
+      "version": "",
+      "audit": "",
+      "content": "",
+      "evidence": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/company/events",
+      "handler": "adminEvents.Events",
+      "middleware": [
+        "chimw.RequestID",
+        "chimw.Recoverer",
+        "cors.Handler(cors.Options{\n\tAllowedOrigins:   append([]string(nil), cfg.HTTP.AllowedOrigins...),\n\tAllowedMethods:   []string{\"GET\", \"POST\", \"PUT\", \"PATCH\", \"DELETE\", \"OPTIONS\"},\n\tAllowedHeaders:   append([]string(nil), cfg.HTTP.AllowedHeaders...),\n\tAllowCredentials: cfg.HTTP.AllowCredentials,\n\tMaxAge:           86400,\n})",
+        "middleware.Auth(cached, cfg.JWTSecret, cfg.PublicTenantID)",
+        "middleware.PermissionLoader(cached)",
+        "cfg.RateLimiter.Middleware",
+        "middleware.RequireAuth",
+        "middleware.RequireAdmin"
+      ],
+      "conditions": [
+        "cfg.CompanyRepository != nil",
+        "ok"
+      ],
+      "source": "internal/api/router.go",
+      "line": 173,
+      "authority": "",
+      "resource": "",
+      "version": "",
+      "audit": "",
+      "content": "",
+      "evidence": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/users/{id}/permission-editor",
+      "handler": "perm.PatchPermissionEditor",
+      "middleware": [
+        "chimw.RequestID",
+        "chimw.Recoverer",
+        "cors.Handler(cors.Options{\n\tAllowedOrigins:   append([]string(nil), cfg.HTTP.AllowedOrigins...),\n\tAllowedMethods:   []string{\"GET\", \"POST\", \"PUT\", \"PATCH\", \"DELETE\", \"OPTIONS\"},\n\tAllowedHeaders:   append([]string(nil), cfg.HTTP.AllowedHeaders...),\n\tAllowCredentials: cfg.HTTP.AllowCredentials,\n\tMaxAge:           86400,\n})",
+        "middleware.Auth(cached, cfg.JWTSecret, cfg.PublicTenantID)",
+        "middleware.PermissionLoader(cached)",
+        "cfg.RateLimiter.Middleware",
+        "middleware.RequireAdmin"
+      ],
+      "conditions": [],
+      "source": "internal/api/router.go",
+      "line": 245,
+      "authority": "",
+      "resource": "",
+      "version": "",
+      "audit": "",
+      "content": "",
+      "evidence": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/users/{id}/permission-editor/assignment",
+      "handler": "perm.AssignPermissionEditor",
+      "middleware": [
+        "chimw.RequestID",
+        "chimw.Recoverer",
+        "cors.Handler(cors.Options{\n\tAllowedOrigins:   append([]string(nil), cfg.HTTP.AllowedOrigins...),\n\tAllowedMethods:   []string{\"GET\", \"POST\", \"PUT\", \"PATCH\", \"DELETE\", \"OPTIONS\"},\n\tAllowedHeaders:   append([]string(nil), cfg.HTTP.AllowedHeaders...),\n\tAllowCredentials: cfg.HTTP.AllowCredentials,\n\tMaxAge:           86400,\n})",
+        "middleware.Auth(cached, cfg.JWTSecret, cfg.PublicTenantID)",
+        "middleware.PermissionLoader(cached)",
+        "cfg.RateLimiter.Middleware",
+        "middleware.RequireAdmin"
+      ],
+      "conditions": [],
+      "source": "internal/api/router.go",
+      "line": 246,
+      "authority": "",
+      "resource": "",
+      "version": "",
+      "audit": "",
+      "content": "",
+      "evidence": ""
+    }
+  ],
+  "extra": [],
+  "changed": []
+}

@@ -1,0 +1,36 @@
+{
+  "base": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+  "head": "7fea1edeee6bcad3e77edab767997b8757873db1",
+  "unchanged_definitions": [
+    "derive",
+    "file_digest",
+    "lease",
+    "sweep_adopted_tails",
+    "OwnedProcess",
+    "become_subreaper",
+    "join_adopted_tails",
+    "exact_assertions",
+    "Batch.authenticate",
+    "Batch.rpc",
+    "Batch.run_process",
+    "Batch.record_cleanup",
+    "Batch.close_channel",
+    "Batch.cleanup_resources",
+    "Batch.resource_scope",
+    "Batch.request_cancel",
+    "Batch.run"
+  ],
+  "inventory_worker_only_selector_change": true,
+  "execution_lifecycle_only_result_version_change": true,
+  "v1_constructor_equivalent": true,
+  "v1_schema_byte_identical": true,
+  "changed_existing_paths": [
+    "scripts/preparation/r5_external_batch.py"
+  ],
+  "preserved_existing_paths": 2259,
+  "source_hashes": {
+    "scripts/preparation/r5_external_batch.py": "83ff36965120115c6365e40df0eef8da2df20eb33129faba81def89261cd5a12",
+    "scripts/contracts/r5-external-batch-v2.schema.json": "60f3bbf12dbfc28a2cc72e0d5ed38110425514621a11e10eddf1d92007ca9c0a",
+    "scripts/tests/r5_external_batch_v2_checks.py": "dca70ff40eeccd11bdcd8f28e4e4d83d7f7bfdf7dcbd9f95b3481fdd12cd2ede"
+  }
+}

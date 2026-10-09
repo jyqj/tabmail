@@ -1,0 +1,31 @@
+test_cache_has_specific_message_fence_not_ancestor_lock (test_r5_transactions.TransactionInventoryTests.test_cache_has_specific_message_fence_not_ancestor_lock) ... ok
+test_callback_signature_drift_rejected (test_r5_transactions.TransactionInventoryTests.test_callback_signature_drift_rejected) ... ok
+test_constant_backed_observation_is_write_despite_ast_heuristic (test_r5_transactions.TransactionInventoryTests.test_constant_backed_observation_is_write_despite_ast_heuristic) ... ok
+test_current_inventory_is_only_structure_evidence (test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence) ... ok
+test_current_trigger_and_package_constant_changes_remain_fenced (test_r5_transactions.TransactionInventoryTests.test_current_trigger_and_package_constant_changes_remain_fenced) ... ok
+test_duplicate_entry_rejected (test_r5_transactions.TransactionInventoryTests.test_duplicate_entry_rejected) ... ok
+test_external_caller_change_rejected (test_r5_transactions.TransactionInventoryTests.test_external_caller_change_rejected) ... ok
+test_fk_or_trigger_drift_rejected (test_r5_transactions.TransactionInventoryTests.test_fk_or_trigger_drift_rejected) ... ok
+test_gc_round_and_receipt_projection_are_not_transaction_acceptance (test_r5_transactions.TransactionInventoryTests.test_gc_round_and_receipt_projection_are_not_transaction_acceptance) ... ok
+test_literal_and_concatenated_dynamic_sql_distinguished (test_r5_transactions.TransactionInventoryTests.test_literal_and_concatenated_dynamic_sql_distinguished) ... ok
+test_missing_callback_effect_rejected (test_r5_transactions.TransactionInventoryTests.test_missing_callback_effect_rejected) ... ok
+test_missing_file_type_review_rejected (test_r5_transactions.TransactionInventoryTests.test_missing_file_type_review_rejected) ... ok
+test_missing_function_rejected (test_r5_transactions.TransactionInventoryTests.test_missing_function_rejected) ... ok
+test_missing_specific_assertion_rejected (test_r5_transactions.TransactionInventoryTests.test_missing_specific_assertion_rejected) ... ok
+test_missing_specific_sql_effect_rejected (test_r5_transactions.TransactionInventoryTests.test_missing_specific_sql_effect_rejected) ... ok
+test_new_file_without_functions_rejected (test_r5_transactions.TransactionInventoryTests.test_new_file_without_functions_rejected) ... ok
+test_new_migration_rejected (test_r5_transactions.TransactionInventoryTests.test_new_migration_rejected) ... ok
+test_new_pure_function_is_also_rejected_and_no_inventory_allowlist (test_r5_transactions.TransactionInventoryTests.test_new_pure_function_is_also_rejected_and_no_inventory_allowlist) ... ok
+test_new_write_function_rejected (test_r5_transactions.TransactionInventoryTests.test_new_write_function_rejected) ... ok
+test_new_write_in_old_function_rejected (test_r5_transactions.TransactionInventoryTests.test_new_write_in_old_function_rejected) ... ok
+test_obsolete_function_and_wrong_receiver_rejected (test_r5_transactions.TransactionInventoryTests.test_obsolete_function_and_wrong_receiver_rejected) ... ok
+test_package_sql_constant_drift_rejected (test_r5_transactions.TransactionInventoryTests.test_package_sql_constant_drift_rejected) ... ok
+test_pr23_each_added_and_changed_body_has_independent_source_review (test_r5_transactions.TransactionInventoryTests.test_pr23_each_added_and_changed_body_has_independent_source_review) ... ok
+test_read_preview_and_sse_have_real_lock_and_callback_boundaries (test_r5_transactions.TransactionInventoryTests.test_read_preview_and_sse_have_real_lock_and_callback_boundaries) ... ok
+test_structure_cannot_claim_runtime_or_parent_acceptance (test_r5_transactions.TransactionInventoryTests.test_structure_cannot_claim_runtime_or_parent_acceptance) ... ok
+test_update_detected_but_row_lock_not_mutation (test_r5_transactions.TransactionInventoryTests.test_update_detected_but_row_lock_not_mutation) ... ok
+
+----------------------------------------------------------------------
+Ran 26 tests in 6.135s
+
+OK

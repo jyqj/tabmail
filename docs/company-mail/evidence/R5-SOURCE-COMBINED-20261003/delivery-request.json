@@ -1,0 +1,18 @@
+{
+  "request_head": "7c8eba4526568943f682deded1b26f73c2cf7079",
+  "base_branch": "integration/company-mail-r5-batch5-20261003",
+  "push_exit": 0,
+  "push_verified": true,
+  "draft_attempts": 1,
+  "draft_exit": 1,
+  "draft_created": false,
+  "error": "Post https://api.github.com/graphql: Forbidden",
+  "api_actions_stopped": true,
+  "route_or_identity_changed": false,
+  "ci": "UNOBSERVED; PR not created, branch push is outside main-only push trigger",
+  "deferred_approved_branch": "89e7af39aa53408225b284548bffe39ce467aa2d",
+  "deferred_reason": "Root instruction: already frozen and replay complete; deliver current head, next composition only",
+  "runtime_source_sha": "a9012118b4fdab630bc0afea349df3759e9efc66",
+  "task_complete": false,
+  "completed_tasks": "10/171"
+}

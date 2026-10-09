@@ -1,0 +1,103 @@
+{
+  "task": "R5-NEXT-20261008-05",
+  "commit": "ee922f7630731682d0a0f973bf74daf709fcb263",
+  "tree": "4f1ad11b67671f06507622d2f09434072f28ea4c",
+  "baseline_source": "8e5a2c63a23a3e5b1492a069b06eb0baaf7aa82d",
+  "baseline_ci_step_exit": 2,
+  "candidate_ci_step_exit": 1,
+  "original_source_validator_exit": 0,
+  "source_prepared": true,
+  "database_available": false,
+  "real_go_pg_tests_executed": false,
+  "unit_methods": {
+    "preparation_controls": 12,
+    "original_protocol": 52,
+    "backend_continuation": 6,
+    "total": 70,
+    "fail": 0,
+    "skip": 0
+  },
+  "independent_review": "/root/pr_audit ACCEPT; no mandatory fixes",
+  "unchanged_inputs": {
+    "scripts/check_r5_protocol.py": "4c2a066323b9e6871f99c98ef1ea62e770f03bdb4cfaea4911414e36dd1933e8",
+    "scripts/r5_source_inventory.py": "306cfcae043925d656d13b08bd439015e23348df255b363ceb8c10b6890488b2",
+    "scripts/r5_archive_boundary.py": "c02acc09dd0f49b28113f99b05ffc6ff996287fb015d60fa08d7de56d92b7f15",
+    "go.mod": "30eb5ba911706a9c88f5cfa77bea60eb61dbd1cb2570232d581847e12902e377",
+    "go.sum": "5b850553522724f8fa71d36a94de2da91da174270ec4d460bb135dd42f53a33f"
+  },
+  "boundary": "Current actual source preparation and original v4 validator accepted. Missing DSN remains explicit failure, not a skipped/passed PG run. CI must still supply live PG and retain exact original protocol Go/report evidence. No wholePG180, product-green or release qualification.",
+  "files": {
+    "/workspace/scratch/fabe500b93be/tabmail-ci/.github/workflows/company-p0.yml": {
+      "bytes": 15474,
+      "sha256": "bd15b5ad67f2ef47b77f6b5007b142c45ad3cebf78f63285e2f7e4ce01d3f718"
+    },
+    "/workspace/scratch/fabe500b93be/tabmail-ci/scripts/prepare_r5_protocol_source.py": {
+      "bytes": 4888,
+      "sha256": "989a3b57fe79a7fb93956596781801b5adbd3d1f973268f65245c594f2008ce3"
+    },
+    "/workspace/scratch/fabe500b93be/tabmail-ci/scripts/tests/test_r5_protocol_source_preparation.py": {
+      "bytes": 10321,
+      "sha256": "ae6c858180c7af789f9c709151f49012b8c0da05bf31d13b29ca4ae482abe212"
+    },
+    "/workspace/scratch/fabe500b93be/tabmail-ci/scripts/tests/test_r5_backend_evidence_continuation.py": {
+      "bytes": 7934,
+      "sha256": "22c2ea4a0c11ccbc84074b5fb9284aaa1de7ff8f13940d264e652cd5ac7f6fab"
+    },
+    "/workspace/scratch/fabe500b93be/ci-evidence/05-baseline.json": {
+      "bytes": 444,
+      "sha256": "f801443be5d70c5eeba4f3aa50e3fa382257138abf32b7f123159cbf05d8bf2f"
+    },
+    "/workspace/scratch/fabe500b93be/ci-evidence/05-baseline.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/workspace/scratch/fabe500b93be/ci-evidence/05-baseline.stderr": {
+      "bytes": 618,
+      "sha256": "9a881086dbed6a1e20f1f551cb217a5e0954f76e9b35d3a1bc7751512782257a"
+    },
+    "/workspace/scratch/fabe500b93be/ci-evidence/05-candidate.json": {
+      "bytes": 2733,
+      "sha256": "ff0ab2d4f327d2c64b1ea66578ff77d5206eb3c113dac5910b93ba0ef43cdce0"
+    },
+    "/workspace/scratch/fabe500b93be/ci-evidence/05-candidate.stdout": {
+      "bytes": 949,
+      "sha256": "0e648dad666587e2c11c2231bf8b845004dba81d4a2ee59acece9b28d30797df"
+    },
+    "/workspace/scratch/fabe500b93be/ci-evidence/05-candidate.stderr": {
+      "bytes": 100,
+      "sha256": "a273a87288d530531dd3ee8513593fe53474ee48832dd6577c9cb347716c4893"
+    },
+    "/workspace/scratch/fabe500b93be/ci-evidence/05-original-validator.stdout": {
+      "bytes": 241010,
+      "sha256": "96a2724d2e4e06ae33d0981bc9236e4bb5e39eb1212ad305d5d4548af5e09172"
+    },
+    "/workspace/scratch/fabe500b93be/ci-evidence/05-original-validator.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/workspace/scratch/fabe500b93be/ci-evidence/05-controls.log": {
+      "bytes": 2429,
+      "sha256": "d9c20a3389ae1d1ac79bdf19f8a76f80b8c7973369243cd7e6144ce4a5cf3c80"
+    },
+    "/workspace/scratch/fabe500b93be/ci-evidence/05-existing-protocol.log": {
+      "bytes": 7003,
+      "sha256": "5ed29f96e5eb9589284db74a2dffebd534baefe089476ced266dfce3586389e3"
+    },
+    "/workspace/scratch/fabe500b93be/ci-evidence/05-backend-continuation.log": {
+      "bytes": 1328,
+      "sha256": "7d2430bcd2228c3bf6254c99cf18100ef214b1e3b78e8b1b72e6e7767a173d65"
+    },
+    "/workspace/scratch/fabe500b93be/ci-evidence/05-actual-command/tabmail-protocol-source/preparation.json": {
+      "bytes": 949,
+      "sha256": "0e648dad666587e2c11c2231bf8b845004dba81d4a2ee59acece9b28d30797df"
+    },
+    "/workspace/scratch/fabe500b93be/ci-evidence/05-actual-command/tabmail-protocol-source/source-manifest.json": {
+      "bytes": 241009,
+      "sha256": "36699f1694a8c98f099737cb0b4834e618e1648ca453d0e3e03855872b31595a"
+    },
+    "/workspace/scratch/fabe500b93be/ci-evidence/05-actual-command/tabmail-protocol-source/source-manifest.sha256": {
+      "bytes": 65,
+      "sha256": "54b19c33877b704b143869eb2a064a559e62ea43a49ee9579d53f4d555f7df7a"
+    }
+  }
+}

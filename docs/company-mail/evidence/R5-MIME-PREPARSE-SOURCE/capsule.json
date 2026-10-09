@@ -1,0 +1,146 @@
+{
+  "scope": "RES-P6-120-MIME-PREPARSE-01",
+  "status": "SOURCE_ONLY_UNEXECUTED_PENDING_FRESH_INDEPENDENT_REVIEW",
+  "base_head": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+  "write_set": [
+    "internal/mailcontent/parser.go",
+    "internal/mailcontent/mime_budget.go",
+    "internal/mailcontent/mime_budget_test.go",
+    "internal/app/messages/service.go",
+    "internal/app/messages/mime_budget_boundary_test.go"
+  ],
+  "before": {
+    "internal/mailcontent/parser.go": {
+      "exists": true,
+      "sha256": "b4b7b3c4cd594d6762716cb0ce868da52b696f307311dd6de4cefea756769cf1"
+    },
+    "internal/mailcontent/mime_budget.go": {
+      "exists": false
+    },
+    "internal/mailcontent/mime_budget_test.go": {
+      "exists": false
+    },
+    "internal/app/messages/service.go": {
+      "exists": true,
+      "sha256": "3d27af40e991de1f2636672e3bbd3a00f24520f821a308012b11e02802161867"
+    },
+    "internal/app/messages/mime_budget_boundary_test.go": {
+      "exists": false
+    }
+  },
+  "after": {
+    "internal/mailcontent/parser.go": {
+      "exists": true,
+      "sha256": "cab8753b99dd2af3192ad15b5b2c3a99adea830d9665bad2087cea1d96fa31f3"
+    },
+    "internal/mailcontent/mime_budget.go": {
+      "exists": true,
+      "sha256": "342ffd1ce567a943bb8b9ddde7b0812f170f143b564a9e4f7a919aca9c150391"
+    },
+    "internal/mailcontent/mime_budget_test.go": {
+      "exists": true,
+      "sha256": "cd003b9f058e2d81cc2df3fb298a3b8eddf2fb7ff909b166697d705be4ab9390"
+    },
+    "internal/app/messages/service.go": {
+      "exists": true,
+      "sha256": "a852c17b5051989cc91990f78d95f721e441346f11101e66460360c5ac708460"
+    },
+    "internal/app/messages/mime_budget_boundary_test.go": {
+      "exists": true,
+      "sha256": "b405791a97dca02eb6fddf24fa122703909dfb8fdaf96d7bffe287cd82e06a1a"
+    }
+  },
+  "dirty_ownership": "messages/service.go already dirty before this writer; before capsule preserves live baseline; patch is against that baseline, not HEAD. Other writes untouched.",
+  "approved_budget": {
+    "MaxBytes": 26214400,
+    "MaxMIMEDepth": 32,
+    "MaxMIMENodes": 1024,
+    "root_depth": 1,
+    "root_nodes": 1,
+    "attachments_plus_inlines": 512
+  },
+  "call_chain": [
+    "companymail.NewService -> mailcontent.New(objects) -> Parser.Document/Envelope/Attachment -> Parser.load -> readSource -> parseBoundedContext -> mimeBudget.walk -> enmime.ReadEnvelope",
+    "mailindex.NewService -> mailcontent.New(objects) -> Parser.Document -> same bounded admission",
+    "ingest acceptance/recovery -> parseEnvelopeContent -> ParseBounded -> parseBoundedContext; no ingress transaction edits",
+    "messages.GetMessageDetail -> lookupMessage + canReadMessageContent -> objects.Get -> ParseBoundedReader -> same bounded admission",
+    "messages.BreakGlassRead -> admin/reason/lookup + InsertAuditRequired -> objects.Get -> ParseBoundedReader -> same bounded admission"
+  ],
+  "compatibility_matrix": [
+    {
+      "case": "valid <=25MiB, <=32 root-inclusive depth, <=1024 all nodes, <=512 attachment+inline projection",
+      "behavior": "same default enmime result; tests compare complete envelopes and actual tree-node count"
+    },
+    {
+      "case": "previously accepted trees depth>32 or total nodes>1024",
+      "behavior": "new deliberate fail-closed rejection before decoded tree allocation"
+    },
+    {
+      "case": "attachment/inline projection>512",
+      "behavior": "same existing rejection; header-only preflight now rejects before full body/tree decoding"
+    },
+    {
+      "case": "legacy messages body paths exceeding common byte/structural budgets",
+      "behavior": "new deliberate common-budget rejection, mapped through existing app.Internal"
+    },
+    {
+      "case": "message/rfc822 or encoded multipart container",
+      "behavior": "match pinned enmime v2.3.0: message/rfc822 leaf, multipart split from raw without container transfer decoding"
+    },
+    {
+      "case": "missing child Content-Type, folded/space-repaired headers, LF, whitespace delimiter, missing close, nontext child with boundary, text child with boundary, shifted markers and first 4096-byte fill",
+      "behavior": "reuse enmime header+mediatype interpretation and model its exact small boundary lookahead; differential selectors authored, not executed"
+    },
+    {
+      "case": "malformed header/media type, object short read/error, cancellation",
+      "behavior": "fail closed; preserved context/I/O causes or MIME sentinel, no content result; messages retain Internal mapping"
+    }
+  ],
+  "resource_bounds": [
+    "Byte admission occurs before prewalk. Reader fetch uses io.LimitReader MaxBytes+1 with sourceProgressReader; optional WriterTo cannot bypass checks.",
+    "Prewalk keeps raw slice spans and one header at a time, no transfer-decoded bodies and no full MIME tree; recursion checked before >32 stack depth and node admission before >1024 header parsing.",
+    "Bounded repeated scans: each ancestor scans its raw span once; depth <=32 means O(MaxBytes * MaxMIMEDepth), plus <=1024 initial 4096-byte fills. Header allocations bounded by raw bytes; warnings discarded and replayed only by final enmime.",
+    "Reader helper owns Close via sync.Once; cancellation AfterFunc closes reader. Acquisition error with nonnil reader is closed by messages before returning.",
+    "Parser.readSource, four permits, singleflight, cache 64MiB/TTL and source hash remain; same private shared-work context now reaches prewalk/decoder reader.",
+    "In-memory charset/html CPU work is synchronous and not forcibly preemptible. This is structural admission, not measured full parser CPU/heap bound or full-process concurrency claim.",
+    "Custom boundary interpretation intentionally pinned to current dependency github.com/jhillyerd/enmime/v2 v2.3.0 default 4096 bufio; dependency upgrades must rerun differential tests/review."
+  ],
+  "new_test_selectors": [
+    {
+      "package": "./internal/mailcontent",
+      "run": "^TestMIMEPreparseBudget(DepthAndAllNodes|Compatibility|ReaderBoundaries)$"
+    },
+    {
+      "package": "./internal/app/messages",
+      "run": "^TestMessagesMIMEPreparseBudget(RealBodyPaths|AuthorityAndAuditBeforeRead|AcquisitionErrorClosesReader)$"
+    }
+  ],
+  "executor_commands": [
+    "go test ./internal/mailcontent -run '^TestMIMEPreparseBudget(DepthAndAllNodes|Compatibility|ReaderBoundaries)$' -count=1 -v",
+    "go test ./internal/app/messages -run '^TestMessagesMIMEPreparseBudget(RealBodyPaths|AuthorityAndAuditBeforeRead|AcquisitionErrorClosesReader)$' -count=1 -v"
+  ],
+  "validation": {
+    "gofmt": "executed on five exclusive source files (root authorized static formatting)",
+    "git_diff_check": "executed PASS for tracked exclusive files",
+    "go_tests": "NOT_EXECUTED; sole calibration_executor only",
+    "build": "NOT_EXECUTED",
+    "PG": "NOT_EXECUTED",
+    "fresh_independent_review": "PENDING"
+  },
+  "not_claimed": [
+    "P6-100 completion",
+    "P5-060 completion",
+    "P6-120 completion/full parse cost acceptance",
+    "full process memory/CPU/concurrency ceiling",
+    "benchmark/resource green groups rerun",
+    "production access",
+    "commit/push"
+  ],
+  "required_review_focus": [
+    "prewalk-versus-enmime structural agreement incl. raw boundary buffering quirks",
+    "attachment projection count incl. duplicate inline octet-stream",
+    "raw/context/header boundedness",
+    "auth+required audit order and close ownership",
+    "legal-boundary complete envelope differential"
+  ]
+}

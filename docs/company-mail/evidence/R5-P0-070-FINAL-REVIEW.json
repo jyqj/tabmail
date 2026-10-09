@@ -1,0 +1,65 @@
+{
+  "task": "R5-P0-070",
+  "scope": "current finite map and safety-order acceptance, not allproductimplementation",
+  "review_status": "independent_final_inspection_accepted",
+  "task_complete": true,
+  "tested_tree": "c372902572c2b0b00bbc1281ed83906d62476495",
+  "source_files": 778,
+  "default_required": 247,
+  "tag_required": 12,
+  "source_manifest_sha256": "0bd7b6feabdc6f2675f6e270c1dd806b7898a83e171cce252676b3d8f1ae3d15",
+  "postgres_files": 49,
+  "functions": 352,
+  "handwritten_function_traces": 70,
+  "original_slot_families": 68,
+  "current_catalog": {
+    "foreign_keys": 75,
+    "user_triggers": 7,
+    "check_constraints": 34,
+    "goose": 15,
+    "catalog_raw_sha256": "c51f6d858c9d12ba037c769e8e83a03ab8a251b8b5f980272d31700571e86736"
+  },
+  "four_requirements": [
+    {
+      "requirement": "核对tenant/user/refresh-family/mailbox/draft/attachment/job顺序",
+      "proof": "352 exactAST/hash entries + 70 handwritten operation traces; Tfirst guards/U-before-resource/preciseNOWAIT/keyadvisory/stableURLbatch/caller-qualified exceptions; actualACAEAF AH originalcomplete-commandredgreen",
+      "boundary": "7 internalunassembled+1Durablefalse configuration not companyformaldispatch; namesnotresolvedinterface, actualroutes/serviceassembly separately reviewed"
+    },
+    {
+      "requirement": "标明授权检查与写入窗口",
+      "proof": "eachentry exactcheck/lock/effect/errorphase; actorrole/active/SV and key locks heldcommit; namedreader/outerhandlerchecks not claimedastransactionfences; domainverified statementcheckpoint and planlockexpiry admission currentpolicy",
+      "boundary": "not everyfunction/everydeadlinetest runtime; futurepolicy/CAS/transportdeliverystate not silentlyapproved"
+    },
+    {
+      "requirement": "事务地图和并发清单覆盖companyReadTx/companyTx/enqueue trigger/GC",
+      "proof": "49files exactinventory/helpercallback map + actual75FK/7trigger/34CHECKthrough15 + operation-sensitive triggernotes; concurrency names/raw/sourcehashes includeB01parent/audit, ACActor, AEstableuniqueURL, AFInviteP, AHGuardedP",
+      "boundary": "literal/nameclosure not operationfire; PublishversionINSERT not immutableUPDATEtrigger; ConvertexpiresUPDATE not rawkeyUPDATEOFindextrigger; callbackobjectIO insideTX noted"
+    },
+    {
+      "requirement": "每multi-resourcewriter一致锁序，潜在竞争需验证非无证据漏洞",
+      "proof": "actualformalwrite cases follow sameparent/advisory/currentU/M/source order or failfastreverseedge; batchexactids/URLs stable and wholeTxrollback/commitreceipt; finitecurrentlateFK suspects14/46/53/61 provenreal beforetargetrepair, samefinaltestthreecandidates + fresh247/12gates",
+      "boundary": "DBatomicity doesnotphysicalrollback externaldel/SMTP; GCpoolprefixstatements notoneTX; boundedspec and futureP1/P4/P6/P7targets retained"
+    }
+  ],
+  "material_artifacts": {
+    "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": "4335bed4788796a9adb9bb47c4e12e7bea1cd87a23e4b5eccf78d19febc6f259",
+    "docs/company-mail/evidence/R5-TRANSACTION-DB-CATALOG.json": "79b3bac4bcfb35e9e818e3da7473b5771ee338c28c3b729e0060033df842c391",
+    "docs/company-mail/evidence/R5-TRANSACTION-PROOF-REGISTER.json": "0bcae733744b16f31d929611f629b8193282d740beb5e061ef34747b7f2b149b",
+    "docs/company-mail/R5-TRANSACTION-COVERAGE.md": "fe8f5806b1aa56367a6521f64bbe7019ca6c2271001f4f969971470c60f9c966",
+    "docs/company-mail/R5-TRANSACTIONS.md": "d1875fb2ac867eece856e7a53605c446858ac5464e3014866b0cf31cc0e19b52"
+  },
+  "ordinary_future_risks_not_task_gaps": [
+    "physicalobject callbacksuccess/commituncertainty notDBrollback",
+    "GCpoolprefixcommits/fairness futureP3",
+    "P4 finalcommittime policy notcurrentlyspecified",
+    "P7ACKepoch notwebhookbatchmutexproof",
+    "future newcallers/writeprotocols require renewedproof"
+  ],
+  "actual_current_formal_order_gaps_after_AH_review": [],
+  "acceptance_record": {
+    "basis": "original four current finite mapping/ordering requirements; no task acceptance from testcount or syntaxfalseflag",
+    "independent_material_hash_accepted": "074fbeadde651b37bcffd3e85997fb2141f2ea56d36441f3c2eac0e7c6e64f25",
+    "scope": "current source+actualdispatch+operation-sensitive catalog+wait/effect/error owner, bounded presentcallers",
+    "not_claimed": "allbranchesruntime, futureP1P4P6P7, physicalrollbackobjects/SMTP, total171completion"
+  }
+}

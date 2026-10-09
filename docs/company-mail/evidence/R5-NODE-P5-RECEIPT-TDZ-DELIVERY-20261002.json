@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "deliveries": [
+    {
+      "id": "NODE_INITIAL",
+      "archive": "R5-NODE-P5-RECEIPT-UI-INITIAL-LOGS.tar.gz",
+      "review": "R5-NODE-P5-RECEIPT-UI-INITIAL-REVIEW.json",
+      "source_archive": "/private/tmp/tm-r5node-new.p36ab721/P5-RECEIPT-UI-INITIAL-evidence.tar.gz",
+      "source_archive_sha256_from_author": "ca706914932f98c903be3b103527513afe611f263b4d1b0192e685fef09cbe5e",
+      "source_archive_hash_recomputed": false,
+      "safe_archive_sha256": "ca706914932f98c903be3b103527513afe611f263b4d1b0192e685fef09cbe5e",
+      "payload_file_count": 36,
+      "excluded_members": [],
+      "payload_bytes_changed": false,
+      "tests_or_perfilehashes_reexecuted": false
+    },
+    {
+      "id": "TDZ_REPAIR2",
+      "archive": "R5-RECEIPT-TDZ-REPAIR2-LOGS.tar.gz",
+      "review": "R5-RECEIPT-TDZ-REPAIR2-REVIEW.json",
+      "source_archive": "/private/tmp/tm-r5receipt-tdz._ylaufe0/RECEIPT-TDZ-TWO-TARGETS-evidence.tar.gz",
+      "source_archive_sha256_from_author": "a81b78dfc34aeb1ca0c7a2275e24f8b305012afa1cfff2ddac4f2ad5cd7caf2e",
+      "source_archive_hash_recomputed": false,
+      "safe_archive_sha256": "a81b78dfc34aeb1ca0c7a2275e24f8b305012afa1cfff2ddac4f2ad5cd7caf2e",
+      "payload_file_count": 11,
+      "excluded_members": [],
+      "payload_bytes_changed": false,
+      "tests_or_perfilehashes_reexecuted": false
+    }
+  ],
+  "old_raw_or_review_relabelled": false,
+  "whole54_original_CLI1": true,
+  "current_TDZ_only2_CLI0": true,
+  "current_whole54_or_whole36_claim": false,
+  "task_complete": false,
+  "fullCI_green": false,
+  "node_dependencies": "private originallockmodules reused only, no newcoldclaim/no modules/sourcebundle",
+  "runtime_layer": "production TSconsumers with controlled transport, noactualGoPG/SMTP/browser/API",
+  "TDZ_independent_delivered_verdict": {
+    "reviewer": "baseline_dispatch/receipt_ui_independent_review",
+    "scope": "exact2targetboundedruntimeaccepted; prepared454db/d2e pinsmatch; noarchive rehash",
+    "registered": 36,
+    "passed": 2,
+    "failed": 0,
+    "filtered_unexecuted": 34,
+    "CLI_exit": 0,
+    "whole54_original_result": "53PASS1FAILCLI1 kept",
+    "currentwhole_claim": false
+  }
+}

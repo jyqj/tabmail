@@ -65,13 +65,17 @@ func (h *CompanyTemplateHandler) Retire(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	v, ok := companyBody[struct {
-		Revision int  `json:"revision"`
-		Retired  bool `json:"retired"`
+		Revision int   `json:"revision"`
+		Retired  *bool `json:"retired"`
 	}](w, r)
 	if !ok {
 		return
 	}
-	h.result(w, map[string]bool{"updated": true}, h.service.SetMailTemplateRetired(r.Context(), companyActor(r), id, v.Revision, v.Retired))
+	if v.Retired == nil {
+		errBadRequest(w, "explicit retired boolean required")
+		return
+	}
+	h.result(w, map[string]bool{"updated": true}, h.service.SetMailTemplateRetired(r.Context(), companyActor(r), id, v.Revision, *v.Retired))
 }
 
 func (h *CompanyTemplateHandler) Versions(w http.ResponseWriter, r *http.Request) {
@@ -119,12 +123,16 @@ func (h *CompanyTemplateHandler) TemplateGrant(w http.ResponseWriter, r *http.Re
 	v, ok := companyBody[struct {
 		Mailbox uuid.UUID `json:"mailbox_id"`
 		User    uuid.UUID `json:"user_id"`
-		Enabled bool      `json:"enabled"`
+		Enabled *bool     `json:"enabled"`
 	}](w, r)
 	if !ok {
 		return
 	}
-	h.result(w, map[string]bool{"updated": true}, h.service.SetTemplateGrant(r.Context(), companyActor(r), company.TemplateGrant{TemplateID: id, MailboxID: v.Mailbox, UserID: v.User}, v.Enabled))
+	if v.Enabled == nil {
+		errBadRequest(w, "explicit enabled boolean required")
+		return
+	}
+	h.result(w, map[string]bool{"updated": true}, h.service.SetTemplateGrant(r.Context(), companyActor(r), company.TemplateGrant{TemplateID: id, MailboxID: v.Mailbox, UserID: v.User}, *v.Enabled))
 }
 
 func (h *CompanyTemplateHandler) UsableTemplates(w http.ResponseWriter, r *http.Request) {

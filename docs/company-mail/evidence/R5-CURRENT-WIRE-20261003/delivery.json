@@ -1,0 +1,12 @@
+{
+  "evidence_commit": "58e1bc99854ffbef962184ad272440ff6ef0fbb8",
+  "origin_push": "confirmed",
+  "draft_pr_attempts": 1,
+  "draft_pr_status": "denied",
+  "draft_pr_error": "Post https://api.github.com/graphql: Forbidden",
+  "pr_created": false,
+  "merge_or_deploy": false,
+  "final_source_validation": "pass",
+  "private_raw_root": "/workspace/r5-wire-private",
+  "private_raw_published": false
+}

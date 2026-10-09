@@ -1,0 +1,81 @@
+{
+  "all14included_in_fresh_immutable_input_manifest": true,
+  "exact14reference_paths_from_reader_message": true,
+  "old0cf_reference_equal_not_runtime_reuse": true,
+  "reader_certification": "reader originalSOURCE byteequal14refs; not originally independent14hash manifest or signed14pins",
+  "runtime_capture14mapping_from_existing_manifest_not_rehashed": {
+    "internal/api/handlers/company_recovery.go": {
+      "actual_captured_sha256": "0761eaa5321bca1754ae0fbd4a7ece35e34733e13b9cf8281bf10a35ee09597c",
+      "equal": true,
+      "original0cf_reference_sha256": "0761eaa5321bca1754ae0fbd4a7ece35e34733e13b9cf8281bf10a35ee09597c"
+    },
+    "internal/api/handlers/outbound.go": {
+      "actual_captured_sha256": "535a602f0d2b0566c09a8131040ee25471f0266b5c15395ee9b312ffe83fa5a8",
+      "equal": true,
+      "original0cf_reference_sha256": "535a602f0d2b0566c09a8131040ee25471f0266b5c15395ee9b312ffe83fa5a8"
+    },
+    "internal/api/openapi.yaml": {
+      "actual_captured_sha256": "9afe1749637dc9cc2f66956f4026a89244735f1242f203a75003390723a0656f",
+      "equal": true,
+      "original0cf_reference_sha256": "9afe1749637dc9cc2f66956f4026a89244735f1242f203a75003390723a0656f"
+    },
+    "internal/api/router.go": {
+      "actual_captured_sha256": "2fbcaa0a042cb4c8e8eba6b74ea429b855b2aded202bcc79796b796df362f566",
+      "equal": true,
+      "original0cf_reference_sha256": "2fbcaa0a042cb4c8e8eba6b74ea429b855b2aded202bcc79796b796df362f566"
+    },
+    "internal/app/submissions/receipts.go": {
+      "actual_captured_sha256": "f9984b3899fc19dc83aa48e433dd99639be69b5b32b500d67f385dab532b4813",
+      "equal": true,
+      "original0cf_reference_sha256": "f9984b3899fc19dc83aa48e433dd99639be69b5b32b500d67f385dab532b4813"
+    },
+    "internal/company/outbound_receipt.go": {
+      "actual_captured_sha256": "76aa604d110974ccebc584ae497758edce30ad7d91219eeff0bb0b3ef619fee8",
+      "equal": true,
+      "original0cf_reference_sha256": "76aa604d110974ccebc584ae497758edce30ad7d91219eeff0bb0b3ef619fee8"
+    },
+    "internal/store/postgres/company_http_test.go": {
+      "actual_captured_sha256": "8f21511bba2d3092e1cc98b6968e093d308462405e227c43763e71ce234a57be",
+      "equal": true,
+      "original0cf_reference_sha256": "8f21511bba2d3092e1cc98b6968e093d308462405e227c43763e71ce234a57be"
+    },
+    "internal/store/postgres/company_workflows_test.go": {
+      "actual_captured_sha256": "de3742292d0cfcef550f31a4d34f7ecb19884e70b8ab4f1d93deaae0820d945c",
+      "equal": true,
+      "original0cf_reference_sha256": "de3742292d0cfcef550f31a4d34f7ecb19884e70b8ab4f1d93deaae0820d945c"
+    },
+    "internal/store/postgres/outbound_principal.go": {
+      "actual_captured_sha256": "d8b7ecd683724592ed8d9187607fa789de6cf4f7e369a6057e48024db7c2c750",
+      "equal": true,
+      "original0cf_reference_sha256": "d8b7ecd683724592ed8d9187607fa789de6cf4f7e369a6057e48024db7c2c750"
+    },
+    "internal/store/postgres/outbound_receipts.go": {
+      "actual_captured_sha256": "8bea468a548c33b478f3330841258ba77f3076521c52910a2dd7e5ee67190d36",
+      "equal": true,
+      "original0cf_reference_sha256": "8bea468a548c33b478f3330841258ba77f3076521c52910a2dd7e5ee67190d36"
+    },
+    "internal/store/postgres/r5_content_wait_test.go": {
+      "actual_captured_sha256": "1b83bcecc0485c1f986a21899adb6eb654a87b941b5400ffa50c0eb85355301d",
+      "equal": true,
+      "original0cf_reference_sha256": "1b83bcecc0485c1f986a21899adb6eb654a87b941b5400ffa50c0eb85355301d"
+    },
+    "internal/store/postgres/r5_lock_order_test.go": {
+      "actual_captured_sha256": "2f670eb5cb41bbc61b529d6101408aedb2873311aa55aa755d904756e9b80f6e",
+      "equal": true,
+      "original0cf_reference_sha256": "2f670eb5cb41bbc61b529d6101408aedb2873311aa55aa755d904756e9b80f6e"
+    },
+    "internal/store/postgres/r5_permission_snapshot_test.go": {
+      "actual_captured_sha256": "ebe742f361a5f64dcc9004c20e4b1aaab784446e7f4bf7327ae6d46f6f5be53f",
+      "equal": true,
+      "original0cf_reference_sha256": "ebe742f361a5f64dcc9004c20e4b1aaab784446e7f4bf7327ae6d46f6f5be53f"
+    },
+    "internal/testpg/fixture.go": {
+      "actual_captured_sha256": "cd58746b23e0c376a1c48c01ed2837091bbbfc85a7e5bdc49c8eefbbccd17153",
+      "equal": true,
+      "original0cf_reference_sha256": "cd58746b23e0c376a1c48c01ed2837091bbbfc85a7e5bdc49c8eefbbccd17153"
+    }
+  },
+  "source_closure_sha256": "b3d0ea67fdca84a5a22a41389fef680db4de4dc4b4290a281085bbb676f9b76a",
+  "source_sha": "5373e23ccdf5aea57a7664f7d565ec1fcea68a7b",
+  "whole0cfFAIL_not_overwritten": true
+}

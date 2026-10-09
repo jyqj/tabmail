@@ -330,80 +330,6 @@ func (s *PgStore) CountTenantMessagesSince(ctx context.Context, tenantID uuid.UU
 	return n, err
 }
 
-func (s *PgStore) DeleteExpiredMessages(ctx context.Context, before time.Time, limit int) (int, error) {
-	tx, err := s.pool.Begin(ctx)
-	if err != nil {
-		return 0, err
-	}
-	defer tx.Rollback(ctx)
-
-	rows, err := tx.Query(ctx, `
-		WITH doomed AS (
-			SELECT id, mailbox_id
-			FROM messages
-			WHERE ((deleted_at IS NOT NULL AND purge_after < $1) OR (deleted_at IS NULL AND expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))
-			ORDER BY expires_at, id
-			LIMIT $2
-		),
-		deleted AS (
-			DELETE FROM messages m
-			USING doomed d
-			WHERE m.id = d.id
-			RETURNING d.mailbox_id
-		)
-		SELECT mailbox_id, count(*) FROM deleted GROUP BY mailbox_id`, before, limit)
-	if err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	total := 0
-	counts := map[uuid.UUID]int{}
-	for rows.Next() {
-		var mailboxID uuid.UUID
-		var count int
-		if err := rows.Scan(&mailboxID, &count); err != nil {
-			return 0, err
-		}
-		total += count
-		counts[mailboxID] = count
-	}
-	if err := rows.Err(); err != nil {
-		return 0, err
-	}
-	rows.Close()
-	for mailboxID, count := range counts {
-		if _, err := tx.Exec(ctx, `UPDATE mailboxes SET message_count=GREATEST(message_count-$2,0) WHERE id=$1`, mailboxID, count); err != nil {
-			return 0, err
-		}
-	}
-	if err := tx.Commit(ctx); err != nil {
-		return 0, err
-	}
-	return total, nil
-}
-
-func (s *PgStore) ListExpiredObjectKeys(ctx context.Context, before time.Time, limit int) ([]string, error) {
-	rows, err := s.pool.Query(ctx, `
-		SELECT raw_object_key FROM messages
-		WHERE ((deleted_at IS NOT NULL AND purge_after < $1) OR (deleted_at IS NULL AND expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0))))) AND raw_object_key IS NOT NULL AND raw_object_key != ''
-		ORDER BY expires_at, id
-		LIMIT $2`, before, limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var keys []string
-	for rows.Next() {
-		var k string
-		if err := rows.Scan(&k); err != nil {
-			return nil, err
-		}
-		keys = append(keys, k)
-	}
-	return keys, rows.Err()
-}
-
 func (s *PgStore) DeleteExpiredMessagesReturningKeys(ctx context.Context, before time.Time, limit int) (int, []string, error) {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
@@ -421,7 +347,11 @@ func (s *PgStore) DeleteExpiredMessagesReturningKeys(ctx context.Context, before
 		),
 		deleted AS (
 			DELETE FROM messages m USING doomed d WHERE m.id = d.id
-			RETURNING d.mailbox_id, d.raw_object_key
+			  AND ((m.deleted_at IS NOT NULL AND m.purge_after < $1)
+			    OR (m.deleted_at IS NULL AND m.expires_at < $1 AND NOT EXISTS (
+			      SELECT 1 FROM mailboxes mb WHERE mb.id=m.mailbox_id
+			      AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))
+			RETURNING m.mailbox_id, m.raw_object_key
 		)
 		SELECT mailbox_id, raw_object_key, count(*) FROM deleted GROUP BY mailbox_id, raw_object_key`, before, limit)
 	if err != nil {

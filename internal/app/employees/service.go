@@ -5,8 +5,8 @@ package employees
 import (
 	"context"
 	"github.com/google/uuid"
-	"strings"
 	"tabmail/internal/app"
+	"tabmail/internal/app/credentials"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
 )
@@ -15,8 +15,9 @@ type Service struct{ repo company.OffboardingPlanner }
 
 func New(repo company.OffboardingPlanner) *Service { return &Service{repo: repo} }
 func (s *Service) Preview(ctx context.Context, a authz.Actor, target, successor uuid.UUID, options company.OffboardingOptions, reason string) (*company.OffboardingPlan, error) {
-	reason = strings.TrimSpace(reason)
-	if len(reason) < 8 || len(reason) > 1000 || target == uuid.Nil || successor == uuid.Nil || target == successor || target == a.ID {
+	var err error
+	reason, err = credentials.AuditReason(reason)
+	if err != nil || target == uuid.Nil || successor == uuid.Nil || target == successor || target == a.ID {
 		return nil, app.BadRequest("distinct employee/successor and an 8-1000 byte reason required")
 	}
 	if options.Drafts == "" {

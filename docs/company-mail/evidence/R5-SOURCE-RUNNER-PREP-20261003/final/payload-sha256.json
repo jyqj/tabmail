@@ -1,0 +1,22 @@
+{
+  "after-default-selection.json.gz": "6083d06fed93308c77937cf4f345fc262ac6b1ffc27eec09d6e9e03ec705e871",
+  "after-race-r5protocol-selection.json.gz": "7cd294145e764cbc3df336d2d69a4c5836e809a9b2336f6178419f4e36f5e49a",
+  "before-default-selection.json.gz": "6083d06fed93308c77937cf4f345fc262ac6b1ffc27eec09d6e9e03ec705e871",
+  "before-race-r5protocol-selection.json.gz": "7cd294145e764cbc3df336d2d69a4c5836e809a9b2336f6178419f4e36f5e49a",
+  "build.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "compressed-raw-sha256.json": "83e3b75b8b3fd4823303d8798f8b12f00973ce3aa715a15330492bafaecac39b",
+  "deps-freeze.txt": "be168db4468857dcc317265bd1721bfb679994fcf9a3d86ef9506b7dcd6e143f",
+  "missing-wire-final.json": "8c3177692d46b553cc05c51894e16bd94298b452e6d0ab8d7f800971b235c674",
+  "missing-wire-final.stderr": "1c75e605dd76f4116b059e22fdd263556c45cb7abd3177b99c4390dc8d9c537d",
+  "ordinary-receipt-wire.json": "9fdd0d734a549733a89fb9cb5f85035a137e9c5ff452276363579cf65b0950f3",
+  "preparation.json": "d2600f59e25bb154847f8270013733aa442eca54ae43ffde21c7d2835e7fa9df",
+  "preservation.json": "e3c8b06c728d4be2614510b30009c602329e068dcd7e57d5664b05674717a887",
+  "run.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "run.stdout": "0fc54ac3dac23144a464639f8d194745e59efb4eb364dc81ec44f1691677b064",
+  "scoped-final-precommit.stderr": "687913e9dd7524398e6a56edd4e601d0bab5e35b04a9b394134339332ce93aa3",
+  "versioned-final.json": "27c9eddec89a732d5a491c712c3fb38cf53384886876968c05cdb7a1b7634cb7",
+  "versioned-final.stderr": "124885e039bdd344b34061d76f36c002385b034eef785e8ce11f79645c3c26ef",
+  "versioned-final.stdout": "e0de8eb8a0e452049894984699b7fd648bf1c93522a0638bb7b70f5989bd8943",
+  "versioned-summary.json": "dbcc7f9acc1dc5c2631db9d9e7c8518e7469fad526df68e177fc53efb9d97a6d"
+}

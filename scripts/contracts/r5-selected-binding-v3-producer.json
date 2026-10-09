@@ -1,0 +1,126 @@
+{
+  "go_version": "go1.25.7",
+  "package_diagnostic_fields": [
+    "Stale",
+    "StaleReason"
+  ],
+  "package_error_serialization": "PackageError.MarshalJSON in load/pkg.go; IsImportCycle is not emitted",
+  "sources": [
+    {
+      "path": "src/cmd/go/internal/load/pkg.go",
+      "sha256": "ae3866bb04014e27f186572df158068f954b30b72166d30eb34f9f29edb48d31",
+      "url": "https://raw.githubusercontent.com/golang/go/go1.25.7/src/cmd/go/internal/load/pkg.go"
+    },
+    {
+      "path": "src/cmd/go/internal/modinfo/info.go",
+      "sha256": "00f9f50ed29686734903d96c70a3da381c0aa4da607377b8aca143a5718b4aec",
+      "url": "https://raw.githubusercontent.com/golang/go/go1.25.7/src/cmd/go/internal/modinfo/info.go"
+    },
+    {
+      "path": "src/cmd/go/internal/modfetch/codehost/codehost.go",
+      "sha256": "6372669c5429b484391ecabecfc89f278d4470702e875c0d35e9dd1aebc63132",
+      "url": "https://raw.githubusercontent.com/golang/go/go1.25.7/src/cmd/go/internal/modfetch/codehost/codehost.go"
+    }
+  ],
+  "types": {
+    "ModuleError": {
+      "Err": "string"
+    },
+    "ModulePublic": {
+      "Deprecated": "string",
+      "Dir": "string",
+      "Error": "*ModuleError",
+      "GoMod": "string",
+      "GoModSum": "string",
+      "GoVersion": "string",
+      "Indirect": "bool",
+      "Main": "bool",
+      "Origin": "*codehost.Origin",
+      "Path": "string",
+      "Query": "string",
+      "Replace": "*ModulePublic",
+      "Retracted": "[]string",
+      "Reuse": "bool",
+      "Sum": "string",
+      "Time": "*time.Time",
+      "Update": "*ModulePublic",
+      "Version": "string",
+      "Versions": "[]string"
+    },
+    "Origin": {
+      "Hash": "string",
+      "Ref": "string",
+      "RepoSum": "string",
+      "Subdir": "string",
+      "TagPrefix": "string",
+      "TagSum": "string",
+      "URL": "string",
+      "VCS": "string"
+    },
+    "PackageError": {
+      "Err": "string",
+      "ImportStack": "[]string|null",
+      "Pos": "string"
+    },
+    "PackagePublic": {
+      "BinaryOnly": "bool",
+      "BuildID": "string",
+      "CFiles": "[]string",
+      "CXXFiles": "[]string",
+      "CgoCFLAGS": "[]string",
+      "CgoCPPFLAGS": "[]string",
+      "CgoCXXFLAGS": "[]string",
+      "CgoFFLAGS": "[]string",
+      "CgoFiles": "[]string",
+      "CgoLDFLAGS": "[]string",
+      "CgoPkgConfig": "[]string",
+      "CompiledGoFiles": "[]string",
+      "ConflictDir": "string",
+      "DefaultGODEBUG": "string",
+      "DepOnly": "bool",
+      "Deps": "[]string",
+      "DepsErrors": "[]*PackageError",
+      "Dir": "string",
+      "Doc": "string",
+      "EmbedFiles": "[]string",
+      "EmbedPatterns": "[]string",
+      "Error": "*PackageError",
+      "Export": "string",
+      "FFiles": "[]string",
+      "ForTest": "string",
+      "GoFiles": "[]string",
+      "Goroot": "bool",
+      "HFiles": "[]string",
+      "IgnoredGoFiles": "[]string",
+      "IgnoredOtherFiles": "[]string",
+      "ImportComment": "string",
+      "ImportMap": "map[string]string",
+      "ImportPath": "string",
+      "Imports": "[]string",
+      "Incomplete": "bool",
+      "InvalidGoFiles": "[]string",
+      "MFiles": "[]string",
+      "Match": "[]string",
+      "Module": "*modinfo.ModulePublic",
+      "Name": "string",
+      "Root": "string",
+      "SFiles": "[]string",
+      "Shlib": "string",
+      "Stale": "bool",
+      "StaleReason": "string",
+      "Standard": "bool",
+      "SwigCXXFiles": "[]string",
+      "SwigFiles": "[]string",
+      "SysoFiles": "[]string",
+      "Target": "string",
+      "TestEmbedFiles": "[]string",
+      "TestEmbedPatterns": "[]string",
+      "TestGoFiles": "[]string",
+      "TestImports": "[]string",
+      "XTestEmbedFiles": "[]string",
+      "XTestEmbedPatterns": "[]string",
+      "XTestGoFiles": "[]string",
+      "XTestImports": "[]string"
+    }
+  }
+}

@@ -1,0 +1,151 @@
+{
+  "activation": "external_owner_evi_root_admission_required_no_implicit_runtime_authorization",
+  "cache_modes": [
+    "app_cold_db_os_unspecified",
+    "app_hot_db_os_unspecified"
+  ],
+  "candidate_thresholds": {
+    "M_index_ready_query_p95_ms": 1000,
+    "M_list_p95_ms": 500,
+    "S_list_p95_ms": 300,
+    "attachment_and_public_SMTP": "not_list_latency_threshold",
+    "unexplained_regression_percent": 10
+  },
+  "concurrency": 20,
+  "contract_kind": "r5_current18_workload_v1",
+  "contract_schema_version": 1,
+  "evidence_generation": "r5_current18_fork_source_v2_parentclock_v1",
+  "executability": {
+    "L": "not_authorized",
+    "M": "separate_explicit_admission_required_after_new_S_review",
+    "S": "separate_explicit_admission_required",
+    "tool_only": "separate_explicit_admission_required"
+  },
+  "fingerprint_method": "six_actual_canonical_sql_streams_v1",
+  "historical_dataset_reference": {
+    "path": "docs/company-mail/evidence/R5-BENCHMARK-DATASETS.json",
+    "role": "unchanged_original_population_workload_budget_reference_not_current_schema_or_clock_admission",
+    "sha256": "9e81020680dbd6e990cbb35ab1aac16413885e65306d949a5889c4bafda00b36"
+  },
+  "identity_boundary": {
+    "all_persistent_equivalent": false,
+    "protocol_UID_certified": false,
+    "uncovered_fields": "received_at/received-order, lifecycle clock timestamps, indexed_at, next_attempt_at, lease tokens, random actor/mailbox row UUIDs; protocol UID not certified"
+  },
+  "message_sizes": [
+    {
+      "bytes": 4096,
+      "weight_per_1000": 800
+    },
+    {
+      "bytes": 32768,
+      "weight_per_1000": 180
+    },
+    {
+      "bytes": 262144,
+      "weight_per_1000": 19
+    },
+    {
+      "bytes": 2097152,
+      "weight_per_1000": 1
+    }
+  ],
+  "pipeline": {
+    "claim_limit": 20,
+    "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+    "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+    "claim_query_source": "internal/store/postgres/mail_content.go:ClaimMailIndexJobs",
+    "lease_seconds": 90,
+    "maintenance": "no_explicit_analyze_or_planner_or_durability_override",
+    "max_attempts": 5,
+    "parser_concurrency": 4,
+    "parser_join_reserve_seconds": 31,
+    "parser_timeout_seconds": 30,
+    "window_messages": 20
+  },
+  "pool_size": 24,
+  "population": {
+    "historical_personal_permanent": "never reinterpret anomalous expiry as shared finite retention",
+    "lifecycle": {
+      "active_inbox_percent": 80,
+      "archived_percent": 10,
+      "shared_hard_expired_percent": 5,
+      "trash_past_purge_percent": 5
+    },
+    "personal_per_employee": 1,
+    "shared_grants_per_mailbox": 4,
+    "shared_per_employee": 4,
+    "tenant_ratio": [
+      80,
+      20
+    ]
+  },
+  "product_green": false,
+  "resource_scope": {
+    "cache": "app_reset_and_reused_no_os_db_cold_claim",
+    "disk": "owned_raw_objects_plus_owned_pg_database_bytes",
+    "gc": "raw_reference_read_only_not_sweep_throughput",
+    "memory": "go_alloc_and_process_high_water_rss_not_pg_redis_system",
+    "sql": "application_and_worker_pool_not_server_trigger_sql"
+  },
+  "samples_per_workload_cache": 200,
+  "scales": {
+    "L": {
+      "budget_seconds": 43200,
+      "disk_budget_gib": 450,
+      "employees": 1000,
+      "execution": "not_requested_this_batch",
+      "mailboxes": 5000,
+      "messages": 10000000,
+      "release_necessity": "P0 requires actual S and M only; L 10M dataset and budget are frozen but not executed or capacity-certified here. P10/final release claiming 10M must execute L and retain actual evidence."
+    },
+    "M": {
+      "budget_seconds": 10800,
+      "disk_budget_gib": 80,
+      "employees": 1000,
+      "mailboxes": 5000,
+      "messages": 1000000
+    },
+    "S": {
+      "budget_seconds": 1800,
+      "disk_budget_gib": 10,
+      "employees": 100,
+      "mailboxes": 500,
+      "messages": 100000
+    }
+  },
+  "seed": 3893945,
+  "shipping_paths": [
+    "actual_StoreMessage",
+    "filesystem_raw_objects",
+    "production_Parser",
+    "Claim20_Complete",
+    "shipping_HTTP_router",
+    "JWT",
+    "loopback_SMTP_worker",
+    "actual_PostgreSQL_SQL_tracer"
+  ],
+  "sql_tracer_calibration_queries": 20,
+  "system_memory_observation": "not_measured",
+  "task_complete": false,
+  "tool_only": {
+    "budget_seconds": 300,
+    "counts_as_original_scale": false,
+    "disk_budget_gib": 10,
+    "population": [
+      20,
+      100,
+      1000
+    ]
+  },
+  "total_samples": 2800,
+  "workloads": [
+    "inbox_list",
+    "indexed_search",
+    "indexed_message",
+    "permission_mailboxes",
+    "draft_save",
+    "submit_and_loopback_worker",
+    "gc_reference_safety"
+  ]
+}

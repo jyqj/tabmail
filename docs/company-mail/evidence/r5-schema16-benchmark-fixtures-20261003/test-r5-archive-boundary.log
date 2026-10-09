@@ -1,0 +1,20 @@
+test_archive_extra_controls_and_files (test_r5_archive_boundary.ArchiveBoundaryTests.test_archive_extra_controls_and_files) ... ok
+test_archive_family_extra_capsule_and_ancestor_symlink (test_r5_archive_boundary.ArchiveBoundaryTests.test_archive_family_extra_capsule_and_ancestor_symlink) ... ok
+test_budget_and_unavailable_metadata_fail_closed (test_r5_archive_boundary.ArchiveBoundaryTests.test_budget_and_unavailable_metadata_fail_closed) ... ok
+test_descriptor_second_stat_replacement (test_r5_archive_boundary.ArchiveBoundaryTests.test_descriptor_second_stat_replacement) ... ok
+test_every_historical_file_byte_delete_rename (test_r5_archive_boundary.ArchiveBoundaryTests.test_every_historical_file_byte_delete_rename) ... ok
+test_exact_baseline_hashes_and_six_modules (test_r5_archive_boundary.ArchiveBoundaryTests.test_exact_baseline_hashes_and_six_modules) ... ok
+test_import_embed_generate_archive_rejected (test_r5_archive_boundary.ArchiveBoundaryTests.test_import_embed_generate_archive_rejected) ... ok
+test_marker_bytes_value_case_directives (test_r5_archive_boundary.ArchiveBoundaryTests.test_marker_bytes_value_case_directives) ... ok
+test_marker_deletion_and_module_in_all_roots (test_r5_archive_boundary.ArchiveBoundaryTests.test_marker_deletion_and_module_in_all_roots) ... ok
+test_production_all_variants_change_static_domain (test_r5_archive_boundary.ArchiveBoundaryTests.test_production_all_variants_change_static_domain) ... ok
+test_read_leaf_replacement_never_opens_fifo_body (test_r5_archive_boundary.ArchiveBoundaryTests.test_read_leaf_replacement_never_opens_fifo_body) ... ok
+test_registry_duplicate_traversal_forgery (test_r5_archive_boundary.ArchiveBoundaryTests.test_registry_duplicate_traversal_forgery) ... ok
+test_symlink_ancestors_fifo_and_metadata_only (test_r5_archive_boundary.ArchiveBoundaryTests.test_symlink_ancestors_fifo_and_metadata_only) ... ok
+test_third_replace (test_r5_archive_boundary.ArchiveBoundaryTests.test_third_replace) ... ok
+test_unknown_root_and_ignored_go_not_hidden (test_r5_archive_boundary.ArchiveBoundaryTests.test_unknown_root_and_ignored_go_not_hidden) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.477s
+
+OK

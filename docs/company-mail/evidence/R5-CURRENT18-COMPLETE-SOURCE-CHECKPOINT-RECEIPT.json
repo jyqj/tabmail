@@ -1,0 +1,541 @@
+{
+  "actual_source_closure_sha256": "47fd3642eefab51ed9c19db7bc31167ce19f87f864781f36ffbcb3d8ecce9f0f",
+  "boundary": "Complete ordinary source/docs/deployment/frontend/assets/localfork; excludes build/cache/Git/privateenvironment/runtimeobjects/profiles/runtime-evidence archives. No Go/PG/tests/GoList/metadata subprocess invoked; SOURCE not owner/reference/catalog qualification or method admission. Externalcache/toolchain existingversionchecksum boundary retained, bytes not freshhashed",
+  "canonical_algorithm": "SHA1/SHA256(json.dumps(files,sort_keys=True,separators=(',',':')).encode('utf-8')); ensure_ascii=True/no newline",
+  "elapsed_seconds": 0.3382880687713623,
+  "excluded_entries": [
+    [
+      ".DS_Store",
+      "host_config_or_generated_ambient_not_source"
+    ],
+    [
+      ".git",
+      "generated_cache_runtime_or_git_not_source"
+    ],
+    [
+      "docs/company-mail/evidence/R5-ABC-C2-GO-PASS-CAPTURE-FAIL-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-ALIAS43-OAS3-FAILED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AA-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AB-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AC-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AG-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AI-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-CALIBRATION-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-CLOCK-CALIBRATION-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-LOOKAHEAD-S-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-LOOKAHEAD-TOOL-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-M-ABSOLUTE-TIMEOUT-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-M-CLEANUP-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-M-FIRST-FAILED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-M2-CLEANUP-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-M2-FAILED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-PARALLEL-CALIBRATION-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-PIPELINE-TOOL-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-S-CLEANUP-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-S-FIRST-FAILED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-S-PIPELINE-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-S2-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-STORE-DIAGNOSTIC-4K-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-STORE-DIAGNOSTIC-LOOKAHEAD-B-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-AJ-WORKLOAD-CALIBRATION-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-E-BACKEND.jsonl.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-F-BACKEND-PARTIAL.jsonl.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-G-BACKEND.jsonl.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-G-FOCUSED.jsonl.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-J-BACKEND-600.jsonl.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-J-BACKEND.jsonl.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-J-FIRST-BACKEND.jsonl.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-J-FOCUSED-INTERRUPTED.jsonl.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-J-FOCUSED.jsonl.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-J-RETRY-TIMEOUT.jsonl.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-K-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-L-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-M-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-N-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-O-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-P-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-Q-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-R-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-S-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-T-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-U-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-V-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-W-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-X-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-Y-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B01-Z-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B02-OWNERLESS-GUARD-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-B02-WIP-PERMISSION-RUNTIME-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-BROWSER-REPAIR2-PURE-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-C18-RSS-V2-SOURCE-BLOCKED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-C18-RSS-V3-SOURCE-PREPARED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-C18-RSS-V4-SOURCE-CANDIDATE-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-C18-RSS-V5-SOURCE-ADMITTED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-C18-V2-PURE21-ORIGINAL18-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-C18-V2-PURE21-RESOURCE-INFRA-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-COLD-ATOMIC8-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-COMPANY-EVENT-CONSUMER-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-COMPANY-EVENT-TRANSPORT-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-COMPATIBILITY-POST-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-CURRENT-DIRTY-FULLGO-FAILED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-CURRENT-SOURCE-V2-MAP-C-CORRECTED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-CURRENT-SOURCE-V2-ORIGINAL15-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-CURRENT-SOURCE-V4-LAST1-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-CURRENT-WHOLE-Go0cf-FAILED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-CURRENT18-BACKEND-FULLGO-FAILED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-CURRENT18-WHOLE27633-FAILED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-FIRST-SCHEMA17-B5-PROFILECREATE-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-GC-HELPER-ENTRY-AFFECTED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-GC18-FAIRNESS-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-HISTORICAL-IDENTITY-HANDLER-V3-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-HISTORICAL-IDENTITY-PG-PARTIAL-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-HTTP-CONTRACT-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-LEGACY-KEY-RECEIPT10-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-LEGACY-RC3-FRESH-GO-TSC-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-M-PRE-CUTOFF-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-MCAUSE-487-FIRST-INFRA-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-MCAUSE-490-DIAGNOSTIC-SAFE-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-MCAUSE-NEWTESTS-RAW.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-MCAUSE-SOURCE-CAPSULE.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-MIME-FORK-V5-FOUR-TARGETS-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-MIME-FORK-V5-NARRATIVE-CORRECTED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-CAPSULE.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2-CAPSULE.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3-CAPSULE.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-MIME-WALKER-V2-FAILED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-NATIVE-NODE22-COLD-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-NODE-P5-RECEIPT-UI-INITIAL-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-OPENAPI-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-ORDINARY-OAS-TYPED-WIRE-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-P1-GLOBAL-PROFILE-FANOUT-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-P1-PROFILE-VISIBILITY-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-P2-060-INSPECTION-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-P2-RECEIVED-ELIGIBILITY-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-PAUSED-20261001-TOOL-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-PG-LIFECYCLE-FOUR-TWO-LANE-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-PG-PARALLEL-ADDED15-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-PG-PHASE-OLDDFB-DIAGNOSTIC-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-PRODUCT4-RESTORE-GC-LIFECYCLE-P6-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-RECEIPT-A-CONSUMER9-FAILED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-RECEIPT-A-FIXTURE6-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-RECEIPT-FALSECONTENT2-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-RECEIPT-STATUS1-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-RECEIPT-TDZ-REPAIR2-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-RECEIPT-WHOLE4-EXACT14-91-SAFE90-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-RECEIPT-WHOLE4-ORIGINAL90-SAFE89-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-RECIPIENTS-OLDCAPTURE-NEWDOC-READONLY-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-REGISTRY1-MIGRATIONS-DEPENDENCY-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-REGISTRY23-DEPFIX-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-REGISTRY25-INPUT-INCOMPLETE-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-REGISTRY34-FAILED-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-SCHEMA17-CATALOG-UPGRADES-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-STATS-PUBLIC-PROJECTION5-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-WEBHOOK-BC05-ONLY-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-WEBHOOK-V2-HOOKS-CONFIG-PG-INFRA-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-WEBHOOK-V2-ORIGINAL75-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-WIRE-SPLIT-FIRST-TYPECHECK-DIAGNOSTIC-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "docs/company-mail/evidence/R5-WIRE-V2-TYPEGEN-TSC-11FILES-LOGS.tar.gz",
+      "historical_runtime_evidence_archive_not_editable_source; retained_original_in_checkout"
+    ],
+    [
+      "web/.next",
+      "generated_cache_runtime_or_git_not_source"
+    ],
+    [
+      "web/next-env.d.ts",
+      "host_config_or_generated_ambient_not_source"
+    ],
+    [
+      "web/node_modules",
+      "generated_cache_runtime_or_git_not_source"
+    ],
+    [
+      "web/test-failures.log",
+      "runtime_profile_log_or_generatedfile_not_source"
+    ],
+    [
+      "web/tsconfig.tsbuildinfo",
+      "runtime_profile_log_or_generatedfile_not_source"
+    ]
+  ],
+  "external_cache_reference_only": {
+    "Go": "go1.25.7 cachedtoolchain",
+    "enmime": "rootrequire v2.3.0 localthird_party219",
+    "module_checksums": "rootgo.sum captured; cached modules not copied or rehashed"
+  },
+  "files": 1309,
+  "generation": "SOURCE18 beforemigration19; allmigrations1..18/fullcollectorV5 SOURCE-only",
+  "head_locator_only": "587ba75 NOT sourceidentity",
+  "old_manifests_and_failed_runtime_artifacts_preserved": true,
+  "origin_wall": 1790985502.737074,
+  "readonly_editable_source_tree": "/private/tmp/tm-r5current18-complete-SOURCE.7vf5gy3_/editable-source-tree",
+  "source_before_after_stable": true,
+  "source_identity_kind": "canonical_complete_editable_current18_source_tree_sha1_nonruntime_checkpoint",
+  "source_root_before": "/Users/jin/Desktop/tabmail",
+  "source_sha": "c7bf9155f89cd10371665cbd896309385a20dbc0",
+  "status": "CURRENT18_PRE_MIGRATION19_SOURCE_CHECKPOINT_PASS",
+  "total_source_bytes": 20747066
+}

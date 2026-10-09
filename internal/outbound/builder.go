@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"tabmail/internal/models"
 )
@@ -92,16 +93,23 @@ func (m Message) EnvelopeRecipients() []string {
 // Build renders the message to a complete MIME wire form. It returns an error if
 // the body cannot be encoded, rather than silently emitting a truncated message.
 func Build(m Message) ([]byte, error) {
+	if err := validateCustomHeaders(m.Headers); err != nil {
+		return nil, err
+	}
 	var buf bytes.Buffer
 
 	writeHeader(&buf, "From", m.From)
 	if len(m.To) > 0 {
-		writeHeader(&buf, "To", strings.Join(m.To, ", "))
+		if err := writeRecipientHeader(&buf, "To", m.To); err != nil {
+			return nil, err
+		}
 	}
 	if len(m.CC) > 0 {
-		writeHeader(&buf, "Cc", strings.Join(m.CC, ", "))
+		if err := writeRecipientHeader(&buf, "Cc", m.CC); err != nil {
+			return nil, err
+		}
 	}
-	writeHeader(&buf, "Subject", m.Subject)
+	writeSubjectHeader(&buf, m.Subject)
 	writeHeader(&buf, "Date", time.Now().UTC().Format(time.RFC1123Z))
 	writeHeader(&buf, "Message-ID", m.MessageID)
 	writeHeader(&buf, "MIME-Version", "1.0")
@@ -269,6 +277,32 @@ func sanitizeHeaderValue(v string) string {
 	return strings.NewReplacer("\r", "", "\n", "").Replace(v)
 }
 
+// Keep custom field validation shared by submission and legacy job rebuilding.
+// CR/LF stripping and ignored names retain their existing behavior. Other
+// controls cannot be generated in a field body (RFC 5322 section 2.2); a field
+// we do not parse cannot be safely folded inside an arbitrary structured token,
+// so reject a physical line beyond the 998-octet wire limit before enqueue.
+func validateCustomHeaders(headers map[string]string) error {
+	for name, value := range headers {
+		if _, blocked := forbiddenCustomHeaders[strings.ToLower(name)]; blocked || !isValidHeaderName(name) {
+			continue
+		}
+		value = sanitizeHeaderValue(value)
+		if !utf8.ValidString(value) {
+			return fmt.Errorf("custom header %s contains invalid UTF-8", name)
+		}
+		for i := 0; i < len(value); i++ {
+			if (value[i] < 32 && value[i] != '\t') || value[i] == 127 {
+				return fmt.Errorf("custom header %s contains an invalid control character", name)
+			}
+		}
+		if len(name)+2+len(value) > 998 {
+			return fmt.Errorf("custom header %s exceeds the 998-byte line limit", name)
+		}
+	}
+	return nil
+}
+
 // SafeDisplayHeaders projects the stored custom-header map onto the subset
 // that is safe to show to a message reader: exactly the validity and
 // forbidden-name rules Build applies on the wire, so a caller-supplied header
@@ -298,4 +332,63 @@ func writeHeader(buf *bytes.Buffer, key, value string) {
 	io.WriteString(buf, ": ")
 	io.WriteString(buf, sanitizeHeaderValue(value))
 	io.WriteString(buf, "\r\n")
+}
+
+// Address values are already separate mailbox tokens. Fold only the whitespace
+// between them, never commas or spaces inside a quoted local part. Include the
+// separating comma in each token's budget so it cannot overflow a full line.
+// Long individual addresses may exceed the recommended 78 octets but must fit
+// the 998-octet hard limit with continuation whitespace (RFC 5322 section 2.1.1).
+func writeRecipientHeader(buf *bytes.Buffer, key string, addresses []string) error {
+	buf.WriteString(key)
+	buf.WriteByte(':')
+	lineLength := len(key) + 1
+	for i, address := range addresses {
+		token := sanitizeHeaderValue(address)
+		if i+1 < len(addresses) {
+			token += ","
+		}
+		if len(token) > 997 {
+			return fmt.Errorf("recipient address is too long for a MIME header")
+		}
+		if lineLength+1+len(token) > 78 {
+			buf.WriteString("\r\n ")
+			lineLength = 1
+		} else {
+			buf.WriteByte(' ')
+			lineLength++
+		}
+		buf.WriteString(token)
+		lineLength += len(token)
+	}
+	buf.WriteString("\r\n")
+	return nil
+}
+
+// Subject is unstructured text, unlike address and MIME headers. Encode all of
+// it so folding cannot change whitespace or reinterpret literal encoded-words,
+// and long ASCII tokens do not exceed the wire line limit. The 39-byte chunks
+// yield words of at most 64 characters: with "Subject: " the first line is at
+// most 73, below RFC 2047's limit of 76. Words contain complete UTF-8 characters.
+func writeSubjectHeader(buf *bytes.Buffer, subject string) {
+	subject = sanitizeHeaderValue(subject)
+	buf.WriteString("Subject: ")
+	for len(subject) > 0 {
+		n := 0
+		for n < len(subject) {
+			_, size := utf8.DecodeRuneInString(subject[n:])
+			if n+size > 39 {
+				break
+			}
+			n += size
+		}
+		buf.WriteString("=?UTF-8?b?")
+		buf.WriteString(base64.StdEncoding.EncodeToString([]byte(subject[:n])))
+		buf.WriteString("?=")
+		subject = subject[n:]
+		if len(subject) > 0 {
+			buf.WriteString("\r\n ")
+		}
+	}
+	buf.WriteString("\r\n")
 }

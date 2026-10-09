@@ -1,0 +1,98 @@
+test_actual_cli_capture_validate_reject (__main__.IndependentExcludedOracle.test_actual_cli_capture_validate_reject) ... ok
+test_actual_cli_regular_file_swap_must_reject (__main__.IndependentExcludedOracle.test_actual_cli_regular_file_swap_must_reject) ... {"fork": "third_party/enmime-v2.3.0", "action": "capture", "cli_exit": 0, "same_receipt": true, "observation": "CLI_RACE_OBSERVATION 2 True"}
+
+  test_actual_cli_regular_file_swap_must_reject (__main__.IndependentExcludedOracle.test_actual_cli_regular_file_swap_must_reject) (fork='third_party/enmime-v2.3.0', action='capture') ... FAIL
+{"fork": "third_party/enmime-v2.3.0", "action": "validate", "cli_exit": 0, "same_receipt": true, "observation": "CLI_RACE_OBSERVATION 2 True"}
+  test_actual_cli_regular_file_swap_must_reject (__main__.IndependentExcludedOracle.test_actual_cli_regular_file_swap_must_reject) (fork='third_party/enmime-v2.3.0', action='validate') ... FAIL
+{"fork": "third_party/go-smtp", "action": "capture", "cli_exit": 0, "same_receipt": true, "observation": "CLI_RACE_OBSERVATION 2 True"}
+  test_actual_cli_regular_file_swap_must_reject (__main__.IndependentExcludedOracle.test_actual_cli_regular_file_swap_must_reject) (fork='third_party/go-smtp', action='capture') ... FAIL
+{"fork": "third_party/go-smtp", "action": "validate", "cli_exit": 0, "same_receipt": true, "observation": "CLI_RACE_OBSERVATION 2 True"}
+  test_actual_cli_regular_file_swap_must_reject (__main__.IndependentExcludedOracle.test_actual_cli_regular_file_swap_must_reject) (fork='third_party/go-smtp', action='validate') ... FAIL
+test_budget_exact_shared_roots_per_fork_and_overflow (__main__.IndependentExcludedOracle.test_budget_exact_shared_roots_per_fork_and_overflow) ... ok
+test_depth_exact_and_overflow (__main__.IndependentExcludedOracle.test_depth_exact_and_overflow) ... ok
+test_directory_swap_nofollow_public_entries (__main__.IndependentExcludedOracle.test_directory_swap_nofollow_public_entries) ... ok
+test_legal_artifacts_no_reads_and_stable_original_inventory_and_closure (__main__.IndependentExcludedOracle.test_legal_artifacts_no_reads_and_stable_original_inventory_and_closure) ... ok
+test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) ... ok
+test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) ... 
+  test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/enmime-v2.3.0', entry='capture') ... FAIL
+RACE_OBSERVATION {"fork": "third_party/enmime-v2.3.0", "entry": "capture", "nofollow_stats": 2, "symlink_at_return": true}
+  test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/enmime-v2.3.0', entry='<lambda>') ... FAIL
+RACE_OBSERVATION {"fork": "third_party/enmime-v2.3.0", "entry": "<lambda>", "nofollow_stats": 2, "symlink_at_return": true}
+  test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/go-smtp', entry='capture') ... FAIL
+RACE_OBSERVATION {"fork": "third_party/go-smtp", "entry": "capture", "nofollow_stats": 2, "symlink_at_return": true}
+  test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/go-smtp', entry='<lambda>') ... FAIL
+RACE_OBSERVATION {"fork": "third_party/go-smtp", "entry": "<lambda>", "nofollow_stats": 2, "symlink_at_return": true}
+test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) ... ok
+
+======================================================================
+FAIL: test_actual_cli_regular_file_swap_must_reject (__main__.IndependentExcludedOracle.test_actual_cli_regular_file_swap_must_reject) (fork='third_party/enmime-v2.3.0', action='capture')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 308, in test_actual_cli_regular_file_swap_must_reject
+    self.assertEqual(result.returncode, 1, 'real main admitted regular-to-link race')
+AssertionError: 0 != 1 : real main admitted regular-to-link race
+
+======================================================================
+FAIL: test_actual_cli_regular_file_swap_must_reject (__main__.IndependentExcludedOracle.test_actual_cli_regular_file_swap_must_reject) (fork='third_party/enmime-v2.3.0', action='validate')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 308, in test_actual_cli_regular_file_swap_must_reject
+    self.assertEqual(result.returncode, 1, 'real main admitted regular-to-link race')
+AssertionError: 0 != 1 : real main admitted regular-to-link race
+
+======================================================================
+FAIL: test_actual_cli_regular_file_swap_must_reject (__main__.IndependentExcludedOracle.test_actual_cli_regular_file_swap_must_reject) (fork='third_party/go-smtp', action='capture')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 308, in test_actual_cli_regular_file_swap_must_reject
+    self.assertEqual(result.returncode, 1, 'real main admitted regular-to-link race')
+AssertionError: 0 != 1 : real main admitted regular-to-link race
+
+======================================================================
+FAIL: test_actual_cli_regular_file_swap_must_reject (__main__.IndependentExcludedOracle.test_actual_cli_regular_file_swap_must_reject) (fork='third_party/go-smtp', action='validate')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 308, in test_actual_cli_regular_file_swap_must_reject
+    self.assertEqual(result.returncode, 1, 'real main admitted regular-to-link race')
+AssertionError: 0 != 1 : real main admitted regular-to-link race
+
+======================================================================
+FAIL: test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/enmime-v2.3.0', entry='capture')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 233, in test_regular_file_becomes_symlink_on_final_stat_public_entries
+    with self.assertRaises((ValueError, OSError)): action()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/enmime-v2.3.0', entry='<lambda>')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 233, in test_regular_file_becomes_symlink_on_final_stat_public_entries
+    with self.assertRaises((ValueError, OSError)): action()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/go-smtp', entry='capture')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 233, in test_regular_file_becomes_symlink_on_final_stat_public_entries
+    with self.assertRaises((ValueError, OSError)): action()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/go-smtp', entry='<lambda>')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 233, in test_regular_file_becomes_symlink_on_final_stat_public_entries
+    with self.assertRaises((ValueError, OSError)): action()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+----------------------------------------------------------------------
+Ran 9 tests in 1.224s
+
+FAILED (failures=8)

@@ -1,0 +1,126 @@
+{
+  "worktree": "/workspace/scratch/458de7991ac3/tabmail-wave-compose",
+  "branch": "fix/r5-wave1-compose-20261007",
+  "final_commit": "6c73230d7f3c00ab640e2a8b7ce10b20bb88a2f4",
+  "final_tree": "d637625d3de97c3dcd8db8e57130dd09dbf743d1",
+  "worktree_clean": true,
+  "implementation_progress": {
+    "completed": 3,
+    "assigned": 3,
+    "remaining": 0
+  },
+  "parent_todo_progress": {
+    "completed": 10,
+    "total": 171,
+    "remaining": 161,
+    "parent_tasks_closed_by_this_batch": 0
+  },
+  "environment": {
+    "node": "v24.19.0",
+    "npm": "11.9.0",
+    "next": "16.3.6",
+    "react": "19.2.4",
+    "vitest": "4.1.11",
+    "vitest_environment": "jsdom",
+    "max_workers": 2,
+    "dependency_directory": "/workspace/scratch/458de7991ac3/tabmail-deps/web/node_modules"
+  },
+  "items": [
+    {
+      "round": 1,
+      "parent": "R5-P9-080",
+      "title": "Invalidate recovery inspections after version conflicts",
+      "commit": "8e976b634f36fdd09a8332b01cfe6cd800f15b75",
+      "baseline_commit": "4065c4909c8f21a401a9a1af6370fa3f72670b99",
+      "test": "web/features/company/recovery-reinspection.consumer.test.tsx",
+      "test_sha256": "591e3ebe431c87536807f794875493f43859b6b2fbcee80ff45183c241498fb3",
+      "baseline": {
+        "passed": 3,
+        "failed": 4,
+        "exit_code": 1
+      },
+      "fixed": {
+        "passed": 7,
+        "failed": 0,
+        "exit_code": 0
+      },
+      "related": {
+        "passed": 55,
+        "failed": 0,
+        "files": 4
+      },
+      "typecheck_exit_code": 0,
+      "lint_exit_code": 0,
+      "log_prefix": "wave1-recovery-"
+    },
+    {
+      "round": 2,
+      "parent": "R5-P9-090",
+      "title": "Isolate refresh coalescing by current session scope",
+      "commit": "d170ef9a37f5d102674b4172018e5dc1f3e05c3d",
+      "baseline_commit": "8e976b634f36fdd09a8332b01cfe6cd800f15b75",
+      "test": "web/lib/refresh-scope.test.ts",
+      "test_sha256": "5623c542fb8fea02be8f1077b4f73481442aa731216bc1c64c2834a3bd719fdc",
+      "baseline": {
+        "passed": 0,
+        "failed": 6,
+        "exit_code": 1
+      },
+      "fixed": {
+        "passed": 6,
+        "failed": 0,
+        "exit_code": 0
+      },
+      "related": {
+        "passed": 35,
+        "failed": 0,
+        "files": 5
+      },
+      "typecheck_exit_code": 0,
+      "lint_exit_code": 0,
+      "log_prefix": "wave2-refresh-"
+    },
+    {
+      "round": 3,
+      "parent": "R5-P9-100",
+      "title": "Distinguish unavailable recovery queue data from valid empty results",
+      "commit": "6c73230d7f3c00ab640e2a8b7ce10b20bb88a2f4",
+      "baseline_commit": "d170ef9a37f5d102674b4172018e5dc1f3e05c3d",
+      "test": "web/features/company/recovery-queue-state.consumer.test.tsx",
+      "test_sha256": "d6a8c81b7686495dd9ed93d1987483ba7d75c582b46f64c2ace1a80a08ef39ab",
+      "baseline": {
+        "passed": 2,
+        "failed": 6,
+        "exit_code": 1
+      },
+      "fixed_in_final_combined_run": {
+        "passed": 8,
+        "failed": 0,
+        "exit_code": 0
+      },
+      "related": {
+        "passed": 69,
+        "failed": 0,
+        "files": 6
+      },
+      "typecheck_exit_code": 0,
+      "lint_exit_code": 0,
+      "log_prefix": "wave3-queue-"
+    }
+  ],
+  "final_combined_command": "npx vitest run features/company/recovery-queue-state.consumer.test.tsx features/company/recovery-reinspection.consumer.test.tsx features/company/outbound-inspection.consumer.test.tsx lib/refresh-scope.test.ts lib/session-safety.test.ts contexts/auth-context.test.tsx --maxWorkers=2 --reporter=verbose",
+  "collector": {
+    "branch_count_each_round": 134,
+    "semantic_fields_unchanged": true,
+    "line_locations_changed": true,
+    "catalog_not_edited": true
+  },
+  "boundaries": [
+    "No live browser or real multi-tab cookie qualification",
+    "No real HTTP/PG/SMTP operations",
+    "No production build or complete default suite run claimed for these three wave changes",
+    "No dependency, config exclusion, CI threshold, validator, or central TODO changes",
+    "No automatic write replay introduced",
+    "No push or PR from this worker"
+  ]
+}

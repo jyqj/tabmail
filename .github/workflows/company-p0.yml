@@ -3,7 +3,10 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - work/company-mail-r5-goal-20260930
+      - integration/company-mail-r5-*
 permissions:
   contents: read
 concurrency:
@@ -26,36 +29,171 @@ jobs:
           --health-interval 5s --health-timeout 5s --health-retries 12
     env:
       GOSUMDB: sum.golang.org
+      GODEBUG: asynctimerchan=0
       TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
     steps:
       - uses: actions/checkout@v4
+        id: backend_checkout
         with:
           persist-credentials: false
           fetch-depth: 0
+      - name: Record the tested backend checkout
+        id: backend_source
+        if: ${{ !cancelled() && steps.backend_checkout.outcome == 'success' }}
+        run: git rev-parse HEAD > go-test-source-sha.txt
       - uses: actions/setup-go@v5
+        id: backend_go
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
         with:
           go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        id: backend_node
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
+        with:
+          node-version: '22'
       - name: PostgreSQL client for coordinated restore rehearsal
+        id: backend_pg_client
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y postgresql-client-16
           echo /usr/lib/postgresql/16/bin >> "$GITHUB_PATH"
+      - name: Exact immutable archive boundary
+        id: backend_archive
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
+        run: python3 -B scripts/r5_archive_boundary.py --root .
       - name: Build
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
         run: go build ./...
       - name: Race tests with PostgreSQL
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' && steps.backend_pg_client.outcome == 'success' }}
         run: |
-          set -o pipefail
+          set -euo pipefail
+          set +e
           go test -json -race -count=1 -timeout=180s ./... | tee go-test.jsonl
+          test_exit=$?
+          set -e
+          python3 -B scripts/check_go_test_evidence.py --suite backend \
+            --log go-test.jsonl --exit-code "$test_exit" \
+            --source-sha "$(cat go-test-source-sha.txt)" | tee go-test-evidence.json
+      - name: Template grant revocation with PostgreSQL
+        id: backend_template_grant
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          template_grant_evidence="$(mktemp -d "$RUNNER_TEMP/tabmail-template-grant.XXXXXXXX")"
+          echo "evidence_directory=$template_grant_evidence" >> "$GITHUB_OUTPUT"
+          cp go-test-source-sha.txt "$template_grant_evidence/go-test-source-sha.txt"
+          cp scripts/required_go_tests.json "$template_grant_evidence/required_go_tests.json"
+          : "${TABMAIL_TEST_DB_DSN:?explicit disposable TABMAIL_TEST_DB_DSN required}"
+          set +e
+          go test -mod=readonly -json -race -count=1 -timeout=120s \
+            -run '^TestR5TemplateGrantFrozenEmployeeRevocation$' ./internal/store/postgres \
+            > "$template_grant_evidence/go-test.jsonl" 2> "$template_grant_evidence/go-test.stderr"
+          template_grant_exit=$?
+          set -e
+          printf '%s\n' "$template_grant_exit" > "$template_grant_evidence/go-test.exit"
+          python3 -B scripts/check_go_test_evidence.py --suite template-grant-revocation \
+            --manifest "$template_grant_evidence/required_go_tests.json" \
+            --log "$template_grant_evidence/go-test.jsonl" --exit-code "$template_grant_exit" \
+            --source-sha "$(cat "$template_grant_evidence/go-test-source-sha.txt")" \
+            | tee "$template_grant_evidence/go-test-evidence.json"
+      - name: Prove missing execution cannot pass
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
+        run: |
+          python3 -B scripts/test_go_evidence_integration.py \
+            --output-dir go-test-negative-evidence --source-sha "$(cat go-test-source-sha.txt)"
+      - name: Install pinned contract checker dependency
+        id: backend_contract_deps
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
+        run: python3 -m pip install --disable-pip-version-check -r scripts/requirements-contract.txt
+      - name: Prepare the pinned TypeScript scanner dependency
+        id: backend_typescript
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
+        run: |
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, 'scripts')
+          from r5_source_runner_prepare import prepare_typescript
+          receipt = prepare_typescript(Path.cwd())
+          receipt['source_sha'] = Path('go-test-source-sha.txt').read_text().strip()
+          Path('backend-typescript-preparation.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          PY
+      - name: Validation tool regressions
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' && steps.backend_node.outcome == 'success' && steps.backend_contract_deps.outcome == 'success' }}
+        run: python3 -B scripts/run_r5_source_version_tests.py --root . --output source-version-tests.json
       - name: DTO field contract
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_contract_deps.outcome == 'success' }}
         run: python3 scripts/check_contract_drift.py
+      - name: Fresh route/client compatibility inventory and upgrade plan
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' && steps.backend_node.outcome == 'success' && steps.backend_contract_deps.outcome == 'success' && steps.backend_typescript.outcome == 'success' }}
+        run: python3 -B scripts/check_r5_compatibility.py
+      - name: Transaction syntax and review inventory drift
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
+        run: python3 -B scripts/check_r5_transactions.py
+      - name: Real protocol baseline with explicit target failures
+        id: backend_protocol
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
+        env:
+          GOOS: linux
+          GOARCH: amd64
+          CGO_ENABLED: '1'
+          GOENV: 'off'
+          GOWORK: 'off'
+          GOFLAGS: ''
+        run: |
+          set -euo pipefail
+          python3 -B scripts/prepare_r5_protocol_source.py --root . \
+            --output-dir "$RUNNER_TEMP/tabmail-protocol-source"
+          echo "source_directory=$RUNNER_TEMP/tabmail-protocol-source" >> "$GITHUB_OUTPUT"
+          python3 -B scripts/check_r5_protocol.py \
+            --run shared-db --output-dir protocol-baseline-evidence \
+            --source-policy r5_current_local_inputs_archive_boundary_v4 \
+            --source-manifest "$RUNNER_TEMP/tabmail-protocol-source/source-manifest.json" \
+            --source-manifest-sha256 "$(cat "$RUNNER_TEMP/tabmail-protocol-source/source-manifest.sha256")"
+      - name: Actual HTTP response contracts with PostgreSQL
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' && steps.backend_contract_deps.outcome == 'success' }}
+        run: |
+          python3 -B scripts/check_http_contract.py \
+            --output-dir http-contract-evidence --source-sha "$(cat go-test-source-sha.txt)"
       - name: Vet
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
         run: go vet ./...
       - name: Upload test evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: company-p0-test-evidence
-          path: go-test.jsonl
+          path: |
+            source-version-tests.json
+            go-test.jsonl
+            go-test-source-sha.txt
+            go-test-evidence.json
+            go-test-negative-evidence
+            http-contract-evidence
+            !http-contract-evidence/responses.json
+            protocol-baseline-evidence
+            backend-typescript-preparation.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload protocol source manifest
+        if: ${{ always() && steps.backend_protocol.outputs.source_directory != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-p0-protocol-source-manifest
+          path: ${{ steps.backend_protocol.outputs.source_directory }}
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload template grant PostgreSQL evidence
+        if: ${{ always() && steps.backend_template_grant.outputs.evidence_directory != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-template-grant-postgres-evidence
+          path: ${{ steps.backend_template_grant.outputs.evidence_directory }}
+          if-no-files-found: error
           retention-days: 14
   frontend:
     runs-on: ubuntu-latest
@@ -64,32 +202,68 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
+      - name: Record the tested frontend checkout
+        run: git rev-parse HEAD > frontend-source-sha.txt
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: web/package-lock.json
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Install pinned version-test checker dependency
+        run: python3 -m pip install --disable-pip-version-check -r scripts/requirements-contract.txt
       - run: npm ci
+        id: web_install
         working-directory: web
+      - name: Versioned source tests from independent clean Git checkouts
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
+        run: python3 -B scripts/run_r5_source_version_tests.py --root . --output frontend-source-version-tests.json
+      - name: Catalog and TypeScript source validation
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
+        run: |
+          node --test scripts/tests/*.test.cjs
+          node scripts/collect_api_calls.cjs --check
+          python3 -B scripts/check_i18n_keys.py
       - name: Record full dependency audit
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
         run: npm audit --json > /tmp/tabmail-npm-audit.json || test -s /tmp/tabmail-npm-audit.json
       - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         with:
           name: dependency-audit
           path: /tmp/tabmail-npm-audit.json
           retention-days: 14
       - name: Require a complete clean dependency audit
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         run: |
           node -e 'const d=require("/tmp/tabmail-npm-audit.json"); if(!d.metadata?.vulnerabilities || d.error || d.metadata.vulnerabilities.total !== 0) throw new Error("dependency audit missing, failed or contains vulnerabilities");'
       - run: npx tsc --noEmit
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
-      - run: npm test
+      - run: npm test -- --reporter=default --reporter=json --outputFile=../frontend-vitest.json
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
       - run: npm run lint
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
       - run: npm run build
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
+      - name: Retain frontend evidence after validation failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-frontend-evidence
+          path: |
+            frontend-source-sha.txt
+            frontend-source-version-tests.json
+            frontend-vitest.json
+          if-no-files-found: error
+          retention-days: 14
 
   production-web:
     runs-on: ubuntu-latest
@@ -125,6 +299,7 @@ jobs:
           --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
           --health-interval 5s --health-timeout 5s --health-retries 12
     env:
+      GODEBUG: asynctimerchan=0
       TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
       INTERNAL_API_URL: http://127.0.0.1:18080
       TABMAIL_BROWSER_E2E: '1'
@@ -155,13 +330,22 @@ jobs:
           trap 'docker logs tabmail-browser >/tmp/tabmail-next.log 2>&1; docker rm -f tabmail-browser >/dev/null' EXIT
           for i in $(seq 1 60); do curl -sf http://localhost:3000 >/dev/null && break; sleep 1; done
           curl -sf http://localhost:3000 >/dev/null
-          go test -v -count=1 -timeout=180s -run '^TestR3BrowserJourney$' ./internal/store/postgres | tee /tmp/tabmail-browser.log
+          git rev-parse HEAD > /tmp/tabmail-browser-source-sha.txt
+          set +e
+          go test -json -count=1 -timeout=180s -run '^TestR3BrowserJourney$' ./internal/store/postgres | tee /tmp/tabmail-browser.jsonl
+          test_exit=$?
+          set -e
+          python3 -B scripts/check_go_test_evidence.py --suite browser \
+            --log /tmp/tabmail-browser.jsonl --exit-code "$test_exit" \
+            --source-sha "$(cat /tmp/tabmail-browser-source-sha.txt)" | tee /tmp/tabmail-browser-evidence.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: company-browser-evidence
           path: |
             /tmp/tabmail-next.log
-            /tmp/tabmail-browser.log
+            /tmp/tabmail-browser.jsonl
+            /tmp/tabmail-browser-source-sha.txt
+            /tmp/tabmail-browser-evidence.json
             /tmp/tabmail-browser-evidence
           retention-days: 14

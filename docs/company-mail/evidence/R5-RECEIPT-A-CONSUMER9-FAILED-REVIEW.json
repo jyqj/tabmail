@@ -1,0 +1,346 @@
+{
+  "A_PGHTTP_FAIL": "12top53leaf5failedleaf",
+  "A_unit_PASS": "3top17leaf",
+  "M_retry": false,
+  "actual_leaf_count": 81,
+  "actual_schema_version": "17",
+  "actual_source_closure_sha256": "ce502e7ac5aa49882572f5c52ce392b12826d2814f6ae4f632e93d0cecceda31",
+  "actual_top_count": 24,
+  "catalog17_fixture_pending": "currentTestR5SchemaInventoryAndRestart still hard version16; not run and not forged catalog17 or skipPASS",
+  "cleanup": {
+    "base_database": "tm_receipt_a_schema17",
+    "old_resources_untouched": true,
+    "owned_pg_pid": 18340,
+    "owned_pid_observation": "absent",
+    "owned_pid_ps_exit": 1,
+    "owned_root": "/private/tmp/tm-r5receiptA.z1dsm2yo",
+    "pg_stop_exit": 0,
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "test_database_query_exit": 0,
+    "test_databases": [],
+    "utc": "2026-10-02T08:11:57.352825+00:00"
+  },
+  "consumer9_FAIL": "actual9tops8PASS1FAIL; all source-adapted necessary targets, no old whole suite",
+  "failed_leaf_names": [
+    "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay/owner-live",
+    "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay/send-only-shared",
+    "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay/expired-before-replay",
+    "TestR5OutboundReceiptPrivacyHTTPCommitVersusDisplayFailure/display-fails",
+    "TestR5OutboundReceiptPrivacyHTTPCommitVersusDisplayFailure/commit-fails",
+    "TestSubmissionUncertaintyMapsToNeedsAttention"
+  ],
+  "fullCI_green": false,
+  "historic_fullGo_and_M_failures_unchanged": true,
+  "inherited_compile_build_0_not_reexecuted": true,
+  "results": {
+    "A-PGHTTP": {
+      "actual_test_names": [
+        "TestR5OutboundReceiptPrivacyHTTPAllReadSurfaces",
+        "TestR5OutboundReceiptPrivacyHTTPAllReadSurfaces/legacy-list",
+        "TestR5OutboundReceiptPrivacyHTTPAllReadSurfaces/legacy-detail",
+        "TestR5OutboundReceiptPrivacyHTTPAllReadSurfaces/legacy-attempts",
+        "TestR5OutboundReceiptPrivacyHTTPAllReadSurfaces/recipient-aggregate",
+        "TestR5OutboundReceiptPrivacyHTTPAllReadSurfaces/company-list",
+        "TestR5OutboundReceiptPrivacyHTTPAllReadSurfaces/company-detail",
+        "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay",
+        "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay/owner-live",
+        "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay/send-only-shared",
+        "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay/expired-before-replay",
+        "TestR5OutboundReceiptPrivacyHTTPRetry",
+        "TestR5OutboundReceiptPrivacyHTTPRetry/normal",
+        "TestR5OutboundReceiptPrivacyHTTPRetry/display-failure-after-commit",
+        "TestR5OutboundReceiptPrivacyHTTPCommitVersusDisplayFailure",
+        "TestR5OutboundReceiptPrivacyHTTPCommitVersusDisplayFailure/display-fails",
+        "TestR5OutboundReceiptPrivacyHTTPCommitVersusDisplayFailure/commit-fails",
+        "TestR5OutboundReceiptPrivacyPGSnapshotAndUnknownLedger",
+        "TestR5OutboundReceiptPrivacyPGSnapshotAndUnknownLedger/private-failure",
+        "TestR5OutboundReceiptPrivacyPGSnapshotAndUnknownLedger/private-uncertain",
+        "TestR5OutboundReceiptPrivacyPGSnapshotAndUnknownLedger/missing-ledger",
+        "TestR5SubmissionReceiptPrivacyPGCompleteLedger",
+        "TestR5SubmissionReceiptPrivacyPGCompleteLedger/all-next-hop-accepted",
+        "TestR5SubmissionReceiptPrivacyPGCompleteLedger/private-permanent-failure",
+        "TestR5SubmissionReceiptPrivacyPGCompleteLedger/private-temporary-failure",
+        "TestR5SubmissionReceiptPrivacyPGCompleteLedger/private-uncertain",
+        "TestR5SubmissionReceiptPrivacyPGCompleteLedger/private-processing-uncertain",
+        "TestR5SubmissionReceiptPrivacyPGCompleteLedger/in-flight-ambiguity",
+        "TestR5SubmissionReceiptPrivacyPGCompleteLedger/cancelled-with-private-acceptance",
+        "TestR5SubmissionReceiptPrivacyPGCompleteLedger/empty-ledger",
+        "TestR5SubmissionReceiptPrivacyPGCompleteLedger/malformed-ledger",
+        "TestR5SubmissionReceiptPrivacyPGClassification",
+        "TestR5SubmissionReceiptPrivacyPGClassification/public-also-bcc",
+        "TestR5SubmissionReceiptPrivacyPGClassification/cc-also-bcc",
+        "TestR5SubmissionReceiptPrivacyPGClassification/case-display-normalization",
+        "TestR5SubmissionReceiptPrivacyPGClassification/historical-display-not-echoed",
+        "TestR5SubmissionReceiptPrivacyPGClassification/plus-tag-is-not-public-base",
+        "TestR5SubmissionReceiptPrivacyPGClassification/dot-is-not-public-alias",
+        "TestR5SubmissionReceiptPrivacyPGClassification/unknown-envelope-category",
+        "TestR5SubmissionReceiptPrivacyPGClassification/bcc-only",
+        "TestR5SubmissionReceiptPrivacyPGClassification/invalid-public-address",
+        "TestR5SubmissionReceiptPrivacyPGUnknownProvenance",
+        "TestR5SubmissionReceiptPrivacyPGUnknownProvenance/missing-asset",
+        "TestR5SubmissionReceiptPrivacyPGUnknownProvenance/different-mailbox",
+        "TestR5SubmissionReceiptPrivacyPGUnknownProvenance/different-zone",
+        "TestR5SubmissionReceiptPrivacyPGUnknownProvenance/live-job-public-tampering",
+        "TestR5SubmissionReceiptPrivacyPGPrincipalAndLifetime",
+        "TestR5SubmissionReceiptPrivacyPGPrincipalAndLifetime/owner",
+        "TestR5SubmissionReceiptPrivacyPGPrincipalAndLifetime/shared-current-reader",
+        "TestR5SubmissionReceiptPrivacyPGPrincipalAndLifetime/tenant-admin-no-grant",
+        "TestR5SubmissionReceiptPrivacyPGPrincipalAndLifetime/tenant-admin-current-reader",
+        "TestR5SubmissionReceiptPrivacyPGPrincipalAndLifetime/historical-submitter-no-read",
+        "TestR5SubmissionReceiptPrivacyPGPrincipalAndLifetime/expired-content",
+        "TestR5SubmissionReceiptPrivacyHTTPShippingProjection",
+        "TestR5SubmissionReceiptPrivacyHTTPShippingProjection/live-owner",
+        "TestR5SubmissionReceiptPrivacyHTTPShippingProjection/expired-content",
+        "TestR5SubmissionReceiptPrivacyHTTPShippingProjection/historical-submitter-no-read",
+        "TestR5SubmissionReceiptPrivacyHTTPShippingProjection/private-uncertain",
+        "TestR5SubmissionReceiptPrivacyHTTPShippingProjection/unknown-asset",
+        "TestR5SubmissionReceiptPrivacyPGFailClosedReadError",
+        "TestR5SubmissionReceiptPrivacyPGFailClosedReadError/ledger-unavailable",
+        "TestR5SubmissionReceiptPrivacyPGFailClosedReadError/asset-unavailable",
+        "TestR5SubmissionReceiptPrivacyPGTenantIsolation",
+        "TestR5SubmissionReceiptPrivacyPGTenantIsolation/current-foreign-member",
+        "TestR5SubmissionReceiptPrivacyPGTenantIsolation/forged-tenant-on-author"
+      ],
+      "exit": 1,
+      "failed_names": [
+        "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay/owner-live",
+        "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay/send-only-shared",
+        "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay/expired-before-replay",
+        "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay",
+        "TestR5OutboundReceiptPrivacyHTTPCommitVersusDisplayFailure/display-fails",
+        "TestR5OutboundReceiptPrivacyHTTPCommitVersusDisplayFailure/commit-fails",
+        "TestR5OutboundReceiptPrivacyHTTPCommitVersusDisplayFailure"
+      ],
+      "json_decode_error_count": 0,
+      "leaf_count": 53,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "fail",
+          "elapsed": 16.258,
+          "package": "tabmail/internal/store/postgres"
+        }
+      ],
+      "pass_count": 58,
+      "run_count": 65,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 12
+    },
+    "A-unit": {
+      "actual_test_names": [
+        "TestR5OutboundReceiptExplicitProjection",
+        "TestR5OutboundReceiptExplicitProjection/accepted",
+        "TestR5OutboundReceiptExplicitProjection/hidden-permanent",
+        "TestR5OutboundReceiptExplicitProjection/hidden-uncertain",
+        "TestR5OutboundReceiptExplicitProjection/empty-ledger",
+        "TestR5OutboundReceiptExplicitProjection/unknown-source",
+        "TestR5OutboundReceiptExplicitProjection/invalid-ledger",
+        "TestR5OutboundReceiptExplicitProjection/invalid-job-state",
+        "TestR5OutboundReceiptPostCommitDisplayFailure",
+        "TestR5OutboundReceiptPostCommitDisplayFailure/db-error",
+        "TestR5OutboundReceiptPostCommitDisplayFailure/revoked",
+        "TestR5OutboundReceiptPostCommitDisplayFailure/canceled",
+        "TestR5OutboundReceiptPostCommitDisplayFailure/nil",
+        "TestR5OutboundReceiptPostCommitDisplayFailure/wrong-id",
+        "TestR5OutboundReceiptPostCommitDisplayFailure/wrong-tenant",
+        "TestR5OutboundReceiptCommittedAndAttemptsUseSafeSnapshot",
+        "TestR5OutboundReceiptCommittedAndAttemptsUseSafeSnapshot/committed",
+        "TestR5OutboundReceiptCommittedAndAttemptsUseSafeSnapshot/detail",
+        "TestR5OutboundReceiptCommittedAndAttemptsUseSafeSnapshot/attempts",
+        "TestR5OutboundReceiptCommittedAndAttemptsUseSafeSnapshot/recipients"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 17,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 1.442,
+          "package": "tabmail/internal/app/submissions"
+        }
+      ],
+      "pass_count": 20,
+      "run_count": 20,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 3
+    },
+    "consumer-A4-HTTP": {
+      "actual_test_names": [
+        "TestCompanySubmissionsEndpoints"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 1,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 1.972,
+          "package": "tabmail/internal/api"
+        }
+      ],
+      "pass_count": 1,
+      "run_count": 1,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 1
+    },
+    "consumer-A4-PG": {
+      "actual_test_names": [
+        "TestSubmissionProjectionScopeAndDTO",
+        "TestSubmissionUncertaintyMapsToNeedsAttention"
+      ],
+      "exit": 1,
+      "failed_names": [
+        "TestSubmissionUncertaintyMapsToNeedsAttention"
+      ],
+      "json_decode_error_count": 0,
+      "leaf_count": 2,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "fail",
+          "elapsed": 1.126,
+          "package": "tabmail/internal/store/postgres"
+        }
+      ],
+      "pass_count": 1,
+      "run_count": 2,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 2
+    },
+    "consumer-A4-delivery": {
+      "actual_test_names": [
+        "TestR5ProtocolDeliverySharedCases",
+        "TestR5ProtocolDeliverySharedCases/RC03",
+        "TestR5ProtocolDeliverySharedCases/RC04",
+        "TestR5ProtocolDeliverySharedCases/RC05"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 3,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 1.42,
+          "package": "tabmail/internal/delivery"
+        }
+      ],
+      "pass_count": 4,
+      "run_count": 4,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 1
+    },
+    "consumer-A5-HTTP": {
+      "actual_test_names": [
+        "TestCompanySubmissionContentAndAttachmentEndpoints"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 1,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 1.8559999999999999,
+          "package": "tabmail/internal/api"
+        }
+      ],
+      "pass_count": 1,
+      "run_count": 1,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 1
+    },
+    "consumer-A5-PG": {
+      "actual_test_names": [
+        "TestR5PermissionStagePostgresOwnerlessSenderProvenanceConsistency"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 1,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 1.952,
+          "package": "tabmail/internal/store/postgres"
+        }
+      ],
+      "pass_count": 1,
+      "run_count": 1,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 1
+    },
+    "consumer-A5-handlers": {
+      "actual_test_names": [
+        "TestAtomicRetryCommittedResponseStaysSuccessfulAndRestricted",
+        "TestOutboundJobAccessCheckCoversGetRetryAndAttempts",
+        "TestSubmissionReceiptCapabilities"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 3,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 1.482,
+          "package": "tabmail/internal/api/handlers"
+        }
+      ],
+      "pass_count": 3,
+      "run_count": 3,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 3
+    },
+    "official-schema17-bootstrap": {
+      "execution": {
+        "absolute_deadline_wall_time": 1790928767.3474061,
+        "budget_seconds": 90,
+        "elapsed_wall_seconds": 1.967041015625,
+        "final_owned_group_observation": {
+          "members": [],
+          "non_zombie_live_pids": [],
+          "status": "observed"
+        },
+        "observed_wall_time": 1790928679.3144472,
+        "owned_process_group": 18353,
+        "process_returncode": 0,
+        "process_returncode_status": "observed_parent_poll",
+        "scope": "absolute wall deadline including host suspension; cleanup is observed after resume, never guaranteed during sleep",
+        "started_wall_time": 1790928677.3474061,
+        "timed_out": false
+      },
+      "exit": 0
+    }
+  },
+  "scope": "new_closed_ordinary_receipt_A_plus_exact_signed_consumer9",
+  "scope_verdict": "FAIL_6_actual_leaf_failures_preserved_no_full_green",
+  "source_dependency_boundary": "parent7ffe code plus explicitly bound original unchanged protocol case input; no oldreceipt relabel; new additive dependencyclosure",
+  "source_postcheck_equal": true,
+  "source_sha": "8aea688a87f31f84b74a90ce73b80ed4e76098a9"
+}

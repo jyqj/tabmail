@@ -1,0 +1,432 @@
+{
+  "source_freeze": "9c04feda833d1b3195f96ff2b10285fa1907fe7a",
+  "final_state": {
+    "policy": "r5_external_dependency_runtime_v1",
+    "status": "run_failed",
+    "task_complete": false,
+    "product_green": false,
+    "manifest_sha256": "0f9028da18593f5001f4886e71266451d04fa59c53ee17b192eedd01b0dbdb36",
+    "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+    "dynamic_loader_coverage": "unknown",
+    "final_missing_layers": {
+      "CT01": [
+        "db",
+        "http"
+      ],
+      "CT02": [
+        "db",
+        "http"
+      ],
+      "CT03": [
+        "db",
+        "http"
+      ],
+      "CT04": [
+        "db",
+        "http"
+      ],
+      "CT05": [
+        "db",
+        "http"
+      ],
+      "CT06": [
+        "db",
+        "http"
+      ],
+      "CT07": [
+        "db",
+        "http"
+      ],
+      "CT08": [
+        "db",
+        "http"
+      ],
+      "CT09": [
+        "db",
+        "http"
+      ],
+      "CT10": [
+        "db",
+        "http"
+      ],
+      "RC01": [
+        "db",
+        "http",
+        "components"
+      ],
+      "RC02": [
+        "db",
+        "http",
+        "components"
+      ],
+      "RC03": [
+        "db",
+        "http",
+        "components"
+      ],
+      "RC04": [
+        "db",
+        "http",
+        "components"
+      ],
+      "RC05": [
+        "db",
+        "http",
+        "components"
+      ],
+      "OP01": [
+        "db",
+        "http"
+      ],
+      "OP02": [
+        "db",
+        "http"
+      ],
+      "OP03": [
+        "db",
+        "http"
+      ],
+      "OP04": [
+        "db",
+        "http"
+      ],
+      "RT01": [
+        "db",
+        "http"
+      ],
+      "RT02": [
+        "db",
+        "http"
+      ],
+      "RT03": [
+        "db",
+        "http"
+      ],
+      "RT04": [
+        "db",
+        "http"
+      ],
+      "RT05": [
+        "db",
+        "http"
+      ],
+      "RT06": [
+        "db",
+        "http"
+      ],
+      "RT07": [
+        "db"
+      ],
+      "BC01": [
+        "db",
+        "http"
+      ],
+      "BC02": [
+        "db",
+        "http"
+      ],
+      "BC03": [
+        "db",
+        "http"
+      ],
+      "BC04": [
+        "db",
+        "http"
+      ],
+      "BC05": [
+        "db",
+        "http"
+      ],
+      "BC06": [
+        "db",
+        "http"
+      ],
+      "GC01": [
+        "db"
+      ],
+      "GC02": [
+        "db"
+      ],
+      "LF01": [
+        "db",
+        "http",
+        "components"
+      ],
+      "LF02": [
+        "db",
+        "http",
+        "components"
+      ],
+      "LF03": [
+        "db",
+        "http",
+        "components"
+      ],
+      "LF04": [
+        "db",
+        "http",
+        "components"
+      ],
+      "LF05": [
+        "db",
+        "http",
+        "components"
+      ],
+      "LF06": [
+        "db",
+        "http",
+        "components"
+      ],
+      "LF07": [
+        "db",
+        "http",
+        "components"
+      ],
+      "PE01": [
+        "db",
+        "http",
+        "components"
+      ],
+      "PE02": [
+        "db",
+        "http",
+        "components"
+      ],
+      "PE03": [
+        "db",
+        "http",
+        "components"
+      ],
+      "PE04": [
+        "db",
+        "http",
+        "components"
+      ],
+      "PE05": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    "process_exit_code": 1,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "8d48427b3e689ba72ad952524139f726a3a49d3a4e49ae78efe222197351552c",
+    "error": "shadow source node_modules"
+  },
+  "acceptance": {
+    "manifest_sha256": "0f9028da18593f5001f4886e71266451d04fa59c53ee17b192eedd01b0dbdb36",
+    "source_commit": "9c04feda833d1b3195f96ff2b10285fa1907fe7a",
+    "regular_files": 45584,
+    "links": 41,
+    "directories": 4614,
+    "installed_content_root": "a2cfd86769eebd096c82083b26630824975f6971d08751f6fa5d03d4bb2c28b4",
+    "absent_optional": 96,
+    "source_archive_sha256": "d56e48f130d5cde820c5b1318d984f839e13ff2604658b562c941622804c07b2",
+    "selected_default_sha256": "5482c21217f630409128bd912d2421b28ff54e7673577422b100a817f87c5895",
+    "selected_race_sha256": "782a61dbc7fa59c7e50864ec63ed0e36c930adedade7982ea2f56cb84079cab4",
+    "acceptance": "validated",
+    "independent_actual_inventory_negatives": [
+      {
+        "control": "rehash_content_root",
+        "result": "rejected"
+      },
+      {
+        "control": "rehash_cli",
+        "result": "rejected"
+      },
+      {
+        "control": "rehash_source_descriptor",
+        "result": "rejected"
+      },
+      {
+        "control": "actual_archive_wrong_context",
+        "result": "rejected"
+      }
+    ],
+    "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation"
+  },
+  "tests": {
+    "preparation_and_runtime_controls": 30,
+    "protocol_regressions": 70,
+    "actual_manifest_controls": 4
+  },
+  "go_producers": [
+    {
+      "log": "go-0.jsonl",
+      "sha256": "12bd5a95544441c1a6081c5ad2d9717905eca9e68e268fd73b541868d4b566fa",
+      "package": "tabmail/internal/api/handlers",
+      "run_tests": [
+        "TestR5ProtocolComponentObservations",
+        "TestR5ProtocolComponentObservations/RC01/default",
+        "TestR5ProtocolComponentObservations/RC02/legacy_outbound_list",
+        "TestR5ProtocolComponentObservations/RC02/legacy_outbound_detail",
+        "TestR5ProtocolComponentObservations/RC02/submit_replay",
+        "TestR5ProtocolComponentObservations/RC03/default",
+        "TestR5ProtocolComponentObservations/RC04/default",
+        "TestR5ProtocolComponentObservations/RC05/default",
+        "TestR5ProtocolComponentObservations/LF01/default",
+        "TestR5ProtocolComponentObservations/LF02/default",
+        "TestR5ProtocolComponentObservations/LF03/default",
+        "TestR5ProtocolComponentObservations/LF04/default",
+        "TestR5ProtocolComponentObservations/LF05/frozen",
+        "TestR5ProtocolComponentObservations/LF05/foreign_tenant",
+        "TestR5ProtocolComponentObservations/LF05/self",
+        "TestR5ProtocolComponentObservations/LF05/higher_role",
+        "TestR5ProtocolComponentObservations/LF06/default",
+        "TestR5ProtocolComponentObservations/LF07/default",
+        "TestR5ProtocolComponentObservations/PE01/default",
+        "TestR5ProtocolComponentObservations/PE02/omitted",
+        "TestR5ProtocolComponentObservations/PE02/null",
+        "TestR5ProtocolComponentObservations/PE02/false",
+        "TestR5ProtocolComponentObservations/PE02/0",
+        "TestR5ProtocolComponentObservations/PE02/[]",
+        "TestR5ProtocolComponentObservations/PE03/default",
+        "TestR5ProtocolComponentObservations/PE04/default",
+        "TestR5ProtocolComponentObservations/PE05/default"
+      ],
+      "failed_tests": [
+        "TestR5ProtocolComponentObservations/RC01/default",
+        "TestR5ProtocolComponentObservations/RC02/legacy_outbound_list",
+        "TestR5ProtocolComponentObservations/RC02/legacy_outbound_detail",
+        "TestR5ProtocolComponentObservations/RC02/submit_replay",
+        "TestR5ProtocolComponentObservations/RC03/default",
+        "TestR5ProtocolComponentObservations/RC04/default",
+        "TestR5ProtocolComponentObservations/RC05/default",
+        "TestR5ProtocolComponentObservations/LF01/default",
+        "TestR5ProtocolComponentObservations/LF02/default",
+        "TestR5ProtocolComponentObservations/LF03/default",
+        "TestR5ProtocolComponentObservations/LF04/default",
+        "TestR5ProtocolComponentObservations/LF05/frozen",
+        "TestR5ProtocolComponentObservations/LF05/foreign_tenant",
+        "TestR5ProtocolComponentObservations/LF05/self",
+        "TestR5ProtocolComponentObservations/LF05/higher_role",
+        "TestR5ProtocolComponentObservations/LF06/default",
+        "TestR5ProtocolComponentObservations/LF07/default",
+        "TestR5ProtocolComponentObservations/PE01/default",
+        "TestR5ProtocolComponentObservations/PE02/omitted",
+        "TestR5ProtocolComponentObservations/PE02/null",
+        "TestR5ProtocolComponentObservations/PE02/false",
+        "TestR5ProtocolComponentObservations/PE02/0",
+        "TestR5ProtocolComponentObservations/PE02/[]",
+        "TestR5ProtocolComponentObservations/PE03/default",
+        "TestR5ProtocolComponentObservations/PE04/default",
+        "TestR5ProtocolComponentObservations/PE05/default",
+        "TestR5ProtocolComponentObservations"
+      ],
+      "skipped_tests": [],
+      "terminal": [
+        "fail"
+      ]
+    },
+    {
+      "log": "go-1.jsonl",
+      "sha256": "84da99a6c6437bd48e6b95961c45c5627c91720920fcb7742021e9445b81b8c6",
+      "package": "tabmail/internal/app/credentials",
+      "run_tests": [
+        "TestR5ProtocolAuditReasonSharedCases",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/empty",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/whitespace",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/seven",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/trim_seven",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/eight",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_six",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_nine",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_twelve",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/maximum",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/trim_maximum",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/over_maximum"
+      ],
+      "failed_tests": [],
+      "skipped_tests": [],
+      "terminal": [
+        "pass"
+      ]
+    },
+    {
+      "log": "go-2.jsonl",
+      "sha256": "1e83c6cae8a876c89818b6c64d3bf26a6b017bf24ff638fb813182bae8c14b29",
+      "package": "tabmail/internal/delivery",
+      "run_tests": [
+        "TestR5ProtocolDeliverySharedCases",
+        "TestR5ProtocolDeliverySharedCases/RC03",
+        "TestR5ProtocolDeliverySharedCases/RC04",
+        "TestR5ProtocolDeliverySharedCases/RC05"
+      ],
+      "failed_tests": [],
+      "skipped_tests": [],
+      "terminal": [
+        "pass"
+      ]
+    }
+  ],
+  "component_assertions": [
+    {
+      "case_variant": "RC01/default",
+      "name": "R5 protocol component RC01 default secure behavior",
+      "status": "failed",
+      "failure_sha256": "17c6ece88a6361a18da31d6b02655f1443093095a4a78dac9f53299a340ae599",
+      "source_frames": [
+        "components/company/r5-protocol-shared-components.test.tsx:126:18"
+      ],
+      "target_markers": [],
+      "vitest_json_sha256": "ef438b2779102391a80ebc2a8f0b084647bb66cbe5911d901b5e2a7af8212f5c",
+      "observations_sha256": "df8fb5d282c8aaa432aa374f50f1d61ebc79d73960cde969cae84a9a76ce49e5",
+      "observed_http_metadata": [
+        {
+          "method": "GET",
+          "path": "/api/v1/company/submissions/<fixture-id>",
+          "status": 200
+        }
+      ]
+    }
+  ],
+  "runtime_artifact_metadata": [
+    {
+      "path": "web/node_modules/.vite",
+      "kind": "directory",
+      "size": null
+    },
+    {
+      "path": "web/node_modules/.vite/vitest",
+      "kind": "directory",
+      "size": null
+    },
+    {
+      "path": "web/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "kind": "directory",
+      "size": null
+    },
+    {
+      "path": "web/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+      "kind": "file",
+      "size": 141
+    }
+  ],
+  "private_artifact_hashes": {
+    "runtime-unit-final.log": "5bcc4d1aa6645ac5468c4480433643cddce5e407275e33c6b9bfb9f6aa01cc52",
+    "protocol-unit-final.log": "66fdd2e7cf9d5f7d8dee40d8167b8ec8732d39148b3ec992643c66381cdbcac0",
+    "compile-only.log": "b78e20d30e7210e01b008376c9740ed01cf1f3d1ced4e6325a09ee64dfd41fd8",
+    "npm-install.log": "913fd2953e3363b2149c3f30b16b3a9ea5026be0d20b026a730909f65be6bef6",
+    "stderr.private": "8d48427b3e689ba72ad952524139f726a3a49d3a4e49ae78efe222197351552c",
+    "selected-default.json": "5482c21217f630409128bd912d2421b28ff54e7673577422b100a817f87c5895",
+    "selected-race.json": "782a61dbc7fa59c7e50864ec63ed0e36c930adedade7982ea2f56cb84079cab4",
+    "archive.json": "d56e48f130d5cde820c5b1318d984f839e13ff2604658b562c941622804c07b2",
+    "runtime-manifest.json": "0f9028da18593f5001f4886e71266451d04fa59c53ee17b192eedd01b0dbdb36"
+  },
+  "declaration": {
+    "candidate_adopted": false,
+    "source_policy_changed": false,
+    "selected_policy_changed": false,
+    "direct_python_vitest_runtime": "notrun_due_failed_go_component_producer",
+    "esm_cjs_vite_workers_jsdom_complete_resolution": "unknown",
+    "observed_runtime": "real configured TSX/jsdom component assertion ran via external CLI; not a complete loader inventory",
+    "hostile_concurrency": "not_qualified_for_hostile_concurrent_mutation",
+    "central_10_171": "unchanged",
+    "historical_vcs_error_128_cause": "unproven",
+    "dependency_terminal_drift": {
+      "added": [],
+      "removed": [],
+      "changed": []
+    }
+  }
+}

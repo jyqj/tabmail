@@ -1,0 +1,21 @@
+✔ literal catalog calls include single/double quote and static template (22.236053ms)
+✔ comments and string examples are not calls (4.761449ms)
+✔ decoded escape sequences keep key identity (2.068171ms)
+✔ computed calls reported rather than called checked (2.583135ms)
+✔ useText is identified by local binding, not a file-wide bypass (14.177728ms)
+✔ aliased hooks and catalog function are checked (4.732859ms)
+✔ a fake useText import cannot disable checks (3.809058ms)
+✔ object t and nested TSX expressions are scanned (4.223348ms)
+✔ typed bilingual callbacks are distinct from catalog callbacks (7.598782ms)
+✔ syntax errors fail the scanner (2.378124ms)
+✔ empty source list fails (0.280467ms)
+✔ Python and AST integration: valid source (310.328785ms)
+✔ Python and AST integration: missing key in features (389.163789ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1083.439471

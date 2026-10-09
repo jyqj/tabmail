@@ -1,0 +1,92 @@
+{
+  "METHOD_DATASET_versions_not_changed": true,
+  "SOURCE_CAPTURE_calls_not_repeated_for_receipt_checks": true,
+  "UTC_derived": "2026-10-02T17:56:11.655906+00:00",
+  "actual_CAPTURE_real_checkout_count": 1,
+  "actual_SOURCE_CAPTURE_verdict": "PASS",
+  "actual_SOURCE_files": 972,
+  "actual_SOURCE_receipt": "/private/tmp/tm-r5currentSource-policyV2.9q7pqk7b/actual-current-SOURCE-receipt.json",
+  "actual_SOURCE_receipt_bytes_sha256": "f8248963826ea238c6e8f671e7247b8a41326e9602f696e538ed2c14aac4d94f",
+  "actual_Source_identity_kind": "policy_bound_local_input_superset_sha1_v2",
+  "actual_Source_sha": "07910a04d7e4020542fa07da88ab2c19056985b0",
+  "actual_closure_sha256": "bf0b91942e273ca7803d80a5a26121ed4e6fd5f8053230fcadaff88ee86a484c",
+  "actual_context_declaration": {
+    "build_tag_sets": [
+      []
+    ],
+    "cgo_enabled": 1,
+    "go_flags": "",
+    "go_work": "off",
+    "goarch": "arm64",
+    "goos": "darwin",
+    "race": true,
+    "selection": "all_local_variants_superset"
+  },
+  "cleanup": {
+    "Go_PG_Node_native_benchmark_services_started": false,
+    "original_outer300_elapsed_seconds": 1.399404764175415,
+    "own_group_gone": true,
+    "real_subprocess_audit_block_triggered": false,
+    "source_readonly_pins_equal": true,
+    "within300": true
+  },
+  "default18_vs_fixed16_and_lookahead_current_policy_explicit_migration_still_BLOCK": true,
+  "new_full_CurrentSourceInventoryTests_methods": 15,
+  "no_expect_fixture_or_production_edits_no_retry": true,
+  "not_product_or_MIME_failure": true,
+  "overall_full_calibration_PASS": false,
+  "readonlySyntheticSOURCE_extra2test_only_contract_inputs_separate_from_actual_protocol_receipt": {
+    "actual_bytes_no_registry_archives_or_extra_tests_scope": true,
+    "files": {
+      "docs/company-mail/evidence/R5-BENCHMARK-DATASETS.json": "9e81020680dbd6e990cbb35ab1aac16413885e65306d949a5889c4bafda00b36",
+      "docs/company-mail/evidence/R5-BENCHMARK-LOOKAHEAD100-METHOD.json": "d286ae9f5f4b68033ba9739a1276de22f1e0f7ef88e15642d52633da943b49a7"
+    },
+    "not_part_of_real_protocol_purpose_receipt": true
+  },
+  "real_subprocess_go_native_dispatch_audit_tripped": false,
+  "required_forkReader_mapC_metadata_routerEmbeds_helper_presence": {
+    "actual_receipt_byte_sha256": "f8248963826ea238c6e8f671e7247b8a41326e9602f696e538ed2c14aac4d94f",
+    "files": 972,
+    "fork_reader_mapC_actual_present": false,
+    "no_second_capture": true,
+    "required_presence": {
+      "internal/api/docsassets/redoc.standalone.js": true,
+      "internal/api/docsassets/swagger-ui-bundle.js": true,
+      "internal/api/docsassets/swagger-ui.css": true,
+      "internal/api/router.go": true,
+      "scripts/r5_source_inventory.py": true,
+      "scripts/tests/test_r5_current_source_inventory.py": true,
+      "third_party/enmime-v2.3.0/LICENSE": true,
+      "third_party/enmime-v2.3.0/PROVENANCE.json": true,
+      "third_party/enmime-v2.3.0/UPSTREAM-DELTA.patch": true,
+      "third_party/enmime-v2.3.0/UPSTREAM-MANIFEST.json": true,
+      "third_party/enmime-v2.3.0/internal/textproto/reader_test.go": true
+    },
+    "router_cssjs_patterns_present": true,
+    "same_single_real_receipt": true,
+    "source_closure_sha256": "bf0b91942e273ca7803d80a5a26121ed4e6fd5f8053230fcadaff88ee86a484c",
+    "source_sha": "07910a04d7e4020542fa07da88ab2c19056985b0"
+  },
+  "scope": "one actual checkout SOURCE capture (protocolpurpose) + exact fullnewCurrentclass and affectedsynthetic methods; not runtime platform/GoPG/benchmark",
+  "selected_scoped7pins": {
+    "scripts/check_r5_protocol.py": "adb0511bc351553fd0fffd4a1a943221b4bcb1e7495e685bd5a4a9d229f75939",
+    "scripts/r5_source_inventory.py": "b1d6f934df15a9560d818d8cfff38a1b1e75f4f2739e7b16bf634e9f3fd86ea5",
+    "scripts/run_r5_benchmark.py": "8e79f331f8dc257cb3bad617714d5caf72c43e1ae7d71089cebc827e64b6d52d",
+    "scripts/tests/test_r5_benchmark.py": "84cbce24b9d436d60787758d3c82cbe025cc41884e3cda7b3c07bae73d2f3bfa",
+    "scripts/tests/test_r5_current_source_inventory.py": "d7a786f1644fd0b07fd3f8dba9e0e98e30d6cac8f750f528facb5b517f3779d8",
+    "scripts/tests/test_r5_protocol.py": "485f82c440887b2b5b292c9c22d262d5925b40acb19839f0c86415e0e573778f",
+    "scripts/tests/test_r5_protocol_source_inventory.py": "7f73a08a31ae73a031164ea9e145f4c2f9a41acaf3dfbc296f52f213e93a8085"
+  },
+  "setup_error": "BenchmarkLookaheadTests.setUp constructs schema16 result, validate_tool_result compares actual frozen current SOURCE migrations max18 and throws observed schema differs from actual migration source at run_r5_benchmark.py:390 before method body",
+  "source_identity_boundary": "Complete declared repository-local directory input superset; includes all local replacement files and embed assets, not Go-selected inputs, external module cache, toolchain, native libraries, installed npm dependencies, or cross-platform execution",
+  "synthetic_Error": 2,
+  "synthetic_Fail": 0,
+  "synthetic_Pass": 20,
+  "synthetic_Skip": 0,
+  "synthetic_actual_methods": 22,
+  "synthetic_verdict": "FAIL_setup_ERROR_two_BenchmarkLookahead_bodies_unexecuted",
+  "unexecuted_affected_method_bodies": [
+    "BenchmarkLookaheadTests.test_current_closure_blocks_legacy_method_identity_until_explicit_migration",
+    "BenchmarkLookaheadTests.test_runner_default_overrides_ambient_optin_and_selected_source_must_match"
+  ]
+}

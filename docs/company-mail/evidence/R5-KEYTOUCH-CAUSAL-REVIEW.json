@@ -1,0 +1,143 @@
+{
+  "Go_process_compile_and_test_elapsed": 15.885265111923218,
+  "actualGOMAXPROCS": 2,
+  "actualGoexit": 0,
+  "actualPID_phase_SQL_witnesses": [
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:384: phase=after-row telemetry_pid=98250 advisory_blocker_pid=98259 query=UPDATE tenant_api_keys SET last_used_at=now(), last_used_ip=$2 WHERE id=$1\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyTouchReceiptAdmissionCausality/telemetry_held_conflicts",
+      "Time": "2026-10-03T06:28:10.08255+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:386: phase=same_key_SHARE_wait waiter_pid=98260 exact_blocker_pid=98250 holder_query=UPDATE tenant_api_keys SET last_used_at=now(), last_used_ip=$2 WHERE id=$1\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyTouchReceiptAdmissionCausality/telemetry_held_conflicts",
+      "Time": "2026-10-03T06:28:10.086043+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:429: phase=telemetry_committed holder_pid=98250 trigger_phase=after-row calls=1 last_used_at_and_ip_verified=true\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyTouchReceiptAdmissionCausality/telemetry_held_conflicts",
+      "Time": "2026-10-03T06:28:11.587799+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:384: phase=before-statement telemetry_pid=98325 advisory_blocker_pid=98353 query=UPDATE tenant_api_keys SET last_used_at=now(), last_used_ip=$2 WHERE id=$1\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyTouchReceiptAdmissionCausality/telemetry_committed_then_zone_revoked",
+      "Time": "2026-10-03T06:28:11.931258+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:429: phase=telemetry_committed holder_pid=98325 trigger_phase=before-statement calls=1 last_used_at_and_ip_verified=true\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyTouchReceiptAdmissionCausality/telemetry_committed_then_zone_revoked",
+      "Time": "2026-10-03T06:28:11.937342+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:384: phase=before-statement telemetry_pid=98358 advisory_blocker_pid=98367 query=UPDATE tenant_api_keys SET last_used_at=now(), last_used_ip=$2 WHERE id=$1\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyTouchReceiptAdmissionCausality/permission_change_held_conflicts",
+      "Time": "2026-10-03T06:28:12.225229+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:389: phase=same_key_SHARE_wait waiter_pid=98371 exact_blocker_pid=98369 holder_query=UPDATE tenant_api_keys SET allowed_zone_ids=$2 WHERE id=$1\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyTouchReceiptAdmissionCausality/permission_change_held_conflicts",
+      "Time": "2026-10-03T06:28:12.229213+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:429: phase=telemetry_committed holder_pid=98358 trigger_phase=before-statement calls=1 last_used_at_and_ip_verified=true\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyTouchReceiptAdmissionCausality/permission_change_held_conflicts",
+      "Time": "2026-10-03T06:28:13.738404+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:384: phase=before-statement telemetry_pid=98416 advisory_blocker_pid=98436 query=UPDATE tenant_api_keys SET last_used_at=now(), last_used_ip=$2 WHERE id=$1\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyTouchReceiptAdmissionCausality/unrevoked_retry_and_telemetry_commit",
+      "Time": "2026-10-03T06:28:14.044181+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:429: phase=telemetry_committed holder_pid=98416 trigger_phase=before-statement calls=1 last_used_at_and_ip_verified=true\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyTouchReceiptAdmissionCausality/unrevoked_retry_and_telemetry_commit",
+      "Time": "2026-10-03T06:28:14.056412+08:00"
+    }
+  ],
+  "actual_fixture_assertions_scope": "same-key exactblocked SHARE probe/UPDATE held telemetry409; committed telemetry zonewithdrawal404 no effects; held permissionchange409; valid retry/audit-outbox-once/lastusedtimestampIP committed as assertions in frozen1top4leaf",
+  "actual_seen_fresh_DB_count": 4,
+  "actual_seen_fresh_DBs": [
+    "tm_test_454a8338e66b46a2b18e937d4eb1567b",
+    "tm_test_c30cc0204bbf4f578b7a4172c747f366",
+    "tm_test_df464d179ecd4527a9eeddafa1f8bfae",
+    "tm_test_ff962f81724c4180b00ab1e82b094ed5"
+  ],
+  "actualleaf": 4,
+  "actualracePASSnodes": 5,
+  "actualtop": 1,
+  "base_actual_official_New_Migrate18": true,
+  "cleanup": {
+    "PG180_within": true,
+    "all_owned_groups_gone": true,
+    "cleanup_unknown_or_residual": false,
+    "global_original180_elapsed": 22.929187059402466,
+    "native_PG_started": true,
+    "native_stop_exit": 0,
+    "observer_joined": true,
+    "oldroots_or_externalservices_untouched": true,
+    "owned_PG_PID": 97643,
+    "owned_PID_current_observation": "absent",
+    "owned_PID_ps_exit": 1,
+    "owned_base_and_temporary_DB_connections": [
+      "tm_keytouch_validation|0"
+    ],
+    "owned_cleanup_decision": "stop_only_proved_owned",
+    "owned_final_status_exit": 0,
+    "owned_start_attempted": true,
+    "pidfile_absent": true,
+    "runtime_acceptance_allowed": true,
+    "socket_absent": true,
+    "within180": true
+  },
+  "direct_each_fresh_db_schema18_query_samples": "not measured separately; eachselectedfixturecurrentmigrate/testbodyPASS not extrapolated as4directcatalogqueries",
+  "exact_selector": "^TestR5KeyTouchReceiptAdmissionCausality$",
+  "historical89451_holder_identity": "NOT_PROVEN; new controlled same-key causal fixture only",
+  "no_product_SQLfix_whole180_capacity_or_P7_parent_claim": true,
+  "no_retry_other_test_or_scope": true,
+  "no_skip_or_unfinished": true,
+  "no_token_DSN_parameterpayload_or_responsebody_logging": true,
+  "old_AS0infra_or_a331wholeFAIL_not_relabelled": true,
+  "outer_original_budget_seconds": 180,
+  "outer_original_nativeinit_capture_cleanup_elapsed": 22.929187059402466,
+  "package_elapsed": 5.984,
+  "package_timeout_seconds": 60,
+  "signed1testpin": {
+    "internal/store/postgres/r5_key_touch_admission_test.go": "7dfe893dbccb5fc2f46d360cb717880e9dee37d17080595c4239378c7276060f"
+  },
+  "source_closure_sha256": "85fd37c1eb40dcca3779aa06b70a134973eb5e709f17f4aa15f0d7968a8d1977",
+  "source_compileinputs": {
+    "actualdefault_tagcatalog_excluded_selected_compileinputs": true,
+    "actualembed_inputs": 22,
+    "actualfork_selected_files": 34,
+    "actualselected_local_inputs": 362,
+    "externalmodule_boundary": "GoList actualversions/Sum/toolchain; externalcachedfiles not rehashed privately",
+    "missing_or_unknown": []
+  },
+  "source_sha": "42126f8ed039fa143031689ecf3d4c6266721c50",
+  "sourcepost": {
+    "actual_closure_sha256": "85fd37c1eb40dcca3779aa06b70a134973eb5e709f17f4aa15f0d7968a8d1977",
+    "all_captured_inputbytes_equal": true,
+    "rootfork_module_sum_replace_readonlyunchanged": true
+  },
+  "status": "BOUNDED_KEY_TOUCH_CAUSAL_FIXTURE_PASS"
+}

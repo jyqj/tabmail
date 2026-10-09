@@ -1,0 +1,18 @@
+....................................................................................................................E..................................................................................................
+======================================================================
+ERROR: test_http_response_bindings (unittest.loader._FailedTest.test_http_response_bindings)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_http_response_bindings
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/tests/test_http_response_bindings.py", line 4, in <module>
+    from test_openapi_contract import gate, ROOT
+ModuleNotFoundError: No module named 'test_openapi_contract'
+
+
+----------------------------------------------------------------------
+Ran 215 tests in 37.841s
+
+FAILED (errors=1)

@@ -1,4 +1,4 @@
-.PHONY: build run dev test vet lint web-lint web-test web-build contract-check i18n-check check backup-db restore-db backup-obj backup-obj-s3 restore-obj restore-obj-s3 docker-up docker-down clean
+.PHONY: build run dev test vet lint web-lint web-test web-build contract-deps contract-check compatibility-check transaction-check protocol-baseline http-contract-check i18n-check validation-tools-test i18n-source-test check backup-db restore-db backup-obj backup-obj-s3 restore-obj restore-obj-s3 docker-up docker-down clean
 
 BINARY  := tabmail
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
@@ -32,15 +32,45 @@ web-test:
 web-build:
 	cd web && npm run build
 
+# Run this explicitly in a virtualenv or the disposable validation container.
+contract-deps:
+	python3 -m pip install -r scripts/requirements-contract.txt
+
 contract-check:
 	python3 scripts/check_contract_drift.py
+
+# Fresh route/client AST inventory and coordinated upgrade plan, not product approval.
+compatibility-check:
+	python3 -B scripts/check_r5_compatibility.py
+
+# Syntax/caller/FK inventory drift, NOT runtime lock correctness.
+transaction-check:
+	python3 -B scripts/check_r5_transactions.py
+
+# Fresh real DB/HTTP protocol baseline; documented target red stays explicit.
+protocol-baseline:
+	@root=$$(mktemp -d "$${TMPDIR:-/tmp}/tabmail-protocol.XXXXXX"); \
+	  python3 -B scripts/check_r5_protocol.py --run shared-db --output-dir "$$root/run"
+
+# Requires the disposable PostgreSQL DSN and explicitly installed test dependencies.
+http-contract-check:
+	@root=$$(mktemp -d "$${TMPDIR:-/tmp}/tabmail-http-contract.XXXXXX"); \
+	  echo "HTTP contract evidence: $$root/run"; \
+	  python3 -B scripts/check_http_contract.py --output-dir "$$root/run" --source-sha "$$(git rev-parse HEAD)"
 
 i18n-check:
 	python3 scripts/check_i18n_keys.py
 
+validation-tools-test:
+	python3 -B -m unittest discover -s scripts/tests -p 'test_*.py' -v
+
+i18n-source-test:
+	node --test scripts/tests/*.test.cjs
+	node scripts/collect_api_calls.cjs --check
+
 lint: vet web-lint
 
-check: test vet contract-check i18n-check web-lint web-test web-build
+check: test vet transaction-check contract-check compatibility-check http-contract-check protocol-baseline validation-tools-test i18n-source-test i18n-check web-lint web-test web-build
 
 
 backup-db:

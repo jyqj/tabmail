@@ -1,0 +1,64 @@
+{
+  "actual_source_closure_sha256": "879af89b59fa2df5697959cf3e7449247c29ff069664fe6882275bef751a054d",
+  "central_checker_alias_mapping_still_pending_not_modified": true,
+  "cleanup": {
+    "all_owned_groups_absent": true,
+    "noPG_API_SMTP_Node_browser_build_or_genericchecker": true,
+    "selected_source_pins_equal": true
+  },
+  "fullCI_productgreen": false,
+  "results": {
+    "python-eight-contracts": {
+      "CLI_exit": 0,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false,
+      "wall_seconds": 0.31345367431640625
+    },
+    "typed-Go-wire-exporter": {
+      "CLI_exit": 0,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false,
+      "wall_seconds": 5.6804492473602295
+    }
+  },
+  "scope_boundary": "actual typed projections and shipping envelope encoders plus scoped Python OAS evaluator, capabilities constructed; no router/PG/current-authority/full genericOAS checker acceptance",
+  "source_sha": "8bff536680c891d4a8beab044d70e6cec979b909",
+  "wire": {
+    "bytes": 18228,
+    "evidence_level": "typed-projection-and-shipping-envelope-only; not HTTP admission or PG acceptance",
+    "fixture_count": 21,
+    "fixture_names": [
+      "known",
+      "unknown",
+      "known",
+      "unknown",
+      "known",
+      "unknown",
+      "known",
+      "unknown",
+      "committed-fallback",
+      "known",
+      "unknown",
+      "known",
+      "unknown",
+      "known",
+      "unknown",
+      "known",
+      "unknown",
+      "committed-fallback",
+      "known-empty-bcc",
+      "known-bcc",
+      "legacy-unknown-bcc"
+    ],
+    "present": true,
+    "sha256": "9fdd0d734a549733a89fb9cb5f85035a137e9c5ff452276363579cf65b0950f3"
+  }
+}

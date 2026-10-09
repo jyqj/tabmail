@@ -1,0 +1,9 @@
+{
+  "new34member_archive": "/private/tmp/tm-r5MIME-forkV5-four.90yu5jcq/MIME-FORK-V5-with-appendonly-narrative-corrections-evidence.tar.gz",
+  "new_archive_bytes": 179292,
+  "new_archive_sha256": "7de4101fbbbc848a0790c005d475f9983d6f9aa653958869f0bf6510b33b3b82",
+  "old_archive_retained": true,
+  "old_archive_sha256": "050b85dc71aab1b6bd35ec3969baf57c5a2f37aa40392edf8e58ff8a88e69688",
+  "only_append_correction_no_execution": true,
+  "original33_payload_byteidentical": true
+}

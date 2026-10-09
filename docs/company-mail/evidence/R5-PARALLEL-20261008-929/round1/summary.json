@@ -1,0 +1,226 @@
+{
+  "batch": "R5-PARALLEL-20261008-929",
+  "issue": 81,
+  "round": 1,
+  "implemented": [
+    "01",
+    "02",
+    "03",
+    "06"
+  ],
+  "completed": 4,
+  "total": 10,
+  "remaining": 6,
+  "parent_completed": 10,
+  "parent_total": 171,
+  "parent_remaining": 161,
+  "tested_commit": "d7e80786b0ea3e43b34f90d0908eaca5c4d94863",
+  "tested_tree": "9236bb517c04e42e6081d3583ca968eb0702c185",
+  "baseline": "b916bee08399eacd199d3bef8e5e5ebc2265a7d8",
+  "concurrent_integration": "b81233d",
+  "verification": {
+    "integrated_go": {
+      "packages": [
+        "workqueue",
+        "dkim",
+        "app/domains",
+        "policy",
+        "resolver"
+      ],
+      "race": true,
+      "leaf_pass": 138,
+      "leaf_fail": 0,
+      "leaf_skip": 0
+    },
+    "frontend_templates": {
+      "pass": 113,
+      "fail": 0,
+      "skip": 0
+    },
+    "backend_broader_author_run": {
+      "leaf_pass": 756,
+      "leaf_fail": 0,
+      "leaf_skip": 10,
+      "skip_reason": "ingest PostgreSQL fixture requires TABMAIL_TEST_DB_DSN"
+    }
+  },
+  "review": {
+    "01": "frontend_work reviewed arithmetic, actual call sites and worker regression; root reviewed diff",
+    "02": "root reviewed grants snapshot, candidates and parent mailbox loading wiring",
+    "03": "pr_review independently verified code, immutable tests and raw 28-leaf red/green; root authored",
+    "06": "root reviewed original/derived address validation and consumer tests"
+  },
+  "limitations": [
+    "No full PostgreSQL or shipping-browser qualification",
+    "Current full CI remains blocked by existing PG/private fixture/audit/catalog gates",
+    "DKIM helper preserves historical display whitespace, case and reordering compatibility; not a full signature verifier"
+  ],
+  "files": [
+    {
+      "path": "round1-go.jsonl",
+      "bytes": 140102,
+      "sha256": "53a2dd98d4c5eb9e0ea5f93eb17b41d7e613e27957ebff7e3d4d3cc9e63dab0d"
+    },
+    {
+      "path": "backend-01-backoff-related-race.jsonl",
+      "bytes": 789254,
+      "sha256": "93f15d33263d1ecba22afba0eed9f2f8dde378d281b3c5a85a5f487cd5a71c35"
+    },
+    {
+      "path": "backend-01-backoff-baseline.jsonl",
+      "bytes": 20264,
+      "sha256": "e1999e2103b4c1e915922d57cc670f2ad59b6fb3daaf0add949c4ac10915a2da"
+    },
+    {
+      "path": "backend-01-backoff-summary.json",
+      "bytes": 4138,
+      "sha256": "56320ca3397b8675d29308c22c765506e41b896f93f6e3e73fbca358554d9df1"
+    },
+    {
+      "path": "backend-01-backoff-vet.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend-01-backoff-related-race.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend-01-backoff-fixed.jsonl",
+      "bytes": 16636,
+      "sha256": "7efed4726c41ef11954727c978ea91a6692fc07087346c1ab1d2f097d09da6af"
+    },
+    {
+      "path": "backend-01-backoff-baseline.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend-01-backoff-fixed.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "frontend-02-related.log",
+      "bytes": 623,
+      "sha256": "1ab70d1845119a22431e4e39dedace4607331ad3201096bd577f38aa08c7a417"
+    },
+    {
+      "path": "frontend-02-typecheck.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "frontend-02-summary.json",
+      "bytes": 1554,
+      "sha256": "e385a9be2ad59b40115b766a28bbc783734a2f909783110ba9dce11b878d5857"
+    },
+    {
+      "path": "frontend-02-red.exit",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "path": "frontend-02-related.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "frontend-02-green.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "frontend-02-lint.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "frontend-02-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "frontend-02-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "frontend-02-red.log",
+      "bytes": 22637,
+      "sha256": "9556fcf13d7f39a096ff872e729392885a4f123980b9854bc7c22d2395bd2a80"
+    },
+    {
+      "path": "frontend-02-green.log",
+      "bytes": 618,
+      "sha256": "35ec80a2623fd8e236b1498dad0325d6361d8342a6de4762d3945bf64f307367"
+    },
+    {
+      "path": "frontend-01-independent-source-review.json",
+      "bytes": 1200,
+      "sha256": "f4438e2c11d6477cfe8e907dead5b919ea6c5c1d154a66aa7a85c6231a14e5ef"
+    },
+    {
+      "path": "transport-06-vet.jsonl",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "transport-06-baseline.jsonl",
+      "bytes": 25019,
+      "sha256": "a78564e7bf094ec58e75b230fba14e98177f44114f5c8f37582096552d6567a7"
+    },
+    {
+      "path": "transport-06-vet.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "transport-06-candidate.jsonl",
+      "bytes": 30498,
+      "sha256": "6312c70e163e5d7abf60e47a2a9312f1f7876a301d348f6c3fd8dac953a865e9"
+    },
+    {
+      "path": "transport-06-candidate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "transport-06-candidate-summary.json",
+      "bytes": 1679,
+      "sha256": "ca5e5ae9f5db50d0d8d139f77c9acbefb474c0a9dade73f79ae259a5d01d9c85"
+    },
+    {
+      "path": "transport-06-baseline.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "transport-06-baseline-summary.json",
+      "bytes": 2104,
+      "sha256": "0188f41fc1be991c2db7d95dc85af2a26394835d4e4027a29405eda3e4abc944"
+    },
+    {
+      "path": "root-dkim-consumer-baseline.jsonl",
+      "bytes": 33304,
+      "sha256": "8dca8aaa77cb517946eb9d9263fdebe8170c56f1ff83ec7a929e61f9f01593ae"
+    },
+    {
+      "path": "root-dkim-final-candidate.jsonl",
+      "bytes": 48457,
+      "sha256": "ad255fee6e31a466646168b788a94b6e47e9bf53f944fe58b9671ddb847c4624"
+    },
+    {
+      "path": "root-dkim-vet.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "archive": {
+    "path": "raw-evidence.zip",
+    "bytes": 84991,
+    "sha256": "6a29a63ac9ecbc023decb97665600c49879c02795a1c28a6f5552dfe8c05593c",
+    "files_location": "All files listed below are original bytes inside this archive."
+  }
+}

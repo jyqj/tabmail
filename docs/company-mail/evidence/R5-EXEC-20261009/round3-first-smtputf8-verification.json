@@ -1,0 +1,1281 @@
+{
+  "schema": 1,
+  "task": "EXEC09",
+  "qualification": "ACCEPT for the exact original PR224 candidate tree; later candidate heads require their own source-qualified results",
+  "public_head": "6c475d30e490ae69e2db512d431617aa4e9301d8",
+  "public_tree": "55a10b9e87f71bccd0a726cd184abeddeb6e78e1",
+  "actual_checkout": "bd7bea1a4d400317641ce2c5e160eb31486e88a6",
+  "actual_checkout_parents": [
+    "ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+    "6c475d30e490ae69e2db512d431617aa4e9301d8"
+  ],
+  "run": {
+    "id": 37882581660,
+    "url": "https://github.com/jyqj/tabmail/actions/runs/37882581660",
+    "attempt": 1,
+    "event": "pull_request",
+    "head_sha": "6c475d30e490ae69e2db512d431617aa4e9301d8",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-09T04:09:47Z",
+    "updated_at": "2026-10-09T04:10:36Z"
+  },
+  "job_id": 113665372994,
+  "runtime": {
+    "go": "go1.25.7 linux/amd64",
+    "postgres": null,
+    "checker_unittest_methods": 6,
+    "checker_unittest_result": "OK"
+  },
+  "test_source_sha256": "03047b4ba6b9c4590e032dfc58eeada6750e3b2e4c7aa80b96859ab98354e372",
+  "baseline_public_source": "ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+  "raw_github_job_log": {
+    "blob_sha": "b1a368b648e5d9bf8dff562125a8245e200fcedb",
+    "sha256": "73113653f6eef4aef1cf459169876496a864b2946b28830eabc42c60843fd7e8",
+    "utf8_bytes": 548296,
+    "complete": true,
+    "modified": false
+  },
+  "original_go_jsonl": {
+    "baseline": {
+      "blob_sha": "274f0ed7987a64e707ff1c3a3e47fd82d466d514",
+      "sha256": "7117cb65c4fc2dafb1ad7db5daffb4c6a5208a050fcff283340773d5b17ca7a0",
+      "bytes": 160230
+    },
+    "candidate": {
+      "blob_sha": "cb0f76d65043092e0410ae51f7c8de5623ae140b",
+      "sha256": "51c4949a116ab7f2f15d43c545e1cebb5bd00da0ab1e489eadc591a8aaff7856",
+      "bytes": 110261
+    }
+  },
+  "original_stderr": {
+    "baseline_bytes": 0,
+    "candidate_bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "github_artifact": {
+    "id": 11594298432,
+    "name": "smtputf8-recovery-evidence",
+    "size_in_bytes": 25167,
+    "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11594298432",
+    "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11594298432/zip",
+    "expired": false,
+    "created_at": "2026-10-09T04:10:31Z",
+    "expires_at": "2026-10-23T04:10:30Z",
+    "updated_at": "2026-10-09T04:10:31Z",
+    "digest": "sha256:af5a173ce5d36beef9e1866e96d8690dab40f75285afeeb6aadfcef2fc2ccf82",
+    "workflow_run": {
+      "id": 37882581660,
+      "repository_id": 1188928152,
+      "head_repository_id": 1188928152,
+      "head_branch": "fix/tabmail-exec-round3-20261009",
+      "head_sha": "6c475d30e490ae69e2db512d431617aa4e9301d8"
+    }
+  },
+  "independent_checks": [
+    "Every extracted Go stdout/stderr byte sequence matched the execution record's original SHA256",
+    "Exact start and terminal ID sets, no missing/duplicate/skip/unexpected scope",
+    "All package and parent outcomes checked separately from leaves",
+    "No build-fail, FailedBuild, panic or data race",
+    "All source assertions checked across leaf, parent and package scopes",
+    "Actual defect observations checked against frozen fixture semantics, not runner summary",
+    "Before/after source identity unchanged; candidate tree equals the publicly retrieved head tree",
+    "Full original logs preserved; no local evidence reconstruction"
+  ],
+  "scope": "Actual TCP/TLS/MX transport with FakeStore recipient persistence. Does not claim PostgreSQL-backed recipient storage.",
+  "results": {
+    "baseline": {
+      "source": {
+        "commit": "6a5e3dce6a117082fc0ace2cb06bd5cc3bb45a0b",
+        "tree": "3a3121e5aaffc5240894b9a18f3941c957330929",
+        "test_sha256": "03047b4ba6b9c4590e032dfc58eeada6750e3b2e4c7aa80b96859ab98354e372"
+      },
+      "source_after": {
+        "commit": "6a5e3dce6a117082fc0ace2cb06bd5cc3bb45a0b",
+        "tree": "3a3121e5aaffc5240894b9a18f3941c957330929",
+        "test_sha256": "03047b4ba6b9c4590e032dfc58eeada6750e3b2e4c7aa80b96859ab98354e372"
+      },
+      "exit_code": 1,
+      "timed_out": false,
+      "command": [
+        "go",
+        "test",
+        "-mod=readonly",
+        "-json",
+        "-race",
+        "-p",
+        "1",
+        "-count=1",
+        "-timeout=120s",
+        "-run",
+        "^TestExecSMTPUTF8",
+        "./internal/outbound"
+      ],
+      "package": "tabmail/internal/outbound",
+      "package_result": "fail",
+      "package_elapsed": 0.811,
+      "event_count": 565,
+      "started_count": 113,
+      "leaf_count": 109,
+      "counts": {
+        "pass": 71,
+        "fail": 38,
+        "skip": 0
+      },
+      "source_assertion_count": 101,
+      "marker_count": 38,
+      "markers": [
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_sender_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<发送者@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<发送者@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_recipient_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<收件人@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<收件人@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_domain_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@例子.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@例子.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_last_bcc",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\" \"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\" \"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_top_level_header",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=324",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=324"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_sender_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<发送者@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<发送者@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_recipient_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<收件人@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<收件人@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_domain_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@例子.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@例子.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_last_bcc",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\" \"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\" \"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_top_level_header",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=324",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=324"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_sender_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<发送者@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<发送者@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_recipient_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<收件人@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<收件人@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_domain_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@例子.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@例子.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_last_bcc",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\" \"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\" \"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_top_level_header",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=324",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=324"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_sender_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<发送者@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<发送者@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_recipient_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<收件人@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<收件人@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_domain_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@例子.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@例子.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_last_bcc",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\" \"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\" \"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_top_level_header",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=324",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=324"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_sender_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<发送者@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<发送者@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_recipient_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<收件人@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<收件人@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_domain_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@例子.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@例子.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_last_bcc",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\" \"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\" \"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_top_level_header",
+          "line": "r5_exec_smtputf8_test.go:340: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=324",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=324"
+        },
+        {
+          "test": "TestExecSMTPUTF8RefreshAfterSTARTTLS/relay_starttls/final_capable=false/unicode_last_bcc",
+          "line": "r5_exec_smtputf8_test.go:365: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\" \"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\" \"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8RefreshAfterSTARTTLS/direct_starttls/final_capable=false/unicode_last_bcc",
+          "line": "r5_exec_smtputf8_test.go:365: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\" \"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\" \"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8HELOFallback/relay_plain/unicode_sender_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:386: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<发送者@example.test>\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<发送者@example.test>\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=false/to",
+          "line": "r5_exec_smtputf8_test.go:506: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=356",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=356"
+        },
+        {
+          "test": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=false/cc",
+          "line": "r5_exec_smtputf8_test.go:506: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=356",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=356"
+        },
+        {
+          "test": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=false/bcc",
+          "line": "r5_exec_smtputf8_test.go:506: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=315",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=315"
+        },
+        {
+          "test": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=false/header",
+          "line": "r5_exec_smtputf8_test.go:506: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=368",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=368"
+        },
+        {
+          "test": "TestExecSMTPUTF8HELOFallback/direct_plain/unicode_sender_envelope_only",
+          "line": "r5_exec_smtputf8_test.go:386: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<发送者@example.test>\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<发送者@example.test>\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=298"
+        },
+        {
+          "test": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=false/to",
+          "line": "r5_exec_smtputf8_test.go:506: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=356",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=356"
+        },
+        {
+          "test": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=false/cc",
+          "line": "r5_exec_smtputf8_test.go:506: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=356",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=356"
+        },
+        {
+          "test": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=false/bcc",
+          "line": "r5_exec_smtputf8_test.go:506: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=315",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<\\\"信箱 @ 帮助台\\\"@recipient.test>\"] DATA=1 body_bytes=315"
+        },
+        {
+          "test": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=false/header",
+          "line": "r5_exec_smtputf8_test.go:506: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=368",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<reader@recipient.test>\"] DATA=1 body_bytes=368"
+        },
+        {
+          "test": "TestExecSMTPUTF8TriesNextMXBeforeSending",
+          "line": "r5_exec_smtputf8_test.go:422: EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<收件人@recipient.test>\"] DATA=1 body_bytes=298",
+          "message": "EXEC09_SENT_WITHOUT_SMTPUTF8 MAIL=[\"MAIL FROM:<sender@example.test> BODY=8BITMIME\"] RCPT=[\"RCPT TO:<收件人@recipient.test>\"] DATA=1 body_bytes=298"
+        }
+      ],
+      "leaf_results": [
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_domain_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_last_bcc",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_recipient_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_sender_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_top_level_header",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_domain_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_last_bcc",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_recipient_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_sender_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_top_level_header",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_domain_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_last_bcc",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_recipient_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_sender_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_top_level_header",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_domain_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_last_bcc",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_recipient_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_sender_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_top_level_header",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_domain_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_last_bcc",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_recipient_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_sender_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_top_level_header",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8HELOFallback/direct_plain/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8HELOFallback/direct_plain/unicode_sender_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8HELOFallback/relay_plain/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8HELOFallback/relay_plain/unicode_sender_envelope_only",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/direct_starttls/final_capable=false/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/direct_starttls/final_capable=false/unicode_last_bcc",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/direct_starttls/final_capable=true/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/direct_starttls/final_capable=true/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/relay_starttls/final_capable=false/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/relay_starttls/final_capable=false/unicode_last_bcc",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/relay_starttls/final_capable=true/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/relay_starttls/final_capable=true/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=false/bcc",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=false/cc",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=false/header",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=false/to",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=true/bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=true/cc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=true/header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=true/to",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=false/bcc",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=false/cc",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=false/header",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=false/to",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=true/bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=true/cc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=true/header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=true/to",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8TriesNextMXBeforeSending",
+          "status": "fail"
+        }
+      ],
+      "parent_results": [
+        {
+          "name": "TestExecSMTPUTF8Capabilities",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8HELOFallback",
+          "status": "fail"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger",
+          "status": "fail"
+        }
+      ],
+      "stdout_sha256": "7117cb65c4fc2dafb1ad7db5daffb4c6a5208a050fcff283340773d5b17ca7a0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0
+    },
+    "candidate": {
+      "source": {
+        "commit": "bd7bea1a4d400317641ce2c5e160eb31486e88a6",
+        "tree": "55a10b9e87f71bccd0a726cd184abeddeb6e78e1",
+        "test_sha256": "03047b4ba6b9c4590e032dfc58eeada6750e3b2e4c7aa80b96859ab98354e372"
+      },
+      "source_after": {
+        "commit": "bd7bea1a4d400317641ce2c5e160eb31486e88a6",
+        "tree": "55a10b9e87f71bccd0a726cd184abeddeb6e78e1",
+        "test_sha256": "03047b4ba6b9c4590e032dfc58eeada6750e3b2e4c7aa80b96859ab98354e372"
+      },
+      "exit_code": 0,
+      "timed_out": false,
+      "command": [
+        "go",
+        "test",
+        "-mod=readonly",
+        "-json",
+        "-race",
+        "-p",
+        "1",
+        "-count=1",
+        "-timeout=120s",
+        "-run",
+        "^TestExecSMTPUTF8",
+        "./internal/outbound"
+      ],
+      "package": "tabmail/internal/outbound",
+      "package_result": "pass",
+      "package_elapsed": 1.771,
+      "event_count": 456,
+      "started_count": 113,
+      "leaf_count": 109,
+      "counts": {
+        "pass": 109,
+        "fail": 0,
+        "skip": 0
+      },
+      "source_assertion_count": 0,
+      "marker_count": 0,
+      "markers": [],
+      "leaf_results": [
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=false/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_plain/capable=true/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=false/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/direct_starttls/capable=true/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=false/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_implicit_tls/capable=true/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=false/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_plain/capable=true/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=false/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/eight_bit_body_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/unicode_domain_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/unicode_recipient_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8Capabilities/relay_starttls/capable=true/unicode_top_level_header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8HELOFallback/direct_plain/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8HELOFallback/direct_plain/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8HELOFallback/relay_plain/ascii_quoted_alabel",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8HELOFallback/relay_plain/unicode_sender_envelope_only",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/direct_starttls/final_capable=false/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/direct_starttls/final_capable=false/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/direct_starttls/final_capable=true/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/direct_starttls/final_capable=true/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/relay_starttls/final_capable=false/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/relay_starttls/final_capable=false/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/relay_starttls/final_capable=true/encoded_headers_body_and_attachment",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS/relay_starttls/final_capable=true/unicode_last_bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=false/bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=false/cc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=false/header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=false/to",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=true/bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=true/cc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=true/header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/direct_plain/capable=true/to",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=false/bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=false/cc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=false/header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=false/to",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=true/bcc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=true/cc",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=true/header",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger/relay_plain/capable=true/to",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8TriesNextMXBeforeSending",
+          "status": "pass"
+        }
+      ],
+      "parent_results": [
+        {
+          "name": "TestExecSMTPUTF8Capabilities",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8RefreshAfterSTARTTLS",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8HELOFallback",
+          "status": "pass"
+        },
+        {
+          "name": "TestExecSMTPUTF8SubmissionRecipientLedger",
+          "status": "pass"
+        }
+      ],
+      "stdout_sha256": "51c4949a116ab7f2f15d43c545e1cebb5bd00da0ab1e489eadc591a8aaff7856",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0
+    }
+  }
+}

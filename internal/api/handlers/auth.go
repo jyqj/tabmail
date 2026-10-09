@@ -2,10 +2,16 @@ package handlers
 
 import (
 	"context"
+	"errors"
+	"io"
 	"net/http"
+	"net/mail"
 	"strings"
+	"tabmail/internal/app/credentials"
 	"time"
+	"unicode/utf8"
 
+	"tabmail/internal/api/lifecycle"
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/authn"
 	"tabmail/internal/models"
@@ -39,6 +45,7 @@ type settingsReader interface {
 
 // AuthHandler handles authentication endpoints.
 type AuthHandler struct {
+	background              *lifecycle.Owner
 	companyOnly             bool
 	store                   authStore
 	jwtSecret               string
@@ -49,8 +56,16 @@ type AuthHandler struct {
 	logger                  zerolog.Logger
 }
 
-func NewAuthHandler(s authStore, jwtSecret string, defaultPlanID uuid.UUID, openRegistration bool, settings settingsReader, cookieSecure bool, l zerolog.Logger) *AuthHandler {
+func NewAuthHandler(s authStore, jwtSecret string, defaultPlanID uuid.UUID, openRegistration bool, settings settingsReader, cookieSecure bool, l zerolog.Logger, owners ...*lifecycle.Owner) *AuthHandler {
+	var owner *lifecycle.Owner
+	if len(owners) > 0 {
+		owner = owners[0]
+	}
+	if owner == nil {
+		owner = lifecycle.New()
+	}
 	return &AuthHandler{
+		background:              owner,
 		store:                   s,
 		jwtSecret:               jwtSecret,
 		defaultPlanID:           defaultPlanID,
@@ -61,6 +76,12 @@ func NewAuthHandler(s authStore, jwtSecret string, defaultPlanID uuid.UUID, open
 	}
 }
 
+// StopContext joins the standalone Login handler's detached work, or the shared
+// Router owner when injected at construction. It never creates a new budget.
+func (h *AuthHandler) StopContext(ctx context.Context) error { return h.background.StopContext(ctx) }
+func (h *AuthHandler) CloseAdmission()                       { h.background.CloseAdmission() }
+func (h *AuthHandler) Done() <-chan struct{}                 { return h.background.Done() }
+
 // RefreshCookieName is the httpOnly cookie that carries the refresh token.
 // The token never appears in a JSON response body, so XSS cannot exfiltrate
 // it from localStorage.
@@ -69,6 +90,17 @@ const RefreshCookieName = "tabmail_refresh_token"
 // refreshCookiePath restricts the cookie to the auth endpoints that actually
 // consume it (/api/v1/auth/refresh, /api/v1/auth/logout).
 const refreshCookiePath = "/api/v1/auth"
+
+// Auth bodies contain credentials and small profile fields, never mail content.
+// Stored email/display names are at most 255 characters, passwords at most 72
+// bytes, and refresh tokens 43 ASCII bytes. 64 KiB leaves ample JSON escaping
+// and whitespace headroom while bounding decoding before credential work.
+const maxAuthBodyBytes = 64 * 1024
+
+func decodeAuthBody(w http.ResponseWriter, r *http.Request, dst any) error {
+	r.Body = http.MaxBytesReader(w, r.Body, maxAuthBodyBytes)
+	return decodeBody(r, dst)
+}
 
 func (h *AuthHandler) setRefreshCookie(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
@@ -105,17 +137,30 @@ func refreshTokenFromRequest(r *http.Request, bodyToken string) string {
 
 // Login handles POST /api/v1/auth/login
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	ctx, release, enterErr := h.background.Enter(r.Context())
+	if enterErr != nil {
+		writeJSON(w, http.StatusServiceUnavailable, envelope{Error: &apiErr{Code: "UNAVAILABLE", Message: "API request admission unavailable"}})
+		return
+	}
+	defer release()
+	r = r.WithContext(ctx)
 	var req struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
-	if err := decodeBody(r, &req); err != nil {
+	if err := decodeAuthBody(w, r, &req); err != nil {
 		errBadRequest(w, "invalid request body")
 		return
 	}
 	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
 	if req.Email == "" || req.Password == "" {
 		errBadRequest(w, "email and password are required")
+		return
+	}
+	// bcrypt comparison ignores bytes after its 72-byte input boundary.
+	// Reject them before account lookup, while retaining legacy short passwords.
+	if len(req.Password) > credentials.MaxPasswordBytes {
+		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "invalid email or password"}})
 		return
 	}
 
@@ -141,12 +186,20 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	accessToken, refreshToken, err := h.issueTokenPair(r.Context(), user)
 	if err != nil {
+		if errors.Is(err, store.ErrAuthenticationChanged) {
+			writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "invalid email or password"}})
+			return
+		}
 		h.logger.Err(err).Msg("login: issue tokens")
 		errInternal(w)
 		return
 	}
 
-	go func() { _ = h.store.TouchUserLogin(context.Background(), user.ID) }()
+	if err := h.background.Go(r.Context(), func() { _ = h.store.TouchUserLogin(context.Background(), user.ID) }); err != nil {
+		h.logger.Error().Err(err).Msg("login: background ownership unavailable")
+		errInternal(w)
+		return
+	}
 
 	h.setRefreshCookie(w, refreshToken)
 	ok(w, map[string]any{
@@ -183,7 +236,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		Password    string `json:"password"`
 		DisplayName string `json:"display_name"`
 	}
-	if err := decodeBody(r, &req); err != nil {
+	if err := decodeAuthBody(w, r, &req); err != nil {
 		errBadRequest(w, "invalid request body")
 		return
 	}
@@ -192,8 +245,33 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "email and password are required")
 		return
 	}
-	if len(req.Password) < 8 {
-		errBadRequest(w, "password must be at least 8 characters")
+	if err := credentials.ValidatePassword(req.Password); err != nil {
+		errBadRequest(w, err.Error())
+		return
+	}
+	displayName := strings.TrimSpace(req.DisplayName)
+	if displayName == "" {
+		displayName = strings.Split(req.Email, "@")[0]
+	}
+	// Validate the normalized values before lookup or tenant creation. PostgreSQL
+	// stores these fields as VARCHAR(255), measured in characters, and rejects NUL.
+	for _, value := range []string{req.Email, displayName} {
+		if strings.ContainsRune(value, 0) || utf8.RuneCountInString(value) > 255 {
+			errBadRequest(w, "email and display_name must contain at most 255 characters and no NUL characters")
+			return
+		}
+	}
+	// Registration stores one mailbox identity, not an RFC 5322 display-name,
+	// group or list. Wrapping in angle brackets asks the parser for an addr-spec
+	// while retaining legitimate quoted local parts and the existing normalized
+	// spelling. This validates syntax; it does not prove ownership or delivery.
+	// net/mail also accepts obsolete whitespace after @ and removes it from
+	// the parsed value. Do not store that spelling as a different account
+	// identity. The last @ is the delimiter even inside a quoted local part.
+	separator := strings.LastIndexByte(req.Email, '@')
+	if _, err := mail.ParseAddress("<" + req.Email + ">"); err != nil ||
+		separator < 0 || strings.ContainsAny(req.Email[separator+1:], " \t\r\n") {
+		errBadRequest(w, "email must be a single mailbox address")
 		return
 	}
 
@@ -224,11 +302,6 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		h.logger.Err(err).Msg("register: create tenant")
 		errInternal(w)
 		return
-	}
-
-	displayName := strings.TrimSpace(req.DisplayName)
-	if displayName == "" {
-		displayName = strings.Split(req.Email, "@")[0]
 	}
 
 	user := &models.User{
@@ -272,7 +345,11 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		RefreshToken string `json:"refresh_token"`
 	}
-	_ = decodeBody(r, &req)
+	// An absent body is valid for cookie clients; a supplied invalid body is not.
+	if err := decodeAuthBody(w, r, &req); err != nil && !errors.Is(err, io.EOF) {
+		errBadRequest(w, "invalid request body")
+		return
+	}
 	raw := refreshTokenFromRequest(r, req.RefreshToken)
 	if raw == "" {
 		errBadRequest(w, "refresh_token is required")
@@ -304,12 +381,18 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	// subsequent read temporarily fails. Never strand the browser on its consumed
 	// ancestor or issue an access token without a current active user.
 	h.setRefreshCookie(w, nextRaw)
+	if next.Issuance == nil {
+		h.logger.Error().Msg("refresh: rotation omitted authentication snapshot")
+		errInternal(w)
+		return
+	}
+	authenticated := *next.Issuance
 	user, err := h.store.GetUser(r.Context(), next.UserID)
 	if err != nil {
 		errInternal(w)
 		return
 	}
-	if user == nil || !user.IsActive {
+	if !authenticated.MatchesUser(next.UserID, user) {
 		_ = h.store.RevokeRefreshTokenByHash(r.Context(), nextHash)
 		h.clearRefreshCookie(w)
 		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "user unavailable"}})
@@ -331,7 +414,10 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		RefreshToken string `json:"refresh_token"`
 	}
-	_ = decodeBody(r, &req)
+	if err := decodeAuthBody(w, r, &req); err != nil && !errors.Is(err, io.EOF) {
+		errBadRequest(w, "invalid request body")
+		return
+	}
 	raw := refreshTokenFromRequest(r, req.RefreshToken)
 	var err error
 	if raw != "" {
@@ -378,7 +464,7 @@ func (h *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		OldPassword string `json:"old_password"`
 		NewPassword string `json:"new_password"`
 	}
-	if err := decodeBody(r, &req); err != nil {
+	if err := decodeAuthBody(w, r, &req); err != nil {
 		errBadRequest(w, "invalid request body")
 		return
 	}
@@ -386,11 +472,11 @@ func (h *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "old_password and new_password are required")
 		return
 	}
-	if len(req.NewPassword) < 12 || len(req.NewPassword) > 72 {
-		errBadRequest(w, "new password must be 12-72 bytes")
+	if err := credentials.ValidatePassword(req.NewPassword); err != nil {
+		errBadRequest(w, err.Error())
 		return
 	}
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.OldPassword)); err != nil {
+	if len(req.OldPassword) > credentials.MaxPasswordBytes || bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.OldPassword)) != nil {
 		writeJSON(w, http.StatusForbidden, envelope{Error: &apiErr{Code: "INVALID_PASSWORD", Message: "incorrect old password"}})
 		return
 	}
@@ -451,6 +537,10 @@ func (h *AuthHandler) issueTokenPair(ctx context.Context, user *models.User) (ac
 		UserID:    user.ID,
 		TokenHash: refreshHash,
 		ExpiresAt: time.Now().Add(authn.RefreshTokenTTL),
+		// The authenticated values are immutable command input. The store
+		// rechecks them under the same lock that protects this token insertion;
+		// a later active state alone cannot resurrect a pre-freeze login.
+		Issuance: &models.RefreshTokenIssuance{UserID: user.ID, TenantID: user.TenantID, PasswordHash: user.PasswordHash, SessionVersion: user.SessionVersion},
 	}
 	if err := h.store.CreateRefreshToken(ctx, rt); err != nil {
 		return "", "", err

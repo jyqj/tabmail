@@ -7,11 +7,14 @@ import (
 	"encoding/hex"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"tabmail/internal/app"
+	"tabmail/internal/authz"
 	"tabmail/internal/hooks"
 	"tabmail/internal/metrics"
 	"tabmail/internal/models"
@@ -26,6 +29,7 @@ type Store interface {
 	CreateTenant(ctx context.Context, t *models.Tenant) error
 	ListTenants(ctx context.Context) ([]*models.Tenant, error)
 	GetTenant(ctx context.Context, id uuid.UUID) (*models.Tenant, error)
+	GetOverride(ctx context.Context, tenantID uuid.UUID) (*models.TenantOverride, error)
 	UpsertOverride(ctx context.Context, o *models.TenantOverride) error
 	DeleteTenant(ctx context.Context, id uuid.UUID) error
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
@@ -33,7 +37,7 @@ type Store interface {
 	CreatePlan(ctx context.Context, p *models.Plan) error
 	UpdatePlan(ctx context.Context, p *models.Plan) error
 	DeletePlan(ctx context.Context, id uuid.UUID) error
-	CreateAPIKey(ctx context.Context, k *models.TenantAPIKey) error
+	CreateAPIKeyAuthorized(ctx context.Context, issuer authz.APIKeyIssuer, k *models.TenantAPIKey) error
 	GetAPIKey(ctx context.Context, id uuid.UUID) (*models.TenantAPIKey, error)
 	ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*models.TenantAPIKey, error)
 	ListAPIKeysByOwner(ctx context.Context, tenantID uuid.UUID, ownerUserID uuid.UUID) ([]*models.TenantAPIKey, error)
@@ -163,6 +167,13 @@ func (s *Service) ListSettings(ctx context.Context) ([]*models.SystemSetting, er
 
 // UpdateSetting updates a single system setting.
 func (s *Service) UpdateSetting(ctx context.Context, key, value string, actor string) error {
+	if err := validateSetting(key, value, time.Now()); err != nil {
+		return err
+	}
+	return s.updateValidatedSetting(ctx, key, value, actor)
+}
+
+func validateSetting(key, value string, now time.Time) error {
 	if key == "" {
 		return app.BadRequest("key is required")
 	}
@@ -171,9 +182,16 @@ func (s *Service) UpdateSetting(ctx context.Context, key, value string, actor st
 	case models.SettingAutoCreateRouteRPM, models.SettingAutoCreateTenantRPM,
 		models.SettingMonitorHistory, models.SettingFallbackRetentionH,
 		models.SettingPublicIPRPM:
-		// Must be a valid int
-		if _, err := fmt.Sscanf(value, "%d", new(int)); err != nil {
+		// Match the settings reader: the entire stored value must be an int.
+		// A valid prefix would otherwise be accepted here and default at runtime.
+		hours, err := strconv.Atoi(value)
+		if err != nil {
 			return app.BadRequest("value must be an integer for " + key)
+		}
+		if key == models.SettingFallbackRetentionH {
+			if _, err := models.MessageExpiry(nil, hours, now); err != nil {
+				return app.BadRequest(err.Error())
+			}
 		}
 	case models.SettingStripPlusTag, models.SettingOpenRegistration:
 		// Must be a valid bool
@@ -187,7 +205,10 @@ func (s *Service) UpdateSetting(ctx context.Context, key, value string, actor st
 			return app.BadRequest("value must be full, local, or domain for " + key)
 		}
 	}
+	return nil
+}
 
+func (s *Service) updateValidatedSetting(ctx context.Context, key, value, actor string) error {
 	if err := s.settings.Set(ctx, key, value, ""); err != nil {
 		return app.Internal(err)
 	}
@@ -200,10 +221,23 @@ func (s *Service) UpdateSetting(ctx context.Context, key, value string, actor st
 	return nil
 }
 
-// BulkUpdateSettings updates multiple settings at once.
+// BulkUpdateSettings validates the complete request before applying updates.
+// Storage failures can still leave preceding successful writes in place.
 func (s *Service) BulkUpdateSettings(ctx context.Context, updates map[string]string, actor string) error {
+	type settingUpdate struct{ key, value string }
+	batch := make([]settingUpdate, 0, len(updates))
 	for key, value := range updates {
-		if err := s.UpdateSetting(ctx, key, value, actor); err != nil {
+		batch = append(batch, settingUpdate{key: key, value: value})
+	}
+	sort.Slice(batch, func(i, j int) bool { return batch[i].key < batch[j].key })
+	now := time.Now()
+	for _, update := range batch {
+		if err := validateSetting(update.key, update.value, now); err != nil {
+			return err
+		}
+	}
+	for _, update := range batch {
+		if err := s.updateValidatedSetting(ctx, update.key, update.value, actor); err != nil {
 			return err
 		}
 	}
@@ -211,6 +245,9 @@ func (s *Service) BulkUpdateSettings(ctx context.Context, updates map[string]str
 }
 
 func (s *Service) CreateTenant(ctx context.Context, name string, planID uuid.UUID, actor string) (*models.Tenant, error) {
+	if err := validateAdminName(name, tenantNameMaxCharacters); err != nil {
+		return nil, err
+	}
 	plan, err := s.store.GetPlan(ctx, planID)
 	if err != nil {
 		return nil, app.Internal(err)
@@ -233,12 +270,20 @@ func (s *Service) CreateTenant(ctx context.Context, name string, planID uuid.UUI
 }
 
 func (s *Service) UpdateTenantOverride(ctx context.Context, tenantID uuid.UUID, body models.TenantOverride, actor string) (*models.TenantOverride, error) {
+	if err := validateConfigIntegers(body); err != nil {
+		return nil, err
+	}
 	tenant, err := s.store.GetTenant(ctx, tenantID)
 	if err != nil {
 		return nil, app.Internal(err)
 	}
 	if tenant == nil {
 		return nil, app.NotFound("tenant not found")
+	}
+	if body.RetentionHours != nil {
+		if _, err := models.MessageExpiry(nil, *body.RetentionHours, time.Now()); err != nil {
+			return nil, app.BadRequest(err.Error())
+		}
 	}
 	body.TenantID = tenantID
 	if err := s.store.UpsertOverride(ctx, &body); err != nil {
@@ -270,6 +315,15 @@ func (s *Service) DeleteTenant(ctx context.Context, id uuid.UUID, actor string) 
 }
 
 func (s *Service) CreatePlan(ctx context.Context, p *models.Plan, actor string) (*models.Plan, error) {
+	if err := validateAdminName(p.Name, planNameMaxCharacters); err != nil {
+		return nil, err
+	}
+	if err := validatePlanIntegers(p); err != nil {
+		return nil, err
+	}
+	if _, err := models.MessageExpiry(nil, p.RetentionHours, time.Now()); err != nil {
+		return nil, app.BadRequest(err.Error())
+	}
 	if err := s.store.CreatePlan(ctx, p); err != nil {
 		return nil, app.Internal(err)
 	}
@@ -284,6 +338,15 @@ func (s *Service) CreatePlan(ctx context.Context, p *models.Plan, actor string) 
 }
 
 func (s *Service) UpdatePlan(ctx context.Context, p *models.Plan, actor string) (*models.Plan, error) {
+	if err := validateAdminName(p.Name, planNameMaxCharacters); err != nil {
+		return nil, err
+	}
+	if err := validatePlanIntegers(p); err != nil {
+		return nil, err
+	}
+	if _, err := models.MessageExpiry(nil, p.RetentionHours, time.Now()); err != nil {
+		return nil, app.BadRequest(err.Error())
+	}
 	if err := s.store.UpdatePlan(ctx, p); err != nil {
 		return nil, app.Internal(err)
 	}
@@ -310,7 +373,14 @@ func (s *Service) DeletePlan(ctx context.Context, id uuid.UUID, actor string) er
 	return nil
 }
 
-func (s *Service) CreateAPIKey(ctx context.Context, tenantID uuid.UUID, label string, scopes []string, actor string, callerPerm *models.EffectivePermission, callerUserID *uuid.UUID, allowedZoneIDs []uuid.UUID) (*APIKeyIssueResult, error) {
+// CreateAPIKey issues credentials only through the mandatory atomic store
+// command. Authentication's user snapshot supplies the home-tenant proof;
+// authorization and ownership are re-evaluated by the store under its fences.
+func (s *Service) CreateAPIKey(ctx context.Context, tenantID uuid.UUID, label string, scopes []string, actor authz.Actor, authenticated *models.User, allowedZoneIDs []uuid.UUID) (*APIKeyIssueResult, error) {
+	issuer, valid := authz.NewAPIKeyIssuer(actor, authenticated)
+	if !valid {
+		return nil, app.Forbidden("current interactive JWT issuer required")
+	}
 	tenant, err := s.store.GetTenant(ctx, tenantID)
 	if err != nil {
 		return nil, app.Internal(err)
@@ -322,113 +392,19 @@ func (s *Service) CreateAPIKey(ctx context.Context, tenantID uuid.UUID, label st
 	if err != nil {
 		return nil, err
 	}
-
-	// Enforce scope restrictions for non-admin callers
-	if callerPerm != nil {
-		scopeSet := make(map[string]struct{}, len(scopes))
-		for _, sc := range scopes {
-			scopeSet[sc] = struct{}{}
-		}
-		if _, ok := scopeSet["send:write"]; ok {
-			if !callerPerm.CanSend {
-				return nil, app.Forbidden("cannot create api key with send:write scope: sending not allowed")
-			}
-		}
-		if _, ok := scopeSet["send:read"]; ok {
-			if !callerPerm.CanSend {
-				return nil, app.Forbidden("cannot create api key with send:read scope: sending not allowed")
-			}
-		}
-		if _, ok := scopeSet["domains:write"]; ok {
-			if !callerPerm.CanCreateDomains {
-				return nil, app.Forbidden("cannot create api key with domains:write scope: domain creation not allowed")
-			}
-		}
-		if _, ok := scopeSet["routes:write"]; ok {
-			if !callerPerm.CanCreateRoutes {
-				return nil, app.Forbidden("cannot create api key with routes:write scope: route creation not allowed")
-			}
-		}
-		// There is no profile-level mailbox/message write capability today.
-		// Do not let a regular user mint broad write credentials that outlive
-		// interactive permission checks; tenant/platform admins can still
-		// create integration keys from admin endpoints.
-		if _, ok := scopeSet["mailboxes:write"]; ok {
-			return nil, app.Forbidden("cannot create api key with mailboxes:write scope: admin approval required")
-		}
-		if _, ok := scopeSet["messages:write"]; ok {
-			return nil, app.Forbidden("cannot create api key with messages:write scope: admin approval required")
-		}
-		if _, ok := scopeSet["webhooks:read"]; ok {
-			return nil, app.Forbidden("cannot create api key with webhooks:read scope: admin approval required")
-		}
-		if _, ok := scopeSet["webhooks:write"]; ok {
-			return nil, app.Forbidden("cannot create api key with webhooks:write scope: admin approval required")
-		}
-	}
-
-	// Validate allowed_zone_ids: each zone must belong to the tenant.
-	if len(allowedZoneIDs) > 0 {
-		for _, zoneID := range allowedZoneIDs {
-			zone, err := s.store.GetZone(ctx, zoneID)
-			if err != nil {
-				return nil, app.Internal(err)
-			}
-			if zone == nil {
-				return nil, app.BadRequest(fmt.Sprintf("zone %s not found", zoneID))
-			}
-			if zone.TenantID != tenantID {
-				return nil, app.Forbidden(fmt.Sprintf("zone %s does not belong to tenant", zoneID))
-			}
-		}
-		// Subset check: non-admin caller can't exceed their own zone restrictions.
-		if callerPerm != nil && len(callerPerm.AllowedZoneIDs) > 0 {
-			allowed := make(map[uuid.UUID]struct{}, len(callerPerm.AllowedZoneIDs))
-			for _, z := range callerPerm.AllowedZoneIDs {
-				allowed[z] = struct{}{}
-			}
-			for _, z := range allowedZoneIDs {
-				if _, ok := allowed[z]; !ok {
-					return nil, app.Forbidden(fmt.Sprintf("zone %s is not in your allowed zone list", z))
-				}
-			}
-		}
-	}
-
 	raw := generateKey()
 	hash := sha256.Sum256([]byte(raw))
 	k := &models.TenantAPIKey{
-		TenantID:    tenantID,
-		KeyHash:     hex.EncodeToString(hash[:]),
-		KeyPrefix:   raw[:12],
-		Label:       label,
-		Scopes:      scopes,
-		OwnerUserID: callerUserID,
+		TenantID: tenantID, KeyHash: hex.EncodeToString(hash[:]),
+		KeyPrefix: raw[:12], Label: label, Scopes: scopes,
+		AllowedZoneIDs: append([]uuid.UUID(nil), allowedZoneIDs...),
 	}
-	// Use explicitly provided zone IDs, or inherit from caller permission.
-	if len(allowedZoneIDs) > 0 {
-		k.AllowedZoneIDs = append([]uuid.UUID(nil), allowedZoneIDs...)
-	} else if callerPerm != nil && len(callerPerm.AllowedZoneIDs) > 0 {
-		k.AllowedZoneIDs = append([]uuid.UUID(nil), callerPerm.AllowedZoneIDs...)
+	if err := s.store.CreateAPIKeyAuthorized(ctx, issuer, k); err != nil {
+		return nil, app.FromAuthz(err)
 	}
-	if err := s.store.CreateAPIKey(ctx, k); err != nil {
-		return nil, app.Internal(err)
-	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
-		TenantID:     app.UUIDPtr(tenantID),
-		Action:       "api_key.create",
-		ResourceType: "tenant_api_key",
-		ResourceID:   app.UUIDPtr(k.ID),
-		Actor:        actor,
-		Details:      app.MustJSON(map[string]any{"label": k.Label, "key_prefix": k.KeyPrefix, "scopes": k.Scopes, "owner_user_id": callerUserID}),
-	})
 	return &APIKeyIssueResult{
-		ID:        k.ID,
-		Key:       raw,
-		KeyPrefix: k.KeyPrefix,
-		Label:     k.Label,
-		Scopes:    k.Scopes,
-		CreatedAt: k.CreatedAt,
+		ID: k.ID, Key: raw, KeyPrefix: k.KeyPrefix, Label: k.Label,
+		Scopes: k.Scopes, CreatedAt: k.CreatedAt,
 	}, nil
 }
 
@@ -506,6 +482,15 @@ func (s *Service) Stats(ctx context.Context) (*models.SystemStats, error) {
 	if err != nil {
 		return nil, app.Internal(err)
 	}
+	// Storage retains its pointer API; the public projection is always an
+	// array of complete values, including [] when there are no recent rows.
+	recentAudit := make([]models.AuditEntry, len(audit))
+	for i, entry := range audit {
+		if entry == nil {
+			return nil, app.Internal(fmt.Errorf("recent audit contains nil entry at index %d", i))
+		}
+		recentAudit[i] = *entry
+	}
 	deadLetters := []models.DeadLetter{}
 	deadLetterSize := 0
 	webhooksEnabled := false
@@ -521,7 +506,7 @@ func (s *Service) Stats(ctx context.Context) (*models.SystemStats, error) {
 		MailboxesCount:  mailboxes,
 		MessagesCount:   messages,
 		Metrics:         metrics.Snapshot(webhooksEnabled, deadLetterSize),
-		RecentAudit:     audit,
+		RecentAudit:     recentAudit,
 		TenantDelivery:  metrics.TopTenantDelivery(10),
 		MailboxDelivery: metrics.TopMailboxDelivery(10),
 		DeadLetters:     deadLetters,

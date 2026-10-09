@@ -1,0 +1,326 @@
+[
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "delivery-status.json",
+    "private_raw_sha256": "90c2508571aa31d34806117def7ad50c012453ba75062cf234b37d203fff0b84",
+    "public_safe_sha256": "90c2508571aa31d34806117def7ad50c012453ba75062cf234b37d203fff0b84"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "USAGE19-first-A-private-derived-review.json",
+    "private_raw_sha256": "0a317985594bad3826e4bbb906af96d6014f63426b1640f025726d52cf880792",
+    "public_safe_sha256": "f3c3f2cab5d1c0c7c9429dd9efccc022190d4846a99c876847bd137b23138335"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/batch-terminal-review.json",
+    "private_raw_sha256": "dce4ffa824abada70ebcebfbcf38a34eaaf2cbc455bedcac6c33a8c7728710d9",
+    "public_safe_sha256": "551b934b61a9b5440a9c368016a47038e9a773d0113e0e1aa8c95c6ee73658a7"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/owned-start-attempt.json",
+    "private_raw_sha256": "e8456ed296f1945baa67d0d3ed59f6c8b4ba2783ae6a80e9130efe40c645ed66",
+    "public_safe_sha256": "e8456ed296f1945baa67d0d3ed59f6c8b4ba2783ae6a80e9130efe40c645ed66"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/actual-local-compileinput-proof.json",
+    "private_raw_sha256": "af0c60352e3658bfd0834bde6c63dba9cdfb4d94393fee776fc6662e388e06bb",
+    "public_safe_sha256": "af0c60352e3658bfd0834bde6c63dba9cdfb4d94393fee776fc6662e388e06bb"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/source-after.json",
+    "private_raw_sha256": "3cd7846f9fa3dbbe114e5b980efce91281e3d3214ce6e14cf6ef03db35ba1c8f",
+    "public_safe_sha256": "3cd7846f9fa3dbbe114e5b980efce91281e3d3214ce6e14cf6ef03db35ba1c8f"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/resource-preflight.json",
+    "private_raw_sha256": "527d9ff54cee4cc9ecfb11b692146e7d8c57134b8e91be040eba347bc872c747",
+    "public_safe_sha256": "527d9ff54cee4cc9ecfb11b692146e7d8c57134b8e91be040eba347bc872c747"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/original-budget.json",
+    "private_raw_sha256": "236341e07b614c9ff9744046f54c5a68e678b2b5c685f8162d7a7250e1dd3055",
+    "public_safe_sha256": "236341e07b614c9ff9744046f54c5a68e678b2b5c685f8162d7a7250e1dd3055"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/DB-observations.json",
+    "private_raw_sha256": "7990dbe3b036d90f4a274e52793ef89ca8018f7b65ca9123977f66d48c0b3b81",
+    "public_safe_sha256": "7990dbe3b036d90f4a274e52793ef89ca8018f7b65ca9123977f66d48c0b3b81"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/source-receipt.json",
+    "private_raw_sha256": "31a5ad1e9c9d8ed8bdaeb1948b6eb4fa8e54c3a34f3580857b4cc44278545ee5",
+    "public_safe_sha256": "31a5ad1e9c9d8ed8bdaeb1948b6eb4fa8e54c3a34f3580857b4cc44278545ee5"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/terminalDBconn/stdout",
+    "private_raw_sha256": "051d8a229c3ed0a15fb250ce8ac56ea8536c2e4b6efdcaae6859806c5786a1cd",
+    "public_safe_sha256": "051d8a229c3ed0a15fb250ce8ac56ea8536c2e4b6efdcaae6859806c5786a1cd"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/terminalDBconn/stderr",
+    "private_raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public_safe_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/terminalDBconn/go.exit",
+    "private_raw_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "public_safe_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/phases/terminalDBconn/process-receipt.json",
+    "private_raw_sha256": "105f1b1d39eeb5bf1495c47c9c359d4085f4fc1f4f995c5ba8b628691fc3dcc3",
+    "public_safe_sha256": "cbcd2a7feab63314dee8990b82e030d4f1b92037d4c4a7baa238ef8fdedf5ac5"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/actualbase/stdout",
+    "private_raw_sha256": "14f99b42bf2e315cc58802f8a695eab1253fe3576a770e91776be2b552e7f428",
+    "public_safe_sha256": "14f99b42bf2e315cc58802f8a695eab1253fe3576a770e91776be2b552e7f428"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/actualbase/stderr",
+    "private_raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public_safe_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/actualbase/go.exit",
+    "private_raw_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "public_safe_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/phases/actualbase/process-receipt.json",
+    "private_raw_sha256": "44c29f316aef1d8f46b6d7556fe2841405f22c27008a33c0b352225253664d1e",
+    "public_safe_sha256": "ab750716393d1ceb98d9227ab9677e01491f15b530001f9ecc8878905fa25e31"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/actual19/stdout",
+    "private_raw_sha256": "a9742eb8ee320e006666aef25ae9aeed948247f3125c9cafa7cf97b7e7467dd5",
+    "public_safe_sha256": "a9742eb8ee320e006666aef25ae9aeed948247f3125c9cafa7cf97b7e7467dd5"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/actual19/stderr",
+    "private_raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public_safe_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/actual19/go.exit",
+    "private_raw_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "public_safe_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/phases/actual19/process-receipt.json",
+    "private_raw_sha256": "0a8e99932960f030fc7ea458eb4b1ae17626c41b6143b3da251a770a50794332",
+    "public_safe_sha256": "c663506003f9d370330a99d6c48f838c9103df6ed2c8b7ab382bea12f4a3fcbf"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/phases/root-default-race-deps-GoList/stdout",
+    "private_raw_sha256": "bb6c1cb4cb392cfec69ebbba2aa05457362910029a603b0570975c57cbfae08c",
+    "public_safe_sha256": "4541c9c5735bfe8524b7b24a5c2f65cd8577e7e2c9f513e27f2c0326fd590b26"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/root-default-race-deps-GoList/stderr",
+    "private_raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public_safe_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/root-default-race-deps-GoList/go.exit",
+    "private_raw_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "public_safe_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/phases/root-default-race-deps-GoList/process-receipt.json",
+    "private_raw_sha256": "1abb3282308440931fb5b4278b9cbc58c55bd5389eea1405a7138bd980a22a06",
+    "public_safe_sha256": "88b07d2bacacb06ca40f0188c5c3813cce8ab4481171bf3bdced9d52aefc2645"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/phases/exact-Go-A/stdout",
+    "private_raw_sha256": "fcc0a42502ce5de403007b761ef688762d4243538b92f57347053d07b695a81a",
+    "public_safe_sha256": "e0e7b364eadf2afa6f220e3e47d40c1cae089f44dc877673171217036f03e66e"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/exact-Go-A/stderr",
+    "private_raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public_safe_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/exact-Go-A/go.exit",
+    "private_raw_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "public_safe_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/phases/exact-Go-A/process-receipt.json",
+    "private_raw_sha256": "4a614278f99ef785ef835133fddf6121b49b832c49441eac1359b2d2fa9a069a",
+    "public_safe_sha256": "71f66a56da666bd0eb740c75f94411c578926a9409c74ad8894014a174006a0b"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/initdb/stdout",
+    "private_raw_sha256": "799db005e215753602d1e1862b6a2478de06e6c1af2d0bf6f6708e18000a7104",
+    "public_safe_sha256": "799db005e215753602d1e1862b6a2478de06e6c1af2d0bf6f6708e18000a7104"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/initdb/stderr",
+    "private_raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public_safe_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/initdb/go.exit",
+    "private_raw_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "public_safe_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/phases/initdb/process-receipt.json",
+    "private_raw_sha256": "02dd64049661ca3006c9fddafe33bd61c7ff74af4ca2e0b43c86d2bb74489d63",
+    "public_safe_sha256": "1c87e0833ee4ab5b26fe16f6e9e954ded5891b2404fffeb57df36d9152c48aa8"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/native-stop/stdout",
+    "private_raw_sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "public_safe_sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/native-stop/stderr",
+    "private_raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public_safe_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/native-stop/go.exit",
+    "private_raw_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "public_safe_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/phases/native-stop/process-receipt.json",
+    "private_raw_sha256": "aeb61f04aeb31bbcef4c4f13fde0fe7cfe651b17ec8ee56037d627c6e58ce68b",
+    "public_safe_sha256": "8db661075ce1c70494a8065f5b9e28ce7448ce629188b9aefae60e85dacfdea4"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/PGconfig/stdout",
+    "private_raw_sha256": "4420d359bf9e7280117aad7c072cb04d618a217068dbd5cb6b1e59cc73309280",
+    "public_safe_sha256": "4420d359bf9e7280117aad7c072cb04d618a217068dbd5cb6b1e59cc73309280"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/PGconfig/stderr",
+    "private_raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public_safe_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/PGconfig/go.exit",
+    "private_raw_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "public_safe_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/phases/PGconfig/process-receipt.json",
+    "private_raw_sha256": "b8157a2766efac831a31ff858765e21eedad771f6f1ad696fdca5bc4bde967c8",
+    "public_safe_sha256": "11b550d92db60f6139b2765ba6df7a1179d58e679fa4e84a94af6374d3b5db9a"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/PGstart/stdout",
+    "private_raw_sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "public_safe_sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/PGstart/stderr",
+    "private_raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public_safe_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/PGstart/go.exit",
+    "private_raw_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "public_safe_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/phases/PGstart/process-receipt.json",
+    "private_raw_sha256": "897a69d7d4189ee9676292539b0ecdde0667ce7587d23d03b4c3d1404b36395a",
+    "public_safe_sha256": "46ce1027652304f71f078cae0a42cfcc9cbc605b0ccad6130615cbcaa9da8558"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/officialNewMigrate19/stdout",
+    "private_raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public_safe_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/officialNewMigrate19/stderr",
+    "private_raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public_safe_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/officialNewMigrate19/go.exit",
+    "private_raw_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "public_safe_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/phases/officialNewMigrate19/process-receipt.json",
+    "private_raw_sha256": "f0a60615212f6d9fa7447d56950f487e973ee921cb25f355fb13ac4657044072",
+    "public_safe_sha256": "c2d3fa07ebde8233bbbbd888860cf6a9ec9510544302c77bfe29ef7afa313afc"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/phases/createbase/stdout",
+    "private_raw_sha256": "691e4b64d448c6cffd680247056c2f445e4fbf2dcbc9be821934064e906d1ce7",
+    "public_safe_sha256": "e9e56c3d4926523a371480046b66e3c90199c4b01f6a7083eaa365f65cd0a4a9"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/createbase/stderr",
+    "private_raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public_safe_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": false,
+    "member": "A/phases/createbase/go.exit",
+    "private_raw_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "public_safe_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "changed_for_URI_SQL_ENV_redaction": true,
+    "member": "A/phases/createbase/process-receipt.json",
+    "private_raw_sha256": "8ba8e4c30c3ab0740519cd030f2d2e06f305f0322d38100f0dd5ad9f3c5ecd99",
+    "public_safe_sha256": "287851be535d0e980ca7eb2e3024afbc286d9f68392937c806e808926d7fd66c"
+  }
+]

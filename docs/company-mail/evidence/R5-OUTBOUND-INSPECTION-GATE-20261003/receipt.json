@@ -1,0 +1,114 @@
+{
+  "base": "eb366eecb6413f5aa025afb4ee63bd1eea7fdf7d",
+  "prior_tested_source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+  "branch": "fix/r5-receipt-inspection-test-gate",
+  "changed_test_sha256": "5384da140747c776a10239aeeaeadcc7472af964c657983a4eec255e16cac671",
+  "requirements_sha256": "2bb7efbcab2b053a6326e11b9c6227e48ccca55b43ff653ab9359ea958439a97",
+  "before": {
+    "argv": [
+      "/tmp/r5-inspection-gate-venv/bin/python",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "scripts.tests.test_outbound_inspection_contract.OutboundInspectionContractTests.test_ordinary_receipt_schemas_not_expanded"
+    ],
+    "exit": 1,
+    "tests": 1,
+    "errors": 1,
+    "failure": "KeyError: properties"
+  },
+  "pure": {
+    "argv": [
+      "/tmp/r5-inspection-gate-venv/bin/python",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "scripts.tests.test_permission_editor_contract",
+      "scripts.tests.test_company_admin_events_contract",
+      "scripts.tests.test_ordinary_receipt_contract",
+      "scripts.tests.test_outbound_inspection_contract",
+      "scripts.tests.test_openapi_contract",
+      "scripts.tests.test_contract_drift",
+      "scripts.tests.test_contract_source_aliases",
+      "scripts.tests.test_http_contract",
+      "scripts.tests.test_i18n_keys",
+      "scripts.tests.test_r5_smtp_owner_source_inventory"
+    ],
+    "exit": 0,
+    "typed_fixture": "absent; explicit skip expected",
+    "tests": 227,
+    "pass": 226,
+    "skip": 1,
+    "fail": 0,
+    "error": 0,
+    "elapsed_seconds": 6.186,
+    "count_difference_from_prior": "+3 new methods; +7 methods now executed after prior HTTP setUpClass dependency failure"
+  },
+  "typed_go": {
+    "argv": [
+      "go",
+      "test",
+      "-p=1",
+      "./internal/api/handlers",
+      "-run",
+      "^TestOrdinaryReceiptOpenAPIWireFixtures$",
+      "-count=1",
+      "-v"
+    ],
+    "environment": {
+      "PATH_prefix": "/workspace/tabmail-cloud/tools/go/bin",
+      "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+      "GOCACHE": "/workspace/tabmail-cloud/gocache",
+      "GOPATH": "/workspace/tabmail-cloud/gopath",
+      "GOFLAGS": "-mod=readonly",
+      "GOMAXPROCS": "2",
+      "ORDINARY_RECEIPT_WIRE_FIXTURE": "/tmp/r5-inspection-gate-evidence/ordinary-wire.json"
+    },
+    "exit": 0,
+    "tests": 1,
+    "fixtures": 21,
+    "package_elapsed_seconds": 0.005,
+    "scope": "typed projection and shipping envelope; implicit cached compile, not race/HTTP admission/PG; independent compile duration unknown"
+  },
+  "typed_python": {
+    "argv": [
+      "/tmp/r5-inspection-gate-venv/bin/python",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "scripts.tests.test_ordinary_receipt_contract"
+    ],
+    "environment": {
+      "ORDINARY_RECEIPT_WIRE_FIXTURE": "/tmp/r5-inspection-gate-evidence/ordinary-wire.json"
+    },
+    "exit": 0,
+    "tests": 8,
+    "pass": 8,
+    "skip": 0,
+    "error": 0,
+    "fail": 0
+  },
+  "progress": "10/171 unchanged; parent TODO untouched",
+  "prior_receipt": "../R5-INTEGRATION-20261003/receipt.json",
+  "limits": [
+    "No production file changes",
+    "No PG, real mailbox, public SMTP, merge or deploy",
+    "No whole project/CI/shipping acceptance",
+    "Prior dependency errors and KeyError retained, not rewritten"
+  ],
+  "sha256": {
+    "before.stderr": "c8387e9dbb176c732f926ec25a3d885fa7c47f379aa28b5b79f202310d61a6a1",
+    "contracts-run.json": "311bf79e250ca911b1b2b031cb215075c8397cd4fd91bd81cea125872872f1e8",
+    "contracts.stderr": "4a41a192307ac5f483e66fb2928cde2aff9e1513c063a351be2a27e16a0ebccc",
+    "contracts.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "deps-freeze.txt": "be168db4468857dcc317265bd1721bfb679994fcf9a3d86ef9506b7dcd6e143f",
+    "ordinary-wire.json": "9fdd0d734a549733a89fb9cb5f85035a137e9c5ff452276363579cf65b0950f3",
+    "typed-go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "typed-go.stdout": "84bc1309046fe04c8ac9660abb20e98afcd3a2c0b1f41e4892fbf6face4c2b40",
+    "typed-python.stderr": "de44b8f72e1cc5bb011cfcdac3488c887e46a06a8f9a500e7cfcf4115d167176",
+    "typed-python.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "UTC": "2026-10-02T19:37:11.284324+00:00",
+  "actual_race_metadata_inputs": {
+    "BC05_protocol": {
+      "EmbedFiles": 22,
+      "GoList_exit": 0,
+      "rows": 400,
+      "selected_local": 363
+    },
+    "hooks_config": {
+      "EmbedFiles": 0,
+      "GoList_exit": 0,
+      "rows": 238,
+      "selected_local": 70
+    }
+  },
+  "actual_scope_source": "current WebhookV2 component720 sourceff73f8ea4d26e87f483cb73d5a29cd32f06fe5bf/closure97ba558ec6159c10b759624250cfb2299b267f4d3ba01ec134b236baf57c5357",
+  "correction1": "source_certification_layers.runtime inherited handler3 label in generic audit template is NOT actualhandler runtime here; stage1 actual hooks22+config1, stage2 onlyBC05compile metadata and zeroPGbody duebootstrapinfraERROR",
+  "correction2": "external_cache labels mentioning private490 are generic inherited description, not sourcefiles counted490; current720 actualcaptured localfork/fullGo/embeds+protocoldocs; external stdmodule caches versions/checksums observed but their byte trees not hashed in private720",
+  "kind": "derived_label_only_correction_no_raw_SOURCE_or_execution_changes",
+  "no_test_source_capture_OR_tree_hash_repeat": true,
+  "old_archive": "/private/tmp/tm-r5webhookV2-exact.546tf6cp/WEBHOOK-V2-hooksconfig137P-PG0test-INFRA-evidence.tar.gz",
+  "old_archive_sha256": "4887f9aa6b0d8be05b29d7cb9e0ee0be0a384ee43c3b6d9af03ce181e1e609a1",
+  "original_fields_raw_source_manifests_stderr_and_137PASS_bootstrapError_counts_preserved": true,
+  "selected_metadata_not_native_schema18_runtime_or_PGBC05_PASS": true
+}

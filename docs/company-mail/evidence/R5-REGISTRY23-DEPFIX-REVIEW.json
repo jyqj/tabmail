@@ -1,0 +1,61 @@
+{
+  "actual_ERROR": 1,
+  "actual_PASS": 22,
+  "actual_failed_or_error": [
+    {
+      "class": "scripts.tests.test_r5_benchmark.BenchmarkRegistryTests.test_frozen_S2_must_not_be_backfilled_with_new_pipeline_metadata",
+      "name": "test_frozen_S2_must_not_be_backfilled_with_new_pipeline_metadata",
+      "status": "ERROR"
+    }
+  ],
+  "actual_source_closure_sha256": "4e684771a1215d77c9fb5392db8f077f0a9403dda357b6d2740a8633f73a0cc3",
+  "actual_test_count": 23,
+  "controller_finalization_error": {
+    "happened_after_two_groups_termination": true,
+    "observed_controller_exit": 1,
+    "observed_from_tool_chunk": "14ee83",
+    "original_aggregate_origin_status": "unknown_not_saved_before_crash; no invented180windowproof",
+    "phase_budgets_and_test_CLI_raw_unchanged": true,
+    "reason": "time.time()-origin where loop copied-file local origin overwrote float with pathlib.Path",
+    "type": "TypeError"
+  },
+  "infra_missing_actual_current_migration_source": true,
+  "original23_scope_overall_pass": false,
+  "original2PASS_and12PASS_not_reexecuted": true,
+  "phases": {
+    "real-registry-CLI": {
+      "CLI_exit": 0,
+      "already_observed_after_child_exit_group": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "fresh_readonly_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "observed_phase_elapsed_seconds": 0.20659303665161133,
+      "original_phase_absolute_deadline": 1790936161.965661,
+      "raw_execution_budget": "/private/tmp/tm-r5registry23-depfix.xwl7j0q4/real-registry-CLI/execution-budget.json"
+    },
+    "registry23-affected-depfix": {
+      "CLI_exit": 1,
+      "already_observed_after_child_exit_group": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "fresh_readonly_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "observed_phase_elapsed_seconds": 3.842697858810425,
+      "original_phase_absolute_deadline": 1790936161.965654,
+      "raw_execution_budget": "/private/tmp/tm-r5registry23-depfix.xwl7j0q4/registry23-affected-depfix/execution-budget.json"
+    }
+  },
+  "source_sha": "a4e4093d153da174fabe92d622cff22100762db4",
+  "typedM_realCLI_acceptance": "3 historical S identities + known failedM852900/d286/schema16; baseline_complete false, not validMbaseline"
+}

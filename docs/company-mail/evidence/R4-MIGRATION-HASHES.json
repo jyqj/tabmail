@@ -1,0 +1,15 @@
+{
+  "00001_baseline.sql": "233a6e0a5dea5e08de370aa3d8cd7e69a61f9cfaf2421846e23494de0e4e0549",
+  "00002_mailbox_grants.sql": "51615b38624aaa3010c5b8e7ff84ddafbd22046fe5f8992bfc2c31b5592a6ba5",
+  "00003_refresh_token_family.sql": "11a168f78cf5b3b11e369f3c089e6252258bfa0a5cdbfc192b1581284d3c541b",
+  "00004_owned_mailbox_private.sql": "e8abcdd3026d6586afd20d0a7375c9b9a10bcfab94b9a5ddcace0efa3899add1",
+  "00005_company_workflows.sql": "f6a66202fd0f2bdc9d3b6ceecb05cee5f6bd96f620d665e873222938b0e5ba50",
+  "00006_draft_submission.sql": "8c02d23d9b06da8524e4ce67ade38cb72aa289f675b8856a831a62915907610a",
+  "00007_message_user_state.sql": "8a0806eb2367d797a5af2f3f030d4767db9202b4cf7af472e360e8dcaa873caf",
+  "00008_send_policy.sql": "f97a25c5fd3911bded2d1e63a094027780c34b58a503c27561c7423dc4cbc891",
+  "00009_domain_asset_guard.sql": "54348b595d017a36edb77930f666aa6a26fadf7e848bf1cf5d1e4190c57fcc2a",
+  "00010_sent_mail_archive.sql": "57156b73a3f5f4ba4aab55ce0a6e3a670a74b52544e7df13ea38e7dd61fb259f",
+  "00011_mail_content_index.sql": "6232a3c74b75980d48bcc2f8e2e5f79854c366a89f09743deb5a8ebbfe747042",
+  "00012_employee_disposition.sql": "2f7d448d04c185a1642399a0f6559d2df7ed9a1e59ac2523167e259e24e3d9b0",
+  "00013_draft_creation_receipts.sql": "69c605b794be3b3884659c6315d518b94c69ffb8259d00199a45ee4d1e1160c3"
+}

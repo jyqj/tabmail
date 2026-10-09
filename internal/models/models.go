@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"math"
 	"time"
 
 	"github.com/google/uuid"
@@ -35,13 +36,16 @@ type User struct {
 }
 
 type RefreshToken struct {
-	FamilyID  uuid.UUID  `json:"-" db:"family_id"`
-	ID        uuid.UUID  `json:"id" db:"id"`
-	UserID    uuid.UUID  `json:"user_id" db:"user_id"`
-	TokenHash string     `json:"-" db:"token_hash"`
-	ExpiresAt time.Time  `json:"expires_at" db:"expires_at"`
-	CreatedAt time.Time  `json:"created_at" db:"created_at"`
-	RevokedAt *time.Time `json:"revoked_at,omitempty" db:"revoked_at"`
+	// Issuance is an ephemeral authentication snapshot, never a stored token
+	// field. Login/registration provide it; successful rotation returns it.
+	Issuance  *RefreshTokenIssuance `json:"-" db:"-"`
+	FamilyID  uuid.UUID             `json:"-" db:"family_id"`
+	ID        uuid.UUID             `json:"id" db:"id"`
+	UserID    uuid.UUID             `json:"user_id" db:"user_id"`
+	TokenHash string                `json:"-" db:"token_hash"`
+	ExpiresAt time.Time             `json:"expires_at" db:"expires_at"`
+	CreatedAt time.Time             `json:"created_at" db:"created_at"`
+	RevokedAt *time.Time            `json:"revoked_at,omitempty" db:"revoked_at"`
 }
 
 type AdminInvitation struct {
@@ -371,6 +375,7 @@ type MetricPoint struct {
 
 type DeliveryStats struct {
 	Key              string `json:"key"`
+	Aggregate        bool   `json:"aggregate,omitempty"` // Combined untracked keys; Key is empty.
 	Accepted         int64  `json:"accepted"`
 	Rejected         int64  `json:"rejected"`
 	DeliveriesOK     int64  `json:"deliveries_ok"`
@@ -446,7 +451,7 @@ type SystemStats struct {
 	MailboxesCount  int             `json:"mailboxes_count"`
 	MessagesCount   int             `json:"messages_count"`
 	Metrics         MetricsSnapshot `json:"metrics"`
-	RecentAudit     []*AuditEntry   `json:"recent_audit"`
+	RecentAudit     []AuditEntry    `json:"recent_audit"`
 	TenantDelivery  []DeliveryStats `json:"tenant_delivery"`
 	MailboxDelivery []DeliveryStats `json:"mailbox_delivery"`
 	DeadLetters     []DeadLetter    `json:"dead_letters"`
@@ -483,7 +488,18 @@ type Page struct {
 	PerPage int `json:"per_page"`
 }
 
-func (p Page) Offset() int { return (p.Page - 1) * p.PerPage }
+// Offset saturates an unrepresentable page position instead of wrapping it
+// into an earlier page or a negative SQL/slice offset. Normalize retains the
+// public page and page-size defaults; it does not cap the requested page.
+func (p Page) Offset() int {
+	if p.Page <= 1 || p.PerPage <= 0 {
+		return 0
+	}
+	if p.Page-1 > math.MaxInt/p.PerPage {
+		return math.MaxInt
+	}
+	return (p.Page - 1) * p.PerPage
+}
 
 func (p Page) Normalize() Page {
 	if p.Page < 1 {
@@ -519,6 +535,7 @@ type PermissionProfile struct {
 	IsSystem          bool        `json:"is_system" db:"is_system"`
 	CreatedAt         time.Time   `json:"created_at" db:"created_at"`
 	UpdatedAt         time.Time   `json:"updated_at" db:"updated_at"`
+	Revision          string      `json:"revision,omitempty"`
 }
 
 type UserPermissionOverride struct {
@@ -546,16 +563,73 @@ type EffectivePermission struct {
 	CanCreateDomains  bool        `json:"can_create_domains"`
 	CanCreateRoutes   bool        `json:"can_create_routes"`
 	CanCreateAPIKeys  bool        `json:"can_create_api_keys"`
+	DomainAccessMode  string      `json:"domain_access_mode,omitempty"`
 }
 
 // AllowsZone reports whether zoneID is within the permission's allowed-zone
 // list. A nil permission or an empty list means every zone is allowed. This is
 // the canonical home for the zone-allowlist membership rule.
-func (p *EffectivePermission) AllowsZone(zoneID uuid.UUID) bool {
+// ZoneScope is the canonical all/restricted/deny-all interpretation. Empty
+// legacy arrays still mean all; explicit none is never inferred from length.
+func (p *EffectivePermission) ZoneScope() (bool, []uuid.UUID) {
 	if p == nil {
+		return false, nil
+	}
+	switch p.DomainAccessMode {
+	case "all":
+		return false, nil
+	case "none":
+		return true, nil
+	case "list":
+		return true, p.AllowedZoneIDs
+	case "":
+		return len(p.AllowedZoneIDs) > 0, p.AllowedZoneIDs
+	default:
+		return true, nil
+	}
+}
+func (p *EffectivePermission) RestrictsZones() bool {
+	restricted, _ := p.ZoneScope()
+	return restricted
+}
+func (p *EffectivePermission) AllowsZone(zoneID uuid.UUID) bool {
+	restricted, ids := p.ZoneScope()
+	if !restricted {
 		return true
 	}
-	return ZoneAllowed(p.AllowedZoneIDs, zoneID)
+	for _, id := range ids {
+		if id == zoneID {
+			return true
+		}
+	}
+	return false
+}
+
+// NarrowZones intersects an API key restriction with canonical owner scope.
+// A deny-all owner is never expanded by a nonempty key list.
+func (p *EffectivePermission) NarrowZones(key []uuid.UUID) {
+	if p == nil || len(key) == 0 {
+		return
+	}
+	restricted, own := p.ZoneScope()
+	out := []uuid.UUID{}
+	if !restricted {
+		out = append(out, key...)
+	} else {
+		for _, id := range own {
+			for _, allowed := range key {
+				if id == allowed {
+					out = append(out, id)
+					break
+				}
+			}
+		}
+	}
+	p.AllowedZoneIDs = out
+	p.DomainAccessMode = "list"
+	if len(out) == 0 {
+		p.DomainAccessMode = "none"
+	}
 }
 
 // ZoneAllowed reports whether zoneID is within allowedZoneIDs. An empty list

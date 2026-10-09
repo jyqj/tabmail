@@ -1,7 +1,9 @@
 package api_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -13,7 +15,9 @@ import (
 
 	"tabmail/internal/api/handlers"
 	"tabmail/internal/authn"
+	"tabmail/internal/company"
 	"tabmail/internal/models"
+	"tabmail/internal/testpg"
 	"tabmail/internal/testutil"
 )
 
@@ -189,18 +193,72 @@ func TestReleaseSharedOutboundReadIsNotRetry(t *testing.T) {
 	if err := st.SetMailboxGrant(ctx, grant); err != nil {
 		t.Fatal(err)
 	}
-	// A current read grant sees full content. The sender keeps only the
-	// operation receipt: without a CURRENT read grant on the sending mailbox
-	// the body stays redacted even for the historical submitter.
+	// Ordinary detail/list stay receipt-only even for a current mailbox reader.
+	// The independent real content route is exercised below with fresh PG.
+	assertReceipt := func(w *httptest.ResponseRecorder, list, canRead bool) {
+		t.Helper()
+		if w.Code != 200 {
+			t.Fatalf("receipt status=%d", w.Code)
+		}
+		for _, secret := range []string{j.TextBody, j.Subject, j.MailFrom, j.To[0], j.BCC[0], "content_redacted"} {
+			if strings.Contains(w.Body.String(), secret) {
+				t.Fatal("ordinary receipt disclosed content or a retired marker")
+			}
+		}
+		var envelope struct{ Data json.RawMessage }
+		if err := json.Unmarshal(w.Body.Bytes(), &envelope); err != nil {
+			t.Fatal(err)
+		}
+		data := envelope.Data
+		if list {
+			var rows []json.RawMessage
+			if err := json.Unmarshal(data, &rows); err != nil || len(rows) != 1 {
+				t.Fatalf("receipt list count=%d error=%v", len(rows), err)
+			}
+			data = rows[0]
+		}
+		assertFields := func(raw json.RawMessage, names string) map[string]json.RawMessage {
+			t.Helper()
+			var fields map[string]json.RawMessage
+			if err := json.Unmarshal(raw, &fields); err != nil || fields == nil {
+				t.Fatalf("receipt object missing or malformed: %v", err)
+			}
+			allowed := map[string]bool{}
+			for _, name := range strings.Fields(names) {
+				allowed[name] = true
+			}
+			for name := range fields {
+				if !allowed[name] {
+					t.Fatalf("ordinary receipt field outside explicit whitelist: %s", name)
+				}
+			}
+			return fields
+		}
+		fields := assertFields(data, "id tenant_id state status progress created_at updated_at attempt_count next_retry delivery_uncertain capabilities")
+		progress := assertFields(fields["progress"], "completeness counts")
+		assertFields(progress["counts"], "total accepted pending temporary permanent uncertain")
+		assertFields(fields["capabilities"], "view_content retry retry_block_reason")
+		var receipt company.OutboundReceipt
+		decoder := json.NewDecoder(bytes.NewReader(data))
+		decoder.DisallowUnknownFields() // Includes nested progress/counts/capabilities.
+		if err := decoder.Decode(&receipt); err != nil {
+			t.Fatal(err)
+		}
+		if receipt.ID != j.ID || receipt.TenantID == nil || *receipt.TenantID != tenant || receipt.State != models.OutboundFailed || receipt.Status != "needs_attention" || receipt.Progress.Completeness != "known" || receipt.Progress.Counts == nil || *receipt.Progress.Counts != (company.OutboundReceiptCounts{Total: 2, Pending: 2}) || receipt.DeliveryUncertain {
+			t.Fatal("ordinary receipt lost identity or complete ledger progress")
+		}
+		if receipt.Capabilities == nil || receipt.Capabilities.ViewContent != canRead || receipt.Capabilities.Retry {
+			t.Fatal("read authority widened retry or changed current content capability")
+		}
+		if canRead && !list && receipt.Capabilities.RetryBlockReason != "sender_authority" {
+			t.Fatal("reader retry refusal lost sender-authority reason")
+		}
+	}
 	for _, p := range []string{path, "/api/v1/outbound"} {
 		w := rbRequest(t, h, reader, "GET", p, "", nil)
-		if w.Code != 200 || !strings.Contains(w.Body.String(), j.TextBody) || !strings.Contains(w.Body.String(), `"content_redacted":false`) {
-			t.Fatalf("granted reader history %d %s", w.Code, w.Body.String())
-		}
+		assertReceipt(w, p == "/api/v1/outbound", true)
 		w = rbRequest(t, h, sender, "GET", p, "", nil)
-		if w.Code != 200 || strings.Contains(w.Body.String(), j.TextBody) || !strings.Contains(w.Body.String(), `"content_redacted":true`) {
-			t.Fatalf("sender receipt without read grant %d %s", w.Code, w.Body.String())
-		}
+		assertReceipt(w, p == "/api/v1/outbound", false)
 	}
 	if w := rbRequest(t, h, reader, "POST", path+"/retry", "{}", nil); w.Code != 403 {
 		t.Fatalf("read-only grant retried: %d %s", w.Code, w.Body.String())
@@ -222,9 +280,50 @@ func TestReleaseSharedOutboundReadIsNotRetry(t *testing.T) {
 	if stored.TextBody != j.TextBody || len(stored.BCC) != 1 {
 		t.Fatal("redaction mutated stored mail")
 	}
+	t.Run("current_content_route", func(t *testing.T) {
+		f := testpg.NewR5HTTPFixture(t)
+		c := f.Companies[0]
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		setRead := func(role string, read bool) {
+			t.Helper()
+			box, err := f.Store.GetWorkMailbox(ctx, c.Actor, c.Shared.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err = f.Store.SetWorkGrant(ctx, c.Actor, models.MailboxGrant{TenantID: c.Tenant.ID, MailboxID: c.Shared.ID, UserID: c.Users[role].ID, CanRead: read}, box.Revision); err != nil {
+				t.Fatal(err)
+			}
+		}
+		setRead("sender", false)
+		job := &models.OutboundJob{TenantID: c.Tenant.ID, ZoneID: c.Zone.ID, UserID: &c.Users["sender"].ID, SenderUserID: &c.Users["sender"].ID, SenderMailboxID: &c.Shared.ID, MailFrom: c.Shared.FullAddress, To: []string{"visible@example.test"}, BCC: []string{"bcc-hidden@example.test"}, RcptTo: []string{"visible@example.test", "bcc-hidden@example.test"}, Subject: "Shared history", TextBody: "shared-sensitive-body", State: models.OutboundFailed}
+		if err := f.Store.CreateOutboundJob(ctx, job); err != nil {
+			t.Fatal(err)
+		}
+		contentPath := "/api/v1/company/submissions/" + job.ID.String() + "/content"
+		status, raw := f.Request(t, ctx, f.JWT(0, "reader"), "GET", contentPath, nil, "")
+		var content struct{ Data company.SubmissionContent }
+		if status != 200 || json.Unmarshal(raw, &content) != nil || content.Data.ID != job.ID || content.Data.TextBody != job.TextBody || content.Data.Subject != job.Subject || content.Data.MailFrom != job.MailFrom || len(content.Data.To) != 1 || content.Data.To[0] != job.To[0] || len(content.Data.BCC) != 1 || content.Data.BCC[0] != job.BCC[0] || content.Data.RecipientCompleteness != "complete" || content.Data.ContentRedacted {
+			t.Fatal("current reader did not receive the independent durable content projection")
+		}
+		for _, role := range []string{"sender", "admin"} {
+			if status, _ := f.Request(t, ctx, f.JWT(0, role), "GET", contentPath, nil, ""); status != 404 {
+				t.Fatalf("%s without current read grant received content: status=%d", role, status)
+			}
+		}
+		if status, _ := f.Request(t, ctx, f.JWT(0, "reader"), "POST", "/api/v1/outbound/"+job.ID.String()+"/retry", map[string]any{}, ""); status != 403 {
+			t.Fatalf("current content reader retried: status=%d", status)
+		}
+		setRead("reader", false)
+		if status, _ := f.Request(t, ctx, f.JWT(0, "reader"), "GET", contentPath, nil, ""); status != 404 {
+			t.Fatalf("revoked reader retained content: status=%d", status)
+		}
+	})
 }
 
-// null explicitly clears a profile; a missing field must preserve it.
+// An absent profile field preserves the ordinary member PATCH path. Explicit
+// null/present profile intent must now use the versioned assignment protocol;
+// this legacy entry rejects it rather than silently clearing or assigning.
 func TestReleaseMemberPatchNullVersusAbsent(t *testing.T) {
 	st, obj, tenant := seededStores(t)
 	admin := seedUserForTest(t, st, tenant, models.RoleAdmin)
@@ -240,16 +339,48 @@ func TestReleaseMemberPatchNullVersusAbsent(t *testing.T) {
 	if w.Code != 200 {
 		t.Fatalf("patch absent: %d %s", w.Code, w.Body.String())
 	}
-	got, _ := st.GetUser(context.Background(), employee.ID)
-	if got.PermissionProfileID == nil || *got.PermissionProfileID != profile {
-		t.Fatal("absent profile field was overwritten")
+	got, err := st.GetUser(context.Background(), employee.ID)
+	if err != nil {
+		t.Fatal(err)
 	}
-	w = rbRequest(t, h, admin, "PATCH", path, `{"permission_profile_id":null}`, nil)
-	if w.Code != 200 {
-		t.Fatalf("patch null: %d %s", w.Code, w.Body.String())
+	if got == nil || got.PermissionProfileID == nil || *got.PermissionProfileID != profile || got.DisplayName != "preserve profile" {
+		t.Fatal("omitted profile intent did not preserve assignment and ordinary member field update")
 	}
-	got, _ = st.GetUser(context.Background(), employee.ID)
-	if got.PermissionProfileID != nil {
-		t.Fatal("explicit null did not clear permission profile")
+	before := *got
+	audits, err := st.ListAuditEntries(context.Background(), 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, body := range []string{
+		`{"permission_profile_id":null}`,
+		`{"permission_profile_id":"` + profile.String() + `"}`,
+		`{"display_name":"must not partially update","permission_profile_id":null}`,
+	} {
+		w = rbRequest(t, h, admin, "PATCH", path, body, nil)
+		if w.Code != http.StatusConflict || !strings.Contains(w.Body.String(), `"code":"CONFLICT"`) || !strings.Contains(w.Body.String(), "use permission-editor/assignment with expected_revision") {
+			t.Fatalf("legacy explicit profile intent must reject upgraded protocol: %d %s", w.Code, w.Body.String())
+		}
+		got, err = st.GetUser(context.Background(), employee.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// This existing fixture has no persistent permission-revision adapter;
+		// compare the complete stored member (including session version and
+		// UpdatedAt) and audit ledger, without fabricating a CAS observation.
+		if got == nil || *got != before {
+			t.Fatal("rejected profile intent changed member state/version or partially applied other fields")
+		}
+		afterAudits, err := st.ListAuditEntries(context.Background(), 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(afterAudits) != len(audits) {
+			t.Fatal("rejected legacy assignment created an audit")
+		}
+		for i, entry := range afterAudits {
+			if entry.ID != audits[i].ID || entry.Action != audits[i].Action || string(entry.Details) != string(audits[i].Details) {
+				t.Fatal("rejected legacy assignment altered an existing audit")
+			}
+		}
 	}
 }

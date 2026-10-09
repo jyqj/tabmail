@@ -1,0 +1,192 @@
+--- a/internal/mailcontent/mime_budget.go
++++ b/internal/mailcontent/mime_budget.go
+@@ -106,6 +106,12 @@
+ 		return ErrMIMEParse
+ 	}
+ 	ctype := header.Get("Content-Type")
++	// setupHeaders returns immediately for a child with absent OR empty CT.
++	// In particular it does not populate Disposition from an otherwise valid
++	// Content-Disposition header. Count the node, but not projected parts.
++	if ctype == "" && depth != 1 {
++		return nil
++	}
+ 	if ctype == "" && depth == 1 {
+ 		ctype = `text/plain; charset="us-ascii"`
+ 	}
+@@ -138,6 +144,13 @@
+ 	}
+ 	if !recurse {
+ 		return nil
++	}
++	// Default enmime readers use a 4096-byte Peek buffer. CR candidates
++	// request len("--"+boundary)+4 bytes. Larger recursive boundaries cannot
++	// be modeled by the normal look-ahead path, so reject them explicitly.
++	// RFC-valid boundaries (at most 70 characters) are unaffected.
++	if len(boundary) > 4090 {
++		return ErrMIMEParse
+ 	}
+ 	body := raw[len(raw)-reader.Len()-br.Buffered():]
+ 	prefix := []byte("--" + boundary)
+@@ -195,8 +208,11 @@
+ // Match enmime v2.3.0 boundaryReader.Read's small look-ahead, including its
+ // tolerant delimiter/terminator matching and omission of the separator CRLF.
+ // This works on raw slices: no bodies, decoded content or complete tree are
+-// allocated. Each ancestor scans a byte at most once (depth <= 32), while
+-// traversal uses at most 32 stack frames and 1024 header admissions.
++// allocated. Traversal admits at most 32 depths and 1024 headers; a deeper
++// candidate is rejected immediately before parsing its header.
++// Initial-fill candidates can repeatedly search overlapping windows of length
++// len(prefix)+padding+2; newline candidates later use the same look-ahead.
++// Admission bounds are not a measured CPU or heap bound.
+ func budgetPartEnd(ctx context.Context, raw, prefix []byte) (int, error) {
+ 	final := appendBoundaryFinal(prefix)
+ 	for pos := 0; pos < len(raw); {
+--- a/internal/mailcontent/mime_budget_test.go
++++ b/internal/mailcontent/mime_budget_test.go
+@@ -76,6 +76,146 @@
+ 		})
+ 	}
+ }
++func TestMIMEPreparseBudgetProjectionCompatibility(t *testing.T) {
++	for _, ctype := range []string{"missing", "empty"} {
++		for _, disposition := range []string{"attachment", "inline"} {
++			t.Run(ctype+"_"+disposition, func(t *testing.T) {
++				header := "Content-Disposition: " + disposition
++				if ctype == "empty" {
++					header = "Content-Type:\r\n" + header
++				}
++				raw := budgetWide(maxParts+1, header)
++				want, err := enmime.ReadEnvelope(bytes.NewReader(raw))
++				if err != nil {
++					t.Fatal(err)
++				}
++				if len(Parts(want)) != 0 {
++					t.Fatalf("original parts %d, want 0", len(Parts(want)))
++				}
++				b := mimeBudget{ctx: context.Background()}
++				if err := b.walk(raw, 1); err != nil {
++					t.Fatal(err)
++				}
++				if b.parts != 0 || b.nodes != maxParts+2 {
++					t.Fatalf("preflight nodes=%d parts=%d", b.nodes, b.parts)
++				}
++				got, err := ParseBounded(raw)
++				if err != nil {
++					t.Fatal(err)
++				}
++				if !reflect.DeepEqual(got, want) {
++					t.Fatal("missing/empty CT disposition projection changed")
++				}
++			})
++		}
++	}
++	for _, count := range []int{256, 257} {
++		t.Run(fmt.Sprintf("octet_inline_%d", count), func(t *testing.T) {
++			raw := budgetWide(count, "Content-Type: application/octet-stream\r\nContent-Disposition: inline")
++			want, err := enmime.ReadEnvelope(bytes.NewReader(raw))
++			if err != nil {
++				t.Fatal(err)
++			}
++			if len(want.Attachments) != count || len(want.Inlines) != count || len(Parts(want)) != 2*count {
++				t.Fatalf("original double projection changed")
++			}
++			b := mimeBudget{ctx: context.Background()}
++			preErr := b.walk(raw, 1)
++			got, err := ParseBounded(raw)
++			if count == 256 {
++				if preErr != nil || err != nil || b.parts != 512 || !reflect.DeepEqual(got, want) {
++					t.Fatalf("exact double projection rejected/changed: %v / %v, count %d", preErr, err, b.parts)
++				}
++			} else {
++				if !errors.Is(preErr, ErrMIMEParts) || !errors.Is(err, ErrMIMEParts) || got != nil {
++					t.Fatalf("double projection above 512 admitted: %v / %v", preErr, err)
++				}
++			}
++		})
++	}
++}
++
++// markerOffset is relative to the exact start of the child, including its
++// MIME headers. It is not a body-padding approximation to the bufio fill.
++func budgetOffsetFixture(boundary string, markerOffset int, terminator bool) ([]byte, []byte) {
++	header := "Content-Type: text/plain\r\n\r\n"
++	marker := "--" + boundary
++	if terminator {
++		marker += "--"
++	}
++	child := header + strings.Repeat("x", markerOffset-len(header)) + marker + "\r\nContent-Type: text/plain\r\n\r\nsecond\r\n--" + boundary + "--\r\n"
++	raw := "Content-Type: multipart/mixed; boundary=" + boundary + "\r\n\r\n--" + boundary + "\r\n" + child
++	return []byte(raw), []byte(child)
++}
++func TestMIMEPreparseBudgetBoundaryOffsets(t *testing.T) {
++	for _, boundaryLen := range []int{1, 70, 4090} {
++		boundary := strings.Repeat("B", boundaryLen)
++		for _, offset := range []int{4093, 4094, 4095, 4096, 4097, 4098} {
++			for _, terminator := range []bool{false, true} {
++				raw, child := budgetOffsetFixture(boundary, offset, terminator)
++				for _, nested := range []bool{false, true} {
++					t.Run(fmt.Sprintf("len_%d/offset_%d/final_%v/nested_%v", boundaryLen, offset, terminator, nested), func(t *testing.T) {
++						if nested {
++							raw = append([]byte("Content-Type: multipart/mixed; boundary=OUTER\r\n\r\n--OUTER\r\n"), raw...)
++							raw = append(raw, []byte("\r\n--OUTER--\r\n")...)
++						}
++						end, err := budgetPartEnd(context.Background(), child, []byte("--"+boundary))
++						if err != nil {
++							t.Fatal(err)
++						}
++						// A delimiter can match with one leading byte in the small
++						// window. A final marker fills that window, so cannot shift.
++						expected := bytes.LastIndex(child, []byte("\r\n--"+boundary+"--"))
++						if terminator && offset <= 4095 {
++							expected = offset
++						}
++						if !terminator && offset <= 4096 {
++							expected = offset - 1
++						}
++						if end != expected {
++							t.Fatalf("part end=%d want %d (child-relative marker=%d)", end, expected, offset)
++						}
++						want, originalErr := enmime.ReadEnvelope(bytes.NewReader(raw))
++						got, parseErr := ParseBounded(raw)
++						if (originalErr == nil) != (parseErr == nil) {
++							t.Fatalf("error changed: original %v bounded %v", originalErr, parseErr)
++						}
++						if originalErr == nil {
++							if !reflect.DeepEqual(got, want) {
++								t.Fatal("exact fill-offset envelope changed")
++							}
++							b := mimeBudget{ctx: context.Background()}
++							if err := b.walk(raw, 1); err != nil {
++								t.Fatal(err)
++							}
++							if b.nodes != len(want.Root.DepthMatchAll(func(*enmime.Part) bool { return true })) || b.parts != len(Parts(want)) {
++								t.Fatal("offset preflight/projection differs from enmime")
++							}
++						}
++					})
++				}
++			}
++		}
++	}
++	for _, nested := range []bool{false, true} {
++		t.Run(fmt.Sprintf("recursive_boundary_4091_rejected/nested_%v", nested), func(t *testing.T) {
++			boundary := strings.Repeat("L", 4091)
++			raw := []byte("Content-Type: multipart/mixed; boundary=" + boundary + "\r\n\r\n--" + boundary + "\r\nContent-Type: text/plain\r\n\r\nbody\r\n--" + boundary + "--\r\n")
++			if nested {
++				raw = append([]byte("Content-Type: multipart/mixed; boundary=OUTER\r\n\r\n--OUTER\r\n"), raw...)
++				raw = append(raw, []byte("\r\n--OUTER--\r\n")...)
++			}
++			b := mimeBudget{ctx: context.Background()}
++			if err := b.walk(raw, 1); !errors.Is(err, ErrMIMEParse) {
++				t.Fatalf("long recursive boundary admission %v", err)
++			}
++			if env, err := ParseBounded(raw); !errors.Is(err, ErrMIMEParse) || env != nil {
++				t.Fatalf("long recursive boundary %v / %v", env, err)
++			}
++		})
++	}
++}
++
+ func TestMIMEPreparseBudgetCompatibility(t *testing.T) {
+ 	fixtures := [][]byte{
+ 		[]byte(multipartFixture),

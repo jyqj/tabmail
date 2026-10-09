@@ -1,0 +1,5 @@
+
+> web@0.1.0 test
+> vitest run --reporter=json --outputFile=/tmp/r5-integration-20261003/frontend-results.json features/company/profile-management.consumer.test.tsx features/company/permission-editor.consumer.test.tsx features/company/permission-editor-session.consumer.test.tsx features/company/company-event-consumer.test.tsx lib/api/permission-editor.serializer.test.ts
+
+JSON report written to /tmp/r5-integration-20261003/frontend-results.json

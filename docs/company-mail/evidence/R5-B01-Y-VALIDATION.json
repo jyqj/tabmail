@@ -1,0 +1,212 @@
+{
+  "version": 1,
+  "batch": "B01-Y",
+  "date": "2026-10-01",
+  "base_commit": "777eaa83a0b61bc2f68c105efbe5bfbfc4189a61",
+  "tested_tree": "9dfd3d3bee057c77cffd62edea2543f88872ed53",
+  "source_files_verified": 720,
+  "source_hashes_verified": true,
+  "private_validation_commit": "a779bf96b2fa26fee6e79b6cb5eb9570540174c3",
+  "excluded_next_batch": [
+    "internal/store/postgres/r5_restore_retention_snapshot_test.go",
+    "internal/store/postgres/r5_template_version_order_test.go",
+    "internal/store/postgres/r5_convert_shared_retention_order_test.go"
+  ],
+  "backend": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 5899,
+    "log_sha256": "0dd213f2080aec9f24edc4bb02d921728700d366ffbe99af24d6cb752baf120e",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 218,
+    "manifest_sha256": "49b99568c8b73633d84193a7aac3395d6dab0ed876602ba8a87503d23a381dd4",
+    "packages": 52,
+    "process_exit_code": 0,
+    "source_sha": "9dfd3d3bee057c77cffd62edea2543f88872ed53",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 1382,
+    "tests_skipped": 1,
+    "tests_started": 1383
+  },
+  "build_vet_scope": "literal ./... in isolated frozen tree with physical node_modules; 52 packages observed",
+  "postgres_package_seconds": 158.954,
+  "gates": {
+    "final2-api": 0,
+    "final2-backend-gate": 0,
+    "final2-backend": 0,
+    "final2-build": 0,
+    "final2-contract": 0,
+    "final2-http": 0,
+    "final2-i18n": 0,
+    "final2-mod-verify": 0,
+    "final2-negative": 0,
+    "final2-node": 0,
+    "final2-protocol-components": 0,
+    "final2-protocol-db": 0,
+    "final2-python": 0,
+    "final2-tsc": 0,
+    "final2-tx-check": 0,
+    "final2-vet": 0,
+    "final2-web-build": 0,
+    "final2-web-lint": 0,
+    "final2-web-test": 0
+  },
+  "python_tests": 247,
+  "node_tests": 23,
+  "vitest_tests": 118,
+  "protocol": {
+    "db_status": "shared_scoped_evidence_passed",
+    "db_cases_verified": 46,
+    "db_target_leafs": 29,
+    "components_status": "shared_scoped_evidence_passed",
+    "components_cases": 16,
+    "components_runtime_leafs": 23,
+    "component_target_leafs": 12,
+    "component_scoped_pass_leafs": 11,
+    "components_errors": 0,
+    "missing_required_layers_combined": {
+      "RC02": [
+        "components"
+      ]
+    },
+    "product_green": false,
+    "semantic_followups": [
+      "BC02/BC03 current capability observations are not execution of future formal idempotent migration/backfill writes",
+      "RC02 legacy list/detail/submit replay has no exact declared component consumer; no scope exemption",
+      "shipping browser not certified by jsdom/loopback"
+    ]
+  },
+  "transaction_inventory": {
+    "files": 49,
+    "functions": 350,
+    "sql_execution_calls": 451,
+    "direct_write_candidates": 126,
+    "write_closure_candidates": 141,
+    "up_migrations": 14,
+    "runtime_all_verified": false,
+    "acceptance_matrix": "R5-TRANSACTION-COVERAGE.md section10 / JSON acceptance_matrix"
+  },
+  "activation": {
+    "test_sha256": "a4fe9130c67828c0f6d9c6b0a58c8e278b17241ece889af4cb75eccf9de9bb64",
+    "baseline": {
+      "pass": 6,
+      "fail": 8,
+      "events": 14
+    },
+    "candidate_rounds": [
+      {
+        "pass": 14,
+        "fail": 0
+      },
+      {
+        "pass": 14,
+        "fail": 0
+      },
+      {
+        "pass": 14,
+        "fail": 0
+      }
+    ],
+    "scope": "elapsed DB clock after tenant/invitation/audit waits; committed verified/mx withdrawal; real domain writer busy409; full rollback; controls"
+  },
+  "message_maintenance": {
+    "test_sha256": "637aa7e23ae9df1d6067045cd5982a6d0101c719456d91218e166b39d40dc256",
+    "baseline": {
+      "pass": 4,
+      "fail": 6,
+      "events": 10
+    },
+    "candidate_rounds": [
+      {
+        "pass": 10,
+        "fail": 0
+      },
+      {
+        "pass": 10,
+        "fail": 0
+      },
+      {
+        "pass": 10,
+        "fail": 0
+      }
+    ],
+    "scope": "trusted work Trash/organize/owner seen source order vs retention; explicit state owners, bytes/index lease/counter/rawkeys/derived writes; bulk original tombstone control"
+  },
+  "personal_state": {
+    "test_sha256": "4da84fe1950cba39dc2f203dceb0f578280544c6164b46c70874d62ef2e01d72",
+    "baseline": {
+      "pass": 2,
+      "fail": 3,
+      "events": 5
+    },
+    "candidate_rounds": [
+      {
+        "pass": 5,
+        "fail": 0
+      },
+      {
+        "pass": 5,
+        "fail": 0
+      },
+      {
+        "pass": 5,
+        "fail": 0
+      }
+    ],
+    "scope": "nonowner first seen/star sparse FK insert vs physical retention; reverse controls and full rollback; existing-state paths not all proved"
+  },
+  "original_failed_full": {
+    "tested_tree": "c04c2ab0f0d66d20fbe2146a6515e6b33ab47720",
+    "backend_exit": 1,
+    "component_controller_exit": 1,
+    "next_build_exit": 1,
+    "causes": [
+      "legacy message audit tests still expected source-row waiting after new NOWAIT; 2 leaves+parents failed and cumulative wait hit original180s PG package budget",
+      "actual Vitest schema omits optional numRuntimeErrorTestSuites; packet validator failed closed all23",
+      "Turbopack refused isolated node_modules symlink outside project root"
+    ],
+    "fixes": [
+      "resource/action-specific audit advisory controller; assertions and budgets unchanged; all29 TestR5Audited events pass",
+      "strict optional-counter compatibility and negative tests; no raw/marker alteration",
+      "physical APFS clone dependency tree into clean isolated snapshot; no user cache deletion"
+    ],
+    "scores_not_reused": true
+  },
+  "resource": {
+    "handle": "/tmp/tabmail-r5-b01y.93xK955q",
+    "pg_pid": 34679,
+    "pg_stopped": false,
+    "reason": "all Y processes terminal; exclusive PG lease intentionally continues for authorized serial Z, no second PG or full suite",
+    "private_dsn_archived": false
+  },
+  "bundle": {
+    "path": "docs/company-mail/evidence/R5-B01-Y-LOGS.tar.gz",
+    "members": 603,
+    "sha256": "5dd1090f92dbab32e4cc8deff2b0afe447da9a1f49871bcb229f887e38e55623",
+    "excludes": "responses.json/private fixture/token/DSN/source snapshot/database/node_modules"
+  },
+  "parent_completion": "6/171",
+  "p0_070_complete": false,
+  "p0_080_complete": false,
+  "remaining": [
+    "070 finite source/caller/remaining relation adjudication; no all-runtime proof",
+    "080 RC02 component applicability and BC02/03 formal future backfill scope",
+    "Z actual restored-row stale retention eligibility; messages.go unchanged in Y",
+    "Z template parent mutual exclusion/CAS/audit controls not executed",
+    "P0-090/100/110/120 and original P1-P11 dependency gates"
+  ],
+  "remote_changes": false,
+  "post_validation_document_drift": [
+    "README.md",
+    "docs/company-mail/R5-TODO.md",
+    "docs/company-mail/R5-TRANSACTIONS.md"
+  ]
+}

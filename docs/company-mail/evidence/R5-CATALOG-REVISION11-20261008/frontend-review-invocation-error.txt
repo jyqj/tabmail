@@ -1,0 +1,21 @@
+test_r5_catalog_reconciliation (unittest.loader._FailedTest.test_r5_catalog_reconciliation) ... ERROR
+
+======================================================================
+ERROR: test_r5_catalog_reconciliation (unittest.loader._FailedTest.test_r5_catalog_reconciliation)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_r5_catalog_reconciliation
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "/workspace/scratch/b8f95a1acb4c/tabmail-review-catalog/scripts/tests/test_r5_catalog_reconciliation.py", line 14, in <module>
+    import check_r5_transactions as tx
+ModuleNotFoundError: No module named 'check_r5_transactions'
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)

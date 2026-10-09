@@ -2,13 +2,14 @@ package testutil
 
 import (
 	"context"
-	"errors"
 	"github.com/google/uuid"
+	"tabmail/internal/delivery"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 	"time"
 )
 
-var errFakeDeliveryToken = errors.New("delivery token mismatch: job was re-claimed")
+var errFakeDeliveryToken = store.ErrDeliveryTokenMismatch
 
 func (s *FakeStore) ClaimOutboundJobs(_ context.Context, _ time.Time, _ int) ([]*models.OutboundJob, error) {
 	s.mu.Lock()
@@ -43,38 +44,10 @@ func (s *FakeStore) ClaimOutboundJobs(_ context.Context, _ time.Time, _ int) ([]
 }
 func (s *FakeStore) validOutbound(id uuid.UUID, token *uuid.UUID) *models.OutboundJob {
 	j := s.outboundJobs[id]
-	if j == nil || token == nil || j.DeliveryToken == nil || *token != *j.DeliveryToken || j.State != models.OutboundProcessing || j.LeaseUntil == nil || !j.LeaseUntil.After(time.Now()) {
+	if !delivery.LeaseOwned(j, token, time.Now()) {
 		return nil
 	}
 	return j
-}
-func (s *FakeStore) BeginOutboundDomain(_ context.Context, id uuid.UUID, token *uuid.UUID, domain string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	j := s.validOutbound(id, token)
-	if j == nil || j.InFlightDomain != "" || domain == "" {
-		return errFakeDeliveryToken
-	}
-	for _, d := range j.DeliveredDomains {
-		if d == domain {
-			return errFakeDeliveryToken
-		}
-	}
-	j.InFlightDomain = domain
-	return nil
-}
-func (s *FakeStore) CompleteOutboundDomain(_ context.Context, id uuid.UUID, token *uuid.UUID, domain string, accepted bool) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	j := s.validOutbound(id, token)
-	if j == nil || j.InFlightDomain != domain {
-		return errFakeDeliveryToken
-	}
-	j.InFlightDomain = ""
-	if accepted {
-		j.DeliveredDomains = append(j.DeliveredDomains, domain)
-	}
-	return nil
 }
 func finishFakeOutbound(j *models.OutboundJob, state models.OutboundState, reason string) {
 	j.State = state
@@ -94,7 +67,11 @@ func (s *FakeStore) MarkOutboundJobSent(_ context.Context, id uuid.UUID, token *
 	j.SMTPCode = &code
 	j.SMTPResponse = response
 	j.MessageIDHeader = messageID
-	finishFakeOutbound(j, models.OutboundSent, "")
+	state, err := delivery.FinalState(delivery.FinishSent, j.InFlightDomain != "")
+	if err != nil {
+		return err
+	}
+	finishFakeOutbound(j, state, "")
 	return nil
 }
 func (s *FakeStore) MarkOutboundJobRetry(_ context.Context, id uuid.UUID, token *uuid.UUID, reason string, next time.Time) error {
@@ -104,9 +81,12 @@ func (s *FakeStore) MarkOutboundJobRetry(_ context.Context, id uuid.UUID, token 
 	if j == nil {
 		return errFakeDeliveryToken
 	}
-	state := models.OutboundRetry
+	state, err := delivery.FinalState(delivery.FinishRetry, j.InFlightDomain != "")
+	if err != nil {
+		return err
+	}
 	if j.InFlightDomain != "" {
-		state = models.OutboundFailed
+		reason = delivery.UncertainRetryPrefix + reason
 	}
 	j.NextAttemptAt = next
 	finishFakeOutbound(j, state, reason)
@@ -119,9 +99,13 @@ func (s *FakeStore) MarkOutboundJobFailed(_ context.Context, id uuid.UUID, token
 	if j == nil {
 		return errFakeDeliveryToken
 	}
-	state := models.OutboundFailed
+	event := delivery.FinishFailed
 	if dead {
-		state = models.OutboundDead
+		event = delivery.FinishDead
+	}
+	state, err := delivery.FinalState(event, j.InFlightDomain != "")
+	if err != nil {
+		return err
 	}
 	finishFakeOutbound(j, state, reason)
 	return nil

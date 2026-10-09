@@ -1,0 +1,15 @@
+{
+  "scope": "one existing declared registry dependency capture receipt only",
+  "registry": "/Users/jin/Desktop/tabmail/docs/company-mail/evidence/R5-BENCHMARK-RUNS.json",
+  "row_failure_variant": "observed_absolute10800_timeout_incomplete_preparation",
+  "declared_field": "readonly_reporting_corrections",
+  "file": "/Users/jin/Desktop/tabmail/docs/company-mail/evidence/R5-B01-AJ-M-ABSOLUTE-TIMEOUT-READONLY-CORRECTIONS.json",
+  "bytes": 6252,
+  "sha256": "d98be876f27193ebc42a0f0cf8faa140b283ea52b58578c20290a893f2d44d0a",
+  "canonical_source_sha": "8529007132f1d61a2571e43aaabfe15b8452baa1",
+  "original_review": "R5-B01-AJ-M-ABSOLUTE-TIMEOUT-REVIEW.json",
+  "raw_source": "R5-B01-AJ-M-ABSOLUTE-TIMEOUT-LOGS.tar.gz:M/go.jsonl",
+  "payload_bytes_modified": false,
+  "old_review_raw_row_modified": false,
+  "tests_repeated": false
+}

@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
@@ -55,45 +57,35 @@ func (s *PgStore) ListWorkMessages(ctx context.Context, a authz.Actor, id uuid.U
 	out := []*models.Message{}
 	total := 0
 	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
-		v, e := s.mailboxAccessTx(ctx, tx, a, id)
-		if e != nil {
+		if e := s.authorizeReceivedMailboxTx(ctx, tx, a, id); e != nil {
 			return e
-		}
-		if !v.CanRead {
-			return app.Forbidden("mailbox read permission required")
 		}
 		viewer := uuid.Nil
 		if uid := a.EffectiveUserID(); uid != nil {
 			viewer = *uid
 		}
-		filter := `m.tenant_id=$1 AND m.mailbox_id=$2 AND ` + where + ` AND ($3='%%' OR m.subject ILIKE $3 OR m.sender ILIKE $3 OR array_to_string(m.recipients,',') ILIKE $3 OR EXISTS(SELECT 1 FROM mail_documents d WHERE d.tenant_id=m.tenant_id AND d.message_id=m.id AND d.source_key=m.raw_object_key AND d.parser_version=1 AND d.search_text ILIKE $3))`
-		if e = tx.QueryRow(ctx, `SELECT count(*) FROM messages m WHERE `+filter, a.TenantID, id, pattern).Scan(&total); e != nil {
-			return e
-		}
-		rows, e := tx.Query(ctx, workMessageSelect("$6")+` WHERE `+filter+` ORDER BY m.received_at DESC,m.id DESC LIMIT $4 OFFSET $5`, a.TenantID, id, pattern, page.PerPage, page.Offset(), viewer)
+		filter := `m.tenant_id=$1 AND m.mailbox_id=$2 AND ` + where + ` AND ` + receivedContentEligible + ` AND ($3='%%' OR m.subject ILIKE $3 OR m.sender ILIKE $3 OR array_to_string(m.recipients,',') ILIKE $3 OR EXISTS(SELECT 1 FROM mail_documents d WHERE d.tenant_id=m.tenant_id AND d.message_id=m.id AND d.source_key=m.raw_object_key AND d.parser_version=1 AND d.search_text ILIKE $3))`
+		var e error
+		out, total, e = readReceivedPageTx(ctx, tx, filter, "$6", "$4", "$5", "DESC", a.TenantID, id, pattern, page.PerPage, page.Offset(), viewer)
 		if e != nil {
 			return e
 		}
-		defer rows.Close()
-		for rows.Next() {
-			m, e := scanWorkMessage(rows)
-			if e != nil {
-				return e
-			}
-			m.RawObjectKey = ""
-			out = append(out, m)
-		}
-		return rows.Err()
+		return requireReceivedMailboxLiveTx(ctx, tx, a.TenantID, id)
 	})
-	return out, total, e
+	if e != nil {
+		return nil, 0, e
+	}
+	return out, total, nil
 }
 func messageMutation(ctx context.Context, tx pgx.Tx, tenant, mailbox, id uuid.UUID, action string) error {
+	if action == "restore" {
+		_, err := restoreMessageMutation(ctx, tx, tenant, mailbox, id)
+		return err
+	}
 	var sql string
 	switch action {
 	case "trash":
 		sql = `UPDATE messages SET deleted_at=COALESCE(deleted_at,now()),purge_after=COALESCE(purge_after,now()+interval '30 days') WHERE tenant_id=$1 AND mailbox_id=$2 AND id=$3`
-	case "restore":
-		sql = `UPDATE messages SET deleted_at=NULL,purge_after=NULL,expires_at=NULL WHERE tenant_id=$1 AND mailbox_id=$2 AND id=$3 AND deleted_at IS NOT NULL`
 	case "archive":
 		sql = `UPDATE messages SET archived_at=now() WHERE tenant_id=$1 AND mailbox_id=$2 AND id=$3 AND deleted_at IS NULL`
 	case "unarchive":
@@ -105,6 +97,21 @@ func messageMutation(ctx context.Context, tx pgx.Tx, tenant, mailbox, id uuid.UU
 	default:
 		return app.BadRequest("unsupported message action")
 	}
+	// Retention owns a source before updating mailbox count and its tenant
+	// event. Do not wait in that reverse order while this caller owns M/T.
+	// Match the non-key row lock of these status UPDATEs.
+	var source uuid.UUID
+	e := tx.QueryRow(ctx, `SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND id=$3 FOR NO KEY UPDATE NOWAIT`, tenant, mailbox, id).Scan(&source)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return app.NotFound("message unavailable for this action")
+	}
+	if e != nil {
+		var pg *pgconn.PgError
+		if errors.As(e, &pg) && pg.Code == "55P03" {
+			return app.Conflict("message is changing; try again")
+		}
+		return e
+	}
 	tag, e := tx.Exec(ctx, sql, tenant, mailbox, id)
 	if e != nil {
 		return e
@@ -114,6 +121,71 @@ func messageMutation(ctx context.Context, tx pgx.Tx, tenant, mailbox, id uuid.UU
 	}
 	return nil
 }
+
+// capturedRestoreDeadline is one command observation, not a new retention
+// policy or cache. Capture only after source NOWAIT ownership; never extend a
+// deadline to make a historical row eligible. The locked mailbox supplies the
+// same owner-only personal historical exemption as receivedContentEligible.
+type capturedRestoreDeadline struct {
+	tenant, mailbox, message uuid.UUID
+	expiresAt, purgeAfter    *time.Time
+}
+
+func (d *capturedRestoreDeadline) check(ctx context.Context, tx pgx.Tx) error {
+	var eligible bool
+	err := tx.QueryRow(ctx, `SELECT (m.expires_at IS NOT DISTINCT FROM $4::timestamptz)
+       AND `+receivedContentEligible+`
+       AND ($5::timestamptz IS NULL OR $5::timestamptz>clock_timestamp())
+       FROM messages m WHERE m.tenant_id=$1 AND m.mailbox_id=$2 AND m.id=$3`,
+		d.tenant, d.mailbox, d.message, d.expiresAt, d.purgeAfter).Scan(&eligible)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return app.NotFound("message unavailable for this action")
+	}
+	if err != nil {
+		return err
+	}
+	if !eligible {
+		return app.Conflict("message retention deadline elapsed; cannot restore")
+	}
+	return nil
+}
+func restoreMessageMutation(ctx context.Context, tx pgx.Tx, tenant, mailbox, id uuid.UUID) (*capturedRestoreDeadline, error) {
+	d := &capturedRestoreDeadline{tenant: tenant, mailbox: mailbox, message: id}
+	var trashed bool
+	err := tx.QueryRow(ctx, `SELECT expires_at,purge_after,deleted_at IS NOT NULL
+        FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND id=$3
+        FOR NO KEY UPDATE NOWAIT`, tenant, mailbox, id).Scan(&d.expiresAt, &d.purgeAfter, &trashed)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, app.NotFound("message unavailable for this action")
+	}
+	if err != nil {
+		var pg *pgconn.PgError
+		if errors.As(err, &pg) && pg.Code == "55P03" {
+			return nil, app.Conflict("message is changing; try again")
+		}
+		return nil, err
+	}
+	if !trashed {
+		return nil, app.NotFound("message unavailable for this action")
+	}
+	if err = d.check(ctx, tx); err != nil {
+		return nil, err
+	}
+	tag, err := tx.Exec(ctx, `UPDATE messages m SET deleted_at=NULL,purge_after=NULL
+        WHERE m.tenant_id=$1 AND m.mailbox_id=$2 AND m.id=$3 AND m.deleted_at IS NOT NULL
+        AND `+receivedContentEligible, tenant, mailbox, id)
+	if err != nil {
+		return nil, err
+	}
+	if tag.RowsAffected() != 1 {
+		return nil, app.Conflict("message retention deadline elapsed; cannot restore")
+	}
+	if err = d.check(ctx, tx); err != nil {
+		return nil, err
+	}
+	return d, nil
+}
+
 func messageOutbox(ctx context.Context, tx pgx.Tx, tenant, id uuid.UUID, address, action string) error {
 	eventType := "message." + action
 	raw, e := json.Marshal(hooks.Event{Type: eventType, TenantID: tenant.String(), Mailbox: address, MessageID: id.String(), OccurredAt: time.Now().UTC()})
@@ -135,11 +207,17 @@ func messageOutbox(ctx context.Context, tx pgx.Tx, tenant, id uuid.UUID, address
 // the historical messages.seen fast path so the company workbench and the
 // legacy mailbox route stay consistent for the owner's own mailbox.
 func (s *PgStore) MutateWorkMessage(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID, action string) error {
-	return s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	// Audit and personal state insert tenant references. Protect the parent
+	// before actor/mailbox locks, then keep the grant snapshot until commit.
+	return s.companyReferencedTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		if e := lockMailboxAuthorization(ctx, tx, a.TenantID, mailbox); e != nil {
+			return e
+		}
 		v, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
 		if e != nil {
 			return e
 		}
+		var restoreGuard *capturedRestoreDeadline
 		switch action {
 		case "seen", "unseen", "starred", "unstarred":
 			if !v.CanRead {
@@ -152,14 +230,27 @@ func (s *PgStore) MutateWorkMessage(ctx context.Context, a authz.Actor, mailbox,
 			if !v.CanRead || !v.CanOrganize {
 				return app.Forbidden("mailbox organize permission required")
 			}
-			if e = messageMutation(ctx, tx, a.TenantID, mailbox, id, action); e != nil {
+			if action == "restore" {
+				restoreGuard, e = restoreMessageMutation(ctx, tx, a.TenantID, mailbox, id)
+			} else {
+				e = messageMutation(ctx, tx, a.TenantID, mailbox, id, action)
+			}
+			if e != nil {
 				return e
 			}
 		}
 		if e = companyAudit(ctx, tx, a, "message."+action, "message", id, map[string]any{"mailbox_id": mailbox}); e != nil {
 			return e
 		}
-		return messageOutbox(ctx, tx, a.TenantID, id, v.Mailbox.FullAddress, action)
+		if e = messageOutbox(ctx, tx, a.TenantID, id, v.Mailbox.FullAddress, action); e != nil {
+			return e
+		}
+		// Audit/outbox can block after purge was cleared. The operation still
+		// owns its original deadline; elapsed time rolls back ALL effects.
+		if restoreGuard != nil {
+			return restoreGuard.check(ctx, tx)
+		}
+		return nil
 	})
 }
 
@@ -175,6 +266,21 @@ func (s *PgStore) writePersonalMessageState(ctx context.Context, tx pgx.Tx, a au
 	}
 	if (action == "seen" || action == "unseen") && v.Mailbox.Kind == "personal" && v.Mailbox.OwnerUserID != nil && *v.Mailbox.OwnerUserID == *uid {
 		return messageMutation(ctx, tx, a.TenantID, mailbox, id, action)
+	}
+	// The sparse row's FK eventually protects this source. Acquire that same
+	// key protection without waiting while M SHARE is held, before either a
+	// first INSERT or an existing-state UPSERT can conflict with deletion.
+	var source uuid.UUID
+	e := tx.QueryRow(ctx, `SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND id=$3 FOR KEY SHARE NOWAIT`, a.TenantID, mailbox, id).Scan(&source)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return app.NotFound("message unavailable for this action")
+	}
+	if e != nil {
+		var pg *pgconn.PgError
+		if errors.As(e, &pg) && pg.Code == "55P03" {
+			return app.Conflict("message is changing; try again")
+		}
+		return e
 	}
 	// $7 marks a seen-toggle: only that dimension is written, the other keeps
 	// whatever the member previously recorded (insert defaults it to false).
@@ -215,7 +321,19 @@ func (s *PgStore) TrashCompanyMessages(ctx context.Context, tenant, mailbox uuid
 	if id != nil {
 		e = messageMutation(ctx, tx, tenant, mailbox, *id, "trash")
 	} else {
-		_, e = tx.Exec(ctx, `UPDATE messages SET deleted_at=now(),purge_after=now()+interval '30 days' WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL`, tenant, mailbox)
+		// Only update this statement's locked active sources. Existing trash
+		// tombstones keep their original deadline; NOWAIT rejects a source held
+		// by physical maintenance before audit/outbox can be committed.
+		_, e = tx.Exec(ctx, `WITH locked AS MATERIALIZED (
+ SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT
+) UPDATE messages m SET deleted_at=now(),purge_after=now()+interval '30 days'
+ FROM locked l WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL`, tenant, mailbox)
+		if e != nil {
+			var pg *pgconn.PgError
+			if errors.As(e, &pg) && pg.Code == "55P03" {
+				return app.Conflict("messages are changing; try again")
+			}
+		}
 	}
 	if e != nil {
 		return e
@@ -379,6 +497,13 @@ func (s *PgStore) SaveMailDraft(ctx context.Context, a authz.Actor, v company.Dr
 		return nil, app.BadRequest("draft too large")
 	}
 	e = s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		// Company grant/policy/handover commands advance this mailbox row.
+		// Hold SHARE before reading those rights until the draft write commits:
+		// a revocation either precedes the read or completes after this save.
+		// Draft saves do not acquire the global tenant administration lock.
+		if e := lockMailboxAuthorization(ctx, tx, a.TenantID, v.MailboxID); e != nil {
+			return e
+		}
 		rights, e := s.mailboxAccessTx(ctx, tx, a, v.MailboxID)
 		if e != nil {
 			return e
@@ -491,6 +616,13 @@ func (s *PgStore) ReserveMailAttachment(ctx context.Context, a authz.Actor, v co
 	v.State = "uploading"
 	v.ContentType = "application/octet-stream"
 	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		// Keep mailbox authorization valid through any uploader-budget wait and
+		// the reservation INSERT. Grant/policy/handover writers advance this
+		// same mailbox row; acquire it before the budget key, as in draft/finish.
+		// This does not lock permission profiles or add a tenant-exclusive lock.
+		if e := lockMailboxAuthorization(ctx, tx, a.TenantID, v.MailboxID); e != nil {
+			return e
+		}
 		rights, e := s.mailboxAccessTx(ctx, tx, a, v.MailboxID)
 		if e != nil {
 			return e
@@ -521,13 +653,22 @@ func (s *PgStore) FinishMailAttachment(ctx context.Context, a authz.Actor, id uu
 	if len(sha) != 64 {
 		return app.BadRequest("invalid checksum")
 	}
+	if _, err := hex.DecodeString(sha); err != nil {
+		return app.BadRequest("invalid checksum")
+	}
+	sha = strings.ToLower(sha)
 	return s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		// This first lookup identifies the mailbox only. Recheck the exact
+		// reservation after acquiring mailbox -> attachment locks below.
 		var mailbox uuid.UUID
 		e := tx.QueryRow(ctx, `SELECT mailbox_id FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2 AND id=$3 AND state='uploading'`, a.TenantID, a.ID, id).Scan(&mailbox)
 		if errors.Is(e, pgx.ErrNoRows) {
 			return app.NotFound("upload not found")
 		}
 		if e != nil {
+			return e
+		}
+		if e = lockMailboxAuthorization(ctx, tx, a.TenantID, mailbox); e != nil {
 			return e
 		}
 		rights, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
@@ -537,8 +678,25 @@ func (s *PgStore) FinishMailAttachment(ctx context.Context, a authz.Actor, id uu
 		if !rights.CanSend {
 			return app.Forbidden("mailbox sending authority revoked during upload")
 		}
-		_, e = tx.Exec(ctx, `UPDATE mail_attachments SET state='ready',sha256=$4 WHERE tenant_id=$1 AND user_id=$2 AND id=$3`, a.TenantID, a.ID, id, sha)
-		return e
+		var locked uuid.UUID
+		e = tx.QueryRow(ctx, `SELECT id FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2 AND id=$3 AND mailbox_id=$4 FOR UPDATE`, a.TenantID, a.ID, id, mailbox).Scan(&locked)
+		if errors.Is(e, pgx.ErrNoRows) {
+			return app.NotFound("upload not found")
+		}
+		if e != nil {
+			return e
+		}
+		// Evaluate expiry in a NEW statement after any row-lock wait. now()
+		// would retain the transaction's earlier time. The conditional update
+		// also prevents a competing completion from replacing a ready checksum.
+		tag, e := tx.Exec(ctx, `UPDATE mail_attachments SET state='ready',sha256=$4 WHERE tenant_id=$1 AND user_id=$2 AND id=$3 AND mailbox_id=$5 AND state='uploading' AND expires_at>clock_timestamp()`, a.TenantID, a.ID, id, sha, mailbox)
+		if e != nil {
+			return e
+		}
+		if tag.RowsAffected() != 1 {
+			return app.Conflict("upload expired, completed, or changed; upload again after reviewing its state")
+		}
+		return nil
 	})
 }
 func (s *PgStore) GetWorkAttachment(ctx context.Context, a authz.Actor, id uuid.UUID) (*company.Attachment, error) {

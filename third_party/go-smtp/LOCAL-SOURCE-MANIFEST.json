@@ -1,0 +1,120 @@
+{
+  "status": "SOURCE_ONLY_NOT_COMPILED_NOT_RUN_NOT_REVIEWED",
+  "upstream_original_file_count": 23,
+  "unchanged_upstream_file_count": 21,
+  "changed_upstream_files": [
+    "conn.go",
+    "server.go"
+  ],
+  "new_top_level_test_count_static": 14,
+  "new_expanded_leaf_test_count_static": 18,
+  "root_go_mod_before_sha256": "a2e87e7f71509440e83df143c1875bb778ac1d2aabaa3fc66f109dcb2f32acc4",
+  "root_go_mod_change": "append exact local replace only; existing bytes retained",
+  "module_closure_sha256": {
+    "go.mod": "30eb5ba911706a9c88f5cfa77bea60eb61dbd1cb2570232d581847e12902e377",
+    "go.sum": "5b850553522724f8fa71d36a94de2da91da174270ec4d460bb135dd42f53a33f",
+    "third_party/go-smtp/go.mod": "c90914c039d7a1eba0c1c07c00435f0561607cb0e56bf43664c63a45c6e17900",
+    "third_party/go-smtp/go.sum": "91f0cc69b3e71d54c3de263a771da33435278b78aad1b4be6608d0f149da8a1f",
+    "third_party/enmime-v2.3.0/go.mod": "976135226793cb303993bce4659b3883783db3225d9e5617d1e3a1540e5c5862",
+    "third_party/enmime-v2.3.0/go.sum": "0c19f867af32840597157de144e8ff9bd39dc3178522df145fd288cc4422aac4"
+  },
+  "author_source_closure_sha256": {
+    "third_party/go-smtp/.build.yml": "d1ae2fea7401b061ed9d0b2969434cd77373b43dd15f5e7f682b5a52f77e441e",
+    "third_party/go-smtp/.github/ISSUE_TEMPLATE/config.yml": "1862a3a03d992ba1d95d2b3b253d027082d50c00647eacbc4211d172a4f8d708",
+    "third_party/go-smtp/.github/ISSUE_TEMPLATE/issue_template.md": "a0253867be44b5480f97bd5344552da896a67a588edc48dc1cf6954aa1403682",
+    "third_party/go-smtp/.gitignore": "c1e244c0520af51e2c4762a68defbda93ed24d4dbbbec2d60c4ea4d8c075a897",
+    "third_party/go-smtp/LICENSE": "ed667a24be2a9c3f2fbcd275c70aa9cf19f61345836d08dd5669f4b5737ab036",
+    "third_party/go-smtp/LOCAL-PATCH.diff": "e7ca4ab4de6348bebe375a81c37370d67474c932f67bd92ff2971657892a5824",
+    "third_party/go-smtp/LOCAL-PROVENANCE.md": "bb8d225f6159fbdd5571e3ba286b7e923d20446ef8e1917ead142a6556e274c5",
+    "third_party/go-smtp/README.md": "3847e839321356cf5ececaf6fd4f74a1ca7f57969253322bfbe00ce897d4c421",
+    "third_party/go-smtp/UPSTREAM-MANIFEST.json": "697694fbef2690dc111c2524ae9029aa070d301466d062d8ff53e5e73d168756",
+    "third_party/go-smtp/backend.go": "7792120dd25e43fbb79656fb31ff3290e7884a3c4ea3c8266a0ff9c6d89b2438",
+    "third_party/go-smtp/client.go": "7adcc4610ff4810ab903d0a811e8a32382a2490e06d340631ef425e9cb6597de",
+    "third_party/go-smtp/client_test.go": "39f4eeac6088d41c3502534bd2fa8d5b6a88df0e7f28a0ca41473993b66cfd93",
+    "third_party/go-smtp/cmd/smtp-debug-server/main.go": "ba8d5652ecc64121fbb84314ce43036a8ffd93503935a5e71b947f8d7edb820f",
+    "third_party/go-smtp/conn.go": "7fffcf21ae9e17c408ce857d766dc576d27ccd873f9509abf14d5043e5998eb5",
+    "third_party/go-smtp/data.go": "9dd19f115369da72cb36668f953bcc19f73fd1994e8063db5c3a75ca7481d0c8",
+    "third_party/go-smtp/example_server_test.go": "3b25705ecbe3679140e7f7deaceeb5f8357513d10b3c2b83d733629118afc958",
+    "third_party/go-smtp/example_test.go": "1ea3e758d34c28ad3eed4b70a27ce0eb6c54d669475b6eef3ec7e0dda81f4ac2",
+    "third_party/go-smtp/go.mod": "c90914c039d7a1eba0c1c07c00435f0561607cb0e56bf43664c63a45c6e17900",
+    "third_party/go-smtp/go.sum": "91f0cc69b3e71d54c3de263a771da33435278b78aad1b4be6608d0f149da8a1f",
+    "third_party/go-smtp/lengthlimit_reader.go": "ce4040c9285a3620285dcce853ef2359872a375577a6f3d2034da3b049b024f6",
+    "third_party/go-smtp/lmtp_server_test.go": "d0f53be6fdc352d1b0549bddf5fd3b06d78cf575a6dfc180a0166dbd3d98ecdc",
+    "third_party/go-smtp/owner_lifecycle_test.go": "4c7a00a64d1b975491b1c9c6b7a1da499d28cbe0d56d2ca75326776c709419bd",
+    "third_party/go-smtp/parse.go": "47346dc8ef668dc34132b7d143016b1e186da22ecd389c51ba820e16a8d6e722",
+    "third_party/go-smtp/parse_test.go": "c6ef7e37e399a7b8a041e29a445fe0ef3f1256b701b4b74ce57638be653e9cd7",
+    "third_party/go-smtp/server.go": "75be3110a5b04e7aa48acbe6c35509c52d878ef6c32289e9511d35f637e327c2",
+    "third_party/go-smtp/server_test.go": "14e20d0dd3db489d9158eb00a26aa648c8dec08a9f57c4015dacc1d809c6428b",
+    "third_party/go-smtp/smtp.go": "fd93bf53ff98cc529960272d1ff46acee127f37114ee724bf7fd9ff96dcbda43",
+    "third_party/go-smtp/LOCAL-REVIEW-FIX.diff": "585ea4c26970cac46b3441e4502e86bd99197b8a1727be807ef0422a7ef70d35"
+  },
+  "manifest_self_excluded": true,
+  "revision": {
+    "reason": "independent SOURCE F1/F2 changes required",
+    "before_source_manifest_sha256": "5f6bfbe8cb9ff6a6807d6c39588bd7be991aad7b3a68ab1cf7beea8b7e81988b",
+    "status": "SOURCE_FIX_PREPARED_NOT_RUN_NOT_REREVIEWED",
+    "before_source_sha256": {
+      "conn.go": "8ad62e3b8e253ccac422cbfbcb48fca978d234629a7cfae5af35997c3e4e767c",
+      "server.go": "bf29aa2178e756fb39d892f1c90a3007ac4bba4484721353cb43ba785d4a01c0",
+      "owner_lifecycle_test.go": "e35e6ac2a451b4e493fa3971f9231d972a07b936c4a5c3b8c4b286998b82fe56"
+    },
+    "test_only_toolchain_requirement": "Go 1.25+ testing/synctest; upstream module pins unchanged"
+  },
+  "negative_controls_source_design": [
+    {
+      "id": "remove_handler_data_join",
+      "file": "server.go",
+      "replace_exact_once": {
+        "from": "\t\tc.dataWG.Wait()\n\t\tc.logout()",
+        "to": "\t\tc.logout()"
+      },
+      "selector": "^TestOwnerBDAT(DelayedEntryShutdown|PanicTailIncludedInShutdown)$",
+      "expected_failure": "Logout occurred before DATA owner exited",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "remove_reset_data_join",
+      "file": "conn.go",
+      "replace_exact_once": {
+        "from": "\tc.dataWG.Wait()\n\n\tc.locker.Lock()",
+        "to": "\tc.locker.Lock()"
+      },
+      "selector": "^TestOwnerBDATResetJoinsBeforeSessionReuse$",
+      "expected_failure": "Session.Reset occurred before DATA owner exited",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "remove_shutdown_connection_join",
+      "file": "server.go",
+      "replace_exact_once": {
+        "from": "\t\ts.wg.Wait()\n",
+        "to": ""
+      },
+      "selector": "^TestOwnerBDAT(DelayedEntryShutdown|PanicTailIncludedInShutdown)$",
+      "expected_failure": "Shutdown prematurely returned / tail escaped join",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "remove_shutdown_serve_join",
+      "file": "server.go",
+      "replace_exact_once": {
+        "from": "\t\ts.serveWG.Wait()\n",
+        "to": ""
+      },
+      "selector": "^TestOwnerShutdownWaitsForLateAcceptDisposal$",
+      "expected_failure": "late Accept escaped join",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "disable_close_dispatch_gate",
+      "file": "conn.go",
+      "replace_exact_once": {
+        "from": "\treturn c.closed\n",
+        "to": "\treturn false\n"
+      },
+      "selector": "^TestOwnerClosedParseErrorsDoNotDispatchBufferedCommands$",
+      "expected_failure": "closed buffered EHLO/business command dispatched",
+      "status": "NOT_RUN"
+    }
+  ]
+}

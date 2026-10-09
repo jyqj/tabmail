@@ -1,0 +1,177 @@
+{
+  "batch": "B01-R",
+  "base_commit": "862f09b280b7af376b50a523553a822de57c6909",
+  "tested_tree": "dbdba853daebd6488f6a869bc045f058c6ec8f40",
+  "source_files_verified": 643,
+  "scope": "target user access explanation snapshot; no public DTO or policy change",
+  "results": {
+    "baseline-final": 1,
+    "pg-focused-1": 0,
+    "pg-focused-1-gate": 0,
+    "pg-focused-2": 0,
+    "pg-focused-2-gate": 0,
+    "pg-focused-3": 0,
+    "pg-focused-3-gate": 0,
+    "build": 0,
+    "vet": 0,
+    "python": 0,
+    "contract": 0,
+    "backend-full": 0,
+    "backend-gate": 0,
+    "http-runtime": 0,
+    "missing-dsn": 0,
+    "missing-dsn-gate": 1
+  },
+  "go_counts": {
+    "baseline-final": {
+      "run": 34,
+      "output": 89,
+      "fail": 25,
+      "pass": 9
+    },
+    "pg-focused-1": {
+      "run": 115,
+      "output": 230,
+      "pass": 115
+    },
+    "pg-focused-2": {
+      "run": 115,
+      "output": 230,
+      "pass": 115
+    },
+    "pg-focused-3": {
+      "run": 115,
+      "output": 230,
+      "pass": 115
+    },
+    "backend-full": {
+      "run": 1042,
+      "output": 2168,
+      "pass": 1041,
+      "pause": 20,
+      "cont": 20,
+      "skip": 1
+    },
+    "missing-dsn": {
+      "run": 1,
+      "output": 3,
+      "skip": 1
+    }
+  },
+  "required_gates": {
+    "pg-focused-1-gate": {
+      "status": "pass",
+      "suite": "content-postgres-boundary",
+      "source_sha": "dbdba853daebd6488f6a869bc045f058c6ec8f40",
+      "tests_passed": 115,
+      "tests_failed": 0,
+      "tests_skipped": 0,
+      "mandatory_tests": 30,
+      "mandatory_missing_or_not_passed": 0,
+      "log_sha256": "4047b5f0c842d5e18d0d03da78599ad4a6951cf5b8c5cfc8e1ee3235ca8179ba",
+      "manifest_sha256": "5a7512cd35723415360b74943811306bc8203c81ce931bfb2729affc92bf84a7"
+    },
+    "pg-focused-2-gate": {
+      "status": "pass",
+      "suite": "content-postgres-boundary",
+      "source_sha": "dbdba853daebd6488f6a869bc045f058c6ec8f40",
+      "tests_passed": 115,
+      "tests_failed": 0,
+      "tests_skipped": 0,
+      "mandatory_tests": 30,
+      "mandatory_missing_or_not_passed": 0,
+      "log_sha256": "eed52a8762b63585e0f4522279821420233810c6278003093a34809a915c6413",
+      "manifest_sha256": "5a7512cd35723415360b74943811306bc8203c81ce931bfb2729affc92bf84a7"
+    },
+    "pg-focused-3-gate": {
+      "status": "pass",
+      "suite": "content-postgres-boundary",
+      "source_sha": "dbdba853daebd6488f6a869bc045f058c6ec8f40",
+      "tests_passed": 115,
+      "tests_failed": 0,
+      "tests_skipped": 0,
+      "mandatory_tests": 30,
+      "mandatory_missing_or_not_passed": 0,
+      "log_sha256": "3c2172c3debc4c071426b6973acfb9e7f9d209376bae42c353aa5d040fd8f06b",
+      "manifest_sha256": "5a7512cd35723415360b74943811306bc8203c81ce931bfb2729affc92bf84a7"
+    },
+    "backend-gate": {
+      "status": "pass",
+      "suite": "backend",
+      "source_sha": "dbdba853daebd6488f6a869bc045f058c6ec8f40",
+      "tests_passed": 1041,
+      "tests_failed": 0,
+      "tests_skipped": 1,
+      "mandatory_tests": 129,
+      "mandatory_missing_or_not_passed": 0,
+      "log_sha256": "4730235f58d299d0896a42d717d7032387543232af3f6a1eccfb494668097361",
+      "manifest_sha256": "5a7512cd35723415360b74943811306bc8203c81ce931bfb2729affc92bf84a7"
+    },
+    "missing-dsn-gate": {
+      "status": "fail",
+      "suite": "content-postgres-boundary",
+      "source_sha": "dbdba853daebd6488f6a869bc045f058c6ec8f40",
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "tests_skipped": 1,
+      "mandatory_tests": 30,
+      "mandatory_missing_or_not_passed": 30,
+      "log_sha256": "341ea4c6eb5fbbfe139cb9dd1e98e28149cc13ef5f728812d54ef51cc8536a94",
+      "manifest_sha256": "5a7512cd35723415360b74943811306bc8203c81ce931bfb2729affc92bf84a7"
+    }
+  },
+  "http": {
+    "status": "pass",
+    "source_sha": "dbdba853daebd6488f6a869bc045f058c6ec8f40",
+    "errors": [],
+    "responses": 80,
+    "successful_operations": 65,
+    "required_success_variants": 66,
+    "excluded_operations": [
+      {
+        "method": "GET",
+        "path": "/api/v1/company/domains/{id}/verification",
+        "reason": "Live DNS status lookups are outside this loopback HTTP/PG fixture."
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/company/domains/{id}/verify",
+        "reason": "Live DNS verification is outside this loopback HTTP/PG fixture."
+      }
+    ],
+    "spec_sha256": "2c39ce1a1495af06204cebd12774ecf7fc64aa6bbd5784bb0fb46ac9d451c060",
+    "capture_sha256": "ab1cea9055035e98d9aa99ed8b01808837a41e755064b84e928d6da04707abab"
+  },
+  "python_tests": 168,
+  "versions": {
+    "go": "go version go1.25.7 darwin/arm64",
+    "postgres": "postgres (PostgreSQL) 16.13",
+    "psql": "psql (PostgreSQL) 16.13",
+    "pg_dump": "pg_dump (PostgreSQL) 16.13",
+    "python": "Python 3.12.11"
+  },
+  "cleanup": {
+    "pid": 35606,
+    "stop_exit": 0,
+    "pidfile_removed": true
+  },
+  "bundle": {
+    "path": "docs/company-mail/evidence/R5-B01-R-LOGS.tar.gz",
+    "members": 101,
+    "bytes": 173865,
+    "sha256": "d3afba82b413fa4862d2e7a65721b53a644452c60d9e08c356855490c724aca4"
+  },
+  "early_failures": [
+    "unused pgx test import; compilation only, not baseline evidence",
+    "candidate cancellation NOWAIT probe raced asynchronous server teardown; final bounded reacquisition uses unchanged 12s budget; final tests rerun on baseline and candidate"
+  ],
+  "not_executed": [
+    "shipping browser journey",
+    "frontend suite",
+    "remote CI",
+    "live DNS",
+    "SSE reconnection/cross-process replay",
+    "S/M/L performance",
+    "production migration/deployment"
+  ]
+}

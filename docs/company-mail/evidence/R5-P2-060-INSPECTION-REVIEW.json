@@ -1,0 +1,154 @@
+{
+  "M_L_executed": false,
+  "actual_leaf_cases": [
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5OutboundInspectionPGCurrentAuthorityAfterWait/demote"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5OutboundInspectionPGCurrentAuthorityAfterWait/freeze"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5OutboundInspectionPGCurrentAuthorityAfterWait/epoch"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5OutboundInspectionPGCurrentAuthorityAfterWait/tenant-demotion"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5OutboundInspectionPGBusyJobAndLedger/outbound_jobs"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5OutboundInspectionPGBusyJobAndLedger/outbound_recipients"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5OutboundInspectionPGLedgerAndJobSnapshotFence"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5OutboundInspectionPGFaultZeroPayloadAndEffects/audit_log"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5OutboundInspectionPGFaultZeroPayloadAndEffects/outbox_events"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5OutboundInspectionPGSafeCompleteProjection"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPProjectionAndAtomicAudit"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPSevenPrincipalsAndSelectedCompany/reader"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPSevenPrincipalsAndSelectedCompany/organizer"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPSevenPrincipalsAndSelectedCompany/historical-sender"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPSevenPrincipalsAndSelectedCompany/tenant-admin"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPSevenPrincipalsAndSelectedCompany/frozen"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPSevenPrincipalsAndSelectedCompany/user-owned-key"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPSevenPrincipalsAndSelectedCompany/ownerless-key"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPAuditAndOutboxFaultNoPayload/audit_log"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPAuditAndOutboxFaultNoPayload/outbox_events"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPFreshActorAfterLockWait/demote"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPFreshActorAfterLockWait/freeze"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPFreshActorAfterLockWait/epoch"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPBusySnapshotNoPayload/outbound_jobs"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5OutboundInspectionHTTPBusySnapshotNoPayload/outbound_recipients"
+    }
+  ],
+  "actual_source_closure_sha256": "b341f50b3fc31434cf20211d8a152af05e0de87c041e98b5e6d01994faf2ac81",
+  "boundary": "P2-060 narrow selectors only; no old S/tools/32PG/pure projection/compile gates repeated; executor classification not independent full171/G0/P0 audit",
+  "coverage": [
+    "seven actual principals and only selected-company super administrator succeeds; cross-tenant/missing denied",
+    "actor row lock-wait fresh authority recheck for demotion/token epoch/frozen",
+    "job/recipient-ledger busy fences and coherent snapshot",
+    "required same-transaction audit/outbox faults yield no response payload and zero persistent effects",
+    "secret canary/header/BCC/category/enhanced-code/full-ledger status typed projection"
+  ],
+  "created_utc": "2026-10-01T19:56:48.004351+00:00",
+  "go_exit": 0,
+  "leaf_case_count": 25,
+  "negative_baseline": "optional HEAD handler overlay RED not executed; this report only certifies new true runtime positive/negative controlled cases",
+  "owned_process_group_observation": {
+    "members": [],
+    "non_zombie_live_pids": [],
+    "status": "observed"
+  },
+  "package_elapsed_seconds": {
+    "tabmail/internal/api": 4.329,
+    "tabmail/internal/store/postgres": 4.973
+  },
+  "product_green": false,
+  "race_enabled": true,
+  "raw_sha256": "b457e5369b46abf2ae10f793e8344109fdba13ad72ad14ec7e8158660a65cb72",
+  "source_identity_kind": "canonical_source_closure_sha1",
+  "source_receipt": "source-receipt.json",
+  "source_sha": "2514362546277c3003e97e122ed39eb9f3e9df76",
+  "status": "P2-060_new_inspection_runtime_passed",
+  "task_complete": false,
+  "tested_snapshot": "/tmp/tm-r5inspection.IMJJcJcf/src",
+  "top_test_count": 10,
+  "top_tests": {
+    "tabmail/internal/api": [
+      "TestR5OutboundInspectionHTTPAuditAndOutboxFaultNoPayload",
+      "TestR5OutboundInspectionHTTPBusySnapshotNoPayload",
+      "TestR5OutboundInspectionHTTPFreshActorAfterLockWait",
+      "TestR5OutboundInspectionHTTPProjectionAndAtomicAudit",
+      "TestR5OutboundInspectionHTTPSevenPrincipalsAndSelectedCompany"
+    ],
+    "tabmail/internal/store/postgres": [
+      "TestR5OutboundInspectionPGBusyJobAndLedger",
+      "TestR5OutboundInspectionPGCurrentAuthorityAfterWait",
+      "TestR5OutboundInspectionPGFaultZeroPayloadAndEffects",
+      "TestR5OutboundInspectionPGLedgerAndJobSnapshotFence",
+      "TestR5OutboundInspectionPGSafeCompleteProjection"
+    ]
+  },
+  "total_test_and_subtest_pass_events": 32
+}

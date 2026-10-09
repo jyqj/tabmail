@@ -1,0 +1,32 @@
+{
+  "scope": "ADVANCE-06 / issue #202",
+  "baseline_commit": "a2bb86a962c54540b0a3a959a5011992a9024bf3",
+  "original_batch_commit": "fdea2178759ce9842844926374ea98517bc4188b",
+  "baseline_target_product_bytes_identical_to_original_batch": true,
+  "fixed_baseline": {
+    "pass": 3,
+    "fail": 15,
+    "skip": 0
+  },
+  "final_new_cases": {
+    "pass": 18,
+    "fail": 0,
+    "skip": 0
+  },
+  "final_related_cases": {
+    "pass": 95,
+    "fail": 0,
+    "skip": 0
+  },
+  "nonincremental_typecheck_exit": 0,
+  "scoped_eslint_exit": 0,
+  "source_sha256": {
+    "web/app/(dashboard)/company/templates/page.tsx": "0d1fe8f21bcbdb5791ef4be438b934c4c9b3aa96913ca8dbe7be9d0f0f9193c8",
+    "web/components/company/templates/editor.tsx": "b3c6bbc9a00b8526f39720a959a9e2e9604334764d4ebfaf7eaa4d1a95f6df3f",
+    "web/components/company/templates/versions.tsx": "5a89ddd6a9aa8ab4a4e985ce6ca72d5dfc568ff32a7a8569b3576b61fc6dcfc5",
+    "web/components/company/templates/version-revoke-editor.test.tsx": "89368cf0bfd56526f8f6be9fd315688db4604140320bef249bbeb88902993837"
+  },
+  "full_frontend_qualification": false,
+  "shipping_browser_qualification": false,
+  "database_qualification": false
+}

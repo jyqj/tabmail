@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "reviewer": "remaining_gate_dispatch_audit newly independent, no implementation involvement",
+  "source_sha": "7ffe88737b4b846ad96978b2a69a105caccf3914",
+  "actual_source_closure_sha256": "567f05e8d5edd1067afb16e80f5b5a8638e5aeb49c292aad122925fc737729db",
+  "bounded_verdict": "BOUNDED_RUNTIME_PASS no family-source/raw blocker",
+  "actual_groups": {
+    "restore": [
+      5,
+      30,
+      35
+    ],
+    "gc": [
+      7,
+      9,
+      10
+    ],
+    "offboarding": [
+      11,
+      42,
+      47
+    ],
+    "p6_green": [
+      7,
+      15,
+      19
+    ]
+  },
+  "all_green_race_exit0_no_fail_skip_missing": true,
+  "P6_RED_correct_counts": {
+    "nodes": {
+      "total": 19,
+      "pass": 6,
+      "fail": 13
+    },
+    "leaves": {
+      "total": 15,
+      "pass": 5,
+      "fail": 10
+    },
+    "tops": {
+      "total": 7,
+      "pass": 2,
+      "fail": 5
+    },
+    "layer": "exactone productionfile canonicaloverlay0911 only; FakeStore shippingdeliverRecipients, notSMTP/PG, notinfra"
+  },
+  "bootstrap_infra_product_tests": [
+    0,
+    0
+  ],
+  "cleanup": "PG16.13 actualschema17 final92502/stop0/tempDBempty/PIDsocketgone; all3ownedcleanup, oldMuntouched",
+  "new_original171_completed_ids": [],
+  "leaf_scope_assessment": [
+    {
+      "ids": [
+        "R5-P3-030"
+      ],
+      "covered": "received restore technical A05 clauses",
+      "not_closed": "P3-010/020 commonpolicy and reliable historicalmigration unaccepted prerequisites; no implication from30leaf alone"
+    },
+    {
+      "ids": [
+        "R5-P3-040"
+      ],
+      "not_closed": "sentrestore and prior restore-first expiry fixture notcovered"
+    },
+    {
+      "ids": [
+        "R5-P3-060"
+      ],
+      "not_closed": "all reference-establishment races multiattachmentreverse/finish/consume/transfer missing"
+    },
+    {
+      "ids": [
+        "R5-P3-070"
+      ],
+      "covered": "101storphan/allprotected/logical100candidate bounded outcomes",
+      "not_closed": "physicalscan cost not100cap and dependencies050/060 notclosed"
+    },
+    {
+      "ids": [
+        "R5-P3-080"
+      ],
+      "not_closed": "21tenants/scannerrestart/multipleScanner fairness missing"
+    },
+    {
+      "ids": [
+        "R5-P3-090"
+      ],
+      "covered": "metadata/orphan atomic+held authority",
+      "not_closed": "commituncertain/realobjectdelete failure wholechain missing"
+    },
+    {
+      "ids": [
+        "R5-P4-030"
+      ],
+      "covered": "frozen modern+successor bounded",
+      "not_closed": "P4-020 reliable historicalcompletion migration/unique fact notcovered"
+    },
+    {
+      "ids": [
+        "R5-P4-040",
+        "R5-P4-050",
+        "R5-P4-060"
+      ],
+      "not_closed": "fullqueue/key/grant rollbackseed/samecountdifferentasset/twoadmins lostresponse/legacyoneStepcompletion mapping missing"
+    },
+    {
+      "ids": [
+        "R5-P4-100",
+        "R5-P4-110"
+      ],
+      "not_closed": "fullreentry and harddelete nottested"
+    },
+    {
+      "ids": [
+        "R5-P6-060"
+      ],
+      "covered": "current shipping function ordering and error-chain underFakeStore barriers",
+      "not_closed": "PGdurablecheckpoint/realsmtp250cancel/leasechange/workerrestart noresend missing"
+    }
+  ],
+  "count_policy": "No checkbox changed due real scope/dependency gaps, not artificial keep10. Original171 scope allpreserved; fullCI/G0/Mvalidbaseline notclosed."
+}

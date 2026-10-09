@@ -1,0 +1,226 @@
+{
+  "L_executed": false,
+  "M_executed": false,
+  "actual_distribution": {
+    "employees": 100,
+    "index_ready_count": 100000,
+    "lifecycle_counts": {
+      "archived": 10000,
+      "hard_expired": 5000,
+      "inbox": 80000,
+      "trash_expired": 5000
+    },
+    "mailboxes": 500,
+    "max_distinct_shared_grantees": 4,
+    "messages": 100000,
+    "mime_size_counts": {
+      "2097152": 100,
+      "262144": 1900,
+      "32768": 18000,
+      "4096": 80000
+    },
+    "min_distinct_shared_grantees": 4,
+    "personal_mailboxes": 100,
+    "shared_grant_rows": 1600,
+    "shared_mailboxes": 400,
+    "tenant_message_counts": {
+      "bench-0.test": 80000,
+      "bench-1.test": 20000
+    }
+  },
+  "actual_same_parameter_deep_claim_pairs": [
+    {
+      "actual_claim_batch": 20,
+      "actual_claim_requested_limit": 20,
+      "actual_claim_wall_seconds": 0.0033410000000000002,
+      "observed_same_parameters_explain_only": true,
+      "parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+      "query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+      "ready_heap_depth": 20
+    },
+    {
+      "actual_claim_batch": 20,
+      "actual_claim_requested_limit": 20,
+      "actual_claim_wall_seconds": 0.0013679999999999942,
+      "observed_same_parameters_explain_only": true,
+      "parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+      "query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+      "ready_heap_depth": 1000
+    },
+    {
+      "actual_claim_batch": 20,
+      "actual_claim_requested_limit": 20,
+      "actual_claim_wall_seconds": 0.0008690000000000087,
+      "observed_same_parameters_explain_only": true,
+      "parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+      "query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+      "ready_heap_depth": 10000
+    },
+    {
+      "actual_claim_batch": 20,
+      "actual_claim_requested_limit": 20,
+      "actual_claim_wall_seconds": 0.0010849999999997806,
+      "observed_same_parameters_explain_only": true,
+      "parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+      "query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+      "ready_heap_depth": 99980
+    }
+  ],
+  "actual_source_closure_sha256": "3e3e5d35af81f1f000eaa998f2b7232a8af2388ab78dcbbc36d27df7785ed173",
+  "baseline_complete": true,
+  "candidate_result": {
+    "candidate_threshold_passed": true,
+    "candidate_thresholds": [
+      {
+        "cache_mode": "app_cold_db_os_unspecified",
+        "candidate_limit_ms": 300,
+        "p95_ms": 9.118,
+        "passed": true,
+        "workload": "inbox_list"
+      },
+      {
+        "cache_mode": "app_hot_db_os_unspecified",
+        "candidate_limit_ms": 300,
+        "p95_ms": 4.145,
+        "passed": true,
+        "workload": "inbox_list"
+      }
+    ],
+    "product_green": false,
+    "relative_regression": "no_reference_baseline_yet_not_certified",
+    "scale": "S",
+    "status": "actual_scale_evidence_validated",
+    "task_complete": false
+  },
+  "comparison_boundary": "S candidate inbox thresholds pass only; indexed_search p95~5.93/6.09sec is actual S observation, no S search cutoff existed; no capacity/relative-regression/full-gate/M approval inferred",
+  "created_utc": "2026-10-01T19:32:40.826218+00:00",
+  "dataset_fingerprint": "4bd741d42fda6d537c563d4698b3429bc0192aef139f2635c36af8451797877c",
+  "dataset_sha256": "9e81020680dbd6e990cbb35ab1aac16413885e65306d949a5889c4bafda00b36",
+  "disk_max_bytes": 1892809751,
+  "execution_wall": {
+    "budget_seconds": 1800,
+    "completed_unix_seconds": 1790883056.082201,
+    "elapsed_wall_seconds": 1518.898014,
+    "started_unix_seconds": 1790881537.184187
+  },
+  "fingerprint_method": "six_actual_canonical_sql_streams_v1",
+  "fingerprint_streams": [
+    {
+      "row_count": 2,
+      "sha256": "52bb8abf43f2b8d1c70a857875517f9d67f71d29c71df8fd8c4d422782214319",
+      "stream_id": 0
+    },
+    {
+      "row_count": 100000,
+      "sha256": "c1320b1f274f58d002b4dc6efccfa3ad27ebf987ea40ffefbe2f7a2d224f5201",
+      "stream_id": 1
+    },
+    {
+      "row_count": 100000,
+      "sha256": "18ecbb5f4cc7c4978ccf6dce061d7593a6c2895597c669a9b9b45a53ccb77ea3",
+      "stream_id": 2
+    },
+    {
+      "row_count": 1600,
+      "sha256": "82c5585af05db441664d8423339a0564fe366353c4fb1eb71a5591448f7a0188",
+      "stream_id": 3
+    },
+    {
+      "row_count": 102,
+      "sha256": "48d9e19f3677babafc76ca1eeb9dde067bb872e76819534cd0fe1f20bc215951",
+      "stream_id": 4
+    },
+    {
+      "row_count": 500,
+      "sha256": "6db17ce5ff9c48f020b95f3673bfa93dcda44411eaaeff5b976ad0db0452d2da",
+      "stream_id": 5
+    }
+  ],
+  "full_workload_sample_count": 2800,
+  "go_exit": 0,
+  "go_test_to_package_wall_seconds": 1528.7153480052948,
+  "original_outer_process_budget_receipt": {
+    "absolute_deadline_wall_time": 1790883335.2984672,
+    "budget_seconds": 1800,
+    "elapsed_wall_seconds": 1530.7269649505615,
+    "observed_wall_time": 1790883066.025432,
+    "owned_process_group": 20116,
+    "process_returncode": 0,
+    "process_returncode_status": "observed_parent_poll",
+    "scope": "absolute wall deadline including host suspension; cleanup is observed after resume, never guaranteed during sleep",
+    "started_wall_time": 1790881535.2984672,
+    "timed_out": false
+  },
+  "owned_process_group_observation": {
+    "members": [],
+    "non_zombie_live_pids": [],
+    "status": "observed"
+  },
+  "population": [
+    100,
+    500,
+    100000
+  ],
+  "preparation": {
+    "active_budget": 20,
+    "claim_calls": 5001,
+    "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+    "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+    "claim_wall_seconds": 8.837165000000029,
+    "company_wall_seconds": 0.807895,
+    "final_empty_claim": true,
+    "joined_completed_jobs": 100000,
+    "joined_inflight": 0,
+    "joined_ready_before_last_claim": 100000,
+    "joined_stored_messages": 100000,
+    "last_claim_batch": 0,
+    "last_claim_wall_seconds": 0.0005629999999996471,
+    "max_active": 20,
+    "max_claim_batch": 20,
+    "max_wall_monotonic_gap_ms": 0.468333,
+    "max_window_messages": 20,
+    "method": "bounded_store_claim_complete_window_v1",
+    "parse_complete_wall_seconds": 166.16586399999971,
+    "parser_canceled_joined_calls": 0,
+    "parser_join_policy": "uncancelled_document_wait_with_31s_absolute_wall_admission_guard",
+    "parser_join_reserve_seconds": 31,
+    "parser_joined_call_wall_seconds_sum": 1463.697968,
+    "parser_joined_calls": 100000,
+    "parser_joined_inflight": 0,
+    "parser_min_start_remaining_wall_seconds": 418.901972,
+    "parser_original_deadline_unix_seconds": 1790883337.184187,
+    "parser_quiescent": true,
+    "pending_upper_bound": 20,
+    "phase": "terminal",
+    "pipeline_wall_seconds": 1380.357542,
+    "producer_done": true,
+    "sql_ready_count": 100000,
+    "store_wall_seconds": 1203.2575640000018
+  },
+  "product_green": false,
+  "raw_go_sha256": "362fa0a306be0d9ff609296c36d66140e0a7630a6d4528abf9889f386ed9ae43",
+  "result_sha256": "94068294972d354b70f59a1d473f55722066379f6c2751d387cdc1275d7266a0",
+  "review_role": "executor runtime classification, not independent fresh G0/P0 full audit",
+  "rss_max_bytes": 328728576,
+  "runner_exit": 0,
+  "safety_assertions": [
+    "inbox_list:foreign_and_revoked_current_source_denied",
+    "indexed_search:foreign_and_revoked_current_source_denied",
+    "indexed_message:foreign_and_revoked_current_source_denied",
+    "permission_mailboxes:foreign_and_revoked_current_source_denied",
+    "draft_save:foreign_and_revoked_current_source_denied",
+    "submit_and_loopback_worker:foreign_and_revoked_current_source_denied",
+    "gc_reference_safety:foreign_and_revoked_current_source_denied"
+  ],
+  "safety_assertions_passed": true,
+  "scale": "S",
+  "schema_version": 16,
+  "source_identity_kind": "canonical_source_closure_sha1",
+  "source_identity_proof_member": "canonical-source-identity-proof.json",
+  "source_sha_semantics": "canonical_source_closure_sha1_not_git_tree_or_commit",
+  "source_tree": "3d07b72b3732cf289410aefaaba49f8d8423f746",
+  "status": "complete_original_S_runtime_validated",
+  "task_complete": false,
+  "terminal_empty_claim_at_exact_ready100k_seconds": 0.0005629999999996471,
+  "workloads_rows": 14
+}

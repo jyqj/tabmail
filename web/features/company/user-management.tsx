@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,14 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "@/components/ui/card";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { DataTable, DataTablePagination } from "@/components/crud/data-table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { listUsers, inviteAdmin, updateUser, deleteUser, listPermissionProfiles, listDomains, getUserPermission, setUserPermissionOverride, deleteUserPermissionOverride, } from "@/lib/api";
-import type { AdminUser, EffectivePermission, UserPermissionOverride, } from "@/lib/types";
-import { Plus, MoreHorizontal, Trash2, Users, Copy, Shield, UserCheck, SlidersHorizontal, Gauge, } from "lucide-react";
+import { listUsers, updateUser, deleteUser, listPermissionProfiles, listDomains, } from "@/lib/api";
+import type { AdminUser, EffectivePermission, } from "@/lib/types";
+import { MoreHorizontal, Trash2, Users, Copy, Shield, UserCheck, SlidersHorizontal, Gauge, } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
@@ -23,104 +23,95 @@ import { useAuth } from "@/contexts/auth-context";
 import { canManageTenantUsers } from "@/lib/permissions";
 import { safeConfirm } from "@/lib/utils";
 import { useCRUDPage } from "@/hooks/use-crud-page";
+import { getUserPermissionEditor, patchUserPermissionEditor, assignUserPermissionEditor } from "@/lib/api/permissions";
+import { buildPermissionEditorCommand, permissionEditorFormFromSnapshot, validateObservedPermissionProfile } from "@/lib/api/permission-editor-types";
+import type { PermissionEditorForm, PermissionEditorSnapshot, PermissionField } from "@/lib/api/permission-editor-types";
+import { useCompanyEventConsumer } from "./company-event-consumer";
+import { sessionScope, useSessionScope } from "@/lib/session";
+import { AdminInvitation } from "./admin-invitation";
 const USERS_PER_PAGE = 20;
 const NONE_PROFILE = "__none__";
-interface PermOverrideForm {
-    can_send: boolean | null;
-    daily_send_quota: string;
-    daily_receive_quota: string;
-    max_mailboxes: string;
-    max_domains: string;
-    allowed_zone_ids: string[] | null;
-    can_create_domains: boolean | null;
-    can_create_routes: boolean | null;
-    can_create_api_keys: boolean | null;
-}
-const emptyOverrideForm: PermOverrideForm = {
+const emptyOverrideForm: PermissionEditorForm = {
     can_send: null,
     daily_send_quota: "",
     daily_receive_quota: "",
     max_mailboxes: "",
     max_domains: "",
-    allowed_zone_ids: null,
+    domain_access: { mode: "inherit", zone_ids: [] },
     can_create_domains: null,
     can_create_routes: null,
     can_create_api_keys: null,
 };
 export default function UsersPage() {
     const { t } = useI18n();
-    const { level } = useAuth();
+    const permissionFormId = useId();
+    const { level, tenantId: activeTenantId, user: actorUser } = useAuth();
     // UX-only gate; the backend authz seam is authoritative.
     const isPlatformAdmin = canManageTenantUsers(level);
     const [page, setPage] = useState(1);
     const { data: usersRes, isLoading: loading, mutate: mutateUsers, } = useCRUDPage(["admin-users", page], () => listUsers({ page, per_page: USERS_PER_PAGE }), "admin.usersLoadFailed");
-    const { data: profilesRes } = useCRUDPage("admin-users-permission-profiles", () => listPermissionProfiles(), "admin.permProfilesLoadFailed");
-    const { data: domainsRes } = useCRUDPage("admin-users-domains", () => listDomains(), "domains.loadFailed");
+    const { data: profilesRes, mutate: mutateProfiles } = useCRUDPage("admin-users-permission-profiles", () => listPermissionProfiles(), "admin.permProfilesLoadFailed");
+    const { data: domainsRes, mutate: mutateDomains } = useCRUDPage("admin-users-domains", () => listDomains(), "domains.loadFailed");
     const users = usersRes?.data ?? [];
     const total = usersRes?.meta?.total ?? users.length;
     const profiles = profilesRes?.data ?? [];
     const domains = domainsRes?.data ?? [];
-    const [inviteOpen, setInviteOpen] = useState(false);
-    const [inviting, setInviting] = useState(false);
-    const [inviteEmail, setInviteEmail] = useState("");
-    const [inviteResult, setInviteResult] = useState<{
-        invite_code: string;
-        email: string;
-    } | null>(null);
     // Permission management dialog
     const [permUser, setPermUser] = useState<AdminUser | null>(null);
     const [permEffective, setPermEffective] = useState<EffectivePermission | null>(null);
-    const [permForm, setPermForm] = useState<PermOverrideForm>(emptyOverrideForm);
-    const [permProfileId, setPermProfileId] = useState<string>(NONE_PROFILE);
+    const [permForm, setPermForm] = useState<PermissionEditorForm>(emptyOverrideForm);
+    const [permSnapshot, setPermSnapshot] = useState<PermissionEditorSnapshot | null>(null);
+    const [permLoading, setPermLoading] = useState(false);
+    const [permNeedsReload, setPermNeedsReload] = useState(false);
+    const [permConflict, setPermConflict] = useState(false);
+    const permEpoch = useRef(0);
+    const permRequest = useRef<AbortController | null>(null);
+    const [permProfileId, setPermProfileId] = useState(NONE_PROFILE);
+    const [permSelectedProfileRevision, setPermSelectedProfileRevision] = useState<string | null>(null);
+    useEffect(() => () => { permEpoch.current++; permRequest.current?.abort(); }, []);
     const [permSaving, setPermSaving] = useState(false);
     const [permResetting, setPermResetting] = useState(false);
+    const session = useSessionScope();
+    const memberRevokedScope = useRef<string | null>(null);
+    const currentMemberContext = () => session === sessionScope() && memberRevokedScope.current !== session;
+    useEffect(() => {
+        ++permEpoch.current; permRequest.current?.abort();
+        setPermUser(null); setPermSnapshot(null); setPermEffective(null); setPermForm(emptyOverrideForm);
+        setPermLoading(false); setPermSaving(false); setPermResetting(false); setPermNeedsReload(false); setPermConflict(false);
+    }, [session]);
     const profileName = (profileId?: string) => {
         if (!profileId)
             return null;
         return profiles.find((p) => p.id === profileId)?.name ?? null;
     };
     const domainLabel = (id: string) => domains.find((domain) => domain.id === id)?.domain ?? id.slice(0, 8);
-    const handleInvite = async () => {
-        if (!inviteEmail.trim())
-            return;
-        setInviting(true);
-        try {
-            const res = await inviteAdmin(inviteEmail.trim());
-            setInviteResult({ invite_code: res.data.invite_code, email: res.data.email });
-            setInviteEmail("");
-            toast.success(t("admin.inviteSent"));
-        }
-        catch (e: unknown) {
-            const err = e as {
-                error?: {
-                    message?: string;
-                };
-            };
-            toast.error(err?.error?.message || t("admin.inviteFailed"));
-        }
-        finally {
-            setInviting(false);
-        }
-    };
     const handleToggleActive = async (user: AdminUser) => {
+        if (!canManageMember(user) || !currentMemberContext()) return;
         try {
             await updateUser(user.id, { is_active: !user.is_active });
+            if (!currentMemberContext()) return;
             toast.success(user.is_active ? t("admin.userDeactivated") : t("admin.userActivated"));
             mutateUsers();
         }
         catch {
+            if (!currentMemberContext()) return;
             toast.error(t("admin.updateFailed"));
         }
     };
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (user: AdminUser) => {
+        if (!canDeleteMember(user) || !currentMemberContext()) return;
         if (!safeConfirm(t("admin.confirmDeleteUser")))
             return;
+        // Confirmation may outlive the identity that opened this row.
+        if (!canDeleteMember(user) || !currentMemberContext()) return;
         try {
-            await deleteUser(id);
+            await deleteUser(user.id);
+            if (!currentMemberContext()) return;
             toast.success(t("admin.userDeleted"));
             mutateUsers();
         }
         catch (e: unknown) {
+            if (!currentMemberContext()) return;
             const err = e as {
                 error?: {
                     message?: string;
@@ -130,114 +121,175 @@ export default function UsersPage() {
         }
     };
     // Permission management
-    const openPermDialog = async (user: AdminUser) => {
-        setPermUser(user);
+    const assertPermTenant = (snapshot: PermissionEditorSnapshot, user: AdminUser) => {
+        if (!activeTenantId || user.tenant_id !== activeTenantId || snapshot.tenant_id !== activeTenantId ||
+            snapshot.revision.tenant_id !== activeTenantId || snapshot.user_id !== user.id) {
+            throw new Error("Permission editor belongs to a different active tenant");
+        }
+    };
+    const applyPermSnapshot = (snapshot: PermissionEditorSnapshot) => {
+        setPermSnapshot(snapshot);
+        setPermProfileId(snapshot.revision.profile_id ?? NONE_PROFILE);
+        setPermSelectedProfileRevision(snapshot.revision.profile_revision);
+        setPermEffective(snapshot.effective);
+        setPermForm(permissionEditorFormFromSnapshot(snapshot));
+        setPermConflict(false);
+        setPermNeedsReload(false);
+    };
+    const loadPermSnapshot = async (user: AdminUser) => {
+        const epoch = ++permEpoch.current;
+        permRequest.current?.abort();
+        const controller = new AbortController();
+        permRequest.current = controller;
+        setPermLoading(true);
+        setPermSnapshot(null);
         setPermEffective(null);
         setPermForm(emptyOverrideForm);
-        setPermProfileId(user.permission_profile_id || NONE_PROFILE);
+        setPermNeedsReload(false);
+        setPermConflict(false);
         try {
-            const res = await getUserPermission(user.id);
-            setPermEffective(res.data);
-        }
-        catch {
-            toast.error(t("admin.permLoadFailed"));
+            if (!activeTenantId || user.tenant_id !== activeTenantId) throw new Error("Permission target belongs to a different active tenant");
+            // Explicit reload discards the old assignment draft AND obtains a
+            // new destination-profile observation; do not rebase old intent.
+            const [response] = await Promise.all([
+                getUserPermissionEditor(user.id, { signal: controller.signal }), mutateProfiles(),
+            ]);
+            assertPermTenant(response.data, user);
+            if (epoch === permEpoch.current && !controller.signal.aborted) applyPermSnapshot(response.data);
+        } catch (error: unknown) {
+            if (epoch !== permEpoch.current || controller.signal.aborted) return;
+            const failure = error as { error?: { message?: string } };
+            toast.error(failure?.error?.message || t("admin.permLoadFailed"));
+        } finally {
+            if (epoch === permEpoch.current) setPermLoading(false);
         }
     };
-    const handlePermProfileChange = async (value: string | null) => {
-        if (!permUser)
-            return;
-        const effectiveValue = value ?? NONE_PROFILE;
-        const newProfileId = effectiveValue === NONE_PROFILE ? null : effectiveValue;
-        setPermProfileId(effectiveValue);
-        try {
-            await updateUser(permUser.id, { permission_profile_id: newProfileId });
-            toast.success(t("admin.permProfileUpdated"));
-            mutateUsers();
-            // Refresh effective permissions
-            const res = await getUserPermission(permUser.id);
-            setPermEffective(res.data);
-            // Update the local permUser to reflect the change
-            setPermUser((prev) => prev ? { ...prev, permission_profile_id: newProfileId ?? undefined } : null);
-        }
-        catch (e: unknown) {
-            const err = e as {
-                error?: {
-                    message?: string;
-                };
-            };
-            toast.error(err?.error?.message || t("admin.permProfileUpdateFailed"));
-            // Revert selection
-            setPermProfileId(permUser.permission_profile_id || NONE_PROFILE);
-        }
+    const openPermDialog = (user: AdminUser) => {
+        setPermUser(user);
+        setPermSaving(false);
+        setPermResetting(false);
+        void loadPermSnapshot(user);
+    };
+    const closePermDialog = () => {
+        ++permEpoch.current;
+        permRequest.current?.abort();
+        setPermUser(null);
+        setPermSnapshot(null);
+        setPermEffective(null);
+        setPermSaving(false);
+        setPermResetting(false);
+    };
+    const eventRevoked = useCompanyEventConsumer({
+        tenantId: activeTenantId, enabled: level === "admin" || level === "super_admin",
+        cacheKeys: ["admin-users", "admin-users-permission-profiles", "admin-users-domains"],
+        onInvalidate: () => {
+            if (!permUser) return;
+            ++permEpoch.current; permRequest.current?.abort();
+            setPermLoading(false); setPermSaving(false); setPermResetting(false);
+            setPermNeedsReload(true); setPermConflict(true); setPermEffective(null);
+            // Keep permForm/assignment intent and observed revision. Only an
+            // explicit reload may discard/review a dirty permission draft.
+        },
+        revalidate: () => Promise.all([mutateUsers(), mutateProfiles(), mutateDomains()]),
+        onRevoked: () => {
+            memberRevokedScope.current = session;
+            closePermDialog(); setPermForm(emptyOverrideForm);
+        },
+    });
+    // UX-only mirror of the member guard. Superadmins may select another
+    // tenant; ordinary admins stay in their own. Backend guards stay authoritative.
+    const canManageMember = (user: AdminUser) => !eventRevoked && !!actorUser?.id && !!activeTenantId &&
+        user.tenant_id === activeTenantId && (level === "super_admin" || (level === "admin" && actorUser.tenant_id === activeTenantId && user.role === "user"));
+    const canDeleteMember = (user: AdminUser) => canManageMember(user) && user.id !== actorUser?.id;
+    const editorProfiles = permSnapshot?.profile
+        ? [permSnapshot.profile, ...profiles.filter(profile => profile.id !== permSnapshot.profile?.id)] : profiles;
+    const knownProfile = (id: string) => {
+        const profile = editorProfiles.find(item => item.id === id);
+        if (!profile || (profile.tenant_id != null && profile.tenant_id !== permSnapshot?.tenant_id)) return null;
+        try { validateObservedPermissionProfile(profile); return profile; } catch { return null; }
+    };
+    const editorTenantBound = !eventRevoked && !!activeTenantId && permSnapshot?.tenant_id === activeTenantId && permUser?.tenant_id === activeTenantId;
+    const editorBusy = permLoading || permNeedsReload || permSaving || permResetting;
+    const canAssign = editorTenantBound && !!permSnapshot?.capabilities.assign_profile && !editorBusy;
+    const assignmentChanged = !!permSnapshot && (permProfileId === NONE_PROFILE ? null : permProfileId) !== permSnapshot.revision.profile_id;
+    const observedDestination = permProfileId === NONE_PROFILE || (permSelectedProfileRevision !== null && knownProfile(permProfileId)?.revision === permSelectedProfileRevision);
+    const handlePermProfileChange = (value: string | null) => {
+        if (!canAssign) return;
+        const id = value ?? NONE_PROFILE;
+        if (id === NONE_PROFILE) { setPermProfileId(id); setPermSelectedProfileRevision(null); return; }
+        const destination = knownProfile(id);
+        if (!destination) return;
+        setPermProfileId(destination.id); setPermSelectedProfileRevision(destination.revision);
+    };
+    const canPatch = editorTenantBound && !!permSnapshot?.capabilities.patch && !permLoading && !permNeedsReload && !permSaving && !permResetting;
+    let pendingCommand: ReturnType<typeof buildPermissionEditorCommand> | null = null;
+    if (permSnapshot) {
+        try { pendingCommand = buildPermissionEditorCommand(permSnapshot, permForm); } catch { /* Invalid intent never enables a write. */ }
+    }
+    const hasChangedFields = !!pendingCommand && Object.keys(pendingCommand.patch).length > 0;
+    const canSave = !!pendingCommand && !editorBusy && (assignmentChanged
+        ? canAssign && observedDestination && (!hasChangedFields || !!permSnapshot?.capabilities.patch)
+        : canPatch && hasChangedFields);
+    const failPermWrite = (error: unknown) => {
+        const failure = error as { error?: { code?: string; message?: string } };
+        setPermConflict(failure?.error?.code === "CONFLICT" || failure?.error?.code === "REVISION_CONFLICT");
+        // Preserve all input and the observed revision. An uncertain or rejected
+        // write requires an explicit reload; never auto-replay stale intent.
+        setPermNeedsReload(true);
+        toast.error(failure?.error?.message || t("admin.permSaveFailed"));
     };
     const handleSaveOverrides = async () => {
-        if (!permUser)
-            return;
+        if (!permUser || !permSnapshot || !canSave || !pendingCommand) return;
+        const epoch = permEpoch.current;
+        const controller = new AbortController();
+        permRequest.current = controller;
         setPermSaving(true);
         try {
-            const body: Partial<UserPermissionOverride> = {};
-            if (permForm.can_send !== null)
-                body.can_send = permForm.can_send;
-            if (permForm.daily_send_quota.trim() !== "")
-                body.daily_send_quota = Number(permForm.daily_send_quota);
-            if (permForm.daily_receive_quota.trim() !== "")
-                body.daily_receive_quota = Number(permForm.daily_receive_quota);
-            if (permForm.max_mailboxes.trim() !== "")
-                body.max_mailboxes = Number(permForm.max_mailboxes);
-            if (permForm.max_domains.trim() !== "")
-                body.max_domains = Number(permForm.max_domains);
-            if (permForm.allowed_zone_ids !== null)
-                body.allowed_zone_ids = permForm.allowed_zone_ids;
-            if (permForm.can_create_domains !== null)
-                body.can_create_domains = permForm.can_create_domains;
-            if (permForm.can_create_routes !== null)
-                body.can_create_routes = permForm.can_create_routes;
-            if (permForm.can_create_api_keys !== null)
-                body.can_create_api_keys = permForm.can_create_api_keys;
-            await setUserPermissionOverride(permUser.id, body);
+            const response = assignmentChanged
+                ? await assignUserPermissionEditor(permUser.id, {
+                    ...pendingCommand, profile_id: permProfileId === NONE_PROFILE ? null : permProfileId,
+                    profile_revision: permSelectedProfileRevision,
+                }, { signal: controller.signal })
+                : await patchUserPermissionEditor(permUser.id, pendingCommand, { signal: controller.signal });
+            if (epoch !== permEpoch.current || controller.signal.aborted) return;
+            assertPermTenant(response.data, permUser);
+            applyPermSnapshot(response.data);
             toast.success(t("admin.permSaved"));
-            // Refresh effective permissions
-            const res = await getUserPermission(permUser.id);
-            setPermEffective(res.data);
-        }
-        catch (e: unknown) {
-            const err = e as {
-                error?: {
-                    message?: string;
-                };
-            };
-            toast.error(err?.error?.message || t("admin.permSaveFailed"));
-        }
-        finally {
-            setPermSaving(false);
+        } catch (error: unknown) {
+            if (epoch === permEpoch.current && !controller.signal.aborted) failPermWrite(error);
+        } finally {
+            if (epoch === permEpoch.current) setPermSaving(false);
         }
     };
     const handleResetOverrides = async () => {
-        if (!permUser)
-            return;
+        if (!permUser || !permSnapshot || !canPatch || assignmentChanged) return;
+        const epoch = permEpoch.current;
+        const controller = new AbortController();
+        permRequest.current = controller;
         setPermResetting(true);
         try {
-            await deleteUserPermissionOverride(permUser.id);
+            const response = await patchUserPermissionEditor(permUser.id, {
+                expected_revision: { ...permSnapshot.revision },
+                patch: { can_send: null, daily_send_quota: null, daily_receive_quota: null,
+                    max_mailboxes: null, max_domains: null, can_create_domains: null,
+                    can_create_routes: null, can_create_api_keys: null, domain_access: { mode: "inherit", zone_ids: [] } },
+            }, { signal: controller.signal });
+            if (epoch !== permEpoch.current || controller.signal.aborted) return;
+            assertPermTenant(response.data, permUser);
+            applyPermSnapshot(response.data);
             toast.success(t("admin.permResetSuccess"));
-            setPermForm(emptyOverrideForm);
-            // Refresh effective permissions
-            const res = await getUserPermission(permUser.id);
-            setPermEffective(res.data);
-        }
-        catch (e: unknown) {
-            const err = e as {
-                error?: {
-                    message?: string;
-                };
-            };
-            toast.error(err?.error?.message || t("admin.permResetFailed"));
-        }
-        finally {
-            setPermResetting(false);
+        } catch (error: unknown) {
+            if (epoch === permEpoch.current && !controller.signal.aborted) failPermWrite(error);
+        } finally {
+            if (epoch === permEpoch.current) setPermResetting(false);
         }
     };
+    const sourceLabel = (field: PermissionField) => {
+        const source = permSnapshot?.field_sources[field];
+        return source === "override" ? t("admin.permSourceOverride") : source === "profile" ? t("admin.permSourceProfile") : t("admin.permSourceDefault");
+    };
     const effectiveEntries: {
-        key: string;
+        key: PermissionField;
         label: string;
         value: string;
     }[] = permEffective
@@ -248,9 +300,11 @@ export default function UsersPage() {
             { key: "max_mailboxes", label: t("admin.permMaxMailboxes"), value: String(permEffective.max_mailboxes) },
             { key: "max_domains", label: t("admin.permMaxDomains"), value: String(permEffective.max_domains) },
             {
-                key: "allowed_zone_ids",
+                key: "domain_access",
                 label: t("admin.permAllowedZoneScope"),
-                value: permEffective.allowed_zone_ids?.length
+                value: permSnapshot?.effective.domain_access_mode === "none" || permSnapshot?.overrides?.domain_access.mode === "none"
+                    ? t("admin.permNoDomainsAllowed")
+                    : permEffective.allowed_zone_ids?.length
                     ? permEffective.allowed_zone_ids.map(domainLabel).join(", ")
                     : t("admin.permAllDomains"),
             },
@@ -260,63 +314,7 @@ export default function UsersPage() {
         ]
         : [];
     return (<div className="flex flex-col">
-      <PageHeader title={t("admin.usersTitle")} description={t("admin.usersCount", { count: total })} actions={isPlatformAdmin ? (<Dialog open={inviteOpen} onOpenChange={(open) => {
-                setInviteOpen(open);
-                if (!open) {
-                    setInviteResult(null);
-                    setInviteEmail("");
-                }
-            }}>
-            <DialogTrigger render={<Button size="sm" className="gap-1.5"/>}>
-              <Plus className="h-3.5 w-3.5"/>
-              {t("admin.inviteAdmin")}
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>{t("admin.inviteTitle")}</DialogTitle>
-                <DialogDescription>
-                  {t("admin.inviteDesc")}
-                </DialogDescription>
-              </DialogHeader>
-
-              {inviteResult ? (<div className="space-y-4 py-4">
-                  <div className="rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950 p-3">
-                    <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">
-                      {t("admin.inviteCreated")}
-                    </p>
-                    <p className="text-xs text-green-700 dark:text-green-300 mb-2">
-                      {inviteResult.email}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 text-xs break-all bg-white dark:bg-black/20 p-2 rounded">
-                        {inviteResult.invite_code}
-                      </code>
-                      <Button variant="outline" size="icon" className="h-8 w-8 shrink-0" onClick={() => {
-                    navigator.clipboard.writeText(inviteResult.invite_code);
-                    toast.success(t("admin.copied"));
-                }}>
-                        <Copy className="h-3.5 w-3.5"/>
-                      </Button>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setInviteOpen(false)}>
-                      {t("admin.close")}
-                    </Button>
-                  </DialogFooter>
-                </div>) : (<div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label>{t("admin.email")}</Label>
-                    <Input type="email" placeholder={t("admin.emailPlaceholder")} value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleInvite()}/>
-                  </div>
-                  <DialogFooter>
-                    <Button onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}>
-                      {inviting ? t("admin.inviting") : t("admin.sendInvite")}
-                    </Button>
-                  </DialogFooter>
-                </div>)}
-            </DialogContent>
-          </Dialog>) : null}/>
+      <PageHeader title={t("admin.usersTitle")} description={t("admin.usersCount", { count: total })} actions={isPlatformAdmin && !eventRevoked ? <AdminInvitation key={session} scope={session} /> : null}/>
 
       <div className="p-4 space-y-4">
         <Card>
@@ -358,7 +356,7 @@ export default function UsersPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Switch size="sm" checked={user.is_active} onCheckedChange={() => handleToggleActive(user)}/>
+                          <Switch size="sm" disabled={!canManageMember(user)} checked={user.is_active} onCheckedChange={() => handleToggleActive(user)}/>
                           <span className="text-xs text-muted-foreground">
                             {user.is_active ? t("admin.active") : t("admin.inactive")}
                           </span>
@@ -389,7 +387,7 @@ export default function UsersPage() {
                               {t("admin.copyId")}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleDelete(user.id)} className="text-destructive focus:text-destructive">
+                            <DropdownMenuItem disabled={!canDeleteMember(user)} onClick={() => handleDelete(user)} className="text-destructive focus:text-destructive">
                               <Trash2 className="h-4 w-4 mr-2"/>
                               {t("admin.deleteUser")}
                             </DropdownMenuItem>
@@ -405,7 +403,7 @@ export default function UsersPage() {
 
       {/* Permission Management Dialog */}
       <Dialog open={permUser !== null} onOpenChange={(open) => { if (!open)
-        setPermUser(null); }}>
+        closePermDialog(); }}>
         <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>{t("admin.permTitle")}</DialogTitle>
@@ -426,7 +424,7 @@ export default function UsersPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {permEffective ? (effectiveEntries.map((entry) => (<div key={entry.key} className="flex items-center justify-between gap-3 text-sm">
-                      <span className="text-muted-foreground">{entry.label}</span>
+                      <span className="text-muted-foreground">{entry.label}<Badge variant="outline" className="ml-2 text-[10px]">{sourceLabel(entry.key)}</Badge></span>
                       <span className="font-medium tabular-nums">{entry.value}</span>
                     </div>))) : (<div className="space-y-3">
                     {Array.from({ length: 8 }).map((_, i) => (<Skeleton key={i} className="h-6 w-full"/>))}
@@ -438,14 +436,16 @@ export default function UsersPage() {
             <div className="space-y-4">
               {/* Profile selector */}
               <div className="space-y-2">
-                <Label>{t("admin.permProfileLabel")}</Label>
-                <Select value={permProfileId} onValueChange={handlePermProfileChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("admin.permSelectProfile")}/>
+                <Label htmlFor={`${permissionFormId}-profile`}>{t("admin.permProfileLabel")}</Label>
+                <Select value={permProfileId} onValueChange={handlePermProfileChange} disabled={!canAssign}>
+                  <SelectTrigger id={`${permissionFormId}-profile`} aria-label={t("admin.permProfileLabel")}>
+                    <SelectValue placeholder={t("admin.permSelectProfile")} >
+                      {permProfileId === NONE_PROFILE ? t("admin.permDefault") : editorProfiles.find(profile => profile.id === permProfileId)?.name ?? t("admin.permSelectProfile")}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={NONE_PROFILE}>{t("admin.permDefault")}</SelectItem>
-                    {profiles.map((profile) => (<SelectItem key={profile.id} value={profile.id}>
+                    {editorProfiles.map((profile) => (<SelectItem key={profile.id} value={profile.id} disabled={!knownProfile(profile.id)}>
                         {profile.name}
                       </SelectItem>))}
                   </SelectContent>
@@ -457,44 +457,44 @@ export default function UsersPage() {
 
                 {/* Boolean switches */}
                 <div className="flex items-center justify-between">
-                  <Label>{t("admin.permCanSend")}</Label>
+                  <Label id={`${permissionFormId}-can_send-label`} htmlFor={`${permissionFormId}-can_send`}>{t("admin.permCanSend")}</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">{t("admin.permInherit")}</span>
-                    <Switch size="sm" checked={permForm.can_send === null ? false : permForm.can_send} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_send: checked }))}/>
-                    {permForm.can_send !== null && (<Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_send: null }))}>
+                    <Switch id={`${permissionFormId}-can_send`} aria-labelledby={`${permissionFormId}-can_send-label`} disabled={!canPatch} size="sm" checked={permForm.can_send === null ? false : permForm.can_send} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_send: checked }))}/>
+                    {permForm.can_send !== null && (<Button type="button" aria-label={`${t("admin.permInheritShort")}: ${t("admin.permCanSend")}`} title={`${t("admin.permInheritShort")}: ${t("admin.permCanSend")}`} disabled={!canPatch} variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_send: null }))}>
                         <Trash2 className="h-3 w-3"/>
                       </Button>)}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <Label>{t("admin.permCanCreateDomains")}</Label>
+                  <Label id={`${permissionFormId}-can_create_domains-label`} htmlFor={`${permissionFormId}-can_create_domains`}>{t("admin.permCanCreateDomains")}</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">{t("admin.permInherit")}</span>
-                    <Switch size="sm" checked={permForm.can_create_domains === null ? false : permForm.can_create_domains} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_domains: checked }))}/>
-                    {permForm.can_create_domains !== null && (<Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_create_domains: null }))}>
+                    <Switch id={`${permissionFormId}-can_create_domains`} aria-labelledby={`${permissionFormId}-can_create_domains-label`} disabled={!canPatch} size="sm" checked={permForm.can_create_domains === null ? false : permForm.can_create_domains} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_domains: checked }))}/>
+                    {permForm.can_create_domains !== null && (<Button type="button" aria-label={`${t("admin.permInheritShort")}: ${t("admin.permCanCreateDomains")}`} title={`${t("admin.permInheritShort")}: ${t("admin.permCanCreateDomains")}`} disabled={!canPatch} variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_create_domains: null }))}>
                         <Trash2 className="h-3 w-3"/>
                       </Button>)}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <Label>{t("admin.permCanCreateRoutes")}</Label>
+                  <Label id={`${permissionFormId}-can_create_routes-label`} htmlFor={`${permissionFormId}-can_create_routes`}>{t("admin.permCanCreateRoutes")}</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">{t("admin.permInherit")}</span>
-                    <Switch size="sm" checked={permForm.can_create_routes === null ? false : permForm.can_create_routes} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_routes: checked }))}/>
-                    {permForm.can_create_routes !== null && (<Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_create_routes: null }))}>
+                    <Switch id={`${permissionFormId}-can_create_routes`} aria-labelledby={`${permissionFormId}-can_create_routes-label`} disabled={!canPatch} size="sm" checked={permForm.can_create_routes === null ? false : permForm.can_create_routes} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_routes: checked }))}/>
+                    {permForm.can_create_routes !== null && (<Button type="button" aria-label={`${t("admin.permInheritShort")}: ${t("admin.permCanCreateRoutes")}`} title={`${t("admin.permInheritShort")}: ${t("admin.permCanCreateRoutes")}`} disabled={!canPatch} variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_create_routes: null }))}>
                         <Trash2 className="h-3 w-3"/>
                       </Button>)}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <Label>{t("admin.permCanCreateApiKeys")}</Label>
+                  <Label id={`${permissionFormId}-can_create_api_keys-label`} htmlFor={`${permissionFormId}-can_create_api_keys`}>{t("admin.permCanCreateApiKeys")}</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">{t("admin.permInherit")}</span>
-                    <Switch size="sm" checked={permForm.can_create_api_keys === null ? false : permForm.can_create_api_keys} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_api_keys: checked }))}/>
-                    {permForm.can_create_api_keys !== null && (<Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_create_api_keys: null }))}>
+                    <Switch id={`${permissionFormId}-can_create_api_keys`} aria-labelledby={`${permissionFormId}-can_create_api_keys-label`} disabled={!canPatch} size="sm" checked={permForm.can_create_api_keys === null ? false : permForm.can_create_api_keys} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_api_keys: checked }))}/>
+                    {permForm.can_create_api_keys !== null && (<Button type="button" aria-label={`${t("admin.permInheritShort")}: ${t("admin.permCanCreateApiKeys")}`} title={`${t("admin.permInheritShort")}: ${t("admin.permCanCreateApiKeys")}`} disabled={!canPatch} variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_create_api_keys: null }))}>
                         <Trash2 className="h-3 w-3"/>
                       </Button>)}
                   </div>
@@ -509,27 +509,29 @@ export default function UsersPage() {
                       </p>
                     </div>
                     <div className="flex shrink-0 gap-2">
-                      <Button type="button" variant={permForm.allowed_zone_ids === null ? "default" : "outline"} size="sm" onClick={() => setPermForm((prev) => ({ ...prev, allowed_zone_ids: null }))}>
+                      <Button type="button" aria-label={`${t("admin.permInheritShort")}: ${t("admin.permAllowedZoneScope")}`} disabled={!canPatch} variant={permForm.domain_access.mode === "inherit" ? "default" : "outline"} size="sm" onClick={() => setPermForm((prev) => ({ ...prev, domain_access: { mode: "inherit", zone_ids: [] } }))}>
                         {t("admin.permInheritShort")}
                       </Button>
-                      <Button type="button" variant={permForm.allowed_zone_ids !== null && permForm.allowed_zone_ids.length === 0 ? "default" : "outline"} size="sm" onClick={() => setPermForm((prev) => ({ ...prev, allowed_zone_ids: [] }))}>
+                      <Button type="button" disabled={!canPatch} variant={permForm.domain_access.mode === "all" ? "default" : "outline"} size="sm" onClick={() => setPermForm((prev) => ({ ...prev, domain_access: { mode: "all", zone_ids: [] } }))}>
                         {t("admin.permAll")}
+                      </Button>
+                      <Button type="button" disabled={!canPatch} variant={permForm.domain_access.mode === "none" ? "default" : "outline"} size="sm" onClick={() => setPermForm((prev) => ({ ...prev, domain_access: { mode: "none", zone_ids: [] } }))}>
+                        {t("admin.permNoDomainsAllowed")}
                       </Button>
                     </div>
                   </div>
 
                   {domains.length === 0 ? (<p className="text-xs text-muted-foreground">{t("admin.permNoDomains")}</p>) : (<div className="grid gap-2">
                       {domains.map((domain) => {
-                const selected = permForm.allowed_zone_ids?.includes(domain.id) ?? false;
-                return (<label key={domain.id} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
-                            <span className="truncate">{domain.domain}</span>
-                            <Switch size="sm" checked={selected} onCheckedChange={(checked) => setPermForm((prev) => {
-                        const current = prev.allowed_zone_ids ?? [];
+                const selected = permForm.domain_access.mode === "list" && permForm.domain_access.zone_ids.includes(domain.id);
+                return (<label key={domain.id} htmlFor={`${permissionFormId}-zone-${domain.id}`} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
+                            <span id={`${permissionFormId}-zone-${domain.id}-label`} className="truncate">{domain.domain}</span>
+                            <Switch id={`${permissionFormId}-zone-${domain.id}`} aria-labelledby={`${permissionFormId}-zone-${domain.id}-label`} disabled={!canPatch} size="sm" checked={selected} onCheckedChange={(checked) => setPermForm((prev) => {
+                        const current = prev.domain_access.mode === "list" ? prev.domain_access.zone_ids : [];
+                        const zone_ids = checked ? Array.from(new Set([...current, domain.id])) : current.filter((id) => id !== domain.id);
                         return {
                             ...prev,
-                            allowed_zone_ids: checked
-                                ? Array.from(new Set([...current, domain.id]))
-                                : current.filter((id) => id !== domain.id),
+                            domain_access: { mode: zone_ids.length ? "list" : "none", zone_ids },
                         };
                     })}/>
                           </label>);
@@ -539,37 +541,42 @@ export default function UsersPage() {
 
                 {/* Number inputs */}
                 <div className="space-y-2">
-                  <Label>{t("admin.permDailySendQuota")}</Label>
-                  <Input type="number" placeholder={t("admin.permInherit")} value={permForm.daily_send_quota} onChange={(e) => setPermForm((prev) => ({ ...prev, daily_send_quota: e.target.value }))}/>
+                  <Label htmlFor={`${permissionFormId}-daily_send_quota`}>{t("admin.permDailySendQuota")}</Label>
+                  <Input id={`${permissionFormId}-daily_send_quota`} disabled={!canPatch} min={0} step={1} type="number" placeholder={t("admin.permInherit")} value={permForm.daily_send_quota} onChange={(e) => setPermForm((prev) => ({ ...prev, daily_send_quota: e.target.value }))}/>
                   <p className="text-xs text-muted-foreground">{t("admin.permZeroUnlimited")}</p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t("admin.permDailyReceiveQuota")}</Label>
-                  <Input type="number" placeholder={t("admin.permInherit")} value={permForm.daily_receive_quota} onChange={(e) => setPermForm((prev) => ({ ...prev, daily_receive_quota: e.target.value }))}/>
+                  <Label htmlFor={`${permissionFormId}-daily_receive_quota`}>{t("admin.permDailyReceiveQuota")}</Label>
+                  <Input id={`${permissionFormId}-daily_receive_quota`} disabled={!canPatch} min={0} step={1} type="number" placeholder={t("admin.permInherit")} value={permForm.daily_receive_quota} onChange={(e) => setPermForm((prev) => ({ ...prev, daily_receive_quota: e.target.value }))}/>
                   <p className="text-xs text-muted-foreground">{t("admin.permZeroUnlimited")}</p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t("admin.permMaxMailboxes")}</Label>
-                  <Input type="number" placeholder={t("admin.permInherit")} value={permForm.max_mailboxes} onChange={(e) => setPermForm((prev) => ({ ...prev, max_mailboxes: e.target.value }))}/>
+                  <Label htmlFor={`${permissionFormId}-max_mailboxes`}>{t("admin.permMaxMailboxes")}</Label>
+                  <Input id={`${permissionFormId}-max_mailboxes`} disabled={!canPatch} min={0} step={1} type="number" placeholder={t("admin.permInherit")} value={permForm.max_mailboxes} onChange={(e) => setPermForm((prev) => ({ ...prev, max_mailboxes: e.target.value }))}/>
                   <p className="text-xs text-muted-foreground">{t("admin.permZeroUnlimited")}</p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t("admin.permMaxDomains")}</Label>
-                  <Input type="number" placeholder={t("admin.permInherit")} value={permForm.max_domains} onChange={(e) => setPermForm((prev) => ({ ...prev, max_domains: e.target.value }))}/>
+                  <Label htmlFor={`${permissionFormId}-max_domains`}>{t("admin.permMaxDomains")}</Label>
+                  <Input id={`${permissionFormId}-max_domains`} disabled={!canPatch} min={0} step={1} type="number" placeholder={t("admin.permInherit")} value={permForm.max_domains} onChange={(e) => setPermForm((prev) => ({ ...prev, max_domains: e.target.value }))}/>
                   <p className="text-xs text-muted-foreground">{t("admin.permZeroUnlimited")}</p>
                 </div>
               </div>
             </div>
           </div>
 
+          {permConflict && <p role="alert" className="text-sm text-destructive">{t("admin.permConflict")}</p>}
+          {permSnapshot && !permSnapshot.capabilities.patch && <p role="status" className="text-sm text-muted-foreground">{t("admin.permReadOnly")}</p>}
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={handleResetOverrides} disabled={permResetting || !permUser}>
+            <Button variant="outline" aria-label={t("admin.permReload")} onClick={() => { if (permUser) void loadPermSnapshot(permUser); }} disabled={permLoading || permSaving || permResetting || !permUser}>
+              {t("admin.permReload")}
+            </Button>
+            <Button variant="outline" onClick={handleResetOverrides} disabled={!canPatch || assignmentChanged || !permUser}>
               {permResetting ? t("admin.permResetting") : t("admin.permReset")}
             </Button>
-            <Button onClick={handleSaveOverrides} disabled={permSaving || !permUser}>
+            <Button onClick={handleSaveOverrides} disabled={!canSave || !permUser}>
               {permSaving ? t("admin.permSaving") : t("admin.permSave")}
             </Button>
           </DialogFooter>

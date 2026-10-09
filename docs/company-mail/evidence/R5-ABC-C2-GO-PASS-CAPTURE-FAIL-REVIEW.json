@@ -1,0 +1,130 @@
+{
+  "SSE_safe_ready_proof": {
+    "actual_status": 200,
+    "body_bytes": 73,
+    "body_sha256": "a4eedd4c3da7e0d742474b24260968414f7041130a10e079801714942bf31a9b",
+    "capture_id": "company.events.ready",
+    "complete_ready_frame": true,
+    "headers": {
+      "Cache-Control": "private, no-store, no-transform",
+      "Content-Type": "text/event-stream",
+      "X-Accel-Buffering": "no"
+    },
+    "method": "GET",
+    "parsed_field_names": [
+      "tenant_id"
+    ],
+    "route": "/api/v1/company/events",
+    "tenant_value_private_not_published": true,
+    "wire_auth_current_scope_not_public_payload_dump": true
+  },
+  "actual_Go_leaf_PASS": 59,
+  "actual_Go_test_subtest_PASS": 73,
+  "actual_Go_top_PASS": 17,
+  "actual_HTTP_capture_response_count": 81,
+  "actual_handlers_production_not_modified": true,
+  "actual_source_closure_sha256": "68cf6eabf087a5d9b206fd478bd3493fef915b78eb9959b9c0abec9514a8c386",
+  "capture_private_file_excluded_from_archive": "http-capture/responses.json contains synthetic invitation secrets/tenantready actual body; retained0700 root/0600file",
+  "cleanup": {
+    "absolute_deadline_wall": 1790942975.263826,
+    "base_database": "tm_abc_c2_validation",
+    "budget_seconds": 600,
+    "elapsed_through_nativecleanup": 46.09628224372864,
+    "oldstoppedpartialroots_untouched": true,
+    "owned_pg_pid": 64862,
+    "owned_pid_observation": "absent",
+    "owned_root": "/private/tmp/tm-r5ABC-C2.8db5ic64",
+    "pg_stop_exit": 0,
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "temporary_databases_and_connections": [],
+    "test_database_query_exit": 0,
+    "utc": "2026-10-02T12:00:21.215454+00:00",
+    "window_origin_wall": 1790942375.263826,
+    "within_original600": true
+  },
+  "formal_HTTP_Go_evidence_exit_or_status": "pass",
+  "formal_HTTP_Go_exit": 0,
+  "formal_HTTP_oneGoentry_only": true,
+  "formal_capture_validator_exit": 1,
+  "nested_inner_Go_groups_observed_and_gone": true,
+  "not_whole206_completion": true,
+  "old_fullGo_stillFAIL": true,
+  "results": {
+    "A-two-affected-receipt-API": {
+      "CLI_exit": 0,
+      "elapsed_wall_seconds": 9.723791122436523,
+      "failed": [],
+      "leaf": 2,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "passed": 3,
+      "skipped": [],
+      "test_subtest_run_count": 3,
+      "timed_out": false,
+      "top": 2
+    },
+    "B-A-wholejourney-and-two-Goose-children": {
+      "CLI_exit": 0,
+      "elapsed_wall_seconds": 10.459203720092773,
+      "failed": [],
+      "leaf": 3,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "passed": 4,
+      "skipped": [],
+      "test_subtest_run_count": 4,
+      "timed_out": false,
+      "top": 2
+    },
+    "formal-HTTP-capture-validator": {
+      "CLI_exit": 1,
+      "elapsed_wall_seconds": 4.556687831878662,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "late-privacy-12tops-not-started-in-dfb": {
+      "CLI_exit": 0,
+      "elapsed_wall_seconds": 15.800935983657837,
+      "failed": [],
+      "leaf": 53,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "passed": 65,
+      "skipped": [],
+      "test_subtest_run_count": 65,
+      "timed_out": false,
+      "top": 12
+    },
+    "official-current18-bootstrap": {
+      "CLI_exit": 0,
+      "elapsed_wall_seconds": 4.234333753585815,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    }
+  },
+  "scope": "ABC_C2affected_plus_formal_realHTTPJSON_SSE_validation_and_named_latePrivacy_only; not wholebackend/206completion",
+  "scope_verdict": "Go_affected_targetsPASS_actualHTTPproducerPASS_but_formal_capturevalidatorFAIL_recipients_OAS_shape_preserved",
+  "source_sha": "33307f7bfd87a24b758f5020669c9b313337e3d3",
+  "validator_actual_errors": [
+    "[http-schema] recipients.list: path=['data'] keyword=type",
+    "[http-missing-success] ('GET', '/api/v1/company/outbound/{id}/recipients', '200')"
+  ]
+}

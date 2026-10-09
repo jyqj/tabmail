@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "task_complete": false,
+  "runtime_verified": false,
+  "source": "permission_contract independent read-only AST export, not test rerun",
+  "before": 127,
+  "after": 132,
+  "new_routes": [
+    "GET /api/v1/admin/permissions/{id}/deletion-preview",
+    "GET /api/v1/admin/users/{id}/permission-editor",
+    "PATCH /api/v1/admin/users/{id}/permission-editor",
+    "POST /api/v1/admin/users/{id}/permission-editor/assignment",
+    "GET /api/v1/company/events"
+  ],
+  "old_registration_tuples_changed": [],
+  "old_P1_semantic_updates": [
+    "DELETE /api/v1/admin/permissions/{id}",
+    "PATCH /api/v1/admin/permissions/{id}",
+    "GET /api/v1/admin/permissions",
+    "POST /api/v1/admin/permissions",
+    "PUT /api/v1/admin/users/{id}/permissions",
+    "DELETE /api/v1/admin/users/{id}/permissions"
+  ],
+  "line_fields": "AST collector source-location hints refreshed; outer-wrapper hints are not independent exact declaration-location proof",
+  "new_request_response_todo_fields": true,
+  "historical_client_AST": "retained labelled historical, not claimed newest wholeTS refresh",
+  "checker_changed_or_relaxed": false,
+  "Go_or_PG_run_by_doc_owner": false,
+  "affected_executor_selector": "^TestR5RouteInventory$",
+  "boundary": "Complete registration matrix132 with5newcontracts and6current P1 semantic corrections at5d1b cutoff; sole affected route132 passed. Historical fullGo2aa9/Go1 preserved. Later ProfileCreate guarded WIP is not the legacyCreate source reviewed in this matrix freeze; nextsource review needed.",
+  "official_affected_route_result": {
+    "source": "5d1b723b7dae6d4fbc94bb0405bd35af91ceb396",
+    "raw": "R5-M-PRE-CUTOFF-LOGS.tar.gz:phases/route132/stdout",
+    "exit": 0,
+    "selector": "^TestR5RouteInventory$",
+    "whole_go_or_132_role_runtime_claim": false
+  }
+}

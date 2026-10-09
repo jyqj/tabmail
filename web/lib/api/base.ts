@@ -6,6 +6,7 @@ import {
   sessionScope,
 } from "../session";
 import type { APIError, LoginResponse, APIResponse } from "../types";
+import { createEventStreamParser } from "./event-stream";
 
 export interface RequestOptions {
   signal?: AbortSignal;
@@ -258,7 +259,7 @@ export async function request<T>(
   }
 }
 
-let refreshPromise: Promise<boolean> | null = null;
+let refreshOperation: { scope: string; promise: Promise<boolean> } | null = null;
 
 // Web Locks serializes the shared HttpOnly refresh cookie across tabs. The
 // second tab observes the first tab's replacement access token and does not
@@ -268,7 +269,8 @@ export async function tryRefreshToken(
   failedToken: string,
   scope = sessionScope(),
 ): Promise<boolean> {
-  if (refreshPromise) return refreshPromise;
+  if (scope !== sessionScope()) return false;
+  if (refreshOperation?.scope === scope) return refreshOperation.promise;
   if (typeof navigator === "undefined" || !navigator.locks) return false;
   const promise = (async () =>
     await navigator.locks.request("tabmail-refresh", async () => {
@@ -278,9 +280,11 @@ export async function tryRefreshToken(
       if (current !== failedToken) return true;
       return doRefreshToken(scope, failedToken);
     }))().finally(() => {
-    refreshPromise = null;
+    // A queued operation from a retired scope can finish while its replacement
+    // is still running. It must not release the new scope's coalescing entry.
+    if (refreshOperation?.promise === promise) refreshOperation = null;
   });
-  refreshPromise = promise;
+  refreshOperation = { scope, promise };
   return promise;
 }
 
@@ -354,27 +358,39 @@ export async function streamEvents(
   const lease = sessionRequest(signal);
   let cursor = "";
   let failures = 0;
+  const assertCurrent = () => {
+    assertSession(lease.scope);
+    if (lease.signal.aborted) throw new DOMException("Aborted", "AbortError");
+  };
   try {
     while (!lease.signal.aborted) {
-      assertSession(lease.scope);
+      assertCurrent();
       try {
         const headers = buildHeaders(path);
+        // A different tab can rotate this token while fetch is pending. The
+        // response belongs to the token actually sent, not the latest one.
+        const usedSessionToken = requestUsedAccessToken(headers);
         if (cursor) headers["Last-Event-ID"] = cursor;
         let res = await fetch(`${getBaseUrl()}${path}`, {
           headers,
           credentials: "include",
           signal: lease.signal,
         });
-        assertSession(lease.scope);
-        if (res.status === 401 && requestUsedAccessToken(headers)) {
-          if (
-            !(await tryRefreshToken(
-              headers.Authorization?.slice(7) || "",
-              lease.scope,
-            ))
-          )
-            throw new Error("Authentication required");
-          assertSession(lease.scope);
+        assertCurrent();
+        if (res.status === 401 && usedSessionToken) {
+          const renewed = await tryRefreshToken(
+            headers.Authorization?.slice(7) || "",
+            lease.scope,
+          );
+          assertCurrent();
+          if (!renewed) {
+            // A rejected refresh clears the identity. Network, server and
+            // malformed-response failures preserve it and use stream backoff;
+            // they are not evidence that administrative authority was revoked.
+            if (typeof navigator === "undefined" || !navigator.locks || !getStoredKey("tabmail_access_token"))
+              throw new DOMException("Stream permission revoked", "NotAllowedError");
+            throw new Error("Stream authentication temporarily unavailable");
+          }
           const retry = buildHeaders(path);
           if (cursor) retry["Last-Event-ID"] = cursor;
           res = await fetch(`${getBaseUrl()}${path}`, {
@@ -383,6 +399,7 @@ export async function streamEvents(
             signal: lease.signal,
           });
         }
+        assertCurrent();
         if (res.status === 401 || res.status === 403)
           throw new DOMException(
             "Stream permission revoked",
@@ -394,43 +411,28 @@ export async function streamEvents(
         onEvent({ type: "resync", data: null });
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
-        let buffer = "";
+        const parser = createEventStreamParser(frame => {
+          assertCurrent();
+          if (frame.id !== undefined) cursor = frame.id;
+          if (frame.data === undefined) return;
+          let data: unknown = frame.data;
+          try {
+            data = JSON.parse(frame.data);
+          } catch {
+            /* raw event data */
+          }
+          onEvent({
+            type: frame.type,
+            data: transform ? transform(data) : data,
+          });
+          failures = 0;
+        });
         try {
           while (!lease.signal.aborted) {
             const { value, done } = await reader.read();
-            assertSession(lease.scope);
+            assertCurrent();
             if (done) break;
-            buffer += decoder
-              .decode(value, { stream: true })
-              .replace(/\r\n/g, "\n");
-            if (buffer.length > 1024 * 1024)
-              throw new Error("Oversized event stream frame");
-            let boundary: number;
-            while ((boundary = buffer.indexOf("\n\n")) >= 0) {
-              const chunk = buffer.slice(0, boundary);
-              buffer = buffer.slice(boundary + 2);
-              let event = "message";
-              const lines: string[] = [];
-              for (const line of chunk.split("\n")) {
-                if (line.startsWith("id:")) cursor = line.slice(3).trim();
-                if (line.startsWith("event:")) event = line.slice(6).trim();
-                if (line.startsWith("data:"))
-                  lines.push(line.slice(5).trimStart());
-              }
-              if (!lines.length) continue;
-              let data: unknown = lines.join("\n");
-              try {
-                data = JSON.parse(data as string);
-              } catch {
-                /* raw event data */
-              }
-              assertSession(lease.scope);
-              onEvent({
-                type: event,
-                data: transform ? transform(data) : data,
-              });
-              failures = 0;
-            }
+            parser.push(decoder.decode(value, { stream: true }));
           }
         } finally {
           await reader.cancel().catch(() => undefined);

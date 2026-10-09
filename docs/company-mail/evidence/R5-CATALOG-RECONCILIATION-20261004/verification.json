@@ -1,0 +1,175 @@
+{
+  "source_commit": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+  "qualification": "static-source-inventory-only",
+  "tool": {
+    "go": "go1.25.7 linux/amd64",
+    "go_path": "/workspace/tabmail-cloud/tools/go/bin/go",
+    "node": "v24.19.0",
+    "cache": "/tmp/r5-catalog-reconcile-20261004/cache",
+    "modulecache": "/workspace/tabmail-cloud/gomod",
+    "GOPROXY": "off"
+  },
+  "runs": [
+    {
+      "log": "old-tests.log",
+      "tests": 45,
+      "passed": 43,
+      "errors": 2,
+      "failures": 0,
+      "exit": 1,
+      "qualification": "old pins reject current facts; errors preserved"
+    },
+    {
+      "log": "current-tests.log",
+      "tests": 50,
+      "passed": 49,
+      "errors": 0,
+      "failures": 1,
+      "exit": 1,
+      "qualification": "initial revision run; historical PR23 comparison not yet separated; retained"
+    },
+    {
+      "log": "final-tests.log",
+      "tests": 50,
+      "passed": 50,
+      "errors": 0,
+      "failures": 0,
+      "exit": 0
+    },
+    {
+      "log": "final-route-inclusive-tests.log",
+      "tests": 51,
+      "passed": 51,
+      "errors": 0,
+      "failures": 0,
+      "skips": 0,
+      "expected_failures": 0,
+      "exit": 0,
+      "modules": {
+        "test_r5_transactions": 26,
+        "test_r5_compatibility": 19,
+        "test_r5_catalog_reconciliation": 6
+      }
+    }
+  ],
+  "actual_route_source_control": {
+    "before_exit": 0,
+    "unapproved_route_exit": 1,
+    "rejection": "undocumented route GET /unreviewed-docs-assets/*"
+  },
+  "transaction_cli": {
+    "status": "PASS",
+    "postgres_files": 62,
+    "functions": 395,
+    "sql_execution_calls": 498,
+    "direct_write_functions": 134,
+    "write_closure_functions": 154,
+    "migration_files": 19,
+    "task_complete": false,
+    "runtime_verified": false,
+    "meaning": "syntax inventory current; no concurrency or behavior equivalence claim"
+  },
+  "compatibility_cli": {
+    "wire_validation_scope": "not_checked_current_wire_required",
+    "historical_wire_reference": {
+      "artifact_ref": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json",
+      "sha256": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+      "qualification": "historical_metadata_only_not_current_wire"
+    },
+    "status": "source_inventory_and_upgrade_plan_checked",
+    "task_complete": false,
+    "product_green": false,
+    "routes": 132,
+    "client_branches": 134,
+    "source_files": 94,
+    "openapi_missing": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/suppression",
+      "GET /docs-assets/*"
+    ],
+    "no_shipped_client": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/admin/status",
+      "GET /api/v1/auth/me",
+      "GET /api/v1/company/outbound/{id}/recipients",
+      "GET /api/v1/suppression",
+      "GET /docs",
+      "GET /docs-assets/*",
+      "GET /metrics",
+      "GET /openapi.yaml",
+      "GET /ready",
+      "GET /redoc"
+    ],
+    "runtime_boundary": "No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required."
+  },
+  "private_evidence": {
+    "old-tests.log": {
+      "private_path": "/tmp/r5-catalog-reconcile-20261004/old-tests.log",
+      "bytes": 13461,
+      "sha256": "2f13151c6f336e81632ccad8d77fd7c887a6e4c30ae4be56b85ffdcbcaa531e5"
+    },
+    "current-tests.log": {
+      "private_path": "/tmp/r5-catalog-reconcile-20261004/current-tests.log",
+      "bytes": 9299,
+      "sha256": "b39fd85ea693e6463a761df021a9ce3877ef1acc250f9ff6564ddecc893c5dea"
+    },
+    "final-tests.log": {
+      "private_path": "/tmp/r5-catalog-reconcile-20261004/final-tests.log",
+      "bytes": 8101,
+      "sha256": "4885c3fcf857a0a1074a873e385ff4ed3a67d47bfdd927e06f86717009003369"
+    },
+    "final-route-inclusive-tests.log": {
+      "private_path": "/tmp/r5-catalog-reconcile-20261004/final-route-inclusive-tests.log",
+      "bytes": 8310,
+      "sha256": "e4738ee78ed7ddd5e21f597240aae19fc949bff6dcf8a048af9ed74d31ef0c1a"
+    },
+    "route-control.log": {
+      "private_path": "/tmp/r5-catalog-reconcile-20261004/route-control.log",
+      "bytes": 215,
+      "sha256": "fa672d86409f92beee7ba011f6ccb622d0e11c3082e3825a1569e0f32d27f6b8"
+    },
+    "transaction-cli.json": {
+      "private_path": "/tmp/r5-catalog-reconcile-20261004/transaction-cli.json",
+      "bytes": 309,
+      "sha256": "517448bd669e67d3c12da0b4e94ef95e34bf2c94d156a3aadabc4b2a464c80fe"
+    },
+    "compatibility-cli.json": {
+      "private_path": "/tmp/r5-catalog-reconcile-20261004/compatibility-cli.json",
+      "bytes": 1117,
+      "sha256": "677f536dea0eccc18aba48fb1134bf11abab8c980e362691fb8a01a9bd29d4db"
+    },
+    "ast.json": {
+      "private_path": "/tmp/r5-catalog-reconcile-20261004/ast.json",
+      "bytes": 3145513,
+      "sha256": "73bf6120f2f5a4ff8a3cbf574a3f227ad7658166c5bed26b3e303d332809f32d"
+    },
+    "migrations.json": {
+      "private_path": "/tmp/r5-catalog-reconcile-20261004/migrations.json",
+      "bytes": 25027,
+      "sha256": "97766e7554d86e945bff31285c2b41ac58c9fb89bfc4bf714b15441c4447eac5"
+    },
+    "routes.json": {
+      "private_path": "/tmp/r5-catalog-reconcile-20261004/routes.json",
+      "bytes": 129143,
+      "sha256": "878151efea072c892f2744bd5b1ec576fe0e4736e87bcfda08be271e95688636"
+    },
+    "clients.json": {
+      "private_path": "/tmp/r5-catalog-reconcile-20261004/clients.json",
+      "bytes": 40875,
+      "sha256": "767df38180ee6b51eb47b468eb41dc3516e0bcd7600118b8b4689a1d1e6adf8c"
+    }
+  },
+  "central_progress": "10/171 unchanged",
+  "not_run": [
+    "formal default",
+    "sharedDB",
+    "HTTP",
+    "components",
+    "wholePG180",
+    "services/PG",
+    "actual mail",
+    "selected source metadata/capture",
+    "preparation"
+  ],
+  "historical_failure_evidence": "unchanged; no recertification"
+}

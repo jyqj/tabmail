@@ -2,6 +2,7 @@ package domainapp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
+	storeport "tabmail/internal/store"
 )
 
 type store interface {
@@ -55,8 +57,8 @@ type Service struct {
 	// (e.g. in tests or when the resolver is not wired in); the resolver TTL
 	// still bounds drift.
 	resolverInv ResolverInvalidator
-	lookupTXT   func(string) ([]string, error)
-	lookupMX    func(string) ([]*net.MX, error)
+	lookupTXT   func(context.Context, string) ([]string, error)
+	lookupMX    func(context.Context, string) ([]*net.MX, error)
 	logger      zerolog.Logger
 }
 
@@ -86,16 +88,42 @@ type VerificationStatus struct {
 
 const dnsLookupTimeout = 3 * time.Second
 
-func lookupTXTWithTimeout(name string) ([]string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), dnsLookupTimeout)
-	defer cancel()
-	return net.DefaultResolver.LookupTXT(ctx, name)
+func lookupTXTWithTimeout(parent context.Context, name string) ([]string, error) {
+	return lookupDNSWithTimeout(parent, name, net.DefaultResolver.LookupTXT)
 }
 
-func lookupMXWithTimeout(name string) ([]*net.MX, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), dnsLookupTimeout)
+func lookupMXWithTimeout(parent context.Context, name string) ([]*net.MX, error) {
+	return lookupDNSWithTimeout(parent, name, net.DefaultResolver.LookupMX)
+}
+
+func lookupDNSWithTimeout[T any](parent context.Context, name string, lookup func(context.Context, string) (T, error)) (T, error) {
+	ctx, cancel := context.WithTimeout(parent, dnsLookupTimeout)
 	defer cancel()
-	return net.DefaultResolver.LookupMX(ctx, name)
+	var zero T
+	if err := ctx.Err(); err != nil {
+		return zero, err
+	}
+	type result struct {
+		value T
+		err   error
+	}
+	// The Go resolver may wait for its socket deadline after context cancellation.
+	// Return to the request immediately; the lookup retains the same bounded
+	// deadline and its buffered result cannot block after the caller has left.
+	done := make(chan result, 1)
+	go func() {
+		value, err := lookup(ctx, name)
+		done <- result{value: value, err: err}
+	}()
+	select {
+	case <-ctx.Done():
+		return zero, ctx.Err()
+	case result := <-done:
+		if err := ctx.Err(); err != nil {
+			return zero, err
+		}
+		return result.value, result.err
+	}
 }
 
 func NewService(s store, dispatcher *hooks.Dispatcher, expectedMXHost string, resolverInv ResolverInvalidator, logger zerolog.Logger) *Service {
@@ -130,10 +158,20 @@ func (s *Service) invalidateRoutes(zoneID uuid.UUID) {
 // initialization (e.g., in tests), never during request handling.
 func (s *Service) SetResolvers(lookupTXT func(string) ([]string, error), lookupMX func(string) ([]*net.MX, error)) {
 	if lookupTXT != nil {
-		s.lookupTXT = lookupTXT
+		s.lookupTXT = func(ctx context.Context, name string) ([]string, error) {
+			if err := ctx.Err(); err != nil {
+				return nil, err
+			}
+			return lookupTXT(name)
+		}
 	}
 	if lookupMX != nil {
-		s.lookupMX = lookupMX
+		s.lookupMX = func(ctx context.Context, name string) ([]*net.MX, error) {
+			if err := ctx.Err(); err != nil {
+				return nil, err
+			}
+			return lookupMX(name)
+		}
 	}
 }
 
@@ -193,7 +231,10 @@ func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *mod
 	// do not have owner-level quotas.
 	ownerUserID := actor.EffectiveUserID()
 	if actor.Permission != nil && !isAdmin && ownerUserID != nil && !models.IsUnlimited(actor.Permission.MaxDomains) {
-		owned := countOwnedZones(ctx, s.store, tenant.ID, ownerUserID)
+		owned, err := countOwnedZones(ctx, s.store, tenant.ID, ownerUserID)
+		if err != nil {
+			return nil, app.Internal(err)
+		}
 		if owned >= actor.Permission.MaxDomains {
 			return nil, app.Forbidden("domain limit reached")
 		}
@@ -220,7 +261,7 @@ func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *mod
 	if parent != nil && !authz.ZoneAllowed(actor, parent.ID) {
 		return nil, app.Forbidden("parent zone not in allowed list")
 	}
-	if actor.Permission != nil && !isAdmin && parent == nil && len(actor.Permission.AllowedZoneIDs) > 0 {
+	if actor.Permission != nil && !isAdmin && parent == nil && actor.Permission.RestrictsZones() {
 		return nil, app.Forbidden("restricted credentials cannot create root domains")
 	}
 	cfg, err := s.store.EffectiveConfig(ctx, tenant.ID)
@@ -252,9 +293,8 @@ func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *mod
 	zone.DKIMSelector = tabdkim.DefaultSelector
 	zone.DKIMEnabled = false
 	if err := s.store.CreateZone(ctx, zone); err != nil {
-		errLower := strings.ToLower(err.Error())
-		if strings.Contains(errLower, "duplicate") || strings.Contains(errLower, "unique") || strings.Contains(errLower, "23505") {
-			return nil, app.Conflict("domain already exists")
+		if errors.Is(err, storeport.ErrDomainAlreadyExists) {
+			return nil, &app.Error{Kind: app.KindConflict, Message: "domain already exists", Err: err}
 		}
 		return nil, app.Internal(err)
 	}
@@ -319,7 +359,13 @@ func (s *Service) TriggerVerify(ctx context.Context, actor authz.Actor, zoneID u
 	if err != nil {
 		return nil, VerificationChecks{}, err
 	}
-	checks := s.lookupVerification(zone)
+	if err := ctx.Err(); err != nil {
+		return nil, VerificationChecks{}, app.Internal(err)
+	}
+	checks := s.lookupVerification(ctx, zone)
+	if err := ctx.Err(); err != nil {
+		return nil, VerificationChecks{}, app.Internal(err)
+	}
 	zone.IsVerified = checks.TXT.Status == "pass"
 	zone.MXVerified = checks.MX.Status == "pass"
 	if checks.DKIM.Status == "pass" && zone.DKIMPrivateKeyPEM != nil {
@@ -361,7 +407,13 @@ func (s *Service) VerificationStatus(ctx context.Context, actor authz.Actor, zon
 	if err != nil {
 		return nil, err
 	}
-	checks := s.lookupVerification(zone)
+	if err := ctx.Err(); err != nil {
+		return nil, app.Internal(err)
+	}
+	checks := s.lookupVerification(ctx, zone)
+	if err := ctx.Err(); err != nil {
+		return nil, app.Internal(err)
+	}
 	dkimRecord := ""
 	dkimHost := ""
 	if zone.DKIMPrivateKeyPEM != nil {
@@ -408,9 +460,12 @@ func (s *Service) authorize(ctx context.Context, actor authz.Actor, action authz
 	return app.FromAuthz(s.az.Authorize(ctx, actor, action, res))
 }
 
-func (s *Service) lookupVerification(zone *models.DomainZone) VerificationChecks {
+func (s *Service) lookupVerification(ctx context.Context, zone *models.DomainZone) VerificationChecks {
 	expectedMX := s.expectedMX()
-	vals, txtErr := s.lookupTXT(zone.Domain)
+	vals, txtErr := s.lookupTXT(ctx, zone.Domain)
+	if ctx.Err() != nil {
+		return VerificationChecks{}
+	}
 	txtCheck := DNSCheck{Status: "fail"}
 	for _, txt := range vals {
 		if strings.TrimSpace(txt) == zone.TXTRecord {
@@ -421,7 +476,10 @@ func (s *Service) lookupVerification(zone *models.DomainZone) VerificationChecks
 	if txtErr != nil {
 		txtCheck.Details = append(txtCheck.Details, txtErr.Error())
 	}
-	mxVals, mxErr := s.lookupMX(zone.Domain)
+	mxVals, mxErr := s.lookupMX(ctx, zone.Domain)
+	if ctx.Err() != nil {
+		return VerificationChecks{}
+	}
 	mxCheck := DNSCheck{Status: "fail"}
 	for _, mx := range mxVals {
 		host := normalizeDNSName(mx.Host)
@@ -433,13 +491,17 @@ func (s *Service) lookupVerification(zone *models.DomainZone) VerificationChecks
 	if mxErr != nil {
 		mxCheck.Details = append(mxCheck.Details, mxErr.Error())
 	}
-	return VerificationChecks{
-		TXT:   txtCheck,
-		MX:    mxCheck,
-		SPF:   s.lookupTXTRecord(zone.Domain, func(v string) bool { return strings.HasPrefix(strings.ToLower(strings.TrimSpace(v)), "v=spf1") }),
-		DKIM:  s.lookupDKIMRecord(zone),
-		DMARC: s.lookupTXTRecord("_dmarc."+zone.Domain, func(v string) bool { return strings.HasPrefix(strings.ToLower(strings.TrimSpace(v)), "v=dmarc1") }),
+	checks := VerificationChecks{TXT: txtCheck, MX: mxCheck}
+	checks.SPF = s.lookupTXTRecord(ctx, zone.Domain, func(v string) bool { return strings.HasPrefix(strings.ToLower(strings.TrimSpace(v)), "v=spf1") })
+	if ctx.Err() != nil {
+		return VerificationChecks{}
 	}
+	checks.DKIM = s.lookupDKIMRecord(ctx, zone)
+	if ctx.Err() != nil {
+		return VerificationChecks{}
+	}
+	checks.DMARC = s.lookupTXTRecord(ctx, "_dmarc."+zone.Domain, func(v string) bool { return strings.HasPrefix(strings.ToLower(strings.TrimSpace(v)), "v=dmarc1") })
+	return checks
 }
 
 func (s *Service) expectedMX() string {
@@ -515,8 +577,8 @@ func ensureTenantScope(tenant *models.Tenant, isAdmin bool) error {
 	return app.EnsureTenantScope(tenant, isAdmin)
 }
 
-func (s *Service) lookupTXTRecord(name string, match func(string) bool) DNSCheck {
-	vals, err := s.lookupTXT(name)
+func (s *Service) lookupTXTRecord(ctx context.Context, name string, match func(string) bool) DNSCheck {
+	vals, err := s.lookupTXT(ctx, name)
 	check := DNSCheck{Status: "fail"}
 	for _, v := range vals {
 		check.Details = append(check.Details, v)
@@ -530,7 +592,7 @@ func (s *Service) lookupTXTRecord(name string, match func(string) bool) DNSCheck
 	return check
 }
 
-func (s *Service) lookupDKIMRecord(zone *models.DomainZone) DNSCheck {
+func (s *Service) lookupDKIMRecord(ctx context.Context, zone *models.DomainZone) DNSCheck {
 	check := DNSCheck{Status: "fail"}
 	if zone == nil {
 		check.Details = append(check.Details, "zone missing")
@@ -550,26 +612,34 @@ func (s *Service) lookupDKIMRecord(zone *models.DomainZone) DNSCheck {
 		selector = tabdkim.DefaultSelector
 	}
 	name := tabdkim.DNSRecordName(selector, zone.Domain)
-	vals, err := s.lookupTXT(name)
+	vals, err := s.lookupTXT(ctx, name)
 	for _, v := range vals {
 		check.Details = append(check.Details, v)
-		if tabdkim.TXTValueMatchesPublicKey(v, publicKey) {
-			check.Status = "pass"
-		}
 	}
 	if err != nil {
 		check.Details = append(check.Details, err.Error())
+		return check
+	}
+	// LookupTXT already joins character strings belonging to one TXT RR.
+	// Multiple records for a selector are ambiguous (RFC 6376 section 3.6.2.2)
+	// and rejected by our signature verifier, even if one key matches.
+	if len(vals) != 1 {
+		check.Details = append(check.Details, "expected exactly one DKIM TXT record")
+		return check
+	}
+	if tabdkim.TXTValueMatchesPublicKey(vals[0], publicKey) {
+		check.Status = "pass"
 	}
 	return check
 }
 
-func countOwnedZones(ctx context.Context, st store, tenantID uuid.UUID, ownerUserID *uuid.UUID) int {
+func countOwnedZones(ctx context.Context, st store, tenantID uuid.UUID, ownerUserID *uuid.UUID) (int, error) {
 	if ownerUserID == nil {
-		return 0
+		return 0, nil
 	}
 	zones, err := st.ListZones(ctx, tenantID)
 	if err != nil {
-		return 0
+		return 0, err
 	}
 	n := 0
 	for _, z := range zones {
@@ -577,7 +647,7 @@ func countOwnedZones(ctx context.Context, st store, tenantID uuid.UUID, ownerUse
 			n++
 		}
 	}
-	return n
+	return n, nil
 }
 
 func normalizeDNSName(v string) string {

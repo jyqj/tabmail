@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"strconv"
 	"strings"
@@ -13,7 +12,6 @@ import (
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
 	"tabmail/internal/models"
-	"tabmail/internal/outbound"
 )
 
 // The employee submission view projects outbound jobs the actor may see:
@@ -22,63 +20,23 @@ import (
 // Administrative roles confer no bypass — the management view of delivery
 // internals stays in the recovery surface.
 
-const submissionSelect = `SELECT s.id,s.sender_mailbox_id,s.mail_from,s.subject,
- COALESCE(s.template_version_id::TEXT,''),s.draft_id IS NOT NULL,
- COALESCE(array_length(s.attachment_ids,1),0),s.created_at,
- s.state,s.in_flight_domain<>'' FROM outbound_jobs s`
+// Read only ordinary-operation metadata. No content/address columns are even
+// selected for the public company receipt scan.
+const submissionSelect = `SELECT s.id,s.tenant_id,s.state,s.created_at,s.updated_at,
+ s.attempts,s.next_attempt_at,s.in_flight_domain<>'',s.recipient_ledger FROM outbound_jobs s`
 
-func scanSubmission(row pgx.Row) (*company.Submission, models.OutboundState, bool, error) {
-	v := &company.Submission{}
-	var state models.OutboundState
+func scanSubmission(row pgx.Row) (*models.OutboundJob, error) {
+	job := &models.OutboundJob{}
 	var inFlight bool
-	var templateVersion string
-	if e := row.Scan(&v.ID, &v.MailboxID, &v.MailFrom, &v.Subject, &templateVersion, &v.DraftConsumed, &v.AttachmentCount, &v.CreatedAt, &state, &inFlight); e != nil {
-		return nil, "", false, e
+	if err := row.Scan(&job.ID, &job.TenantID, &job.State, &job.CreatedAt, &job.UpdatedAt, &job.Attempts, &job.NextAttemptAt, &inFlight, &job.RecipientLedger); err != nil {
+		return nil, err
 	}
-	if templateVersion != "" {
-		id, e := uuid.Parse(templateVersion)
-		if e != nil {
-			return nil, "", false, e
-		}
-		v.TemplateVersionID = &id
+	// Only presence affects outcome; the private recipient-domain value is never
+	// read or exposed on an ordinary receipt.
+	if inFlight {
+		job.InFlightDomain = "present"
 	}
-	return v, state, inFlight, nil
-}
-
-// applySubmissionOutcome derives the user-facing status and uncertainty flag
-// from the job state plus the recipient ledger. In-flight ambiguity is fed to
-// the mapper as an "uncertain" ledger entry so it surfaces as needs_attention.
-func applySubmissionOutcome(v *company.Submission, state models.OutboundState, inFlight bool) {
-	states := make([]string, 0, len(v.Recipients)+1)
-	for _, r := range v.Recipients {
-		states = append(states, r.State)
-	}
-	if inFlight && state != models.OutboundProcessing {
-		states = append(states, "uncertain")
-		v.DeliveryUncertain = true
-	}
-	v.Status = company.DeriveSubmissionStatus(state, states)
-}
-
-func loadSubmissionRecipients(ctx context.Context, tx pgx.Tx, tenant uuid.UUID, ids []uuid.UUID) (map[uuid.UUID][]company.SubmissionRecipient, error) {
-	out := map[uuid.UUID][]company.SubmissionRecipient{}
-	if len(ids) == 0 {
-		return out, nil
-	}
-	rows, e := tx.Query(ctx, `SELECT job_id,address,state FROM outbound_recipients WHERE tenant_id=$1 AND job_id=ANY($2) ORDER BY job_id,address`, tenant, ids)
-	if e != nil {
-		return nil, e
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var job uuid.UUID
-		r := company.SubmissionRecipient{}
-		if e := rows.Scan(&job, &r.Address, &r.State); e != nil {
-			return nil, e
-		}
-		out[job] = append(out[job], r)
-	}
-	return out, rows.Err()
+	return job, nil
 }
 
 // submissionScope builds the tenant-isolated visibility predicate for the
@@ -110,10 +68,7 @@ func submissionScopeFor(a authz.Actor, argBase int, allowSubmitter bool) (string
 		n++
 		u := "$" + strconv.Itoa(n)
 		args = append(args, *uid)
-		readable := `s.sender_mailbox_id IN (
-			SELECT m.id FROM mailboxes m WHERE m.tenant_id=$` + strconv.Itoa(argBase) + `
-			 AND (m.expires_at IS NULL OR m.expires_at>clock_timestamp())
-			 AND (m.owner_user_id=` + u + ` OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.tenant_id=m.tenant_id AND g.mailbox_id=m.id AND g.user_id=` + u + ` AND g.can_read)))`
+		readable := `s.sender_mailbox_id IN (SELECT m.id FROM mailboxes m WHERE ` + readableMailboxPredicate(argBase, n) + `)`
 		if allowSubmitter {
 			where = append(where, `(s.user_id=`+u+` OR s.sender_user_id=`+u+` OR `+readable+`)`)
 		} else {
@@ -127,10 +82,10 @@ func submissionScopeFor(a authz.Actor, argBase int, allowSubmitter bool) (string
 		// Unknown principal: visible rows stay empty rather than broadening.
 		where = append(where, `FALSE`)
 	}
-	if a.Permission != nil && len(a.Permission.AllowedZoneIDs) > 0 {
+	if restricted, ids := a.Permission.ZoneScope(); restricted {
 		n++
 		where = append(where, `s.zone_id=ANY($`+strconv.Itoa(n)+`)`)
-		args = append(args, a.Permission.AllowedZoneIDs)
+		args = append(args, ids)
 	}
 	return strings.Join(where, " AND "), args
 }
@@ -151,56 +106,51 @@ func (s *PgStore) ListSubmissions(ctx context.Context, a authz.Actor, pg models.
 			return e
 		}
 		defer rows.Close()
-		type rowState struct {
-			state    models.OutboundState
-			inFlight bool
-		}
-		states := map[uuid.UUID]rowState{}
+		jobs := []*models.OutboundJob{}
 		ids := []uuid.UUID{}
 		for rows.Next() {
-			v, state, inFlight, e := scanSubmission(rows)
-			if e != nil {
-				return e
+			job, err := scanSubmission(rows)
+			if err != nil {
+				return err
 			}
-			out = append(out, *v)
-			ids = append(ids, v.ID)
-			states[v.ID] = rowState{state, inFlight}
+			jobs = append(jobs, job)
+			ids = append(ids, job.ID)
 		}
-		if e := rows.Err(); e != nil {
-			return e
+		if err := rows.Err(); err != nil {
+			return err
 		}
-		recips, e := loadSubmissionRecipients(ctx, tx, a.TenantID, ids)
-		if e != nil {
-			return e
+		recips, err := loadSubmissionReceiptRecipients(ctx, tx, a.TenantID, ids)
+		if err != nil {
+			return err
 		}
-		for i := range out {
-			out[i].Recipients = recips[out[i].ID]
-			rs := states[out[i].ID]
-			applySubmissionOutcome(&out[i], rs.state, rs.inFlight)
+		for _, job := range jobs {
+			view := company.ProjectOutboundReceipt(job, recips[job.ID].ledgerStates, job.RecipientLedger)
+			out = append(out, *view)
 		}
 		return nil
 	})
-	return out, total, e
+	if e != nil {
+		return nil, 0, e
+	}
+	return out, total, nil
 }
 
 func (s *PgStore) GetSubmission(ctx context.Context, a authz.Actor, id uuid.UUID) (*company.Submission, error) {
 	v := &company.Submission{}
 	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		where, args := submissionScope(a, 2)
-		sv, state, inFlight, e := scanSubmission(tx.QueryRow(ctx, submissionSelect+` WHERE `+where+` AND s.id=$1`, append([]any{id}, args...)...))
+		job, e := scanSubmission(tx.QueryRow(ctx, submissionSelect+` WHERE `+where+` AND s.id=$1`, append([]any{id}, args...)...))
 		if e == pgx.ErrNoRows {
 			return app.NotFound("submission not found")
 		}
 		if e != nil {
 			return e
 		}
-		recips, e := loadSubmissionRecipients(ctx, tx, a.TenantID, []uuid.UUID{id})
+		recips, e := loadSubmissionReceiptRecipients(ctx, tx, a.TenantID, []uuid.UUID{id})
 		if e != nil {
 			return e
 		}
-		sv.Recipients = recips[id]
-		applySubmissionOutcome(sv, state, inFlight)
-		*v = *sv
+		*v = *company.ProjectOutboundReceipt(job, recips[id].ledgerStates, job.RecipientLedger)
 		return nil
 	})
 	if e != nil {
@@ -212,31 +162,15 @@ func (s *PgStore) GetSubmission(ctx context.Context, a authz.Actor, id uuid.UUID
 // Content and attachment projections require current mailbox read rights.
 // Historical submitter identity only permits the separate operation receipt.
 // Denial collapses to 404, including after grants or ownership are revoked.
-const submissionContentSelect = `SELECT s.id,s.subject,s.mail_from,s.to_addrs,s.cc_addrs,s.headers_json,s.text_body,s.html_body,s.created_at` + sentContentFrom
-
 func (s *PgStore) GetSubmissionContent(ctx context.Context, a authz.Actor, id uuid.UUID) (*company.SubmissionContent, error) {
-	v := &company.SubmissionContent{}
-	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
-		where, args := submissionContentScope(a, 2)
-		var to, cc []string
-		var headers json.RawMessage
-		e := tx.QueryRow(ctx, submissionContentSelect+` WHERE `+where+` AND s.id=$1`, append([]any{id}, args...)...).
-			Scan(&v.ID, &v.Subject, &v.MailFrom, &to, &cc, &headers, &v.TextBody, &v.HTMLBody, &v.CreatedAt)
-		if errors.Is(e, pgx.ErrNoRows) {
-			return app.NotFound("submission not found")
-		}
-		if e != nil {
-			return e
-		}
-		v.To = append([]string{}, to...)
-		v.CC = append([]string{}, cc...)
-		// The stored custom-header map keeps the raw caller input; readers only
-		// ever see the same filtered subset the wire message carried.
-		v.Headers = outbound.SafeDisplayHeaders(headers)
-		return nil
+	var v *company.SubmissionContent
+	err := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, current authz.Actor) error {
+		var err error
+		v, err = readSentContentTx(ctx, tx, current, id)
+		return err
 	})
-	if e != nil {
-		return nil, e
+	if err != nil {
+		return nil, err
 	}
 	return v, nil
 }

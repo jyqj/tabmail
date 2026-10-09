@@ -1,29 +1,56 @@
 "use client";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAPI } from "@/hooks/use-api";
-import { company, workPath, type WorkGrant, type WorkMailbox, type MailboxGrantSnapshot } from "@/lib/company";
+import { company, workPath, type WorkGrantInput, type WorkMailbox, type MailboxGrantSnapshot } from "@/lib/company";
 import type { AdminUser } from "@/lib/types";
+import { isConflict } from "@/lib/error-code";
+import { sessionScope, useSessionScope } from "@/lib/session";
 import { EmployeeField } from "./employee-field";
-import { ActionButton, Field, inputClass, LoadError, useAction, useText } from "./common";
+import { ActionButton, LoadError, useAction, useText } from "./common";
+import { MailboxLifecycleEditor } from "./mailbox-lifecycle";
 
-export function GrantEditor({
-  mailbox,
-  employees,
-  refresh,
-}: {
+type GrantEditorProps = {
   mailbox: WorkMailbox;
   employees: AdminUser[];
   refresh: () => Promise<unknown>;
-}) {
+};
+
+export function GrantEditor(props: GrantEditorProps) {
+  const scope = useSessionScope();
+  return <GrantEditorSession key={`${scope}:${props.mailbox.mailbox.id}`} {...props} scope={scope} />;
+}
+
+function GrantEditorSession({
+  mailbox,
+  employees,
+  refresh,
+  scope,
+}: GrantEditorProps & { scope: string }) {
   const t = useText();
   const { busy, run } = useAction();
   const grants = useAPI(["mailbox-grants", mailbox.mailbox.id], () =>
     company<MailboxGrantSnapshot>(`${workPath(mailbox.mailbox.id)}/grants`),
   );
   const [grantRevision, setGrantRevision] = useState<number | null>(null);
-  const [conflict, setConflict] = useState(false);
-  const empty: WorkGrant = {
+  const [conflictRevision, setConflictRevision] = useState<number | null>(null);
+  const [savedRevision, setSavedRevision] = useState<number | null>(null);
+  const [reviewError, setReviewError] = useState<unknown>(null);
+  const lifetime = useRef<object | null>(null);
+  const draftIntent = useRef<object>({});
+  const highestRevision = useRef(0);
+  useLayoutEffect(() => {
+    lifetime.current = {};
+    return () => { lifetime.current = null; };
+  }, []);
+  useLayoutEffect(() => {
+    if (Number.isSafeInteger(grants.data?.revision))
+      highestRevision.current = Math.max(highestRevision.current, grants.data!.revision);
+  }, [grants.data]);
+  const owns = (owner: object) => lifetime.current === owner && scope === sessionScope();
+  const loadError = reviewError ?? grants.error;
+  const readReady = Boolean(grants.data) && !loadError && !grants.isLoading && !grants.isValidating;
+  const empty: WorkGrantInput = {
     user_id: "",
     can_read: false,
     can_organize: false,
@@ -31,12 +58,46 @@ export function GrantEditor({
     template_only: false,
   };
   const [grant, setGrant] = useState(empty);
-  const stale = conflict || (grantRevision !== null && grants.data?.revision !== grantRevision);
-  const [nextOwner, setNextOwner] = useState("");
-  const [reason, setReason] = useState("");
+  const stale = conflictRevision !== null || savedRevision !== null || (grantRevision !== null && grants.data?.revision !== grantRevision);
+  const readSnapshot = (owner: object, minimumRevision: number) => grants.mutate(async () => {
+    const snapshot = await company<MailboxGrantSnapshot>(`${workPath(mailbox.mailbox.id)}/grants`);
+    if (!owns(owner)) throw new DOMException("Mailbox grant editor changed", "AbortError");
+    if (!snapshot || !Number.isSafeInteger(snapshot.revision) ||
+      snapshot.revision < Math.max(minimumRevision, highestRevision.current) || !Array.isArray(snapshot.grants)) {
+      throw new Error(t("无法确认当前权限版本，请重新加载权限。", "Could not confirm the current permission version. Reload permissions."));
+    }
+    return snapshot;
+  }, { revalidate: false });
+  const reloadGrants = () => run(async () => {
+    const owner = lifetime.current;
+    if (!owner || !owns(owner)) return;
+    setReviewError(null);
+    const minimumRevision = Math.max(grantRevision ?? 0, conflictRevision ?? 0, savedRevision ?? 0, grants.data?.revision ?? 0, highestRevision.current);
+    try {
+      // mutate() without data may resolve with the old cache after a failed
+      // revalidation. An explicit fetch mutation must succeed before review
+      // can discard the form or release a conflict.
+      const latest = await readSnapshot(owner, minimumRevision);
+      if (!owns(owner)) return;
+      if (!latest) throw new Error(t("权限读取未完成，请重新加载。", "Permission read did not complete. Reload permissions."));
+      await refresh();
+      if (!owns(owner)) return;
+      draftIntent.current = {};
+      setGrant(empty);
+      setGrantRevision(null);
+      // A fresh same-revision read is valid after a transient lock conflict.
+      // Selecting a member from the pre-conflict cache is never a review.
+      setConflictRevision(null);
+      setSavedRevision(null);
+    } catch (error) {
+      if (!owns(owner)) return;
+      setReviewError(error);
+      throw error;
+    }
+  });
   return (
     <div className="space-y-4">
-      <LoadError error={grants.error} onRetry={() => void grants.mutate()} />
+      <LoadError error={loadError} onRetry={reloadGrants} />
       <p className="text-sm text-muted-foreground">
         {t(
           "属主具有内建权限；其他成员必须显式授权。全不选即撤销授权。",
@@ -50,9 +111,10 @@ export function GrantEditor({
           (v) => v.id !== mailbox.mailbox.owner_user_id,
         )}
         onChange={(id) => {
+          if (scope !== sessionScope()) return;
+          draftIntent.current = {};
           setGrant(grants.data?.grants.find((v) => v.user_id === id) ?? { ...empty, user_id: id });
-          setGrantRevision(grants.data?.revision ?? null);
-          setConflict(false);
+          setGrantRevision(readReady ? grants.data?.revision ?? null : null);
         }}
       />
       <div className="flex flex-wrap gap-5">
@@ -64,6 +126,8 @@ export function GrantEditor({
               type="checkbox"
               checked={grant[key]}
               onChange={(e) => {
+                if (scope !== sessionScope()) return;
+                draftIntent.current = {};
                 const next = { ...grant, [key]: e.target.checked };
                 if (key === "can_organize" && next.can_organize)
                   next.can_read = true;
@@ -88,31 +152,54 @@ export function GrantEditor({
         ))}
       </div>
       {stale && <p role="alert">{t("权限已经变化，请重新加载并选择成员核对，旧表单不会自动覆盖。", "Permissions changed. Reload and select the member again; the old form will not overwrite them.")}</p>}
-      <ActionButton disabled={busy} onClick={() => run(async () => {
-        await grants.mutate();
-        await refresh();
-        setGrant(empty);
-        setGrantRevision(null);
-        setConflict(false);
-      })}>{t("重新加载权限", "Reload permissions")}</ActionButton>
+      <ActionButton disabled={busy} onClick={reloadGrants}>{t("重新加载权限", "Reload permissions")}</ActionButton>
       <ActionButton
-        disabled={busy || stale || grantRevision === null || !grant.user_id || Boolean(grants.error)}
+        disabled={busy || stale || !readReady || grantRevision === null || !grant.user_id}
         onClick={() =>
           run(async () => {
+            const owner = lifetime.current;
+            if (!owner || !owns(owner) || stale || !readReady || grantRevision === null || !grant.user_id) return;
+            const intent = draftIntent.current;
             try {
               await company(`${workPath(mailbox.mailbox.id)}/grants`, {
                 method: "PUT",
-                body: { ...grant, revision: grantRevision },
+                body: { user_id: grant.user_id, can_read: grant.can_read,
+                  can_organize: grant.can_organize, can_send: grant.can_send,
+                  template_only: grant.template_only, revision: grantRevision },
               });
             } catch (error) {
-              if ((error as { error?: { code?: string } }).error?.code === "CONFLICT") setConflict(true);
+              if (!owns(owner)) return;
+              if (isConflict(error)) setConflictRevision(grantRevision);
+              if (error instanceof SyntaxError) {
+                // Parsing can fail after a successful HTTP status. Preserve
+                // the draft and require a real read before another write.
+                const uncertain = new Error(t("无法确认授权保存结果，请重新加载权限核对后再试。", "Could not confirm the grant save result. Reload permissions before trying again."));
+                setConflictRevision(grantRevision);
+                setReviewError(uncertain);
+                throw uncertain;
+              }
               throw error;
             }
-            setGrant(empty);
-            setGrantRevision(null);
-            await grants.mutate();
-            await refresh();
+            if (!owns(owner)) return;
+            // This PUT has committed even if a following GET fails. A newer
+            // member/rights draft remains pinned to its observed revision.
+            const minimumRevision = Math.max(grantRevision + 1, highestRevision.current);
+            setSavedRevision(minimumRevision);
+            if (draftIntent.current === intent) {
+              draftIntent.current = {};
+              setGrant(empty);
+              setGrantRevision(null);
+            }
             toast.success(t("授权已更新", "Grant updated"));
+            try {
+              const fresh = await readSnapshot(owner, minimumRevision);
+              if (!owns(owner)) return;
+              if (!fresh) throw new Error("Grant readback did not complete");
+              await refresh();
+              if (owns(owner)) { setSavedRevision(null); setReviewError(null); }
+            } catch {
+              if (owns(owner)) setReviewError(new Error(t("授权已保存，但无法刷新当前权限。请重新加载权限核对。", "The grant was saved, but current permissions could not be refreshed. Reload permissions to review.")));
+            }
           })
         }
       >
@@ -127,78 +214,7 @@ export function GrantEditor({
           {v.template_only ? t("仅模板", "template only") : ""}
         </p>
       ))}
-      {mailbox.mailbox.kind === "personal" && (
-        <EmployeeField
-          label={t("新属主", "New owner")}
-          value={nextOwner}
-          employees={employees.filter(
-            (v) => v.id !== mailbox.mailbox.owner_user_id,
-          )}
-          onChange={setNextOwner}
-        />
-      )}
-      {(mailbox.mailbox.kind === "personal" ||
-        mailbox.mailbox.kind === "legacy") && (
-        <>
-          <Field
-            label={t(
-              "资源变更原因（至少 8 个字符）",
-              "Resource-change reason (8+ characters)",
-            )}
-          >
-            {(id) => (
-              <input
-                id={id}
-                className={inputClass}
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-              />
-            )}
-          </Field>
-          <ActionButton
-            disabled={
-              busy ||
-              reason.trim().length < 8 ||
-              (mailbox.mailbox.kind === "personal" && !nextOwner)
-            }
-            onClick={() =>
-              run(async () => {
-                if (mailbox.mailbox.kind === "personal")
-                  await company(`${workPath(mailbox.mailbox.id)}/handover`, {
-                    method: "POST",
-                    body: {
-                      owner_user_id: nextOwner,
-                      revision: mailbox.revision,
-                      reason,
-                    },
-                  });
-                else
-                  await company(
-                    `${workPath(mailbox.mailbox.id)}/convert-shared`,
-                    {
-                      method: "POST",
-                      body: { revision: mailbox.revision, reason },
-                    },
-                  );
-                await refresh();
-                toast.success(
-                  t("邮箱生命周期已更新", "Mailbox lifecycle updated"),
-                );
-              })
-            }
-          >
-            {mailbox.mailbox.kind === "personal"
-              ? t(
-                  "移交邮箱（不删除邮件）",
-                  "Transfer mailbox (preserve messages)",
-                )
-              : t(
-                  "迁移为私有共享邮箱并永久保留",
-                  "Convert to private, permanently retained shared mailbox",
-                )}
-          </ActionButton>
-        </>
-      )}
+      <MailboxLifecycleEditor mailbox={mailbox} employees={employees} refresh={refresh} busy={busy} run={run} />
     </div>
   );
 }

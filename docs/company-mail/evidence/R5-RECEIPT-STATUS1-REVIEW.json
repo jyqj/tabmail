@@ -1,0 +1,28 @@
+{
+  "CLI_exit": 0,
+  "actual_source_closure_sha256": "d819c5a903b405bcf4f27328da531d6c39996ac8230cdb22b932d0d6de55c7f4",
+  "actual_targets": [
+    {
+      "name": "closed ordinary receipt runtime DTO rejects stale waiting status and accepts only actual producer status categories",
+      "status": "passed"
+    }
+  ],
+  "cleanup": {
+    "noPG_API_SMTP_NodeServer_browser_build_npmci": true,
+    "owned_group_observation": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "owned_groups_gone": true,
+    "source_selected_pin_equal": true
+  },
+  "expected_exact1_matches": true,
+  "filtered_not_executed_count": 36,
+  "fullCI_or_whole_file_green": false,
+  "passed_actual": 1,
+  "prior_TDZ2_and_first54_boundaries_preserved": "/private/tmp/tm-r5receipt-tdz._ylaufe0",
+  "source_sha": "66618fd02b7f9a86a529eeeb6cd0469a1073cb25",
+  "timed_out": false,
+  "wall_seconds": 1.3502836227416992
+}

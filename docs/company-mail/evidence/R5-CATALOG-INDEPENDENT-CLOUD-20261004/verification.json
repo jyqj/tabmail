@@ -1,0 +1,87 @@
+{
+  "reviewed_head": "4540fb91ba742443dcf0a872b80261e58af7b3ab",
+  "base": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+  "author_tests": {
+    "tests": 51,
+    "passed": 51,
+    "errors": 0,
+    "failures": 0,
+    "skips": 0,
+    "seconds": 43.332
+  },
+  "private_logs": {
+    "author-tests.log": {
+      "private_path": "/tmp/R5-CATALOG-INDEPENDENT-CLOUD-20261004/author-tests.log",
+      "bytes": 8310,
+      "sha256": "40735cc1ca692933618d72e659bcdf3a0993c0c80c1498f455299cbefb9670b1"
+    },
+    "independent.log": {
+      "private_path": "/tmp/R5-CATALOG-INDEPENDENT-CLOUD-20261004/independent.log",
+      "bytes": 87,
+      "sha256": "1637300a250bb5e2b2bf1d7a4ce3a5ad82746385bb2994cfadce9961f2c12eb2"
+    },
+    "transaction-cli.json": {
+      "private_path": "/tmp/R5-CATALOG-INDEPENDENT-CLOUD-20261004/transaction-cli.json",
+      "bytes": 309,
+      "sha256": "517448bd669e67d3c12da0b4e94ef95e34bf2c94d156a3aadabc4b2a464c80fe"
+    },
+    "compatibility-cli.json": {
+      "private_path": "/tmp/R5-CATALOG-INDEPENDENT-CLOUD-20261004/compatibility-cli.json",
+      "bytes": 1117,
+      "sha256": "677f536dea0eccc18aba48fb1134bf11abab8c980e362691fb8a01a9bd29d4db"
+    }
+  },
+  "transaction_cli": {
+    "status": "PASS",
+    "postgres_files": 62,
+    "functions": 395,
+    "sql_execution_calls": 498,
+    "direct_write_functions": 134,
+    "write_closure_functions": 154,
+    "migration_files": 19,
+    "task_complete": false,
+    "runtime_verified": false,
+    "meaning": "syntax inventory current; no concurrency or behavior equivalence claim"
+  },
+  "compatibility_cli": {
+    "wire_validation_scope": "not_checked_current_wire_required",
+    "historical_wire_reference": {
+      "artifact_ref": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json",
+      "sha256": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+      "qualification": "historical_metadata_only_not_current_wire"
+    },
+    "status": "source_inventory_and_upgrade_plan_checked",
+    "task_complete": false,
+    "product_green": false,
+    "routes": 132,
+    "client_branches": 134,
+    "source_files": 94,
+    "openapi_missing": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/suppression",
+      "GET /docs-assets/*"
+    ],
+    "no_shipped_client": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/admin/status",
+      "GET /api/v1/auth/me",
+      "GET /api/v1/company/outbound/{id}/recipients",
+      "GET /api/v1/suppression",
+      "GET /docs",
+      "GET /docs-assets/*",
+      "GET /metrics",
+      "GET /openapi.yaml",
+      "GET /ready",
+      "GET /redoc"
+    ],
+    "runtime_boundary": "No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required."
+  },
+  "tools": {
+    "go": "go1.25.7 linux/amd64",
+    "node": "v24.19.0",
+    "typescript": "5.9.3",
+    "cache": "/tmp/R5-CATALOG-INDEPENDENT-CLOUD-20261004/cache",
+    "module_cache": "/workspace/tabmail-cloud/gomod",
+    "GOPROXY": "off"
+  }
+}

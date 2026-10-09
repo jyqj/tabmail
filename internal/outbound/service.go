@@ -3,6 +3,7 @@ package outbound
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/mail"
 	"strings"
@@ -28,7 +29,7 @@ const maxRetryDelay = 1 * time.Hour
 type Service struct {
 	workerMu   sync.Mutex
 	cfg        config.Outbound
-	store      store.Store
+	store      Repository
 	adapter    DeliveryAdapter
 	logger     zerolog.Logger
 	objects    store.ObjectStore
@@ -41,7 +42,7 @@ type Service struct {
 // NewService creates a new outbound service. gov is the published-template
 // governance dependency (the production Postgres store implements it); a nil
 // gov fails construction instead of degrading at send time.
-func NewService(cfg config.Outbound, st store.Store, gov TemplateGovernance, logger zerolog.Logger) *Service {
+func NewService(cfg config.Outbound, st Repository, gov TemplateGovernance, logger zerolog.Logger) *Service {
 	if gov == nil {
 		panic("outbound: template governance dependency is required (pass the store that implements TemplateForSend)")
 	}
@@ -63,6 +64,10 @@ func NewService(cfg config.Outbound, st store.Store, gov TemplateGovernance, log
 
 // SendRequest is the validated input for submitting an outbound email.
 type SendRequest struct {
+	// Principal is request-scoped authority, never persisted on a durable job.
+	// HTTP callers carry the credential generation through the final commit;
+	// workers continue validating the current durable sender independently.
+	Principal         *authz.Actor
 	SenderMailboxID   *uuid.UUID
 	TenantID          uuid.UUID
 	UserID            *uuid.UUID
@@ -120,21 +125,26 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 	req.CC = append([]string{}, req.CC...)
 	req.BCC = append([]string{}, req.BCC...)
 	if !s.cfg.Enabled {
-		return nil, false, fmt.Errorf("outbound sending is disabled")
+		return nil, false, app.BadRequest("outbound sending is disabled")
+	}
+	// Reject malformed custom MIME fields before a durable submission can
+	// consume its idempotency key, quota, attachments, or draft revision.
+	if err := validateCustomHeaders(req.Headers); err != nil {
+		return nil, false, app.BadRequest(err.Error())
 	}
 
 	canonical, err := authz.CanonicalSender(req.From)
 	if err != nil {
-		return nil, false, err
+		return nil, false, app.BadRequest("invalid from address")
 	}
 	req.From = canonical
 	for _, group := range [][]string{req.To, req.CC, req.BCC} {
 		for i, a := range group {
-			parsed, parseErr := mail.ParseAddress(a)
+			parsed, parseErr := ParseRecipientAddress(a)
 			if parseErr != nil {
-				return nil, false, parseErr
+				return nil, false, app.BadRequest("invalid recipient address")
 			}
-			group[i] = strings.ToLower(parsed.Address)
+			group[i] = parsed.Envelope
 		}
 	}
 	if len(req.IdempotencyKey) > 128 || strings.ContainsAny(req.IdempotencyKey, "\r\n") {
@@ -169,27 +179,27 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 		}
 		req.Subject, req.TextBody, req.HTMLBody, e = company.Render(v.Snapshot, req.TemplateVars, employee, name, req.From)
 		if e != nil {
-			return nil, false, e
+			return nil, false, app.BadRequest("invalid template variables")
 		}
 	}
 
-	// Validate all email addresses using RFC 5322 parsing.
+	// Validate mailbox syntax, including SMTP's tagged IPv6 recipient literal.
 	if _, err := mail.ParseAddress(req.From); err != nil {
-		return nil, false, fmt.Errorf("invalid from address %q: %w", req.From, err)
+		return nil, false, app.BadRequest("invalid from address")
 	}
 	for _, addr := range req.To {
-		if _, err := mail.ParseAddress(addr); err != nil {
-			return nil, false, fmt.Errorf("invalid to address %q: %w", addr, err)
+		if _, err := ParseRecipientAddress(addr); err != nil {
+			return nil, false, app.BadRequest("invalid to address")
 		}
 	}
 	for _, addr := range req.CC {
-		if _, err := mail.ParseAddress(addr); err != nil {
-			return nil, false, fmt.Errorf("invalid cc address %q: %w", addr, err)
+		if _, err := ParseRecipientAddress(addr); err != nil {
+			return nil, false, app.BadRequest("invalid cc address")
 		}
 	}
 	for _, addr := range req.BCC {
-		if _, err := mail.ParseAddress(addr); err != nil {
-			return nil, false, fmt.Errorf("invalid bcc address %q: %w", addr, err)
+		if _, err := ParseRecipientAddress(addr); err != nil {
+			return nil, false, app.BadRequest("invalid bcc address")
 		}
 	}
 
@@ -200,19 +210,19 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 	allRcpt = append(allRcpt, req.BCC...)
 
 	if len(allRcpt) == 0 {
-		return nil, false, fmt.Errorf("at least one recipient required")
+		return nil, false, app.BadRequest("at least one recipient required")
 	}
 	if len(allRcpt) > 50 {
-		return nil, false, fmt.Errorf("too many recipients (max 50)")
+		return nil, false, app.BadRequest("too many recipients (max 50)")
 	}
 	if req.Subject == "" {
-		return nil, false, fmt.Errorf("subject is required")
+		return nil, false, app.BadRequest("subject is required")
 	}
 	if len(req.Subject) > 998 {
-		return nil, false, fmt.Errorf("subject too long (max 998 chars)")
+		return nil, false, app.BadRequest("subject too long (max 998 chars)")
 	}
 	if req.TextBody == "" && req.HTMLBody == "" {
-		return nil, false, fmt.Errorf("text_body or html_body required")
+		return nil, false, app.BadRequest("text_body or html_body required")
 	}
 
 	// Build Message-ID header.
@@ -225,7 +235,7 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 	if len(req.Headers) > 0 {
 		b, err := json.Marshal(req.Headers)
 		if err != nil {
-			return nil, false, fmt.Errorf("invalid headers: %w", err)
+			return nil, false, app.Internal(err)
 		}
 		headersJSON = b
 	}
@@ -237,9 +247,9 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 		draftID = &id
 	}
 	job := &models.OutboundJob{
-		SenderUserID:      req.UserID,
-		SenderKeyID:       req.APIKeyID,
-		SenderMailboxID:   req.SenderMailboxID,
+		SenderUserID:    req.UserID,
+		SenderKeyID:     req.APIKeyID,
+		SenderMailboxID: req.SenderMailboxID,
 		// TemplateName is intentionally no longer written: the legacy
 		// name-based render path is gone. The column stays for provenance of
 		// pre-existing jobs rendered by the retired /api/v1/send path.
@@ -267,14 +277,12 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 		NextAttemptAt:    now,
 	}
 
-	if _, ok := s.store.(recipientStore); ok {
-		job.RecipientLedger = true
-	}
+	job.RecipientLedger = true
 	job.ContentDigest = contentDigest(job)
 	if err := s.ValidateJobAuthorization(ctx, job); err != nil {
 		return nil, false, err
 	}
-	replayed, err := s.createOutboundJob(ctx, job, req.Quota, req.Draft)
+	replayed, err := s.createOutboundJob(ctx, job, req.Quota, req.Draft, req.Principal)
 	if err != nil {
 		return nil, false, fmt.Errorf("enqueue outbound job: %w", err)
 	}
@@ -288,20 +296,18 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 	return job, replayed, nil
 }
 
-func (s *Service) createOutboundJob(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption) (bool, error) {
-	if draft != nil {
-		repo, ok := s.store.(interface {
-			CreateOutboundJobConsumeDraft(context.Context, *models.OutboundJob, store.OutboundQuotaReservation, store.DraftConsumption) (bool, error)
-		})
-		if !ok {
-			return false, app.BadRequest("draft submission unavailable")
+func (s *Service) createOutboundJob(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption, principal *authz.Actor) (bool, error) {
+	return s.store.CreateOutboundJobAuthorized(ctx, job, quota, draft, func(ctx context.Context, reader store.OutboundRetryReader, current *models.OutboundJob, reservation store.OutboundQuotaReservation) (store.OutboundQuotaReservation, error) {
+		if principal != nil {
+			if err := ValidateRetryRequester(ctx, reader, *principal, current); err != nil {
+				return reservation, err
+			}
 		}
-		return repo.CreateOutboundJobConsumeDraft(ctx, job, quota, *draft)
-	}
-	if quota.HasLimits() {
-		return false, s.store.CreateOutboundJobWithQuota(ctx, job, quota)
-	}
-	return false, s.store.CreateOutboundJob(ctx, job)
+		if err := ValidateJobAuthorization(ctx, reader, reader, current); err != nil {
+			return reservation, err
+		}
+		return CurrentEnqueueQuota(ctx, reader, principal, current, reservation)
+	})
 }
 
 // StartWorker begins the background delivery worker loop. It is the
@@ -318,14 +324,32 @@ func (s *Service) StartWorker(ctx context.Context) {
 // Stop drains a StartWorker-launched goroutine, waiting for the in-flight
 // batch to finish. Absorbs the legacy Shutdown() semantics.
 func (s *Service) Stop() {
-	if s.worker == nil {
-		return
+	s.workerMu.Lock()
+	worker := s.worker
+	s.workerMu.Unlock()
+	if worker != nil {
+		worker.Stop()
 	}
-	s.worker.Stop()
 }
 
-// Shutdown is retained for the main goroutine's existing call site; it
-// forwards to Stop.
+// StopContext cancels the current worker generation and waits for its actual
+// exit within ctx. A non-nil error is an incomplete drain, not permission to
+// release the store or start a replacement. The process lifecycle owner must
+// first seal startup, cancel its run context, and join any pending StartWorker
+// invocation before calling this method; an idle snapshot cannot join a future
+// start. Legacy Stop/Shutdown retain their graceful, unbounded contract.
+func (s *Service) StopContext(ctx context.Context) error {
+	s.workerMu.Lock()
+	worker := s.worker
+	s.workerMu.Unlock()
+	if worker == nil {
+		return nil
+	}
+	return worker.StopContext(ctx)
+}
+
+// Shutdown is retained for legacy callers and forwards to graceful Stop.
+// The process shutdown coordinator uses StopContext instead.
 func (s *Service) Shutdown() { s.Stop() }
 
 // ensureWorker builds the workqueue.Worker once. Idempotent.
@@ -349,6 +373,11 @@ func (s *Service) ensureWorker() *workqueue.Worker[*outboundJob] {
 		s.cfg.PollInterval,
 		s.cfg.BatchSize,
 		s.logger,
+		// The store leases one row at a time. Keep that safety boundary while
+		// allowing BatchSize completed jobs per poll, without an idle poll
+		// interval between rows already waiting in the queue.
+		workqueue.WithSerialClaims(),
+		workqueue.WithStopOnFailure(),
 	)
 	return s.worker
 }
@@ -416,10 +445,11 @@ func (s *Service) processOne(ctx context.Context, job *workqueue.Job[*outboundJo
 		}
 	}
 
-	if out.RecipientLedger {
-		return s.deliverRecipients(ctx, out, job.Lease.Token, mime)
+	if !out.RecipientLedger {
+		// Unmigrated history is an operator hold, never a second send path.
+		return store.ErrOutboundUncertain
 	}
-	return s.deliverDomains(ctx, out, job.Lease.Token, mime)
+	return s.deliverRecipients(ctx, out, job.Lease.Token, mime)
 }
 
 func (s *Service) dkimFailClosed() bool {
@@ -446,7 +476,7 @@ func (s *Service) DKIMSendBlockReason(zone *models.DomainZone) string {
 
 // isTokenMismatch checks if the error is a delivery token mismatch sentinel.
 func isTokenMismatch(err error) bool {
-	return err != nil && err.Error() == "delivery token mismatch: job was re-claimed"
+	return errors.Is(err, store.ErrDeliveryTokenMismatch)
 }
 
 func extractDomain(addr string) string {

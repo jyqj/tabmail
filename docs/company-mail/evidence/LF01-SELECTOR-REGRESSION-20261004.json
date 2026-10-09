@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "kind": "focused-self-authored-regression-not-formal-qualification",
+  "base": "f875672dea2b68fdec9e0b986f4863724da5d7ba",
+  "original_formal_evidence_commit": "46de5010b7dc79b841c52d6ff7245d070a846a76",
+  "original_formal": {
+    "elapsed_seconds": 53.781,
+    "pass": 17,
+    "fail": 9,
+    "missing": 17,
+    "qualified": 0,
+    "rerun": false
+  },
+  "baseline_control": {
+    "test": "TestLF01OwnedShippingSelector/frozen",
+    "exit_code": 1,
+    "failure": "frozen target absent from Employee to offboard selector",
+    "elapsed_seconds": 1.688
+  },
+  "fixed_real_probe": {
+    "test": "^TestLF01Owned",
+    "elapsed_seconds": 7.968,
+    "exit_code": 0,
+    "shipping_ui_scenarios": [
+      "active",
+      "frozen",
+      "race",
+      "target-race"
+    ],
+    "http_negative_boundaries": true,
+    "reactivation_guard": true,
+    "frozen_old_jwt_status": 401,
+    "completed_next_preview_status": 409,
+    "successor_freeze_execute_status": 400,
+    "target_state_race_execute_status": 409,
+    "mailbox_ownership_and_completed_plan_counts_checked": true
+  },
+  "synthetic_selector_controls": {
+    "tests_passed": 4,
+    "response_mocks": false,
+    "covers": [
+      "active/frozen target selection",
+      "frozen/foreign/self/higher-role successor exclusion",
+      "ordinary/absent callers",
+      "super-admin hierarchy",
+      "selected company scope",
+      "stale selections after eligibility and caller changes"
+    ]
+  },
+  "checks": {
+    "focused_eslint": "pass",
+    "typescript_no_emit": "pass",
+    "git_diff_check": "pass",
+    "go_version": "1.25.7"
+  },
+  "backend_gap_observation": {
+    "higher_role_successor_preview_http_status": 200,
+    "backend_changed": false,
+    "business_qualified": false
+  },
+  "cleanup": {
+    "owned_database_count": 0,
+    "owned_database_connections": 0,
+    "owned_cluster_stopped": true
+  },
+  "raw_log_sha256": {
+    "lf01-baseline.log": "c6563cbb9ffcdfca0a15df187d4d5d0acf237c3c0cf44e04eb9a51ef8b246b79",
+    "lf01-go.log": "57f969b5ad5921675527916d55ac5f12ba82e0d4f28c4b28957296eb62e7d221",
+    "lf01-unit.log": "04169f4cbc140569ce3e7e4a1b4859ac9048bc4c42e6f9754fecc98907bc0d28",
+    "lf01-cleanup.log": "cbb8bd5de29626c5161747698437d92bf20cb3429df159127327147a5c04b5e4"
+  }
+}

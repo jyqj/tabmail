@@ -1,5 +1,7 @@
 "use client";
+import { useLayoutEffect, useRef } from "react";
 import { useAPI } from "@/hooks/use-api";
+import { sessionScope, useSessionScope } from "@/lib/session";
 import {
   company,
   revokeTemplateVersion,
@@ -21,39 +23,76 @@ import {
 // deliberately worded apart from the template-level retire switch in the
 // library view (retire = no longer selectable; revoke = urgent stop of
 // undelivered sends of this one version, delivered results untouched).
-export function TemplateVersionsView({
-  template,
-  refreshKey,
-  onRevoked,
-}: {
+type VersionsProps = {
   template: MailTemplate | null;
   refreshKey: number;
   onRevoked?: () => void | Promise<void>;
+  /** The owning page keeps the mutation alive across its tab changes. */
+  onRevoke?: (version: TemplateVersion) => Promise<void>;
+  disabled?: boolean;
+};
+
+export function TemplateVersionsView(props: VersionsProps) {
+  const scope = useSessionScope();
+  return <TemplateVersionHistory
+    key={JSON.stringify([scope, props.template?.id, props.template?.revision, props.refreshKey])}
+    {...props}
+    scope={scope}
+  />;
+}
+
+function TemplateVersionHistory({ template, refreshKey, onRevoked, onRevoke, disabled = false, scope }: VersionsProps & {
+  scope: string;
 }) {
   const t = useText();
   const { busy, run } = useAction();
   const versions = useAPI(
-    template?.id ? ["template-versions", template.id, refreshKey] : null,
+    template?.id ? ["template-versions", template.id, template.revision, refreshKey] : null,
     () => company<TemplateVersion[]>(`/templates/${template!.id}/versions`),
   );
+  const ready = !!template?.id && !versions.error && !versions.isLoading && !versions.isValidating && Array.isArray(versions.data);
+  const lifetime = useRef<object | null>(null);
+  const currentRead = useRef<{ data: TemplateVersion[] | undefined; ready: boolean } | null>(null);
+  useLayoutEffect(() => {
+    lifetime.current = {};
+    return () => { lifetime.current = null; };
+  }, []);
+  useLayoutEffect(() => {
+    currentRead.current = { data: versions.data, ready };
+    return () => { currentRead.current = null; };
+  }, [versions.data, ready]);
+  const owns = (owner: object) => lifetime.current === owner && scope === sessionScope();
+
   function revokeVersion(v: TemplateVersion) {
-    if (!template?.id) return;
+    const observed = currentRead.current;
+    const owner = lifetime.current;
+    if (!template?.id || busy || disabled || !owner || !owns(owner) || !observed?.ready ||
+      !observed.data?.includes(v) || v.template_id !== template.id || v.revoked_at) return;
     const confirmed = safeConfirm(
       t(
         `撤销不可逆：v${v.version} 的所有未发出的投递将被立即停止，已发出的投递结果与历史完全不变，同模板其他版本不受影响。要让模板整体不再可选，请在模板库使用「停用」。确定撤销该版本？`,
         `Irreversible: revoking v${v.version} immediately stops every delivery of this version that has not started yet. Already-delivered outcomes and history are unchanged, and sibling versions are unaffected. To make the whole template unselectable, use Retire in the library. Revoke this version?`,
       ),
     );
-    if (!confirmed) return;
+    if (!confirmed || currentRead.current !== observed || !owns(owner)) return;
     void run(async () => {
-      await revokeTemplateVersion(template.id!, v.version, template.revision);
-      await versions.mutate();
-      await onRevoked?.();
+      if (onRevoke) {
+        await onRevoke(v);
+        return;
+      }
+      try {
+        await revokeTemplateVersion(template.id!, v.version, template.revision);
+        if (!owns(owner)) return;
+        await versions.mutate();
+        if (owns(owner)) await onRevoked?.();
+      } catch (error) {
+        if (owns(owner)) throw error;
+      }
     });
   }
   return (
     <Section title={t("版本历史", "Version history")}>
-      {!template && (
+      {!template?.id && (
         <p className="text-muted-foreground">
           {t(
             "从模板库选择一个模板后查看其已发布版本。",
@@ -61,13 +100,20 @@ export function TemplateVersionsView({
           )}
         </p>
       )}
-      {template && (
+      {template?.id && (
         <LoadError
           error={versions.error}
           onRetry={() => void versions.mutate()}
         />
       )}
-      {template &&
+      {template?.id && (versions.isLoading || versions.isValidating) && (
+        <p role="status" className="text-muted-foreground">
+          {versions.data
+            ? t("正在刷新版本历史…", "Refreshing version history…")
+            : t("正在加载版本历史…", "Loading version history…")}
+        </p>
+      )}
+      {template?.id && !versions.error && !versions.isLoading &&
         (versions.data ?? []).map((v) => (
           <div
             key={v.id}
@@ -95,7 +141,7 @@ export function TemplateVersionsView({
             {!v.revoked_at && (
               <button
                 type="button"
-                disabled={busy}
+                disabled={busy || disabled || !ready}
                 data-testid={`revoke-version-${v.version}`}
                 onClick={() => revokeVersion(v)}
                 className="shrink-0 rounded-md border border-destructive px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 disabled:opacity-50"
@@ -105,7 +151,7 @@ export function TemplateVersionsView({
             )}
           </div>
         ))}
-      {template && !versions.isLoading && !versions.data?.length && (
+      {ready && versions.data?.length === 0 && (
         <p className="text-muted-foreground">
           {t("该模板尚未发布任何版本", "This template has no published versions")}
         </p>

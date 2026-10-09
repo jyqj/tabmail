@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "base_commit": "a50571f8d85e20c3359ac53e7ea9eefb7c6492e3",
+  "source_tree": "dbf66c17c2cc55a5a7866428bce06c48265b90d1",
+  "source_files_verified": 639,
+  "status": "validated_after_driver_summary_error",
+  "backend": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 4343,
+    "log_sha256": "8ac27145660793dd5c392e2071777b47b7db1990dd98239afd1a70c420b10906",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 122,
+    "manifest_sha256": "1ad698204928a6f0397d0917ec16dce375a1501b19ad1832f4033a5d2f3a9a3d",
+    "packages": 50,
+    "process_exit_code": 0,
+    "source_sha": "dbf66c17c2cc55a5a7866428bce06c48265b90d1",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 1007,
+    "tests_skipped": 1,
+    "tests_started": 1008
+  },
+  "http": {
+    "status": "pass",
+    "source_sha": "dbf66c17c2cc55a5a7866428bce06c48265b90d1",
+    "errors": [],
+    "responses": 80,
+    "successful_operations": 65,
+    "required_success_variants": 66,
+    "excluded_operations": [
+      {
+        "method": "GET",
+        "path": "/api/v1/company/domains/{id}/verification",
+        "reason": "Live DNS status lookups are outside this loopback HTTP/PG fixture."
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/company/domains/{id}/verify",
+        "reason": "Live DNS verification is outside this loopback HTTP/PG fixture."
+      }
+    ],
+    "spec_sha256": "2c39ce1a1495af06204cebd12774ecf7fc64aa6bbd5784bb0fb46ac9d451c060",
+    "capture_sha256": "ba456448b81334dfd39495f76c8b8282902dffd3dd81c071520f40794c1eb6d4"
+  },
+  "missing_dsn": {
+    "status": "fail",
+    "tests_skipped": 5,
+    "mandatory_missing_or_not_passed": 22
+  },
+  "counts": {
+    "baseline-final": {
+      "events": {
+        "run": 27,
+        "output": 65,
+        "fail": 15,
+        "pass": 12
+      },
+      "failed": [
+        "TestR5PermissionSnapshotOrdersChanges/profile-local",
+        "TestR5PermissionSnapshotOrdersChanges/profile-global",
+        "TestR5PermissionSnapshotOrdersChanges/override-insert",
+        "TestR5PermissionSnapshotOrdersChanges/override-update",
+        "TestR5PermissionSnapshotOrdersChanges/override-clear",
+        "TestR5PermissionSnapshotOrdersChanges",
+        "TestR5PermissionSnapshotWriterFirstReloads/clear=false",
+        "TestR5PermissionSnapshotWriterFirstReloads/clear=true",
+        "TestR5PermissionSnapshotWriterFirstReloads",
+        "TestR5PermissionSnapshotBusyProfileFailsClosed/update",
+        "TestR5PermissionSnapshotBusyProfileFailsClosed/delete",
+        "TestR5PermissionSnapshotBusyProfileFailsClosed",
+        "TestR5PermissionSnapshotOrdersContentScope/profile",
+        "TestR5PermissionSnapshotOrdersContentScope/override",
+        "TestR5PermissionSnapshotOrdersContentScope"
+      ]
+    },
+    "pg-focused-1": {
+      "events": {
+        "run": 81,
+        "output": 162,
+        "pass": 81
+      },
+      "failed": []
+    },
+    "pg-focused-2": {
+      "events": {
+        "run": 81,
+        "output": 162,
+        "pass": 81
+      },
+      "failed": []
+    },
+    "pg-focused-3": {
+      "events": {
+        "run": 81,
+        "output": 162,
+        "pass": 81
+      },
+      "failed": []
+    },
+    "backend-full": {
+      "events": {
+        "run": 1008,
+        "output": 2100,
+        "pass": 1007,
+        "pause": 20,
+        "cont": 20,
+        "skip": 1
+      },
+      "failed": []
+    }
+  },
+  "commands": {
+    "pg-focused-1": 0,
+    "pg-focused-2": 0,
+    "pg-focused-3": 0,
+    "pg-focused-1-gate": 0,
+    "pg-focused-2-gate": 0,
+    "pg-focused-3-gate": 0,
+    "baseline-final": 1,
+    "final-build": 0,
+    "final-vet": 0,
+    "final-python": 0,
+    "final-contract": 0,
+    "backend-full": 0,
+    "backend-gate": 0,
+    "http-runtime": 0,
+    "missing-dsn": 0,
+    "missing-dsn-gate": 1,
+    "stop": 0
+  },
+  "python_tests": 168,
+  "versions": {
+    "go": "go version go1.25.7 darwin/arm64",
+    "postgres": "postgres (PostgreSQL) 16.13",
+    "psql": "psql (PostgreSQL) 16.13",
+    "pg_dump": "pg_dump (PostgreSQL) 16.13",
+    "python": "3.12.11"
+  },
+  "cleanup": {
+    "pid": 84818,
+    "stop_exit": 0,
+    "pidfile_removed": true
+  },
+  "driver_issue": {
+    "stage": "formatting missing-dsn gate output after expected exit 1",
+    "error": "AttributeError: 'str' object has no attribute 'get'",
+    "test_command_failed": false,
+    "original_job_exit": 1,
+    "resolution": "complete JSON reports parsed according to their format; exact exits, hashes, source files and cleanup verified; original failed job not relabelled"
+  },
+  "not_run": [
+    "frontend suite",
+    "shipping browser journey",
+    "remote CI",
+    "two live DNS operations",
+    "SSE reconnection/cross-process replay",
+    "S/M/L performance",
+    "production migrations or deployment"
+  ],
+  "bundle": {
+    "file": "R5-B01-Q-LOGS.tar.gz",
+    "members": 105,
+    "bytes": 160148,
+    "sha256": "cce7e6c543f365bab2948731c3238e9f546e9c09e27d4fa426976ae480e2a8d8",
+    "member_manifest": "MANIFEST.json"
+  },
+  "publication": {
+    "raw_http_responses_in_bundle": false,
+    "server_log_in_bundle": false,
+    "environment_in_bundle": false
+  },
+  "summary_parser_failure_retained": true
+}

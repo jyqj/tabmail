@@ -1,0 +1,67 @@
+{
+  "batch": "R5-NEXT-1543-20261009",
+  "baseline": "30d2d05ab6ddcc23f47d9b9786885817aef50a0f",
+  "rounds": [
+    {
+      "round": 1,
+      "sha": "4b35e6452a0b4d8c63b590bf100552675dcaf6fc",
+      "tree": "3b1b2644c7e7f05b57396afbf04daf8b8394da33",
+      "parents": [
+        "30d2d05ab6ddcc23f47d9b9786885817aef50a0f",
+        "559d01edd58c6af5cbc5965e1202ff575e4e2cda"
+      ],
+      "merged_at": "2026-10-09T08:52:15Z",
+      "issues": [
+        226,
+        227,
+        231,
+        232
+      ],
+      "batchComplete": 4,
+      "batchRemaining": 6,
+      "merge_commit_time": "2026-10-09T08:52:15Z"
+    },
+    {
+      "round": 2,
+      "sha": "6ce823fecda07f27364bb7e597bbb40767c1f7c2",
+      "tree": "48f894a0417091278a9d197096d13995b9041b38",
+      "parents": [
+        "4b35e6452a0b4d8c63b590bf100552675dcaf6fc",
+        "7bb9b8abff9a6a53b1d0010f96cc13728a9330c5"
+      ],
+      "merged_at": "2026-10-09T08:54:20Z",
+      "issues": [
+        228,
+        230,
+        234
+      ],
+      "batchComplete": 7,
+      "batchRemaining": 3,
+      "merge_commit_time": "2026-10-09T08:54:19Z"
+    },
+    {
+      "round": 3,
+      "sha": "509a7dec2009486f10fa18c0f401fdbb7cdf3f4d",
+      "tree": "fd362eed901840f23f58b477104a642f2a6cbf51",
+      "parents": [
+        "6ce823fecda07f27364bb7e597bbb40767c1f7c2",
+        "17be458fb9d36e135a95962638b68ce105c16518"
+      ],
+      "merged_at": "2026-10-09T08:56:35Z",
+      "issues": [
+        229,
+        233,
+        236
+      ],
+      "batchComplete": 10,
+      "batchRemaining": 0,
+      "merge_commit_time": "2026-10-09T08:56:34Z"
+    }
+  ],
+  "batchComplete": 10,
+  "batchTotal": 10,
+  "batchRemaining": 0,
+  "parentComplete": 10,
+  "parentTotal": 171,
+  "parentRemaining": 161
+}

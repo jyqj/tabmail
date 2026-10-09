@@ -1,0 +1,139 @@
+{
+  "artifact_kind": "central_summary_of_delivered_SOURCE_runtime_independent_findings_NOT_new_machine_raw",
+  "current_main_schema": "19 SOURCE; nativebaseSQL19 in A/D1/D2; not fullcatalog/currentMethod qualification",
+  "physical_api_key_usage_SOURCE": "original9 plus2addon independentlyPASS; exactcapsules /private/tmp/tm-r5usage19-source.1y979_90 and tm-r5usage19-source-v2.0tk29gna",
+  "residuals": [
+    "Stop has no explicitdeadline",
+    "original retry rejection accepts401/403/404 not409",
+    "auth asyncTouch lacks explicitjoin"
+  ],
+  "original_A": {
+    "source": "755a64743213016d42c6a025401368aaa4a36ccf",
+    "closure": "95a9c8216aedab9f55a66d4035e51b72f8a879754efe412fe29ea094fb79a0dd",
+    "top_leaf_nodes": [
+      12,
+      26,
+      32
+    ],
+    "node_PASS_FAIL": [
+      25,
+      7
+    ],
+    "leaf_PASS_FAIL": [
+      21,
+      5
+    ],
+    "Go_exit": 1,
+    "B_S_C": "NOT_RUN",
+    "internal_six_PASS_not_transferable": "ConnString points tobase notfreshDB; cannot reuse as qualification",
+    "firstfail_labels": [
+      "TwoPoolsDeadline",
+      "fresh19migrationpair mismatch",
+      "upgradefixture_not18",
+      "heldusagehelper error",
+      "SchemaInventory missingR4 runtimecaptureinput afterteststart not overall0test"
+    ],
+    "elapsed300_seconds": 40.77903604507446,
+    "cleanup": "native35560stop0 allDB onlybase tm_usage19_a otherclient0 PIDsocketgroupssamplergone; base retained"
+  },
+  "D1D2": {
+    "code_source": "54a46523480bc42a14e1af3543545846a5ab1ff9",
+    "code_closure": "794b29918be9047190ba3fc685d25b70ecc3ffd5f9930b3074e619b1fd796dd4",
+    "runtime_input_closure": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+    "joint_closure": "bb1621915501653fea2c691b1ccf33af3d502bd76401868e20491d7ae36b0d1a",
+    "runtime_inputs": "R4JSON plus19SQL20inputs independentlycaptured prepost, not oldsourcepolicy capture or D3PASS",
+    "D1_top_leaf_nodes": [
+      5,
+      9,
+      12
+    ],
+    "D1_Go_exit": 0,
+    "D1_actual_connection_identity_assertions": 26,
+    "D1_freshDB": 9,
+    "D1_not_repeated": true,
+    "D2_top_leaf_nodes": [
+      1,
+      1,
+      2
+    ],
+    "D2_Go_exit": 1,
+    "D2_observation": "authorityfree usagewaiterjoin PASS then independentrouter404 nonJSON,current500, exact200 rejects",
+    "D2_independent_source_rootcause": "outercontext chi.RouteContext pollution, not current productionfix proven",
+    "D3": "NOT_RUN",
+    "cleanup": "PG48630/49858stop0 allDBonlybase otherclient0 PIDsocketgroupsgone; bases retained"
+  },
+  "clean_context_fix": {
+    "source_only_capsule": "/private/tmp/tm-r5usage19-clean-request-context.0xpsiwae",
+    "after_sha256_from_author": "8158445c6bb9969b49c9f7d00da19b475e320bda781a0dba3882399bcd6a212f",
+    "path": "internal/store/postgres/r5_key_touch_admission_test.go",
+    "independent_admission": "PENDING_at_parent_instruction",
+    "runtime": "NOT_RUN",
+    "only_D2_after_admission": "D1 notrerun, D3/BSC notautomatic"
+  },
+  "all_previous_raw_archives_unchanged": true,
+  "schema19_component_whole_PASS": false,
+  "task_complete": false,
+  "product_green": false,
+  "latest_qualified_scopes": {
+    "D1": "old5top9leaf12racePASS accepted, notrerun",
+    "D2clean": {
+      "source": "f79eb4d71716da1357bac706427163ca41a35d79",
+      "code_closure": "e281399a4d32c013e9b485a088cf253670ee97559b338f1b9e79332a343bf9ac",
+      "runtime_closure": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+      "joint": "aca2dcc226494eab9ca6207e1e5416635bafceee20c90fddee4b646e2e4833fa",
+      "actual_top_leaf_nodes": [
+        1,
+        1,
+        2
+      ],
+      "race_Go_exit": 0,
+      "independent_actual_accepted": true,
+      "original300_elapsed": 19.04020881652832,
+      "native": 71177,
+      "cleanup": "allownedgroups/nativePIDsocketgone onlybase tm_usage19_d2 otherclient0 private stoppedbase retained"
+    },
+    "D3_B_S": {
+      "source_same_as_D2clean": true,
+      "top_leaf_nodes": [
+        6,
+        8,
+        10
+      ],
+      "race_Go_exit": 0,
+      "independent_actual_accepted": true,
+      "archive_original219_sha": "c8436243c33ce28ca2d2f80cf52826d2d7a006485dea955f41111bbb3f0b5c03",
+      "archive_append220_sha": "7428c5ad0ba044ab5cc5f1160adf14686c5cadb1e3ac6b970d7d5e961c938a42",
+      "C_qualified": false
+    },
+    "C0_V8": {
+      "classification": "pretest observerINFRA_UNKNOWN noemittedstart_terminal_orendpoint_resourcequalification",
+      "Go_parent_observed_exit": -15,
+      "JSONL_bytes": 0,
+      "test_package_terminals": 0,
+      "C0_member_identity": "notrecorded cannotguess",
+      "V8_member_identity": "safe_member basenameNULL SIDNULL ProcessLookupError overallUNKNOWN, notinferred identity",
+      "absolute_no_unseen_brief_listener_or_fixture_code_claim": false,
+      "allfinalowned_nativegroupsgone": true,
+      "base0client_private_stopped_retained": true
+    },
+    "V9": {
+      "level": "SOURCE_PENDING_INDEPENDENT_ADMISSION_NOT_ACTUAL",
+      "entry_V8_bytes_unchanged_prefix": "9e01",
+      "observer_sha": "e8532e6df59db09bf382cc1be9c65ac1696327f7c708b73a01e65d84bba8f268",
+      "new_mock_PASS": 3,
+      "mock_seconds": 0.001,
+      "change": "record safe basename before independentSID result; preserve name on SIDerror but overallUNKNOWN; unsafeNameNULL; unknownowner noextract/query",
+      "oldmock_or_actualqueries_repeated": false,
+      "runtime_qualified": false
+    }
+  },
+  "current_active_blockers": [
+    "C observerV9 SOURCE notadmitted/runtime",
+    "legacyStop noexplicitdeadline andformalcaller notintegrated",
+    "authasyncTouch noexplicitjoin",
+    "originalretry rejects409",
+    "whole fourCI currentMethod profile reference notqualified"
+  ],
+  "original_A_and_D2_FAILED_preserved": true,
+  "B_S_C": "B/S nowboundedPASS; C notqualified, previous NOT_RUN is historical"
+}

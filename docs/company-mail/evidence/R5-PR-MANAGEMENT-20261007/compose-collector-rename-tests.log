@@ -1,0 +1,17 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> web@0.1.0 test
+> vitest run components/company/compose-sender-ownership.test.tsx components/company/compose-preview-response.test.tsx --maxWorkers=2
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 /workspace/scratch/458de7991ac3/tabmail/web
+
+
+ Test Files  2 passed (2)
+      Tests  40 passed (40)
+   Start at  19:44:04
+   Duration  9.98s (transform 1.79s, setup 1.80s, import 1.83s, tests 6.33s, environment 6.61s)
+

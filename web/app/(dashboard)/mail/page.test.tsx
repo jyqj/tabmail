@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -10,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { sessionScope } from "@/lib/session";
+import { parseSubmissionContent } from "@/lib/receipt-types";
 
 import { MessagePane } from "@/features/mail/components/message-pane";
 import { SubmissionPane } from "@/features/mail/components/submission-pane";
@@ -56,39 +58,50 @@ vi.mock("@/lib/api/base", async (importOriginal) => ({
   request: (...args: unknown[]) => requestMock(...args),
 }));
 
-import type { Submission, WorkMailbox } from "@/lib/company";
+import type { Submission, SubmissionContent, WorkMailbox } from "@/lib/company";
 import type { MessageDetail } from "@/lib/types";
 
+const submissionId = "30000000-0000-4000-8000-000000000001";
+const submissionTenantId = "10000000-0000-4000-8000-000000000001";
+const submissionAttachmentId = "50000000-0000-4000-8000-000000000001";
 const baseSubmission = (over: Partial<Submission> = {}): Submission => ({
-  id: "job-1",
-  mailbox_id: "mb-1",
-  from: "worker@company.test",
-  subject: "quarterly report",
-  recipients: [{ address: "dest@client.test", state: "accepted" }],
+  id: submissionId,
+  tenant_id: submissionTenantId,
+  state: "sent",
   status: "accepted",
-  draft_consumed: false,
-  attachment_count: 1,
+  progress: { completeness: "known", counts: { total: 1, accepted: 1, pending: 0, temporary: 0, permanent: 0, uncertain: 0 } },
+  created_at: new Date().toISOString(),
+  delivery_uncertain: false,
+  capabilities: { view_content: true, retry: false, retry_block_reason: "state_not_retryable" },
+  ...over,
+});
+const baseSubmissionContent = (over: Partial<SubmissionContent> = {}): SubmissionContent => ({
+  id: submissionId,
+  subject: "quarterly report",
+  from: "worker@company.test",
+  to: ["dest@client.test"],
+  cc: [],
+  bcc: [],
+  recipient_completeness: "complete",
+  text_body: "see attached",
   created_at: new Date().toISOString(),
   content_redacted: false,
-  delivery_uncertain: false,
   ...over,
+});
+const retryableSubmission = (viewContent: boolean): Submission => baseSubmission({
+  state: "failed",
+  status: "needs_attention",
+  progress: { completeness: "known", counts: { total: 1, accepted: 0, pending: 0, temporary: 0, permanent: 1, uncertain: 0 } },
+  capabilities: { view_content: viewContent, retry: true, retry_block_reason: "" },
 });
 
 describe("SubmissionPane sent-content view", () => {
   beforeEach(() => {
     submissionMock.mockReset().mockResolvedValue(baseSubmission());
-    submissionContentMock.mockReset().mockResolvedValue({
-      id: "job-1",
-      subject: "quarterly report",
-      from: "worker@company.test",
-      to: ["dest@client.test"],
-      text_body: "see attached",
-      created_at: new Date().toISOString(),
-      content_redacted: false,
-    });
+    submissionContentMock.mockReset().mockResolvedValue(baseSubmissionContent());
     submissionAttachmentsMock.mockReset().mockResolvedValue([
       {
-        id: "att-1",
+        id: submissionAttachmentId,
         filename: "report.csv",
         content_type: "text/csv",
         size: 2048,
@@ -101,14 +114,14 @@ describe("SubmissionPane sent-content view", () => {
   afterEach(() => cleanup());
 
   it("reveals the sent body and attachment download on demand", async () => {
-    render(<SubmissionPane id="job-1" />);
-    await screen.findByText(/worker@company\.test/);
+    render(<SubmissionPane id={submissionId} />);
+    await screen.findByText(`Task: ${submissionId}`);
     expect(submissionContentMock).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole("button", { name: "View content" }));
+    fireEvent.click(screen.getByRole("button", { name: "View content (re-authorized)" }));
     await screen.findByText("see attached");
-    expect(submissionContentMock).toHaveBeenCalledWith("job-1");
-    expect(submissionAttachmentsMock).toHaveBeenCalledWith("job-1");
+    expect(submissionContentMock).toHaveBeenCalledWith(submissionId, expect.any(AbortSignal));
+    expect(submissionAttachmentsMock).toHaveBeenCalledWith(submissionId, expect.any(AbortSignal));
 
     const download = await screen.findByRole("button", {
       name: /report\.csv/,
@@ -116,7 +129,7 @@ describe("SubmissionPane sent-content view", () => {
     fireEvent.click(download);
     await waitFor(() =>
       expect(downloadFileMock).toHaveBeenCalledWith(
-        "/submissions/job-1/attachments/att-1/download",
+        `/submissions/${submissionId}/attachments/${submissionAttachmentId}/download`,
         "report.csv",
       ),
     );
@@ -126,23 +139,23 @@ describe("SubmissionPane sent-content view", () => {
   });
 
   it("shows the redaction notice instead of a body when content is redacted", async () => {
-    submissionContentMock.mockResolvedValue({
-      id: "job-1",
-      subject: "quarterly report",
-      from: "worker@company.test",
-      to: ["dest@client.test"],
-      created_at: new Date().toISOString(),
+    // Invalid success-wire rejection, not a readable/redacted success DTO or
+    // a substitute for backend current-read/lifecycle denial coverage.
+    submissionContentMock.mockImplementation(async () => parseSubmissionContent({
+      ...baseSubmissionContent({ html_body: "<p>private invalid-wire HTML</p>" }),
       content_redacted: true,
-    });
-    render(<SubmissionPane id="job-1" />);
-    fireEvent.click(await screen.findByRole("button", { name: "View content" }));
-    await screen.findByText("The message body is not visible to you.");
+    }, submissionId));
+    render(<SubmissionPane id={submissionId} />);
+    fireEvent.click(await screen.findByRole("button", { name: "View content (re-authorized)" }));
+    await screen.findByText("Content and attachments are currently unavailable; recheck read access and message retention.");
     expect(screen.queryByText("see attached")).toBeNull();
+    expect(screen.queryByTitle("HTML email preview")).toBeNull();
+    expect(document.body).not.toHaveTextContent("private invalid-wire HTML");
   });
 
   it("keeps the content collapsed until requested", async () => {
-    render(<SubmissionPane id="job-1" />);
-    await screen.findByText(/worker@company\.test/);
+    render(<SubmissionPane id={submissionId} />);
+    await screen.findByText(`Task: ${submissionId}`);
     await waitFor(() => expect(submissionContentMock).not.toHaveBeenCalled());
     expect(screen.queryByText("see attached")).toBeNull();
   });
@@ -150,6 +163,7 @@ describe("SubmissionPane sent-content view", () => {
 
 const baseMailbox = (over: Partial<WorkMailbox> = {}): WorkMailbox => ({
   mailbox: {
+    kind: "shared",
     id: "mb-1",
     tenant_id: "tenant-1",
     zone_id: "zone-1",
@@ -267,37 +281,33 @@ describe("SubmissionPane capabilities", () => {
         },
       }),
     );
-    render(<SubmissionPane id="job-1" />);
-    await screen.findByText(/worker@company\.test/);
+    render(<SubmissionPane id={submissionId} />);
+    await screen.findByText(`Task: ${submissionId}`);
     expect(
-      screen.getByRole("button", { name: "View content" }),
+      screen.getByRole("button", { name: "View content (re-authorized)" }),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /Retry unfinished recipients/ }),
+      screen.queryByRole("button", { name: /Safely retry unfinished targets/ }),
     ).toBeNull();
   });
 
   it("shows retry but not content when the server grants retry only", async () => {
     submissionMock.mockResolvedValue(
-      baseSubmission({
-        capabilities: { view_content: false, retry: true },
-      }),
+      retryableSubmission(false),
     );
-    render(<SubmissionPane id="job-1" />);
-    await screen.findByText(/worker@company\.test/);
+    render(<SubmissionPane id={submissionId} />);
+    await screen.findByText(`Task: ${submissionId}`);
     expect(
-      screen.queryByRole("button", { name: "View content" }),
+      screen.queryByRole("button", { name: "View content (re-authorized)" }),
     ).toBeNull();
     expect(
-      screen.getByRole("button", { name: /Retry unfinished recipients/ }),
+      screen.getByRole("button", { name: /Safely retry unfinished targets/ }),
     ).toBeInTheDocument();
   });
 
   it("surfaces the uncertain-outcome notice on a delivery_uncertain conflict", async () => {
     submissionMock.mockResolvedValue(
-      baseSubmission({
-        capabilities: { view_content: true, retry: true },
-      }),
+      retryableSubmission(true),
     );
     requestMock.mockRejectedValue({
       error: {
@@ -306,18 +316,18 @@ describe("SubmissionPane capabilities", () => {
         reason: "delivery_uncertain",
       },
     });
-    render(<SubmissionPane id="job-1" />);
-    await screen.findByText(/worker@company\.test/);
+    render(<SubmissionPane id={submissionId} />);
+    await screen.findByText(`Task: ${submissionId}`);
     fireEvent.click(
-      screen.getByRole("button", { name: /Retry unfinished recipients/ }),
+      screen.getByRole("button", { name: /Safely retry unfinished targets/ }),
     );
     await waitFor(() =>
       expect(vi.mocked(toast.error)).toHaveBeenCalledWith(
-        expect.stringContaining("Uncertain outcome"),
+        expect.stringContaining("verify next-hop evidence for uncertain outcomes"),
       ),
     );
     expect(requestMock).toHaveBeenCalledWith(
-      "/api/v1/outbound/job-1/retry",
+      `/api/v1/outbound/${submissionId}/retry`,
       expect.objectContaining({ method: "POST" }),
     );
   });
@@ -327,35 +337,34 @@ describe("SubmissionPane capabilities", () => {
 function RefreshableSubmission() {
   const { mutate } = useSWRConfig();
   return <>
-    <SubmissionPane id="job-1" />
-    <button onClick={() => void mutate(["session", sessionScope(), ["submission", "job-1"]])}>Refresh receipt</button>
-    <button onClick={() => void mutate(["session", sessionScope(), ["submission-attachments", "job-1"]])}>Refresh files</button>
+    <SubmissionPane id={submissionId} />
+    <button onClick={() => void mutate(["session", sessionScope(), ["submission", submissionId]])}>Refresh receipt</button>
   </>;
 }
 
 describe("Revocation while a sent message is open", () => {
   beforeEach(() => {
-    submissionMock.mockReset().mockResolvedValue(baseSubmission({ capabilities: { view_content: true, retry: false } }));
-    submissionContentMock.mockReset().mockResolvedValue({ id: "job-1", text_body: "private body", content_redacted: false });
-    submissionAttachmentsMock.mockReset().mockResolvedValue([{ id: "att-1", filename: "private.csv", size: 1 }]);
+    submissionMock.mockReset().mockResolvedValue(baseSubmission({ capabilities: { view_content: true, retry: false, retry_block_reason: "state_not_retryable" } }));
+    submissionContentMock.mockReset().mockResolvedValue(baseSubmissionContent({ text_body: "private body" }));
+    submissionAttachmentsMock.mockReset().mockResolvedValue([{ id: submissionAttachmentId, filename: "private.csv", size: 1 }]);
   });
-  afterEach(() => cleanup());
+  afterEach(() => { cleanup(); vi.useRealTimers(); });
 
   it("unmounts open content, clears cached bytes and requires an explicit reopen after regrant", async () => {
     render(<RefreshableSubmission />);
-    fireEvent.click(await screen.findByRole("button", { name: "View content" }));
+    fireEvent.click(await screen.findByRole("button", { name: "View content (re-authorized)" }));
     await screen.findByText("private body");
     await screen.findByRole("button", { name: /private.csv/ });
-    submissionMock.mockResolvedValue(baseSubmission({ capabilities: { view_content: false, retry: false } }));
+    submissionMock.mockResolvedValue(baseSubmission({ capabilities: { view_content: false, retry: false, retry_block_reason: "sender_authority" } }));
     fireEvent.click(screen.getByText("Refresh receipt"));
     await waitFor(() => expect(screen.queryByText("private body")).toBeNull());
     expect(screen.queryByRole("button", { name: /private.csv/ })).toBeNull();
     expect(screen.queryByRole("button", { name: /View content|Hide content/ })).toBeNull();
-    submissionContentMock.mockResolvedValue({ id: "job-1", text_body: "newly authorized body", content_redacted: false });
+    submissionContentMock.mockResolvedValue(baseSubmissionContent({ text_body: "newly authorized body", bcc: null, recipient_completeness: "legacy_unknown" }));
     submissionAttachmentsMock.mockResolvedValue([]);
-    submissionMock.mockResolvedValue(baseSubmission({ capabilities: { view_content: true, retry: false } }));
+    submissionMock.mockResolvedValue(baseSubmission({ capabilities: { view_content: true, retry: false, retry_block_reason: "state_not_retryable" } }));
     fireEvent.click(screen.getByText("Refresh receipt"));
-    const view = await screen.findByRole("button", { name: "View content" });
+    const view = await screen.findByRole("button", { name: "View content (re-authorized)" });
     expect(screen.queryByText("private body")).toBeNull();
     fireEvent.click(view);
     await screen.findByText("newly authorized body");
@@ -363,12 +372,17 @@ describe("Revocation while a sent message is open", () => {
   });
 
   it("does not leave cached attachment metadata visible after a denied revalidation", async () => {
+    // The live content reader has no body/files SWR cache. Drive its actual
+    // defensive poll with a controlled interval clock; retain denial assertions.
+    vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
     render(<RefreshableSubmission />);
-    fireEvent.click(await screen.findByRole("button", { name: "View content" }));
+    fireEvent.click(await screen.findByRole("button", { name: "View content (re-authorized)" }));
     await screen.findByRole("button", { name: /private.csv/ });
     submissionAttachmentsMock.mockRejectedValue({ error: { code: "FORBIDDEN", message: "revoked" } });
-    fireEvent.click(screen.getByText("Refresh files"));
+    await act(async () => { await vi.advanceTimersByTimeAsync(15000); });
     await waitFor(() => expect(screen.queryByRole("button", { name: /private.csv/ })).toBeNull());
+    expect(screen.queryByText("private body")).toBeNull();
+    vi.useRealTimers();
   });
 });
 

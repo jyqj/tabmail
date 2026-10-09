@@ -94,11 +94,18 @@ func (s *PgStore) ListSendIdentitiesByZone(ctx context.Context, zoneID uuid.UUID
 }
 
 func (s *PgStore) FindSendIdentityForAddress(ctx context.Context, tenantID uuid.UUID, address string) (*models.SendIdentity, error) {
+	return findSendIdentityForAddress(ctx, s.pool, tenantID, address, "")
+}
+
+// Optional row protection is supplied only by the atomic retry adapter.
+func findSendIdentityForAddress(ctx context.Context, q interface {
+	QueryRow(context.Context, string, ...any) pgx.Row
+}, tenantID uuid.UUID, address, lock string) (*models.SendIdentity, error) {
 	// Try exact match first.
-	row := s.pool.QueryRow(ctx, `
+	row := q.QueryRow(ctx, `
 		SELECT id, tenant_id, zone_id, mailbox_id, address, identity_type, verified, created_at
 		FROM send_identities
-		WHERE tenant_id = $1 AND address = $2 AND identity_type = 'exact'`, tenantID, address)
+		WHERE tenant_id = $1 AND address = $2 AND identity_type = 'exact'`+lock, tenantID, address)
 	si := &models.SendIdentity{}
 	err := row.Scan(&si.ID, &si.TenantID, &si.ZoneID, &si.MailboxID, &si.Address, &si.IdentityType, &si.Verified, &si.CreatedAt)
 	if err == nil {
@@ -114,10 +121,10 @@ func (s *PgStore) FindSendIdentityForAddress(ctx context.Context, tenantID uuid.
 	}
 	domain := address[idx+1:]
 	wildcardAddr := "*@" + domain
-	row = s.pool.QueryRow(ctx, `
+	row = q.QueryRow(ctx, `
 		SELECT id, tenant_id, zone_id, mailbox_id, address, identity_type, verified, created_at
 		FROM send_identities
-		WHERE tenant_id = $1 AND address = $2 AND identity_type = 'domain_wildcard'`, tenantID, wildcardAddr)
+		WHERE tenant_id = $1 AND address = $2 AND identity_type = 'domain_wildcard'`+lock, tenantID, wildcardAddr)
 	si = &models.SendIdentity{}
 	err = row.Scan(&si.ID, &si.TenantID, &si.ZoneID, &si.MailboxID, &si.Address, &si.IdentityType, &si.Verified, &si.CreatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {

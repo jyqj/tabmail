@@ -93,6 +93,12 @@ func (h *Hub) Subscribe(mailbox string) (<-chan Event, func()) {
 }
 
 func (h *Hub) Publish(event Event) {
+	h.PublishContext(context.Background(), event)
+}
+
+// PublishContext emits the committed live event even if its caller has canceled.
+// Only the best-effort monitor write inherits that cancellation and deadline.
+func (h *Hub) PublishContext(ctx context.Context, event Event) {
 	event.At = time.Now().UTC()
 	metrics.RealtimeEventPublished()
 
@@ -112,7 +118,11 @@ func (h *Hub) Publish(event Event) {
 	h.mu.Unlock()
 
 	if h.recorder != nil {
-		_ = h.recorder.CreateMonitorEvent(context.Background(), &models.MonitorEvent{
+		// Monitor history is best effort after live delivery. A blocked INSERT
+		// must not hold the caller (including ingest workers) indefinitely.
+		recordCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+		err := h.recorder.CreateMonitorEvent(recordCtx, &models.MonitorEvent{
 			Type:      string(event.Type),
 			Mailbox:   event.Mailbox,
 			MessageID: event.MessageID,
@@ -121,5 +131,10 @@ func (h *Hub) Publish(event Event) {
 			Size:      event.Size,
 			At:        event.At,
 		})
+		if err != nil {
+			metrics.MonitorEventFailed()
+		} else {
+			metrics.MonitorEventRecorded()
+		}
 	}
 }

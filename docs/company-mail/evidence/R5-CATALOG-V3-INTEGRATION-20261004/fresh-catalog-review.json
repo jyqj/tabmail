@@ -1,0 +1,216 @@
+{
+  "base": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+  "reviewed_head": "4540fb91ba742443dcf0a872b80261e58af7b3ab",
+  "verdict": "accept_static_reconciliation",
+  "delta_paths": [
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/README.md",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/historical-compatibility-inventory-revision1.json",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/historical-transaction-inventory-revision1.json",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/reconciliation.json",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/source-change-chain.json",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/verification.json",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+    "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+    "scripts/tests/test_r5_catalog_reconciliation.py",
+    "scripts/tests/test_r5_transactions.py"
+  ],
+  "revision1_byte_preserved_sha256": {
+    "transaction": "3ebb5fe8499f663cfe6af906e550787011d17c439db238c22cbe4256c9e59988",
+    "compatibility": "cfd20e67cdec8b1c03b4e2f882c5f791f53e28d910af13411e81d777fd621820"
+  },
+  "source_history": {
+    "internal/store/postgres/employee_disposition.go": {
+      "reviewed_changes": 1,
+      "all_path_commits": [
+        "23228449254bc0312171640a637e359187169192"
+      ]
+    },
+    "internal/api/handlers/r5_protocol_component_observations_test.go": {
+      "reviewed_changes": 6,
+      "all_path_commits": [
+        "850f067cf41e082d4134b1b58cccf17a27ce51bd",
+        "c8df5721bc3411d23d1e3b5ba4be917893d65fc2",
+        "5b2715332d56c113e69a51bab2728f601ec0a82a",
+        "20b51d48c4a849615817ee461699d31fe3e0cb4c",
+        "7beb93faf99fd50323edb4ddd00ed19a3e6ab405",
+        "dc350c3e6c66553cf3a16b9771abb091cd6de1a8"
+      ]
+    },
+    "internal/store/postgres/r5_protocol_shared_test.go": {
+      "reviewed_changes": 1,
+      "all_path_commits": [
+        "6138113c1896cb810db567605154b5023f0340de"
+      ]
+    }
+  },
+  "provenance_rows_verified": 8,
+  "transaction_entry_deltas_verified": {
+    "internal/store/postgres/company_members.go:*PgStore:companyTx": [
+      "callers"
+    ],
+    "internal/store/postgres/company_members.go::companyAudit": [
+      "callers"
+    ],
+    "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding": [
+      "assertions",
+      "evidence",
+      "lock_fk_wait_fence",
+      "syntax"
+    ],
+    "internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding": [
+      "assertions",
+      "evidence",
+      "lock_fk_wait_fence",
+      "syntax"
+    ],
+    "internal/store/postgres/employee_disposition.go:*PgStore:applyOffboarding": [
+      "assertions",
+      "callers",
+      "evidence",
+      "syntax"
+    ],
+    "internal/store/postgres/employee_disposition.go:*PgStore:offboardingPlanTarget": [
+      "callers",
+      "evidence",
+      "syntax"
+    ],
+    "internal/store/postgres/employee_disposition.go:*PgStore:offboardingQualifiedTarget": [
+      "assertions",
+      "callers",
+      "evidence",
+      "lock_fk_wait_fence",
+      "syntax"
+    ],
+    "internal/store/postgres/employee_disposition.go:*PgStore:offboardingTarget": [
+      "evidence",
+      "syntax"
+    ],
+    "internal/store/postgres/employee_disposition.go::offboardingAuthorityEpochTx": [
+      "assertions",
+      "callers",
+      "evidence",
+      "lock_fk_wait_fence",
+      "syntax"
+    ],
+    "internal/store/postgres/employee_disposition.go::offboardingEpochsTx": [
+      "callers",
+      "evidence",
+      "syntax"
+    ],
+    "internal/store/postgres/employee_disposition.go::offboardingPreviewDeadlineTx": [
+      "assertions",
+      "callers",
+      "evidence",
+      "lock_fk_wait_fence",
+      "syntax"
+    ],
+    "internal/store/postgres/employee_disposition.go::offboardingSnapshot": [
+      "assertions",
+      "callers",
+      "evidence",
+      "lock_fk_wait_fence",
+      "syntax"
+    ],
+    "internal/store/postgres/employee_disposition.go::offboardingSubjectsTx": [
+      "assertions",
+      "callers",
+      "evidence",
+      "file_family_context",
+      "lock_fk_wait_fence",
+      "source_review",
+      "syntax"
+    ],
+    "internal/store/postgres/mailbox_revision.go::transferOwnedMailboxes": [
+      "callers"
+    ],
+    "internal/store/postgres/member_guard.go::guardMemberRemoval": [
+      "callers"
+    ],
+    "internal/store/postgres/outbound_receipts.go:outboundReceiptRow:Scan": [
+      "callers"
+    ],
+    "internal/store/postgres/postgres.go:*PgStore:Close": [
+      "callers"
+    ],
+    "internal/store/postgres/postgres.go::New": [
+      "callers"
+    ],
+    "internal/store/postgres/users.go::scanUser": [
+      "callers"
+    ]
+  },
+  "fresh_controls": [
+    {
+      "control": "actual successor role-policy bypass",
+      "result": "rejected",
+      "reason": "function syntax drift: internal/store/postgres/employee_disposition.go::offboardingSubjectsTx"
+    },
+    {
+      "control": "actual file-only bytes",
+      "result": "rejected",
+      "reason": "postgres file set/content drift"
+    },
+    {
+      "control": "extra AST SQL operation",
+      "result": "rejected",
+      "reason": "function syntax drift"
+    },
+    {
+      "control": "unreviewed route fact",
+      "result": "rejected",
+      "reason": "route producer differs"
+    },
+    {
+      "control": "actual component closure bytes",
+      "result": "rejected",
+      "reason": "source hash drift"
+    }
+  ],
+  "transaction": {
+    "status": "PASS",
+    "postgres_files": 62,
+    "functions": 395,
+    "sql_execution_calls": 498,
+    "direct_write_functions": 134,
+    "write_closure_functions": 154,
+    "migration_files": 19,
+    "task_complete": false,
+    "runtime_verified": false,
+    "meaning": "syntax inventory current; no concurrency or behavior equivalence claim"
+  },
+  "compatibility": {
+    "wire_validation_scope": "not_checked_current_wire_required",
+    "historical_wire_reference": {
+      "artifact_ref": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json",
+      "sha256": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+      "qualification": "historical_metadata_only_not_current_wire"
+    },
+    "status": "source_inventory_and_upgrade_plan_checked",
+    "task_complete": false,
+    "product_green": false,
+    "routes": 132,
+    "client_branches": 134,
+    "source_files": 94,
+    "openapi_missing": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/suppression",
+      "GET /docs-assets/*"
+    ],
+    "no_shipped_client": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/admin/status",
+      "GET /api/v1/auth/me",
+      "GET /api/v1/company/outbound/{id}/recipients",
+      "GET /api/v1/suppression",
+      "GET /docs",
+      "GET /docs-assets/*",
+      "GET /metrics",
+      "GET /openapi.yaml",
+      "GET /ready",
+      "GET /redoc"
+    ],
+    "runtime_boundary": "No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required."
+  },
+  "runtime_qualified": false,
+  "central_progress": "10/171 unchanged"
+}

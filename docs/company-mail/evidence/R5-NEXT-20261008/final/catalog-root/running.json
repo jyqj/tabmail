@@ -1,0 +1,23 @@
+{
+  "source_commit": "f413a9138d305cf154ed2cecaddcf9b9a2397666",
+  "local_tested_head": "9a5fb4f95f6d42e913956b0cd175d9d4bfc33aeb",
+  "local_tested_tree": "26c5a97c88487af2ba0470e304bdb218864f805e",
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "-v",
+    "scripts.tests.test_r5_catalog_reconciliation",
+    "scripts.tests.test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence",
+    "scripts.tests.test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion"
+  ],
+  "environment": {
+    "PYTHONPATH": "/workspace/scratch/fabe500b93be/tabmail/scripts:/workspace/scratch/fabe500b93be/tabmail/scripts/tests",
+    "GOTOOLCHAIN": "local",
+    "GOMAXPROCS": "2",
+    "GOMODCACHE": "/workspace/scratch/458de7991ac3/go-cache/mod",
+    "GOCACHE": "/workspace/scratch/fabe500b93be/go-cache/build"
+  },
+  "scope": "15 reconciliation methods plus two exact current-source positives. This invocation is separate from the disclosed incomplete-copy setup and import-loader failures. It is not a full 60-method or whole CI run.",
+  "started_utc": "2026-10-07T17:59:12Z"
+}

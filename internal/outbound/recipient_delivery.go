@@ -7,26 +7,17 @@ import (
 	"github.com/google/uuid"
 	"net/textproto"
 	"tabmail/internal/authz"
-	"tabmail/internal/company"
+	"tabmail/internal/delivery"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 )
-
-type recipientStore interface {
-	ListOutboundRecipients(context.Context, uuid.UUID, uuid.UUID) ([]company.Recipient, error)
-	BeginOutboundRecipient(context.Context, uuid.UUID, *uuid.UUID, string) (bool, error)
-	CompleteOutboundRecipient(context.Context, uuid.UUID, *uuid.UUID, string, string, int, string) error
-}
 
 // A transaction per envelope recipient is deliberate: a rejected RCPT cannot
 // poison valid recipients at that domain. It costs more relay connections than
 // batching, but keeps every accepted/permanent/uncertain result independently
 // fenced. The full To/CC headers stay intact and BCC stays envelope-only.
 func (s *Service) deliverRecipients(ctx context.Context, j *models.OutboundJob, token *uuid.UUID, mime []byte) error {
-	st, ok := s.store.(recipientStore)
-	if !ok {
-		return fmt.Errorf("per-recipient ledger unavailable")
-	}
+	st := s.store
 	recipients, e := st.ListOutboundRecipients(ctx, j.TenantID, j.ID)
 	if e != nil {
 		return e
@@ -34,16 +25,20 @@ func (s *Service) deliverRecipients(ctx context.Context, j *models.OutboundJob, 
 	if len(recipients) == 0 {
 		return fmt.Errorf("recipient ledger is empty")
 	}
-	temporary, permanent := 0, 0
+	var temporaryErrors []error
+	permanent := 0
 	for _, rcpt := range recipients {
 		switch rcpt.State {
-		case "accepted":
+		case delivery.Accepted:
 			continue
-		case "permanent":
+		case delivery.Permanent:
 			permanent++
 			continue
-		case "uncertain":
-			return s.store.MarkOutboundJobFailed(ctx, j.ID, token, "Recipient acceptance is uncertain; operator review required", false)
+		case delivery.Uncertain:
+			if err := s.store.MarkOutboundJobFailed(ctx, j.ID, token, "Recipient acceptance is uncertain; operator review required", false); err != nil {
+				return fmt.Errorf("%w: mark uncertain recipient job: %w", store.ErrOutboundUncertain, err)
+			}
+			return nil
 		}
 		if err := s.ValidateJobAuthorization(ctx, j); err != nil {
 			if authz.IsAuthzError(err) {
@@ -65,50 +60,64 @@ func (s *Service) deliverRecipients(ctx context.Context, j *models.OutboundJob, 
 		attempt.RcptTo = []string{rcpt.Address}
 		var result *DeliveryResult
 		var deliveryErr error
-		suppressed, suppressErr := s.store.IsSuppressed(ctx, j.TenantID, rcpt.Address)
-		if suppressErr != nil {
-			deliveryErr = suppressErr
-		} else if suppressed {
-			deliveryErr = &textproto.Error{Code: 550, Msg: "Recipient suppressed"}
+		address, addressErr := ParseRecipientAddress(rcpt.Address)
+		if addressErr != nil {
+			deliveryErr = fmt.Errorf("invalid queued recipient: %w", addressErr)
 		} else {
-			result, deliveryErr = s.adapter.Deliver(ctx, &attempt, mime)
+			// Use the same decoded identity as the synchronous submission check;
+			// SMTP quoting must not create a second suppression identity.
+			suppressed, suppressErr := s.store.IsSuppressed(ctx, j.TenantID, address.Identity)
+			if suppressErr != nil {
+				deliveryErr = suppressErr
+			} else if suppressed {
+				deliveryErr = &textproto.Error{Code: 550, Msg: "Recipient suppressed"}
+			} else {
+				result, deliveryErr = s.adapter.Deliver(ctx, &attempt, mime)
+			}
 		}
-		if result != nil {
-			// Protocol diagnostics are also retained on the recipient in the fenced
-			// completion transaction. Attempt telemetry failure cannot erase progress.
-			err = s.store.CreateOutboundAttempt(ctx, &models.OutboundAttempt{ID: uuid.New(), JobID: j.ID, TenantID: j.TenantID, Adapter: result.Adapter, Attempt: j.Attempts, SMTPCode: result.SMTPCode, SMTPResponse: result.SMTPResponse, RemoteHost: result.RemoteHost, StartedAt: result.StartedAt, FinishedAt: result.FinishedAt, Error: result.Error})
-			if err != nil {
-				s.logger.Warn().Err(err).Msg("recording delivery telemetry")
+		recordAttempt := func() {
+			if result != nil {
+				// The fenced recipient completion (or uncertain terminal marker)
+				// precedes optional telemetry, including slow writes and cancellation.
+				if err := s.store.CreateOutboundAttempt(ctx, &models.OutboundAttempt{ID: uuid.New(), JobID: j.ID, TenantID: j.TenantID, Adapter: result.Adapter, Attempt: j.Attempts, SMTPCode: result.SMTPCode, SMTPResponse: result.SMTPResponse, RemoteHost: result.RemoteHost, StartedAt: result.StartedAt, FinishedAt: result.FinishedAt, Error: result.Error}); err != nil {
+					s.logger.Warn().Err(err).Msg("recording delivery telemetry")
+				}
 			}
 		}
 		if errors.Is(deliveryErr, store.ErrOutboundUncertain) {
-			return s.store.MarkOutboundJobFailed(ctx, j.ID, token, "Recipient acceptance uncertain: "+rcpt.Address, false)
+			if err := s.store.MarkOutboundJobFailed(ctx, j.ID, token, "Recipient acceptance uncertain: "+rcpt.Address, false); err != nil {
+				return fmt.Errorf("%w: mark uncertain recipient job: %w", deliveryErr, err)
+			}
+			recordAttempt()
+			return nil
 		}
-		state, code, diagnostic := "accepted", 250, "Accepted by next hop"
+		state, code, diagnostic := delivery.Accepted, 250, "Accepted by next hop"
 		if deliveryErr != nil {
-			state = "temporary"
+			state = delivery.Temporary
 			code = 0
 			diagnostic = deliveryErr.Error()
 			var reply *textproto.Error
 			if errors.As(deliveryErr, &reply) {
 				code = reply.Code
 				if code >= 500 && code < 600 {
-					state = "permanent"
+					state = delivery.Permanent
 				}
 			}
 		}
 		if err = st.CompleteOutboundRecipient(ctx, j.ID, token, rcpt.Address, state, code, diagnostic); err != nil {
-			return fmt.Errorf("%w: recipient checkpoint: %v", store.ErrOutboundUncertain, err)
+			// A checkpoint failure cannot erase the delivery outcome or its cause.
+			return errors.Join(fmt.Errorf("%w: recipient checkpoint: %w", store.ErrOutboundUncertain, err), deliveryErr)
 		}
-		if state == "temporary" {
-			temporary++
+		recordAttempt()
+		if state == delivery.Temporary {
+			temporaryErrors = append(temporaryErrors, fmt.Errorf("recipient %s: %w", rcpt.Address, deliveryErr))
 		}
-		if state == "permanent" {
+		if state == delivery.Permanent {
 			permanent++
 		}
 	}
-	if temporary > 0 {
-		return fmt.Errorf("%d recipient(s) temporarily failed; accepted recipients will not be resent", temporary)
+	if len(temporaryErrors) > 0 {
+		return fmt.Errorf("%d recipient(s) temporarily failed; accepted recipients will not be resent: %w", len(temporaryErrors), errors.Join(temporaryErrors...))
 	}
 	if permanent > 0 {
 		return s.store.MarkOutboundJobFailed(ctx, j.ID, token, fmt.Sprintf("%d recipient(s) permanently rejected; remaining recipients accepted", permanent), false)

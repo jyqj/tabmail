@@ -1,0 +1,192 @@
+{
+  "scope": "RES-P6-120-MIME-PREPARSE-01-SOURCE-V3",
+  "status": "SOURCE_V3_UNEXECUTED_PENDING_ORIGINAL_INDEPENDENT_REVIEWER",
+  "write_set": [
+    "internal/mailcontent/mime_budget.go",
+    "internal/mailcontent/mime_budget_test.go"
+  ],
+  "before": {
+    "internal/mailcontent/mime_budget.go": {
+      "exists": true,
+      "sha256": "b2d93567f4556971b9967ad80157cc9d70ace8dd31a6393075c4eba6e2521364"
+    },
+    "internal/mailcontent/mime_budget_test.go": {
+      "exists": true,
+      "sha256": "36858895bd2b84b84b7be6316c9e4bbd950a21fc797e137e46ef5553dc6c6758"
+    }
+  },
+  "after": {
+    "internal/mailcontent/mime_budget.go": {
+      "exists": true,
+      "sha256": "b92072b2f5fb89a9eea2956e40746a22bbfea22a530fca197da3f65a00288003"
+    },
+    "internal/mailcontent/mime_budget_test.go": {
+      "exists": true,
+      "sha256": "8aeb043be4a841a4619e2afec8137e3397f7983c5db3021d833523295faf4b22"
+    }
+  },
+  "unchanged_v2_write_set_pins": {
+    "internal/mailcontent/parser.go": {
+      "exists": true,
+      "sha256": "cab8753b99dd2af3192ad15b5b2c3a99adea830d9665bad2087cea1d96fa31f3"
+    },
+    "internal/app/messages/service.go": {
+      "exists": true,
+      "sha256": "a852c17b5051989cc91990f78d95f721e441346f11101e66460360c5ac708460"
+    },
+    "internal/app/messages/mime_budget_boundary_test.go": {
+      "exists": true,
+      "sha256": "b405791a97dca02eb6fddf24fa122703909dfb8fdaf96d7bffe287cd82e06a1a"
+    }
+  },
+  "supersedes_source_capsule": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2-CAPSULE.json",
+  "preserved_history": "V1 and V2 capsules/archives unchanged. V3 before captures exactly the two affected V2 source hashes. Original V2 runtime JSON/delivery/archive paths are read-only and retained.",
+  "failure_order": [
+    {
+      "phase": "V1 independent source review",
+      "state": "BLOCK: missing/empty child CT early-return mismatch"
+    },
+    {
+      "phase": "V2 source correction and original independent source re-review",
+      "state": "source admitted for bounded execution only; no runtime PASS"
+    },
+    {
+      "phase": "V2 sole calibration runtime",
+      "state": "FAIL: mailcontent failed 26 leaves + 2 parent nodes, messages package passed; 8 top,123 leaves,129 total,101 PASS,28 FAIL,0 SKIP; original outer elapsed 10.032655 seconds; resources gone"
+    },
+    {
+      "phase": "V3 static source correction",
+      "state": "NOT_EXECUTED; root has not authorized new runtime; original independent reviewer re-review pending"
+    }
+  ],
+  "v2_runtime_failure_binding": {
+    "runtime_review": "/private/tmp/tm-r5mime-v2-runtime.64gyfkxv/MIME-V2-runtime-review.json",
+    "delivery_receipt": "/private/tmp/tm-r5mime-v2-runtime.64gyfkxv/delivery-receipt.json",
+    "source_sha": "853e4a22e81462d61dce4f8f0496d6f4cd408bb7",
+    "source_closure_sha256": "5f37cf9e51cee9d28a51cac15e4ca7c3343ee74a1f27d2291dcd19bbb19306a4",
+    "archive": "/private/tmp/tm-r5mime-v2-runtime.64gyfkxv/MIME-V2-new-bounded-FAIL-evidence.tar.gz",
+    "archive_sha256": "95b746cb3b2a9236d59eedc4e748d30b22a1032b97bbc68596e49884c45d1ce2",
+    "go_exit": 1,
+    "PASS_nodes": 101,
+    "FAIL_nodes": 28,
+    "SKIP": 0,
+    "top": 8,
+    "leaf": 123,
+    "failed_leaf": 26,
+    "failed_leaves": [
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_false",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_true",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_false",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_true",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_false",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_true",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_false",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_true",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_false",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_true",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_false",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_true",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_false",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_true",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_false",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_true",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_false",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_true",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_false",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_true",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_false",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_true",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_false",
+      "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_true",
+      "TestMIMEPreparseBudgetCompatibility/14",
+      "TestMIMEPreparseBudgetCompatibility/15"
+    ],
+    "cleanup": {
+      "Go_group_gone": true,
+      "final_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "native_PG_started": false,
+      "network_services_started": false,
+      "old_resources_not_touched": true,
+      "original_outer300_elapsed_seconds": 10.032655000686646,
+      "owned_process_group": 12079,
+      "within_original300": true
+    },
+    "not_v3_evidence": true
+  },
+  "cause_trace": [
+    {
+      "source": "github.com/jhillyerd/enmime/v2@v2.3.0/part.go:449-450",
+      "step": "Each new part is wrapped in default 4096-byte bufio.Reader. ReadHeader/decoding see the logical EOF produced by boundaryReader."
+    },
+    {
+      "source": "github.com/jhillyerd/enmime/v2@v2.3.0/boundary.go:124-133",
+      "step": "Mid-first-fill delimiter/terminator matches return buffered n>0, io.EOF and clear atPartStart=false, but do not consume the marker in the underlying parent reader."
+    },
+    {
+      "source": "github.com/jhillyerd/enmime/v2@v2.3.0/boundary.go:174-180",
+      "step": "The subsequent Next FIRST drains current part using io.Copy(io.Discard,b), then scans delimiter lines. This was omitted in V1/V2 slice traversal."
+    },
+    {
+      "source": "github.com/jhillyerd/enmime/v2@v2.3.0/boundary.go:88-109",
+      "step": "During that drain atPartStart=false, non-CR/LF positions no longer match markers. Shifted/mid-line marker and apparent following MIME headers are discarded until a recognized CR/LF boundary candidate. They do not allocate child nodes."
+    },
+    {
+      "source": "internal/mailcontent/mime_budget.go V2->V3 patch",
+      "step": "V2 advanced directly to line-Next at the logical EOF cursor, so counted a phantom sibling at the mid-line delimiter (24 offset leaves + Compatibility14/15). Mid-line terminators could instead prematurely stop and undercount later real CRLF children. V3 explicitly performs post-EOF discard with firstFill=false whenever nonempty bytes were delivered, before line-Next."
+    }
+  ],
+  "design": {
+    "admission": "All byte/depth/node/projection budgets checked before final enmime allocation; unchanged 25MiB,32(root1),1024(root1),512 attachment+inline.",
+    "boundary_policy": "Unchanged approved recursive boundary>4090 failclosed ErrMIMEParse.",
+    "read_state": "budgetPartEnd delegates initial firstFill=true; budgetBoundaryEnd firstFill=false checks CR/LF candidates only, including at byte zero. end==0 retains atPartStart=true and needs no extra discard advancement.",
+    "no_decode": "Discard emulation scans raw slices only; no body transfer decoding or full MIME tree allocation.",
+    "resource_claim": "No single-pass, linear CPU, complete heap or full-parser cost claim. Added drain scans and existing overlapping lookahead scans remain context-checked; input dimensions are admitted, cost not benchmarked.",
+    "auth_audit_close": "Untouched V2 messages source and already-passed boundary selectors; no rerun of messages proposed."
+  },
+  "tests": {
+    "existing_failed_fixtures": "All 26 original failing leaves retained without loosening their assertions or changing fixture preconditions.",
+    "new_target": "TestMIMEPreparseBudgetBoundaryDrain: trace-derived direct/nested mid-line delimiter/final EOF, discarded inline octet phantom, later real canonical attachment; assert exact drain cursor, original enmime actual node/projected count, preflight agreement and complete-envelope equality.",
+    "minimal_rerun_suggestions": [
+      {
+        "package": "./internal/mailcontent",
+        "run": "^TestMIMEPreparseBudgetBoundaryOffsets$/^len_(1|70|4090)$/^offset_409[3-6]$/^final_false$/^nested_(false|true)$",
+        "scope": "24 V2 failed leaves only"
+      },
+      {
+        "package": "./internal/mailcontent",
+        "run": "^TestMIMEPreparseBudgetCompatibility$/^(14|15)$",
+        "scope": "2 V2 failed leaves only"
+      },
+      {
+        "package": "./internal/mailcontent",
+        "run": "^TestMIMEPreparseBudgetBoundaryDrain$",
+        "scope": "new 12 direct/nested delimiter/final drain-order leaves"
+      }
+    ],
+    "execution_state": "NOT_EXECUTED. Only sole calibration_executor after root authorization and original independent reviewer admission.",
+    "validation": "gofmt and git diff --check only, no Go/PG/test/build/service"
+  },
+  "required_review_focus": [
+    "V2 raw failure facts versus source pins",
+    "Read n>0+EOF clears atPartStart before Next discard",
+    "No-budget/no-node consumption of discarded phantom headers",
+    "Later real canonical child preserved after mid-line final marker",
+    "Initial zero-byte EOF versus nonzero-byte EOF state",
+    "Recursion, context guards and unchanged admission budgets"
+  ],
+  "not_claimed": [
+    "V3 runtime PASS",
+    "V2 runtime failure fixed by measured execution",
+    "P6-120 completion",
+    "P6-100 completion",
+    "P5-060 completion",
+    "full parser cost acceptance",
+    "messages package rerun",
+    "commit/push",
+    "production access"
+  ]
+}

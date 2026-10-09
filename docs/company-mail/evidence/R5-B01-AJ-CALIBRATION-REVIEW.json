@@ -1,0 +1,50 @@
+{
+  "batch": "B01-AJ",
+  "reviewer": "contract_owner",
+  "base_commit": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+  "tool2_source_tree": "100fad1d8a6c268b2f59f15122d872b227a7953a",
+  "source_sha_semantics": "git_write_tree_label_not_commit",
+  "tool1": {
+    "go_exit": 0,
+    "accepted": false,
+    "reason": "captured quota SQL plan does not read messages"
+  },
+  "tool2": {
+    "go_exit": 0,
+    "tests_pass": 5,
+    "tests_fail": 0,
+    "tests_skip": 0,
+    "closure_files_verified": 425,
+    "closure_mismatches": 0,
+    "dataset_plan_observations_accepted": true,
+    "final_sampling_safety_accepted": false,
+    "reason": "new active-source authorization positive controls require fresh tool3",
+    "actual_result_sha256": "84e9d11aa9e0936f1fb7d4b4e8be75f9fe341832247c1f254b0761abbb91a549",
+    "rss_bytes": 362496000,
+    "disk_bytes": 31334927
+  },
+  "S_executed": false,
+  "M_executed": false,
+  "task100_complete": false,
+  "G0_accepted": false,
+  "archive": {
+    "path": "docs/company-mail/evidence/R5-B01-AJ-CALIBRATION-LOGS.tar.gz",
+    "sha256": "7e45b8845489fe7d7f15bc251d57e6ae190801148cf194b211ebe24094f82f31",
+    "members": {
+      "tool1/result.json": "d8d0b1ac7c54b959a2b4fec1ae65da0dc05eab708f765ff44ad80e1f0cd4e69e",
+      "tool1/run.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "tool1/run.jsonl": "2997087b9e7854e3eb109d3a5b76a4eb9996184f17eaab203dcf39a02fa252b5",
+      "tool1/run.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tool1/source.sha256": "2a9d8ec54b63ab633f2ee237963dddfbeef21a2718e88f995882c57fb743775b",
+      "tool2/result.json": "84e9d11aa9e0936f1fb7d4b4e8be75f9fe341832247c1f254b0761abbb91a549",
+      "tool2/run.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "tool2/run.jsonl": "e4703de5ecce4aaa1e36eb4917f28e45d8ceeea329a3ff8174acf0f2390bf6f1",
+      "tool2/run.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tool2/source-closure.json": "214d4019b7160a0981ecff92f021e2fcdb9f6235adec90308ce55500fd33dffb",
+      "tool2/validation.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "tool2/validation.json": "c7038b4ec8e5b3527b4ee87f586e98835cfff2900929f34abc2dd58bd1891d74",
+      "tool2/validation.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "excluded": "DSN/JWT/raw HTTP responses/private fixtures/database/raw objects/source tar"
+}

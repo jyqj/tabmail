@@ -1,0 +1,10 @@
+test_archive_guard_order_and_version_dispatch (test_r5_ci_wiring.R5CIWiringTests.test_archive_guard_order_and_version_dispatch) ... ok
+test_existing_jobs_toolchain_and_timer_mode (test_r5_ci_wiring.R5CIWiringTests.test_existing_jobs_toolchain_and_timer_mode) ... ok
+test_pr_base_boundary_is_shared (test_r5_ci_wiring.R5CIWiringTests.test_pr_base_boundary_is_shared) ... ok
+test_push_remains_main_only_and_no_privileged_event (test_r5_ci_wiring.R5CIWiringTests.test_push_remains_main_only_and_no_privileged_event) ... ok
+test_read_only_checkout_and_exact_source_archive (test_r5_ci_wiring.R5CIWiringTests.test_read_only_checkout_and_exact_source_archive) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.044s
+
+OK

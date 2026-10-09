@@ -23,6 +23,7 @@ import (
 
 type Config struct {
 	URLs         string
+	AllowedCIDRs string
 	Secret       string
 	Timeout      time.Duration
 	MaxRetries   int
@@ -47,13 +48,13 @@ type Event struct {
 type dispatcherStore interface {
 	CreateOutboxEvent(ctx context.Context, e *models.OutboxEvent) error
 	ClaimOutboxEvents(ctx context.Context, now time.Time, limit int) ([]*models.OutboxEvent, error)
-	MarkOutboxEventDone(ctx context.Context, id uuid.UUID) error
-	MarkOutboxEventRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time) error
+	MarkOutboxEventDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error
+	MarkOutboxEventRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time) error
 	CreateWebhookDeliveries(ctx context.Context, event *models.OutboxEvent, urls []string) error
 	ListWebhookEndpoints(ctx context.Context, tenantID uuid.UUID) ([]*models.WebhookEndpoint, error)
 	ClaimWebhookDeliveries(ctx context.Context, now time.Time, limit int) ([]*models.WebhookDelivery, error)
-	MarkWebhookDeliveryDone(ctx context.Context, id uuid.UUID) error
-	MarkWebhookDeliveryRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
+	MarkWebhookDeliveryDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error
+	MarkWebhookDeliveryRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time, dead bool) error
 	ListDeadWebhookDeliveries(ctx context.Context, limit int) ([]models.DeadLetter, error)
 	CountDeadWebhookDeliveries(ctx context.Context) (int, error)
 }
@@ -71,9 +72,14 @@ type Dispatcher struct {
 	batchSize    int
 	store        dispatcherStore
 
+	// Policy and its private connection pool share one immutable lifetime.
+	destinationPolicy    *destinationPolicy
+	destinationPolicyErr error
+
 	// outboxWorker fans claimed outbox events out into webhook_delivery rows.
 	// deliveryWorker POSTs each delivery to its URL. Both are built lazily in
 	// Run so a dispatcher without a store stays a no-op.
+	workersMu      sync.Mutex
 	outboxWorker   *workqueue.Worker[*outboxPayload]
 	deliveryWorker *workqueue.Worker[*deliveryPayload]
 
@@ -84,10 +90,7 @@ type Dispatcher struct {
 func New(cfg Config, logger zerolog.Logger) *Dispatcher {
 	var urls []string
 	for _, u := range strings.Split(cfg.URLs, ",") {
-		u = strings.TrimSpace(u)
-		if u != "" {
-			urls = append(urls, u)
-		}
+		urls = appendUniqueURL(urls, u)
 	}
 	timeout := cfg.Timeout
 	if timeout <= 0 {
@@ -114,17 +117,30 @@ func New(cfg Config, logger zerolog.Logger) *Dispatcher {
 		batchSize = 100
 	}
 	metrics.WebhooksConfigured(len(urls))
+	destination, destinationErr := newDestinationPolicy(cfg.AllowedCIDRs, timeout)
+	transport := newDestinationTransport(destination, destinationErr)
 	return &Dispatcher{
-		urls:         urls,
-		secret:       cfg.Secret,
-		client:       &http.Client{Timeout: timeout},
-		logger:       logger.With().Str("component", "hooks").Logger(),
-		enabled:      len(urls) > 0,
-		maxRetries:   maxRetries,
-		retryDelay:   retryDelay,
-		deadLimit:    deadLimit,
-		pollInterval: pollInterval,
-		batchSize:    batchSize,
+		urls:   urls,
+		secret: cfg.Secret,
+		client: &http.Client{
+			Timeout:   timeout,
+			Transport: transport,
+			// A redirect is not an authorized webhook destination, even on the
+			// same origin. Keep its 3xx response on the normal retry/error path
+			// without forwarding the payload or signature to a second URL.
+			CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		},
+		logger:               logger.With().Str("component", "hooks").Logger(),
+		enabled:              len(urls) > 0,
+		maxRetries:           maxRetries,
+		retryDelay:           retryDelay,
+		deadLimit:            deadLimit,
+		pollInterval:         pollInterval,
+		batchSize:            batchSize,
+		destinationPolicy:    destination,
+		destinationPolicyErr: destinationErr,
 	}
 }
 
@@ -151,10 +167,13 @@ func (d *Dispatcher) Publish(event Event) {
 		metrics.WebhookFailed()
 		return
 	}
+	// One publication owns one event identity, shared by all fanout targets.
+	// Retries use the existing delivery record and never regenerate either ID.
+	eventID := uuid.New()
 	if d.store != nil {
 		metrics.WebhookQueued()
 		if err := d.store.CreateOutboxEvent(context.Background(), &models.OutboxEvent{
-			ID:         uuid.New(),
+			ID:         eventID,
 			EventType:  event.Type,
 			Payload:    body,
 			OccurredAt: event.OccurredAt,
@@ -169,6 +188,7 @@ func (d *Dispatcher) Publish(event Event) {
 		metrics.WebhookQueued()
 		go d.dispatchDirect(&models.WebhookDelivery{
 			ID:        uuid.New(),
+			EventID:   eventID,
 			URL:       url,
 			EventType: event.Type,
 			Payload:   body,
@@ -212,7 +232,7 @@ func (d *Dispatcher) Run(ctx context.Context) {
 	if !d.Enabled() || d.store == nil {
 		return
 	}
-	d.ensureWorkers()
+	outboxWorker, deliveryWorker := d.ensureWorkers()
 	// Two independent workers run concurrently: the outbox worker fans events
 	// out into delivery rows, the delivery worker POSTs each delivery. The
 	// legacy single-loop serialized them, but the two stages share no
@@ -220,15 +240,18 @@ func (d *Dispatcher) Run(ctx context.Context) {
 	// state transitions or retry cadence.
 	var wg sync.WaitGroup
 	wg.Add(2)
-	go func() { defer wg.Done(); d.outboxWorker.Run(ctx) }()
-	go func() { defer wg.Done(); d.deliveryWorker.Run(ctx) }()
+	go func() { defer wg.Done(); outboxWorker.Run(ctx) }()
+	go func() { defer wg.Done(); deliveryWorker.Run(ctx) }()
 	wg.Wait()
 }
 
-// ensureWorkers builds the outbox and delivery workers once. Idempotent.
-func (d *Dispatcher) ensureWorkers() {
+// ensureWorkers publishes one complete worker pair. Only construction is
+// serialized; each Run caller keeps its independent worker capacity and context.
+func (d *Dispatcher) ensureWorkers() (*workqueue.Worker[*outboxPayload], *workqueue.Worker[*deliveryPayload]) {
+	d.workersMu.Lock()
+	defer d.workersMu.Unlock()
 	if d.outboxWorker != nil && d.deliveryWorker != nil {
-		return
+		return d.outboxWorker, d.deliveryWorker
 	}
 	d.outboxWorker = workqueue.NewWorker[*outboxPayload](
 		newOutboxStore(d.store),
@@ -239,6 +262,7 @@ func (d *Dispatcher) ensureWorkers() {
 		d.pollInterval,
 		d.batchSize,
 		d.logger,
+		workqueue.WithSerialClaims(),
 	)
 	d.deliveryWorker = workqueue.NewWorker[*deliveryPayload](
 		newDeliveryStore(d.store),
@@ -249,7 +273,9 @@ func (d *Dispatcher) ensureWorkers() {
 		d.pollInterval,
 		d.batchSize,
 		d.logger,
+		workqueue.WithSerialClaims(),
 	)
+	return d.outboxWorker, d.deliveryWorker
 }
 
 // processOutbox fans one claimed outbox event out into a webhook_delivery row
@@ -370,28 +396,58 @@ func (d *Dispatcher) dispatch(ctx context.Context, delivery *models.WebhookDeliv
 		return nil
 	}
 	var lastErr string
+	if d.destinationPolicyErr != nil {
+		return d.rejectDestination(delivery, d.destinationPolicyErr)
+	}
+	if d.destinationPolicy == nil {
+		return d.rejectDestination(delivery, destinationDenied("invalid_policy"))
+	}
+	if err := d.destinationPolicy.validateURL(delivery.URL); err != nil {
+		return d.rejectDestination(delivery, err)
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, delivery.URL, bytes.NewReader(delivery.Payload))
 	if err != nil {
-		return err
+		return d.rejectDestination(delivery, destinationDenied("invalid_url"))
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-TabMail-Event", delivery.EventType)
 	req.Header.Set("X-TabMail-Attempt", strconv.Itoa(delivery.Attempts))
+	// Missing identities cannot become a shared all-zero deduplication key.
+	// In particular, dispatch must not invent a fresh identity on each retry.
+	if delivery.EventID != uuid.Nil {
+		req.Header.Set("X-TabMail-Event-ID", delivery.EventID.String())
+	}
+	if delivery.ID != uuid.Nil {
+		req.Header.Set("X-TabMail-Delivery-ID", delivery.ID.String())
+	}
 	if d.secret != "" {
 		req.Header.Set("X-TabMail-Signature", sign(d.secret, delivery.Payload))
 	}
 	resp, err := d.client.Do(req)
 	if err != nil {
-		d.logger.Warn().Err(err).Str("url", delivery.URL).Int("attempt", delivery.Attempts).Msg("webhook request failed")
+		var denied *destinationPolicyError
+		if errors.As(err, &denied) {
+			// Client.Do wraps errors in url.Error, whose Error includes the query.
+			return d.rejectDestination(delivery, denied)
+		}
+		err = redactWebhookURLError(err)
+		d.logger.Warn().Err(err).Str("delivery_id", delivery.ID.String()).Int("attempt", delivery.Attempts).Msg("webhook request failed")
 		return err
 	}
-	_ = resp.Body.Close()
+	// No response payload is part of the webhook contract. Close without
+	// draining an unbounded or slow body, including a rejected redirect.
+	defer resp.Body.Close()
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		return nil
 	}
 	lastErr = "status " + strconv.Itoa(resp.StatusCode)
-	d.logger.Warn().Str("url", delivery.URL).Int("status", resp.StatusCode).Int("attempt", delivery.Attempts).Msg("webhook non-2xx response")
+	d.logger.Warn().Str("delivery_id", delivery.ID.String()).Int("status", resp.StatusCode).Int("attempt", delivery.Attempts).Msg("webhook non-2xx response")
 	return errors.New(lastErr)
+}
+
+func (d *Dispatcher) rejectDestination(delivery *models.WebhookDelivery, err error) error {
+	d.logger.Warn().Err(err).Str("delivery_id", delivery.ID.String()).Int("attempt", delivery.Attempts).Msg("webhook destination rejected")
+	return err
 }
 
 func (d *Dispatcher) pushDeadLetter(dl models.DeadLetter) {

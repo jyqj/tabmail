@@ -1,0 +1,33 @@
+{
+  "artifact_kind": "central_classification_of_existing_actual_catalog_not_raw_edit",
+  "historical_actual_catalog": "R5-TRANSACTION-DB-CATALOG-SCHEMA18-ACTUAL-20261002.json",
+  "original_sha256_from_executor": "02a5850d03a8909ee95720e56d755128b4e6f923ab43cbeffb35fc0de1f14f94",
+  "source_sha": "cb03f7a27e9e9cf45fd815c141ad2cb645e08134",
+  "actual_goose_version": 18,
+  "actual_collection_counts": {
+    "columns": 507,
+    "constraints": 185,
+    "indexes": 154,
+    "sequences": 3,
+    "tables": 51,
+    "trigger_functions": 11,
+    "triggers": 11
+  },
+  "actual_structure_observations_valid": true,
+  "actual_catalog_is_complete_C18_07_reference": false,
+  "missing_dimensions": [
+    "column typmod",
+    "trigger enabled-state",
+    "index valid/ready-state",
+    "sequence cache and ownership",
+    "ordinary non-trigger functions"
+  ],
+  "functions_count11_means": "sampled trigger_functions, not all PostgreSQL functions",
+  "historical_reference_shape_complete": false,
+  "runtime_reference_ready": false,
+  "old_raw_bytes_modified": false,
+  "fill_missing_fields_from_source_or_defaults_allowed": false,
+  "C18_07_future_full_catalog_qualification": "BLOCKED pending actual fullfields and signed sourcebound references",
+  "task_complete": false,
+  "product_green": false
+}

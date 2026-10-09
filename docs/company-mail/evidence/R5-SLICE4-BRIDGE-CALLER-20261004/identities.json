@@ -1,0 +1,47 @@
+{
+  "base_commit": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+  "base_tree": "d117c724daa0987e6fbf43c50cd66ca6c95f1e64",
+  "tested_implementation_commit": "13ac32bbb8576a8a237dfbed46596ede8f3276ad",
+  "tested_implementation_tree": "e096e992e8333d201c336cbf618818ec912c388c",
+  "branch": "candidate/slice4-bridge-caller-20261004",
+  "commands": [
+    "python3 -B scripts/tests/r5_slice4_bridge_caller_checks.py",
+    "python3 -B docs/company-mail/evidence/R5-SLICE4-BRIDGE-CALLER-20261004/static_checks.py",
+    "git diff --check"
+  ],
+  "result": {
+    "pure_controls": 33,
+    "go_data_matrix": {
+      "rows": 7290,
+      "accepted_rows": 4
+    },
+    "static_controls": 4564,
+    "preserved_paths": 2257,
+    "os_process_events": []
+  },
+  "source_sha256": {
+    "internal/api/handlers/r5_protocol_component_observations_test.go": "22c7eff281505fef03e4adfd8b6d7fe1724e157446153ede9640d3c0ff588dc7",
+    "internal/api/handlers/r5_external_runtime_probe_test.go": "addb72c44b11167810bb888c74d20954086390fa2c9a5a44ccd9332c4988a4b7",
+    "scripts/check_r5_protocol.py": "4c2a066323b9e6871f99c98ef1ea62e770f03bdb4cfaea4911414e36dd1933e8",
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-CALLER-20261004/static_checks.py": "89d8f23311f78b05bf2fe3d193b04617137675580efcf212e8bb13bdb82550d6",
+    "scripts/tests/r5_slice4_bridge_caller_checks.py": "02c27ec7f165056e8fb1134fb57c6ee3deae96f9aee166c17a9c103db706b724"
+  },
+  "evidence_sha256": {
+    "frozen-caller.py.txt": "8673f071517ee1d59526f89a38a7df8f29a7da2d63e7cc10789d2df0e7e94dba",
+    "frozen-component.go.txt": "42deed5c10a1bcc510ea144e36ecac6af377a8fe8a08cea57bf3190eecb73757",
+    "frozen-probe.go.txt": "ca4af3b2b16ef14e56670434f553918b2b5c045aae9669ab6ea977e71c869f8a",
+    "frozen-tree.json": "da76bccc72e4de2ddd03ff728956a0ccabfe90d33b021b7750dc3afb0a45cfc4",
+    "pure-results.json": "775377bb94c4f0331625a9b2614ec41b80cd73e2ef2208605e98d0f7380b923d",
+    "reviewed-delta.json": "fcefba5a14549723787dad9ea36c092337ae1b37dc576658bd70a097cb9794e3",
+    "static-results.json": "c1f98350f27455b4665079a8652911f3dcf72795dfead361b1911e6c1c807955",
+    "static_checks.py": "89d8f23311f78b05bf2fe3d193b04617137675580efcf212e8bb13bdb82550d6"
+  },
+  "central": "10/171 unchanged; historical F52 unchanged",
+  "limitations": [
+    "Independent exact-head review pending",
+    "No Go/tool/runtime/process/capture/Node/PG/mail/formal/lifecycle execution",
+    "No batch or RPC interface edits",
+    "Frozen full admission validation remains delegated to runtime helper",
+    "No registry/closure/discovery/old-receipt changes; closure integration and physical qualification remain pending"
+  ]
+}

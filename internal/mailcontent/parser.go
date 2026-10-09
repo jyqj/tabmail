@@ -3,7 +3,6 @@
 package mailcontent
 
 import (
-	"bytes"
 	"container/list"
 	"context"
 	"crypto/sha256"
@@ -27,6 +26,15 @@ const MaxBytes int64 = 25 * 1024 * 1024
 const cacheBudget int64 = 64 * 1024 * 1024
 const maxParts = 512
 
+// ErrAttachmentNotFound means the source parsed successfully, but the requested
+// immutable part ID is absent. Source I/O and MIME errors retain their causes.
+var ErrAttachmentNotFound = errors.New("attachment not found in this source")
+
+// Bound expensive distinct-key work per Parser, independently of the LRU's
+// retained-byte budget. Same-key waiters share one slot through singleflight.
+const maxConcurrentParses = 4
+const parseTimeout = 30 * time.Second
+
 type ObjectReader interface {
 	Get(context.Context, string) (io.ReadCloser, error)
 }
@@ -44,10 +52,11 @@ type Parser struct {
 	entries map[string]*list.Element
 	bytes   int64
 	flight  singleflight.Group
+	parses  chan struct{}
 }
 
 func New(objects ObjectReader) *Parser {
-	return &Parser{objects: objects, lru: list.New(), entries: map[string]*list.Element{}}
+	return &Parser{objects: objects, lru: list.New(), entries: map[string]*list.Element{}, parses: make(chan struct{}, maxConcurrentParses)}
 }
 func Hash(raw []byte) string { h := sha256.Sum256(raw); return hex.EncodeToString(h[:]) }
 func SafeFilename(name string) string {
@@ -66,6 +75,13 @@ func SafeFilename(name string) string {
 func Parts(env *enmime.Envelope) []*enmime.Part {
 	return append(append([]*enmime.Part{}, env.Attachments...), env.Inlines...)
 }
+
+// ParseBounded checks bytes before parsing and structural limits at the real
+// allocation/header events. Ingest calls this entry directly; Parser
+// uses the same admission with its existing shared-work context.
+func ParseBounded(raw []byte) (*enmime.Envelope, error) {
+	return parseBoundedContext(context.Background(), raw)
+}
 func (p *Parser) load(ctx context.Context, key string) (*parsed, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -73,54 +89,57 @@ func (p *Parser) load(ctx context.Context, key string) (*parsed, error) {
 	if key == "" || p.objects == nil {
 		return nil, errors.New("raw source unavailable")
 	}
-	p.mu.Lock()
-	if el := p.entries[key]; el != nil {
-		v := el.Value.(*parsed)
-		if time.Now().Before(v.until) {
-			p.lru.MoveToFront(el)
-			p.mu.Unlock()
+	if v := p.cached(key); v != nil {
+		return v, nil
+	}
+	ch := p.flight.DoChan(key, func() (any, error) {
+		// A previous flight may have populated the cache between the caller's
+		// lookup and joining singleflight. Do not reopen that immutable source.
+		if v := p.cached(key); v != nil {
 			return v, nil
 		}
-		p.bytes -= v.size
-		p.lru.Remove(el)
-		delete(p.entries, key)
-	}
-	p.mu.Unlock()
-	ch := p.flight.DoChan(key, func() (any, error) {
-		// Do not tie a shared parse to the first viewer's cancelled request. The
-		// parse is bounded by its own timeout; each waiter may independently leave.
-		parseCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
+		// Keep shared work independent of one waiter's cancellation, but include
+		// capacity waiting in its own deadline. No object opens before admission.
+		parseCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), parseTimeout)
 		defer cancel()
-		r, e := p.objects.Get(parseCtx, key)
-		if e != nil {
+		select {
+		case p.parses <- struct{}{}:
+			defer func() { <-p.parses }()
+		case <-parseCtx.Done():
+			return nil, parseCtx.Err()
+		}
+		if e := parseCtx.Err(); e != nil {
 			return nil, e
 		}
-		if r == nil {
-			return nil, errors.New("object reader unavailable")
-		}
-		defer r.Close()
-		raw, e := io.ReadAll(io.LimitReader(r, MaxBytes+1))
+		raw, e := p.readSource(parseCtx, key)
 		if e != nil {
 			return nil, e
 		}
 		if int64(len(raw)) > MaxBytes {
-			return nil, errors.New("message exceeds 25 MiB parser limit")
+			return nil, ErrMIMEBytes
 		}
-		env, e := enmime.ReadEnvelope(bytes.NewReader(raw))
+		sourceHash := Hash(raw)
+		if e = ValidateSourceHash(key, sourceHash); e != nil {
+			return nil, e
+		}
+		env, e := parseBoundedContext(parseCtx, raw)
 		if e != nil {
-			return nil, errors.New("MIME parsing failed")
+			return nil, e
+		}
+		if e = parseCtx.Err(); e != nil {
+			return nil, e
 		}
 		parts := Parts(env)
-		if len(parts) > maxParts {
-			return nil, errors.New("MIME part limit exceeded")
-		}
 		size := int64(len(raw) + len(env.Text) + len(env.HTML))
 		for _, f := range parts {
 			size += int64(len(f.Content))
 		}
-		v := &parsed{env: env, hash: Hash(raw), size: size, key: key, until: time.Now().Add(2 * time.Minute)}
+		v := &parsed{env: env, hash: sourceHash, size: size, key: key, until: time.Now().Add(2 * time.Minute)}
 		p.mu.Lock()
 		defer p.mu.Unlock()
+		if e = parseCtx.Err(); e != nil {
+			return nil, e
+		}
 		if size <= cacheBudget {
 			if old := p.entries[key]; old != nil {
 				p.bytes -= old.Value.(*parsed).size
@@ -143,6 +162,9 @@ func (p *Parser) load(ctx context.Context, key string) (*parsed, error) {
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	case result := <-ch:
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		if result.Err != nil {
 			return nil, result.Err
 		}
@@ -164,9 +186,9 @@ func (p *Parser) Document(ctx context.Context, id uuid.UUID, key string) (*compa
 	if e != nil {
 		return nil, e
 	}
-	d := &company.ParsedMessage{MessageID: id, SourceKey: key, SourceSHA256: v.hash, ParserVersion: Version, TextBody: v.env.Text, Parts: []company.ParsedAttachment{}}
+	d := &company.ParsedMessage{MessageID: id, SourceKey: key, SourceSHA256: v.hash, ParserVersion: Version, TextBody: derivedText(v.env.Text), Parts: []company.ParsedAttachment{}}
 	if v.env.HTML != "" {
-		d.HTMLBody, e = sanitize.HTML(v.env.HTML)
+		d.HTMLBody, e = sanitize.HTML(derivedText(v.env.HTML))
 		if e != nil {
 			d.HTMLBody = ""
 			d.BodyAccess = "sanitize_failed"
@@ -196,6 +218,15 @@ func (p *Parser) Document(ctx context.Context, id uuid.UUID, key string) (*compa
 	d.ThreadKey = company.Hash(root)
 	return d, nil
 }
+
+// MIME transfer decoding can produce arbitrary octets even for a declared
+// textual part. Project them to representable UTF-8 before persistence and
+// HTML sanitization. The raw source, its digest, shared envelope and binary
+// attachment bytes retain their exact original identities.
+func derivedText(value string) string {
+	return strings.ReplaceAll(strings.ToValidUTF8(value, "\ufffd"), "\x00", "\ufffd")
+}
+
 func (p *Parser) Attachment(ctx context.Context, message uuid.UUID, key, id string) (*company.ParsedAttachment, []byte, error) {
 	v, e := p.load(ctx, key)
 	if e != nil {
@@ -207,5 +238,5 @@ func (p *Parser) Attachment(ctx context.Context, message uuid.UUID, key, id stri
 			return &company.ParsedAttachment{ID: id, Index: i, Filename: SafeFilename(f.FileName), Size: len(f.Content), ContentType: f.ContentType, SHA256: h}, append([]byte(nil), f.Content...), nil
 		}
 	}
-	return nil, nil, errors.New("attachment not found in this source")
+	return nil, nil, ErrAttachmentNotFound
 }

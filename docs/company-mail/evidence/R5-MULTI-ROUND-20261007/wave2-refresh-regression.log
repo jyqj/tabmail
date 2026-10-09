@@ -1,0 +1,48 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 /workspace/scratch/458de7991ac3/tabmail-wave-compose/web
+
+ ✓ lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > allows the new account scope to refresh behind an older queued operation 24ms
+ ✓ lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > allows the new tenant scope to refresh behind an older queued operation 13ms
+ ✓ lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > allows the new epoch scope to refresh behind an older queued operation 3ms
+ ✓ lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > lets an actual current-tenant GET renew after 401 instead of inheriting a stale false result 8ms
+ ✓ lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > keeps current-scope callers coalesced after the older scope finishes, including a temporary failure 4ms
+ ✓ lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > does not mask a current-scope denied refresh or replay its unsafe write 4ms
+ ✓ contexts/auth-context.test.tsx > auth-context > 默认从 localStorage 读取并推导 public level 56ms
+ ✓ contexts/auth-context.test.tsx > auth-context > 支持 JWT / tenant 状态写入与清理 359ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > does not log out after a temporary refresh failure 13ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > coalesces concurrent refresh calls and uses the replacement token 7ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > does not overwrite another account with a stale refresh response 57ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > aborts requests and discards response bodies after account switching 3ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > does not automatically replay unsafe POST after renewal 4ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > retries an idempotent send with the same key and request body 2ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > keeps the current session when server logout fails 1ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > holds the shared cookie lock until login body and local identity are installed 54ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > changes scope on tenant changes but not token rotation 6ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > fails closed without Web Locks rather than racing refresh cookies 1ms
+ ✓ lib/api/base-stream.test.ts > streamEvents framing over actual ReadableStream chunks > decodes one-byte UTF-8 chunks and "\n" line endings 118ms
+ ✓ lib/api/base-stream.test.ts > streamEvents framing over actual ReadableStream chunks > decodes one-byte UTF-8 chunks and "\r\n" line endings 34ms
+ ✓ lib/api/base-stream.test.ts > streamEvents framing over actual ReadableStream chunks > decodes one-byte UTF-8 chunks and "\r" line endings 5ms
+ ✓ lib/api/base-stream.test.ts > streamEvents framing over actual ReadableStream chunks > dispatches many small frames in a chunk larger than the single-frame bound 106ms
+ ✓ lib/api/base-stream.test.ts > streamEvents framing over actual ReadableStream chunks > preserves raw whitespace and empty data fields instead of trimming payloads 34ms
+ ✓ lib/api/base-stream.test.ts > streamEvents framing over actual ReadableStream chunks > reconnects with a completed cursor after "id: next\r\n\r\n" 9ms
+ ✓ lib/api/base-stream.test.ts > streamEvents framing over actual ReadableStream chunks > reconnects with a completed cursor after "id: next\n\n" 7ms
+ ✓ lib/api/base-stream.test.ts > streamEvents framing over actual ReadableStream chunks > uses only complete valid cursor updates: "id: committed\n\ndata: ignored partial\nid: unfinished" 7ms
+ ✓ lib/api/base-stream.test.ts > streamEvents framing over actual ReadableStream chunks > uses only complete valid cursor updates: "id: committed\n\nid: bad\u0000id\ndata: ok\n\n" 2ms
+ ✓ lib/api/base-stream.test.ts > streamEvents framing over actual ReadableStream chunks > uses only complete valid cursor updates: "id: committed\n\nid\n\n" 7ms
+ ✓ lib/api/base-stream.test.ts > streamEvents framing over actual ReadableStream chunks > does not dispatch a later buffered frame after abort 1ms
+ ✓ lib/api/base-stream.test.ts > streamEvents framing over actual ReadableStream chunks > does not dispatch a later buffered frame after session change 22ms
+ ✓ lib/api/base-stream.test.ts > streamEvents framing over actual ReadableStream chunks > keeps completed events and rejects an oversized unfinished frame 22ms
+ ✓ lib/api/base-stream.test.ts > streamEvents framing over actual ReadableStream chunks > does not dispatch an unterminated frame at EOF 1ms
+ ✓ lib/api/base.test.ts > api/base > 使用 JWT 并附带 tenant id 4ms
+ ✓ lib/api/base.test.ts > api/base > request 会拼接 query 参数并返回文本响应 7ms
+ ✓ lib/api/base.test.ts > api/base > request 在非 2xx 时抛出后端错误体 3ms
+
+ Test Files  5 passed (5)
+      Tests  35 passed (35)
+   Start at  20:34:01
+   Duration  8.25s (transform 810ms, setup 1.35s, import 1.04s, tests 1.02s, environment 7.57s)
+

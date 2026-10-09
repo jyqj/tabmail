@@ -1,0 +1,1415 @@
+{
+  "base": "93005b644c1f39fa85072fe913156cf3d6c798e1",
+  "branch": "r5-permission-audit-20261003",
+  "parent_tasks": [
+    "R5-P1-090",
+    "R5-P1-100"
+  ],
+  "parent_done": false,
+  "central_count": "10/171 unchanged",
+  "toolchain": {
+    "node": "v24.19.0",
+    "npm": "11.9.0",
+    "dependencies": "existing lockfile/node_modules; no dependency mutation"
+  },
+  "final_source_sha256": {
+    "web/features/company/profile-management.tsx": "849ffaa1d4d0475a56d331f91d616500e30da17b817a72e58554525af70a55d1",
+    "web/features/company/profile-management.consumer.test.tsx": "01690387bc1799ee0ec96da5eac74e03eb5bcf8fb2d50cba3eec9959083735f1",
+    "web/features/company/permission-editors.r5audit.tsx": "07ac7293bc03d0097a2b49cf537172ed8532802c9d48fc47bd463043cb34a704",
+    "web/features/company/permission-editor.consumer.test.tsx": "f4d98006fa8e54167a86c1c20f42eab205b9dde05060e03b7707964a62190a4c",
+    "web/features/company/permission-editor-session.consumer.test.tsx": "8a74b41c282436f4c583cd0e37c4c44d8ddc38ac62456c044baaf8c1660e0ba4",
+    "web/features/company/company-event-consumer.test.tsx": "18fd4000778be21a0dce311c9ad29729cc597fe97d62d3f5ead12ffbfde27afb",
+    "web/lib/api/permission-editor.serializer.test.ts": "67da4c15bf31e86d2f9667b102fc2bd6f606c857f27a3410eca6cd3b8dcea7e0"
+  },
+  "runs": [
+    {
+      "id": "baseline",
+      "command": "npm test -- --reporter=json --outputFile=/tmp/r5-profile-baseline.json features/company/profile-management.consumer.test.tsx",
+      "cwd": "web",
+      "scope": "original profile suite",
+      "source": "93005b644c1f39fa85072fe913156cf3d6c798e1",
+      "exit": 0,
+      "total": 20,
+      "pass": 20,
+      "fail": 0,
+      "skip": 0,
+      "failed_test_names": []
+    },
+    {
+      "id": "red",
+      "command": "npm test -- --reporter=json --outputFile=/tmp/r5-profile-red.json features/company/profile-management.consumer.test.tsx",
+      "cwd": "web",
+      "scope": "four new defect reproductions against pinned production",
+      "source": "93005b644c1f39fa85072fe913156cf3d6c798e1",
+      "exit": 1,
+      "total": 24,
+      "pass": 20,
+      "fail": 4,
+      "skip": 0,
+      "failed_test_names": [
+        "does not restore untouched revoked fields after conflict refresh",
+        "blocks saves after a failed revision refresh even with a formerly valid revision",
+        "reports 401 denial and blocks later submissions in this session",
+        "reports 403 denial and blocks later submissions in this session"
+      ]
+    },
+    {
+      "id": "fix1",
+      "command": "npm test -- --reporter=json --outputFile=/tmp/r5-profile-fix1.json features/company/profile-management.consumer.test.tsx",
+      "cwd": "web",
+      "scope": "first minimal production patch; existing full-form/no-op assumptions still old",
+      "source": "intermediate uncommitted patch, not final-tree qualification",
+      "exit": 1,
+      "total": 24,
+      "pass": 19,
+      "fail": 5,
+      "skip": 0,
+      "failed_test_names": [
+        "sends observed decimal revision, explicit false and zero in fields",
+        "does not manufacture a missing legacy revision or permit unsafe quotas",
+        "ignores old-session edit resolve without clearing a new write lock",
+        "ignores old-session edit reject without clearing a new write lock",
+        "platform admin edits a global profile using its observed revision without changing scope"
+      ]
+    },
+    {
+      "id": "fix2",
+      "command": "npm test -- --reporter=json --outputFile=/tmp/r5-profile-fix2.json features/company/profile-management.consumer.test.tsx",
+      "cwd": "web",
+      "scope": "profile suite with changed-field intent assertions",
+      "source": "intermediate uncommitted patch, not final-tree qualification",
+      "exit": 0,
+      "total": 25,
+      "pass": 25,
+      "fail": 0,
+      "skip": 0,
+      "failed_test_names": []
+    },
+    {
+      "id": "final",
+      "command": "npm test -- --reporter=json --outputFile=/tmp/r5-permission-final.json features/company/profile-management.consumer.test.tsx features/company/permission-editor.consumer.test.tsx features/company/permission-editor-session.consumer.test.tsx features/company/company-event-consumer.test.tsx lib/api/permission-editor.serializer.test.ts",
+      "cwd": "web",
+      "scope": "five related component/consumer/serializer suites; jsdom + synthetic fetch and real API/session, no PostgreSQL or real browser",
+      "source": "production same final source; fixture still immediate-EOF JSON SSE",
+      "exit": 1,
+      "total": 147,
+      "pass": 146,
+      "fail": 1,
+      "skip": 0,
+      "suites": [
+        {
+          "path": "web/features/company/company-event-consumer.test.tsx",
+          "total": 14,
+          "results": [
+            {
+              "name": "mounted EOF reconnect re-reads overview then authoritative resource without rebasing draft",
+              "status": "passed"
+            },
+            {
+              "name": "refresh endpoint final failure stops the original scope and clears its private draft",
+              "status": "passed"
+            },
+            {
+              "name": "refresh endpoint success preserves stable identity and dirty draft through actual stream retry",
+              "status": "passed"
+            },
+            {
+              "name": "re-reads authoritative profiles on duplicate events without rebasing a dirty CAS form",
+              "status": "passed"
+            },
+            {
+              "name": "strictly ignores wrong-tenant, unknown and permission-bearing payloads",
+              "status": "passed"
+            },
+            {
+              "name": "periodic tenant-bound resync invalidates deletion confirmation without automatic DELETE",
+              "status": "passed"
+            },
+            {
+              "name": "same-principal token rotation keeps the stream and dirty draft",
+              "status": "passed"
+            },
+            {
+              "name": "a late same-scope preview GET cannot restore confirmation after resync",
+              "status": "passed"
+            },
+            {
+              "name": "a current role downgrade aborts the prior stream and clears the old private draft",
+              "status": "passed"
+            },
+            {
+              "name": "terminal 401 evicts only the current management scope and stops retrying",
+              "status": "passed"
+            },
+            {
+              "name": "terminal 403 evicts only the current management scope and stops retrying",
+              "status": "passed"
+            },
+            {
+              "name": "authoritative read revocation aborts the live stream and closes private draft UI",
+              "status": "passed"
+            },
+            {
+              "name": "old-session late 403 cannot evict a new tenant or its draft",
+              "status": "passed"
+            },
+            {
+              "name": "real permission editor preserves dirty intent but requires explicit reload after an event",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "path": "web/features/company/permission-editor-session.consumer.test.tsx",
+          "total": 17,
+          "results": [
+            {
+              "name": "tenant change clears loaded ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "tenant change clears get ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "tenant change clears patch ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "tenant change clears assignment ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "session change clears loaded ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "session change clears get ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "session change clears patch ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "session change clears assignment ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "logout change clears loaded ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "logout change clears get ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "logout change clears patch ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "logout change clears assignment ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "rejects a self-consistent old-tenant user row and snapshot delivered under a new tenant transport",
+              "status": "passed"
+            },
+            {
+              "name": "rejects a same-target wrong-tenant PATCH response rather than importing its capabilities or version",
+              "status": "passed"
+            },
+            {
+              "name": "rejects a same-target wrong-tenant POST response rather than importing its capabilities or version",
+              "status": "passed"
+            },
+            {
+              "name": "new-session read does not reuse the old session's write capabilities",
+              "status": "passed"
+            },
+            {
+              "name": "a new-tenant read rejects another target's self-consistent snapshot",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "path": "web/features/company/permission-editor.consumer.test.tsx",
+          "total": 22,
+          "results": [
+            {
+              "name": "formal assignment capability enables a versioned profile selector without immediately mutating permissions",
+              "status": "passed"
+            },
+            {
+              "name": "assignment submits the observed target profile revision and dirty overrides in one atomic POST",
+              "status": "passed"
+            },
+            {
+              "name": "unassignment sends an explicit NULL profile identity/version pair with an empty override patch",
+              "status": "passed"
+            },
+            {
+              "name": "assignment conflict preserves the staged profile and dirty quota but prohibits automatic replays",
+              "status": "passed"
+            },
+            {
+              "name": "an old assignment response cannot overwrite a newly opened user's profile or overrides",
+              "status": "passed"
+            },
+            {
+              "name": "loads the real Go inherited raw NULL slice instead of staying disabled behind a validation error",
+              "status": "passed"
+            },
+            {
+              "name": "accepts a clear/reset response containing Go inherited zone_ids NULL and can continue editing",
+              "status": "passed"
+            },
+            {
+              "name": "incomplete effective {} never enables a consumer write",
+              "status": "passed"
+            },
+            {
+              "name": "incomplete effective {\"can_send\":false} never enables a consumer write",
+              "status": "passed"
+            },
+            {
+              "name": "loads raw false/zero/null separately from effective and patches only the dirty quota",
+              "status": "passed"
+            },
+            {
+              "name": "clearing an existing numeric override sends explicit null rather than omission",
+              "status": "passed"
+            },
+            {
+              "name": "setting an inherited quota to zero sends explicit zero, even when unlimited is the effective value",
+              "status": "passed"
+            },
+            {
+              "name": "preserves dirty edits on conflict and never automatically replays or falls back to PUT",
+              "status": "passed"
+            },
+            {
+              "name": "reload after conflict explicitly discards draft and uses the fresh observed revision",
+              "status": "passed"
+            },
+            {
+              "name": "domain All preserves empty-zone mode instead of treating all empty arrays alike",
+              "status": "passed"
+            },
+            {
+              "name": "domain No domains allowed preserves empty-zone mode instead of treating all empty arrays alike",
+              "status": "passed"
+            },
+            {
+              "name": "domain Inherit preserves empty-zone mode instead of treating all empty arrays alike",
+              "status": "passed"
+            },
+            {
+              "name": "unchecking the last allowed zone sends none, never the legacy empty-array allow-all",
+              "status": "passed"
+            },
+            {
+              "name": "disables mutations for capability false without pretending the edit succeeded",
+              "status": "passed"
+            },
+            {
+              "name": "reset is one revision-bound explicit inherit patch, not legacy DELETE",
+              "status": "passed"
+            },
+            {
+              "name": "a failed snapshot never uses effective-only legacy data to enable an unsafe save",
+              "status": "passed"
+            },
+            {
+              "name": "discards an older target snapshot that resolves after switching users",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "path": "web/features/company/profile-management.consumer.test.tsx",
+          "total": 25,
+          "results": [
+            {
+              "name": "sends observed decimal revision, explicit false and zero in fields",
+              "status": "failed"
+            },
+            {
+              "name": "keeps draft on conflict, blocks blind retry and requires manual revision refresh",
+              "status": "passed"
+            },
+            {
+              "name": "opening and saving without field changes preserves raw NULL and sends no command",
+              "status": "passed"
+            },
+            {
+              "name": "does not restore untouched revoked fields after conflict refresh",
+              "status": "passed"
+            },
+            {
+              "name": "blocks saves after a failed revision refresh even with a formerly valid revision",
+              "status": "passed"
+            },
+            {
+              "name": "reports 401 denial and blocks later submissions in this session",
+              "status": "passed"
+            },
+            {
+              "name": "reports 403 denial and blocks later submissions in this session",
+              "status": "passed"
+            },
+            {
+              "name": "does not manufacture a missing legacy revision or permit unsafe quotas",
+              "status": "passed"
+            },
+            {
+              "name": "shows effective before/after and requires explicit revision-bound deletion confirmation",
+              "status": "passed"
+            },
+            {
+              "name": "invalidates stale deletion preview and never automatically replays DELETE",
+              "status": "passed"
+            },
+            {
+              "name": "ignores old-session edit resolve without clearing a new write lock",
+              "status": "passed"
+            },
+            {
+              "name": "ignores old-session edit reject without clearing a new write lock",
+              "status": "passed"
+            },
+            {
+              "name": "ignores old-session DELETE resolve without clearing new preview/confirmation",
+              "status": "passed"
+            },
+            {
+              "name": "ignores old-session DELETE reject without clearing new preview/confirmation",
+              "status": "passed"
+            },
+            {
+              "name": "ignores old-session create resolve without clearing new draft/busy state",
+              "status": "passed"
+            },
+            {
+              "name": "ignores old-session create reject without clearing new draft/busy state",
+              "status": "passed"
+            },
+            {
+              "name": "ignores an old-session revision refresh rejection without unlocking a newer refresh",
+              "status": "passed"
+            },
+            {
+              "name": "platform admin edits a global profile using its observed revision without changing scope",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed or non-string observed profile revision \"0\"",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed or non-string observed profile revision \"01\"",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed or non-string observed profile revision \"9223372036854775808\"",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed or non-string observed profile revision 9",
+              "status": "passed"
+            },
+            {
+              "name": "tenant admin cannot mutate protected scope {\"is_system\":true}",
+              "status": "passed"
+            },
+            {
+              "name": "tenant admin cannot mutate protected scope {\"tenant_id\":null}",
+              "status": "passed"
+            },
+            {
+              "name": "tenant admin cannot mutate protected scope {\"tenant_id\":\"10000000-0000-4000-8000-000000000002\"}",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "path": "web/lib/api/permission-editor.serializer.test.ts",
+          "total": 69,
+          "results": [
+            {
+              "name": "serializes assignment and dirty overrides as one POST with both observed revisions",
+              "status": "passed"
+            },
+            {
+              "name": "an explicit null assignment pair remains null, not omitted or legacy updateUser",
+              "status": "passed"
+            },
+            {
+              "name": "assignment omission of expected_revision is rejected before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "assignment omission of profile_id is rejected before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "assignment omission of profile_revision is rejected before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "assignment omission of patch is rejected before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "assignment rejects an invalid selected profile observation {\"profile_id\":\"40000000-0000-4000-8000-000000000002\",\"profile_revision\":null}",
+              "status": "passed"
+            },
+            {
+              "name": "assignment rejects an invalid selected profile observation {\"profile_id\":null,\"profile_revision\":\"5\"}",
+              "status": "passed"
+            },
+            {
+              "name": "assignment rejects an invalid selected profile observation {\"profile_id\":\"40000000-0000-4000-8000-000000000002\",\"profile_revision\":\"01\"}",
+              "status": "passed"
+            },
+            {
+              "name": "assignment rejects an invalid selected profile observation {\"profile_id\":\"40000000-0000-4000-8000-000000000002\",\"profile_revision\":5}",
+              "status": "passed"
+            },
+            {
+              "name": "assignment rejects an invalid selected profile observation {\"profile_id\":\"40000000-0000-4000-8000-000000000002\",\"profile_revision\":\"9223372036854775808\"}",
+              "status": "passed"
+            },
+            {
+              "name": "assignment conflicts never retry as legacy user update, override PUT or second POST",
+              "status": "passed"
+            },
+            {
+              "name": "GET accepts Go 'inherit' raw zone_ids 'null' without changing raw NULL or field sources",
+              "status": "passed"
+            },
+            {
+              "name": "GET accepts Go 'inherit' raw zone_ids 'omitted' without changing raw NULL or field sources",
+              "status": "passed"
+            },
+            {
+              "name": "GET accepts Go 'all' raw zone_ids 'null' without changing raw NULL or field sources",
+              "status": "passed"
+            },
+            {
+              "name": "GET accepts Go 'all' raw zone_ids 'omitted' without changing raw NULL or field sources",
+              "status": "passed"
+            },
+            {
+              "name": "GET accepts Go 'none' raw zone_ids 'null' without changing raw NULL or field sources",
+              "status": "passed"
+            },
+            {
+              "name": "GET accepts Go 'none' raw zone_ids 'omitted' without changing raw NULL or field sources",
+              "status": "passed"
+            },
+            {
+              "name": "PATCH response accepts Go 'inherit' raw zone_ids 'null' while preserving NULL and sources",
+              "status": "passed"
+            },
+            {
+              "name": "PATCH response accepts Go 'inherit' raw zone_ids 'omitted' while preserving NULL and sources",
+              "status": "passed"
+            },
+            {
+              "name": "PATCH response accepts Go 'all' raw zone_ids 'null' while preserving NULL and sources",
+              "status": "passed"
+            },
+            {
+              "name": "PATCH response accepts Go 'all' raw zone_ids 'omitted' while preserving NULL and sources",
+              "status": "passed"
+            },
+            {
+              "name": "PATCH response accepts Go 'none' raw zone_ids 'null' while preserving NULL and sources",
+              "status": "passed"
+            },
+            {
+              "name": "PATCH response accepts Go 'none' raw zone_ids 'omitted' while preserving NULL and sources",
+              "status": "passed"
+            },
+            {
+              "name": "list zone_ids null remains invalid on GET and PATCH responses",
+              "status": "passed"
+            },
+            {
+              "name": "list zone_ids omitted remains invalid on GET and PATCH responses",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source can_send before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source daily_send_quota before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source daily_receive_quota before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source max_mailboxes before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source max_domains before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source can_create_domains before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source can_create_routes before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source can_create_api_keys before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source domain_access before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects incomplete effective {} instead of producing undefined quotas or allow-all",
+              "status": "passed"
+            },
+            {
+              "name": "rejects incomplete effective {\"can_send\":false} instead of producing undefined quotas or allow-all",
+              "status": "passed"
+            },
+            {
+              "name": "rejects a profile object missing identity even when sources pretend it is a valid profile",
+              "status": "passed"
+            },
+            {
+              "name": "rejects 'target ID mismatch' at GET without reaching any PATCH",
+              "status": "passed"
+            },
+            {
+              "name": "rejects 'tenant revision mismatch' at GET without reaching any PATCH",
+              "status": "passed"
+            },
+            {
+              "name": "rejects 'numeric revision' at GET without reaching any PATCH",
+              "status": "passed"
+            },
+            {
+              "name": "rejects 'half-present profile version' at GET without reaching any PATCH",
+              "status": "passed"
+            },
+            {
+              "name": "rejects 'override source without raw value' at GET without reaching any PATCH",
+              "status": "passed"
+            },
+            {
+              "name": "rejects 'missing raw presence' at GET without reaching any PATCH",
+              "status": "passed"
+            },
+            {
+              "name": "creates a same-effective false/zero override instead of mistaking it for inherited intent",
+              "status": "passed"
+            },
+            {
+              "name": "unchanged raw absence produces no dirty fields; never synthesizes defaults from effective",
+              "status": "passed"
+            },
+            {
+              "name": "keeps all separate from the other empty-zone intents",
+              "status": "passed"
+            },
+            {
+              "name": "keeps none separate from the other empty-zone intents",
+              "status": "passed"
+            },
+            {
+              "name": "keeps inherit separate from the other empty-zone intents",
+              "status": "passed"
+            },
+            {
+              "name": "rejects unsafe quota -1 before any write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects unsafe quota 1.5 before any write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects unsafe quota NaN before any write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects unsafe quota Infinity before any write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects unsafe quota 9007199254740992 before any write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects missing raw field source rather than filling it with permissive defaults",
+              "status": "passed"
+            },
+            {
+              "name": "keeps auth/current and legacy effective consumers on their effective response contract",
+              "status": "passed"
+            },
+            {
+              "name": "reads a separate raw editor snapshot endpoint",
+              "status": "passed"
+            },
+            {
+              "name": "preserves omitted/null/false/zero and large decimal revisions in PATCH JSON",
+              "status": "passed"
+            },
+            {
+              "name": "does not retry a rejected editor PATCH using legacy PUT/DELETE or updateUser",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed revision 0 before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed revision 01 before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed revision -1 before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed revision 1.5 before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed revision 9223372036854775808 before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "rejects a target mismatch and a half-present profile observation before writing",
+              "status": "passed"
+            },
+            {
+              "name": "rejects invalid domain intent {\"mode\":\"list\",\"zone_ids\":[]} before writing",
+              "status": "passed"
+            },
+            {
+              "name": "rejects invalid domain intent {\"mode\":\"none\",\"zone_ids\":[\"10000000-0000-4000-8000-000000000001\"]} before writing",
+              "status": "passed"
+            },
+            {
+              "name": "rejects invalid domain intent {\"mode\":\"list\",\"zone_ids\":[\"10000000-0000-4000-8000-000000000001\",\"10000000-0000-4000-8000-000000000001\"]} before writing",
+              "status": "passed"
+            },
+            {
+              "name": "ignores a late editor snapshot from an earlier authenticated identity",
+              "status": "passed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "final2",
+      "command": "npm test -- --reporter=json --outputFile=/tmp/r5-permission-final2.json features/company/profile-management.consumer.test.tsx features/company/permission-editor.consumer.test.tsx features/company/permission-editor-session.consumer.test.tsx features/company/company-event-consumer.test.tsx lib/api/permission-editor.serializer.test.ts",
+      "cwd": "web",
+      "scope": "five related component/consumer/serializer suites; jsdom + synthetic fetch and real API/session, no PostgreSQL or real browser",
+      "source": "final2 hashes below for exercised files; audit status instrumentation added afterward and only type/lint checked",
+      "exit": 0,
+      "total": 150,
+      "pass": 150,
+      "fail": 0,
+      "skip": 0,
+      "suites": [
+        {
+          "path": "web/features/company/company-event-consumer.test.tsx",
+          "total": 14,
+          "results": [
+            {
+              "name": "mounted EOF reconnect re-reads overview then authoritative resource without rebasing draft",
+              "status": "passed"
+            },
+            {
+              "name": "refresh endpoint final failure stops the original scope and clears its private draft",
+              "status": "passed"
+            },
+            {
+              "name": "refresh endpoint success preserves stable identity and dirty draft through actual stream retry",
+              "status": "passed"
+            },
+            {
+              "name": "re-reads authoritative profiles on duplicate events without rebasing a dirty CAS form",
+              "status": "passed"
+            },
+            {
+              "name": "strictly ignores wrong-tenant, unknown and permission-bearing payloads",
+              "status": "passed"
+            },
+            {
+              "name": "periodic tenant-bound resync invalidates deletion confirmation without automatic DELETE",
+              "status": "passed"
+            },
+            {
+              "name": "same-principal token rotation keeps the stream and dirty draft",
+              "status": "passed"
+            },
+            {
+              "name": "a late same-scope preview GET cannot restore confirmation after resync",
+              "status": "passed"
+            },
+            {
+              "name": "a current role downgrade aborts the prior stream and clears the old private draft",
+              "status": "passed"
+            },
+            {
+              "name": "terminal 401 evicts only the current management scope and stops retrying",
+              "status": "passed"
+            },
+            {
+              "name": "terminal 403 evicts only the current management scope and stops retrying",
+              "status": "passed"
+            },
+            {
+              "name": "authoritative read revocation aborts the live stream and closes private draft UI",
+              "status": "passed"
+            },
+            {
+              "name": "old-session late 403 cannot evict a new tenant or its draft",
+              "status": "passed"
+            },
+            {
+              "name": "real permission editor preserves dirty intent but requires explicit reload after an event",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "path": "web/features/company/permission-editor-session.consumer.test.tsx",
+          "total": 17,
+          "results": [
+            {
+              "name": "tenant change clears loaded ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "tenant change clears get ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "tenant change clears patch ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "tenant change clears assignment ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "session change clears loaded ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "session change clears get ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "session change clears patch ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "session change clears assignment ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "logout change clears loaded ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "logout change clears get ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "logout change clears patch ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "logout change clears assignment ownership without a manual dialog close and cannot rebase old intent",
+              "status": "passed"
+            },
+            {
+              "name": "rejects a self-consistent old-tenant user row and snapshot delivered under a new tenant transport",
+              "status": "passed"
+            },
+            {
+              "name": "rejects a same-target wrong-tenant PATCH response rather than importing its capabilities or version",
+              "status": "passed"
+            },
+            {
+              "name": "rejects a same-target wrong-tenant POST response rather than importing its capabilities or version",
+              "status": "passed"
+            },
+            {
+              "name": "new-session read does not reuse the old session's write capabilities",
+              "status": "passed"
+            },
+            {
+              "name": "a new-tenant read rejects another target's self-consistent snapshot",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "path": "web/features/company/permission-editor.consumer.test.tsx",
+          "total": 22,
+          "results": [
+            {
+              "name": "formal assignment capability enables a versioned profile selector without immediately mutating permissions",
+              "status": "passed"
+            },
+            {
+              "name": "assignment submits the observed target profile revision and dirty overrides in one atomic POST",
+              "status": "passed"
+            },
+            {
+              "name": "unassignment sends an explicit NULL profile identity/version pair with an empty override patch",
+              "status": "passed"
+            },
+            {
+              "name": "assignment conflict preserves the staged profile and dirty quota but prohibits automatic replays",
+              "status": "passed"
+            },
+            {
+              "name": "an old assignment response cannot overwrite a newly opened user's profile or overrides",
+              "status": "passed"
+            },
+            {
+              "name": "loads the real Go inherited raw NULL slice instead of staying disabled behind a validation error",
+              "status": "passed"
+            },
+            {
+              "name": "accepts a clear/reset response containing Go inherited zone_ids NULL and can continue editing",
+              "status": "passed"
+            },
+            {
+              "name": "incomplete effective {} never enables a consumer write",
+              "status": "passed"
+            },
+            {
+              "name": "incomplete effective {\"can_send\":false} never enables a consumer write",
+              "status": "passed"
+            },
+            {
+              "name": "loads raw false/zero/null separately from effective and patches only the dirty quota",
+              "status": "passed"
+            },
+            {
+              "name": "clearing an existing numeric override sends explicit null rather than omission",
+              "status": "passed"
+            },
+            {
+              "name": "setting an inherited quota to zero sends explicit zero, even when unlimited is the effective value",
+              "status": "passed"
+            },
+            {
+              "name": "preserves dirty edits on conflict and never automatically replays or falls back to PUT",
+              "status": "passed"
+            },
+            {
+              "name": "reload after conflict explicitly discards draft and uses the fresh observed revision",
+              "status": "passed"
+            },
+            {
+              "name": "domain All preserves empty-zone mode instead of treating all empty arrays alike",
+              "status": "passed"
+            },
+            {
+              "name": "domain No domains allowed preserves empty-zone mode instead of treating all empty arrays alike",
+              "status": "passed"
+            },
+            {
+              "name": "domain Inherit preserves empty-zone mode instead of treating all empty arrays alike",
+              "status": "passed"
+            },
+            {
+              "name": "unchecking the last allowed zone sends none, never the legacy empty-array allow-all",
+              "status": "passed"
+            },
+            {
+              "name": "disables mutations for capability false without pretending the edit succeeded",
+              "status": "passed"
+            },
+            {
+              "name": "reset is one revision-bound explicit inherit patch, not legacy DELETE",
+              "status": "passed"
+            },
+            {
+              "name": "a failed snapshot never uses effective-only legacy data to enable an unsafe save",
+              "status": "passed"
+            },
+            {
+              "name": "discards an older target snapshot that resolves after switching users",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "path": "web/features/company/profile-management.consumer.test.tsx",
+          "total": 28,
+          "results": [
+            {
+              "name": "sends observed decimal revision, explicit false and zero in fields",
+              "status": "passed"
+            },
+            {
+              "name": "keeps draft on conflict, blocks blind retry and requires manual revision refresh",
+              "status": "passed"
+            },
+            {
+              "name": "opening and saving without field changes preserves raw NULL and sends no command",
+              "status": "passed"
+            },
+            {
+              "name": "preserves NULL zone storage when changing only description",
+              "status": "passed"
+            },
+            {
+              "name": "an incomplete observed profile cannot enable a write using default UI values",
+              "status": "passed"
+            },
+            {
+              "name": "denied profile loading disables creation and reports the server's reason",
+              "status": "passed"
+            },
+            {
+              "name": "does not restore untouched revoked fields after conflict refresh",
+              "status": "passed"
+            },
+            {
+              "name": "blocks saves after a failed revision refresh even with a formerly valid revision",
+              "status": "passed"
+            },
+            {
+              "name": "reports 401 denial and blocks later submissions in this session",
+              "status": "passed"
+            },
+            {
+              "name": "reports 403 denial and blocks later submissions in this session",
+              "status": "passed"
+            },
+            {
+              "name": "does not manufacture a missing legacy revision or permit unsafe quotas",
+              "status": "passed"
+            },
+            {
+              "name": "shows effective before/after and requires explicit revision-bound deletion confirmation",
+              "status": "passed"
+            },
+            {
+              "name": "invalidates stale deletion preview and never automatically replays DELETE",
+              "status": "passed"
+            },
+            {
+              "name": "ignores old-session edit resolve without clearing a new write lock",
+              "status": "passed"
+            },
+            {
+              "name": "ignores old-session edit reject without clearing a new write lock",
+              "status": "passed"
+            },
+            {
+              "name": "ignores old-session DELETE resolve without clearing new preview/confirmation",
+              "status": "passed"
+            },
+            {
+              "name": "ignores old-session DELETE reject without clearing new preview/confirmation",
+              "status": "passed"
+            },
+            {
+              "name": "ignores old-session create resolve without clearing new draft/busy state",
+              "status": "passed"
+            },
+            {
+              "name": "ignores old-session create reject without clearing new draft/busy state",
+              "status": "passed"
+            },
+            {
+              "name": "ignores an old-session revision refresh rejection without unlocking a newer refresh",
+              "status": "passed"
+            },
+            {
+              "name": "platform admin edits a global profile using its observed revision without changing scope",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed or non-string observed profile revision \"0\"",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed or non-string observed profile revision \"01\"",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed or non-string observed profile revision \"9223372036854775808\"",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed or non-string observed profile revision 9",
+              "status": "passed"
+            },
+            {
+              "name": "tenant admin cannot mutate protected scope {\"is_system\":true}",
+              "status": "passed"
+            },
+            {
+              "name": "tenant admin cannot mutate protected scope {\"tenant_id\":null}",
+              "status": "passed"
+            },
+            {
+              "name": "tenant admin cannot mutate protected scope {\"tenant_id\":\"10000000-0000-4000-8000-000000000002\"}",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "path": "web/lib/api/permission-editor.serializer.test.ts",
+          "total": 69,
+          "results": [
+            {
+              "name": "serializes assignment and dirty overrides as one POST with both observed revisions",
+              "status": "passed"
+            },
+            {
+              "name": "an explicit null assignment pair remains null, not omitted or legacy updateUser",
+              "status": "passed"
+            },
+            {
+              "name": "assignment omission of expected_revision is rejected before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "assignment omission of profile_id is rejected before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "assignment omission of profile_revision is rejected before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "assignment omission of patch is rejected before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "assignment rejects an invalid selected profile observation {\"profile_id\":\"40000000-0000-4000-8000-000000000002\",\"profile_revision\":null}",
+              "status": "passed"
+            },
+            {
+              "name": "assignment rejects an invalid selected profile observation {\"profile_id\":null,\"profile_revision\":\"5\"}",
+              "status": "passed"
+            },
+            {
+              "name": "assignment rejects an invalid selected profile observation {\"profile_id\":\"40000000-0000-4000-8000-000000000002\",\"profile_revision\":\"01\"}",
+              "status": "passed"
+            },
+            {
+              "name": "assignment rejects an invalid selected profile observation {\"profile_id\":\"40000000-0000-4000-8000-000000000002\",\"profile_revision\":5}",
+              "status": "passed"
+            },
+            {
+              "name": "assignment rejects an invalid selected profile observation {\"profile_id\":\"40000000-0000-4000-8000-000000000002\",\"profile_revision\":\"9223372036854775808\"}",
+              "status": "passed"
+            },
+            {
+              "name": "assignment conflicts never retry as legacy user update, override PUT or second POST",
+              "status": "passed"
+            },
+            {
+              "name": "GET accepts Go 'inherit' raw zone_ids 'null' without changing raw NULL or field sources",
+              "status": "passed"
+            },
+            {
+              "name": "GET accepts Go 'inherit' raw zone_ids 'omitted' without changing raw NULL or field sources",
+              "status": "passed"
+            },
+            {
+              "name": "GET accepts Go 'all' raw zone_ids 'null' without changing raw NULL or field sources",
+              "status": "passed"
+            },
+            {
+              "name": "GET accepts Go 'all' raw zone_ids 'omitted' without changing raw NULL or field sources",
+              "status": "passed"
+            },
+            {
+              "name": "GET accepts Go 'none' raw zone_ids 'null' without changing raw NULL or field sources",
+              "status": "passed"
+            },
+            {
+              "name": "GET accepts Go 'none' raw zone_ids 'omitted' without changing raw NULL or field sources",
+              "status": "passed"
+            },
+            {
+              "name": "PATCH response accepts Go 'inherit' raw zone_ids 'null' while preserving NULL and sources",
+              "status": "passed"
+            },
+            {
+              "name": "PATCH response accepts Go 'inherit' raw zone_ids 'omitted' while preserving NULL and sources",
+              "status": "passed"
+            },
+            {
+              "name": "PATCH response accepts Go 'all' raw zone_ids 'null' while preserving NULL and sources",
+              "status": "passed"
+            },
+            {
+              "name": "PATCH response accepts Go 'all' raw zone_ids 'omitted' while preserving NULL and sources",
+              "status": "passed"
+            },
+            {
+              "name": "PATCH response accepts Go 'none' raw zone_ids 'null' while preserving NULL and sources",
+              "status": "passed"
+            },
+            {
+              "name": "PATCH response accepts Go 'none' raw zone_ids 'omitted' while preserving NULL and sources",
+              "status": "passed"
+            },
+            {
+              "name": "list zone_ids null remains invalid on GET and PATCH responses",
+              "status": "passed"
+            },
+            {
+              "name": "list zone_ids omitted remains invalid on GET and PATCH responses",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source can_send before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source daily_send_quota before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source daily_receive_quota before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source max_mailboxes before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source max_domains before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source can_create_domains before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source can_create_routes before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source can_create_api_keys before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects absent source domain_access before the form can write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects incomplete effective {} instead of producing undefined quotas or allow-all",
+              "status": "passed"
+            },
+            {
+              "name": "rejects incomplete effective {\"can_send\":false} instead of producing undefined quotas or allow-all",
+              "status": "passed"
+            },
+            {
+              "name": "rejects a profile object missing identity even when sources pretend it is a valid profile",
+              "status": "passed"
+            },
+            {
+              "name": "rejects 'target ID mismatch' at GET without reaching any PATCH",
+              "status": "passed"
+            },
+            {
+              "name": "rejects 'tenant revision mismatch' at GET without reaching any PATCH",
+              "status": "passed"
+            },
+            {
+              "name": "rejects 'numeric revision' at GET without reaching any PATCH",
+              "status": "passed"
+            },
+            {
+              "name": "rejects 'half-present profile version' at GET without reaching any PATCH",
+              "status": "passed"
+            },
+            {
+              "name": "rejects 'override source without raw value' at GET without reaching any PATCH",
+              "status": "passed"
+            },
+            {
+              "name": "rejects 'missing raw presence' at GET without reaching any PATCH",
+              "status": "passed"
+            },
+            {
+              "name": "creates a same-effective false/zero override instead of mistaking it for inherited intent",
+              "status": "passed"
+            },
+            {
+              "name": "unchanged raw absence produces no dirty fields; never synthesizes defaults from effective",
+              "status": "passed"
+            },
+            {
+              "name": "keeps all separate from the other empty-zone intents",
+              "status": "passed"
+            },
+            {
+              "name": "keeps none separate from the other empty-zone intents",
+              "status": "passed"
+            },
+            {
+              "name": "keeps inherit separate from the other empty-zone intents",
+              "status": "passed"
+            },
+            {
+              "name": "rejects unsafe quota -1 before any write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects unsafe quota 1.5 before any write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects unsafe quota NaN before any write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects unsafe quota Infinity before any write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects unsafe quota 9007199254740992 before any write",
+              "status": "passed"
+            },
+            {
+              "name": "rejects missing raw field source rather than filling it with permissive defaults",
+              "status": "passed"
+            },
+            {
+              "name": "keeps auth/current and legacy effective consumers on their effective response contract",
+              "status": "passed"
+            },
+            {
+              "name": "reads a separate raw editor snapshot endpoint",
+              "status": "passed"
+            },
+            {
+              "name": "preserves omitted/null/false/zero and large decimal revisions in PATCH JSON",
+              "status": "passed"
+            },
+            {
+              "name": "does not retry a rejected editor PATCH using legacy PUT/DELETE or updateUser",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed revision 0 before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed revision 01 before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed revision -1 before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed revision 1.5 before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "rejects malformed revision 9223372036854775808 before contacting the server",
+              "status": "passed"
+            },
+            {
+              "name": "rejects a target mismatch and a half-present profile observation before writing",
+              "status": "passed"
+            },
+            {
+              "name": "rejects invalid domain intent {\"mode\":\"list\",\"zone_ids\":[]} before writing",
+              "status": "passed"
+            },
+            {
+              "name": "rejects invalid domain intent {\"mode\":\"none\",\"zone_ids\":[\"10000000-0000-4000-8000-000000000001\"]} before writing",
+              "status": "passed"
+            },
+            {
+              "name": "rejects invalid domain intent {\"mode\":\"list\",\"zone_ids\":[\"10000000-0000-4000-8000-000000000001\",\"10000000-0000-4000-8000-000000000001\"]} before writing",
+              "status": "passed"
+            },
+            {
+              "name": "ignores a late editor snapshot from an earlier authenticated identity",
+              "status": "passed"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit --incremental false",
+      "cwd": "web",
+      "exit": 0,
+      "scope": "all TypeScript sources including opt-in audit; zero test assertions"
+    },
+    {
+      "command": "npx eslint features/company/profile-management.tsx features/company/profile-management.consumer.test.tsx features/company/permission-editors.r5audit.tsx",
+      "cwd": "web",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 1,
+      "warning": "existing operation.current effect cleanup react-hooks/exhaustive-deps warning"
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    },
+    {
+      "command": "initial same-path eslint command",
+      "exit": 1,
+      "errors": 1,
+      "warnings": 1,
+      "error": "inherited test body:any; replaced with Record<string, unknown>"
+    }
+  ],
+  "setup_failures": [
+    {
+      "command": "initial Python test insertion using web/ relative path from web cwd",
+      "result": "FileNotFoundError, no source changed, no assertions executed; corrected from repo cwd"
+    },
+    {
+      "command": "npm test from repository root without package.json",
+      "exit": 254,
+      "result": "ENOENT, zero assertions; rerun from web"
+    },
+    {
+      "command": "expanded test insertion using web/ relative path from web cwd",
+      "result": "FileNotFoundError, no source changed; corrected with absolute path"
+    }
+  ],
+  "notrun": [
+    "real browser interaction",
+    "Go-owned A01/A02 HTTP/PostgreSQL component audit",
+    "full web suite/build/CI",
+    "server/DB/SMTP tests"
+  ],
+  "integration_blocker": "Go P0 r5_component_baseline_test.go still requires historical vulnerability and child exit 1. Parent owns promotion to new required secure protocol producer; audit TS now requires real A02 PATCH statuses [200,409]. Not executed here.",
+  "authorization_boundary": "Only synthetic fetch fixtures; no real accounts/mail/production DB/external SMTP/credential changes. No shared API client/DTO/OpenAPI/migration/CI/TODO changes."
+}

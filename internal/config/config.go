@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
+	"tabmail/internal/models"
 )
 
 const (
@@ -50,10 +51,10 @@ type Root struct {
 type SMTP struct {
 	Addr                string        `default:"0.0.0.0:2525" desc:"SMTP listen address"`
 	Domain              string        `default:"localhost" desc:"SMTP HELO/banner domain"`
-	MaxRecipients       int           `default:"200" desc:"Max RCPT TO per message"`
-	MaxMessageBytes     int           `default:"26214400" desc:"Max message size (bytes)"`
+	MaxRecipients       int           `default:"200" desc:"Max RCPT TO per message (must be positive)"`
+	MaxMessageBytes     int           `default:"26214400" desc:"Max message size in bytes (must be positive)"`
 	MaxConnections      int           `split_words:"true" default:"100" desc:"Max concurrent SMTP connections (0=unlimited)"`
-	Timeout             time.Duration `default:"300s" desc:"Idle connection timeout"`
+	Timeout             time.Duration `default:"300s" desc:"Idle connection and MAIL/RCPT lookup timeout (must be positive)"`
 	TLSEnabled          bool          `default:"false" desc:"Enable STARTTLS"`
 	TLSCert             string        `default:"" desc:"TLS certificate path"`
 	TLSKey              string        `default:"" desc:"TLS private key path"`
@@ -82,7 +83,7 @@ type HTTP struct {
 type DB struct {
 	DSN             string        `default:"postgres://tabmail:tabmail@localhost:5432/tabmail?sslmode=disable" desc:"PostgreSQL connection string"`
 	MaxOpenConns    int           `default:"25" desc:"Max open connections"`
-	MaxIdleConns    int           `default:"5" desc:"Max idle connections"`
+	MaxIdleConns    int           `default:"5" desc:"Minimum pool size (0 through MaxOpenConns)"`
 	ConnMaxLifetime time.Duration `default:"300s" desc:"Connection max lifetime"`
 }
 
@@ -94,8 +95,8 @@ type Redis struct {
 }
 
 type Storage struct {
-	RetentionScanInterval time.Duration `default:"60s" desc:"Retention scanner interval"`
-	RetentionBatchSize    int           `default:"1000" desc:"Rows per cleanup batch"`
+	RetentionScanInterval time.Duration `default:"60s" desc:"Retention scanner interval (must be positive)"`
+	RetentionBatchSize    int           `default:"1000" desc:"Rows per cleanup batch (must be positive)"`
 	FallbackRetentionH    int           `default:"24" desc:"System-level fallback retention hours"`
 }
 
@@ -111,6 +112,7 @@ type S3 struct {
 
 type Webhook struct {
 	URLs         string        `default:"" desc:"Comma-separated inbound event webhook URLs"`
+	AllowedCIDRs string        `envconfig:"ALLOWED_CIDRS" default:"" desc:"Explicitly authorized webhook destination CIDRs; ordinary public addresses are allowed by default; webhooks connect directly without environment proxies"`
 	Secret       string        `default:"" desc:"Optional webhook signature secret"`
 	Timeout      time.Duration `default:"5s" desc:"Webhook request timeout"`
 	MaxRetries   int           `default:"3" desc:"Max webhook retry attempts"`
@@ -157,6 +159,9 @@ func Load() (*Root, error) {
 	if err := envconfig.Process(envPrefix, c); err != nil {
 		return nil, fmt.Errorf("config: %w", err)
 	}
+	// This deployment authorization has no generic envconfig tag fallback.
+	// Absence and explicit empty both mean public-only, never ALLOWED_CIDRS.
+	c.Webhook.AllowedCIDRs = os.Getenv("TABMAIL_WEBHOOK_ALLOWED_CIDRS")
 	// Canonical split_words spelling wins. Retain the historical documented
 	// spelling only as an explicit compatibility alias.
 	if _, present := os.LookupEnv("TABMAIL_OBJECT_STORE"); !present {
@@ -173,6 +178,9 @@ func Load() (*Root, error) {
 func (c *Root) Validate() error {
 	if c == nil {
 		return fmt.Errorf("config: nil root config")
+	}
+	if _, err := models.MessageExpiry(nil, c.Storage.FallbackRetentionH, time.Now()); err != nil {
+		return fmt.Errorf("config: TABMAIL_STORAGE_FALLBACKRETENTIONH: %w", err)
 	}
 	if c.CompanyOnly && (c.MailboxNaming != "full" || !c.Ingest.Durable) {
 		return fmt.Errorf("config: company mode requires full mailbox naming and durable ingress")
@@ -194,6 +202,9 @@ func (c *Root) Validate() error {
 	}
 	if strings.TrimSpace(c.DB.DSN) == "" {
 		return fmt.Errorf("config: TABMAIL_DB_DSN is required")
+	}
+	if err := c.DB.Validate(); err != nil {
+		return err
 	}
 	if strings.TrimSpace(c.Redis.Addr) == "" {
 		return fmt.Errorf("config: TABMAIL_REDIS_ADDR is required")
@@ -266,6 +277,26 @@ func (c *Root) Validate() error {
 		if strings.TrimSpace(c.Outbound.RelayHost) == "" {
 			return fmt.Errorf("config: TABMAIL_OUTBOUND_RELAY_HOST is required when outbound is enabled in relay mode")
 		}
+	}
+	// Defaults are applied by Load's envconfig tags. Explicit nonpositive
+	// limits must not silently disable SMTP admission or panic/spin retention.
+	for _, bound := range []struct {
+		name  string
+		value int64
+	}{
+		{"TABMAIL_SMTP_MAXRECIPIENTS", int64(c.SMTP.MaxRecipients)},
+		{"TABMAIL_SMTP_MAXMESSAGEBYTES", int64(c.SMTP.MaxMessageBytes)},
+		{"TABMAIL_SMTP_TIMEOUT", int64(c.SMTP.Timeout)},
+		{"TABMAIL_STORAGE_RETENTIONSCANINTERVAL", int64(c.Storage.RetentionScanInterval)},
+		{"TABMAIL_STORAGE_RETENTIONBATCHSIZE", int64(c.Storage.RetentionBatchSize)},
+	} {
+		if bound.value <= 0 {
+			return fmt.Errorf("config: %s must be positive", bound.name)
+		}
+	}
+	// Zero is the documented opt-out for the connection limiter only.
+	if c.SMTP.MaxConnections < 0 {
+		return fmt.Errorf("config: TABMAIL_SMTP_MAX_CONNECTIONS must be nonnegative (0 means unlimited)")
 	}
 	return nil
 }

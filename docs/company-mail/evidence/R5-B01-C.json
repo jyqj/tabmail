@@ -1,0 +1,184 @@
+{
+  "batch": "B01-C",
+  "base_sha": "97675a743f83287b85297af4e94c339ce5a83bba",
+  "implementation_commit": "57a7492e401d13dfe9c03eba3787d9030b2f7c8b",
+  "implementation_tree": "dca5e6cf8e526ebcd34258c0c7c24010aa1ba3ae",
+  "runtime_source_sha256": {
+    "internal/store/postgres/r5_component_baseline_test.go": "0c1ac75df769a0e3b307fb8959b40f5d66cba5b02c15f463ebe3c63f59f9595f",
+    "internal/store/postgres/r5_lock_order_test.go": "c7ed16cb0edc86343a547d6d580f2a00fbc71e15961a5482be9834bda9b7d705",
+    "scripts/check_i18n_keys.py": "83bb6261a2c4e7a8e27b577292bfa3507e7c5e6392a237463e0cb128117ee039",
+    "scripts/collect_api_calls.cjs": "545bbe7058a3db20cea32089b68190b47278e8f850cf62871543a99d85dc0515",
+    "scripts/required_go_tests.json": "e3de15de9bbe4665c5319454dc74934fc778b1af53f1da0342c78d5dd38d8d87",
+    "scripts/run_r5_audit_baseline.py": "b5599f6fbc06b13775dc876007119b6be6e290ee419432db3ff6bbcbb04e1926",
+    "scripts/tests/api_calls.test.cjs": "461b792d73abd0ff4d44122af91799e30496d5af5e0037a7a319a4090fa1d7a6",
+    "scripts/tests/test_i18n_keys.py": "27cc2293eae14790ba7fd97ae4c5b1329222c88bc185dd34cd7ec4317231fd03",
+    "scripts/tests/test_r5_audit_baseline.py": "578de82c168d1a3e5343960a42a44bbbb1906a1f079ed5e0efb32a00ee125f31",
+    "web/features/company/permission-editors.r5audit.tsx": "688696d13890d6143925b085f61d9071fe36f1a6a18d7de7bafc8d81ecb8e514",
+    "web/vitest.r5audit.config.ts": "bea50a22239137677cbe64fa23be769f935ed0c6ce6079415c33c8942f8e2d26"
+  },
+  "reviewed_document_sha256": {
+    "docs/company-mail/R5-TRANSACTIONS.md": "9adf7fe82d36e7253978eaa658a5283fd3dc4e5e6910e571f91b1a2ca6d6be37",
+    "scripts/testenv/README.md": "b77479599386fe48c9f6f4322512e51f61e7e0970a64c8a4d442ba3975d6bfaa"
+  },
+  "source_review": {
+    "snapshot_files": 509,
+    "existing_production_support_files_unchanged": 323,
+    "documentation_only_changes_after_validation": {
+      "scripts/testenv/README.md": {
+        "tested_snapshot": "a6461dc8ae1320c65b8feccbe56cf30a11e28637a98ce2180464c0623f7c75db",
+        "reviewed_document": "b77479599386fe48c9f6f4322512e51f61e7e0970a64c8a4d442ba3975d6bfaa"
+      }
+    },
+    "runtime_sources_match": true
+  },
+  "backend": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 2504,
+    "log_sha256": "00b71636c0d4ee12a887ff41e5c3ea02d32c60e74b7c2a20883195c0d2cbd026",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 19,
+    "manifest_sha256": "e3de15de9bbe4665c5319454dc74934fc778b1af53f1da0342c78d5dd38d8d87",
+    "packages": 48,
+    "process_exit_code": 0,
+    "source_sha": "97675a743f83287b85297af4e94c339ce5a83bba",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 554,
+    "tests_skipped": 1,
+    "tests_started": 555
+  },
+  "frontend": {
+    "success": true,
+    "numTotalTests": 108,
+    "numPassedTests": 108,
+    "numFailedTests": 0,
+    "numPendingTests": 0
+  },
+  "tool_tests": {
+    "python_passed": 57,
+    "node_passed": 23,
+    "failed": 0
+  },
+  "db_baseline": {
+    "status": "baseline_reproduced",
+    "product_fixed": false,
+    "reproduced": [
+      "A01",
+      "A02",
+      "A03",
+      "A04",
+      "A05",
+      "A06",
+      "A07"
+    ],
+    "errors": [],
+    "process_exit_code": 1,
+    "log_sha256": "a4f0ece25ab3bf854cb9ea3bd4abddbb32d5dd41145a5bf159c6aafd563047b1",
+    "tests_expected": 7,
+    "layer": "db",
+    "source_sha": "97675a743f83287b85297af4e94c339ce5a83bba",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-timeout=180s",
+      "-tags=r5audit",
+      "-run",
+      "^TestR5AuditA0[1-7]",
+      "./internal/store/postgres"
+    ],
+    "test_source_sha256": "d935efbf1e9007928fc50e92fb152f2c1de161359c9fedffd97883a257add099",
+    "evidence_boundary": "Real PostgreSQL and loopback HTTP; no rendered components in this layer."
+  },
+  "component_baseline": {
+    "status": "baseline_reproduced",
+    "product_fixed": false,
+    "reproduced": [
+      "A01",
+      "A02"
+    ],
+    "errors": [],
+    "process_exit_code": 1,
+    "log_sha256": "d6bea66886e07758889b9cfc32fe4ea025384b82348f9119829e9afa8d0fc292",
+    "tests_expected": 2,
+    "layer": "components",
+    "source_sha": "97675a743f83287b85297af4e94c339ce5a83bba",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-timeout=180s",
+      "-tags=r5audit",
+      "-run",
+      "^TestR5ComponentA0[12]",
+      "./internal/store/postgres"
+    ],
+    "test_source_sha256": "0c1ac75df769a0e3b307fb8959b40f5d66cba5b02c15f463ebe3c63f59f9595f",
+    "evidence_boundary": "Original React editors, Base UI, SWR and real API/session clients, real loopback HTTP and PostgreSQL; injected auth context and jsdom layout shims, not a shipping-browser test."
+  },
+  "lock_observations_passed": 5,
+  "task_status": {
+    "closed_this_round": [
+      "R5-P0-030"
+    ],
+    "partial": [
+      "R5-P0-070"
+    ],
+    "completed": 6,
+    "total": 171,
+    "G0_complete": false
+  },
+  "production_fixes": false,
+  "shipping_browser_executed": false,
+  "github_ci_executed": false,
+  "pushed": false,
+  "environment": {
+    "image": "sha256:65934079f212a76983064db24e7a26066106a7e173cf2b05e4f1621aebfdb5c7",
+    "go": "1.25.7",
+    "node": "22.23.1",
+    "python": "3.12.14",
+    "postgres": "16",
+    "network": "session-owned internal; no host ports; loopback API; no external mail"
+  },
+  "raw_log_sha256": {
+    "backend-final-2.jsonl": "00b71636c0d4ee12a887ff41e5c3ea02d32c60e74b7c2a20883195c0d2cbd026",
+    "frontend-tools-final.log": "f8c70142856c0cc85d3ef2302327fd02c855bfc4ff98040f34998bff49282dfe",
+    "vitest-ordinary.json": "acd973659d8b4846290b83342befb95d905c612149f283e8ecc2986a0f0b3035",
+    "db-final/audit.jsonl": "a4f0ece25ab3bf854cb9ea3bd4abddbb32d5dd41145a5bf159c6aafd563047b1",
+    "components-final/audit.jsonl": "d6bea66886e07758889b9cfc32fe4ea025384b82348f9119829e9afa8d0fc292",
+    "locks-1.jsonl": "e5461b67500a9a63f724280938cb3799253b986e4b2cdce3800b46447a677049",
+    "locks-2.jsonl": "554230702fda3de429f980c7144e2d027152624a675a1fcda7352e80be4b41bd",
+    "locks-3.jsonl": "74be3d85fd85d722dc189497f67efffa8cbcfcbd51b1cceb39ff7e11f93f35e8"
+  },
+  "retained_evidence_sha256": {
+    "R5-B01-C-COMPONENTS.json": "d040b6dc4c52d1e21210a549b64d936104e1a919b8e77e67b452ce8f8fa14c0e",
+    "R5-B01-C-AUDIT.jsonl": "d6bea66886e07758889b9cfc32fe4ea025384b82348f9119829e9afa8d0fc292",
+    "R5-B01-C-LOCKS.jsonl": "778a29a65f5eee0da52cb14c334f985f983f480cc5f6105bd213100eb3599b14"
+  },
+  "intermediate_failures": [
+    "Component fixture lacked real SidebarProvider; added provider; not counted as defect reproduction.",
+    "Initial lock hypothesis incorrectly assumed direct tenant FK; actual schema targets user/mailbox; verified actual mailbox wait instead.",
+    "One i18n subprocess reported a NameError despite unchanged file hashes; identical isolated rerun and complete final suite passed; cause not established, original log retained.",
+    "TypeScript rejected getByRole exact option; changed to anchored name regex and reran components and ordinary frontend.",
+    "Source checker initially included post-validation testenv README as executable evidence; now distinguishes reviewed documentation from unchanged executed runtime sources."
+  ],
+  "local_log_directory": "/var/folders/g6/80ckk0w918xcr2c7j17wc0jc0000gn/T/tabmail-r5-b01c-rd5btvgj/.validation",
+  "cleanup": {
+    "session_owned_postgres_removed": true,
+    "session_owned_internal_network_removed": true,
+    "existing_services_untouched": true,
+    "cache_and_evidence_retained": true
+  }
+}

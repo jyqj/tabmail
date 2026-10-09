@@ -1,0 +1,8 @@
+{"Time":"2026-10-03T16:55:37.510216123Z","Action":"start","Package":"github.com/emersion/go-smtp"}
+{"Time":"2026-10-03T16:55:37.519673377Z","Action":"run","Package":"github.com/emersion/go-smtp","Test":"TestOwnerR5CloudLogoutTailRetainedJoin"}
+{"Time":"2026-10-03T16:55:37.519699573Z","Action":"output","Package":"github.com/emersion/go-smtp","Test":"TestOwnerR5CloudLogoutTailRetainedJoin","Output":"=== RUN   TestOwnerR5CloudLogoutTailRetainedJoin\n"}
+{"Time":"2026-10-03T16:55:37.520515398Z","Action":"output","Package":"github.com/emersion/go-smtp","Test":"TestOwnerR5CloudLogoutTailRetainedJoin","Output":"--- PASS: TestOwnerR5CloudLogoutTailRetainedJoin (0.00s)\n"}
+{"Time":"2026-10-03T16:55:37.520525672Z","Action":"pass","Package":"github.com/emersion/go-smtp","Test":"TestOwnerR5CloudLogoutTailRetainedJoin","Elapsed":0}
+{"Time":"2026-10-03T16:55:37.520674201Z","Action":"output","Package":"github.com/emersion/go-smtp","Output":"PASS\n"}
+{"Time":"2026-10-03T16:55:38.521749741Z","Action":"output","Package":"github.com/emersion/go-smtp","Output":"ok  \tgithub.com/emersion/go-smtp\t1.011s\n"}
+{"Time":"2026-10-03T16:55:38.521784098Z","Action":"pass","Package":"github.com/emersion/go-smtp","Elapsed":1.012}

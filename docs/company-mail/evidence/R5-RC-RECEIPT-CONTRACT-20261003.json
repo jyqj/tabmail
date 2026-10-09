@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "task": "R5 RC receipt component contract diagnosis and acceptance repair",
+  "base": "e5e6a2b4a429dbaf07f34a4f37a6d489d7e0422c",
+  "initial_repair_commit": "5387b2c08e56e0f8db9a9ed0ea9b6fdc8fe6a152",
+  "scope": "acceptance tests and author-owned RC seed oracle only; no product change",
+  "source_files_sha256": {
+    "web/components/company/r5-protocol-shared-components.test.tsx": "421eb77b639d389852c5b034545175e539c8a5303a8bf0c79624e3b6030d0464",
+    "web/components/company/r5-receipt-contract-oracle.ts": "598e1407a13ef96b4bdc96d3391ad1dc2dece36e5baf727e9df8b32f72516594",
+    "web/components/company/r5-receipt-contract-oracle.test.ts": "7a87ad29a6a07bbbc30941ada7213168964740d4a3d646123a1c028b691ba63e",
+    "internal/api/handlers/r5_protocol_component_observations_test.go": "a98a648ecbb754b371748fda9b79977ff093341165ae72ea12a17d5ceb43ac3b"
+  },
+  "fixed_cases_sha256": "f46d58c45dbf66e48eb1e379fd019aa5c02dc153f004548a69752f45dc52b1b7",
+  "validation": {
+    "unit": {
+      "result": "passed",
+      "files": 3,
+      "tests": 63,
+      "existing_tests": 41,
+      "new_tests": 22,
+      "existing_files": [
+        "web/lib/receipt-types.test.ts",
+        "web/components/company/r5-protocol.test.tsx"
+      ],
+      "new_file": "web/components/company/r5-receipt-contract-oracle.test.ts",
+      "scope": "synthetic oracle objects, closed parser tests, and controlled hook rendering from Go unit projection; not real HTTP/PG formal component evidence",
+      "command": "npm test -- --run lib/receipt-types.test.ts components/company/r5-protocol.test.tsx components/company/r5-receipt-contract-oracle.test.ts",
+      "safe_log_sha256": "867dd1d8b31f41755da4261f267b56385fba49d9d3311edce1964e1003cf6400"
+    },
+    "typescript": {
+      "result": "passed",
+      "command": "node_modules/.bin/tsc --noEmit",
+      "safe_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "eslint": {
+      "result": "passed",
+      "files": [
+        "web/components/company/r5-protocol-shared-components.test.tsx",
+        "web/components/company/r5-receipt-contract-oracle.ts",
+        "web/components/company/r5-receipt-contract-oracle.test.ts"
+      ],
+      "safe_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "initial_tagged_go_compile": {
+      "result": "passed",
+      "executed_tests": 0,
+      "command": "go test -tags=r5protocol -run '^$' ./internal/api/handlers",
+      "safe_log_sha256": "f1054357a4fed8508f37cd469331cdcf4783ef88d99b711a1cee73578dcae531"
+    },
+    "formal_rc": {
+      "result": "not_run",
+      "reason": "root will integrate after separately owned source-local Vitest cache repair"
+    }
+  },
+  "historical_failure": {
+    "preserved": true,
+    "reference": "R5-EXTERNAL-RUNTIME-20261003/README.md",
+    "case": "RC01/default",
+    "assertion": "Attachments label missing",
+    "real_submission_http_status": 200,
+    "classification": "unclassified original-case failure; not accepted target red"
+  },
+  "central_completed": 10,
+  "central_total": 171,
+  "product_green": false,
+  "task_complete": false,
+  "draft_pr": {
+    "created": false,
+    "attempts": 1,
+    "failure": "GitHub GraphQL API Forbidden",
+    "retry": false
+  },
+  "published_private_artifacts": false
+}

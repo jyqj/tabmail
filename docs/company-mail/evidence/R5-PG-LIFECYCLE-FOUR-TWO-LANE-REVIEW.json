@@ -1,0 +1,279 @@
+{
+  "actual_admission_logs": [
+    {
+      "active": [
+        "TestR5SentReadUsesTimeAfterIdentityWait"
+      ],
+      "event": "acquired",
+      "time": "2026-10-02T21:03:48.282628+08:00",
+      "top": "TestR5SentReadUsesTimeAfterIdentityWait"
+    },
+    {
+      "active": [
+        "TestR5SentMutationRejectsExpiryAfterItemWait",
+        "TestR5SentReadUsesTimeAfterIdentityWait"
+      ],
+      "event": "acquired",
+      "time": "2026-10-02T21:03:48.282658+08:00",
+      "top": "TestR5SentMutationRejectsExpiryAfterItemWait"
+    },
+    {
+      "active": [
+        "TestR5SentReadUsesTimeAfterIdentityWait"
+      ],
+      "event": "released_after_fixturecleanup",
+      "time": "2026-10-02T21:03:52.958754+08:00",
+      "top": "TestR5SentMutationRejectsExpiryAfterItemWait"
+    },
+    {
+      "active": [
+        "TestR5SentMutationRollsBackExpiryDuringAuditWait",
+        "TestR5SentReadUsesTimeAfterIdentityWait"
+      ],
+      "event": "acquired",
+      "time": "2026-10-02T21:03:52.958841+08:00",
+      "top": "TestR5SentMutationRollsBackExpiryDuringAuditWait"
+    },
+    {
+      "active": [
+        "TestR5SentMutationRollsBackExpiryDuringAuditWait"
+      ],
+      "event": "released_after_fixturecleanup",
+      "time": "2026-10-02T21:03:55.287946+08:00",
+      "top": "TestR5SentReadUsesTimeAfterIdentityWait"
+    },
+    {
+      "active": [
+        "TestR5ActivationExpiryAfterRealWaitRollsBack",
+        "TestR5SentMutationRollsBackExpiryDuringAuditWait"
+      ],
+      "event": "acquired",
+      "time": "2026-10-02T21:03:55.288038+08:00",
+      "top": "TestR5ActivationExpiryAfterRealWaitRollsBack"
+    },
+    {
+      "active": [
+        "TestR5ActivationExpiryAfterRealWaitRollsBack"
+      ],
+      "event": "released_after_fixturecleanup",
+      "time": "2026-10-02T21:03:59.844709+08:00",
+      "top": "TestR5SentMutationRollsBackExpiryDuringAuditWait"
+    },
+    {
+      "active": [],
+      "event": "released_after_fixturecleanup",
+      "time": "2026-10-02T21:04:02.116766+08:00",
+      "top": "TestR5ActivationExpiryAfterRealWaitRollsBack"
+    }
+  ],
+  "actual_observed_admission_peak": 2,
+  "actual_overlaps": [
+    {
+      "time": "2026-10-02T21:03:48.282658+08:00",
+      "tops": [
+        "TestR5SentMutationRejectsExpiryAfterItemWait",
+        "TestR5SentReadUsesTimeAfterIdentityWait"
+      ]
+    },
+    {
+      "time": "2026-10-02T21:03:52.958841+08:00",
+      "tops": [
+        "TestR5SentMutationRollsBackExpiryDuringAuditWait",
+        "TestR5SentReadUsesTimeAfterIdentityWait"
+      ]
+    },
+    {
+      "time": "2026-10-02T21:03:55.288038+08:00",
+      "tops": [
+        "TestR5ActivationExpiryAfterRealWaitRollsBack",
+        "TestR5SentMutationRollsBackExpiryDuringAuditWait"
+      ]
+    }
+  ],
+  "actual_parallel_overlap_parser_pending": true,
+  "actual_pause_cont": [
+    {
+      "event": "pause",
+      "test": "TestR5ActivationExpiryAfterRealWaitRollsBack",
+      "time": "2026-10-02T21:03:48.281336+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5SentMutationRejectsExpiryAfterItemWait",
+      "time": "2026-10-02T21:03:48.281578+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5SentMutationRollsBackExpiryDuringAuditWait",
+      "time": "2026-10-02T21:03:48.28163+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5SentReadUsesTimeAfterIdentityWait",
+      "time": "2026-10-02T21:03:48.281694+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5SentReadUsesTimeAfterIdentityWait",
+      "time": "2026-10-02T21:03:48.282365+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5SentMutationRejectsExpiryAfterItemWait",
+      "time": "2026-10-02T21:03:48.282545+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5SentMutationRollsBackExpiryDuringAuditWait",
+      "time": "2026-10-02T21:03:52.958817+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5ActivationExpiryAfterRealWaitRollsBack",
+      "time": "2026-10-02T21:03:55.287991+08:00"
+    }
+  ],
+  "actual_source_closure_sha256": "0f92fbe64e997d667d3c0bcceabdfb047b2312390247765b6131aef104a5f894",
+  "admission_end_empty": true,
+  "cleanup": {
+    "budget_seconds": 300,
+    "elapsed_total_capture_pure_init_real_observation_cleanup": 32.45901894569397,
+    "oldpartialstoppedroots_not_touched": true,
+    "original_deadline": 1790946510.896113,
+    "original_origin": 1790946210.896113,
+    "owned_pg_pid": 25043,
+    "owned_pid_observation": "absent",
+    "owned_root": "/private/tmp/tm-r5pgparallel-run.4korz_mk",
+    "pg_stop_exit": 0,
+    "pidfile_absent": true,
+    "query_exit": 0,
+    "socket_absent": true,
+    "temporaryDB_connections": [],
+    "within_original300": true
+  },
+  "context_deadline_start": "source-reviewed: all unchanged fixture/context/deadline setup after each acquired log; actualSQL clock and blocker assertions in11children PASS; no invented per-op timer",
+  "fixture_conn_peak_sampled_lower_bound": 8,
+  "fresh_db_schema_seed_drop_proof": [
+    {
+      "allDBabsent_terminal": true,
+      "database_identity_sha256": "869031285b8e0ab8e157431e69a88a6438d8203a3acc80f27185a782779a8351",
+      "fresh_creation_observed": true,
+      "schema18_and_seed_users3_mailboxes2_observed": true
+    },
+    {
+      "allDBabsent_terminal": true,
+      "database_identity_sha256": "602ecce9598b5d43a236e4c7b2f1c498f20010394e46cf9d7b3e8cf18fda4517",
+      "fresh_creation_observed": true,
+      "schema18_and_seed_users3_mailboxes2_observed": true
+    },
+    {
+      "allDBabsent_terminal": true,
+      "database_identity_sha256": "6cf1a13a3728e5e2c5602c18df5166ecb1840e5b78b3ef63e410e8b127e3a7e8",
+      "fresh_creation_observed": true,
+      "schema18_and_seed_users3_mailboxes2_observed": true
+    },
+    {
+      "allDBabsent_terminal": true,
+      "database_identity_sha256": "de0e08f8099f9f20ec7a458e102b4dc08563a486a541d4efa8b1860980a50109",
+      "fresh_creation_observed": true,
+      "schema18_and_seed_users3_mailboxes2_observed": true
+    },
+    {
+      "allDBabsent_terminal": true,
+      "database_identity_sha256": "447f662d3bce0097fed5ca564bd4e666c825124da20519d2e35e09ed62a4f563",
+      "fresh_creation_observed": true,
+      "schema18_and_seed_users3_mailboxes2_observed": true
+    },
+    {
+      "allDBabsent_terminal": true,
+      "database_identity_sha256": "e86ddfa13539e2bd816c1f4e55f2a1876f1f8385117e43f0e7752009d409e2aa",
+      "fresh_creation_observed": true,
+      "schema18_and_seed_users3_mailboxes2_observed": true
+    },
+    {
+      "allDBabsent_terminal": true,
+      "database_identity_sha256": "9c1bcafb305760a9cb0366329eae7d0dd96bf9c696bc059d475b51600585a2f5",
+      "fresh_creation_observed": true,
+      "schema18_and_seed_users3_mailboxes2_observed": true
+    },
+    {
+      "allDBabsent_terminal": true,
+      "database_identity_sha256": "c424a23993c5439f2037b35eb93c476073131c9e6ebd2bb37c187734bbcb6373",
+      "fresh_creation_observed": true,
+      "schema18_and_seed_users3_mailboxes2_observed": true
+    },
+    {
+      "allDBabsent_terminal": true,
+      "database_identity_sha256": "eabf4987950ef566271c20a8b3cc5c2a23c825c054328bf978b575a6b7746791",
+      "fresh_creation_observed": true,
+      "schema18_and_seed_users3_mailboxes2_observed": true
+    },
+    {
+      "allDBabsent_terminal": true,
+      "database_identity_sha256": "845e77fbedd223f5da193c5c864522a87e4251104a94896941486f303e7a69ce",
+      "fresh_creation_observed": true,
+      "schema18_and_seed_users3_mailboxes2_observed": true
+    },
+    {
+      "allDBabsent_terminal": true,
+      "database_identity_sha256": "632b9d376c210766651ac5288cfd512d05d22fc1d3a22b9f4688e6942ca21992",
+      "fresh_creation_observed": true,
+      "schema18_and_seed_users3_mailboxes2_observed": true
+    }
+  ],
+  "fresh_fixture_db_count_observed": 11,
+  "full_pkg180_fit_not_certified": true,
+  "not_whole180_solution_or206completion": true,
+  "pure_fake_not_PG_evidence": true,
+  "pure_invalid_partial_dropfailure_is_fake": "pure controlled closures and drop context only, not realinvalidDSN/fault proof",
+  "results": {
+    "pure-admission-new2": {
+      "CLI_exit": 0,
+      "actual_run_count": 2,
+      "failed": [],
+      "group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "leaf": 2,
+      "passed": 2,
+      "skipped": [],
+      "timed_out": false,
+      "top": 2
+    },
+    "pure-fixture-lifecycle-new2": {
+      "CLI_exit": 0,
+      "actual_run_count": 7,
+      "failed": [],
+      "group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "leaf": 6,
+      "passed": 7,
+      "skipped": [],
+      "timed_out": false,
+      "top": 2
+    },
+    "realPG-four-truewaits-original11children": {
+      "CLI_exit": 0,
+      "actual_run_count": 15,
+      "failed": [],
+      "group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "leaf": 11,
+      "passed": 15,
+      "skipped": [],
+      "timed_out": false,
+      "top": 4
+    }
+  },
+  "scope_verdict": "PASS_newpure_helper_mechanics_separate_and_realPG4tops11children_actual2lane_overlap",
+  "source_sha": "74f627f721decd575bf752846b839a23fc9f5a51",
+  "unknown_connection_samples": 0
+}

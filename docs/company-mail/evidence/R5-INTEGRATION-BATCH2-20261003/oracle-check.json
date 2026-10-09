@@ -1,0 +1,8 @@
+{
+  "original_commit": "08ea0791d3694fa0f85ae415c76eb7aa78170c99",
+  "original_runner_sha256": "d6c4492d0c38c9c98f9b1426a7a77f1ce24178627cc2d512982c4e4980a1cafc",
+  "original_test_body_byte_identical": true,
+  "fixtures_byte_identical": true,
+  "new_cases": 1,
+  "runner_changes": "new case, output directory, report candidate/baseline binding only"
+}

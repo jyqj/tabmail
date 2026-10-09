@@ -1,0 +1,12 @@
+{
+  "budget_seconds": 300,
+  "cleanup_reserved_seconds": 30,
+  "clock_source": "controller time.time/time.monotonic self-reported; not trusted external attestation",
+  "origin_mono_actual_before_capture": 242353.162900625,
+  "origin_wall_actual_before_capture": 1791009850.977855,
+  "original_deadline_mono": 242653.162900625,
+  "original_deadline_wall": 1791010150.977855,
+  "sequence": "origin -> resourcepreflight -> SOURCE capture -> GoList actualcontext -> go test -> cleanup/post",
+  "workstop_mono": 242623.162900625,
+  "workstop_wall": 1791010120.977855
+}

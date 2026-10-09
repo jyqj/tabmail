@@ -1,0 +1,198 @@
+{
+  "status": "locked_Mpre_cutoff_complete_five_Go_affected_pass_protocol_registry_fail_preserved",
+  "source_sha": "5d1b723b7dae6d4fbc94bb0405bd35af91ceb396",
+  "source_receipt": "source-receipt.json",
+  "phase_actuals": {
+    "protocol-shared-manifest": {
+      "exit": 1,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+        "-B",
+        "scripts/check_r5_protocol.py",
+        "--run",
+        "shared-db",
+        "--output-dir",
+        "/tmp/tm-r5shortfix.3sp1awTN/protocol-original",
+        "--source-manifest",
+        "/tmp/tm-r5shortfix.3sp1awTN/protocol-source-manifest.json",
+        "--source-manifest-sha256",
+        "9c697fce7eb463efe49c3d6cd3ed6a918a55fc514333dc55b1dbcea5b79e67f8"
+      ]
+    },
+    "route132": {
+      "exit": 0,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go",
+        "test",
+        "-mod=readonly",
+        "-json",
+        "-race",
+        "-count=1",
+        "-p",
+        "1",
+        "-timeout=180s",
+        "./internal/architecture",
+        "-run",
+        "^TestR5RouteInventory$"
+      ]
+    },
+    "api-null": {
+      "exit": 0,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go",
+        "test",
+        "-mod=readonly",
+        "-json",
+        "-race",
+        "-count=1",
+        "-p",
+        "1",
+        "-timeout=180s",
+        "./internal/api",
+        "-run",
+        "^TestReleaseMemberPatchNullVersusAbsent$"
+      ]
+    },
+    "registry21": {
+      "exit": 1,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+        "-B",
+        "-m",
+        "unittest",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_failed_attempt_uses_actual_raw_exit_and_source",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_failed_population_float_and_fake_product_green_rejected",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_fake_flags_tool_only_and_source_identity_rejected",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_frozen_S2_must_not_be_backfilled_with_new_pipeline_metadata",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_historical_contract_and_schema_not_current_metadata",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_missing_history_or_archive_and_failed_attempt_not_success",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_missing_original_result_not_a_green_review",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_missing_raw_runner_exit_cannot_be_inferred_from_go",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_original_command_cannot_extend_frozen_go_timeout",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_preflight_population_budget_and_artifact_hashes_rejected",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_raw_exit_failure_cannot_be_hidden_by_passed_review",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_raw_host_suspend_budget_cannot_hide_under_go_elapsed",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_raw_source_and_process_protocol_not_only_hashes",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_real_success_and_failed_attempts_are_not_static_empty_registry",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_source_closure_digest_not_just_declared_source",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_tool_only_marker_on_original_scale_result_rejected",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_unknown_failed_variant_never_becomes_success",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_unknown_failed_variant_preserves_exact_original_provenance",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_unknown_failed_variant_rejection_must_be_actual_eperm",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_unknown_failed_variant_rejects_terminal_go_or_missing_exit_key",
+        "test_r5_benchmark.BenchmarkRegistryTests.test_unknown_failed_variant_requires_raw_rejection_and_absence",
+        "-v"
+      ]
+    },
+    "received2": {
+      "exit": 0,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go",
+        "test",
+        "-mod=readonly",
+        "-json",
+        "-race",
+        "-count=1",
+        "-p",
+        "1",
+        "-timeout=180s",
+        "./internal/store/postgres",
+        "-run",
+        "^Test(R3SoftDeleteRestoreRetentionAndEvents|R5CacheWriteVersusPhysicalDeleteLockOrder)$/^expired$"
+      ]
+    },
+    "r5-fixtures2": {
+      "exit": 0,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go",
+        "test",
+        "-mod=readonly",
+        "-json",
+        "-race",
+        "-count=1",
+        "-p",
+        "1",
+        "-timeout=180s",
+        "-tags=r5fixtures",
+        "./internal/testpg",
+        "-run",
+        "^TestR5FixtureHTTP(QuotaAndRequiredAuditRollback|KeyScopeRevocationAndExpiry)$"
+      ]
+    },
+    "goose16": {
+      "exit": 0,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go",
+        "test",
+        "-mod=readonly",
+        "-json",
+        "-race",
+        "-count=1",
+        "-p",
+        "1",
+        "-timeout=180s",
+        "./internal/store/postgres",
+        "-run",
+        "^TestP0GooseRestartAndHistoricalGrantSafety$/^upgrade_and_restart$"
+      ]
+    }
+  },
+  "new_protocol_identity": "cdb0c29233e2cea70533b883df6492ffa4328249e7a61936deccb80414428136",
+  "new_protocol_manifest_bytes_SHA256": "9c697fce7eb463efe49c3d6cd3ed6a918a55fc514333dc55b1dbcea5b79e67f8",
+  "dependency_closure_fix": "only14safe directrefs originalbytes; new backend depidentity notold2aa",
+  "registry21_result": "actual21setup errors KeyErrorarchive reviewshape, notmissingartifact norPASS",
+  "protocol_result": "manifest/root/hash/scope actualaccepted and real19Go runtime attempted; old409 protocol/retention/BCC failures not green; noGitfake",
+  "five_affected_Go_all_exit0": true,
+  "old_fullGo_failure_not_retested_or_relabelled": true,
+  "remaining_unfrozen_work": "transactioninventory/A03/catalog/newProfileCreate/browser runtime stagedMafter",
+  "native_cleanup": {
+    "status": "locked_shortcutoff_owned_native_PG_cleaned",
+    "observed_utc": "2026-10-02T03:43:45.750873+00:00",
+    "owned_pg_pid": 45525,
+    "owned_root": "/tmp/tm-r5shortfix.3sp1awTN",
+    "pg_stop_exit": 0,
+    "postmaster_pid_absent": true,
+    "owned_socket_absent": true,
+    "owned_pid_final_observation": "absent",
+    "terminal_test_DB_report": "0\n",
+    "M_not_yet_started": true
+  },
+  "task_complete": false,
+  "product_green": false,
+  "M_started": false
+}

@@ -1,0 +1,25 @@
+{
+  "created_utc": "2026-10-02T01:44:13.326194+00:00",
+  "status": "new_consumer29_composed_actual_green_after13fixture_only_repair",
+  "initial_whole29_exit": 1,
+  "initial_actual_passed": 16,
+  "initial_fixture_failed": 13,
+  "repair_selected13_exit": 0,
+  "repair_actual_passed": 13,
+  "repair_intentionally_excluded_previous_passed_case": [
+    "mounted company event consumers real permission editor preserves dirty intent but requires explicit reload after an event"
+  ],
+  "all29_unique_have_actual_pass": true,
+  "old16_reexecuted": false,
+  "source_boundary": "cold532 dependency/source base+7captured new files; single new test dd8515\u219218fd fixture delta; production/expect/clock remain same, first29FAILraw not relabelled as full29exit0",
+  "source_receipt": "source-receipt.json",
+  "fixture_delta": "repair13/source-delta.json",
+  "owned_repair_node_group_absence": {
+    "status": "observed",
+    "members": [],
+    "non_zombie_live_pids": []
+  },
+  "M_PG_Go_Next_browser_started": false,
+  "task_complete": false,
+  "product_green": false
+}

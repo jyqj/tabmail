@@ -1,0 +1,176 @@
+{
+  "pr": 210,
+  "workflow_run": 37833287011,
+  "job": 113503840648,
+  "artifact": 11573874798,
+  "public_head": "ad6b39451b6a4206519e998bccf889f1308ad130",
+  "actual_checkout": "28e017cf31d65d4b554cc5c31711f7f4656aa416",
+  "actual_full_tree": "19dbe626627213b474bbaa54f41740976a3e6def",
+  "source_version_json_present": false,
+  "ci_failure_phase": "discover",
+  "ci_error": "ValueError: test discovery import failure",
+  "ci_concrete_import_error_reported": false,
+  "ci_reported_discovered_count": null,
+  "ci_reported_executed_count": null,
+  "ci_reported_missing_count": null,
+  "ci_reported_skip_count": null,
+  "ci_groups_entered": false,
+  "ci_groups_entered_basis": "stack trace at run/discover before prepare and group dispatch in unchanged runner",
+  "local_discovery_diagnosis": {
+    "scope": "import-only with real Go and original CLI sys.path; not CI test statistics",
+    "old_catalog_fdea": {
+      "ids": 816,
+      "loader_errors": 0
+    },
+    "public_product_26a": {
+      "ids_including_one_failed_placeholder": 817,
+      "error": "ModuleNotFoundError: No module named 'scripts'"
+    },
+    "public_final_ad6_and_4730": {
+      "ids_including_one_failed_placeholder": 819,
+      "error": "ModuleNotFoundError: No module named 'scripts'"
+    },
+    "candidate": {
+      "commit": "c6f64e16f4432e5c4f58cf4ad58431e141d307f4",
+      "tree": "e574f842350c2d483280a56593eb0d66f0cf3ea2",
+      "ids": 821,
+      "loader_errors": 0,
+      "tests_executed": 0
+    }
+  },
+  "fixed_original_verifier_methods": {
+    "baseline_import_failure": true,
+    "baseline_methods_executed": 0,
+    "candidate_passed": 3,
+    "candidate_failed": 0,
+    "candidate_skipped": 0,
+    "scope": "synthetic runner verification; no new PostgreSQL execution"
+  },
+  "implementation_todos_completed": 0,
+  "files": {
+    "company-frontend-evidence.zip": {
+      "bytes": 76420,
+      "sha256": "aab0af1550efcf770b37045d3e274d42d2fd17b8392e2a2eb0eaa4ad3f0c5bed"
+    },
+    "frontend-source-sha.txt": {
+      "bytes": 41,
+      "sha256": "227a88e98a4e0daaf26a460cf414e6361c3e40537a7c37991c37ca505863c490"
+    },
+    "frontend-job.log": {
+      "bytes": 158207,
+      "sha256": "07305b8d76e4dbe3647ea3890e1dcec127ea400b793c75038746c7054faf044a"
+    },
+    "frontend-source-version-failure.log": {
+      "bytes": 1820,
+      "sha256": "2cfc2cfff0ac1acff35fba3d83a661e601a2b9dc6bfa4779ba21a41b63875c4c"
+    },
+    "frontend-vitest.json": {
+      "bytes": 719557,
+      "sha256": "f09fe6bd95a34e1b8cba3b215eed0663e984414b0cdd554693ae2ec957d6dfeb"
+    },
+    "frontend-artifact-metadata.json": {
+      "bytes": 741,
+      "sha256": "18c5bd09601fc1c7e48d28aef268ee95c1aeac9aee5561c541cab1f7cf4eee9f"
+    },
+    "public-source-identification.json": {
+      "bytes": 14187,
+      "sha256": "6bf2fc2d50fb0e087fc25c99bd0e17d5d49a39fda3022a0fafe93bf8c6376091"
+    },
+    "import-fix-pins.json": {
+      "bytes": 2022,
+      "sha256": "da092c7c46d3731605c8ebf7f991fe158f867c7530912b7587faa27b79594ce1"
+    },
+    "diagnose_discovery.py": {
+      "bytes": 2020,
+      "sha256": "5afb8f4929043648567229a742b75d950c353cbb2f4ad6bf466045400615a3ea"
+    },
+    "run_three_api_verifier_tests.py": {
+      "bytes": 3031,
+      "sha256": "e62fd722079c77b0a08b61b0a02a41932bbdfb540be463c1b8c2ed7aabd1fd5c"
+    },
+    "discovery-fdea.json": {
+      "bytes": 2374,
+      "sha256": "984bf17348f93f402c9326ab6a32fbd3dba015be9cb74c123308c91fc39a90a1"
+    },
+    "discovery-fdea.stdout": {
+      "bytes": 2374,
+      "sha256": "984bf17348f93f402c9326ab6a32fbd3dba015be9cb74c123308c91fc39a90a1"
+    },
+    "discovery-fdea.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "discovery-26a.json": {
+      "bytes": 3171,
+      "sha256": "13a3872cac3091dcf277b6d874e36c19d9b77b75e90e27570e8c6faf4507ef52"
+    },
+    "discovery-26a.stdout": {
+      "bytes": 3171,
+      "sha256": "13a3872cac3091dcf277b6d874e36c19d9b77b75e90e27570e8c6faf4507ef52"
+    },
+    "discovery-26a.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "discovery-ad6.json": {
+      "bytes": 3171,
+      "sha256": "b8a125f97a6d5f2748d432cba210df09e2ace2feef8a8d999e45399dcd85b434"
+    },
+    "discovery-ad6.stdout": {
+      "bytes": 3171,
+      "sha256": "b8a125f97a6d5f2748d432cba210df09e2ace2feef8a8d999e45399dcd85b434"
+    },
+    "discovery-ad6.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "discovery-4730.json": {
+      "bytes": 3172,
+      "sha256": "e7472949b81172269ee347e50194f006914081af077e4c64af038e3e12a24fbc"
+    },
+    "discovery-4730.stdout": {
+      "bytes": 3172,
+      "sha256": "e7472949b81172269ee347e50194f006914081af077e4c64af038e3e12a24fbc"
+    },
+    "discovery-4730.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "discovery-c6f.json": {
+      "bytes": 2373,
+      "sha256": "5dee9492e3e864a0163ee6a5f0f2da2112e2e6b0bac556254c351e147332c35f"
+    },
+    "discovery-c6f.stdout": {
+      "bytes": 2373,
+      "sha256": "5dee9492e3e864a0163ee6a5f0f2da2112e2e6b0bac556254c351e147332c35f"
+    },
+    "discovery-c6f.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "three-methods-4730.json": {
+      "bytes": 3012,
+      "sha256": "75fa1e63c5034b26f5d3309eb50c4d927f435687fb4232bd5bbdb1e16367d30e"
+    },
+    "three-methods-4730.stdout": {
+      "bytes": 3012,
+      "sha256": "75fa1e63c5034b26f5d3309eb50c4d927f435687fb4232bd5bbdb1e16367d30e"
+    },
+    "three-methods-4730.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "three-methods-c6f.json": {
+      "bytes": 2120,
+      "sha256": "c22d042d0f081bf3f859881ca6379f83c672cb3af8a933ad1cdc39cdff3adb9a"
+    },
+    "three-methods-c6f.stdout": {
+      "bytes": 2120,
+      "sha256": "c22d042d0f081bf3f859881ca6379f83c672cb3af8a933ad1cdc39cdff3adb9a"
+    },
+    "three-methods-c6f.stderr": {
+      "bytes": 577,
+      "sha256": "5815d8ef0f3d44b3c8239a75df1fc91a7faf155d2ec1097d6478f83b27615f09"
+    }
+  }
+}

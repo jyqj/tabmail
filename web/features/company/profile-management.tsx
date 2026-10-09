@@ -1,5 +1,5 @@
 "use client";
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState, useRef, useEffect, useId, type Dispatch, type SetStateAction } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { listPermissionProfiles, createPermissionProfile, updatePermissionProfile, deletePermissionProfile, listDomains, listAdminDomains, listTenants, } from "@/lib/api";
+import { listDomains, listAdminDomains, listTenants, } from "@/lib/api";
+import { useSessionScope, sessionScope } from "@/lib/session";
 import type { DomainZone, PermissionProfile, Tenant } from "@/lib/types";
 import { Plus, MoreHorizontal, Trash2, Shield, Copy, Pencil, } from "lucide-react";
 import { toast } from "sonner";
@@ -22,7 +23,28 @@ import { useCRUDPage } from "@/hooks/use-crud-page";
 import { useAuth } from "@/contexts/auth-context";
 import { isSuperAdminLevel } from "@/lib/permissions";
 import { useI18n } from "@/lib/i18n";
-import { safeConfirm } from "@/lib/utils";
+import { listPermissionProfiles, createPermissionProfile, updatePermissionProfile, deletePermissionProfile, getPermissionProfileDeletionPreview } from "@/lib/api/permissions";
+import { useCompanyEventConsumer } from "./company-event-consumer";
+import { validateObservedPermissionProfile, type PermissionProfileUpdateFields } from "@/lib/api/permission-editor-types";
+type DeletionPreview = Awaited<ReturnType<typeof getPermissionProfileDeletionPreview>>["data"];
+function validQuotas(form: PermissionFormData): boolean { return [form.daily_send_quota, form.daily_receive_quota, form.max_mailboxes, form.max_domains].every(value => /^(0|[1-9][0-9]*)$/.test(value) && Number.isSafeInteger(Number(value))); }
+function observedProfile(profile: PermissionProfile): boolean {
+    try { validateObservedPermissionProfile(profile); return true; } catch { return false; }
+}
+function profileFieldPatch(form: PermissionFormData, baseline: PermissionFormData): PermissionProfileUpdateFields {
+    const fields: PermissionProfileUpdateFields = {};
+    for (const key of Object.keys(form) as (keyof PermissionFormData)[]) {
+        if (key === "tenant_id") continue;
+        const value = form[key], original = baseline[key];
+        const wire = typeof value === "string" ? (key === "name" || key === "description" ? value.trim() : Number(value)) : value;
+        const before = typeof original === "string" ? (key === "name" || key === "description" ? original.trim() : Number(original)) : original;
+        if (JSON.stringify(wire) !== JSON.stringify(before)) Object.assign(fields, { [key]: wire });
+    }
+    return fields;
+}
+function permissionError(error: unknown): { code?: string; message?: string } {
+    return (error as { error?: { code?: string; message?: string } })?.error ?? {};
+}
 const GLOBAL_PROFILE_SCOPE = "__global__";
 interface PermissionFormData {
     tenant_id: string | null;
@@ -52,6 +74,22 @@ const defaultForm: PermissionFormData = {
     can_create_routes: false,
     can_create_api_keys: false,
 };
+function profileForm(profile: PermissionProfile): PermissionFormData {
+    return {
+        tenant_id: profile.tenant_id ?? null,
+        name: profile.name,
+        description: profile.description,
+        can_send: profile.can_send,
+        daily_send_quota: String(profile.daily_send_quota),
+        daily_receive_quota: String(profile.daily_receive_quota),
+        max_mailboxes: String(profile.max_mailboxes),
+        max_domains: String(profile.max_domains),
+        allowed_zone_ids: [...(profile.allowed_zone_ids ?? [])],
+        can_create_domains: profile.can_create_domains,
+        can_create_routes: profile.can_create_routes,
+        can_create_api_keys: profile.can_create_api_keys,
+    };
+}
 function formatQuota(value: number): string {
     return value === 0 ? "∞" : String(value);
 }
@@ -71,15 +109,17 @@ function tenantLabel(tenants: Tenant[], tenantId?: string | null): string {
 function zoneLabel(zone: DomainZone): string {
     return zone.domain || shortId(zone.id);
 }
-function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, tenants, tenantScopeLocked = false, }: {
+function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, tenants, tenantScopeLocked = false, disabled = false, }: {
     form: PermissionFormData;
     setForm: Dispatch<SetStateAction<PermissionFormData>>;
     domainOptions: DomainZone[];
     isPlatformAdmin: boolean;
     tenants: Tenant[];
     tenantScopeLocked?: boolean;
+    disabled?: boolean;
 }) {
     const { t } = useI18n();
+    const formId = useId();
     const scopedDomainOptions = isPlatformAdmin && form.tenant_id
         ? domainOptions.filter((zone) => zone.tenant_id === form.tenant_id)
         : isPlatformAdmin
@@ -106,17 +146,17 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
     ];
     return (<div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
       <div className="space-y-1.5">
-        <Label className="text-xs">{t("permissions.name")}</Label>
-        <Input value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} placeholder={t("permissions.namePlaceholder")}/>
+        <Label htmlFor={`${formId}-name`} className="text-xs">{t("permissions.name")}</Label>
+        <Input id={`${formId}-name`} disabled={disabled} value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} placeholder={t("permissions.namePlaceholder")}/>
       </div>
       <div className="space-y-1.5">
-        <Label className="text-xs">{t("permissions.descriptionField")}</Label>
-        <Input value={form.description} onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))} placeholder={t("permissions.descriptionPlaceholder")}/>
+        <Label htmlFor={`${formId}-description`} className="text-xs">{t("permissions.descriptionField")}</Label>
+        <Input id={`${formId}-description`} disabled={disabled} value={form.description} onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))} placeholder={t("permissions.descriptionPlaceholder")}/>
       </div>
 
       {isPlatformAdmin && (<div className="space-y-1.5">
-          <Label className="text-xs">{t("permissions.scope")}</Label>
-          <Select value={form.tenant_id ?? GLOBAL_PROFILE_SCOPE} disabled={tenantScopeLocked} onValueChange={(value) => setForm((prev) => {
+          <Label id={`${formId}-scope-label`} htmlFor={`${formId}-scope`} className="text-xs">{t("permissions.scope")}</Label>
+          <Select value={form.tenant_id ?? GLOBAL_PROFILE_SCOPE} disabled={disabled || tenantScopeLocked} onValueChange={(value) => setForm((prev) => {
                 const nextTenantID = value === GLOBAL_PROFILE_SCOPE ? null : value;
                 return {
                     ...prev,
@@ -126,7 +166,7 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
                         : [],
                 };
             })}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger id={`${formId}-scope`} aria-labelledby={`${formId}-scope-label`} className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -145,15 +185,15 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
 
       <div className="grid grid-cols-2 gap-3">
         {switchFields.map((f) => (<div key={f.key} className="flex items-center justify-between rounded-md border p-3">
-            <Label className="text-xs font-normal">{f.label}</Label>
-            <Switch size="sm" checked={form[f.key] as boolean} onCheckedChange={(checked: boolean) => setForm((prev) => ({ ...prev, [f.key]: checked }))}/>
+            <Label id={`${formId}-${f.key}-label`} htmlFor={`${formId}-${f.key}`} className="text-xs font-normal">{f.label}</Label>
+            <Switch id={`${formId}-${f.key}`} aria-labelledby={`${formId}-${f.key}-label`} disabled={disabled} size="sm" checked={form[f.key] as boolean} onCheckedChange={(checked: boolean) => setForm((prev) => ({ ...prev, [f.key]: checked }))}/>
           </div>))}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         {numberFields.map((f) => (<div key={f.key} className="space-y-1.5">
-            <Label className="text-xs">{f.label}</Label>
-            <Input type="number" min={0} value={form[f.key] as string} onChange={(e) => setForm((prev) => ({ ...prev, [f.key]: e.target.value }))} placeholder="0"/>
+            <Label htmlFor={`${formId}-${f.key}`} className="text-xs">{f.label}</Label>
+            <Input id={`${formId}-${f.key}`} disabled={disabled} type="number" min={0} value={form[f.key] as string} onChange={(e) => setForm((prev) => ({ ...prev, [f.key]: e.target.value }))} placeholder="0"/>
             <p className="text-[10px] text-muted-foreground">
               {t("permissions.zeroUnlimited")}
             </p>
@@ -170,7 +210,7 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
           </span>
         </div>
         <div className="rounded-md border p-3 space-y-2">
-          <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setForm((prev) => ({ ...prev, allowed_zone_ids: [] }))} disabled={domainPickerDisabled}>
+          <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setForm((prev) => ({ ...prev, allowed_zone_ids: [] }))} disabled={disabled || domainPickerDisabled}>
             {t("permissions.allowAllDomains")}
           </Button>
           {domainPickerDisabled ? (<p className="text-xs text-muted-foreground">
@@ -178,9 +218,9 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
             </p>) : scopedDomainOptions.length === 0 ? (<p className="text-xs text-muted-foreground">{t("permissions.noDomainsHint")}</p>) : (<div className="grid gap-2">
               {scopedDomainOptions.map((zone) => {
                 const checked = form.allowed_zone_ids.includes(zone.id);
-                return (<label key={zone.id} className="flex items-center justify-between gap-3 rounded border px-2 py-1.5 text-xs">
-                    <span className="truncate" title={zone.domain}>{zoneLabel(zone)}</span>
-                    <Switch size="sm" checked={checked} onCheckedChange={(next: boolean) => setForm((prev) => ({
+                return (<label key={zone.id} htmlFor={`${formId}-zone-${zone.id}`} className="flex items-center justify-between gap-3 rounded border px-2 py-1.5 text-xs">
+                    <span id={`${formId}-zone-${zone.id}-label`} className="truncate" title={zone.domain}>{zoneLabel(zone)}</span>
+                    <Switch id={`${formId}-zone-${zone.id}`} aria-labelledby={`${formId}-zone-${zone.id}-label`} disabled={disabled} size="sm" checked={checked} onCheckedChange={(next: boolean) => setForm((prev) => ({
                         ...prev,
                         allowed_zone_ids: next
                             ? Array.from(new Set([...prev.allowed_zone_ids, zone.id]))
@@ -194,11 +234,11 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
     </div>);
 }
 export default function PermissionsPage() {
-    const { level } = useAuth();
+    const { level, tenantId } = useAuth();
     const { t } = useI18n();
     // UX-only gate; the backend authz seam is authoritative.
     const isPlatformAdmin = isSuperAdminLevel(level);
-    const { data: profilesRes, isLoading: loading, mutate: mutateProfiles, } = useCRUDPage("permission-profiles", () => listPermissionProfiles(), "permissions.loadFailed");
+    const { data: profilesRes, isLoading: loading, error: profilesError, mutate: mutateProfiles, } = useCRUDPage("permission-profiles", () => listPermissionProfiles(), "permissions.loadFailed");
     const profiles = profilesRes?.data ?? [];
     const total = profiles.length;
     const { data: domainsRes } = useAPI(isPlatformAdmin ? "permission-profile-admin-domains" : "permission-profile-domains", () => (isPlatformAdmin ? listAdminDomains() : listDomains()));
@@ -210,12 +250,61 @@ export default function PermissionsPage() {
     const [creating, setCreating] = useState(false);
     const [form, setForm] = useState<PermissionFormData>(defaultForm);
     const [editOpen, setEditOpen] = useState(false);
-    const [editingProfile, setEditingProfile] = useState<PermissionProfile | null>(null);
-    const [editForm, setEditForm] = useState<PermissionFormData>(defaultForm);
+    // Revision, baseline and draft commit together, including refresh rebases.
+    const [editor, setEditor] = useState({ profile: null as PermissionProfile | null, baseline: defaultForm, form: defaultForm });
+    const { profile: editingProfile, baseline: editBaseline, form: editForm } = editor;
+    const setEditingProfile = (profile: PermissionProfile | null) => setEditor(prev => ({ ...prev, profile }));
+    const setEditForm: Dispatch<SetStateAction<PermissionFormData>> = update => setEditor(prev => ({ ...prev, form: typeof update === "function" ? update(prev.form) : update }));
+    const [accessError, setAccessError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
+    const [editStale, setEditStale] = useState(false);
+    const [reviewFresh, setReviewFresh] = useState(false);
+    const [freshProfile, setFreshProfile] = useState<PermissionProfile | null>(null);
+    const [refreshing, setRefreshing] = useState(false);
+    const [deletingProfile, setDeletingProfile] = useState<PermissionProfile | null>(null);
+    const [preview, setPreview] = useState<DeletionPreview | null>(null);
+    const [previewBusy, setPreviewBusy] = useState(false);
+    const [deleteBusy, setDeleteBusy] = useState(false);
+    const [confirmed, setConfirmed] = useState(false);
+    const operation = useRef(0);
+    const writeBusy = useRef(false);
+    const session = useSessionScope();
+    const isCurrent = (token: number, scope: string) => token === operation.current && scope === sessionScope();
+    useEffect(() => {
+        ++operation.current;
+        writeBusy.current = false; setCreating(false); setSaving(false); setDeleteBusy(false); setRefreshing(false);
+        setEditOpen(false); setEditingProfile(null); setEditStale(false); setFreshProfile(null); setReviewFresh(false);
+        setDeletingProfile(null); setPreview(null); setConfirmed(false); setPreviewBusy(false);
+        setDialogOpen(false); setForm(defaultForm); setAccessError(null);
+        return () => { ++operation.current; };
+    }, [session]);
+    const eventRevoked = useCompanyEventConsumer({
+        tenantId, enabled: level === "admin" || isPlatformAdmin,
+        cacheKeys: ["permission-profiles", "permission-profile-admin-domains", "permission-profile-domains", "permission-profile-tenants"],
+        onInvalidate: () => {
+            // Fence background revision/preview GETs, without unlocking an
+            // in-flight business write or rebasing any dirty form fields.
+            if (!writeBusy.current) { ++operation.current; setRefreshing(false); setPreviewBusy(false); }
+            if (editingProfile) setEditStale(true);
+            setFreshProfile(null); setReviewFresh(false); setPreview(null); setConfirmed(false);
+        },
+        revalidate: () => mutateProfiles(),
+        onRevoked: () => {
+            ++operation.current; writeBusy.current = false;
+            setCreating(false); setSaving(false); setDeleteBusy(false); setRefreshing(false);
+            setEditOpen(false); setEditingProfile(null); setEditForm(defaultForm);
+            setFreshProfile(null); setReviewFresh(false); setEditStale(false);
+            setDeletingProfile(null); setPreview(null); setConfirmed(false); setPreviewBusy(false);
+            setDialogOpen(false); setForm(defaultForm); setAccessError(null);
+        },
+    });
+    const canManageScope = (profile: PermissionProfile) => !accessError && !eventRevoked && !profile.is_system && (isPlatformAdmin || (level === "admin" && !!tenantId && profile.tenant_id === tenantId));
+    const mayManage = (profile: PermissionProfile) => !profilesError && !loading && canManageScope(profile);
     const handleCreate = async () => {
-        if (!form.name.trim())
+        if (accessError || profilesError || loading || eventRevoked || session !== sessionScope() || writeBusy.current || (level !== "admin" && !isPlatformAdmin) || !form.name.trim() || !validQuotas(form))
             return;
+        const token = ++operation.current, scope = session;
+        writeBusy.current = true;
         setCreating(true);
         try {
             await createPermissionProfile({
@@ -232,104 +321,131 @@ export default function PermissionsPage() {
                 can_create_routes: form.can_create_routes,
                 can_create_api_keys: form.can_create_api_keys,
             });
+            if (!isCurrent(token, scope)) return;
             setForm(defaultForm);
             setDialogOpen(false);
             toast.success(t("permissions.created"));
             mutateProfiles();
         }
         catch (e: unknown) {
-            const err = e as {
-                error?: {
-                    message?: string;
-                };
-            };
+            if (!isCurrent(token, scope)) return;
+            const err = { error: permissionError(e) };
+            if (["UNAUTHORIZED", "FORBIDDEN"].includes(err.error.code ?? "")) setAccessError(err.error.message || err.error.code!);
             toast.error(err?.error?.message || t("permissions.createFailed"));
         }
         finally {
-            setCreating(false);
+            if (isCurrent(token, scope)) { writeBusy.current = false; setCreating(false); }
         }
     };
     const openEdit = (profile: PermissionProfile) => {
-        if (profile.is_system) {
+        if (!mayManage(profile)) {
             toast.error(t("permissions.systemCannotEdit"));
             return;
         }
-        setEditingProfile(profile);
-        setEditForm({
-            tenant_id: profile.tenant_id ?? null,
-            name: profile.name,
-            description: profile.description,
-            can_send: profile.can_send,
-            daily_send_quota: String(profile.daily_send_quota),
-            daily_receive_quota: String(profile.daily_receive_quota),
-            max_mailboxes: String(profile.max_mailboxes),
-            max_domains: String(profile.max_domains),
-            allowed_zone_ids: profile.allowed_zone_ids ?? [],
-            can_create_domains: profile.can_create_domains,
-            can_create_routes: profile.can_create_routes,
-            can_create_api_keys: profile.can_create_api_keys,
-        });
+        ++operation.current;
+        setEditStale(false); setFreshProfile(null); setReviewFresh(false);
+        const initial = profileForm(profile);
+        setEditor({ profile, baseline: initial, form: initial });
         setEditOpen(true);
     };
     const handleEdit = async () => {
-        if (!editingProfile || !editForm.name.trim())
+        if (session !== sessionScope() || writeBusy.current || !editingProfile || !mayManage(editingProfile) || !observedProfile(editingProfile) || editStale || reviewFresh || !editForm.name.trim() || !validQuotas(editForm))
             return;
+        if (!Object.keys(profileFieldPatch(editForm, editBaseline)).length) return;
+        const token = ++operation.current, scope = session;
+        writeBusy.current = true;
         setSaving(true);
         try {
             await updatePermissionProfile(editingProfile.id, {
-                name: editForm.name.trim(),
-                description: editForm.description.trim(),
-                can_send: editForm.can_send,
-                daily_send_quota: Number(editForm.daily_send_quota),
-                daily_receive_quota: Number(editForm.daily_receive_quota),
-                max_mailboxes: Number(editForm.max_mailboxes),
-                max_domains: Number(editForm.max_domains),
-                allowed_zone_ids: editForm.allowed_zone_ids,
-                can_create_domains: editForm.can_create_domains,
-                can_create_routes: editForm.can_create_routes,
-                can_create_api_keys: editForm.can_create_api_keys,
+                expected_revision: editingProfile.revision!,
+                fields: profileFieldPatch(editForm, editBaseline),
             });
+            if (!isCurrent(token, scope)) return;
             setEditOpen(false);
             setEditingProfile(null);
             toast.success(t("permissions.updated"));
             mutateProfiles();
         }
         catch (e: unknown) {
-            const err = e as {
-                error?: {
-                    message?: string;
-                };
-            };
-            toast.error(err?.error?.message || t("permissions.updateFailed"));
+            if (!isCurrent(token, scope)) return;
+            const err = { error: permissionError(e) };
+            if (["UNAUTHORIZED", "FORBIDDEN"].includes(err.error.code ?? "")) setAccessError(err.error.message || err.error.code!);
+            setEditStale(true);
+            toast.error(err?.error?.message || t("permissions.profileConflict"));
         }
         finally {
-            setSaving(false);
+            if (isCurrent(token, scope)) { writeBusy.current = false; setSaving(false); }
         }
     };
-    const handleDelete = async (profile: PermissionProfile) => {
-        if (profile.is_system) {
-            toast.error(t("permissions.systemCannotDelete"));
-            return;
-        }
-        if (!safeConfirm(t("permissions.confirmDelete")))
-            return;
+    const refreshEdit = async () => {
+        if (accessError || session !== sessionScope() || !editingProfile || refreshing || writeBusy.current) return;
+        const token = ++operation.current, scope = session;
+        setRefreshing(true);
         try {
-            await deletePermissionProfile(profile.id);
-            toast.success(t("permissions.deleted"));
-            mutateProfiles();
+            const response = await listPermissionProfiles();
+            if (!isCurrent(token, scope)) return;
+            const current = response.data.find(profile => profile.id === editingProfile.id);
+            if (!current || !canManageScope(current) || !observedProfile(current)) throw new Error("revision unavailable");
+            setFreshProfile(current); setReviewFresh(true);
+            const baseline = profileForm(current);
+            setEditor(prev => {
+                if (!isCurrent(token, scope)) return prev;
+                // Three-way rebase: carry only old-base -> draft user intent.
+                // Untouched fields follow the fresh snapshot (including revocations).
+                const form = { ...baseline };
+                for (const key of Object.keys(profileFieldPatch(prev.form, prev.baseline)) as (keyof PermissionFormData)[]) {
+                    Object.assign(form, { [key]: prev.form[key] });
+                }
+                return { profile: current, baseline, form };
+            });
+            setEditStale(false);
+            mutateProfiles(response, { revalidate: false });
+        } catch (error) {
+            if (!isCurrent(token, scope)) return;
+            setEditStale(true); setFreshProfile(null); setReviewFresh(false);
+            const err = permissionError(error);
+            if (["UNAUTHORIZED", "FORBIDDEN"].includes(err.code ?? "")) setAccessError(err.message || err.code!);
+            toast.error(err.message || t("permissions.revisionUnavailable"));
         }
-        catch (e: unknown) {
-            const err = e as {
-                error?: {
-                    message?: string;
-                };
-            };
-            toast.error(err?.error?.message || t("permissions.deleteFailed"));
+        finally { if (isCurrent(token, scope)) setRefreshing(false); }
+    };
+    const loadPreview = async (profile: PermissionProfile) => {
+        if (session !== sessionScope() || !mayManage(profile) || writeBusy.current) return;
+        const token = ++operation.current, scope = session;
+        setDeletingProfile(profile); setPreview(null); setConfirmed(false); setPreviewBusy(true);
+        try {
+            const response = await getPermissionProfileDeletionPreview(profile.id);
+            if (isCurrent(token, scope)) setPreview(response.data);
+        } catch (error) {
+            if (isCurrent(token, scope)) {
+                const err = permissionError(error);
+                if (["UNAUTHORIZED", "FORBIDDEN"].includes(err.code ?? "")) setAccessError(err.message || err.code!);
+                toast.error(err.message || t("permissions.previewFailed"));
+            }
         }
+        finally { if (isCurrent(token, scope)) setPreviewBusy(false); }
+    };
+    const handleDelete = async () => {
+        if (session !== sessionScope() || writeBusy.current || !deletingProfile || !mayManage(deletingProfile) || !preview || !confirmed || previewBusy) return;
+        const token = ++operation.current, scope = session;
+        writeBusy.current = true; setDeleteBusy(true);
+        try {
+            await deletePermissionProfile(deletingProfile.id, { expected_revision: preview.profile_revision, confirmed_members: preview.members });
+            if (!isCurrent(token, scope)) return;
+            setDeletingProfile(null); setPreview(null); setConfirmed(false);
+            toast.success(t("permissions.deleted")); mutateProfiles();
+        } catch (error) {
+            if (!isCurrent(token, scope)) return;
+            // Every failed write invalidates confirmation, including an unknown commit outcome.
+            setPreview(null); setConfirmed(false);
+            const err = permissionError(error);
+            if (["UNAUTHORIZED", "FORBIDDEN"].includes(err.code ?? "")) setAccessError(err.message || err.code!);
+            toast.error(err.message || t("permissions.profileConflict"));
+        } finally { if (isCurrent(token, scope)) { writeBusy.current = false; setDeleteBusy(false); } }
     };
     return (<div className="flex flex-col">
-      <PageHeader title={t("permissions.title")} description={t("permissions.total", { count: total })} actions={<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger render={<Button size="sm" className="gap-1.5"/>}>
+      <PageHeader title={t("permissions.title")} description={t("permissions.total", { count: total })} actions={<Dialog open={dialogOpen} onOpenChange={open => { if (!creating) setDialogOpen(open); }}>
+            <DialogTrigger render={<Button size="sm" className="gap-1.5" disabled={!!accessError || !!profilesError || loading || eventRevoked || (level !== "admin" && !isPlatformAdmin)}/>}>
               <Plus className="h-3.5 w-3.5"/>
               {t("permissions.create")}
             </DialogTrigger>
@@ -340,15 +456,16 @@ export default function PermissionsPage() {
                   {t("permissions.createDesc")}
                 </DialogDescription>
               </DialogHeader>
-              <PermissionFormFields form={form} setForm={setForm} domainOptions={domainOptions} isPlatformAdmin={isPlatformAdmin} tenants={tenants}/>
+              <PermissionFormFields form={form} setForm={setForm} domainOptions={domainOptions} isPlatformAdmin={isPlatformAdmin} tenants={tenants} disabled={creating}/>
               <DialogFooter>
-                <Button onClick={handleCreate} disabled={creating || !form.name.trim()}>
+                <Button onClick={handleCreate} disabled={!!accessError || !!profilesError || loading || eventRevoked || creating || !form.name.trim() || !validQuotas(form)}>
                   {creating ? t("permissions.creating") : t("permissions.create")}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>}/>
 
+      {(accessError || profilesError) && <p role="alert">{accessError || permissionError(profilesError).message || t("permissions.loadFailed")}</p>}
       <div className="p-4">
         <Card>
           <CardHeader className="pb-3">
@@ -441,7 +558,7 @@ export default function PermissionsPage() {
                               <MoreHorizontal className="h-4 w-4"/>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem disabled={profile.is_system} onClick={() => openEdit(profile)}>
+                              <DropdownMenuItem disabled={!mayManage(profile)} onClick={() => openEdit(profile)}>
                                 <Pencil className="h-4 w-4 mr-2"/>
                                 {t("permissions.edit")}
                               </DropdownMenuItem>
@@ -453,7 +570,7 @@ export default function PermissionsPage() {
                                 {t("permissions.copyId")}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem disabled={profile.is_system} onClick={() => handleDelete(profile)} className="text-destructive focus:text-destructive">
+                              <DropdownMenuItem disabled={!mayManage(profile)} onClick={() => loadPreview(profile)} className="text-destructive focus:text-destructive">
                                 <Trash2 className="h-4 w-4 mr-2"/>
                                 {t("permissions.delete")}
                               </DropdownMenuItem>
@@ -469,7 +586,7 @@ export default function PermissionsPage() {
         </Card>
       </div>
 
-      {editingProfile && (<Dialog open={editOpen} onOpenChange={setEditOpen}>
+      {editingProfile && (<Dialog open={editOpen} onOpenChange={(open) => { if (!saving && !refreshing) { if (!open) ++operation.current; setEditOpen(open); } }}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>{t("permissions.editTitle")}</DialogTitle>
@@ -477,13 +594,40 @@ export default function PermissionsPage() {
                 {t("permissions.editDesc")}
               </DialogDescription>
             </DialogHeader>
-            <PermissionFormFields form={editForm} setForm={setEditForm} domainOptions={domainOptions} isPlatformAdmin={isPlatformAdmin} tenants={tenants} tenantScopeLocked/>
+            <PermissionFormFields form={editForm} setForm={setEditForm} domainOptions={domainOptions} isPlatformAdmin={isPlatformAdmin} tenants={tenants} tenantScopeLocked disabled={saving}/>
+            {freshProfile && <section className="max-h-48 overflow-auto rounded border p-3 text-xs">
+              <p>{t("permissions.latestProfileVersion")} · {freshProfile.revision}</p>
+              <pre className="whitespace-pre-wrap break-all">{JSON.stringify({ name: freshProfile.name, description: freshProfile.description, can_send: freshProfile.can_send, daily_send_quota: freshProfile.daily_send_quota, daily_receive_quota: freshProfile.daily_receive_quota, max_mailboxes: freshProfile.max_mailboxes, max_domains: freshProfile.max_domains, allowed_zone_ids: freshProfile.allowed_zone_ids, can_create_domains: freshProfile.can_create_domains, can_create_routes: freshProfile.can_create_routes, can_create_api_keys: freshProfile.can_create_api_keys }, null, 2)}</pre>
+              <label className="flex gap-2"><input type="checkbox" disabled={saving || refreshing} checked={!reviewFresh} onChange={event => setReviewFresh(!event.target.checked)} />{t("permissions.confirmFreshVersion")}</label>
+            </section>}
             <DialogFooter>
-              <Button onClick={handleEdit} disabled={saving || !editForm.name.trim()}>
+              {(!observedProfile(editingProfile) || editStale) && <div role="alert">{t(editStale ? "permissions.profileConflict" : "permissions.revisionUnavailable")}</div>}
+              <Button variant="outline" onClick={refreshEdit} disabled={!!accessError || saving || refreshing}>{t("permissions.refreshRevision")}</Button>
+              <Button onClick={handleEdit} disabled={!!accessError || !!profilesError || loading || saving || refreshing || editStale || reviewFresh || !observedProfile(editingProfile) || !Object.keys(profileFieldPatch(editForm, editBaseline)).length || !validQuotas(editForm) || !editForm.name.trim()}>
                 {saving ? t("permissions.saving") : t("permissions.save")}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>)}
+      {deletingProfile && <Dialog open onOpenChange={(open) => { if (!open && !deleteBusy) { ++operation.current; setDeletingProfile(null); setPreview(null); setConfirmed(false); setPreviewBusy(false); } }}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader><DialogTitle>{t("permissions.deletionPreviewTitle")}: {deletingProfile.name}</DialogTitle><DialogDescription>{t("permissions.deletionPreviewDesc")}</DialogDescription></DialogHeader>
+          {previewBusy && <p role="status">{t("permissions.previewLoading")}</p>}
+          {preview && <div className="max-h-[55vh] overflow-auto space-y-3">
+            <p>{t("permissions.affectedMembers", { count: preview.members.length })} · {preview.profile_revision}</p>
+            {preview.changes.map(change => <section key={change.revision.user_id} className="rounded border p-3">
+              <p className="text-xs break-all">{change.revision.tenant_id} / {change.revision.user_id}</p>
+              <Table><TableHeader><TableRow><TableHead>{t("permissions.name")}</TableHead><TableHead>{t("permissions.beforeDeletion")}</TableHead><TableHead>{t("permissions.afterDeletion")}</TableHead></TableRow></TableHeader><TableBody>
+                {(Object.keys(change.before) as (keyof typeof change.before)[]).map(field => <TableRow key={field}><TableCell>{field}</TableCell><TableCell>{JSON.stringify(change.before[field])}</TableCell><TableCell>{JSON.stringify(change.after[field])}</TableCell></TableRow>)}
+              </TableBody></Table>
+            </section>)}
+            <label className="flex items-center gap-2"><input type="checkbox" checked={confirmed} disabled={deleteBusy} onChange={event => setConfirmed(event.target.checked)} />{t("permissions.confirmEffects")}</label>
+          </div>}
+          <DialogFooter>
+            <Button variant="outline" disabled={!!accessError || previewBusy || deleteBusy} onClick={() => loadPreview(deletingProfile)}>{t("permissions.refreshPreview")}</Button>
+            <Button variant="destructive" disabled={!!accessError || !!profilesError || loading || !preview || !confirmed || previewBusy || deleteBusy} onClick={handleDelete}>{t("permissions.delete")}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>}
     </div>);
 }

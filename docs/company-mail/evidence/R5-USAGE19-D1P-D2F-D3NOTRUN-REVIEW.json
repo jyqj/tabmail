@@ -1,0 +1,152 @@
+{
+  "BSC_or_originalAwhole_family_not_run": true,
+  "D1_root_database_application_name_checks": "frozen611426tests actualPASS; checks assert live current_database/application_name forfixturepools; no separate emittedSQLsamples claimed",
+  "D2_facts": "usage_update holder+samekey SHARE waiter observed; authority row free after usage waiter joined PASS; independentrouter receipt404/nonJSON/unclassified and currentHTTP500 led exact200required failure; not adjudicated productorfixturecause. No expectations changed/retry.",
+  "D2_safe_phase_status_classification_private_raw": [
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:484: phase=after-row telemetry_pid=50666 advisory_blocker_pid=50665 query_class=usage_update\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+      "Time": "2026-10-03T10:36:38.314622+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:487: phase=same_key_SHARE_wait waiter_pid=50669 exact_blocker_pid=50666 holder_query_class=usage_update\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+      "Time": "2026-10-03T10:36:38.318352+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:494: phase=authority_row_free_after_usage_waiter_join outcome=pass\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+      "Time": "2026-10-03T10:36:39.817236+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:499: phase=independent_router_receipt http_status=404 error_code=not_json reason_class=unclassified\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+      "Time": "2026-10-03T10:36:39.823445+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:537: causal gate evidence failed: phase=independent_router_receipt error_class=type_*errors.errorString independent_http=404 independent_code=not_json independent_reason=unclassified current_http=500\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+      "Time": "2026-10-03T10:36:39.82373+08:00"
+    }
+  ],
+  "actual_controller_exit": 1,
+  "auto_retry_or_source_modifications": false,
+  "batch_results": {
+    "D1": {
+      "FAILnodes": 0,
+      "Goexit": 0,
+      "PASSnodes": 12,
+      "SKIPnodes": 0,
+      "base_SQL_actual19": true,
+      "cleanup": {
+        "DB_connection_query_known": true,
+        "all_non_base_owned_databases": [],
+        "all_non_system_databases": [
+          "tm_usage19_d1"
+        ],
+        "all_owned_connections_zero": true,
+        "all_phase_groups_gone": true,
+        "excluded_current_observer_pid": 49799,
+        "native_PID_absent": true,
+        "native_stopped": true,
+        "observer_sampler_joined": true,
+        "other_client_connections_excluding_current_observer": 0,
+        "owned_native_PID": 48630,
+        "pidfile_absent": true,
+        "socket_absent": true,
+        "temporary_DBs_absent": true
+      },
+      "code_and_runtime_prepost": {
+        "code_same": true,
+        "runtime_closure_sha256": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+        "runtime_same": true
+      },
+      "codeclosure_sha256": "794b29918be9047190ba3fc685d25b70ecc3ffd5f9930b3074e619b1fd796dd4",
+      "failed_tests": [],
+      "jointclosure_sha256": "bb1621915501653fea2c691b1ccf33af3d502bd76401868e20491d7ae36b0d1a",
+      "leaves": 9,
+      "observed_DB_count_lowerbound": 9,
+      "original300_elapsed": 17.577712059020996,
+      "package_elapsed": 3.995,
+      "runtimeclosure_sha256": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+      "samplecount": 196,
+      "source_sha": "54a46523480bc42a14e1af3543545846a5ab1ff9",
+      "status": "BOUNDED_COMPONENT_PASS",
+      "tops": 5,
+      "unfinished": [],
+      "within300": true
+    },
+    "D2": {
+      "FAILnodes": 2,
+      "Goexit": 1,
+      "PASSnodes": 0,
+      "SKIPnodes": 0,
+      "base_SQL_actual19": true,
+      "cleanup": {
+        "DB_connection_query_known": true,
+        "all_non_base_owned_databases": [],
+        "all_non_system_databases": [
+          "tm_usage19_d2"
+        ],
+        "all_owned_connections_zero": true,
+        "all_phase_groups_gone": true,
+        "excluded_current_observer_pid": 50763,
+        "native_PID_absent": true,
+        "native_stopped": true,
+        "observer_sampler_joined": true,
+        "other_client_connections_excluding_current_observer": 0,
+        "owned_native_PID": 49858,
+        "pidfile_absent": true,
+        "socket_absent": true,
+        "temporary_DBs_absent": true
+      },
+      "code_and_runtime_prepost": {
+        "code_same": true,
+        "runtime_closure_sha256": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+        "runtime_same": true
+      },
+      "codeclosure_sha256": "794b29918be9047190ba3fc685d25b70ecc3ffd5f9930b3074e619b1fd796dd4",
+      "failed_tests": [
+        "TestR5KeyUsageAuthorityAdmissionIsolation",
+        "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry"
+      ],
+      "jointclosure_sha256": "bb1621915501653fea2c691b1ccf33af3d502bd76401868e20491d7ae36b0d1a",
+      "leaves": 1,
+      "observed_DB_count_lowerbound": 1,
+      "original300_elapsed": 15.169748067855835,
+      "package_elapsed": 2.556,
+      "runtimeclosure_sha256": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+      "samplecount": 167,
+      "source_sha": "54a46523480bc42a14e1af3543545846a5ab1ff9",
+      "status": "FAILED_INFRA_OR_PRODUCT_UNKNOWN",
+      "tops": 1,
+      "unfinished": [],
+      "within300": true
+    },
+    "D3": {
+      "status": "NOT_RUN_after_first_D2_fail"
+    }
+  },
+  "controller_signed_sha256": "534d2f4c8fd0393f9662e26ae0ed5f13c4dec7949a3231d3788105f01415a4ea",
+  "new_static_runtime_inputs_captured_for_both_executed_stages": {
+    "19diskSQL_same_as_code_embed": true,
+    "R4_json_sha256": "c4d6ab25874f85b240eb457601473b1bafa826999483abcb7d2d5d1b1c0decd7",
+    "manifest_locked_sha256": "18c0c1f89d8f487165f39e89908d2b16c0ec3df6fa5e0848e53a9bee02539a9c",
+    "runtime_input_closure_sha256": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc"
+  },
+  "noSMTPminiredis_Cobserver_externalRedisconnect_started": true,
+  "no_whole180_MethodCatalog171_green": true,
+  "originalA_FAILED755a_and_BSC_NOTRUN_preserved": true,
+  "separate_code_and_runtime_closures_no_old_sourcepolicy_R4_claim": true,
+  "status": "D1_BOUNDED_PASS_D2_FIRST_ACTUAL_FAIL_D3_NOTRUN"
+}

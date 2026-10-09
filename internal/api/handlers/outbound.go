@@ -1,11 +1,8 @@
 package handlers
 
 import (
-	"context"
-	"encoding/json"
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -13,6 +10,7 @@ import (
 
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/app"
+	"tabmail/internal/app/credentials"
 	"tabmail/internal/app/submissions"
 	"tabmail/internal/authz"
 	"tabmail/internal/models"
@@ -50,13 +48,12 @@ func (h *OutboundHandler) GetJob(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	job, err := h.subs.AccessibleOutboundJob(ctx, middleware.TenantFromCtx(ctx), middleware.ActorFromContext(ctx), jobID)
+	view, err := h.subs.OutboundReceiptView(ctx, middleware.TenantFromCtx(ctx), middleware.ActorFromContext(ctx), jobID)
 	if err != nil {
 		writeOutboundJobAccessError(w, h.logger, err, "getting outbound job")
 		return
 	}
-
-	h.writeOutboundView(w, r, job)
+	ok(w, view)
 }
 
 // ListJobs handles GET /api/v1/outbound — list outbound jobs for the tenant.
@@ -71,18 +68,10 @@ func (h *OutboundHandler) ListJobs(w http.ResponseWriter, r *http.Request) {
 
 	pg := pageFromReq(r)
 
-	items, total, err := h.listAccessibleOutboundJobs(ctx, tenant.ID, pg)
+	items, total, err := h.subs.ListOutboundReceiptViews(ctx, tenant, middleware.ActorFromContext(ctx), pg)
 	if err != nil {
 		writeOutboundJobAccessError(w, h.logger, err, "listing outbound jobs")
 		return
-	}
-	for i, job := range items {
-		view, viewErr := h.subs.RedactOutboundJob(ctx, middleware.ActorFromContext(ctx), job)
-		if viewErr != nil {
-			errInternal(w)
-			return
-		}
-		items[i] = view
 	}
 	okList(w, items, total, pg.Page, pg.PerPage)
 }
@@ -100,7 +89,7 @@ func (h *OutboundHandler) RetryJob(w http.ResponseWriter, r *http.Request) {
 		errForbidden(w, "authentication required")
 		return
 	}
-	job, err := h.subs.AccessibleOutboundJob(ctx, middleware.TenantFromCtx(ctx), middleware.ActorFromContext(ctx), jobID)
+	job, err := h.subs.AccessibleOutboundJobForRetry(ctx, middleware.TenantFromCtx(ctx), middleware.ActorFromContext(ctx), jobID)
 	if err != nil {
 		writeOutboundJobAccessError(w, h.logger, err, "getting outbound job for retry")
 		return
@@ -131,20 +120,26 @@ func (h *OutboundHandler) RetryJob(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if err := h.store.RequeueOutboundJob(ctx, jobID); err != nil {
+	updatedJob, err := h.subs.RetryOutboundJob(ctx, middleware.ActorFromContext(ctx), job)
+	if err != nil {
 		if errors.Is(err, store.ErrOutboundNotRetryable) {
 			errConflictReason(w, err.Error(), "state_changed")
-			return
+		} else if errors.Is(err, store.ErrOutboundUncertain) {
+			errConflictReason(w, err.Error(), "delivery_uncertain")
+		} else {
+			respondAppError(w, h.logger, app.FromAuthz(err))
 		}
-		h.logger.Err(err).Str("job_id", jobID.String()).Msg("requeue outbound job")
-		errInternal(w)
 		return
 	}
-	updatedJob, _ := h.store.GetOutboundJob(ctx, jobID)
 	if updatedJob != nil {
-		h.writeOutboundView(w, r, updatedJob)
+		// A committed command survives a later failed display-authority read.
+		// The service returns a typed minimal fallback, never a raw job copy.
+		view := h.subs.CommittedReceiptView(ctx, middleware.ActorFromContext(ctx), updatedJob)
+		ok(w, view)
 	} else {
-		ok(w, map[string]string{"status": "requeued"})
+		// A successful adapter with no display record still must not expose a
+		// made-up successful ledger or encourage replaying a committed command.
+		ok(w, h.subs.CommittedReceiptView(ctx, middleware.ActorFromContext(ctx), &models.OutboundJob{ID: jobID, TenantID: job.TenantID, State: "unknown"}))
 	}
 }
 
@@ -161,36 +156,10 @@ func (h *OutboundHandler) ListAttempts(w http.ResponseWriter, r *http.Request) {
 		errForbidden(w, "authentication required")
 		return
 	}
-	job, err := h.subs.AccessibleOutboundJob(ctx, middleware.TenantFromCtx(ctx), middleware.ActorFromContext(ctx), jobID)
+	attempts, err := h.subs.OutboundAttemptViews(ctx, tenant, middleware.ActorFromContext(ctx), jobID)
 	if err != nil {
-		writeOutboundJobAccessError(w, h.logger, err, "getting outbound job for attempts")
+		writeOutboundJobAccessError(w, h.logger, err, "listing outbound attempts")
 		return
-	}
-	attempts, err := h.store.ListOutboundAttempts(ctx, jobID)
-	if err != nil {
-		h.logger.Err(err).Msg("listing outbound attempts")
-		errInternal(w)
-		return
-	}
-	if attempts == nil {
-		attempts = []*models.OutboundAttempt{}
-	}
-	allowed, err := h.subs.ContentAllowed(ctx, middleware.ActorFromContext(ctx), job)
-	if err != nil {
-		errInternal(w)
-		return
-	}
-	if !allowed {
-		for i, a := range attempts {
-			cp := *a
-			if cp.Error != "" {
-				cp.Error = "Delivery details restricted"
-			}
-			if cp.SMTPResponse != "" {
-				cp.SMTPResponse = "Protocol response restricted"
-			}
-			attempts[i] = &cp
-		}
 	}
 	ok(w, attempts)
 }
@@ -233,7 +202,7 @@ func (h *OutboundHandler) ListSuppressions(w http.ResponseWriter, r *http.Reques
 
 // DeleteSuppression handles DELETE /api/v1/suppression/{id} — remove a
 // suppressed address. The removal is destructive for future deliveries, so it
-// demands a non-empty reason in the body and lands with the audit row in one
+// demands a normalized 8-1000 byte reason and lands with the audit row in one
 // transaction; a failed audit fails the whole request.
 func (h *OutboundHandler) DeleteSuppression(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -253,8 +222,16 @@ func (h *OutboundHandler) DeleteSuppression(w http.ResponseWriter, r *http.Reque
 	var body struct {
 		Reason string `json:"reason"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || strings.TrimSpace(body.Reason) == "" {
-		errBadRequest(w, "reason is required")
+	// Bound the entire document, including trailing whitespace, before any
+	// deletion/audit. Content-Length is optional for a streamed request.
+	r.Body = http.MaxBytesReader(w, r.Body, 64*1024)
+	if err := decodeBody(r, &body); err != nil {
+		errBadRequest(w, "invalid suppression deletion body")
+		return
+	}
+	reason, reasonErr := credentials.AuditReason(body.Reason)
+	if reasonErr != nil {
+		errBadRequest(w, reasonErr.Error())
 		return
 	}
 	actor := middleware.ActorFromContext(ctx)
@@ -266,10 +243,15 @@ func (h *OutboundHandler) DeleteSuppression(w http.ResponseWriter, r *http.Reque
 		ResourceID:   &id,
 		Details: app.MustJSON(map[string]any{
 			"suppression_id": id.String(),
-			"reason":         strings.TrimSpace(body.Reason),
+			"reason":         reason,
 		}),
 	}
-	if err := h.store.DeleteSuppressionAudited(ctx, tenant.ID, id, entry); err != nil {
+	if err := h.store.DeleteSuppressionAuthorized(ctx, actor, id, entry); err != nil {
+		var appErr *app.Error
+		if errors.As(err, &appErr) {
+			respondAppError(w, h.logger, err)
+			return
+		}
 		h.logger.Err(err).Msg("deleting suppression")
 		errInternal(w)
 		return
@@ -277,31 +259,21 @@ func (h *OutboundHandler) DeleteSuppression(w http.ResponseWriter, r *http.Reque
 	noContent(w)
 }
 
-func (h *OutboundHandler) listAccessibleOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
-	// ActionOutboundRead defers row scope to the query level; the authz seam
-	// resolves which owned rows this actor may see. The OwnerListFilter pins
-	// TenantID and the mutually-exclusive owner dimension, so tenant isolation
-	// and the owner rule are both enforced in SQL.
-	scope := authz.OwnerListScope(middleware.ActorFromContext(ctx), tenantID)
-	actor := middleware.ActorFromContext(ctx)
-	scope.ReaderUserID = actor.EffectiveUserID()
-	if actor.Permission != nil {
-		scope.AllowedZoneIDs = actor.Permission.AllowedZoneIDs
-	}
-	return h.store.ListOutboundJobsScoped(ctx, scope, pg)
-}
-
 // writeOutboundJobAccessError maps the submissions service's job-visibility
-// sentinels to the responses the outbound and company endpoints have always
-// produced.
+// sentinels to app errors and replays them through respondAppError. The
+// auth-required 403 and the existence-hiding 404 distinction is intentional
+// and must survive any refactor.
 func writeOutboundJobAccessError(w http.ResponseWriter, logger zerolog.Logger, err error, logMsg string) {
+	var appErr error
 	switch {
 	case errors.Is(err, submissions.ErrOutboundJobAuthRequired):
-		errForbidden(w, "authentication required")
+		appErr = app.Forbidden("authentication required")
 	case errors.Is(err, submissions.ErrOutboundJobNotFound):
-		errNotFound(w, "outbound job not found")
+		appErr = app.NotFound("outbound job not found")
 	default:
-		logger.Err(err).Msg(logMsg)
-		errInternal(w)
+		// A busy authority snapshot is a classified conflict, not an internal
+		// error. Unclassified database failures remain sanitized by the mapper.
+		appErr = err
 	}
+	respondAppError(w, logger, appErr)
 }

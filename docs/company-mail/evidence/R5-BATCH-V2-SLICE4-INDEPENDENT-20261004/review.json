@@ -1,0 +1,91 @@
+{
+  "decision": "ACCEPT",
+  "scope": "Batch source and guarded synthetic gate only",
+  "delivery": "5ebf159302520507829b93c5502b94b0f768f94e",
+  "tested_implementation": "7fea1edeee6bcad3e77edab767997b8757873db1",
+  "base": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+  "branch": "review/r5-slice4-batch-independent-20261004",
+  "independent": {
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "resealed_envelope_bundle_mutations": 168,
+    "os_process_events": []
+  },
+  "author": {
+    "tests": 14,
+    "failures": 0,
+    "errors": 0,
+    "os_process_events": []
+  },
+  "static": {
+    "base": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+    "head": "5ebf159302520507829b93c5502b94b0f768f94e",
+    "unchanged_definitions": [
+      "derive",
+      "file_digest",
+      "lease",
+      "sweep_adopted_tails",
+      "OwnedProcess",
+      "become_subreaper",
+      "join_adopted_tails",
+      "exact_assertions",
+      "Batch.authenticate",
+      "Batch.rpc",
+      "Batch.run_process",
+      "Batch.record_cleanup",
+      "Batch.close_channel",
+      "Batch.cleanup_resources",
+      "Batch.resource_scope",
+      "Batch.request_cancel",
+      "Batch.run"
+    ],
+    "inventory_worker_only_selector_change": true,
+    "execution_lifecycle_only_result_version_change": true,
+    "v1_constructor_equivalent": true,
+    "v1_schema_byte_identical": true,
+    "changed_existing_paths": [
+      "scripts/preparation/r5_external_batch.py"
+    ],
+    "preserved_existing_paths": 2259,
+    "source_hashes": {
+      "scripts/preparation/r5_external_batch.py": "83ff36965120115c6365e40df0eef8da2df20eb33129faba81def89261cd5a12",
+      "scripts/contracts/r5-external-batch-v2.schema.json": "60f3bbf12dbfc28a2cc72e0d5ed38110425514621a11e10eddf1d92007ca9c0a",
+      "scripts/tests/r5_external_batch_v2_checks.py": "dca70ff40eeccd11bdcd8f28e4e4d83d7f7bfdf7dcbd9f95b3481fdd12cd2ede"
+    },
+    "tested_implementation": "7fea1edeee6bcad3e77edab767997b8757873db1",
+    "delivery": "5ebf159302520507829b93c5502b94b0f768f94e",
+    "all_delivery_paths_unchanged": true,
+    "exact_implementation_delta": [
+      "scripts/preparation/r5_external_batch.py",
+      "scripts/contracts/r5-external-batch-v2.schema.json",
+      "scripts/tests/r5_external_batch_v2_checks.py"
+    ]
+  },
+  "central": "10/171 unchanged",
+  "F52": "historical failures unchanged",
+  "blocking_findings": [],
+  "remaining_gates": [
+    "Separate Go bridge/check_r5_protocol selector review",
+    "Closure integration",
+    "Separately authorized physical qualification"
+  ],
+  "sha256": {
+    "docs/company-mail/R5-BATCH-V2-SLICE4-20261004.md": "7e7f35430dd06bef44383fde9bff02667d8abb03891d594c9e4b521123ae6522",
+    "docs/company-mail/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004.md": "a05530617feb47b35ab1ae430c977b9732aa194bad351a97151e22c42eccae7a",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/author.stderr": "d5747c7f7fcce748f3fe29380b4cdd5026ec04e92004a9f87c266a97bf7483ce",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/author.stdout": "ef8dca9c70c879258c771b13293a1b16b034556480eddb3e3064aed29a76b613",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/independent.stderr": "13b799b9b516584ca1fd89e09f66da048e19194afae6bb9335430f979419ea2c",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/independent.stdout": "ea4d1f25a9983304d9a975f798206aca19a7e5961512d04fd15f2e350204f750",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/independent_checks.py": "f97d923e3334ead52dd7a34fe747f56857e4976e7a6b781932610a678a5c0283",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/preserved-tree.json": "805d9b0360e1bff28f6278861cc409c75b264c9db38304fb99184424f78feccb",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/static-results.json": "3e647da094a82f8bb3b911f65121fa39ab1291a2cba4e0877ddf6532ad512656",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/static.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/static.stdout": "e912a612175ec50e6398cd1130615a27e55a2a544b9a5657a3a5af9b5dd5ecfe",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/static_review.py": "e931e206ae9c3f7fa4ec447eae49250cf8c578c1579f78255f8309ce2b8e0d25",
+    "scripts/contracts/r5-external-batch-v2.schema.json": "60f3bbf12dbfc28a2cc72e0d5ed38110425514621a11e10eddf1d92007ca9c0a",
+    "scripts/preparation/r5_external_batch.py": "83ff36965120115c6365e40df0eef8da2df20eb33129faba81def89261cd5a12",
+    "scripts/tests/r5_external_batch_v2_checks.py": "dca70ff40eeccd11bdcd8f28e4e4d83d7f7bfdf7dcbd9f95b3481fdd12cd2ede"
+  },
+  "design_sha256": "d85ca5d1f7029a07cfbfe9c4711c23f3d8fcc9720e7790fc3b38d463a55092f8"
+}

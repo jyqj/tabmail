@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
+	"tabmail/internal/ratelimit"
 )
 
 type Limiter struct {
@@ -45,15 +46,5 @@ func (l *Limiter) Allow(ctx context.Context, tenantID, routeID uuid.UUID) (bool,
 }
 
 func (l *Limiter) checkSlidingWindow(ctx context.Context, key string, limit int) (bool, error) {
-	now := time.Now().UnixMilli()
-	windowStart := now - l.window.Milliseconds()
-	pipe := l.rdb.Pipeline()
-	pipe.ZRemRangeByScore(ctx, key, "0", fmt.Sprintf("%d", windowStart))
-	countCmd := pipe.ZCard(ctx, key)
-	pipe.ZAdd(ctx, key, redis.Z{Score: float64(now), Member: now})
-	pipe.Expire(ctx, key, l.window+time.Second)
-	if _, err := pipe.Exec(ctx); err != nil {
-		return false, err
-	}
-	return countCmd.Val() < int64(limit), nil
+	return ratelimit.Allow(ctx, l.rdb, key, limit, l.window)
 }

@@ -1,0 +1,50 @@
+{
+  "decision": "ACCEPT",
+  "scope": "Bridge/caller explicit selector synthetic and static-source gate only",
+  "base_commit": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+  "tested_commit": "13ac32bbb8576a8a237dfbed46596ede8f3276ad",
+  "delivery_commit": "4643de904ff171b9b14189f63ff5e28470a73c72",
+  "trees": {
+    "03f2f19b5e01f0f033405e7a84cde03794d491ca": "d117c724daa0987e6fbf43c50cd66ca6c95f1e64",
+    "13ac32bbb8576a8a237dfbed46596ede8f3276ad": "e096e992e8333d201c336cbf618818ec912c388c",
+    "4643de904ff171b9b14189f63ff5e28470a73c72": "003092ad589fd6b095e06bce905b0dddb56d8c0e"
+  },
+  "review_branch": "review/slice4-bridge-independent-20261004",
+  "independent_controls": 79,
+  "independent_static_assertions": 2280,
+  "author_controls_replayed": 33,
+  "author_go_data_model_rows": 7290,
+  "author_static_assertions_replayed": 4564,
+  "guarded_OS_process_events": [],
+  "source_sha256": {
+    "internal/api/handlers/r5_external_runtime_probe_test.go": "addb72c44b11167810bb888c74d20954086390fa2c9a5a44ccd9332c4988a4b7",
+    "internal/api/handlers/r5_protocol_component_observations_test.go": "22c7eff281505fef03e4adfd8b6d7fe1724e157446153ede9640d3c0ff588dc7",
+    "scripts/check_r5_protocol.py": "4c2a066323b9e6871f99c98ef1ea62e770f03bdb4cfaea4911414e36dd1933e8",
+    "scripts/tests/r5_slice4_bridge_caller_checks.py": "02c27ec7f165056e8fb1134fb57c6ee3deae96f9aee166c17a9c103db706b724"
+  },
+  "evidence_sha256": {
+    "author-pure-replay.json": "775377bb94c4f0331625a9b2614ec41b80cd73e2ef2208605e98d0f7380b923d",
+    "author-static-replay.json": "c1f98350f27455b4665079a8652911f3dcf72795dfead361b1911e6c1c807955",
+    "independent-results.json": "a970fbdb6144cf00afb80bfcdf348930ffcde7e666bcef9a60f575d889637d54",
+    "independent_checks.py": "b39b768fedf7093bbd59172bc21557692ba61d68293039531185e25a278d6d24",
+    "static-results.json": "e32841ed56d2bff85c449bb75f02e113d169f4d8fe3e4e759f980c1ab89a9435",
+    "static_review.py": "0b504e1a077d4170448c81686f0ff51ab2259dbd9b4b1e24afdd4695f599e221"
+  },
+  "report_sha256": "003ff9d105ad0be09cd7a0bc196e9b2f69fa799bef01034213bc09e8382cb8f9",
+  "findings": [],
+  "limits": [
+    "No Go parser/compiler/decoder/exec behavior proof; source text and lexical model only",
+    "Go duplicate/case-variant fields are not modeled; strict duplicate handling remains delegated to frozen pinned Python helper",
+    "Independent v3 envelope lookup and child/launch boundaries are mocked",
+    "Trusted quiescent controller/path boundary remains; no physical provenance/concurrent mutation/lifecycle qualification"
+  ],
+  "remaining_blockers_for_this_slice": [],
+  "separate_gates": [
+    "Batch",
+    "Closure integration",
+    "Exact combined-source independent review",
+    "Separately authorized physical qualification"
+  ],
+  "central": "10/171 unchanged",
+  "F52": "historical failures unchanged"
+}

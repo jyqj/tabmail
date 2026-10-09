@@ -1,0 +1,244 @@
+{
+  "schema": "recovered-r1-public-comparison-receipts-v1",
+  "findings": [],
+  "implementation_todos_completed": 0,
+  "local_pg_or_go_reexecuted": false,
+  "status": "RECOVERED_ORIGINAL_R1_PUBLIC_COMPARISONS_19_LEAVES",
+  "retrieved_at": "2026-10-09T21:32:15.097Z",
+  "public_source": {
+    "head": "b458e917c6b084fbc557f351f03ca762b1c11924",
+    "actual_ci_checkout": "7564295a786b50ae80e3b45ca221463b04c237e1",
+    "merged_commit": "a6a0090fc069d131213b559f94c669184525f312",
+    "complete_tree": "8dba655927b80a1e5ee66228fd3d29bab3a8bee2",
+    "matching_api_parents": [
+      "ffb22b64698e4ff168a8d622018d3e169b3cdf07",
+      "b458e917c6b084fbc557f351f03ca762b1c11924"
+    ]
+  },
+  "cases": {
+    "refresh-issuance": {
+      "job_id": 113998462652,
+      "api_conclusion": "success",
+      "printed_receipt": {
+        "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/r1-public/refresh-original-stdout-comparison.json",
+        "bytes": 6171,
+        "sha256": "a16b30fd3664fb9f3daef58583b909017baf79227f6170e8e34a3cb15353cfc3"
+      },
+      "original_job_log": {
+        "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/r1-public/refresh-job113998462652-decoded.log",
+        "bytes": 68756,
+        "sha256": "647c926770c76b20d95ff08abf8169fb0b7fac234ba06b86ad05683b6a292348"
+      },
+      "command": [
+        "go",
+        "test",
+        "-mod=readonly",
+        "-race",
+        "-count=1",
+        "-timeout=180s",
+        "-json",
+        "./internal/api/handlers",
+        "-run",
+        "^TestR5RefreshIssuancePostgres"
+      ],
+      "fixed_source_hashes": {
+        "internal/api/handlers/r5_refresh_issuance_pg_test.go": "6404b853662b8d9dfec0f86aa4154674b5d63ea0f0f714af11cee54958e2297e",
+        "internal/api/handlers/r5_refresh_issuance_test.go": "b6877aa181da130982c0538ff4f8d56d6c78da3bd578c6f84e550528da09d53f"
+      },
+      "baseline": {
+        "commit": "74d5fc72f7ad2e086bd3060b78c548dc302d0408",
+        "tree": "5cbe43bbdda6601a8bfca79e5ae9d1f83db7b95c",
+        "pass_count": 6,
+        "fail": 3,
+        "exit_code": 1,
+        "reported_raw_go_jsonl_sha256": "3cb1842894d64258e9f7bc571eece87f349b84da0f1102d30f4347160d97320c"
+      },
+      "candidate": {
+        "commit": "7564295a786b50ae80e3b45ca221463b04c237e1",
+        "tree": "8dba655927b80a1e5ee66228fd3d29bab3a8bee2",
+        "pass_count": 9,
+        "fail": 0,
+        "exit_code": 0,
+        "reported_raw_go_jsonl_sha256": "e16439a61f623a578077132694e03fb51a6333f342cc8e696454216f7c6279b4"
+      },
+      "complete_leaf_names": [
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/display_name",
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/read_failure",
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/unchanged",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/deleted_user",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/freeze",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/freeze_unfreeze",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/password",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/role_change",
+        "TestR5RefreshIssuancePostgresRotationFailurePreservesAncestor"
+      ],
+      "identical_baseline_candidate_leaf_maps": true,
+      "source_stable_and_no_skips_or_missing_as_reported_by_original_runner": true,
+      "raw_go_event_stream_recovered": false
+    },
+    "permission-audit": {
+      "job_id": 113998462514,
+      "api_conclusion": "success",
+      "printed_receipt": {
+        "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/r1-public/audit-original-stdout-comparison.json",
+        "bytes": 7562,
+        "sha256": "e5036a371841c2dc6b96bf2f9ecdd820f7b5456f61f6de8327ad1ce808bcb6df"
+      },
+      "original_job_log": {
+        "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/r1-public/audit-job113998462514-decoded.log",
+        "bytes": 62745,
+        "sha256": "1c306ec6571a91843a66358a79f8d7d0c18b853f3edd3d883050b9c84b307d8c"
+      },
+      "command": [
+        "go",
+        "test",
+        "-mod=readonly",
+        "-race",
+        "-count=1",
+        "-timeout=180s",
+        "-json",
+        "./internal/store/postgres",
+        "-run",
+        "^TestR5PermissionAudit"
+      ],
+      "fixed_source_hashes": {
+        "internal/store/postgres/r5_permission_audit_visibility_test.go": "226e8f23986277a6fede2dd20f7fc485844fc717279077dc411f49530d2201ea"
+      },
+      "baseline": {
+        "commit": "74d5fc72f7ad2e086bd3060b78c548dc302d0408",
+        "tree": "5cbe43bbdda6601a8bfca79e5ae9d1f83db7b95c",
+        "pass_count": 4,
+        "fail": 6,
+        "exit_code": 1,
+        "reported_raw_go_jsonl_sha256": "d92c3e21bdbf3e46417cf8f789ea7de5282fa62af65feaaa4e8c5892e85bab2c"
+      },
+      "candidate": {
+        "commit": "7564295a786b50ae80e3b45ca221463b04c237e1",
+        "tree": "8dba655927b80a1e5ee66228fd3d29bab3a8bee2",
+        "pass_count": 10,
+        "fail": 0,
+        "exit_code": 0,
+        "reported_raw_go_jsonl_sha256": "e2be2fe72307abf111aacdfa38fa7c29304b8c96e7d8bd92c0db7bdf1c6da63d"
+      },
+      "complete_leaf_names": [
+        "TestR5PermissionAuditActualCommandsVisible/permission.override.patch",
+        "TestR5PermissionAuditActualCommandsVisible/permission.profile.assign",
+        "TestR5PermissionAuditActualCommandsVisible/permission.profile.create",
+        "TestR5PermissionAuditActualCommandsVisible/permission.profile.delete",
+        "TestR5PermissionAuditActualCommandsVisible/permission.profile.update",
+        "TestR5PermissionAuditHTTPProjectionPaginationAndBoundaries/admin_paginated_safe_projection",
+        "TestR5PermissionAuditHTTPProjectionPaginationAndBoundaries/api_key_cannot_read",
+        "TestR5PermissionAuditHTTPProjectionPaginationAndBoundaries/current_role_rechecked",
+        "TestR5PermissionAuditHTTPProjectionPaginationAndBoundaries/employee_cannot_read",
+        "TestR5PermissionAuditHTTPProjectionPaginationAndBoundaries/foreign_actor_cannot_read"
+      ],
+      "identical_baseline_candidate_leaf_maps": true,
+      "source_stable_and_no_skips_or_missing_as_reported_by_original_runner": true,
+      "raw_go_event_stream_recovered": false
+    }
+  },
+  "total_candidate_leaf_names": 19,
+  "total_unique_package_test_leaf_names": 19,
+  "source_pins": {
+    "scripts/run_r5_next1010_pg.py": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/r1-public/source/scripts/run_r5_next1010_pg.py",
+      "bytes": 5526,
+      "sha256": "39757c16092992884601953a8c5c2308d216fc7f828ef5fba7d9dbf901976b5d"
+    },
+    ".github/workflows/next1010-regressions.yml": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/r1-public/source/.github/workflows/next1010-regressions.yml",
+      "bytes": 1727,
+      "sha256": "67dbbb7bde728f444f321360aefa3c2ffd1041576c5b171dc516060747a06e85"
+    },
+    "internal/api/handlers/r5_refresh_issuance_pg_test.go": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/r1-public/source/internal/api/handlers/r5_refresh_issuance_pg_test.go",
+      "bytes": 7534,
+      "sha256": "6404b853662b8d9dfec0f86aa4154674b5d63ea0f0f714af11cee54958e2297e"
+    },
+    "internal/api/handlers/r5_refresh_issuance_test.go": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/r1-public/source/internal/api/handlers/r5_refresh_issuance_test.go",
+      "bytes": 7466,
+      "sha256": "b6877aa181da130982c0538ff4f8d56d6c78da3bd578c6f84e550528da09d53f"
+    },
+    "internal/store/postgres/r5_permission_audit_visibility_test.go": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/r1-public/source/internal/store/postgres/r5_permission_audit_visibility_test.go",
+      "bytes": 9464,
+      "sha256": "226e8f23986277a6fede2dd20f7fc485844fc717279077dc411f49530d2201ea"
+    }
+  },
+  "api_evidence": [
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/r1-public/primary-api.json",
+      "bytes": 113491,
+      "sha256": "7459aa5bd362a4866d8c1a9d53d7a95bcee5897e41ec2aafedfc950a29d72da7"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/r1-public/source-api.json",
+      "bytes": 82428,
+      "sha256": "6498bcd0757256d702c7bb9e1736b4cdcb4676c4528a5a499ef139b89c405634"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/r1-public/log-retrieval.json",
+      "bytes": 441,
+      "sha256": "5ded55feb1d415543fb621707282b28a5d79d12cf55f2bd6828c561a70a3c636"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/r1-public/artifacts-api.json",
+      "bytes": 2013,
+      "sha256": "0c5e3873c2838d74c6e7c7c2181c96702928b0a6107311fa4dee40ae5fc76d37"
+    }
+  ],
+  "artifact_metadata": {
+    "api_reported": {
+      "artifacts": [
+        {
+          "id": 11643625684,
+          "name": "next1010-refresh-issuance",
+          "size_in_bytes": 6027,
+          "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11643625684",
+          "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11643625684/zip",
+          "expired": false,
+          "created_at": "2026-10-09T20:17:39Z",
+          "expires_at": "2026-10-23T20:17:38Z",
+          "updated_at": "2026-10-09T20:17:39Z",
+          "digest": "sha256:e5e3cf3a1a700b2797ba83fab44c913deff6511a600c22ccba8e990603586bab",
+          "workflow_run": {
+            "id": 37983162903,
+            "repository_id": 1188928152,
+            "head_repository_id": 1188928152,
+            "head_branch": "fix/r5-next1010-round1",
+            "head_sha": "b458e917c6b084fbc557f351f03ca762b1c11924"
+          }
+        },
+        {
+          "id": 11642978132,
+          "name": "next1010-permission-audit",
+          "size_in_bytes": 6866,
+          "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11642978132",
+          "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11642978132/zip",
+          "expired": false,
+          "created_at": "2026-10-09T20:31:02Z",
+          "expires_at": "2026-10-23T20:31:01Z",
+          "updated_at": "2026-10-09T20:31:02Z",
+          "digest": "sha256:ef2b1a6c250aa59ea834b1ec820e5488a1591d98d8b4647f2842167d411cf11e",
+          "workflow_run": {
+            "id": 37983162903,
+            "repository_id": 1188928152,
+            "head_repository_id": 1188928152,
+            "head_branch": "fix/r5-next1010-round1",
+            "head_sha": "b458e917c6b084fbc557f351f03ca762b1c11924"
+          }
+        }
+      ]
+    },
+    "zip_downloaded": false,
+    "zip_or_raw_go_jsonl_digests_locally_verified": false
+  },
+  "recovery_boundary": [
+    "Both complete original job logs and the original runner comparison objects are freshly recovered from GitHub.",
+    "The old workflow did not print original Go JSONL streams. Its log_sha256 values are original-runner-reported hashes, not newly computed hashes of recovered Go event files.",
+    "The public comparison leaf maps, source identities, frozen file hashes, commands, process exits, and reported skip/missing counters are independently checked for consistency with newly retrieved public source.",
+    "No event-level package-terminal or duplicate-event check can be reconstructed from these logs alone. No native test packet, previous receipt file, commit bundle, or artifact ZIP is claimed restored."
+  ],
+  "recovery_script_sha256": "67efe8f0958ac1f4c1c3210f53b7938834f30fb0308e2ddbf91d11f81fbd1e1e"
+}

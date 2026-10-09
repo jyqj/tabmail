@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "base_sha": "e5e23e21abfe4c7e9f082405e56a95a7f346fa9a",
+  "product_source_sha": "aeed47f0e1998d9925acb680992b051463821d69",
+  "tested_integration_sha": "de1b7d37edbb83004592e7a8f2d78c8434278457",
+  "branch": "integration/company-mail-r5-batch5-20261003",
+  "scoped_results": {
+    "benchmark": {
+      "summary": "Ran 111 tests in 19.440s",
+      "final_status": "OK",
+      "exit": 0
+    },
+    "benchmark-adjacent": {
+      "summary": "Ran 45 tests in 1.824s",
+      "final_status": "OK",
+      "exit": 0
+    },
+    "transactions": {
+      "summary": "Ran 26 tests in 13.894s",
+      "final_status": "OK",
+      "exit": 0
+    },
+    "descriptor": {
+      "summary": "Ran 81 tests in 17.942s",
+      "final_status": "OK",
+      "exit": 0
+    }
+  },
+  "transactions_cli": {
+    "status": "PASS",
+    "task_complete": false,
+    "runtime_verified": false
+  },
+  "default": {
+    "status": "failed",
+    "discovered": 658,
+    "no_missing": false,
+    "no_overlap": true,
+    "missing_test_ids": [
+      "test_r5_compatibility.CompatibilityGateTests.test_cannot_waive_dependency_runtime_or_legacy_client_unknowns",
+      "test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion",
+      "test_r5_compatibility.CompatibilityGateTests.test_dns_exclusions_match_real_HTTP_methods_not_create",
+      "test_r5_compatibility.CompatibilityGateTests.test_duplicate_and_nonfinite_json_rejected",
+      "test_r5_compatibility.CompatibilityGateTests.test_future_rejection_upgrade_and_task_strategies_mandatory",
+      "test_r5_compatibility.CompatibilityGateTests.test_malformed_and_untrusted_producer_sources_rejected",
+      "test_r5_compatibility.CompatibilityGateTests.test_missing_duplicate_and_source_drift_rejected",
+      "test_r5_compatibility.CompatibilityGateTests.test_route_schema_client_and_test_fact_mutations_rejected",
+      "test_r5_compatibility.CompatibilityGateTests.test_routes_and_successor_tasks_match_original_stage_semantics"
+    ],
+    "groups": [
+      {
+        "group": "current",
+        "source_sha": "de1b7d37edbb83004592e7a8f2d78c8434278457",
+        "requested": 654,
+        "started": 645,
+        "failure_events": [],
+        "error_events": [
+          "test_r5_cold_web.ColdWebTests.test_output_refuses_existing_checkout_and_non_temporary_path",
+          "setUpClass (test_r5_compatibility.CompatibilityGateTests)",
+          "test_r5_compatibility.SafeWireJoinTests.test_exact_safe_join_remains_metadata_not_product_approval"
+        ],
+        "skips": [
+          "test_ordinary_receipt_contract.OrdinaryReceiptContractTests.test_fresh_typed_shipping_envelope_bytes"
+        ],
+        "notstarted": [
+          "test_r5_compatibility.CompatibilityGateTests.test_cannot_waive_dependency_runtime_or_legacy_client_unknowns",
+          "test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion",
+          "test_r5_compatibility.CompatibilityGateTests.test_dns_exclusions_match_real_HTTP_methods_not_create",
+          "test_r5_compatibility.CompatibilityGateTests.test_duplicate_and_nonfinite_json_rejected",
+          "test_r5_compatibility.CompatibilityGateTests.test_future_rejection_upgrade_and_task_strategies_mandatory",
+          "test_r5_compatibility.CompatibilityGateTests.test_malformed_and_untrusted_producer_sources_rejected",
+          "test_r5_compatibility.CompatibilityGateTests.test_missing_duplicate_and_source_drift_rejected",
+          "test_r5_compatibility.CompatibilityGateTests.test_route_schema_client_and_test_fact_mutations_rejected",
+          "test_r5_compatibility.CompatibilityGateTests.test_routes_and_successor_tasks_match_original_stage_semantics"
+        ],
+        "exit": 1
+      },
+      {
+        "group": "frozen-v1",
+        "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+        "requested": 4,
+        "started": 4,
+        "failure_events": [],
+        "error_events": [],
+        "skips": [],
+        "notstarted": [],
+        "exit": 0
+      }
+    ]
+  },
+  "prepared": {
+    "status": "failed",
+    "discovered": 658,
+    "no_missing": true,
+    "no_overlap": true,
+    "missing_test_ids": [],
+    "groups": [
+      {
+        "group": "current",
+        "source_sha": "de1b7d37edbb83004592e7a8f2d78c8434278457",
+        "requested": 654,
+        "started": 654,
+        "failure_events": [],
+        "error_events": [
+          "test_r5_cold_web.ColdWebTests.test_output_refuses_existing_checkout_and_non_temporary_path",
+          "test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion",
+          "test_r5_compatibility.SafeWireJoinTests.test_exact_safe_join_remains_metadata_not_product_approval"
+        ],
+        "skips": [
+          "test_ordinary_receipt_contract.OrdinaryReceiptContractTests.test_fresh_typed_shipping_envelope_bytes"
+        ],
+        "notstarted": [],
+        "exit": 1
+      },
+      {
+        "group": "frozen-v1",
+        "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+        "requested": 4,
+        "started": 4,
+        "failure_events": [],
+        "error_events": [],
+        "skips": [],
+        "notstarted": [],
+        "exit": 0
+      }
+    ]
+  },
+  "runner_and_production_unchanged": true,
+  "tool_paths": {
+    "python": "/workspace/r5-batch5/venv/bin/python",
+    "go": "/workspace/tabmail-cloud/tools/go/bin/go",
+    "GOCACHE": "/workspace/r5-batch5/gocache",
+    "GOMODCACHE": "/workspace/r5-batch5/gomod",
+    "TMPDIR": "/workspace/t5"
+  },
+  "initial_push": {
+    "status": "PASS",
+    "remote_verified_sha": "de1b7d37edbb83004592e7a8f2d78c8434278457"
+  },
+  "draft_PR": {
+    "status": "BLOCKED",
+    "attempts": 1,
+    "route": "original gh CLI",
+    "base": "integration/company-mail-r5-batch4-20261003",
+    "exit": 1,
+    "error": "Post https://api.github.com/graphql: Forbidden",
+    "created": false,
+    "alternate_identity_or_route": false
+  },
+  "CI": {
+    "status": "UNOBSERVED",
+    "new_PR_trigger": "NOT_STARTED_PR_NOT_CREATED",
+    "normal_PG180_gate_unchanged": true,
+    "reads_after_denial": 0
+  },
+  "parent_TODO": "10/171",
+  "merged_or_deployed": false
+}

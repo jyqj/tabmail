@@ -1,0 +1,134 @@
+{
+  "GC_scope_boundaries": [
+    "Stable eligible tenant set and completed scheduling rounds: ceil(N/20). Interrupted round advances only attempted prefix.",
+    "Infinite arrivals of new tenant UUIDs have no fixed-round bound.",
+    "Busy session lock returns a skipped round, not evidence that GC ran.",
+    "20 tenant candidates and 100 inner attachment candidates are not physical SQL scan bounds.",
+    "Global pre-scheduler housekeeping errors can abort the entry point before cursor progress.",
+    "Old inner GC green results do not cover this new source; no parent TODO completion is claimed."
+  ],
+  "GCsix_plus_headthree_new_signed_delta_not_compile_only": true,
+  "M_retry": false,
+  "actual_GC_leaf_count": 18,
+  "actual_GC_top_count": 12,
+  "actual_all_leaf_count": 21,
+  "actual_all_test_subtest_pass": 24,
+  "actual_all_top_count": 15,
+  "actual_schema_version": "18",
+  "actual_source_closure_sha256": "2c3ea72f90f201c7282f212e26a44e4188cdd084e9db1f56d00ec6f4a60ea9cc",
+  "catalog_scope": "actual TestR5SchemaInventoryAndRestart O_EXCL18; old15/16/17 unchanged",
+  "cleanup": {
+    "base_database": "tm_gc18_validation",
+    "old_resources_untouched": true,
+    "owned_pg_pid": 61857,
+    "owned_pid_observation": "absent",
+    "owned_pid_ps_exit": 1,
+    "owned_root": "/private/tmp/tm-r5gc18.8ikjdljj",
+    "pg_stop_exit": 0,
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "test_database_query_exit": 0,
+    "test_databases": [],
+    "utc": "2026-10-02T09:17:41.294787+00:00"
+  },
+  "default_fullCI_helper_skip_source_boundary": "TestR5AttachmentGCScannerProcess subprocess-only helper is excluded from this run; default ./... may skip it without child env; fullCI remains separately gated",
+  "fullCI_green": false,
+  "helper_not_selected_as_main": true,
+  "main_missing_skipped_and_unknown_tests": [],
+  "old17catalog398e67_and_1a15_source_not_modified": true,
+  "outer_deadline_wall": 1790933225.397824,
+  "outer_elapsed_seconds": 36.04342699050903,
+  "outer_origin_wall": 1790932625.397824,
+  "outer_within600_including_nativecleanup": true,
+  "physical_SQL_scan_bounded100_not_certified": true,
+  "results": {
+    "GC18-fairness-and-current-heads": {
+      "actual_test_names": [
+        "TestR5AttachmentGCTenantConnectDeadlineCoversDNSAndFallbacks",
+        "TestR5AttachmentGCTenantConnectDeadlineCoversDNSAndFallbacks/default_total_cap",
+        "TestR5AttachmentGCTenantConnectDeadlineCoversDNSAndFallbacks/shorter_config",
+        "TestR5AttachmentGCTenantConnectDeadlineCoversDNSAndFallbacks/shorter_caller",
+        "TestR5AttachmentGCTenantConnectDeadlineCoversDNSAndFallbacks/shared_fallback_budget",
+        "TestArchitectureUpgradeBackfillsExistingEmployeeAssets",
+        "TestR5AttachmentGCTenantCommittedCursorLostAcknowledgement",
+        "TestR5AttachmentGCTenantProtectedPrefixBoundedRounds",
+        "TestR5AttachmentGCTenantDefaultWrapperPositiveControl",
+        "TestR5AttachmentGCTenantFailuresDoNotStarveOthers",
+        "TestR5AttachmentGCTenantLockTimeoutContinuesRound",
+        "TestR5AttachmentGCTenantContinuousWritesAndWrap",
+        "TestR5AttachmentGCTenantActualProcessRestart",
+        "TestR5AttachmentGCTenantDoubleProcessDoesNotReenterBatch",
+        "TestR5AttachmentGCTenantInterruptedSessionResumes",
+        "TestR5AttachmentGCTenantInterruptedSessionResumes/backend_terminated",
+        "TestR5AttachmentGCTenantInterruptedSessionResumes/context_cancelled",
+        "TestR5AttachmentGCTenantInterruptedSessionResumes/process_killed",
+        "TestR5AttachmentGCTenantCursorFailureIsClosed",
+        "TestR5AttachmentGCTenantCursorFailureIsClosed/update_rejected",
+        "TestR5AttachmentGCTenantCursorFailureIsClosed/missing_singleton",
+        "TestR5AttachmentGCTenantEmptySetDeletedCursorAndNewTenant",
+        "TestR5SchemaInventoryAndRestart",
+        "TestR5SentRecipientSnapshotUpgradeV16BoundedTrustedBackfill"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 21,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 22.846,
+          "package": "tabmail/internal/store/postgres"
+        }
+      ],
+      "pass_count": 24,
+      "run_count": 24,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 15
+    },
+    "official-schema18-bootstrap": {
+      "execution": {
+        "absolute_deadline_wall_time": 1790932716.375547,
+        "budget_seconds": 90,
+        "elapsed_wall_seconds": 3.204730987548828,
+        "final_owned_group_observation": {
+          "members": [],
+          "non_zombie_live_pids": [],
+          "status": "observed"
+        },
+        "observed_wall_time": 1790932629.580278,
+        "owned_process_group": 61869,
+        "process_returncode": 0,
+        "process_returncode_status": "observed_parent_poll",
+        "scope": "absolute wall deadline including host suspension; cleanup is observed after resume, never guaranteed during sleep",
+        "started_wall_time": 1790932626.375547,
+        "timed_out": false
+      },
+      "exit": 0
+    }
+  },
+  "schema18_actual_catalog": {
+    "bytes": 196143,
+    "goose_version": 18,
+    "migration_hash_count": 18,
+    "observed_counts": {
+      "columns": 507,
+      "constraints": 185,
+      "foreign_keys": 75,
+      "indexes": 154,
+      "sequences": 3,
+      "tables": 51,
+      "trigger_functions": 11,
+      "triggers": 11
+    },
+    "path": "/private/tmp/tm-r5gc18.8ikjdljj/schema18-actual-catalog.json",
+    "restart_catalog_unchanged": true,
+    "sha256": "02a5850d03a8909ee95720e56d755128b4e6f923ab43cbeffb35fc0de1f14f94"
+  },
+  "scope": "new_GC_tenant_fairness18_plus_three_current_head_targets_only",
+  "scope_verdict": "PASS_actual_new_GC_fairness18_and_three_current_heads_under_original600s",
+  "source_postcheck_equal": true,
+  "source_sha": "cb03f7a27e9e9cf45fd815c141ad2cb645e08134"
+}

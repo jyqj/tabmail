@@ -1,0 +1,501 @@
+{
+  "base": "29a388a3c7d6da03641abe79bb5c728b90b75273",
+  "tested_source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+  "tested_tree": "10c72f860ad875aa35218357bf0c7385a708a3c9",
+  "branch": "integration/company-mail-r5-20261003",
+  "original_deliveries": [
+    "8d357eba379e510fdcde0a94648cdcf62ceb11f9",
+    "b7ac8eb96bd8fabe7a7ddc3c3499679b13a19c87",
+    "7a436549ace77d1baf30f33f6fb8e163077fe34c"
+  ],
+  "merge_conflicts": 0,
+  "toolchain": {
+    "go": "go1.25.7 linux/amd64",
+    "node": "v24.19.0",
+    "npm": "11.9.0",
+    "GODEBUG": "asynctimerchan=0",
+    "dependencies": "existing go.mod/go.sum + web lock unchanged; Python temporary venv installed existing scripts/requirements-contract.txt"
+  },
+  "runs": [
+    {
+      "name": "api",
+      "source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+      "tree": "10c72f860ad875aa35218357bf0c7385a708a3c9",
+      "cwd": "/workspace/tabmail",
+      "argv": [
+        "go",
+        "test",
+        "-race",
+        "-p",
+        "1",
+        "-count=1",
+        "-timeout=90s",
+        "-json",
+        "./internal/api",
+        "./internal/api/lifecycle",
+        "./internal/api/middleware",
+        "./internal/api/handlers",
+        "-run",
+        "^TestR5(CloudBackgroundHTTP|APIBackgroundShutdown)"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 38.29438134700001,
+      "settings": {
+        "GODEBUG": "asynctimerchan=0",
+        "GOMAXPROCS": "2",
+        "GOFLAGS": "-mod=readonly",
+        "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+        "GOCACHE": "/workspace/tabmail-cloud/gocache",
+        "GOPATH": "/workspace/tabmail-cloud/gopath"
+      },
+      "counts": {
+        "top": 27,
+        "leaf": 29,
+        "nodes_started": 31,
+        "pass": 31,
+        "unfinished": 0
+      }
+    },
+    {
+      "name": "caller",
+      "source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+      "tree": "10c72f860ad875aa35218357bf0c7385a708a3c9",
+      "cwd": "/workspace/tabmail",
+      "argv": [
+        "go",
+        "test",
+        "-race",
+        "-p",
+        "1",
+        "-count=1",
+        "-timeout=90s",
+        "-json",
+        "./cmd/tabmail",
+        "-run",
+        "^TestR5(APIBackgroundShutdownCaller|ShutdownCaller)"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 4.337510660000021,
+      "settings": {
+        "GODEBUG": "asynctimerchan=0",
+        "GOMAXPROCS": "2",
+        "GOFLAGS": "-mod=readonly",
+        "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+        "GOCACHE": "/workspace/tabmail-cloud/gocache",
+        "GOPATH": "/workspace/tabmail-cloud/gopath"
+      },
+      "counts": {
+        "top": 18,
+        "leaf": 21,
+        "nodes_started": 22,
+        "pass": 22,
+        "unfinished": 0
+      }
+    },
+    {
+      "name": "contract-check",
+      "source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+      "tree": "10c72f860ad875aa35218357bf0c7385a708a3c9",
+      "cwd": "/workspace/tabmail",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check_contract_drift.py"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.5658173940000211,
+      "settings": {
+        "GODEBUG": "asynctimerchan=0",
+        "GOMAXPROCS": "2",
+        "GOFLAGS": "-mod=readonly",
+        "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+        "GOCACHE": "/workspace/tabmail-cloud/gocache",
+        "GOPATH": "/workspace/tabmail-cloud/gopath"
+      }
+    },
+    {
+      "name": "contracts",
+      "source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+      "tree": "10c72f860ad875aa35218357bf0c7385a708a3c9",
+      "cwd": "/workspace/tabmail",
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "scripts.tests.test_permission_editor_contract",
+        "scripts.tests.test_company_admin_events_contract",
+        "scripts.tests.test_ordinary_receipt_contract",
+        "scripts.tests.test_outbound_inspection_contract",
+        "scripts.tests.test_openapi_contract",
+        "scripts.tests.test_contract_drift",
+        "scripts.tests.test_contract_source_aliases",
+        "scripts.tests.test_http_contract",
+        "scripts.tests.test_i18n_keys",
+        "scripts.tests.test_r5_smtp_owner_source_inventory"
+      ],
+      "exit": 1,
+      "elapsed_seconds": 8.676499575999998,
+      "settings": {
+        "GODEBUG": "asynctimerchan=0",
+        "GOMAXPROCS": "2",
+        "GOFLAGS": "-mod=readonly",
+        "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+        "GOCACHE": "/workspace/tabmail-cloud/gocache",
+        "GOPATH": "/workspace/tabmail-cloud/gopath"
+      },
+      "counts": {
+        "tests_run": 217,
+        "top_test_pass": 194,
+        "top_test_error": 22,
+        "skip": 1,
+        "error_events_including_subtests_and_setupclass": 25
+      },
+      "status": "FAILED: 24 date-time validator error events plus inherited OutboundJob alias error; one fresh typed fixture skip not accepted"
+    },
+    {
+      "name": "fork",
+      "source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+      "tree": "10c72f860ad875aa35218357bf0c7385a708a3c9",
+      "cwd": "/workspace/tabmail",
+      "argv": [
+        "go",
+        "test",
+        "-race",
+        "-p",
+        "1",
+        "-count=1",
+        "-timeout=90s",
+        "-json",
+        "github.com/emersion/go-smtp",
+        "-run",
+        "^TestOwnerR5Cloud"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 3.0302432950000195,
+      "settings": {
+        "GODEBUG": "asynctimerchan=0",
+        "GOMAXPROCS": "2",
+        "GOFLAGS": "-mod=readonly",
+        "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+        "GOCACHE": "/workspace/tabmail-cloud/gocache",
+        "GOPATH": "/workspace/tabmail-cloud/gopath"
+      },
+      "counts": {
+        "top": 1,
+        "leaf": 1,
+        "nodes_started": 1,
+        "pass": 1,
+        "unfinished": 0
+      }
+    },
+    {
+      "name": "frontend",
+      "source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+      "tree": "10c72f860ad875aa35218357bf0c7385a708a3c9",
+      "cwd": "/workspace/tabmail/web",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "--reporter=json",
+        "--outputFile=/tmp/r5-integration-20261003/frontend-results.json",
+        "features/company/profile-management.consumer.test.tsx",
+        "features/company/permission-editor.consumer.test.tsx",
+        "features/company/permission-editor-session.consumer.test.tsx",
+        "features/company/company-event-consumer.test.tsx",
+        "lib/api/permission-editor.serializer.test.ts"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 41.94947840500001,
+      "settings": {
+        "GODEBUG": "asynctimerchan=0",
+        "GOMAXPROCS": "2",
+        "GOFLAGS": "-mod=readonly",
+        "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+        "GOCACHE": "/workspace/tabmail-cloud/gocache",
+        "GOPATH": "/workspace/tabmail-cloud/gopath"
+      },
+      "counts": {
+        "numTotalTests": 150,
+        "numPassedTests": 150,
+        "numFailedTests": 0,
+        "numPendingTests": 0
+      }
+    },
+    {
+      "name": "i18n-source",
+      "source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+      "tree": "10c72f860ad875aa35218357bf0c7385a708a3c9",
+      "cwd": "/workspace/tabmail",
+      "argv": [
+        "node",
+        "--test",
+        "scripts/tests/i18n_sources.test.cjs"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 1.1248933229999807,
+      "settings": {
+        "GODEBUG": "asynctimerchan=0",
+        "GOMAXPROCS": "2",
+        "GOFLAGS": "-mod=readonly",
+        "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+        "GOCACHE": "/workspace/tabmail-cloud/gocache",
+        "GOPATH": "/workspace/tabmail-cloud/gopath"
+      },
+      "counts": {
+        "tests": 13,
+        "pass": 13,
+        "fail": 0,
+        "skip": 0
+      }
+    },
+    {
+      "name": "i18n",
+      "source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+      "tree": "10c72f860ad875aa35218357bf0c7385a708a3c9",
+      "cwd": "/workspace/tabmail",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check_i18n_keys.py"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 1.1204703919999872,
+      "settings": {
+        "GODEBUG": "asynctimerchan=0",
+        "GOMAXPROCS": "2",
+        "GOFLAGS": "-mod=readonly",
+        "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+        "GOCACHE": "/workspace/tabmail-cloud/gocache",
+        "GOPATH": "/workspace/tabmail-cloud/gopath"
+      }
+    },
+    {
+      "name": "lint",
+      "source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+      "tree": "10c72f860ad875aa35218357bf0c7385a708a3c9",
+      "cwd": "/workspace/tabmail/web",
+      "argv": [
+        "npx",
+        "--no-install",
+        "eslint",
+        "features/company/profile-management.tsx",
+        "features/company/profile-management.consumer.test.tsx",
+        "features/company/permission-editors.r5audit.tsx"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 3.436347506000004,
+      "settings": {
+        "GODEBUG": "asynctimerchan=0",
+        "GOMAXPROCS": "2",
+        "GOFLAGS": "-mod=readonly",
+        "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+        "GOCACHE": "/workspace/tabmail-cloud/gocache",
+        "GOPATH": "/workspace/tabmail-cloud/gopath"
+      }
+    },
+    {
+      "name": "smtp",
+      "source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+      "tree": "10c72f860ad875aa35218357bf0c7385a708a3c9",
+      "cwd": "/workspace/tabmail",
+      "argv": [
+        "go",
+        "test",
+        "-race",
+        "-p",
+        "1",
+        "-count=1",
+        "-timeout=90s",
+        "-json",
+        "./internal/smtp",
+        "-run",
+        "^TestR5Cloud"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 4.240793420000017,
+      "settings": {
+        "GODEBUG": "asynctimerchan=0",
+        "GOMAXPROCS": "2",
+        "GOFLAGS": "-mod=readonly",
+        "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+        "GOCACHE": "/workspace/tabmail-cloud/gocache",
+        "GOPATH": "/workspace/tabmail-cloud/gopath"
+      },
+      "counts": {
+        "top": 3,
+        "leaf": 6,
+        "nodes_started": 9,
+        "pass": 9,
+        "unfinished": 0
+      }
+    },
+    {
+      "name": "type",
+      "source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+      "tree": "10c72f860ad875aa35218357bf0c7385a708a3c9",
+      "cwd": "/workspace/tabmail/web",
+      "argv": [
+        "npx",
+        "--no-install",
+        "tsc",
+        "--noEmit",
+        "--incremental",
+        "false"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 6.9656035059999795,
+      "settings": {
+        "GODEBUG": "asynctimerchan=0",
+        "GOMAXPROCS": "2",
+        "GOFLAGS": "-mod=readonly",
+        "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+        "GOCACHE": "/workspace/tabmail-cloud/gocache",
+        "GOPATH": "/workspace/tabmail-cloud/gopath"
+      }
+    },
+    {
+      "name": "contracts-retry",
+      "argv": [
+        "/tmp/r5-integration-20261003/contract-venv/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "scripts.tests.test_http_contract"
+      ],
+      "cwd": "/workspace/tabmail",
+      "exit": 0,
+      "counts": {
+        "tests": 45,
+        "pass": 45,
+        "fail": 0,
+        "error": 0,
+        "skip": 0
+      }
+    },
+    {
+      "name": "contracts-outbound-retry",
+      "argv": [
+        "/tmp/r5-integration-20261003/contract-venv/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "scripts.tests.test_outbound_inspection_contract.OutboundInspectionContractTests.test_ordinary_receipt_schemas_not_expanded"
+      ],
+      "cwd": "/workspace/tabmail",
+      "exit": 1,
+      "counts": {
+        "tests": 1,
+        "pass": 0,
+        "error": 1,
+        "skip": 0
+      }
+    }
+  ],
+  "additional_commands": [
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "venv",
+        "/tmp/r5-integration-20261003/contract-venv"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "/tmp/r5-integration-20261003/contract-venv/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "scripts/requirements-contract.txt"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "go",
+        "list",
+        "-mod=readonly",
+        "-m",
+        "-json",
+        "github.com/emersion/go-smtp",
+        "github.com/jhillyerd/enmime/v2"
+      ],
+      "exit": 0,
+      "settings": "same Go environment as race receipts",
+      "scope": "root MVS metadata only, not fresh byte/cold qualification"
+    },
+    {
+      "argv": [
+        "go",
+        "build",
+        "-o",
+        "/tmp/r5-integration-20261003/tabmail",
+        "./cmd/tabmail"
+      ],
+      "exit": 0,
+      "settings": "same Go environment as race receipts",
+      "scope": "implicit cached compile/link; binary not run or uploaded; standalone compile duration unknown"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0
+    }
+  ],
+  "not_run": [
+    "fullcaller realPG/Redis",
+    "browser",
+    "opt-in A02 HTTP/PG audit",
+    "whole backend/four CI",
+    "watchdog runtime",
+    "current19 Method/Catalog/SML",
+    "million M",
+    "Docker/shipping/public network/security"
+  ],
+  "blocker": "pre-existing scripts.tests.test_outbound_inspection_contract.test_ordinary_receipt_schemas_not_expanded KeyError properties on OutboundJob $ref; relevant inputs identical to base; secure Go baseline producer remains historical red design",
+  "source_freeze": "all product/test source unchanged during tests; central TODO changed only after race/front started; follow-up commits documentation/evidence only",
+  "progress": "10/171; no parent task marked done",
+  "evidence": "synthetic test outputs only; no private originals or operational logs",
+  "evidence_hashes": {
+    "type.stderr": "76162e465989f3f070a9de8db711fbf358e53b74d09ce1bbdb57c727e4c4a16d",
+    "i18n-source.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "contracts-outbound-retry.stderr": "c75b338239c4b56ff2e0d52514776a42f40311f8039863a70593d49b7763af51",
+    "contract-check.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "i18n.stdout": "050063b19b12d493032a74a706db8b1d6df00a32177f19ceae4bc44e6e464bca",
+    "contracts-retry.stderr": "f721eadcac1225af24fe449a5af71e55380a54b83725a8339bf9e67e21e381fa",
+    "contract-check.stdout": "ac85ca4063cc9d0364d01083c413ee443fc25d39f41712ce7bdc1f4ef9de6992",
+    "api.stdout": "0c8373e8c652973cac5b15eab33450ba43490acb8cac22a24f91a78b6089e4eb",
+    "fork.stdout": "88e511c9ad9ac232c0320b384d128cd193a96a900e4c5632234b9c7d10402d2b",
+    "frontend-assertions.json": "d5980c9b50ca483942be2e67f7794eefb46000d2dece6a2a16b062464ace3481",
+    "fork.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "contracts.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "i18n.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "frontend.stdout": "708787e8a4b73fcbd0b7927e42289de46726af3f152d710681f02af3fc01239d",
+    "api.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "contracts-outbound-retry.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lint.stdout": "10934ac56763ff9efc6e28108c43a65aac4d67f2a5fdb9d42b1281dffddf6941",
+    "modules.json": "d368564565d7e547903780cd978e35dd9d76af9b6fbfc707b6590548416613b3",
+    "lint.stderr": "76162e465989f3f070a9de8db711fbf358e53b74d09ce1bbdb57c727e4c4a16d",
+    "contracts.stderr": "93b69ef808641b0152419e3043aa72d307aef20d1899491cf7ccec78696e3ad9",
+    "contracts-retry.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "type.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "contract-deps-freeze.txt": "be168db4468857dcc317265bd1721bfb679994fcf9a3d86ef9506b7dcd6e143f",
+    "frontend.stderr": "56dd0f5393de7f64285f0a6b5826a477fffb59eceed3c9ab675518aed352d279",
+    "smtp.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "caller.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "i18n-source.stdout": "8681cbc35834caf41043882069575dbdbafd369ec15221b1e63faeed127fa8d3",
+    "source-pins.json": "300199c6ac7a1c3cf535aa27a505935bc6981ca0c7a1fd29e3d3467ea92a7b99",
+    "smtp.stdout": "739fe5dc184109cfd27f96ae5aff51e1aaff6d27a5940749635bee88f7905dc3",
+    "caller.stdout": "46aaea54ec93bf1bc1645f104dac8443f955d87a4bb876991f6bbdca62060a7e"
+  }
+}

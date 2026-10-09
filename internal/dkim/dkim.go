@@ -65,34 +65,80 @@ func DNSTXTValue(publicKeyBase64 string) string {
 }
 
 // TXTValueMatchesPublicKey reports whether a DKIM DNS TXT value contains the
-// expected RSA public key. The public-key comparison is exact after removing
-// DNS/display whitespace from the p= tag; other tag values are parsed
-// case-insensitively where DKIM allows it.
+// expected RSA public key and permits this signer's SHA-256 email signatures.
+// The public-key comparison is exact after removing DNS/display whitespace
+// from the p= tag; existing version and key-type display handling is preserved.
 func TXTValueMatchesPublicKey(txtValue, publicKeyBase64 string) bool {
+	expected := stripWhitespace(publicKeyBase64)
+	if expected == "" {
+		return false
+	}
 	tags := parseDKIMTags(txtValue)
 	if !strings.EqualFold(tags["v"], "DKIM1") {
 		return false
 	}
-	if k := strings.TrimSpace(tags["k"]); k != "" && !strings.EqualFold(k, "rsa") {
+	if k, present := tags["k"]; present && !strings.EqualFold(k, "rsa") {
 		return false
 	}
-	return stripWhitespace(tags["p"]) == stripWhitespace(publicKeyBase64)
+	// RFC 6376 section 3.6.1: omitted h=/s= allow all supported hashes and
+	// services; explicit lists must allow the hash and service we actually use.
+	// Their identifiers are case-sensitive, and only s= defines a wildcard.
+	if h, present := tags["h"]; present && !tagListContains(h, "sha256") {
+		return false
+	}
+	if s, present := tags["s"]; present && !tagListContains(s, "email") && !tagListContains(s, "*") {
+		return false
+	}
+	return stripWhitespace(tags["p"]) == expected
 }
 
+func tagListContains(value, expected string) bool {
+	for _, item := range strings.Split(value, ":") {
+		if strings.TrimSpace(item) == expected {
+			return true
+		}
+	}
+	return false
+}
+
+// A malformed or repeated tag invalidates the record. In particular, a later
+// p= must not overwrite an earlier revocation or a different public key.
+// Preserve this matching helper's existing display whitespace/case handling;
+// it is not a replacement for the DKIM signature verifier.
 func parseDKIMTags(txtValue string) map[string]string {
 	tags := make(map[string]string)
-	for _, part := range strings.Split(txtValue, ";") {
+	parts := strings.Split(txtValue, ";")
+	for i, part := range parts {
+		if strings.TrimSpace(part) == "" && i == len(parts)-1 {
+			break // One trailing semicolon is allowed.
+		}
 		key, value, ok := strings.Cut(part, "=")
 		if !ok {
-			continue
+			return nil
 		}
 		key = strings.ToLower(strings.TrimSpace(key))
-		if key == "" {
-			continue
+		if !validTagName(key) {
+			return nil
+		}
+		if _, exists := tags[key]; exists {
+			return nil
 		}
 		tags[key] = strings.TrimSpace(value)
 	}
 	return tags
+}
+
+func validTagName(name string) bool {
+	if name == "" || name[0] < 'a' || name[0] > 'z' {
+		return false
+	}
+	for i := 1; i < len(name); i++ {
+		ch := name[i]
+		if !((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || ch == '_') {
+			return false
+		}
+	}
+	return true
 }
 
 func stripWhitespace(v string) string {

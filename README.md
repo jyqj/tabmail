@@ -6,6 +6,32 @@
 
 公司邮箱 R4 源码检查点为 `baseline/company-mail-r4-20260928`，对应 `507fa292653ee585ba99ce323a29eb4135fccc24`。它是已核对的源码基线，不是生产正式 Release；后续提交可以继续推进 `main`。GitHub 分支、历史 `v1.0.0`、前端私有包版本、CI 证据与本地安全同步方式见 [版本与分支管理](docs/VERSIONING.md)。
 
+## R5 重构进度（实施中，尚未发布）
+
+<!-- R5-FINISH-20261009:BEGIN -->
+**FINISH批次三轮已完成10/10个独立实施TODO，剩余0；逐轮剩余6→3→0。** [#193](https://github.com/jyqj/tabmail/pull/193)、[#194](https://github.com/jyqj/tabmail/pull/194)、[#195](https://github.com/jyqj/tabmail/pull/195)已实际合入，#183–#192均closed/completed。改动覆盖明确的邮箱/模板修改意图、注册密码字节策略、登录与改密会话归属、管理员邀请输入、真实邮箱事务错误分类、带引号回复地址的生成与编辑、S3上传流结束及重播边界。
+
+root与三个原生subagent实施并交叉审查，修复了独审发现的真实Provider成功反馈回归和事务外层错误映射缺口。最终产品merge为`740126660526db987b7914c50a8731b7cac9bf42`；第三轮六个相关Go包1247 race叶、107个UI全部PASS，原默认Go构建及类型/静态检查通过。真实PostgreSQL固定10叶从基线7PASS/3FAIL变为10PASS；精确head的源码证据、PG登录、邮箱PG、Webhook四个workflow均SUCCESS。[revision14目录对账](docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008/README.md)已完成采集与独审，三个原CLI及98项相关Python测试通过，准确执行身份另记。准确执行源、完整CI的失败和限定验收见[FINISH账本](docs/company-mail/R5-FINISH-20261009.md)。
+
+原父清单仍**10/171已验收、剩余161**，以[R5-TODO](docs/company-mail/R5-TODO.md)为准；源码目录和文档维护不算新增实施TODO。[整合PR #56](https://github.com/jyqj/tabmail/pull/56)保持draft，完整PG、严格依赖审计、必需私有fixture和有效M/G0继续开放。以下保留此前批次的各自历史记录。
+<!-- R5-FINISH-20261009:END -->
+
+<!-- R5-STREAM-20261008:BEGIN -->
+**STREAM批次以三轮原生multiagent完成10个独立实施TODO：4＋3＋3，每轮剩余6、3、0。** [#83](https://github.com/jyqj/tabmail/pull/83)、[#87](https://github.com/jyqj/tabmail/pull/87)、[#84](https://github.com/jyqj/tabmail/pull/84)覆盖同步suppression、原件流及ingest恢复读取、JSON缓存策略、protocol工件路径、API key对话框、邮箱成员/发送策略复核、冻结员工模板授权撤销与预览资格。并行NEXT、PARALLEL-929及其历史完整保留，重叠计划已撤出STREAM计数。
+
+完整产品固定为`2aa4f4c18c18ef5417e36bc997034422b27a03c7`，tree `cac18fef263d85b193372bbab9ff4fac6b95d31e`。真实PostgreSQL固定撤销9叶由有效基线7PASS/2FAIL变为9PASS、零SKIP；受影响九个完整Go包1149叶PASS/10既有本地PG-SKIP，相关前端77PASS，完整build/vet、tsc/lint及29页生产构建通过。完整默认前端和完整CI另按实际失败保留，有限验证不自动提供发布资格。父任务仍10/171验收、161剩余，#56保持draft。各轮实现、审查、实际源码、验证限制见[STREAM报告](docs/company-mail/R5-STREAM-20261008.md)。
+<!-- R5-STREAM-20261008:END -->
+
+**2026-10-08 NEXT批次三轮原生 multi-subagent 完成10项新实施子项，剩余0。** [#79](https://github.com/jyqj/tabmail/pull/79)、[#80](https://github.com/jyqj/tabmail/pull/80)、[#82](https://github.com/jyqj/tabmail/pull/82) 已合入 [R5整合PR #56](https://github.com/jyqj/tabmail/pull/56)。改动覆盖PG fixture取消、明确删除确认、域名配额/分页/JSON边界、协议CI源码及失败证据、邀请与域名页面归属、DNS取消。每轮4＋3＋3和完整行为证据见[本批报告](docs/company-mail/R5-NEXT-20261008.md)。前两批20项实施保持历史，不重复计数。
+
+**原父任务仍完成10/171，剩余161；P0为10/12。** 唯一父清单为[R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见[R5-DESIGN](docs/company-mail/R5-DESIGN.md)。本批有限改进不自动完成父项依赖和全部验收；[并行批次 #81](https://github.com/jyqj/tabmail/issues/81)及[STREAM批次](docs/company-mail/R5-STREAM-20261008.md)各有独立范围和计数。
+
+本批产品源码为`ff8872b737a947c158035a0b07d78396397ad626`，与本地受测db7702d整树相同。第3轮根验证：相关Go三包54叶PASS（race），全仓Go build/vet与完整非增量tsc通过；84个Python控制、35个域名UI和单独22个邀请UI通过。不同运行、基线和资格边界分别保存；[revision6源码目录](docs/company-mail/evidence/R5-CATALOG-REVISION6-20261008/README.md)按公开集成f413a91重新采集，保留随后合入的#83/#85/#86事实。在f413检查点上原3条CLI及根17项检查通过。其后并行#87合入f3ea4e9，新增产品完整保留；原3条当前源码门禁均实际拒绝新增漂移，须继续对账。各次结果绑定各自源码，静态目录不提供运行或发布资格。
+
+[真实第2轮CI37654826526](https://github.com/jyqj/tabmail/actions/runs/37654826526)的协议接线已进入PostgreSQL：19顶层/88叶PASS、0FAIL/SKIP，源码manifest前后相同；production-web与browser-journey成功。但完整后端PG/必跑、源码目录、前端版本、默认测试和严格审计仍使该运行失败。这些结果绑定实际合成checkout93889b26，不冒充最终revision6运行。原始artifact、GitHub digest和逐范围结果见[CI证据](docs/company-mail/evidence/R5-NEXT-20261008/ci-37654826526/summary.json)。
+
+本轮关闭了已被#76逐字节覆盖的重复恢复#77；#17、#20、#24、#40仍有独立历史内容，保留draft。前批PR整理和关闭历史见[管理记录](docs/company-mail/R5-PR-MANAGEMENT-20261007.md)。**#56保持draft，完整CI、PG/opt-in fixture、私有前端fixture、完整依赖审计和有效M/G0仍待验收。** main未合入本批集成，未发布或部署。
+
 ## 公司工作流
 
 | 使用者 | 入口 | 能力 |
@@ -31,7 +57,7 @@ docker compose --env-file .env -f docker-compose.prod.yml config
 docker compose --env-file .env -f docker-compose.prod.yml up -d --build
 ```
 
-**现有安装先停止全部旧写入角色并联合备份，再升级全部角色。** 本版本在安全修复迁移 `00009` 基础上新增 `00010`–`00013`：独立已发送资产、正文索引、离职处置计划和草稿创建回执。不修改历史迁移。需要数据库支持 `pg_trgm`。不允许新旧写入端混跑，不执行破坏性的 Down。文件对象存储的协调快照／空目标恢复见 `scripts/company_snapshot.py`；S3 需要协调数据库快照与对象版本恢复。
+**现有安装先停止全部旧写入角色并联合备份，再升级全部角色。** 本版本在安全修复迁移 `00009` 基础上新增 `00010`–`00014`：独立已发送资产、正文索引、离职处置计划、草稿创建回执和强制逐收件人账本。`00014`要求协调停写；历史不确定接受结果保守进入受控核对，不重置为自动重发。不修改历史迁移。需要数据库支持 `pg_trgm`。不允许新旧写入端混跑，不执行破坏性的 Down。文件对象存储的协调快照／空目标恢复见 `scripts/company_snapshot.py`；S3 需要协调数据库快照与对象版本恢复。
 
 ## 发送和数据保留的含义
 

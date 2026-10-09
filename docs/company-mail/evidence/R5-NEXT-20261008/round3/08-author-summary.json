@@ -1,0 +1,420 @@
+{
+  "task": "R5-NEXT-20261008-08",
+  "commit": "5668683c521121a1e8efa50650b88495ff098b7b",
+  "tree": "94335217f0b42d3d6deeb69d01fbfce1a7e83a2f",
+  "baseline_source": "ee922f7630731682d0a0f973bf74daf709fcb263",
+  "test_sha256": "1165afff18bfb16b35f853d7e43529b6a71ca9b9589be0ac6053dcddf368358a",
+  "runner_sha256": "4e50b0565d19b4b42e2c58f86b00d183f59fb817bc98f888cec1b187523341a4",
+  "baseline": {
+    "methods": 14,
+    "passed": 2,
+    "failures": 1,
+    "errors": 11,
+    "skip": 0,
+    "exit_code": 1
+  },
+  "candidate": {
+    "process_controls": 14,
+    "original_protocol": 52,
+    "source_and_workflow": 18,
+    "total": 84,
+    "fail": 0,
+    "skip": 0,
+    "exit_code": 0
+  },
+  "database_available": false,
+  "real_go_pg_tests_executed": false,
+  "formal_budgets_seconds": {
+    "go": 120,
+    "outer": 180
+  },
+  "independent_review": {
+    "reviewer": "/root/pr_audit",
+    "conclusion": "ACCEPT",
+    "blocking_findings": 0,
+    "checks": "10 original functions and 7 source/workflow/mod files byte-identical; 12 actual child controls raw/hash/bytecounts independently matched; 2 no-launch boundaries retained; 84 PASS evidence read, not rerun.",
+    "scope": "shared-db/shared Go process evidence and post source/input checks only; reference/Vitest external launcher and complete descendant lifecycle remain outside scope."
+  },
+  "scope": "Shared Go process byte preservation and failed reports, including post-execution source rejection. Reference/Vitest launchers remain unchanged.",
+  "boundary": "Real owned Python children/missing executable exercise real subprocess timeout/start failure. Events and source closure are explicitly synthetic controls, not Go/PG/source qualification. No claim of full 180-second run, protocol product green, PG performance repair, release qualification or complete descendant-process cleanup.",
+  "code_files": {
+    "scripts/check_r5_protocol.py": {
+      "bytes": 42728,
+      "sha256": "4e50b0565d19b4b42e2c58f86b00d183f59fb817bc98f888cec1b187523341a4"
+    },
+    "scripts/tests/test_r5_protocol_process_evidence.py": {
+      "bytes": 14286,
+      "sha256": "1165afff18bfb16b35f853d7e43529b6a71ca9b9589be0ac6053dcddf368358a"
+    }
+  },
+  "unchanged_inputs": {
+    "scripts/r5_source_inventory.py": {
+      "bytes": 40174,
+      "sha256": "306cfcae043925d656d13b08bd439015e23348df255b363ceb8c10b6890488b2"
+    },
+    "scripts/r5_archive_boundary.py": {
+      "bytes": 12437,
+      "sha256": "c02acc09dd0f49b28113f99b05ffc6ff996287fb015d60fa08d7de56d92b7f15"
+    },
+    "scripts/prepare_r5_protocol_source.py": {
+      "bytes": 4888,
+      "sha256": "989a3b57fe79a7fb93956596781801b5adbd3d1f973268f65245c594f2008ce3"
+    },
+    "scripts/run_r5_source_version_tests.py": {
+      "bytes": 9331,
+      "sha256": "f0c3f43ba9596ab5aa9563325858fbfa4f51944a445042579c7b208e3ba16303"
+    },
+    ".github/workflows/company-p0.yml": {
+      "bytes": 15474,
+      "sha256": "bd15b5ad67f2ef47b77f6b5007b142c45ad3cebf78f63285e2f7e4ce01d3f718"
+    },
+    "go.mod": {
+      "bytes": 2798,
+      "sha256": "30eb5ba911706a9c88f5cfa77bea60eb61dbd1cb2570232d581847e12902e377"
+    },
+    "go.sum": {
+      "bytes": 13408,
+      "sha256": "5b850553522724f8fa71d36a94de2da91da174270ec4d460bb135dd42f53a33f"
+    }
+  },
+  "unchanged_functions": {
+    "load_cases": {
+      "unchanged": true,
+      "sha256": "1a9cae9808b28847ab7aaffc755d617aa814ce15fc2b7f3beb83a7e1959a0837"
+    },
+    "classify_events": {
+      "unchanged": true,
+      "sha256": "9c7a495a3535b7fb877a72556492123314cd23ce3f7f058539d53048dec07d84"
+    },
+    "classify_shared_events": {
+      "unchanged": true,
+      "sha256": "a4492d224278bbcc4325f2790a631d36dca0397c033058b8ce9f517316458b54"
+    },
+    "shared_command": {
+      "unchanged": true,
+      "sha256": "7259b40473f9b67c6edeb0fd43736a6f6f987bf67488c7a94a026b3a412bd8fe"
+    },
+    "source_closure": {
+      "unchanged": true,
+      "sha256": "b8d9e1cd47cdd6bb8e27f93b170a2d332a7ae2e95c7c641e901dac21c86d2eea"
+    },
+    "current_protocol_environment": {
+      "unchanged": true,
+      "sha256": "8c9db49793b9e29647b6e7427e4e399492c21ff6f3a76ffd761ea0f076356b66"
+    },
+    "run_references": {
+      "unchanged": true,
+      "sha256": "bb7f2a4766835e52ee745161f875f5c7cbd9407bb413713ee566a835dd84ecc1"
+    },
+    "external_component_command": {
+      "unchanged": true,
+      "sha256": "1d8959a63c56876e63391e85b022193fd6dea9507c18dc7749842a3470db8203"
+    },
+    "classify_go_component_packets": {
+      "unchanged": true,
+      "sha256": "ddc1b77a01bb98009cf4c6cd075c585027ef0b8df760ca66b23252d0ee88b58e"
+    },
+    "classify_components": {
+      "unchanged": true,
+      "sha256": "c0b81421443836b7adbb0239734bc76980bd6479c4f32430cf874ac97512be3d"
+    }
+  },
+  "controls": {
+    "test_cli_keeps_nonzero_conclusion_and_persisted_report_on_real_start_failure": {
+      "baseline": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": false,
+        "observed_status": "process_error",
+        "observed_error_type": "FileNotFoundError",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180
+      },
+      "candidate": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": true,
+        "observed_status": "process_error",
+        "observed_error_type": "FileNotFoundError",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180,
+        "report_status": "shared_scoped_evidence_failed",
+        "shared_input_verified_cases": 0
+      }
+    },
+    "test_complete_pass_looking_output_followed_by_timeout_cannot_qualify": {
+      "baseline": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": false,
+        "observed_status": "timed_out",
+        "observed_error_type": "TimeoutExpired",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180
+      },
+      "candidate": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": true,
+        "observed_status": "timed_out",
+        "observed_error_type": "TimeoutExpired",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180,
+        "report_status": "shared_scoped_evidence_failed",
+        "shared_input_verified_cases": 0
+      }
+    },
+    "test_completed_invalid_json_keeps_raw_streams_and_failure_report": {
+      "baseline": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": false,
+        "observed_status": "completed",
+        "observed_error_type": null,
+        "observed_returncode": 0,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180
+      },
+      "candidate": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": true,
+        "observed_status": "completed",
+        "observed_error_type": null,
+        "observed_returncode": 0,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180,
+        "report_status": "shared_scoped_evidence_failed",
+        "shared_input_verified_cases": 0
+      }
+    },
+    "test_completed_invalid_utf8_keeps_raw_streams_and_failure_report": {
+      "baseline": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": false,
+        "observed_status": null,
+        "observed_error_type": null,
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180
+      },
+      "candidate": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": true,
+        "observed_status": "completed",
+        "observed_error_type": null,
+        "observed_returncode": 0,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180,
+        "report_status": "shared_scoped_evidence_failed",
+        "shared_input_verified_cases": 0
+      }
+    },
+    "test_completed_nonzero_exit_is_recorded_and_not_laundered_by_pass_events": {
+      "baseline": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": true,
+        "observed_status": "completed",
+        "observed_error_type": null,
+        "observed_returncode": 7,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180,
+        "report_status": "shared_scoped_evidence_failed",
+        "shared_input_verified_cases": 0
+      },
+      "candidate": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": true,
+        "observed_status": "completed",
+        "observed_error_type": null,
+        "observed_returncode": 7,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180,
+        "report_status": "shared_scoped_evidence_failed",
+        "shared_input_verified_cases": 0
+      }
+    },
+    "test_completed_pass_preserves_original_classifier_semantics_and_raw_line_endings": {
+      "baseline": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": true,
+        "observed_status": "completed",
+        "observed_error_type": null,
+        "observed_returncode": 0,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180,
+        "report_status": "shared_scoped_evidence_passed",
+        "shared_input_verified_cases": 1
+      },
+      "candidate": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": true,
+        "observed_status": "completed",
+        "observed_error_type": null,
+        "observed_returncode": 0,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180,
+        "report_status": "shared_scoped_evidence_passed",
+        "shared_input_verified_cases": 1
+      }
+    },
+    "test_existing_output_is_never_overwritten_or_reused": {
+      "baseline": {
+        "real_dispatch_recorded": false,
+        "runner_report_saved": false,
+        "protected_existing_artifact_preserved": true
+      },
+      "candidate": {
+        "real_dispatch_recorded": false,
+        "runner_report_saved": false,
+        "protected_existing_artifact_preserved": true
+      }
+    },
+    "test_post_case_read_failure_after_timeout_keeps_failed_report": {
+      "baseline": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": false,
+        "observed_status": "timed_out",
+        "observed_error_type": "TimeoutExpired",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180
+      },
+      "candidate": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": true,
+        "observed_status": "timed_out",
+        "observed_error_type": "TimeoutExpired",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180,
+        "report_status": "shared_scoped_evidence_failed",
+        "shared_input_verified_cases": 0
+      }
+    },
+    "test_post_source_rejection_after_timeout_keeps_failed_report_with_no_fallback": {
+      "baseline": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": false,
+        "observed_status": "timed_out",
+        "observed_error_type": "TimeoutExpired",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180
+      },
+      "candidate": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": true,
+        "observed_status": "timed_out",
+        "observed_error_type": "TimeoutExpired",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180,
+        "report_status": "shared_scoped_evidence_failed",
+        "shared_input_verified_cases": 0
+      }
+    },
+    "test_preflight_source_rejection_never_dispatches_or_creates_a_pass_report": {
+      "baseline": {
+        "real_dispatch_recorded": false,
+        "runner_report_saved": false
+      },
+      "candidate": {
+        "real_dispatch_recorded": false,
+        "runner_report_saved": false
+      }
+    },
+    "test_real_missing_executable_keeps_child_streams_empty_and_launch_error_separate": {
+      "baseline": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": false,
+        "observed_status": "process_error",
+        "observed_error_type": "FileNotFoundError",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180
+      },
+      "candidate": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": true,
+        "observed_status": "process_error",
+        "observed_error_type": "FileNotFoundError",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180,
+        "report_status": "shared_scoped_evidence_failed",
+        "shared_input_verified_cases": 0
+      }
+    },
+    "test_real_timeout_preserves_partial_streams_and_failure_report": {
+      "baseline": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": false,
+        "observed_status": "timed_out",
+        "observed_error_type": "TimeoutExpired",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180
+      },
+      "candidate": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": true,
+        "observed_status": "timed_out",
+        "observed_error_type": "TimeoutExpired",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180,
+        "report_status": "shared_scoped_evidence_failed",
+        "shared_input_verified_cases": 0
+      }
+    },
+    "test_timeout_keeps_invalid_utf8_bytes_without_replacement_or_report_loss": {
+      "baseline": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": false,
+        "observed_status": "timed_out",
+        "observed_error_type": "TimeoutExpired",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180
+      },
+      "candidate": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": true,
+        "observed_status": "timed_out",
+        "observed_error_type": "TimeoutExpired",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180,
+        "report_status": "shared_scoped_evidence_failed",
+        "shared_input_verified_cases": 0
+      }
+    },
+    "test_timeout_keeps_truncated_json_bytes_without_parse_exception_losing_report": {
+      "baseline": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": false,
+        "observed_status": "timed_out",
+        "observed_error_type": "TimeoutExpired",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180
+      },
+      "candidate": {
+        "real_dispatch_recorded": true,
+        "runner_report_saved": true,
+        "observed_status": "timed_out",
+        "observed_error_type": "TimeoutExpired",
+        "observed_returncode": null,
+        "actual_timeout_seconds": 0.75,
+        "requested_timeout_seconds": 180,
+        "report_status": "shared_scoped_evidence_failed",
+        "shared_input_verified_cases": 0
+      }
+    }
+  },
+  "evidence_inventory": {
+    "path": "/workspace/scratch/fabe500b93be/ci-evidence/08-evidence-inventory.json",
+    "files": 244,
+    "bytes": 54372,
+    "sha256": "fa9b340b1466d368226b33dab4570d2c19a644f273d5a4f4be53263266a1f967"
+  }
+}

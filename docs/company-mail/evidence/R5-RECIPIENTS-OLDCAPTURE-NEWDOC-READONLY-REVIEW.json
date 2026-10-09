@@ -1,0 +1,16 @@
+{
+  "actual_repair_CLI_exit": 0,
+  "group_observation": {
+    "members": [],
+    "non_zombie_live_pids": [],
+    "status": "observed"
+  },
+  "initial_attempt_actual_response_validation_count": 0,
+  "initial_attempt_cli": 1,
+  "initial_import_error": "ModuleNotFoundError check_contract_drift, executor orchestration context not product/schema",
+  "initial_raw_and_archive_b70_preserved": true,
+  "noGoPG_newproducer_or_freshformalCLI": true,
+  "original_180_total_elapsed_including_both_attempts_and_cleanup": 141.24861192703247,
+  "original_180_within": true,
+  "original_capture_sha_unchanged": true
+}

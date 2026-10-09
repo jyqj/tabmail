@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "source": "/tmp/tm-r5browser-pure.1bab0avc",
+  "archive": "R5-BROWSER-REPAIR2-PURE-LOGS.tar.gz",
+  "archive_sha256": "59662b89a6dd780be846a817fe4f1651ab9c983476ddcebb4fbfffa7a21eaefc",
+  "payload_file_count": 6,
+  "payload_bytes_changed": false,
+  "driver_sha256_from_author": "746d4bd19a0034286dc66437954a5505f40a8736b9e17e374dce6e270be3e005",
+  "tests_sha256_from_author": "02e51012b9619e7c48aa5bc49982145bce78dd7eb98e8196ddfffcb395845167",
+  "actual_exit_file": "tests.exit",
+  "actual_exit": 0,
+  "actual_controller_wall_seconds": 0.22140908241271973,
+  "tests": 2,
+  "old7_reexecuted_or_combined_to_new9": false,
+  "actual_browser_server": false,
+  "Go_PG_Docker_actual_chain": false,
+  "task_complete": false,
+  "product_green": false,
+  "new_independent_review": "delivered_signed_bounded_by_baseline_dispatch",
+  "group_absence_receipt": "not_in_this_smallpacket; do_not_infer_allcurrentgroups_absent",
+  "tests_reexecuted_by_docs": false,
+  "per_file_hashes_recomputed": false
+}

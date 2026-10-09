@@ -1,0 +1,958 @@
+{
+  "S_M_L_executed": false,
+  "actual_phases": {
+    "dataset1000": {
+      "actual_distribution": {
+        "employees": 20,
+        "index_ready_count": 1000,
+        "lifecycle_counts": {
+          "archived": 100,
+          "hard_expired": 50,
+          "inbox": 800,
+          "trash_expired": 50
+        },
+        "mailboxes": 100,
+        "max_distinct_shared_grantees": 4,
+        "messages": 1000,
+        "mime_size_counts": {
+          "2097152": 1,
+          "262144": 19,
+          "32768": 180,
+          "4096": 800
+        },
+        "min_distinct_shared_grantees": 4,
+        "personal_mailboxes": 20,
+        "shared_grant_rows": 320,
+        "shared_mailboxes": 80,
+        "tenant_message_counts": {
+          "bench-0.test": 800,
+          "bench-1.test": 200
+        }
+      },
+      "actual_lifecycle": [
+        "run",
+        "pass"
+      ],
+      "fingerprint": "b36d2070cd43e1e472d6a054aab29780e72c1086e1ad415a1635fb2863caca74",
+      "fingerprint_streams": [
+        {
+          "row_count": 2,
+          "sha256": "52bb8abf43f2b8d1c70a857875517f9d67f71d29c71df8fd8c4d422782214319",
+          "stream_id": 0
+        },
+        {
+          "row_count": 1000,
+          "sha256": "280410f8fd3d19c8bd96dcac957c6d4f1ca14853ecb012d3bfce23016a2710db",
+          "stream_id": 1
+        },
+        {
+          "row_count": 1000,
+          "sha256": "118dfb90c7a419e66bcaea2d65a56769305b05302e8223f1417a9d17fd7b2858",
+          "stream_id": 2
+        },
+        {
+          "row_count": 320,
+          "sha256": "3f59b298324672a168460e22a777e1bb964606a3ea3e9ca8c32168bca38fe861",
+          "stream_id": 3
+        },
+        {
+          "row_count": 22,
+          "sha256": "9fa139e0b52b205f3d99e02e97da8f14733c5dfe78b581d156a316b05b2eb3f5",
+          "stream_id": 4
+        },
+        {
+          "row_count": 100,
+          "sha256": "757606be6d6c53f76ce4c394b32d3b01eca9577ebf75c79867fb17e0e266d033",
+          "stream_id": 5
+        }
+      ],
+      "go_exit": 0,
+      "package_elapsed_seconds": 14.484,
+      "preparation": {
+        "active_budget": 20,
+        "claim_calls": 51,
+        "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+        "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+        "claim_wall_seconds": 0.09555899999999999,
+        "company_wall_seconds": 0.169113,
+        "final_empty_claim": true,
+        "joined_completed_jobs": 1000,
+        "joined_inflight": 0,
+        "joined_ready_before_last_claim": 1000,
+        "joined_stored_messages": 1000,
+        "last_claim_batch": 0,
+        "last_claim_wall_seconds": 0.0002360000000000001,
+        "max_active": 20,
+        "max_claim_batch": 20,
+        "max_wall_monotonic_gap_ms": 0.001333,
+        "max_window_messages": 20,
+        "method": "bounded_store_claim_complete_window_v1",
+        "parse_complete_wall_seconds": 1.6253249999999997,
+        "parser_canceled_joined_calls": 0,
+        "parser_join_policy": "uncancelled_document_wait_with_31s_absolute_wall_admission_guard",
+        "parser_join_reserve_seconds": 31,
+        "parser_joined_call_wall_seconds_sum": 14.7766,
+        "parser_joined_calls": 1000,
+        "parser_joined_inflight": 0,
+        "parser_min_start_remaining_wall_seconds": 166.35993,
+        "parser_original_deadline_unix_seconds": 1790880662.3195431,
+        "parser_quiescent": true,
+        "pending_upper_bound": 20,
+        "phase": "terminal",
+        "pipeline_wall_seconds": 13.298488,
+        "producer_done": true,
+        "sql_ready_count": 1000,
+        "store_wall_seconds": 11.550789000000004
+      },
+      "raw_sha256": "e8a74105bc508051d58fbc57c8ec1806266b962bfaf040bf36632c3425297ee2",
+      "result_sha256": "a08e72b99d1aaea738d800707a1012e5da4390b9a0b95dfc2ea4f07254810bc9",
+      "sql_plans": [
+        {
+          "index_ready_count": 1000,
+          "origin": "captured_shipping_query_same_parameters",
+          "parameters_sha256": "09a94f49a765476ad9e5228b161f5142a06e9ce7b060a3948f7652520b6fdbbd",
+          "plan": [
+            {
+              "Plan": {
+                "Async Capable": false,
+                "Node Type": "Aggregate",
+                "Parallel Aware": false,
+                "Partial Mode": "Simple",
+                "Plan Rows": 1,
+                "Plan Width": 8,
+                "Plans": [
+                  {
+                    "Alias": "m",
+                    "Async Capable": false,
+                    "Filter": "((archived_at IS NULL) AND (tenant_id = 'ae065979-02fc-5350-9c31-d49af2fc7efd'::uuid))",
+                    "Node Type": "Bitmap Heap Scan",
+                    "Parallel Aware": false,
+                    "Parent Relationship": "Outer",
+                    "Plan Rows": 14,
+                    "Plan Width": 0,
+                    "Plans": [
+                      {
+                        "Async Capable": false,
+                        "Index Cond": "(mailbox_id = 'c1d0e69d-0c1d-46c2-81d2-47b44de1c65a'::uuid)",
+                        "Index Name": "messages_visible_mailbox",
+                        "Node Type": "Bitmap Index Scan",
+                        "Parallel Aware": false,
+                        "Parent Relationship": "Outer",
+                        "Plan Rows": 19,
+                        "Plan Width": 0,
+                        "Startup Cost": 0,
+                        "Total Cost": 4.42
+                      }
+                    ],
+                    "Recheck Cond": "((mailbox_id = 'c1d0e69d-0c1d-46c2-81d2-47b44de1c65a'::uuid) AND (deleted_at IS NULL))",
+                    "Relation Name": "messages",
+                    "Startup Cost": 4.42,
+                    "Total Cost": 40.7
+                  }
+                ],
+                "Startup Cost": 40.73,
+                "Strategy": "Plain",
+                "Total Cost": 40.74
+              }
+            }
+          ],
+          "query_sha256": "14829666ae927bb00ad43b91f3b240bb076114f3951197b26df1f308915b3dc8",
+          "scale": "tool_only",
+          "schema_version": 16,
+          "source_sha": "3d07b72b3732cf289410aefaaba49f8d8423f746",
+          "workload": "inbox_list"
+        }
+      ],
+      "test": "TestR5BenchmarkToolOnlyDatasetCalibration",
+      "validator": {
+        "S_M_L_executed": false,
+        "product_green": false,
+        "status": "tool_only_observations_validated",
+        "task_complete": false
+      },
+      "validator_exit": 0
+    },
+    "sql20": {
+      "actual_lifecycle": [
+        "run",
+        "pass"
+      ],
+      "go_exit": 0,
+      "package_elapsed_seconds": 1.325,
+      "raw_sha256": "25a5b0c2a5d1a67b61d781b44c095238ee420f2fb411d5002f86a6a5141e6c98",
+      "test": "TestR5BenchmarkSQLTracerCalibration"
+    },
+    "workloads2800": {
+      "actual_distribution": {
+        "employees": 20,
+        "index_ready_count": 1000,
+        "lifecycle_counts": {
+          "archived": 100,
+          "hard_expired": 50,
+          "inbox": 800,
+          "trash_expired": 50
+        },
+        "mailboxes": 100,
+        "max_distinct_shared_grantees": 4,
+        "messages": 1000,
+        "mime_size_counts": {
+          "2097152": 1,
+          "262144": 19,
+          "32768": 180,
+          "4096": 800
+        },
+        "min_distinct_shared_grantees": 4,
+        "personal_mailboxes": 20,
+        "shared_grant_rows": 320,
+        "shared_mailboxes": 80,
+        "tenant_message_counts": {
+          "bench-0.test": 800,
+          "bench-1.test": 200
+        }
+      },
+      "actual_lifecycle": [
+        "run",
+        "pass"
+      ],
+      "disk_bytes": 35642391,
+      "execution_wall": {
+        "budget_seconds": 300,
+        "completed_unix_seconds": 1790880548.729686,
+        "elapsed_wall_seconds": 22.784825,
+        "started_unix_seconds": 1790880525.944861
+      },
+      "fingerprint": "b36d2070cd43e1e472d6a054aab29780e72c1086e1ad415a1635fb2863caca74",
+      "fingerprint_streams": [
+        {
+          "row_count": 2,
+          "sha256": "52bb8abf43f2b8d1c70a857875517f9d67f71d29c71df8fd8c4d422782214319",
+          "stream_id": 0
+        },
+        {
+          "row_count": 1000,
+          "sha256": "280410f8fd3d19c8bd96dcac957c6d4f1ca14853ecb012d3bfce23016a2710db",
+          "stream_id": 1
+        },
+        {
+          "row_count": 1000,
+          "sha256": "118dfb90c7a419e66bcaea2d65a56769305b05302e8223f1417a9d17fd7b2858",
+          "stream_id": 2
+        },
+        {
+          "row_count": 320,
+          "sha256": "3f59b298324672a168460e22a777e1bb964606a3ea3e9ca8c32168bca38fe861",
+          "stream_id": 3
+        },
+        {
+          "row_count": 22,
+          "sha256": "9fa139e0b52b205f3d99e02e97da8f14733c5dfe78b581d156a316b05b2eb3f5",
+          "stream_id": 4
+        },
+        {
+          "row_count": 100,
+          "sha256": "757606be6d6c53f76ce4c394b32d3b01eca9577ebf75c79867fb17e0e266d033",
+          "stream_id": 5
+        }
+      ],
+      "go_exit": 0,
+      "measurements": [
+        {
+          "alloc_bytes": 17337080,
+          "cache_mode": "app_cold_db_os_unspecified",
+          "disk_bytes": 32342543,
+          "max_wall_monotonic_gap_ms": 0.000916,
+          "p50_ms": 2.752,
+          "p95_ms": 9.427,
+          "p99_ms": 10.383,
+          "rss_bytes": 121569280,
+          "samples": 200,
+          "sql_count": 2400,
+          "workload": "inbox_list"
+        },
+        {
+          "alloc_bytes": 16816744,
+          "cache_mode": "app_hot_db_os_unspecified",
+          "disk_bytes": 32342543,
+          "max_wall_monotonic_gap_ms": 0.000917,
+          "p50_ms": 2.769,
+          "p95_ms": 4.573,
+          "p99_ms": 4.943,
+          "rss_bytes": 121716736,
+          "samples": 200,
+          "sql_count": 2400,
+          "workload": "inbox_list"
+        },
+        {
+          "alloc_bytes": 25164448,
+          "cache_mode": "app_cold_db_os_unspecified",
+          "disk_bytes": 32342543,
+          "max_wall_monotonic_gap_ms": 0.003958,
+          "p50_ms": 4.436,
+          "p95_ms": 6.613,
+          "p99_ms": 7.277,
+          "rss_bytes": 121946112,
+          "samples": 200,
+          "sql_count": 2600,
+          "workload": "indexed_search"
+        },
+        {
+          "alloc_bytes": 24604696,
+          "cache_mode": "app_hot_db_os_unspecified",
+          "disk_bytes": 32342543,
+          "max_wall_monotonic_gap_ms": 0.000875,
+          "p50_ms": 4.505,
+          "p95_ms": 6.153,
+          "p99_ms": 6.481,
+          "rss_bytes": 122044416,
+          "samples": 200,
+          "sql_count": 2600,
+          "workload": "indexed_search"
+        },
+        {
+          "alloc_bytes": 24146368,
+          "cache_mode": "app_cold_db_os_unspecified",
+          "disk_bytes": 32350735,
+          "max_wall_monotonic_gap_ms": 0.004708,
+          "p50_ms": 4.645,
+          "p95_ms": 7.394,
+          "p99_ms": 8.503,
+          "rss_bytes": 122077184,
+          "samples": 200,
+          "sql_count": 6000,
+          "workload": "indexed_message"
+        },
+        {
+          "alloc_bytes": 23430248,
+          "cache_mode": "app_hot_db_os_unspecified",
+          "disk_bytes": 32350735,
+          "max_wall_monotonic_gap_ms": 0.000917,
+          "p50_ms": 4.519,
+          "p95_ms": 6.3,
+          "p99_ms": 6.833,
+          "rss_bytes": 122093568,
+          "samples": 200,
+          "sql_count": 6000,
+          "workload": "indexed_message"
+        },
+        {
+          "alloc_bytes": 25799456,
+          "cache_mode": "app_cold_db_os_unspecified",
+          "disk_bytes": 32358927,
+          "max_wall_monotonic_gap_ms": 0.00225,
+          "p50_ms": 3.573,
+          "p95_ms": 5.615,
+          "p99_ms": 6.29,
+          "rss_bytes": 122159104,
+          "samples": 200,
+          "sql_count": 2400,
+          "workload": "permission_mailboxes"
+        },
+        {
+          "alloc_bytes": 25053248,
+          "cache_mode": "app_hot_db_os_unspecified",
+          "disk_bytes": 32358927,
+          "max_wall_monotonic_gap_ms": 0.001292,
+          "p50_ms": 3.531,
+          "p95_ms": 5.435,
+          "p99_ms": 5.783,
+          "rss_bytes": 122191872,
+          "samples": 200,
+          "sql_count": 2400,
+          "workload": "permission_mailboxes"
+        },
+        {
+          "alloc_bytes": 19768352,
+          "cache_mode": "app_cold_db_os_unspecified",
+          "disk_bytes": 32629263,
+          "max_wall_monotonic_gap_ms": 0.001,
+          "p50_ms": 4.567,
+          "p95_ms": 6.097,
+          "p99_ms": 6.495,
+          "rss_bytes": 122191872,
+          "samples": 200,
+          "sql_count": 4400,
+          "workload": "draft_save"
+        },
+        {
+          "alloc_bytes": 22289680,
+          "cache_mode": "app_hot_db_os_unspecified",
+          "disk_bytes": 32711183,
+          "max_wall_monotonic_gap_ms": 0.000959,
+          "p50_ms": 5.064,
+          "p95_ms": 6.924,
+          "p99_ms": 7.982,
+          "rss_bytes": 122306560,
+          "samples": 200,
+          "sql_count": 4400,
+          "workload": "draft_save"
+        },
+        {
+          "alloc_bytes": 131953136,
+          "cache_mode": "app_cold_db_os_unspecified",
+          "disk_bytes": 34234895,
+          "max_wall_monotonic_gap_ms": 0.001833,
+          "p50_ms": 398.523,
+          "p95_ms": 407.007,
+          "p99_ms": 413.424,
+          "rss_bytes": 122667008,
+          "samples": 200,
+          "sql_count": 24880,
+          "workload": "submit_and_loopback_worker"
+        },
+        {
+          "alloc_bytes": 134253944,
+          "cache_mode": "app_hot_db_os_unspecified",
+          "disk_bytes": 35642391,
+          "max_wall_monotonic_gap_ms": 0.00175,
+          "p50_ms": 399.157,
+          "p95_ms": 405.601,
+          "p99_ms": 407.048,
+          "rss_bytes": 122781696,
+          "samples": 200,
+          "sql_count": 24912,
+          "workload": "submit_and_loopback_worker"
+        },
+        {
+          "alloc_bytes": 186784,
+          "cache_mode": "app_cold_db_os_unspecified",
+          "disk_bytes": 35642391,
+          "max_wall_monotonic_gap_ms": 0.001,
+          "p50_ms": 0.164,
+          "p95_ms": 4.831,
+          "p99_ms": 5.292,
+          "rss_bytes": 122781696,
+          "samples": 200,
+          "sql_count": 200,
+          "workload": "gc_reference_safety"
+        },
+        {
+          "alloc_bytes": 158912,
+          "cache_mode": "app_hot_db_os_unspecified",
+          "disk_bytes": 35642391,
+          "max_wall_monotonic_gap_ms": 0.001042,
+          "p50_ms": 0.09,
+          "p95_ms": 0.324,
+          "p99_ms": 0.478,
+          "rss_bytes": 122781696,
+          "samples": 200,
+          "sql_count": 200,
+          "workload": "gc_reference_safety"
+        }
+      ],
+      "package_elapsed_seconds": 23.448,
+      "preparation": {
+        "active_budget": 20,
+        "claim_calls": 51,
+        "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+        "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+        "claim_wall_seconds": 0.09957599999999997,
+        "company_wall_seconds": 0.159183,
+        "final_empty_claim": true,
+        "joined_completed_jobs": 1000,
+        "joined_inflight": 0,
+        "joined_ready_before_last_claim": 1000,
+        "joined_stored_messages": 1000,
+        "last_claim_batch": 0,
+        "last_claim_wall_seconds": 0.00043899999999999495,
+        "max_active": 20,
+        "max_claim_batch": 20,
+        "max_wall_monotonic_gap_ms": 0.282625,
+        "max_window_messages": 20,
+        "method": "bounded_store_claim_complete_window_v1",
+        "parse_complete_wall_seconds": 1.7712939999999997,
+        "parser_canceled_joined_calls": 0,
+        "parser_join_policy": "uncancelled_document_wait_with_31s_absolute_wall_admission_guard",
+        "parser_join_reserve_seconds": 31,
+        "parser_joined_call_wall_seconds_sum": 16.10612,
+        "parser_joined_calls": 1000,
+        "parser_joined_inflight": 0,
+        "parser_min_start_remaining_wall_seconds": 286.143948,
+        "parser_original_deadline_unix_seconds": 1790880825.944861,
+        "parser_quiescent": true,
+        "pending_upper_bound": 20,
+        "phase": "terminal",
+        "pipeline_wall_seconds": 13.549412,
+        "producer_done": true,
+        "sql_ready_count": 1000,
+        "store_wall_seconds": 11.64444
+      },
+      "raw_sha256": "a5e5562081fa310651df2321e44178bd4d6b74fbafe9c7583d8b86e8f6b0ba87",
+      "result_sha256": "95e85f0c9c424906c6afb94749b8f90a2feef84b65d8fe52f98b2d55e9f0592c",
+      "rss_bytes": 122781696,
+      "safety_assertions": [
+        "inbox_list:foreign_and_revoked_current_source_denied",
+        "indexed_search:foreign_and_revoked_current_source_denied",
+        "indexed_message:foreign_and_revoked_current_source_denied",
+        "permission_mailboxes:foreign_and_revoked_current_source_denied",
+        "draft_save:foreign_and_revoked_current_source_denied",
+        "submit_and_loopback_worker:foreign_and_revoked_current_source_denied",
+        "gc_reference_safety:foreign_and_revoked_current_source_denied"
+      ],
+      "samples": 2800,
+      "sql_plans": [
+        {
+          "index_ready_count": 1000,
+          "origin": "captured_shipping_query_same_parameters",
+          "parameters_sha256": "491379b595d12e14cbfb48f5d2f3b781ade709065402b9eeef1b0866f2006f72",
+          "plan": [
+            {
+              "Plan": {
+                "Async Capable": false,
+                "Node Type": "Aggregate",
+                "Parallel Aware": false,
+                "Partial Mode": "Simple",
+                "Plan Rows": 1,
+                "Plan Width": 8,
+                "Plans": [
+                  {
+                    "Alias": "m",
+                    "Async Capable": false,
+                    "Filter": "((archived_at IS NULL) AND (tenant_id = 'ae065979-02fc-5350-9c31-d49af2fc7efd'::uuid))",
+                    "Node Type": "Bitmap Heap Scan",
+                    "Parallel Aware": false,
+                    "Parent Relationship": "Outer",
+                    "Plan Rows": 7,
+                    "Plan Width": 0,
+                    "Plans": [
+                      {
+                        "Async Capable": false,
+                        "Index Cond": "(mailbox_id = '7cb136aa-002f-4af2-9cae-6d37bcc25998'::uuid)",
+                        "Index Name": "messages_visible_mailbox",
+                        "Node Type": "Bitmap Index Scan",
+                        "Parallel Aware": false,
+                        "Parent Relationship": "Outer",
+                        "Plan Rows": 10,
+                        "Plan Width": 0,
+                        "Startup Cost": 0,
+                        "Total Cost": 4.35
+                      }
+                    ],
+                    "Recheck Cond": "((mailbox_id = '7cb136aa-002f-4af2-9cae-6d37bcc25998'::uuid) AND (deleted_at IS NULL))",
+                    "Relation Name": "messages",
+                    "Startup Cost": 4.35,
+                    "Total Cost": 28.15
+                  }
+                ],
+                "Startup Cost": 28.17,
+                "Strategy": "Plain",
+                "Total Cost": 28.18
+              }
+            }
+          ],
+          "query_sha256": "14829666ae927bb00ad43b91f3b240bb076114f3951197b26df1f308915b3dc8",
+          "scale": "tool_only",
+          "schema_version": 16,
+          "source_sha": "3d07b72b3732cf289410aefaaba49f8d8423f746",
+          "workload": "inbox_list"
+        }
+      ],
+      "test": "TestR5BenchmarkToolOnlyWorkloads",
+      "validator": {
+        "S_M_L_executed": false,
+        "product_green": false,
+        "status": "tool_only_observations_validated",
+        "task_complete": false
+      },
+      "validator_exit": 0
+    }
+  },
+  "actual_real_complete_faults": {
+    "boundary": "parent fingerprint mutation/setup also executes; unrelated pure/race/fault selectors not rerun",
+    "child_count": 3,
+    "go_exit": 0,
+    "package_elapsed_seconds": 15.058,
+    "proof": "real Claim20+Parser.Document rejects expired lease/stale token/changed source as exact conflict; rejected SQL docs0; new real lease+Complete recovery SQL sourceboundReady1000 each child",
+    "raw_sha256": "e6a12c5f5d6c438dbdd3d4095d2749bf73f6b3acb5d6a680229a75953d16343e",
+    "status": "passed",
+    "tests": [
+      "TestR5BenchmarkObservedIdentityBinding",
+      "TestR5BenchmarkObservedIdentityBinding/real_complete_rejects_expired_lease",
+      "TestR5BenchmarkObservedIdentityBinding/real_complete_rejects_stale_token",
+      "TestR5BenchmarkObservedIdentityBinding/real_complete_rejects_changed_source"
+    ],
+    "top_count": 1
+  },
+  "complete_workload_samples_across_two_fresh_runs": 5600,
+  "contract_sha256": "9e81020680dbd6e990cbb35ab1aac16413885e65306d949a5889c4bafda00b36",
+  "created_utc": "2026-10-01T18:50:22.466478+00:00",
+  "historical_canonical_equivalence": {
+    "boundary": "comparison only; historical source not recertified under schema16 and no normalized digest invented",
+    "equal_actual_canonical_digest": true,
+    "historical_dataset_fingerprint": "b36d2070cd43e1e472d6a054aab29780e72c1086e1ad415a1635fb2863caca74",
+    "historical_result_path": "/tmp/tm-r5bench.Lh6gKF9n/clock-tool1/result.json",
+    "historical_source_sha": "c9a8c29903c24bd82931c1b012f7df1da3ea48a2"
+  },
+  "orchestration_non_go_error": {
+    "detail": "execution wrapper accidentally invoked original-scale-only lifecycle helper on tool-only events; actual Go return0 remains observed and strict tool-result CLI separately exit0; this helper failure is not a benchmark execution failure",
+    "status": "resolved_without_test_rerun"
+  },
+  "product_green": false,
+  "resource_boundary": "only reused verified root-transferred private PostgreSQL16 socket cluster; tool fixtures automatically CREATE/DROP their own random DBs; objects temporary and not bundled; PG lease retained pending root decision; no production service/config touched",
+  "same_immutable_source_same_six_streams": true,
+  "second_complete_tool_run": {
+    "S_M_L_executed": false,
+    "actual_distribution": {
+      "employees": 20,
+      "index_ready_count": 1000,
+      "lifecycle_counts": {
+        "archived": 100,
+        "hard_expired": 50,
+        "inbox": 800,
+        "trash_expired": 50
+      },
+      "mailboxes": 100,
+      "max_distinct_shared_grantees": 4,
+      "messages": 1000,
+      "mime_size_counts": {
+        "2097152": 1,
+        "262144": 19,
+        "32768": 180,
+        "4096": 800
+      },
+      "min_distinct_shared_grantees": 4,
+      "personal_mailboxes": 20,
+      "shared_grant_rows": 320,
+      "shared_mailboxes": 80,
+      "tenant_message_counts": {
+        "bench-0.test": 800,
+        "bench-1.test": 200
+      }
+    },
+    "created_utc": "2026-10-01T18:57:33.709623+00:00",
+    "execution_wall": {
+      "budget_seconds": 300,
+      "completed_unix_seconds": 1790880997.4838521,
+      "elapsed_wall_seconds": 21.442897,
+      "started_unix_seconds": 1790880976.0409548
+    },
+    "fingerprint": "b36d2070cd43e1e472d6a054aab29780e72c1086e1ad415a1635fb2863caca74",
+    "fingerprint_streams": [
+      {
+        "row_count": 2,
+        "sha256": "52bb8abf43f2b8d1c70a857875517f9d67f71d29c71df8fd8c4d422782214319",
+        "stream_id": 0
+      },
+      {
+        "row_count": 1000,
+        "sha256": "280410f8fd3d19c8bd96dcac957c6d4f1ca14853ecb012d3bfce23016a2710db",
+        "stream_id": 1
+      },
+      {
+        "row_count": 1000,
+        "sha256": "118dfb90c7a419e66bcaea2d65a56769305b05302e8223f1417a9d17fd7b2858",
+        "stream_id": 2
+      },
+      {
+        "row_count": 320,
+        "sha256": "3f59b298324672a168460e22a777e1bb964606a3ea3e9ca8c32168bca38fe861",
+        "stream_id": 3
+      },
+      {
+        "row_count": 22,
+        "sha256": "9fa139e0b52b205f3d99e02e97da8f14733c5dfe78b581d156a316b05b2eb3f5",
+        "stream_id": 4
+      },
+      {
+        "row_count": 100,
+        "sha256": "757606be6d6c53f76ce4c394b32d3b01eca9577ebf75c79867fb17e0e266d033",
+        "stream_id": 5
+      }
+    ],
+    "go_exit": 0,
+    "isolation": "distinct Go process; actual r5BenchOwned independently creates random isolated DB and object TempDir each invocation, test cleanup drops it; concrete temporary DB name not retained because no fixture identity file exists",
+    "measurements": [
+      {
+        "alloc_bytes": 17347288,
+        "cache_mode": "app_cold_db_os_unspecified",
+        "disk_bytes": 32547343,
+        "max_wall_monotonic_gap_ms": 0.001,
+        "p50_ms": 2.815,
+        "p95_ms": 7.975,
+        "p99_ms": 8.93,
+        "rss_bytes": 117161984,
+        "samples": 200,
+        "sql_count": 2400,
+        "workload": "inbox_list"
+      },
+      {
+        "alloc_bytes": 16879432,
+        "cache_mode": "app_hot_db_os_unspecified",
+        "disk_bytes": 32547343,
+        "max_wall_monotonic_gap_ms": 0.000959,
+        "p50_ms": 2.721,
+        "p95_ms": 4.523,
+        "p99_ms": 4.789,
+        "rss_bytes": 117456896,
+        "samples": 200,
+        "sql_count": 2400,
+        "workload": "inbox_list"
+      },
+      {
+        "alloc_bytes": 25084432,
+        "cache_mode": "app_cold_db_os_unspecified",
+        "disk_bytes": 32547343,
+        "max_wall_monotonic_gap_ms": 0.000875,
+        "p50_ms": 4.887,
+        "p95_ms": 6.585,
+        "p99_ms": 7.042,
+        "rss_bytes": 117735424,
+        "samples": 200,
+        "sql_count": 2600,
+        "workload": "indexed_search"
+      },
+      {
+        "alloc_bytes": 24614800,
+        "cache_mode": "app_hot_db_os_unspecified",
+        "disk_bytes": 32547343,
+        "max_wall_monotonic_gap_ms": 0.001,
+        "p50_ms": 4.453,
+        "p95_ms": 6.011,
+        "p99_ms": 6.448,
+        "rss_bytes": 117817344,
+        "samples": 200,
+        "sql_count": 2600,
+        "workload": "indexed_search"
+      },
+      {
+        "alloc_bytes": 24010976,
+        "cache_mode": "app_cold_db_os_unspecified",
+        "disk_bytes": 32555535,
+        "max_wall_monotonic_gap_ms": 0.003708,
+        "p50_ms": 4.344,
+        "p95_ms": 6.181,
+        "p99_ms": 6.615,
+        "rss_bytes": 117981184,
+        "samples": 200,
+        "sql_count": 6000,
+        "workload": "indexed_message"
+      },
+      {
+        "alloc_bytes": 23436136,
+        "cache_mode": "app_hot_db_os_unspecified",
+        "disk_bytes": 32555535,
+        "max_wall_monotonic_gap_ms": 0.001,
+        "p50_ms": 4.453,
+        "p95_ms": 6.286,
+        "p99_ms": 6.806,
+        "rss_bytes": 118030336,
+        "samples": 200,
+        "sql_count": 6000,
+        "workload": "indexed_message"
+      },
+      {
+        "alloc_bytes": 25805320,
+        "cache_mode": "app_cold_db_os_unspecified",
+        "disk_bytes": 32563727,
+        "max_wall_monotonic_gap_ms": 0.000959,
+        "p50_ms": 3.394,
+        "p95_ms": 6.255,
+        "p99_ms": 6.611,
+        "rss_bytes": 118095872,
+        "samples": 200,
+        "sql_count": 2400,
+        "workload": "permission_mailboxes"
+      },
+      {
+        "alloc_bytes": 25090680,
+        "cache_mode": "app_hot_db_os_unspecified",
+        "disk_bytes": 32563727,
+        "max_wall_monotonic_gap_ms": 0.004458,
+        "p50_ms": 3.428,
+        "p95_ms": 5.227,
+        "p99_ms": 5.713,
+        "rss_bytes": 118259712,
+        "samples": 200,
+        "sql_count": 2400,
+        "workload": "permission_mailboxes"
+      },
+      {
+        "alloc_bytes": 19849864,
+        "cache_mode": "app_cold_db_os_unspecified",
+        "disk_bytes": 32866831,
+        "max_wall_monotonic_gap_ms": 0.000958,
+        "p50_ms": 4.461,
+        "p95_ms": 6.103,
+        "p99_ms": 6.463,
+        "rss_bytes": 118308864,
+        "samples": 200,
+        "sql_count": 4400,
+        "workload": "draft_save"
+      },
+      {
+        "alloc_bytes": 22211680,
+        "cache_mode": "app_hot_db_os_unspecified",
+        "disk_bytes": 32948751,
+        "max_wall_monotonic_gap_ms": 0.000959,
+        "p50_ms": 4.885,
+        "p95_ms": 6.755,
+        "p99_ms": 7.07,
+        "rss_bytes": 118358016,
+        "samples": 200,
+        "sql_count": 4400,
+        "workload": "draft_save"
+      },
+      {
+        "alloc_bytes": 131928112,
+        "cache_mode": "app_cold_db_os_unspecified",
+        "disk_bytes": 34513423,
+        "max_wall_monotonic_gap_ms": 0.004709,
+        "p50_ms": 398.457,
+        "p95_ms": 406.766,
+        "p99_ms": 409.176,
+        "rss_bytes": 118702080,
+        "samples": 200,
+        "sql_count": 24877,
+        "workload": "submit_and_loopback_worker"
+      },
+      {
+        "alloc_bytes": 134021256,
+        "cache_mode": "app_hot_db_os_unspecified",
+        "disk_bytes": 35929111,
+        "max_wall_monotonic_gap_ms": 0.004708,
+        "p50_ms": 398.344,
+        "p95_ms": 406.406,
+        "p99_ms": 409.21,
+        "rss_bytes": 118865920,
+        "samples": 200,
+        "sql_count": 24874,
+        "workload": "submit_and_loopback_worker"
+      },
+      {
+        "alloc_bytes": 206048,
+        "cache_mode": "app_cold_db_os_unspecified",
+        "disk_bytes": 35929111,
+        "max_wall_monotonic_gap_ms": 0.000959,
+        "p50_ms": 0.181,
+        "p95_ms": 4.352,
+        "p99_ms": 4.773,
+        "rss_bytes": 118865920,
+        "samples": 200,
+        "sql_count": 200,
+        "workload": "gc_reference_safety"
+      },
+      {
+        "alloc_bytes": 153536,
+        "cache_mode": "app_hot_db_os_unspecified",
+        "disk_bytes": 35929111,
+        "max_wall_monotonic_gap_ms": 0.000917,
+        "p50_ms": 0.076,
+        "p95_ms": 0.16,
+        "p99_ms": 0.192,
+        "rss_bytes": 118882304,
+        "samples": 200,
+        "sql_count": 200,
+        "workload": "gc_reference_safety"
+      }
+    ],
+    "owned_process_group_observation": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "package_elapsed_seconds": 22.616,
+    "preparation": {
+      "active_budget": 20,
+      "claim_calls": 51,
+      "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+      "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+      "claim_wall_seconds": 0.08968699999999998,
+      "company_wall_seconds": 0.153929,
+      "final_empty_claim": true,
+      "joined_completed_jobs": 1000,
+      "joined_inflight": 0,
+      "joined_ready_before_last_claim": 1000,
+      "joined_stored_messages": 1000,
+      "last_claim_batch": 0,
+      "last_claim_wall_seconds": 0.0004139999999999977,
+      "max_active": 20,
+      "max_claim_batch": 20,
+      "max_wall_monotonic_gap_ms": 0.003042,
+      "max_window_messages": 20,
+      "method": "bounded_store_claim_complete_window_v1",
+      "parse_complete_wall_seconds": 1.5509519999999997,
+      "parser_canceled_joined_calls": 0,
+      "parser_join_policy": "uncancelled_document_wait_with_31s_absolute_wall_admission_guard",
+      "parser_join_reserve_seconds": 31,
+      "parser_joined_call_wall_seconds_sum": 14.083249,
+      "parser_joined_calls": 1000,
+      "parser_joined_inflight": 0,
+      "parser_min_start_remaining_wall_seconds": 287.435119,
+      "parser_original_deadline_unix_seconds": 1790881276.0409548,
+      "parser_quiescent": true,
+      "pending_upper_bound": 20,
+      "phase": "terminal",
+      "pipeline_wall_seconds": 12.268078,
+      "producer_done": true,
+      "sql_ready_count": 1000,
+      "store_wall_seconds": 10.591303000000003
+    },
+    "product_green": false,
+    "raw_sha256": "4b5f6d815a26d81b408af1fbcb26f1ce98ca4169c413325b94a728ba7b17d69e",
+    "result_sha256": "20ed8bd11d135ce916adbf0b8f6f00847961375c39ad56f3cd0ebb23880fdc53",
+    "same_actual_six_streams_and_distribution_as_first_complete_run": true,
+    "samples": 2800,
+    "source_sha": "3d07b72b3732cf289410aefaaba49f8d8423f746",
+    "status": "same_immutable_source_second_complete_tool_run_validated",
+    "strict_tool_cli_exit": 0,
+    "task_complete": false
+  },
+  "source_receipt": "source-receipt.json",
+  "source_sha": "3d07b72b3732cf289410aefaaba49f8d8423f746",
+  "task_complete": false,
+  "source_identity_kind": "canonical_source_closure_sha1",
+  "source_identity_boundary": "3d07b72b3732cf289410aefaaba49f8d8423f746 is canonical SHA256 closure SHA1, not a Git commit/tree; original archives and source labels are unchanged",
+  "original_S_M_L_started": false,
+  "archive_delivery": {
+    "path": "docs/company-mail/evidence/R5-B01-AJ-PIPELINE-TOOL-LOGS.tar.gz",
+    "sha256": "52e01f96eb0aed6ff4c14975cfa7006472b1881f0e37f4635600c78765529e02",
+    "members": {
+      "dataset1000/command.json": "33ca7252f604d5dd9d240dc213a66af1c4f0c524178932c1710e2f5c05735f25",
+      "dataset1000/go.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "dataset1000/go.jsonl": "e8a74105bc508051d58fbc57c8ec1806266b962bfaf040bf36632c3425297ee2",
+      "dataset1000/go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dataset1000/result.json": "a08e72b99d1aaea738d800707a1012e5da4390b9a0b95dfc2ea4f07254810bc9",
+      "dataset1000/validation.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "dataset1000/validation.json": "c7038b4ec8e5b3527b4ee87f586e98835cfff2900929f34abc2dd58bd1891d74",
+      "dataset1000/validation.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "deep-ready-resource-plan.json": "bdf2b1bd823124e7ce71acde2901251dbb0b7ce0d6fde9a37aadb1de79be2860",
+      "post-all-calibration-owned-temporary-db-count.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "post-tool-owned-temporary-db-count.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "real-complete-faults/command.json": "6833d843c445c283773eae9b8b880ed4d854a0b6528c9556502b47b7bba83c2a",
+      "real-complete-faults/execution-budget.json": "5c15a5afa9dd8a4a370e2d4aa800a25d9111c6bde2d9814ce0c8e64f2c42a828",
+      "real-complete-faults/go.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "real-complete-faults/go.jsonl": "e6a12c5f5d6c438dbdd3d4095d2749bf73f6b3acb5d6a680229a75953d16343e",
+      "real-complete-faults/go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "real-complete-faults/review.json": "8b6bd8dab92f8da754dabc1a579f9fd0cb17ea6259948e5ce62138ce9315eaa1",
+      "source-label": "def5af1572d5e579af79f58438617697c344c624587f874bde839b00949c292e",
+      "source-receipt.json": "5b4ea37ed7f470e7386d4c343eb53b7b0fe49b330bee34b7834e17fa349e4dc7",
+      "sql20/command.json": "cfd984fdc0b184c595b57a98d295c08be3ddfecd6a1dcf1c1ee317efa2b9a991",
+      "sql20/go.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "sql20/go.jsonl": "25a5b0c2a5d1a67b61d781b44c095238ee420f2fb411d5002f86a6a5141e6c98",
+      "sql20/go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tool-calibration-review.json": "41fe0af62aaa409517757a660b662bbf5a155a79acfbbb8a7eb02b50e42e8589",
+      "tool-fixture-cleanup-receipt.json": "806950b41a9220b56e64ffaf8bc3a85a7e01a609b22b9ac7b63a0262e2ebb721",
+      "workloads2800-round2/command.json": "ae825246021736c266a6c75048a5f8286c74a2e9292dfd1bd8d5c063e1a97689",
+      "workloads2800-round2/execution-budget.json": "e0cb0d2a06383183cac6241016778afca992f97f9947a0e2edf24cd7e853bb52",
+      "workloads2800-round2/go.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "workloads2800-round2/go.jsonl": "4b5f6d815a26d81b408af1fbcb26f1ce98ca4169c413325b94a728ba7b17d69e",
+      "workloads2800-round2/go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "workloads2800-round2/result.json": "20ed8bd11d135ce916adbf0b8f6f00847961375c39ad56f3cd0ebb23880fdc53",
+      "workloads2800-round2/review.json": "6f5fbe962ebdb28db331a0034e2b005c2b1e4328a4b868196defb3b8f3a3d0dd",
+      "workloads2800-round2/validation.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "workloads2800-round2/validation.json": "c7038b4ec8e5b3527b4ee87f586e98835cfff2900929f34abc2dd58bd1891d74",
+      "workloads2800-round2/validation.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "workloads2800/command.json": "ae825246021736c266a6c75048a5f8286c74a2e9292dfd1bd8d5c063e1a97689",
+      "workloads2800/execution-budget.json": "4bc12fe90302d205c4ef8e79b417578cef6b95e4b3453d99a880d4ac314fede9",
+      "workloads2800/go.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "workloads2800/go.jsonl": "a5e5562081fa310651df2321e44178bd4d6b74fbafe9c7583d8b86e8f6b0ba87",
+      "workloads2800/go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "workloads2800/result.json": "95e85f0c9c424906c6afb94749b8f90a2feef84b65d8fe52f98b2d55e9f0592c",
+      "workloads2800/validation.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "workloads2800/validation.json": "c7038b4ec8e5b3527b4ee87f586e98835cfff2900929f34abc2dd58bd1891d74",
+      "workloads2800/validation.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "original_producer_archive_sha256": "f5a6beb548297df4bf167f2731e95b1608e68e9b14d69e900a66ff109691a76d",
+    "excluded_metadata": "AppleDouble ._ sidecars only; every original actual evidence payload unchanged, private producer archive retained"
+  },
+  "approval_boundary": "Two actual fresh1000 complete tools and faults are bounded tool proof only, not deep100k/1M or original S/M capacity/task100/G0 approval"
+}

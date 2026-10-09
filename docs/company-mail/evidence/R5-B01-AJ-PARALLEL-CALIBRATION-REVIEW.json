@@ -1,0 +1,80 @@
+{
+  "task": "R5-P0-100",
+  "batch": "B01-AJ",
+  "status": "fixture_preparation_scheduler_only_tool_accepted",
+  "base_commit": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+  "source_tree": "68cafcc03672edff848b9fd07abd95c34944a35c",
+  "source_sha_semantics": "git_write_tree_not_commit",
+  "contract_sha256": "0b828ec6dda5de423968115ad256746702f81d3011a40ffb2540208943c94fd8",
+  "original_population_and_seed_unchanged": true,
+  "product_or_schema_changes": false,
+  "fixture_scheduler": {
+    "workers": 20,
+    "queue": 20,
+    "pool": 24,
+    "production_parser_concurrency_gate": 4,
+    "single_producer_owns_ordinal_and_rng": true,
+    "error_cancellation_and_worker_join": true
+  },
+  "parallel_tool1": {
+    "go_exit": 0,
+    "strict_cli_exit": 0,
+    "top_level_pass": 6,
+    "failure_control_subtest_pass": 2,
+    "go_elapsed_seconds": 36.003,
+    "race": true
+  },
+  "parallel_tool2": {
+    "go_exit": 0,
+    "strict_cli_exit": 0,
+    "top_level_pass": 1,
+    "go_elapsed_seconds": 22.979,
+    "race": true,
+    "scope": "independent complete 14x200 workload rerun; not another all six top tests",
+    "closure": "same immutable parallel-src with actual shared tool1 closure and after-run 425 hash match"
+  },
+  "each_workload_run": {
+    "pairs": 14,
+    "samples_each": 200,
+    "concurrency": 20,
+    "pool": 24,
+    "source_safety_current_then_revoked_then_restored": [
+      200,
+      403,
+      200
+    ],
+    "foreign_own_then_current": [
+      200,
+      404
+    ]
+  },
+  "same_canonical_fingerprint_three_runs": "b36d2070cd43e1e472d6a054aab29780e72c1086e1ad415a1635fb2863caca74",
+  "comparison": "serial tool6 and parallel tool1/tool2 actual observed canonical dataset fingerprint equal, not parameter hash",
+  "approved_next": "fresh original S2 then M with unchanged 1800s/10800s budget, no downscale",
+  "task100_complete": false,
+  "G0_accepted": false,
+  "S_baseline_complete": false,
+  "M_baseline_complete": false,
+  "archive": {
+    "path": "docs/company-mail/evidence/R5-B01-AJ-PARALLEL-CALIBRATION-LOGS.tar.gz",
+    "sha256": "336dad342aca5617651c8e21806ced6625aab318fb145affa4bf95fa3aa991c9",
+    "members": {
+      "parallel-tool1/result.json": "448a0013d4b0d637db8ed8e7e7c031b224fb6770b56ec9cf7a106b9becfce97d",
+      "parallel-tool1/run.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "parallel-tool1/run.jsonl": "b7ba63003621de5a2cd3e83180b657eb04c814c9a7047963c81034a5ef1385f8",
+      "parallel-tool1/run.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "parallel-tool1/source-closure.json": "a5424a5e06ee41720d1c69a43af1c5e80c694895aa4f185d824ec635b28bf5f1",
+      "parallel-tool1/validation.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "parallel-tool1/validation.json": "c7038b4ec8e5b3527b4ee87f586e98835cfff2900929f34abc2dd58bd1891d74",
+      "parallel-tool1/validation.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "parallel-tool2/result.json": "1441dac00900addf03263a943166ec37997910b55d1e3cfceb22bcfe2002a3d0",
+      "parallel-tool2/run-identity.json": "127967c1bad59b7cbc779c760fdde5474045b81fb9a34530e93d2874120827d6",
+      "parallel-tool2/run.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "parallel-tool2/run.jsonl": "896dd69c5310402a81736b7c53dc81170633bb8128f4d51b40d80ea8143c4e20",
+      "parallel-tool2/run.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "parallel-tool2/validation.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "parallel-tool2/validation.json": "c7038b4ec8e5b3527b4ee87f586e98835cfff2900929f34abc2dd58bd1891d74",
+      "parallel-tool2/validation.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
@@ -56,7 +57,15 @@ func (s *FakeStore) createOutboundJobLocked(job *models.OutboundJob) {
 	if cp.UpdatedAt.IsZero() {
 		cp.UpdatedAt = cp.CreatedAt
 	}
+	cp.RecipientLedger = true
+	s.initializeRecipientLedgerLocked(cp)
 	s.outboundJobs[cp.ID] = cp
+	// A fixture's accepted submission creates distinct synthetic archive facts.
+	// Production lifecycle and transaction behavior are tested on PostgreSQL.
+	if _, exists := s.outboundContent[cp.ID]; !exists && cp.SenderMailboxID != nil {
+		s.outboundContent[cp.ID] = cloneOutboundJob(cp)
+	}
+	job.RecipientLedger = true
 	job.ID = cp.ID
 	job.State = cp.State
 	job.NextAttemptAt = cp.NextAttemptAt
@@ -124,6 +133,10 @@ func (s *FakeStore) CountOutboundByIdentitySince(_ context.Context, tenantID uui
 func (s *FakeStore) RequeueOutboundJob(_ context.Context, id uuid.UUID) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	return s.requeueOutboundJobLocked(id)
+}
+
+func (s *FakeStore) requeueOutboundJobLocked(id uuid.UUID) error {
 	job := s.outboundJobs[id]
 	if job == nil || job.InFlightDomain != "" || (job.State != models.OutboundDead && job.State != models.OutboundFailed) {
 		return store.ErrOutboundNotRetryable
@@ -390,6 +403,54 @@ func (s *FakeStore) DeleteSuppressionAudited(ctx context.Context, tenantID uuid.
 	return nil
 }
 
+// DeleteSuppressionAuthorized mirrors principal-specific admission; fake-store
+// tests are not a PostgreSQL lock or transaction equivalence proof.
+func (s *FakeStore) DeleteSuppressionAuthorized(ctx context.Context, actor authz.Actor, id uuid.UUID, entry models.AuditEntry) error {
+	switch actor.Type {
+	case authz.PrincipalUser:
+		u, err := s.GetUser(ctx, actor.ID)
+		if err != nil {
+			return err
+		}
+		current, ok := authz.RefreshMemberActor(actor, actor.TenantID, u)
+		if !ok || !current.IsTenantAdmin() {
+			return app.Forbidden("tenant administrator required")
+		}
+		actor = current
+	case authz.PrincipalAPIKey:
+		key, err := s.GetAPIKey(ctx, actor.ID)
+		if err != nil {
+			return err
+		}
+		if !authz.OutboundKeyIdentityMatches(actor, key) || actor.TenantWide != (key.OwnerUserID == nil) {
+			return app.Forbidden("key unavailable")
+		}
+		manage := false
+		for _, scope := range key.Scopes {
+			if strings.ToLower(strings.TrimSpace(scope)) == "suppression:manage" {
+				manage = true
+			}
+		}
+		if !manage || (key.ExpiresAt != nil && !key.ExpiresAt.After(time.Now())) {
+			return app.Forbidden("key scope unavailable")
+		}
+		if key.OwnerUserID != nil {
+			u, e := s.GetUser(ctx, *key.OwnerUserID)
+			if e != nil {
+				return e
+			}
+			if u == nil || !u.IsActive || u.TenantID != actor.TenantID {
+				return app.Forbidden("key owner unavailable")
+			}
+		}
+	default:
+		return app.Forbidden("current suppression principal required")
+	}
+	entry.TenantID, entry.Actor = &actor.TenantID, actor.AuditLabel()
+	entry.Action, entry.ResourceType, entry.ResourceID = "suppression.delete", "suppression", &id
+	return s.DeleteSuppressionAudited(ctx, actor.TenantID, id, entry)
+}
+
 // mergeSuppressionAuditDetail decodes an audit entry's details JSON, records
 // the suppressed address, and re-encodes it.
 func mergeSuppressionAuditDetail(details json.RawMessage, address string) (json.RawMessage, error) {
@@ -522,4 +583,3 @@ func (s *FakeStore) listOutboundJobsLocked(pg models.Page, keep func(*models.Out
 	}
 	return items[start:end], total, nil
 }
-

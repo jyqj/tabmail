@@ -8,11 +8,18 @@ import (
 	"github.com/google/uuid"
 
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 )
 
-func (s *FakeStore) CreateRefreshToken(_ context.Context, r *models.RefreshToken) error {
+func (s *FakeStore) CreateRefreshToken(ctx context.Context, r *models.RefreshToken) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if r != nil && r.Issuance != nil && !r.Issuance.MatchesUser(r.UserID, s.users[r.UserID]) {
+		return store.ErrAuthenticationChanged
+	}
 	return s.createRefreshLocked(r)
 }
 func (s *FakeStore) createRefreshLocked(r *models.RefreshToken) error {
@@ -33,6 +40,7 @@ func (s *FakeStore) createRefreshLocked(r *models.RefreshToken) error {
 	}
 	r.CreatedAt = time.Now().UTC()
 	cp := *r
+	cp.Issuance = nil // Only persisted token columns survive the command.
 	s.refreshTokens[r.TokenHash] = &cp
 	return nil
 }
@@ -133,5 +141,6 @@ func (s *FakeStore) RotateRefreshToken(_ context.Context, hash string, next *mod
 	}
 	now := time.Now().UTC()
 	old.RevokedAt = &now
+	next.Issuance = &models.RefreshTokenIssuance{UserID: u.ID, TenantID: u.TenantID, PasswordHash: u.PasswordHash, SessionVersion: u.SessionVersion}
 	return true, false, nil
 }

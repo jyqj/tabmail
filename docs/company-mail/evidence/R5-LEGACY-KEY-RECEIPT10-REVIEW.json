@@ -1,0 +1,220 @@
+{
+  "FAIL": 0,
+  "HTTP_proof_kind": "shipping router auth asserts in actual test, not independent wire dump",
+  "PASS": 11,
+  "SKIP": 0,
+  "actual_case_actions": {
+    "TestR5LegacyContentKeyHTTPPreservesSafeReceipt": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5LegacyContentKeyHTTPPreservesSafeReceipt/api-key-content-forbidden": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5LegacyContentKeyHTTPPreservesSafeReceipt/changed-owner": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5LegacyContentKeyHTTPPreservesSafeReceipt/cross-tenant-key": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5LegacyContentKeyHTTPPreservesSafeReceipt/deleted-key": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5LegacyContentKeyHTTPPreservesSafeReceipt/expired-key": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5LegacyContentKeyHTTPPreservesSafeReceipt/owner-jwt-content-expired": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5LegacyContentKeyHTTPPreservesSafeReceipt/owner-jwt-content-live": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5LegacyContentKeyHTTPPreservesSafeReceipt/receipt-expired": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5LegacyContentKeyHTTPPreservesSafeReceipt/receipt-live": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5LegacyContentKeyHTTPPreservesSafeReceipt/send-write-only": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ]
+  },
+  "actual_child_GOMAXPROCS": "2",
+  "actual_fresh_DB_count_observed": 10,
+  "actual_seed_catalogs": {
+    "tm_test_0d77fcbc36f440a093b83c93b65e43a2": {
+      "mailboxes": 2,
+      "schema": 18,
+      "users": 3,
+      "wall": 1790955714.575149
+    },
+    "tm_test_1839a3a6307e4df78c2c653b7e199ac9": {
+      "mailboxes": 0,
+      "schema": 9,
+      "users": 0,
+      "wall": 1790955714.044776
+    },
+    "tm_test_22595b8dde0342e89abcb34e78eafda5": {
+      "mailboxes": 0,
+      "schema": 9,
+      "users": 0,
+      "wall": 1790955715.5765162
+    },
+    "tm_test_4184321be453402a8448a198165f8a08": {
+      "mailboxes": 0,
+      "schema": 17,
+      "users": 0,
+      "wall": 1790955714.8403451
+    },
+    "tm_test_560574b1bc044ae28f8799de755a6c95": {
+      "mailboxes": 2,
+      "schema": 18,
+      "users": 3,
+      "wall": 1790955713.833518
+    },
+    "tm_test_68737534019a4b1d86ff8cb4711108cc": {
+      "mailboxes": 0,
+      "schema": 16,
+      "users": 0,
+      "wall": 1790955715.102731
+    },
+    "tm_test_7689adb6c1fc4d17a09a1ce327d23e71": {
+      "mailboxes": 4,
+      "schema": 18,
+      "users": 3,
+      "wall": 1790955714.358788
+    },
+    "tm_test_9f2e0c6da3b64b4a87ca5e60dcca1de4": {
+      "mailboxes": 0,
+      "schema": 9,
+      "users": 0,
+      "wall": 1790955713.265867
+    },
+    "tm_test_f89b8f7bda12457e8bfc3dbbcb059724": {
+      "mailboxes": 0,
+      "schema": 11,
+      "users": 0,
+      "wall": 1790955713.575551
+    },
+    "tm_test_fc8bda2d7ecf45279c3fc8b996adebda": {
+      "mailboxes": 4,
+      "schema": 18,
+      "users": 3,
+      "wall": 1790955715.366804
+    }
+  },
+  "actual_source_closure_sha256": "5f37cf9e51cee9d28a51cac15e4ca7c3343ee74a1f27d2291dcd19bbb19306a4",
+  "auto_retry": false,
+  "cleanup": {
+    "native_stop_exit": 0,
+    "observer_joined": true,
+    "old_stopped_roots_untouched": true,
+    "original_outer300_elapsed_seconds": 19.015438079833984,
+    "owned_pg_pid": 9942,
+    "owned_pid_observation": "absent",
+    "owned_pid_ps_exit": 1,
+    "owned_root": "/private/tmp/tm-r5legacy-key-runtime.990v7r27",
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "test_databases_connections": [],
+    "utc": "2026-10-02T15:41:56.818577+00:00",
+    "within_original300": true
+  },
+  "results": {
+    "actual-schema18": {
+      "elapsed_wall_seconds": 0.10708785057067871,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "base-create": {
+      "elapsed_wall_seconds": 0.10555791854858398,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "initdb": {
+      "elapsed_wall_seconds": 0.6273438930511475,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "legacy-one-top": {
+      "elapsed_wall_seconds": 13.435922145843506,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "native-stop": {
+      "elapsed_wall_seconds": 0.10644793510437012,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "official-schema18-bootstrap": {
+      "elapsed_wall_seconds": 3.6339540481567383,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "owned-config": {
+      "elapsed_wall_seconds": 0.10696983337402344,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "pg-start": {
+      "elapsed_wall_seconds": 0.21196794509887695,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "terminal-test-databases": {
+      "elapsed_wall_seconds": 0.10551714897155762,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    }
+  },
+  "schema_catalog_sampling_boundary": {
+    "direct_latest_schema18_databases": 4,
+    "sampled_intermediate_migration_versions_not_final_schema_claim": true,
+    "ten_fixture_success_evidence": "10 named leaves each runs seedCompany/New/Migrate current18 then strict actual HTTP assertions; external sampler observed10 distinct DB names but may miss final18/catalog/seed state of short-lived DBs"
+  },
+  "scope": "only new legacy key receipt1top10leaf; no whole backend rerun",
+  "source_sha": "853e4a22e81462d61dce4f8f0496d6f4cd408bb7",
+  "test_count_run": 11,
+  "whole_backend_PASS_claimed": false
+}

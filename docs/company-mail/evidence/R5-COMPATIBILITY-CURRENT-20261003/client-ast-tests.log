@@ -1,0 +1,35 @@
+✔ request verb and parameter identity (31.498266ms)
+✔ conditional path and verb stay paired (4.778189ms)
+✔ workPath and local base expand (5.684186ms)
+✔ docs strings and tests are not network calls (5.192924ms)
+✔ opt-in audit fixture calls do not become production routes (2.511064ms)
+✔ source is never evaluated (2.213381ms)
+✔ transport forwarding remains explicit (3.545401ms)
+✔ stream uses GET independent of callback options (5.465205ms)
+✔ unrelated path and method predicates are not falsely paired (1.947292ms)
+✔ client drift checks reject missing/new/verb/route mismatch (2.094401ms)
+✔ private helper suffixes enumerate actual routes including omitted default (4.334491ms)
+✔ unknown, exported, escaped and spread helper suffixes stay unresolved (7.306812ms)
+✔ recipient suffix cannot inherit the registered aggregate route (2.116819ms)
+✔ helper parameter assignment prevents finite expansion (2.720207ms)
+✔ helper parameter compound assignment prevents finite expansion (2.346282ms)
+✔ helper parameter logical assignment prevents finite expansion (1.930585ms)
+✔ helper parameter prefix update prevents finite expansion (1.846734ms)
+✔ helper parameter postfix update prevents finite expansion (1.653464ms)
+✔ helper parameter closure write prevents finite expansion (2.713295ms)
+✔ helper parameter array destructuring prevents finite expansion (3.034817ms)
+✔ helper parameter object destructuring prevents finite expansion (2.794464ms)
+✔ helper parameter renamed object destructuring prevents finite expansion (2.481472ms)
+✔ helper parameter nested destructuring prevents finite expansion (2.143686ms)
+✔ helper parameter loop target prevents finite expansion (1.92383ms)
+✔ helper parameter direct eval prevents finite expansion (1.11506ms)
+✔ writes to a shadowed parameter do not invalidate immutable helper parameter (6.051386ms)
+✔ explicit undefined remains unresolved rather than assuming its binding (2.237109ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 552.106611

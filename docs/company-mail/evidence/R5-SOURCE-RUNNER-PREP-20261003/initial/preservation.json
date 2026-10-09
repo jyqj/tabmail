@@ -1,0 +1,27 @@
+{
+  "base_sha": "4aec142bcffd53c6ab91f2263436aaf980833fab",
+  "head_sha": "753e8f94897b92008274d42861f26bcebe3c98b8",
+  "product_sha": "aeed47f0e1998d9925acb680992b051463821d69",
+  "changed_files": [
+    "scripts/r5_source_runner_prepare.py",
+    "scripts/run_r5_source_version_tests.py",
+    "scripts/testenv/README.md",
+    "scripts/tests/test_ordinary_receipt_contract.py",
+    "scripts/tests/test_r5_cold_web.py",
+    "scripts/tests/test_r5_source_version_runner.py"
+  ],
+  "product_preserved": {
+    "cmd": true,
+    "internal": true,
+    "web": true,
+    "third_party": true,
+    "go.mod": true,
+    "go.sum": true
+  },
+  "historical_evidence_preserved": {
+    "scripts/tests/checkpoints": true,
+    "docs/company-mail/evidence": true
+  },
+  "whole_pg180_local": "NOTRUN; original CI gate unchanged",
+  "forbidden_scopes_unchanged": []
+}

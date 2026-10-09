@@ -1,7 +1,6 @@
 package ingest
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -9,7 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"tabmail/internal/classify"
 	"tabmail/internal/config"
 	"tabmail/internal/configcache"
 	"tabmail/internal/hooks"
@@ -23,7 +21,6 @@ import (
 	"tabmail/internal/workqueue"
 
 	"github.com/google/uuid"
-	"github.com/jhillyerd/enmime/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
 )
@@ -43,6 +40,7 @@ type serviceStore interface {
 	MarkIngestJobDone(ctx context.Context, id uuid.UUID) error
 	MarkIngestJobRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
 	ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error)
+	EnqueueOrphanRetry(ctx context.Context, key string) error
 }
 
 type Envelope struct {
@@ -281,6 +279,11 @@ func (s *Service) ensureWorker() *workqueue.Worker[*ingestJob] {
 		s.pollInterval,
 		s.batchSize,
 		s.logger,
+		// ClaimIngress deliberately leases one receipt. Process up to the
+		// configured batch budget by claiming again only after its predecessor
+		// finishes, so later receipts do not spend their leases waiting.
+		workqueue.WithSerialClaims(),
+		workqueue.WithStopOnFailure(),
 	)
 	return s.worker
 }
@@ -304,8 +307,9 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) ([]Reci
 	return s.deliverResolved(ctx, env, raw, nil)
 }
 
-// deliverResolved attempts to store the envelope for every recipient and returns
-// one RecipientOutcome per recipient. The per-recipient drop reasons are part of
+// deliverResolved attempts to store the envelope once per destination mailbox.
+// Repeated canonical addresses are resolved once; distinct aliases of the same
+// mailbox share its first attempt, including failures. The drop reasons are part of
 // the return value (not just logs), so the accept decision can be asserted
 // through this interface. A non-nil error signals an envelope-level failure
 // (policy load or raw persistence) that should be retried, distinct from
@@ -320,30 +324,18 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 	if len(env.Recipients) == 0 {
 		return nil, nil
 	}
-	envMime, err := enmime.ReadEnvelope(bytes.NewReader(raw))
-	if err != nil {
-		s.logger.Warn().Err(err).Msg("parsing MIME envelope (storing raw only)")
-	}
+	// One shared bounded parse + header extraction per envelope; every recipient
+	// below reuses this kernel (same as the durable path's per-receipt parse).
+	content := parseEnvelopeContent(s.logger, raw)
 
 	now := time.Now()
 	outcomes := make([]RecipientOutcome, 0, len(env.Recipients))
+	seenAddresses := make(map[string]bool, len(env.Recipients))
+	seenMailboxes := make(map[uuid.UUID]bool, len(env.Recipients))
 	tenantConfigs := map[uuid.UUID]*models.EffectiveConfig{}
 	pol, err := s.currentPolicy(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("load smtp policy: %w", err)
-	}
-
-	subject := ""
-	var headersJSON json.RawMessage
-	if envMime != nil {
-		subject = envMime.GetHeader("Subject")
-		hm := make(map[string]string)
-		for _, key := range []string{"From", "To", "Cc", "Date", "Message-Id", "Reply-To", "Content-Type"} {
-			if v := envMime.GetHeader(key); v != "" {
-				hm[key] = v
-			}
-		}
-		headersJSON, _ = json.Marshal(hm)
 	}
 
 	objKey, err := s.objects.Put(ctx, raw)
@@ -353,6 +345,10 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 
 	for _, rcpt := range env.Recipients {
 		addr := policy.SanitizeAddr(rcpt)
+		if seenAddresses[addr] {
+			continue
+		}
+		seenAddresses[addr] = true
 		// Reuse a RCPT-phase Result when it is safe (Mailbox present, not just
 		// Created): this is the SMTP-session-reuse fast path. Auto-create
 		// results (Mailbox nil) and freshly-Created results always fall through
@@ -387,65 +383,36 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 		}
 
 		mb := result.Mailbox
-		if !policy.ShouldStoreDomain(mb.ResolvedDomain, pol.DefaultStore, pol.StoreDomains, pol.DiscardDomains) {
-			s.logger.Info().Str("mailbox", mb.FullAddress).Msg("message accepted but discarded by store policy")
-			outcomes = append(outcomes, rejectedOutcome(addr, "store_policy_discard"))
+		// Deduplicate before policy, quota and persistence. A failed or
+		// uncertain metadata write must not be retried through another alias
+		// within the same envelope; the original outcome remains authoritative.
+		if seenMailboxes[mb.ID] {
 			continue
 		}
-		cfg, ok := tenantConfigs[mb.TenantID]
-		if !ok {
-			cfg, err = s.store.EffectiveConfig(ctx, mb.TenantID)
-			if err != nil || cfg == nil {
-				s.logger.Warn().Err(err).Str("mailbox", mb.FullAddress).Msg("load tenant config")
-				outcomes = append(outcomes, erroredOutcome(addr, "tenant_config"))
-				continue
+		seenMailboxes[mb.ID] = true
+		// Shared kernel: store policy → effective config → size gate →
+		// retention → Message(+OTP). Destination resolution above and the
+		// quota/persistence/event differences below stay shell-owned.
+		plan, pf := s.prepareDelivery(ctx, deliveryInput{
+			pol: pol, mb: mb, content: content, raw: raw, objKey: objKey,
+			rcpt: addr, from: env.MailFrom, at: now, cfgCache: tenantConfigs,
+			routeFn: func(context.Context) (*models.DomainRoute, error) { return result.Route, nil },
+		})
+		if pf != nil {
+			if pf.terminal() {
+				outcomes = append(outcomes, rejectedOutcome(addr, pf.code))
+			} else {
+				outcomes = append(outcomes, erroredOutcome(addr, pf.stage))
 			}
-			tenantConfigs[mb.TenantID] = cfg
-		}
-		if cfg.MaxMessageBytes > 0 && len(raw) > cfg.MaxMessageBytes {
-			s.logger.Warn().
-				Str("mailbox", mb.FullAddress).
-				Int("limit", cfg.MaxMessageBytes).
-				Int("size", len(raw)).
-				Msg("tenant max message bytes exceeded")
-			outcomes = append(outcomes, rejectedOutcome(addr, "max_message_bytes"))
 			continue
 		}
-
-		mbRetention, routeRetention, tenantRetention := retentionOf(result, cfg)
-		retH := resolveRetention(mbRetention, routeRetention, tenantRetention, s.fallbackRetentionH)
-		msg := &models.Message{
-			TenantID:     mb.TenantID,
-			MailboxID:    mb.ID,
-			ZoneID:       mb.ZoneID,
-			Sender:       env.MailFrom,
-			Recipients:   []string{addr},
-			Subject:      subject,
-			Size:         int64(len(raw)),
-			RawObjectKey: objKey,
-			HeadersJSON:  headersJSON,
-			ExpiresAt:    models.MessageExpiry(mb, retH, now),
-		}
-		// OTP signal extraction. Reuses the already-parsed envelope (no extra
-		// decode). OTPCode/OTPConfidence stay zero-value when nothing is found,
-		// so the omitempty JSON path and existing deliver tests are unaffected.
-		if envMime != nil {
-			otp := classify.OTPFromMessage(classify.Env{
-				Subject:  subject,
-				TextBody: envMime.Text,
-				HTMLBody: envMime.HTML,
-				From:     env.MailFrom,
-			})
-			if otp.Found {
-				msg.OTPCode = otp.Code
-				msg.OTPConfidence = otp.Confidence
-			}
-		}
-		if ok, err := s.reserveTenantDaily(ctx, mb.TenantID, cfg.DailyQuota); err != nil {
-			s.logger.Warn().Err(err).Str("tenant", mb.TenantID.String()).Msg("reserve tenant daily quota")
+		cfg, msg := plan.cfg, plan.msg
+		allowed, reservationKey, reserveErr := s.reserveTenantDaily(ctx, mb.TenantID, cfg.DailyQuota)
+		if reserveErr != nil {
+			s.logger.Warn().Err(reserveErr).Str("tenant", mb.TenantID.String()).Msg("reserve tenant daily quota")
 			outcomes = append(outcomes, erroredOutcome(addr, "quota_error"))
 			continue
-		} else if !ok {
+		} else if !allowed {
 			s.logger.Warn().
 				Str("tenant", mb.TenantID.String()).
 				Int("limit", cfg.DailyQuota).
@@ -455,14 +422,14 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 		}
 		ok, err := s.objects.StoreMessage(ctx, msg, raw, cfg.MaxMessagesPerMailbox)
 		if err != nil {
-			_ = s.releaseTenantDaily(ctx, mb.TenantID)
+			_ = s.releaseTenantDaily(ctx, reservationKey)
 			metrics.SMTPDeliveryFailed(mb.TenantID.String(), mb.FullAddress)
 			s.logger.Err(err).Str("mailbox", mb.FullAddress).Msg("storing message metadata")
 			outcomes = append(outcomes, erroredOutcome(addr, "store_failed"))
 			continue
 		}
 		if !ok {
-			_ = s.releaseTenantDaily(ctx, mb.TenantID)
+			_ = s.releaseTenantDaily(ctx, reservationKey)
 			s.logger.Warn().
 				Str("mailbox", mb.FullAddress).
 				Int("limit", cfg.MaxMessagesPerMailbox).
@@ -472,12 +439,12 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 		}
 		metrics.SMTPDeliverySucceeded(mb.TenantID.String(), mb.FullAddress)
 		if s.hub != nil {
-			s.hub.Publish(realtime.Event{
+			s.hub.PublishContext(ctx, realtime.Event{
 				Type:      realtime.EventMessage,
 				Mailbox:   mb.FullAddress,
 				MessageID: msg.ID.String(),
 				Sender:    env.MailFrom,
-				Subject:   subject,
+				Subject:   content.subject,
 				Size:      int64(len(raw)),
 			})
 		}
@@ -489,7 +456,7 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 				TenantID:   mb.TenantID.String(),
 				Sender:     env.MailFrom,
 				Recipients: []string{addr},
-				Subject:    subject,
+				Subject:    content.subject,
 			})
 		}
 		outcomes = append(outcomes, RecipientOutcome{
@@ -500,9 +467,14 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 		s.logger.Info().
 			Str("from", env.MailFrom).
 			Str("to", addr).
-			Str("subject", subject).
+			Str("subject", content.subject).
 			Int64("size", int64(len(raw))).
 			Msg("message delivered")
+	}
+	if deliveredCount(outcomes) == 0 {
+		// An error may follow a committed metadata write. The reference lock,
+		// not these outcomes, decides whether this content key can be deleted.
+		s.deleteRawObjectIfOrphaned(ctx, objKey, "no observed delivery")
 	}
 	return outcomes, nil
 }
@@ -531,9 +503,27 @@ func (s *Service) deleteRawObjectIfOrphaned(ctx context.Context, key, reason str
 	if s == nil {
 		return
 	}
-	switch out, err := s.objects.Release(ctx, key); out {
-	case rawobject.CountFailed, rawobject.DeleteFailed:
+	// Cleanup stays synchronous and bounded. A cancelled request does not
+	// authorize deleting an unchecked key, or discard its recovery handoff.
+	release, cancel := context.WithTimeout(ctx, 5*time.Second)
+	out, err := rawobject.Noop, release.Err()
+	if err == nil {
+		out, err = s.objects.Release(release, key)
+	}
+	interrupted := release.Err() != nil
+	cancel()
+	if interrupted || out == rawobject.CountFailed || out == rawobject.DeleteFailed {
 		s.logger.Warn().Err(err).Str("key", key).Str("reason", reason).Msg("release orphan raw object")
+		// One attempt through the existing durable queue. A failed/uncertain
+		// enqueue remains visible; this is not atomic with the earlier Put.
+		handoff, stop := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+		defer stop()
+		if err := s.store.EnqueueOrphanRetry(handoff, key); err != nil {
+			s.logger.Warn().Err(err).Str("key", key).Str("reason", reason).Msg("enqueue orphan retry after unused raw release")
+		}
+		return
+	}
+	switch out {
 	case rawobject.StillReferenced:
 		s.logger.Debug().Str("key", key).Str("reason", reason).Msg("raw object still referenced")
 	case rawobject.Deleted:
@@ -541,16 +531,18 @@ func (s *Service) deleteRawObjectIfOrphaned(ctx context.Context, key, reason str
 	}
 }
 
-func (s *Service) reserveTenantDaily(ctx context.Context, tenantID uuid.UUID, limit int) (bool, error) {
+// The returned key identifies this call's observed Redis increment. Unlimited,
+// database-counted and denied calls own no Redis unit to release.
+func (s *Service) reserveTenantDaily(ctx context.Context, tenantID uuid.UUID, limit int) (bool, string, error) {
 	if limit <= 0 {
-		return true, nil
+		return true, "", nil
 	}
 	if s.rdb == nil {
 		count, err := s.store.CountTenantMessagesSince(ctx, tenantID, time.Now().UTC().Truncate(24*time.Hour))
 		if err != nil {
-			return false, err
+			return false, "", err
 		}
-		return count < limit, nil
+		return count < limit, "", nil
 	}
 	key := fmt.Sprintf("smtp:quota:tenant:%s:%s", tenantID, time.Now().UTC().Format("20060102"))
 	res, err := s.rdb.Eval(ctx, `
@@ -569,17 +561,26 @@ end
 return 1
 `, []string{key}, limit, int((25 * time.Hour).Seconds())).Int()
 	if err != nil {
-		return false, err
+		return false, "", err
 	}
-	return res == 1, nil
+	if res != 1 {
+		return false, "", nil
+	}
+	return true, key, nil
 }
 
-func (s *Service) releaseTenantDaily(ctx context.Context, tenantID uuid.UUID) error {
-	if s.rdb == nil {
+func (s *Service) releaseTenantDaily(ctx context.Context, reservationKey string) error {
+	if s.rdb == nil || reservationKey == "" {
 		return nil
 	}
-	key := fmt.Sprintf("smtp:quota:tenant:%s:%s", tenantID, time.Now().UTC().Format("20060102"))
-	_, err := s.rdb.Eval(ctx, `
+	// The increment belongs to a failed metadata attempt, so its compensation
+	// must survive that request's cancellation. Keep request values for tracing
+	// and bound the new operation instead of inheriting an expired deadline.
+	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+	defer cancel()
+	// A metadata write can finish after midnight; never debit the new day's
+	// unrelated reservations when unwinding an increment made on the old day.
+	_, err := s.rdb.Eval(cleanup, `
 local current = redis.call("GET", KEYS[1])
 if not current then
   return 0
@@ -589,7 +590,10 @@ if tonumber(current) <= 1 then
   return 0
 end
 return redis.call("DECR", KEYS[1])
-`, []string{key}).Result()
+`, []string{reservationKey}).Result()
+	if err != nil {
+		s.logger.Error().Err(err).Msg("release tenant daily quota")
+	}
 	return err
 }
 
@@ -619,22 +623,23 @@ func resolveRetention(mailboxOverride, routeOverride, tenantRetention *int, fall
 	return 24
 }
 
-// retentionOf extracts the override/route/tenant retention for a recipient from
-// the resolved Result and the cached tenant config, returning nil for unset
-// levels so resolveRetention's != nil precedence matches the legacy
-// EffectiveConfig behavior (a non-nil cfg returns RetentionHours even when 0).
-func retentionOf(res *resolver.Result, cfg *models.EffectiveConfig) (mailbox, route, tenant *int) {
-	if res.Mailbox != nil && res.Mailbox.RetentionHoursOverride != nil {
-		v := *res.Mailbox.RetentionHoursOverride
+// retentionOf extracts the mailbox/route/tenant retention override levels so
+// resolveRetention's != nil precedence matches the legacy EffectiveConfig
+// behavior (a non-nil cfg returns RetentionHours even when 0). Both delivery
+// paths share it: the immediate path passes the resolver's matched route, the
+// durable path passes the route it re-fetched from the store during replay.
+func retentionOf(mb *models.Mailbox, route *models.DomainRoute, cfg *models.EffectiveConfig) (mailbox, routeOverride, tenant *int) {
+	if mb != nil && mb.RetentionHoursOverride != nil {
+		v := *mb.RetentionHoursOverride
 		mailbox = &v
 	}
-	if res.Route != nil && res.Route.RetentionHoursOverride != nil {
-		v := *res.Route.RetentionHoursOverride
-		route = &v
+	if route != nil && route.RetentionHoursOverride != nil {
+		v := *route.RetentionHoursOverride
+		routeOverride = &v
 	}
 	if cfg != nil {
 		v := cfg.RetentionHours
 		tenant = &v
 	}
-	return mailbox, route, tenant
+	return mailbox, routeOverride, tenant
 }

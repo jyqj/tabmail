@@ -1,0 +1,27 @@
+test_fail (test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Bad.test_fail) ... FAIL
+
+======================================================================
+FAIL: test_fail (test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Bad.test_fail)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail-slice4/scripts/tests/test_r5_source_version_runner.py", line 40, in test_fail
+    def test_fail(self):self.fail('intentional runner negative')
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: intentional runner negative
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)
+test_skip (test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Skip.test_skip) ... skipped 'intentional runner negative'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK (skipped=1)
+test_expected (test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Expected.test_expected) ... expected failure
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK (expected failures=1)

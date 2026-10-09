@@ -1,0 +1,65 @@
+{
+  "unique_focused_checks": 37,
+  "final": {
+    "new_env_diagnostics": 17,
+    "existing_runner": 15,
+    "existing_binding_negatives": 5,
+    "failures": 0,
+    "errors": 0,
+    "outer_skips": 0
+  },
+  "attempt_history": [
+    {
+      "attempt": "diagnostic-bootstrap-1",
+      "tests": 15,
+      "failures": 3,
+      "errors": 6,
+      "cause": "empty protected sandbox .git mount mistaken for repository"
+    },
+    {
+      "attempt": "diagnostic-bootstrap-2",
+      "tests": 15,
+      "failures": 3,
+      "errors": 6,
+      "cause": "same preserved failure after confirming tempfile root"
+    },
+    {
+      "attempt": "focused-after-root-fix",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "attempt": "focused-expanded",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "attempt": "existing-regression",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "attempt": "focused-final-default-selector",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "attempt": "focused-final-no-PATH-Go",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "attempt": "focused-final-all-CGO-and-tool-input-overrides",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0
+    }
+  ],
+  "negative_runner_children": "One intentional failure, skip and expected failure are asserted by the passing outer runner test; these are not product results.",
+  "formal_runs": 0
+}

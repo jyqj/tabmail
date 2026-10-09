@@ -1,0 +1,118 @@
+{
+  "decision": "ACCEPT",
+  "reviewer": "independent frontend agent",
+  "baseline": {
+    "commit": "4730c648b1c31c34588d585256ff17f417a86b3a",
+    "tree": "19dbe626627213b474bbaa54f41740976a3e6def",
+    "status": ""
+  },
+  "candidate": {
+    "commit": "a5b720d1db6d1932fced4877912cca86dd86117f",
+    "tree": "f3c8519ad94e09d0c0bf93e76fafe91d308a953c",
+    "status": ""
+  },
+  "scope": "Two-file maintenance repair of native source-runner discovery plus an exact single-header catalog preservation allowance; zero product TODOs.",
+  "baseline_discovery": {
+    "loaded_ids": 819,
+    "failed_import_ids": [
+      "unittest.loader._FailedTest.test_r5_api_key_issuance"
+    ],
+    "exception": "test discovery import failure",
+    "test_methods_executed": 0
+  },
+  "candidate_discovery": {
+    "modules": 45,
+    "genuine_ids": 821,
+    "import_errors": 0,
+    "current_ids": 817,
+    "frozen_ids": 4,
+    "test_methods_executed_by_discovery": 0
+  },
+  "candidate_execution": {
+    "original_api_verifier_methods": 3,
+    "original_api_verifier_passed": 3,
+    "candidate_native_guard_methods": 1,
+    "candidate_native_guard_passed": 1,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "negative_control": {
+    "mutation": {
+      "path": "scripts/tests/test_r5_api_key_issuance.py",
+      "old": "self.assertEqual(result[\"leaf_count\"], 18)",
+      "new": "self.assertEqual(result[\"leaf_count\"], 19)",
+      "original_sha256": "05985f7cb7b1ba616a3b85c26b0f7280e7274eef18a834b2d27b1c6d30440db2",
+      "mutated_sha256": "3de2e2ae494e9fb1d333dfad2acaee56268ca39475a417000bbfc35b1d4015f4"
+    },
+    "same_candidate_guard_executed": 1,
+    "expected_failures_observed": 1,
+    "failure_location": "test_r5_catalog_reconciliation.py:6495 exact complete-file byte equality",
+    "source_restored_to_initial_clean_identity": true
+  },
+  "static": {
+    "baseline": "4730c648b1c31c34588d585256ff17f417a86b3a",
+    "baseline_tree": "19dbe626627213b474bbaa54f41740976a3e6def",
+    "candidate": "a5b720d1db6d1932fced4877912cca86dd86117f",
+    "candidate_tree": "f3c8519ad94e09d0c0bf93e76fafe91d308a953c",
+    "changed_paths": [
+      "scripts/tests/test_r5_api_key_issuance.py",
+      "scripts/tests/test_r5_catalog_reconciliation.py"
+    ],
+    "before_api_sha256": "3f484274c3d3686dff7d1135f39f5e053aceacfd37f74e8f40c340e6fd182f30",
+    "after_api_sha256": "05985f7cb7b1ba616a3b85c26b0f7280e7274eef18a834b2d27b1c6d30440db2",
+    "original_class_through_eof_sha256": "4977cf5926b2fd9bab7fa7880bc8158beb7b78a7f5b6b8510a97de07e02df2a4",
+    "original_methods": {
+      "test_accepts_only_complete_declared_execution": {
+        "source_sha256": "9d108e3774c86248a920a5000a206ed84710cdcba46e7a7ddb8f96cbe4bb8c93",
+        "ast_sha256": "051d253aa918abc9afd007dbf18207cb5ec69de266043b45b3579cacabd1dd7f"
+      },
+      "test_rejects_missing_duplicate_and_skipped_results": {
+        "source_sha256": "aa114d59e004016ef133b0b2d5a52e10c3d8694c8bf184707a331182e5add731",
+        "ast_sha256": "cbb8413dedfda58c22273085ed6d2578c234b82b182d6672460b85f028e40f0c"
+      },
+      "test_baseline_http_failure_is_not_a_stale_issuance": {
+        "source_sha256": "50d591b6ac2edf7df61303b8b3512722782fe6b1009fdd0af9f87aa31f084c57",
+        "ast_sha256": "7aa7b67628d8b54aca6730e810331e0523a9d7961767533f583e79a088bdb986"
+      }
+    },
+    "catalog_before_sha256": "954ac87bd688707e54ab5154424c52c9616f3d42d8e3a877cd65123cd907a337",
+    "catalog_after_sha256": "5a5c459974c9eee7af23ba648d28f98f9d48b6045e546c07f15039f23f322943",
+    "exact_single_prefix_substitution": true,
+    "guard_prefixes_match_candidate": true,
+    "protected_manifest_unchanged": true,
+    "original_protected_paths": 174,
+    "other_protected_paths_byte_identical": 173,
+    "historical_files_byte_identical": 120,
+    "catalog_method_count": 33,
+    "all_other_catalog_bytes_identical": true,
+    "products_runner_workflows_unchanged": true,
+    "new_todo_count": 0,
+    "runtime_verified": false,
+    "product_green": false,
+    "task_complete": false
+  },
+  "environment": {
+    "go": "/workspace/scratch/07d33ef3a5cc/toolchains/go/bin/go",
+    "go_version": "go version go1.25.7 linux/amd64",
+    "discovery_pythonpath": "PYTHONPATH unset, sys.path[0] set to the unchanged original scripts file-CLI directory; repository root absent",
+    "guard_pythonpath": "/workspace/scratch/02f0b8733500/tabmail-catalog15-review/scripts:/workspace/scratch/02f0b8733500/tabmail-catalog15-review/scripts/tests"
+  },
+  "evidence_qualification": [
+    "Native runner.discover and partition were invoked; full runner.run/preparation and the 821 discovered methods were not executed.",
+    "The original three API verifier methods use synthetic logs and provide no new PostgreSQL execution proof.",
+    "The native catalog preservation method executed from the reviewed candidate without harness changes; its reviewed exact-prefix handling differs from baseline.",
+    "The first external probe invocation used a relative output path and failed to write its report after changing directory; that launch artifact is preserved separately and is not counted as a source regression."
+  ],
+  "new_todos_completed": 0,
+  "raw_receipts": [
+    "baseline-discovery.json",
+    "candidate-discovery-three.json",
+    "candidate-guard-positive.json",
+    "candidate-guard-assertion-tamper.json",
+    "guard-review.json",
+    "static-review.json"
+  ],
+  "full_source_suite_executed": false,
+  "new_product_runtime_evidence": false
+}

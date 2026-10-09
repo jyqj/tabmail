@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "source_sha": "1a15faf7d4bfe0b1d0cdd610ad4d9fb14618b7f4",
+  "actual_source_closure_sha256": "77714ddf99157760e9da1162362316a514a4acec6602bf383fef1374fb9a318f",
+  "archive": "R5-SCHEMA17-CATALOG-UPGRADES-LOGS.tar.gz",
+  "archive_sha256_from_author": "052067c0d266326e6aeafe6fbfe92840352749189b8e258621047198c8d6f282",
+  "archive_hash_recomputed": false,
+  "payload_file_count": 48,
+  "payload_bytes_changed": false,
+  "catalog": "R5-TRANSACTION-DB-CATALOG-SCHEMA17-ACTUAL-20261002.json",
+  "catalog_sha256_from_author": "398e67a97eff3b4e10c01db3a043b6eef0cc4512e953a0e764c6692b4fbc4dd7",
+  "catalog_bytes": 194779,
+  "catalog_hash_recomputed": false,
+  "catalog_O_EXCL_actual_source": "official TestR5SchemaInventoryAndRestart actualraw output, notversionedited historicalJSON",
+  "actual_counts": {
+    "tables": 50,
+    "columns": 505,
+    "constraints": 183,
+    "FK": 75,
+    "indexes": 153,
+    "triggers": 11,
+    "trigger_functions": 11,
+    "sequences": 3
+  },
+  "goose": 17,
+  "migration_sha_count": 17,
+  "restart_unchanged": true,
+  "tests": [
+    3,
+    3,
+    4
+  ],
+  "historical15_16_catalog_modified": false,
+  "schema18_claimed": false,
+  "M16_source_or_failure_changed": false,
+  "product_tests_or_perfilehashes_repeated_by_docs": false,
+  "task_complete": false,
+  "fullCI_green": false,
+  "cleanup": "owned44570stop0/testDB0conn0/PIDsocketgone; oldresourcesuntouched"
+}

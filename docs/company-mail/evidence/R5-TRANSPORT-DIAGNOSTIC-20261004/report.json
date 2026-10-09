@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "scope": "focused transport diagnostic; not formal evidence or business qualification",
+  "base": "d9a56effa08489f65ebc169ed161d18f8326ee25",
+  "production": "f875672dea2b68fdec9e0b986f4863724da5d7ba",
+  "diagnosis_read": "4b0bc7da980663069eb653e88f29e66dcb4e456a",
+  "command": "go test -tags=r5protocol ./internal/api/handlers -run '^TestR5Transport(RealRouter|FetchObserver|LostSubmitResponse)$' -count=1 -timeout=60s -v",
+  "result": "PASS",
+  "elapsed_seconds": 5.113,
+  "probes": {
+    "RealRouter": [
+      "real ready",
+      "real permission.override.patch",
+      "shipping authority termination yields clean EOF",
+      "ready on reconnect",
+      "JSON 200/409 status, digest and CONFLICT evidence unchanged",
+      "live-stream server cleanup"
+    ],
+    "FetchObserver": [
+      "returns original live response without EOF/JSON wait",
+      "real ready then permission.override.patch metadata",
+      "JSON observations equal client packets",
+      "source abort terminates reader",
+      "close terminates unread live response and observation reader"
+    ],
+    "LostSubmitResponse": [
+      "real 201 commit before connection abort",
+      "explicit 200 idempotent replay",
+      "one persisted job"
+    ]
+  },
+  "cleanup": {
+    "owned_fixture_databases": 0,
+    "owned_fixture_backends": 0,
+    "owned_http_listeners": 0,
+    "owned_cluster_shutdown": "pg_ctl fast stop succeeded"
+  },
+  "runtime": {
+    "go": "1.25.7",
+    "node": "24.19.0",
+    "vitest": "4.1.11",
+    "dependencies": "existing local tree; no formal external-runtime or fresh bootstrap claim"
+  },
+  "shared_tsx": "untouched; integration patch unapplied and git apply --check passed",
+  "formal": "43/26/46 not run; old 17/9/17 preserved",
+  "sha256": {
+    "internal/api/handlers/r5_protocol_component_observations_test.go": "42deed5c10a1bcc510ea144e36ecac6af377a8fe8a08cea57bf3190eecb73757",
+    "internal/api/handlers/r5_protocol_transport_test.go": "57169a39460424bc41a1d0bbfaf17342eef939360c8e2038f4464392d636b47e",
+    "web/components/company/r5-streaming-fetch-observer.ts": "54c273049173f6a9c3e8c6ad79f0c142e1720d6536ede62734f568eca6164997",
+    "web/components/company/r5-streaming-fetch-observer.probe.ts": "2a59a77009386912b6aa03bda149038cd725271b4c7aff8d3ea24f2a5ea3e666",
+    "web/vitest.r5transport.config.ts": "246041400c45913c0ce0442275b82aab2cc4b324a7683c995d3ee8d4dc8b00ec",
+    "docs/company-mail/R5-STREAMING-OBSERVER-INTEGRATION.patch": "21d6d0ec08c034ff64310e9fe46378bd3d28710b5ee0371c1fd0c9463992b463"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "actual_source_closure_sha256": "f0cfe3463617c6b56cb2e3c34db70af480d1679c002fe8b933cd3775ecf179bf",
+  "cleanup": {
+    "four_selected_pins_equal": true,
+    "nativePG_Node_browser_build_not_started": true,
+    "owned_groups_absent": true
+  },
+  "old_dfb_fullFAIL_not_relabelled": true,
+  "results": {
+    "Stats-app3": {
+      "CLI_exit": 0,
+      "actual_PASS": 6,
+      "actual_failed": [],
+      "actual_leaf_count": 5,
+      "actual_run_count": 6,
+      "actual_skipped": [],
+      "actual_top_count": 3,
+      "group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "Stats-handler2": {
+      "CLI_exit": 0,
+      "actual_PASS": 7,
+      "actual_failed": [],
+      "actual_leaf_count": 6,
+      "actual_run_count": 7,
+      "actual_skipped": [],
+      "actual_top_count": 2,
+      "group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    }
+  },
+  "scope": "newStats5only service/valueprojection/handlergate, not PG or globalrouting/currentauthority/freshwholebackend",
+  "source_sha": "fc7c7c554f281e15ce257530656ba369248c8e9e"
+}

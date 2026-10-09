@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "scope": "B01-N file-object adapter; component validated, backend incomplete",
+  "base_commit": "f1f9fe8bd98ccb9f9c58c7ce3f89d91243ba87b9",
+  "branch": "fix/company-file-object-boundary-20260929",
+  "tested_tree": "ca49458ba15c83dd701d6f16b3c6c97fc01daddf",
+  "source_files": 626,
+  "source_manifest_sha256": "d617a6f096af99cf8d8dfe4d1b31736c843b7006152d4c1eb2405b69772393ea",
+  "baseline": {
+    "counts": {
+      "run": 67,
+      "output": 191,
+      "pass": 16,
+      "fail": 51
+    },
+    "failures": [
+      "TestFileObjectRejectsNonCanonicalKeys/get/",
+      "TestFileObjectRejectsNonCanonicalKeys/get/.",
+      "TestFileObjectRejectsNonCanonicalKeys/get/../outside/mail.eml",
+      "TestFileObjectRejectsNonCanonicalKeys/exists/",
+      "TestFileObjectRejectsNonCanonicalKeys/exists/.",
+      "TestFileObjectRejectsNonCanonicalKeys/exists/../outside/mail.eml",
+      "TestFileObjectRejectsNonCanonicalKeys/exists/a/../mail.eml",
+      "TestFileObjectRejectsNonCanonicalKeys/exists/a//mail.eml",
+      "TestFileObjectRejectsNonCanonicalKeys/exists/a\\mail.eml",
+      "TestFileObjectRejectsNonCanonicalKeys/exists/absolute",
+      "TestFileObjectRejectsNonCanonicalKeys/delete/",
+      "TestFileObjectRejectsNonCanonicalKeys/delete/.",
+      "TestFileObjectRejectsNonCanonicalKeys/delete/../outside/mail.eml",
+      "TestFileObjectRejectsNonCanonicalKeys/delete/a/../mail.eml",
+      "TestFileObjectRejectsNonCanonicalKeys/delete/a//mail.eml",
+      "TestFileObjectRejectsNonCanonicalKeys/delete/a\\mail.eml",
+      "TestFileObjectRejectsNonCanonicalKeys/delete/absolute",
+      "TestFileObjectRejectsNonCanonicalKeys/put/a/../mail.eml",
+      "TestFileObjectRejectsNonCanonicalKeys/put/a//mail.eml",
+      "TestFileObjectRejectsNonCanonicalKeys/put/a\\mail.eml",
+      "TestFileObjectRejectsNonCanonicalKeys",
+      "TestFileObjectRejectsEscapingSymlinks/get/parent",
+      "TestFileObjectRejectsEscapingSymlinks/get/leaf",
+      "TestFileObjectRejectsEscapingSymlinks/exists/parent",
+      "TestFileObjectRejectsEscapingSymlinks/exists/leaf",
+      "TestFileObjectRejectsEscapingSymlinks/delete/parent",
+      "TestFileObjectRejectsEscapingSymlinks/delete/leaf",
+      "TestFileObjectRejectsEscapingSymlinks/put/parent",
+      "TestFileObjectRejectsEscapingSymlinks/put/leaf",
+      "TestFileObjectRejectsEscapingSymlinks",
+      "TestFileObjectRejectsDirectoryObjects/get",
+      "TestFileObjectRejectsDirectoryObjects/exists",
+      "TestFileObjectRejectsDirectoryObjects/delete",
+      "TestFileObjectRejectsDirectoryObjects",
+      "TestFileObjectCancelledOperationsHaveNoEffects/get",
+      "TestFileObjectCancelledOperationsHaveNoEffects/exists",
+      "TestFileObjectCancelledOperationsHaveNoEffects/delete",
+      "TestFileObjectCancelledOperationsHaveNoEffects",
+      "TestFileObjectReadHonorsCancellation",
+      "TestFileObjectChecksDeclaredLengthBeforePublication/short",
+      "TestFileObjectChecksDeclaredLengthBeforePublication/extra",
+      "TestFileObjectChecksDeclaredLengthBeforePublication/invalid-negative",
+      "TestFileObjectChecksDeclaredLengthBeforePublication/false-empty",
+      "TestFileObjectChecksDeclaredLengthBeforePublication",
+      "TestFileObjectNoProgressAbortsPublication",
+      "TestFileObjectRelativeRootIsStable",
+      "TestFileObjectParentSwapCannotRedirectPublication",
+      "TestFileObjectPublicationPreservesEOFAndCancellation/nil-source",
+      "TestFileObjectPublicationPreservesEOFAndCancellation",
+      "TestFileObjectDeclaredLengthBoundsConsumption",
+      "TestFileObjectCopyCannotBypassCancelledReader"
+    ],
+    "skips": []
+  },
+  "focused_runs": [
+    {
+      "status": "pass",
+      "passed": 67,
+      "failed": 0,
+      "skipped": 0,
+      "required": 14,
+      "missing": 0,
+      "log_sha256": "041ee1d966d2183944f2ae793249761a1e7346790004ba3b29666168d4cfc3ee"
+    },
+    {
+      "status": "pass",
+      "passed": 67,
+      "failed": 0,
+      "skipped": 0,
+      "required": 14,
+      "missing": 0,
+      "log_sha256": "368bfc3eed42a22d816014372b394268ddf1cf569044c83e22d8e7f236baf848"
+    },
+    {
+      "status": "pass",
+      "passed": 67,
+      "failed": 0,
+      "skipped": 0,
+      "required": 14,
+      "missing": 0,
+      "log_sha256": "aaf72bc5ecf45a433b5036af4c72c36dccd2d5b8fc606af3ec37bc98be22c51d"
+    }
+  ],
+  "build_exit": 0,
+  "vet_exit": 0,
+  "python_tests": 168,
+  "static_contract": {
+    "shared_models": 16,
+    "company_projections": 33,
+    "operations": 67,
+    "exit": 0
+  },
+  "backend_without_database": {
+    "status": "fail",
+    "tests_started": 932,
+    "tests_passed": 773,
+    "tests_failed": 0,
+    "tests_skipped": 159,
+    "mandatory_tests": 105,
+    "mandatory_missing_or_not_passed": 53,
+    "log_sha256": "0bd4dab728a967e30065401f90145a218ea5a199025dde949a25d78977ae71f3"
+  },
+  "backend_gate_exit": 1,
+  "environment": {
+    "go": "go version go1.25.7 darwin/arm64",
+    "python": "Python 3.12.11",
+    "dependencies": "existing caches; GOPROXY=off, GOTOOLCHAIN=local, readonly modules",
+    "test_database_configured": false,
+    "filesystem": "real session-owned temporary directories on darwin/arm64"
+  },
+  "not_run": [
+    "B01-K PostgreSQL concurrency cases",
+    "database HTTP contract journey",
+    "shipping browser journey",
+    "real S3",
+    "production Linux/Windows filesystem runtime",
+    "power-loss durability fault injection",
+    "performance and dependency vulnerability audit",
+    "remote CI and deployment"
+  ],
+  "publication": {
+    "contains_production_data": false,
+    "contains_raw_http_capture": false,
+    "bundle": "R5-B01-N-LOGS.tar.gz",
+    "bytes": 124693,
+    "sha256": "2542f800b1708bfdc030ec5ec095ef6808a39593914d3daa9442672eeb6861a8",
+    "members": 66
+  },
+  "cleanup": {
+    "test_files": "Go TempDir fixtures; no production paths",
+    "database_started": false,
+    "smtp_started": false,
+    "temporary_source_and_logs": "retained outside checkout",
+    "persistent_source_mutation": "only code, tests, manifest and project documents"
+  }
+}

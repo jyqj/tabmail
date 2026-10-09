@@ -1,0 +1,16 @@
+{
+  "attempted-draft-pr-body.md": "13184905443215d5ad0f645094a91d7131fa862a023dfc283571798daf56f023",
+  "draft-pr-body.md": "fe9aa28a4febf21d39cbc426faf9c77e69e8c1f574dff33ed221561d762cb8d6",
+  "draft-pr-result.log": "682deed6ccd21e66582c7f0e0efdffb3363feeac4c8b58f35a46d43dc240c725",
+  "execution-evidence.tar.gz": "96e693879f652d74d9791e9218bc053c714aaac20811a9189edbec13d5f90aed",
+  "historical-migration-drift.json": "aa98b84b950ddea7bce23f08327a1f3d8f4c272d06bded5ed1d65fd76af961b7",
+  "prepared-checkouts.json": "0a0343e201bc02f3f8f75e3f6611134c74450effb12eeed1847f470e90b80683",
+  "prepared-typescript-go-selection.json": "dddf585eaad182467b9d4975cbce14ccf7d79d2bc2668214522bd66ed259bb3b",
+  "preservation.json": "8afa2ef6ca578f4b467c5d721d1d297eafd24a2b872dc35ebf2eaab5984a98d2",
+  "receipt.json": "0089352faf0866ac2d3529202c0e136edf7ea252709c861d92ae96d028580692",
+  "remaining-errors.json": "7bcd329c94aae71d6ae080c58070112edc21e72797aa7be2f99a6c6b6dedf426",
+  "scoped-results.json": "f0b55af3c7f6ec24bb00a4847240225eedea2e41b91ba57ccad1d3e470501103",
+  "typescript-pin-verified.json": "6d50ecf41c5f3b41bc732fddaff50a5d5062cddad239d7f7bcb47a7e4a9a9a2f",
+  "versioned-default.json": "d61d6e1c053a9c9480c50de1cfe30db99404e351ed94230c210f297c765bc8b2",
+  "versioned-prepared.json": "94a111daf48779703716f1b172e94ac32d2f84f3edb57e38968aed53303cd2db"
+}

@@ -49,6 +49,34 @@ func IssueAccessToken(secret string, user *models.User) (string, error) {
 		IssuedAt:       now.Unix(),
 		Exp:            now.Add(AccessTokenTTL).Unix(),
 	}
+	return encodeSignedToken(secret, claims)
+}
+
+// VerifyAccessToken validates and parses an access token. The user identity
+// claim is mandatory, so a mailbox token signed with the same secret is
+// rejected here (and VerifyMailboxToken symmetrically rejects access tokens).
+func VerifyAccessToken(secret, token string) (*AccessClaims, error) {
+	body, err := decodeSignedToken(secret, token)
+	if err != nil {
+		return nil, err
+	}
+	var claims AccessClaims
+	if err := json.Unmarshal(body, &claims); err != nil {
+		return nil, ErrInvalidToken
+	}
+	if claims.UserID == uuid.Nil {
+		return nil, ErrInvalidToken
+	}
+	if claims.Exp <= time.Now().Unix() {
+		return nil, ErrTokenExpired
+	}
+	return &claims, nil
+}
+
+// encodeSignedToken marshals claims and produces the historical two-segment
+// token format "<base64url(json)>.<hex hmac-sha256>" shared by access and
+// mailbox tokens — deliberately not a standard three-part JWT.
+func encodeSignedToken(secret string, claims any) (string, error) {
 	body, err := json.Marshal(claims)
 	if err != nil {
 		return "", fmt.Errorf("marshal claims: %w", err)
@@ -57,8 +85,9 @@ func IssueAccessToken(secret string, user *models.User) (string, error) {
 	return payload + "." + signHMAC(secret, payload), nil
 }
 
-// VerifyAccessToken validates and parses an access token.
-func VerifyAccessToken(secret, token string) (*AccessClaims, error) {
+// decodeSignedToken verifies the two-segment token signature and returns the
+// raw JSON claim body for the caller to unmarshal into its own claim type.
+func decodeSignedToken(secret, token string) ([]byte, error) {
 	parts := strings.SplitN(token, ".", 2)
 	if len(parts) != 2 {
 		return nil, ErrInvalidToken
@@ -71,14 +100,7 @@ func VerifyAccessToken(secret, token string) (*AccessClaims, error) {
 	if err != nil {
 		return nil, ErrInvalidToken
 	}
-	var claims AccessClaims
-	if err := json.Unmarshal(body, &claims); err != nil {
-		return nil, ErrInvalidToken
-	}
-	if claims.Exp <= time.Now().Unix() {
-		return nil, ErrTokenExpired
-	}
-	return &claims, nil
+	return body, nil
 }
 
 // GenerateRefreshToken creates a random refresh token and returns (raw, hash).

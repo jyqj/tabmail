@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "PROPOSAL ONLY. No automatic adoption. A PASS cannot promote source/product qualification.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "policy",
+    "status",
+    "source_manifest_sha256",
+    "dependency_manifest_sha256",
+    "runtime_contract_sha256",
+    "actual_component_started",
+    "producer_execution_sha256",
+    "component_packet_sha256",
+    "reason",
+    "product_green",
+    "task_complete"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "policy": {
+      "const": "r5_external_dependency_runtime_status_v1"
+    },
+    "status": {
+      "enum": [
+        "PREPARED_CANDIDATE_UNADOPTED",
+        "NOTRUN_DEPENDENCY_POLICY_UNADOPTED",
+        "NOTRUN_DEPENDENCY_POLICY_FAILED",
+        "READY_FOR_SCOPED_RUN",
+        "SCOPED_RUN_FAILED",
+        "SCOPED_EVIDENCE_PASSED"
+      ]
+    },
+    "source_manifest_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "dependency_manifest_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "runtime_contract_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "actual_component_started": {
+      "type": "boolean"
+    },
+    "producer_execution_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "component_packet_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "product_green": {
+      "const": false
+    },
+    "task_complete": {
+      "const": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "PREPARED_CANDIDATE_UNADOPTED",
+              "NOTRUN_DEPENDENCY_POLICY_UNADOPTED",
+              "NOTRUN_DEPENDENCY_POLICY_FAILED",
+              "READY_FOR_SCOPED_RUN"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "actual_component_started": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "SCOPED_RUN_FAILED",
+              "SCOPED_EVIDENCE_PASSED"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "actual_component_started": {
+            "const": true
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "READY_FOR_SCOPED_RUN",
+              "SCOPED_RUN_FAILED",
+              "SCOPED_EVIDENCE_PASSED"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "dependency_manifest_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "runtime_contract_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "SCOPED_RUN_FAILED",
+              "SCOPED_EVIDENCE_PASSED"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "producer_execution_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "SCOPED_EVIDENCE_PASSED"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "component_packet_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    }
+  ]
+}

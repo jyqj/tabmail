@@ -50,7 +50,7 @@ func TestSuppressionOrdinaryUserForbidden(t *testing.T) {
 	if w.Code != http.StatusForbidden {
 		t.Fatalf("ordinary user GET expected 403, got %d body=%s", w.Code, w.Body.String())
 	}
-	w = suppressionRouterRequest(t, h, headers, http.MethodDelete, "/api/v1/suppression/"+entry.ID.String(), `{"reason":"cleanup"}`)
+	w = suppressionRouterRequest(t, h, headers, http.MethodDelete, "/api/v1/suppression/"+entry.ID.String(), `{"reason":"cleanup reason"}`)
 	if w.Code != http.StatusForbidden {
 		t.Fatalf("ordinary user DELETE expected 403, got %d body=%s", w.Code, w.Body.String())
 	}
@@ -92,6 +92,10 @@ func TestSuppressionTenantAdminFlow(t *testing.T) {
 		t.Fatalf("delete without reason expected 400, got %d body=%s", w.Code, w.Body.String())
 	}
 	w = suppressionRouterRequest(t, h, headers, http.MethodDelete, "/api/v1/suppression/"+entry.ID.String(), `{"reason":"cleanup"}`)
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("delete with seven-byte reason expected 400, got %d body=%s", w.Code, w.Body.String())
+	}
+	w = suppressionRouterRequest(t, h, headers, http.MethodDelete, "/api/v1/suppression/"+entry.ID.String(), `{"reason":"   cleanup reason   "}`)
 	if w.Code != http.StatusNoContent {
 		t.Fatalf("admin delete with reason expected 204, got %d body=%s", w.Code, w.Body.String())
 	}
@@ -116,7 +120,7 @@ func TestSuppressionTenantAdminFlow(t *testing.T) {
 		if err := json.Unmarshal(a.Details, &details); err != nil {
 			t.Fatal(err)
 		}
-		if details["reason"] != "cleanup" || details["address"] != entry.Address || details["suppression_id"] != entry.ID.String() {
+		if details["reason"] != "cleanup reason" || details["address"] != entry.Address || details["suppression_id"] != entry.ID.String() {
 			t.Fatalf("audit details incomplete: %v", details)
 		}
 	}
@@ -142,11 +146,11 @@ func TestSuppressionAPIKeyScopes(t *testing.T) {
 	if w.Code != http.StatusForbidden {
 		t.Fatalf("send:write key list expected 403, got %d body=%s", w.Code, w.Body.String())
 	}
-	w = suppressionRouterRequest(t, h, map[string]string{"X-API-Key": "sup-send-key"}, http.MethodDelete, "/api/v1/suppression/"+entry.ID.String(), `{"reason":"cleanup"}`)
+	w = suppressionRouterRequest(t, h, map[string]string{"X-API-Key": "sup-send-key"}, http.MethodDelete, "/api/v1/suppression/"+entry.ID.String(), `{"reason":"cleanup reason"}`)
 	if w.Code != http.StatusForbidden {
 		t.Fatalf("send:write key delete expected 403, got %d body=%s", w.Code, w.Body.String())
 	}
-	w = suppressionRouterRequest(t, h, map[string]string{"X-API-Key": "sup-manage-key"}, http.MethodDelete, "/api/v1/suppression/"+entry.ID.String(), `{"reason":"cleanup"}`)
+	w = suppressionRouterRequest(t, h, map[string]string{"X-API-Key": "sup-manage-key"}, http.MethodDelete, "/api/v1/suppression/"+entry.ID.String(), `{"reason":"cleanup reason"}`)
 	if w.Code != http.StatusNoContent {
 		t.Fatalf("suppression:manage key delete expected 204, got %d body=%s", w.Code, w.Body.String())
 	}

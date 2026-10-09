@@ -1,0 +1,36 @@
+{
+  "capture_exit": 0,
+  "validate_exit": 0,
+  "validate_output_equals_receipt": true,
+  "receipt_sha256": "5cc0316d57a2c389b8d52c5e1b1939546be58e96f8d2711d22c8a5ed64bf871b",
+  "source_sha": "7bd2f0e6c2cbbb1edf43a8f3e79a3a6a10ede45e",
+  "source_closure_sha256": "f15ddc1a0f8f0d023beb59a18b39c499b72682bc1787fe54a23de445125d3163",
+  "inventory_implementation_sha256": "174189678fd15e3c4b73d3adb9c82965be75e279c49efcf161ea748fcdbf735c",
+  "loaded_helper_equals_source": true,
+  "file_count": 1038,
+  "fork_counts": {
+    "third_party/enmime-v2.3.0": 219,
+    "third_party/go-smtp": 29
+  },
+  "unqualified": {
+    "effective_root_MVS_observed": false,
+    "go_selected_inputs_observed": false,
+    "external_module_cache_verified": false
+  },
+  "stderr": "",
+  "validate_command": [
+    "python3",
+    "scripts/r5_source_inventory.py",
+    "validate",
+    "--root",
+    "/workspace/tabmail",
+    "--purpose",
+    "protocol",
+    "--policy",
+    "r5_current_local_inputs_smtp_owner_forks_v3",
+    "--receipt",
+    "scripts/tests/checkpoints/r5_source_excluded_metadata_20261003/cli-capture.raw.log",
+    "--receipt-sha256",
+    "5cc0316d57a2c389b8d52c5e1b1939546be58e96f8d2711d22c8a5ed64bf871b"
+  ]
+}

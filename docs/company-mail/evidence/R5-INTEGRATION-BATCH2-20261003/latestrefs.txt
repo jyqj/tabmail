@@ -1,0 +1,4 @@
+7bb7658d363856e8f4a8cefc7630a6ec77e86f04	refs/heads/fix/profile-refresh-three-way-20261003
+b940c6e2a4aa050c657e065ff68c97de7f249b28	refs/heads/fix/r5-receipt-inspection-test-gate
+eb366eecb6413f5aa025afb4ee63bd1eea7fdf7d	refs/heads/integration/company-mail-r5-20261003
+29a388a3c7d6da03641abe79bb5c728b90b75273	refs/heads/work/company-mail-r5-goal-20260930

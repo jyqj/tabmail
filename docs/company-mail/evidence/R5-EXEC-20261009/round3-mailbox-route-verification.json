@@ -1,0 +1,232 @@
+{
+  "schema_version": 1,
+  "batch": "R5-EXEC-20261009",
+  "issue": 220,
+  "review": "root independent actual JSON/exit/source/hash and exact ID verification ACCEPT",
+  "run_id": 37882924532,
+  "job_id": 113666462581,
+  "test_sha256": "2a72bb78cc5f9e82d037a0358875c2d0c433d8cd956e0e7801795756c88e9c66",
+  "verifier_methods": 36,
+  "verifier_execution": {
+    "command": [
+      "/usr/bin/python3",
+      "-B",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "candidate/scripts/tests",
+      "-p",
+      "test_r5_mailbox_route_recovery.py",
+      "-v"
+    ],
+    "started_at": 1791519275.4079244,
+    "timed_out": false,
+    "returncode": 0,
+    "finished_at": 1791519275.5216794
+  },
+  "results": {
+    "baseline": {
+      "states": {
+        "failed": 13,
+        "passed": 5
+      },
+      "ids": [
+        "explicit mailbox route recovery R01 keeps an unavailable inbox route unresolved",
+        "explicit mailbox route recovery R02 keeps an unavailable sent route unresolved",
+        "explicit mailbox route recovery R03 keeps an unavailable archive route unresolved",
+        "explicit mailbox route recovery R04 keeps an unavailable trash route unresolved",
+        "explicit mailbox route recovery R05 rejects an explicit mailbox with no read or send rights",
+        "explicit mailbox route recovery R06 distinguishes an empty explicit mailbox from an absent parameter",
+        "explicit mailbox route recovery R07 prevents Compose from silently choosing another mailbox",
+        "explicit mailbox route recovery R08 retains the ordinary default when no mailbox parameter exists",
+        "explicit mailbox route recovery R09 resolves a valid explicit mailbox instead of the first one",
+        "explicit mailbox route recovery R10 keeps a selected send-only identity usable for Compose",
+        "explicit mailbox route recovery R11 retains an authorized sender for a selected read-only mailbox",
+        "explicit mailbox route recovery R12 does not report permanent unavailability during the initial read",
+        "explicit mailbox route recovery R13 closes a revoked mailbox and its stream without a fallback read",
+        "explicit mailbox route recovery R14 resolves the requested mailbox after an explicit refresh restores access",
+        "explicit mailbox route recovery R15 reads another mailbox only after explicit selection and clears stale detail and page",
+        "explicit mailbox route recovery R16 preserves cross-mailbox drafts and explicitly opening one",
+        "explicit mailbox route recovery R17 preserves cross-mailbox delivery status without a fallback stream",
+        "explicit mailbox route recovery R18 retires pending editor opening between two unavailable mailbox routes"
+      ],
+      "failed": [
+        {
+          "id": "explicit mailbox route recovery R01 keeps an unavailable inbox route unresolved",
+          "message": [
+            "AssertionError: expected [ { …(3) }, { …(3) }, { …(3) }, …(2) ] to have a length of +0 but got 5\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1389:20)\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/chai/index.js:1700:25)\n    at assertUnavailable (/home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:62:26)\n    at /home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:123:7\n    at file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        },
+        {
+          "id": "explicit mailbox route recovery R02 keeps an unavailable sent route unresolved",
+          "message": [
+            "AssertionError: expected [ { …(3) }, { …(3) }, { …(3) } ] to have a length of +0 but got 3\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1389:20)\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/chai/index.js:1700:25)\n    at assertUnavailable (/home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:62:26)\n    at /home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:123:7\n    at file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        },
+        {
+          "id": "explicit mailbox route recovery R03 keeps an unavailable archive route unresolved",
+          "message": [
+            "AssertionError: expected [ { …(3) }, { …(3) }, { …(3) }, …(2) ] to have a length of +0 but got 5\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1389:20)\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/chai/index.js:1700:25)\n    at assertUnavailable (/home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:62:26)\n    at /home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:123:7\n    at file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        },
+        {
+          "id": "explicit mailbox route recovery R04 keeps an unavailable trash route unresolved",
+          "message": [
+            "AssertionError: expected [ { …(3) }, { …(3) }, { …(3) }, …(2) ] to have a length of +0 but got 5\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1389:20)\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/chai/index.js:1700:25)\n    at assertUnavailable (/home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:62:26)\n    at /home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:123:7\n    at file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        },
+        {
+          "id": "explicit mailbox route recovery R05 rejects an explicit mailbox with no read or send rights",
+          "message": [
+            "AssertionError: expected [ { …(3) }, { …(3) }, { …(3) }, …(2) ] to have a length of +0 but got 5\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1389:20)\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/chai/index.js:1700:25)\n    at assertUnavailable (/home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:62:26)\n    at /home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:131:5\n    at file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        },
+        {
+          "id": "explicit mailbox route recovery R06 distinguishes an empty explicit mailbox from an absent parameter",
+          "message": [
+            "AssertionError: expected [ { …(3) }, { …(3) }, { …(3) }, …(2) ] to have a length of +0 but got 5\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1389:20)\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/chai/index.js:1700:25)\n    at assertUnavailable (/home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:62:26)\n    at /home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:135:5\n    at file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        },
+        {
+          "id": "explicit mailbox route recovery R07 prevents Compose from silently choosing another mailbox",
+          "message": [
+            "Error: expect(element).toBeDisabled()\n\nReceived element is not disabled:\n  <button\n  class=\"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 \"\n  type=\"button\"\n/>\n    at Proxy.__VITEST_EXTEND_ASSERTION__ (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1888:12)\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/chai/index.js:1700:25)\n    at /home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:139:29\n    at file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        },
+        {
+          "id": "explicit mailbox route recovery R13 closes a revoked mailbox and its stream without a fallback read",
+          "message": [
+            "Error: expect(element).toHaveTextContent()\n\nExpected element to have text content:\n  /requested mailbox.*unavailable/i\nReceived:\n  No messages\n\nIgnored nodes: comments, script, style\n\u001b[36m<html\u001b[39m\n  \u001b[33mlang\u001b[39m=\u001b[32m\"en\"\u001b[39m\n\u001b[36m>\u001b[39m\n  \u001b[36m<head />\u001b[39m\n  \u001b[36m<body>\u001b[39m\n    \u001b[36m<div>\u001b[39m\n      \u001b[36m<main\u001b[39m\n        \u001b[33mclass\u001b[39m=\u001b[32m\"mx-auto w-full max-w-screen-2xl space-y-4 p-4 md:p-6\"\u001b[39m\n      \u001b[36m>\u001b[39m\n        \u001b[36m<header\u001b[39m\n          \u001b[33mclass\u001b[39m=\u001b[32m\"flex flex-wrap items-center justify-between gap-3\"\u001b[39m\n        \u001b[36m>\u001b[39m\n          \u001b[36m<div>\u001b[39m\n            \u001b[36m<h1\u001b[39m\n              \u001b[33mclass\u001b[39m=\u001b[32m\"text-2xl font-semibold\"\u001b[39m\n            \u001b[36m>\u001b[39m\n              \u001b[0mCompany mail\u001b[0m\n            \u001b[36m</h1>\u001b[39m\n            \u001b[36m<p\u001b[39m\n              \u001b[33mclass\u001b[39m=\u001b[32m\"text-sm text-muted-foreground\"\u001b[39m\n            \u001b[36m>\u001b[39m\n              \u001b[0mPersonal and shared mailboxes · message content and delivery status are separate\u001b[0m\n            \u001b[36m</p>\u001b[39m\n          \u001b[36m</div>\u001b[39m\n          \u001b[36m<div\u001b[39m\n            \u001b[33mclass\u001b[39m=\u001b[32m\"flex gap-2\"\u001b[39m\n          \u001b[36m>\u001b[39m\n            \u001b[36m<button\u001b[39m\n              \u001b[33mclass\u001b[39m=\u001b[32m\"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 \"\u001b[39m\n              \u001b[33mtype\u001b[39m=\u001b[32m\"button\"\u001b[39m\n            \u001b[36m>\u001b[39m\n              \u001b[0mRefresh\u001b[0m\n            \u001b[36m</button>\u001b[39m\n            \u001b[36m<button\u001b[39m\n              \u001b[33mclass\u001b[39m=\u001b[32m\"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 \"\u001b[39m\n              \u001b[33mtype\u001b[39m=\u001b[32m\"button\"\u001b[39m\n            \u001b[36m>\u001b[39m\n              \u001b[0mCompose\u001b[0m\n            \u001b[36m</button>\u001b[39m\n          \u001b[36m</div>\u001b[39m\n        \u001b[36m</header>\u001b[39m\n        \u001b[36m<div\u001b[39m\n          \u001b[33mclass\u001b[39m=\u001b[32m\"grid gap-5 md:grid-cols-[210px_minmax(0,1fr)]\"\u001b[39m\n        \u001b[36m>\u001b[39m\n          \u001b[36m<aside\u001b[39m\n            \u001b[33mclass\u001b[39m=\u001b[32m\"space-y-5\"\u001b[39m\n          \u001b[36m>\u001b[39m\n            \u001b[36m<nav\u001b[39m\n              \u001b[33maria-label\u001b[39m=\u001b[32m\"Mailboxes\"\u001b[39m\n              \u001b[33mclass\u001b[39m=\u001b[32m\"space-y-1\"\u001b[39m\n            \u001b[36m>\u001b[39m\n              \u001b[36m<button\u001b[39m\n                \u001b[33maria-pressed\u001b[39m=\u001b[32m\"true\"\u001b[39m\n                \u001b[33mclass\u001b[39m=\u001b[32m\"block w-full rounded border p-3 text-left text-xs bg-muted\"\u001b[39m\n              \u001b[36m>\u001b[39m\n                \u001b[36m<span\u001b[39m\n                  \u001b[33mclass\u001b[39m=\u001b[32m\"block break-all font-medium\"\u001b[39m\n                \u001b[36m>\u001b[39m\n                  \u001b[0mmailbox-one@fixture.test\u001b[0m\n                \u001b[36m</span>\u001b[39m\n                \u001b[36m<span\u001b[39m\n                  \u001b[33mclass\u001b[39m=\u001b[32m\"text-muted-foreground\"\u001b[39m\n                \u001b[36m>\u001b[39m\n                  \u001b[0mPersonal\u001b[0m\n                  \u001b[0m · \u001b[0m\n                  \u001b[0mread\u001b[0m\n                \u001b[36m</span>\u001b[39m\n              \u001b[36m</button>\u001b[39m\n            \u001b[36m</nav>\u001b[39m\n            \u001b[36m<nav\u001b[39m\n              \u001b[33maria-label\u001b[39m=\u001b[32m\"Mail folders\"\u001b[39m\n              \u001b[33mclass\u001b[39m=\u001b[32m\"flex flex-wrap gap-2 md:flex-col\"\u001b[39m\n            \u001b[36m>\u001b[39m\n              \u001b[36m<button\u001b[39m\n                \u001b[33maria-pressed\u001b[39m=\u001b[32m\"true\"\u001b[39m\n                \u001b[33mclass\u001b[39m=\u001b[32m\"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 bg-muted text-left\"\u001b[39m\n                \u001b[33mtype\u001b[39m=\u001b[32m\"button\"\u001b[39m\n              \u001b[36m>\u001b[39m\n                \u001b[0mInbox\u001b[0m\n              \u001b[36m</button>\u001b[39m\n              \u001b[36m<button\u001b[39m\n                \u001b[33maria-pressed\u001b[39m=\u001b[32m\"false\"\u001b[39m\n                \u001b[33mclass\u001b[39m=\u001b[32m\"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 text-left\"\u001b[39m\n                \u001b[33mtype\u001b[39m=\u001b[32m\"button\"\u001b[39m\n              \u001b[36m>\u001b[39m\n                \u001b[0mSent mail\u001b[0m\n              \u001b[36m</button>\u001b[39m\n              \u001b[36m<button\u001b[39m\n                \u001b[33maria-pressed\u001b[39m=\u001b[32m\"false\"\u001b[39m\n                \u001b[33mclass\u001b[39m=\u001b[32m\"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 text-left\"\u001b[39m\n                \u001b[33mtype\u001b[39m=\u001b[32m\"button\"\u001b[39m\n              \u001b[36m>\u001b[39m\n                \u001b[0mDrafts\u001b[0m\n              \u001b[36m</button>\u001b[39m\n              \u001b[36m<button\u001b[39m\n                \u001b[33maria-pressed\u001b[39m=\u001b[32m\"false\"\u001b[39m\n                \u001b[33mclass\u001b[39m=\u001b[32m\"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 text-left\"\u001b[39m\n                \u001b[33mtype\u001b[39m=\u001b[32m\"button\"\u001b[39m\n              \u001b[36m>\u001b[39m\n                \u001b[0mArchive\u001b[0m\n              \u001b[36m</button>\u001b[39m\n              \u001b[36m<button\u001b[39m\n                \u001b[33maria-pressed\u001b[39m=\u001b[32m\"false\"\u001b[39m\n                \u001b[33mclass\u001b[39m=\u001b[32m\"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 text-left\"\u001b[39m\n                \u001b[33mtype\u001b[39m=\u001b[32m\"button\"\u001b[39m\n              \u001b[36m>\u001b[39m\n                \u001b[0mTrash\u001b[0m\n              \u001b[36m</button>\u001b[39m\n              \u001b[36m<button\u001b[39m\n                \u001b[33maria-pressed\u001b[39m=\u001b[32m\"false\"\u001b[39m\n                \u001b[33mclass\u001b[39m=\u001b[32m\"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 text-left\"\u001b[39m\n                \u001b[33mtype\u001b[39m=\u001b[32m\"button\"\u001b[39m\n              \u001b[36m>\u001b[39m\n                \u001b[0mDelivery status\u001b[0m\n              \u001b[36m</button>\u001b[39m\n            \u001b[36m</nav>\u001b[39m\n          \u001b[36m</aside>\u001b[39m\n          \u001b[36m<section\u001b[39m\n            \u001b[33mclass\u001b[39m=\u001b[32m\"min-w-0 space-y-4\"\u001b[39m\n          \u001b[36m>\u001b[39m\n            \u001b[36m<h2\u001b[39m\n              \u001b[33mclass\u001b[39m=\u001b[32m\"text-lg font-semibold\"\u001b[39m\n            \u001b[36m>\u001b[39m\n              \u001b[0mInbox\u001b[0m\n            \u001b[36m</h2>\u001b[39m\n            \u001b[36m<p\u001b[39m\n              \u001b[33mclass\u001b[39m=\u001b[32m\"text-sm\"\u001b[39m\n            \u001b[36m>\u001b[39m\n              \u001b[0mCurrent mailbox\u001b[0m\n              \u001b[0m: \u001b[0m\n              \u001b[0mmailbox-one@fixture.test\u001b[0m\n            \u001b[36m</p>\u001b[39m\n            \u001b[36m<form\u001b[39m\n              \u001b[33mclass\u001b[39m=\u001b[32m\"flex items-end gap-2\"\u001b[39m\n            \u001b[36m>\u001b[39m\n              \u001b[36m<div\u001b[39m\n                \u001b[33mclass\u001b[39m=\u001b[32m\"flex-1\"\u001b[39m\n              \u001b[36m>\u001b[39m\n                \u001b[36m<div\u001b[39m\n                  \u001b[33mclass\u001b[39m=\u001b[32m\"space-y-1.5\"\u001b[39m\n                \u001b[36m>\u001b[39m\n                  \u001b[36m<label\u001b[39m\n                    \u001b[33mclass\u001b[39m=\u001b[32m\"text-sm font-medium\"\u001b[39m\n                    \u001b[33mfor\u001b[39m=\u001b[32m\"_r_1a_\"\u001b[39m\n                  \u001b[36m>\u001b[39m\n                    \u001b[0mSearch subject, addresses and indexed body\u001b[0m\n                  \u001b[36m</label>\u001b[39m\n                  \u001b[36m<input\u001b[39m\n                    \u001b[33mclass\u001b[39m=\u001b[32m\"w-full rounded-md border bg-background px-3 py-2 text-sm disabled:opacity-50\"\u001b[39m\n                    \u001b[33mid\u001b[39m=\u001b[32m\"_r_1a_\"\u001b[39m\n                    \u001b[33mmaxlength\u001b[39m=\u001b[32m\"200\"\u001b[39m\n                    \u001b[33mvalue\u001b[39m=\u001b[32m\"\"\u001b[39m\n                  \u001b[36m/>\u001b[39m\n                \u001b[36m</div>\u001b[39m\n              \u001b[36m</div>\u001b[39m\n              \u001b[36m<button\u001b[39m\n                \u001b[33mclass\u001b[39m=\u001b[32m\"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 \"\u001b[39m\n                \u001b[33mtype\u001b[39m=\u001b[32m\"submit\"\u001b[39m\n              \u001b[36m>\u001b[39m\n                \u001b[0mSearch\u001b[0m\n              \u001b[36m</button>\u001b[39m\n            \u001b[36m</form>\u001b[39m\n            \u001b[36m<div\u001b[39m\n              \u001b[33mclass\u001b[39m=\u001b[32m\"space-y-3\"\u001b[39m\n            \u001b[36m>\u001b[39m\n              \u001b[36m<p\u001b[39m\n                \u001b[33mclass\u001b[39m=\u001b[32m\"text-xs text-muted-foreground\"\u001b[39m\n              \u001b[36m>\u001b[39m\n                \u001b[0mBody index 0/0; failed 0. Subject/address search remains available for unindexed mail.\u001b[0m\n              \u001b[36m</p>\u001b[39m\n              \u001b[36m<p\u001b[39m\n                \u001b[33mclass\u001b[39m=\u001b[32m\"text-sm text-muted-foreground\"\u001b[39m\n                \u001b[33mrole\u001b[39m=\u001b[32m\"status\"\u001b[39m\n              \u001b[36m>\u001b[39m\n                \u001b[0mNo messages\u001b[0m\n              \u001b[36m</p>\u001b[39m\n              \u001b[36m<div\u001b[39m\n                \u001b[33mclass\u001b[39m=\u001b[32m\"grid min-h-96 gap-4 lg:grid-cols-[minmax(240px,0.85fr)_minmax(0,1.5fr)]\"\u001b[39m\n              \u001b[36m>\u001b[39m\n                \u001b[36m<div\u001b[39m\n                  \u001b[33mclass\u001b[39m=\u001b[32m\"min-w-0 space-y-1 rounded-lg border p-2\"\u001b[39m\n                \u001b[36m/>\u001b[39m\n                \u001b[36m<div\u001b[39m\n                  \u001b[33mclass\u001b[39m=\u001b[32m\"min-w-0\"\u001b[39m\n                \u001b[36m>\u001b[39m\n                  \u001b[36m<p\u001b[39m\n                    \u001b[33mclass\u001b[39m=\u001b[32m\"p-5 text-sm text-muted-foreground\"\u001b[39m\n                  \u001b[36m>\u001b[39m\n                    \u001b[0mSelect a message to read\u001b[0m\n                  \u001b[36m</p>\u001b[39m\n                \u001b[36m</div>\u001b[39m\n              \u001b[36m</div>\u001b[39m\n              \u001b[36m<nav\u001b[39m\n                \u001b[33maria-label\u001b[39m=\u001b[32m\"Pagination\"\u001b[39m\n                \u001b[33mclass\u001b[39m=\u001b[32m\"flex items-center justify-center gap-3 py-3\"\u001b[39m\n              \u001b[36m>\u001b[39m\n                \u001b[36m<button\u001b[39m\n                  \u001b[33mclass\u001b[39m=\u001b[32m\"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 \"\u001b[39m\n                  \u001b[33mdisabled\u001b[39m=\u001b[32m\"\"\u001b[39m\n                  \u001b[33mtype\u001b[39m=\u001b[32m\"button\"\u001b[39m\n                \u001b[36m>\u001b[39m\n                  \u001b[0mPrevious\u001b[0m\n                \u001b[36m</button>\u001b[39m\n                \u001b[36m<span\u001b[39m\n                  \u001b[33mclass\u001b[39m=\u001b[32m\"text-sm\"\u001b[39m\n                \u001b[36m>\u001b[39m\n                  \u001b[0m1\u001b[0m\n                  \u001b[0m / \u001b[0m\n                  \u001b[0m1\u001b[0m\n                  \u001b[0m · \u001b[0m\n                  \u001b[0m0\u001b[0m\n                \u001b[36m</span>\u001b[39m\n                \u001b[36m<button\u001b[39m\n                  \u001b[33mclass\u001b[39m=\u001b[32m\"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 \"\u001b[39m\n                  \u001b[33mdisabled\u001b[39m=\u001b[32m\"\"\u001b[39m\n                  \u001b[33mtype\u001b[39m=\u001b[32m\"button\"\u001b[39m\n                \u001b[36m>\u001b[39m\n                  \u001b[0mNext\u001b[0m\n                \u001b[36m</button>\u001b[39m\n              \u001b[36m</nav>\u001b[39m\n            \u001b[36m</div>\u001b[39m\n          \u001b[36m</section>\u001b[39m\n        \u001b[36m</div>\u001b[39m\n      \u001b[36m</main>\u001b[39m\n    \u001b[36m</div>\u001b[39m\n  \u001b[36m</body>\u001b[39m\n\u001b[36m</html>\u001b[39m\n    at Proxy.__VITEST_EXTEND_ASSERTION__ (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1888:12)\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/chai/index.js:1700:25)\n    at /home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:192:60\n    at runWithExpensiveErrorDiagnosticsDisabled (/home/runner/work/tabmail/tabmail/baseline/web/node_modules/@testing-library/dom/dist/config.js:47:12)\n    at checkCallback (/home/runner/work/tabmail/tabmail/baseline/web/node_modules/@testing-library/dom/dist/wait-for.js:124:77)\n    at Timeout.checkRealTimersCallback (/home/runner/work/tabmail/tabmail/baseline/web/node_modules/@testing-library/dom/dist/wait-for.js:118:16)\n    at listOnTimeout (node:internal/timers:585:17)\n    at processTimers (node:internal/timers:521:7)"
+          ]
+        },
+        {
+          "id": "explicit mailbox route recovery R14 resolves the requested mailbox after an explicit refresh restores access",
+          "message": [
+            "AssertionError: expected [ { …(3) }, { …(3) }, { …(3) }, …(2) ] to have a length of +0 but got 5\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1389:20)\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/chai/index.js:1700:25)\n    at assertUnavailable (/home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:62:26)\n    at /home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:201:5\n    at file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        },
+        {
+          "id": "explicit mailbox route recovery R15 reads another mailbox only after explicit selection and clears stale detail and page",
+          "message": [
+            "AssertionError: expected [ { …(3) }, { …(3) }, { …(3) }, …(6) ] to have a length of +0 but got 9\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1389:20)\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/chai/index.js:1700:25)\n    at assertUnavailable (/home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:62:26)\n    at /home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:210:5\n    at file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        },
+        {
+          "id": "explicit mailbox route recovery R16 preserves cross-mailbox drafts and explicitly opening one",
+          "message": [
+            "AssertionError: expected [ { …(3) } ] to have a length of +0 but got 1\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1389:20)\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/chai/index.js:1700:25)\n    at /home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:222:28\n    at file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        },
+        {
+          "id": "explicit mailbox route recovery R17 preserves cross-mailbox delivery status without a fallback stream",
+          "message": [
+            "AssertionError: expected [ { …(3) } ] to have a length of +0 but got 1\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1389:20)\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/chai/index.js:1700:25)\n    at /home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:234:28\n    at file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        },
+        {
+          "id": "explicit mailbox route recovery R18 retires pending editor opening between two unavailable mailbox routes",
+          "message": [
+            "Error: expect(element).not.toBeInTheDocument()\n\nexpected document not to contain element, found <input\n  class=\"w-full rounded-md border bg-background px-3 py-2 text-sm disabled:opacity-50\"\n  id=\"_r_1k_\"\n  maxlength=\"998\"\n  value=\"Saved cross-mailbox draft\"\n/> instead\n    at Proxy.__VITEST_EXTEND_ASSERTION__ (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1888:12)\n    at Proxy.<anonymous> (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/chai/index.js:1700:25)\n    at /home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx:247:52\n    at file:///home/runner/work/tabmail/tabmail/baseline/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        }
+      ],
+      "identity": {
+        "commit": "3bce5f864fbfcf13b1483fc253a275d8f46ef45b",
+        "package_lock_sha256": "c4f70934466c07c0a2589ead49f120d1b2278d9775e13fdbf7386913b1658869",
+        "status": "",
+        "test_sha256": "2a72bb78cc5f9e82d037a0358875c2d0c433d8cd956e0e7801795756c88e9c66",
+        "tree": "bdab2bf7c362a15fe1eb56563fa58d88a91efcc0"
+      },
+      "exit": 1,
+      "command": [
+        "node",
+        "/home/runner/work/tabmail/tabmail/baseline/web/node_modules/vitest/vitest.mjs",
+        "run",
+        "features/mail/workspace-mailbox-route-recovery.test.tsx",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=json",
+        "--reporter=/home/runner/work/_temp/exec08-route-evidence/dual-source/baseline/execution-boundary-reporter.mjs",
+        "--outputFile=/home/runner/work/_temp/exec08-route-evidence/dual-source/baseline/vitest.json"
+      ],
+      "boundary": {
+        "schema": 1,
+        "nodeVersion": "22.23.3",
+        "runStarts": 1,
+        "runEnds": 1,
+        "processTimeout": false,
+        "reason": "failed",
+        "moduleFiles": [
+          "/home/runner/work/tabmail/tabmail/baseline/web/features/mail/workspace-mailbox-route-recovery.test.tsx"
+        ],
+        "unhandledErrors": [],
+        "scopeErrors": []
+      },
+      "raw_vitest_sha256": "ff8c44ba24324b2b82e630335fb0529844b92af48d726d70ec04453b0e40e97c"
+    },
+    "candidate": {
+      "states": {
+        "passed": 18
+      },
+      "ids": [
+        "explicit mailbox route recovery R01 keeps an unavailable inbox route unresolved",
+        "explicit mailbox route recovery R02 keeps an unavailable sent route unresolved",
+        "explicit mailbox route recovery R03 keeps an unavailable archive route unresolved",
+        "explicit mailbox route recovery R04 keeps an unavailable trash route unresolved",
+        "explicit mailbox route recovery R05 rejects an explicit mailbox with no read or send rights",
+        "explicit mailbox route recovery R06 distinguishes an empty explicit mailbox from an absent parameter",
+        "explicit mailbox route recovery R07 prevents Compose from silently choosing another mailbox",
+        "explicit mailbox route recovery R08 retains the ordinary default when no mailbox parameter exists",
+        "explicit mailbox route recovery R09 resolves a valid explicit mailbox instead of the first one",
+        "explicit mailbox route recovery R10 keeps a selected send-only identity usable for Compose",
+        "explicit mailbox route recovery R11 retains an authorized sender for a selected read-only mailbox",
+        "explicit mailbox route recovery R12 does not report permanent unavailability during the initial read",
+        "explicit mailbox route recovery R13 closes a revoked mailbox and its stream without a fallback read",
+        "explicit mailbox route recovery R14 resolves the requested mailbox after an explicit refresh restores access",
+        "explicit mailbox route recovery R15 reads another mailbox only after explicit selection and clears stale detail and page",
+        "explicit mailbox route recovery R16 preserves cross-mailbox drafts and explicitly opening one",
+        "explicit mailbox route recovery R17 preserves cross-mailbox delivery status without a fallback stream",
+        "explicit mailbox route recovery R18 retires pending editor opening between two unavailable mailbox routes"
+      ],
+      "failed": [],
+      "identity": {
+        "commit": "a0c61d24b17030577566b120a7ddd810506b25e7",
+        "package_lock_sha256": "c4f70934466c07c0a2589ead49f120d1b2278d9775e13fdbf7386913b1658869",
+        "status": "",
+        "test_sha256": "2a72bb78cc5f9e82d037a0358875c2d0c433d8cd956e0e7801795756c88e9c66",
+        "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670"
+      },
+      "exit": 0,
+      "command": [
+        "node",
+        "/home/runner/work/tabmail/tabmail/candidate/web/node_modules/vitest/vitest.mjs",
+        "run",
+        "features/mail/workspace-mailbox-route-recovery.test.tsx",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=json",
+        "--reporter=/home/runner/work/_temp/exec08-route-evidence/dual-source/candidate/execution-boundary-reporter.mjs",
+        "--outputFile=/home/runner/work/_temp/exec08-route-evidence/dual-source/candidate/vitest.json"
+      ],
+      "boundary": {
+        "schema": 1,
+        "nodeVersion": "22.23.3",
+        "runStarts": 1,
+        "runEnds": 1,
+        "processTimeout": false,
+        "reason": "passed",
+        "moduleFiles": [
+          "/home/runner/work/tabmail/tabmail/candidate/web/features/mail/workspace-mailbox-route-recovery.test.tsx"
+        ],
+        "unhandledErrors": [],
+        "scopeErrors": []
+      },
+      "raw_vitest_sha256": "7aae1592e9689686e7d0b7b5e98e08933b9c5c2d441046eafda0c3da9d274172"
+    }
+  },
+  "raw_file_count": 36,
+  "raw_file_byte_lengths_and_receipt_hashes_verified": true,
+  "not_browser_e2e": true,
+  "not_pg": true
+}

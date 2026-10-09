@@ -1,0 +1,12 @@
+{
+  "created_utc": "2026-10-02T01:34:54.150945+00:00",
+  "source_sha": "4074282496c0c60e3b6e0c6f6c1407858939c95c",
+  "result_member": "S/result.json",
+  "result_sha256": "24c54c89d149e13d3f60eb8104eada14fc88261a0ea3ed1b586ad10f14fb1c44",
+  "raw_go_member": "S/go.jsonl",
+  "raw_go_sha256": "968b0bb4d45a22302c4b88418454c258748b369ace3e93a935e6e4b649fe2790",
+  "original_archive": "LOOKAHEAD-ORIGINAL-S-evidence.tar.gz",
+  "original_archive_sha256": "895619840b417a6fdd66c5c68bca0bcc2579d2573aedc08be080dfebb2c0ad2d",
+  "source_raw_archive_unchanged": true,
+  "scope": "post-delivery two-file bounded hash binding only; no source sweep/validator/S reexecution"
+}
