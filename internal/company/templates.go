@@ -26,7 +26,7 @@ const MaxTemplateBytes = 256 * 1024
 // loops, functions, includes or dynamic format widths. Variable data is never
 // parsed as template source. Identity variables cannot be supplied by clients.
 func ValidateTemplate(t TemplateDraft) error {
-	if t.Subject == "" || len(t.Subject) > 998 || !utf8.ValidString(t.Subject) || strings.ContainsAny(t.Subject, "\r\n") {
+	if t.Subject == "" || len(t.Subject) > 998 || !utf8.ValidString(t.Subject) || strings.ContainsAny(t.Subject, "\x00\r\n") {
 		return app.BadRequest("invalid template subject")
 	}
 	if t.TextBody == "" && t.HTMLBody == "" {
@@ -37,6 +37,11 @@ func ValidateTemplate(t TemplateDraft) error {
 	}
 	if !utf8.ValidString(t.TextBody) || !utf8.ValidString(t.HTMLBody) {
 		return app.BadRequest("invalid template body encoding")
+	}
+	// NUL is valid UTF-8 but cannot be stored in PostgreSQL text/jsonb. Reject
+	// it before rendering can silently replace it or publication reaches SQL.
+	if strings.ContainsRune(t.TextBody, '\x00') || strings.ContainsRune(t.HTMLBody, '\x00') {
+		return app.BadRequest("template body contains NUL")
 	}
 	declared := map[string]bool{"employee_name": true, "company_name": true, "sender_address": true}
 	for _, v := range t.Variables {
@@ -93,6 +98,9 @@ func Render(t TemplateDraft, values map[string]string, employee, companyName, se
 	if !utf8.ValidString(employee) || !utf8.ValidString(companyName) || !utf8.ValidString(sender) {
 		return "", "", "", app.BadRequest("invalid template identity encoding")
 	}
+	if strings.ContainsRune(employee, '\x00') || strings.ContainsRune(companyName, '\x00') || strings.ContainsRune(sender, '\x00') {
+		return "", "", "", app.BadRequest("template identity contains NUL")
+	}
 	data := map[string]string{"employee_name": employee, "company_name": companyName, "sender_address": sender}
 	allowed := map[string]Variable{}
 	for _, v := range t.Variables {
@@ -132,6 +140,11 @@ func Render(t TemplateDraft, values map[string]string, employee, companyName, se
 // Publication choices and supplied values share required/type rules. Their
 // encoding and length checks retain the existing caller-specific errors.
 func validateVariableScalar(v Variable, value string) error {
+	// Used for both publication options and submitted values, including
+	// declared variables that are not referenced by this template version.
+	if strings.ContainsRune(value, '\x00') {
+		return app.BadRequest("variable contains NUL: " + v.Name)
+	}
 	if v.Required && strings.TrimSpace(value) == "" {
 		return app.BadRequest("required variable: " + v.Name)
 	}

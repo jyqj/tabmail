@@ -1099,8 +1099,16 @@ func (c *Conn) handleBdat(arg string) {
 	c.lineLimitReader.LineLimit = 0
 
 	chunk := io.LimitReader(c.text.R, int64(size))
-	_, err = io.Copy(c.bdatPipe, chunk)
+	n, err := io.Copy(c.bdatPipe, chunk)
+	if err == nil && n != int64(size) {
+		// Copy treats a short source EOF as success. BDAT must consume the
+		// declared octets before a chunk or the transaction can be accepted.
+		err = io.ErrUnexpectedEOF
+	}
 	if err != nil {
+		// Preserve the backend's abort contract; the SMTP reply still carries
+		// the precise read error instead of acknowledging a truncated chunk.
+		c.bdatPipe.CloseWithError(ErrDataReset)
 		// Backend might return an error early using CloseWithError without consuming
 		// the whole chunk.
 		io.Copy(ioutil.Discard, chunk)

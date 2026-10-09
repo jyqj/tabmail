@@ -601,6 +601,49 @@ components:
         updated_at:
           type: string
           format: date-time
+    SMTPPolicyInput:
+      type: object
+      additionalProperties: false
+      description: Complete policy replacement. Both booleans and all five rule arrays must be supplied; use false or [] explicitly. Missing or null fields and null array entries are rejected before changing the current policy.
+      required:
+      - default_accept
+      - accept_domains
+      - reject_domains
+      - default_store
+      - store_domains
+      - discard_domains
+      - reject_origin_domains
+      properties:
+        default_accept:
+          type: boolean
+        accept_domains:
+          type: array
+          items:
+            type: string
+        reject_domains:
+          type: array
+          items:
+            type: string
+        default_store:
+          type: boolean
+        store_domains:
+          type: array
+          items:
+            type: string
+        discard_domains:
+          type: array
+          items:
+            type: string
+        reject_origin_domains:
+          type: array
+          items:
+            type: string
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          deprecated: true
+          description: Ignored legacy response timestamp; the server supplies the actual update time.
     MonitorEvent:
       type: object
       properties:
@@ -4704,7 +4747,7 @@ paths:
     patch:
       tags:
       - Admin
-      summary: Update current SMTP policy
+      summary: Replace current SMTP policy with explicit complete input
       operationId: updateSMTPPolicy
       security:
       - BearerAuth: []
@@ -4713,10 +4756,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SMTPPolicy'
+              $ref: '#/components/schemas/SMTPPolicyInput'
       responses:
         '200':
           description: OK
+        '400':
+          description: Incomplete or malformed policy replacement; the current policy is unchanged.
   /api/v1/admin/monitor/events:
     get:
       tags:

@@ -1,0 +1,92 @@
+name: EXEC bounded regression checks
+on:
+  pull_request:
+    branches:
+      - main
+      - integration/company-mail-r5-*
+permissions:
+  contents: read
+concurrency:
+  group: exec-regressions-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  go-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Record actual source
+        run: |
+          mkdir exec-evidence
+          git rev-parse HEAD HEAD^{tree} > exec-evidence/source.txt
+          go version > exec-evidence/go-version.txt
+      - name: Template and SMTP affected packages
+        run: |
+          set -euo pipefail
+          go test -mod=readonly -race -p 1 -count=1 -timeout=120s -json \
+            ./internal/company ./internal/app/templates ./internal/smtp \
+            github.com/emersion/go-smtp/... | tee exec-evidence/packages.jsonl
+      - name: Real HTTP policy and template validation
+        run: |
+          set -euo pipefail
+          go test -mod=readonly -race -p 1 -count=1 -timeout=120s -json \
+            ./internal/api/handlers \
+            -run '^(TestR5(SMTPPolicy|TemplateNUL)|TestAdminHandlerSMTPPolicyFallbackAndUpdate$)' | tee exec-evidence/http.jsonl
+      - name: Template name before the SQL boundary
+        run: |
+          set -euo pipefail
+          go test -mod=readonly -race -p 1 -count=1 -timeout=120s -json \
+            ./internal/store/postgres \
+            -run '^TestR5TemplateNULNameBeforeSQL$' | tee exec-evidence/pre-sql.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exec-go-regressions
+          path: exec-evidence
+          if-no-files-found: error
+          retention-days: 14
+  web-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Record actual source
+        run: |
+          mkdir exec-web-evidence
+          git rev-parse HEAD HEAD^{tree} > exec-web-evidence/source.txt
+      - run: npm ci
+        working-directory: web
+      - name: Complete TypeScript check
+        working-directory: web
+        run: npx tsc --noEmit --incremental false
+      - name: Mailbox lifecycle and ownership regressions
+        working-directory: web
+        run: |
+          npx vitest run \
+            components/company/grants-conflict-review.test.tsx \
+            components/company/grants.test.tsx \
+            components/company/mailbox-lifecycle-review.test.tsx \
+            features/company/mailbox-create-ownership.test.tsx \
+            features/company/mailbox-owner-freshness.test.tsx \
+            features/company/mailbox-retention.test.tsx \
+            --reporter=json --outputFile=../exec-web-evidence/vitest.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exec-web-regressions
+          path: exec-web-evidence
+          if-no-files-found: error
+          retention-days: 14

@@ -73,7 +73,7 @@ func (s *PgStore) ListMailTemplates(ctx context.Context, a authz.Actor) ([]compa
 }
 func (s *PgStore) SaveMailTemplate(ctx context.Context, a authz.Actor, v company.Template) (*company.Template, error) {
 	v.Name = strings.TrimSpace(v.Name)
-	if len(v.Name) < 1 || len(v.Name) > 120 {
+	if len(v.Name) < 1 || len(v.Name) > 120 || strings.ContainsRune(v.Name, '\x00') {
 		return nil, app.BadRequest("template name must be 1-120 bytes")
 	}
 	if e := company.ValidateTemplate(v.Draft); e != nil {
