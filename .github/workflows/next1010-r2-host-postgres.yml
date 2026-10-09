@@ -1,0 +1,208 @@
+name: R2 refresh exact-source PostgreSQL replay
+on:
+  pull_request:
+    branches: [verification/r5-next1010-r2-replay-base]
+    paths: [.github/workflows/next1010-r2-host-postgres.yml]
+permissions:
+  contents: read
+concurrency:
+  group: r2-refresh-preinstalled-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      GOSUMDB: sum.golang.org
+      GODEBUG: asynctimerchan=0
+      TASK_PG_ROLE: tm_r2_refresh_${{ github.run_id }}_${{ github.run_attempt }}
+      TASK_PG_DB: tm_r2_refresh_${{ github.run_id }}_${{ github.run_attempt }}
+    steps:
+      - name: Initialize evidence path on the runner
+        shell: bash
+        run: |
+          printf 'TASK_EVIDENCE=%s\n' "$RUNNER_TEMP/next1010-r2-refresh-preinstalled" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          ref: 13a2a07979b2939fe30330e81cc5e12bec253be2
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Assert and record exact product source before execution
+        id: source
+        shell: bash
+        run: |
+          mkdir -p "$TASK_EVIDENCE"
+          cat > "$TASK_EVIDENCE/check-source.py" <<'PY'
+          import hashlib, json, os, subprocess, sys
+          from pathlib import Path
+          expected_commit = "13a2a07979b2939fe30330e81cc5e12bec253be2"
+          expected_tree = "184992fa8a7c8cf3975f2ffb77f91629f4371b2b"
+          expected_files = {
+              "scripts/run_r5_next1010_pg.py": "703e9c81bde85662caa2c59bceeb7b2f242aad11db63dacc7e3190b024ec3389",
+              "internal/api/handlers/r5_refresh_issuance_pg_test.go": "6404b853662b8d9dfec0f86aa4154674b5d63ea0f0f714af11cee54958e2297e",
+              "internal/api/handlers/r5_refresh_issuance_test.go": "b6877aa181da130982c0538ff4f8d56d6c78da3bd578c6f84e550528da09d53f",
+          }
+          def git(*args):
+              return subprocess.check_output(["git", *args], text=True).strip()
+          phase = sys.argv[1]
+          if phase not in ("before", "after"):
+              raise SystemExit("unexpected source-record phase")
+          source = dict(commit=git("rev-parse", "HEAD"), tree=git("rev-parse", "HEAD^{tree}"),
+                        status=git("status", "--porcelain", "--untracked-files=all"),
+                        protected_sha256={name: hashlib.sha256(Path(name).read_bytes()).hexdigest()
+                                          for name in expected_files})
+          record = dict(phase=phase, source=source,
+                        workflow={key: os.environ.get(key) for key in
+                                  ("GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "GITHUB_SHA",
+                                   "GITHUB_WORKFLOW_REF", "GITHUB_WORKFLOW_SHA")},
+                        runner_image={key: os.environ.get(key) for key in
+                                      ("ImageOS", "ImageVersion", "RUNNER_OS", "RUNNER_ARCH")})
+          root = Path(os.environ["TASK_EVIDENCE"])
+          (root / ("source-" + phase + ".json")).write_text(json.dumps(record, indent=2) + "\n")
+          print(json.dumps(record, sort_keys=True))
+          if (source["commit"] != expected_commit or source["tree"] != expected_tree
+                  or source["status"] or source["protected_sha256"] != expected_files):
+              raise SystemExit("exact clean product commit/tree and unchanged runner/test bytes required")
+          if phase == "after" and source != json.loads((root / "source-before.json").read_text())["source"]:
+              raise SystemExit("product source changed during execution")
+          PY
+          python3 -B "$TASK_EVIDENCE/check-source.py" before
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Start preinstalled PostgreSQL 16 and create an owned disposable login
+        id: postgres
+        shell: bash
+        run: |
+          # Official ubuntu24/20261004.327 image documentation lists PostgreSQL 16.15,
+          # disabled by default; the documented start command is systemctl start.
+          # https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+          # The original image was postgres:16, so preserve its major-version boundary.
+          test -x /usr/lib/postgresql/16/bin/psql
+          test -x /usr/lib/postgresql/16/bin/pg_isready
+          /usr/lib/postgresql/16/bin/psql --version > "$TASK_EVIDENCE/postgres-client-version.txt"
+          sudo systemctl start postgresql.service > "$TASK_EVIDENCE/postgres-service.log" 2>&1
+          for task_pg_wait in $(seq 1 60); do
+            if sudo -u postgres /usr/lib/postgresql/16/bin/pg_isready -h /var/run/postgresql -p 5432 -d postgres; then
+              break
+            fi
+            if [ "$task_pg_wait" -eq 60 ]; then
+              exit 1
+            fi
+            sleep 1
+          done
+          sudo -u postgres /usr/lib/postgresql/16/bin/psql -X -v ON_ERROR_STOP=1             -h /var/run/postgresql -p 5432 -d postgres -At             -c "SELECT json_build_object('server_version_num',current_setting('server_version_num')::integer,'server_version',current_setting('server_version'),'version',version());"             > "$TASK_EVIDENCE/postgres-server.json"
+          python3 -B - <<'PY'
+          import json, os
+          from pathlib import Path
+          record = json.loads((Path(os.environ["TASK_EVIDENCE"]) / "postgres-server.json").read_text())
+          print(json.dumps(record, sort_keys=True))
+          if not 160000 <= record["server_version_num"] < 170000:
+              raise SystemExit("preinstalled PostgreSQL server major 16 required")
+          PY
+          TASK_PG_PASSWORD="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
+          echo "::add-mask::$TASK_PG_PASSWORD"
+          # Docker's original POSTGRES_USER was an administrator. Preserve its test
+          # capabilities, including the original fixture's CREATE DATABASE calls.
+          sudo -u postgres /usr/lib/postgresql/16/bin/psql -X -v ON_ERROR_STOP=1             -h /var/run/postgresql -p 5432 -d postgres             -v task_pg_role="$TASK_PG_ROLE" -v task_pg_password="$TASK_PG_PASSWORD"             > "$TASK_EVIDENCE/postgres-create-role.log" <<'SQL'
+          CREATE ROLE :"task_pg_role" LOGIN SUPERUSER CREATEDB PASSWORD :'task_pg_password';
+          SQL
+          touch "$TASK_EVIDENCE/role-created"
+          sudo -u postgres /usr/lib/postgresql/16/bin/psql -X -v ON_ERROR_STOP=1             -h /var/run/postgresql -p 5432 -d postgres             -v task_pg_role="$TASK_PG_ROLE" -v task_pg_db="$TASK_PG_DB"             > "$TASK_EVIDENCE/postgres-create-database.log" <<'SQL'
+          CREATE DATABASE :"task_pg_db" OWNER :"task_pg_role";
+          SQL
+          TASK_PG_DSN="postgres://$TASK_PG_ROLE:$TASK_PG_PASSWORD@localhost:5432/$TASK_PG_DB?sslmode=disable"
+          printf 'TABMAIL_TEST_DB_DSN=%s\n' "$TASK_PG_DSN" >> "$GITHUB_ENV"
+          /usr/lib/postgresql/16/bin/psql "$TASK_PG_DSN" -X -v ON_ERROR_STOP=1 -At             -c "SELECT json_build_object('database',current_database(),'role',current_user,'server_version_num',current_setting('server_version_num')::integer,'version',version(),'server_encoding',current_setting('server_encoding'),'lc_collate',(SELECT datcollate FROM pg_database WHERE datname=current_database()),'transaction_isolation',current_setting('default_transaction_isolation'),'superuser',(SELECT rolsuper FROM pg_roles WHERE rolname=current_user),'createdb',(SELECT rolcreatedb FROM pg_roles WHERE rolname=current_user));"             > "$TASK_EVIDENCE/postgres-test-session.json"
+          python3 -B - <<'PY'
+          import json, os
+          from pathlib import Path
+          record = json.loads((Path(os.environ["TASK_EVIDENCE"]) / "postgres-test-session.json").read_text())
+          print(json.dumps(record, sort_keys=True))
+          if (record["database"] != os.environ["TASK_PG_DB"]
+                  or record["role"] != os.environ["TASK_PG_ROLE"]
+                  or not 160000 <= record["server_version_num"] < 170000
+                  or not record["superuser"] or not record["createdb"]):
+              raise SystemExit("owned PostgreSQL 16 test session not established")
+          PY
+      - name: Execute unchanged fixed baseline and exact candidate runner
+        id: regression
+        shell: bash
+        run: |
+          go version | tee "$TASK_EVIDENCE/go-version.txt"
+          test "$(go env GOVERSION)" = go1.25.7
+          set +e
+          python3 -B scripts/run_r5_next1010_pg.py --candidate .             --case refresh-issuance --output "$TASK_EVIDENCE/original-run"             > "$TASK_EVIDENCE/runner.stdout" 2> "$TASK_EVIDENCE/runner.stderr"
+          task_runner_exit=$?
+          set -e
+          printf '%s\n' "$task_runner_exit" > "$TASK_EVIDENCE/runner.exit"
+          exit "$task_runner_exit"
+      - name: Assert and record exact product source after execution
+        if: ${{ always() && steps.source.outcome == 'success' }}
+        shell: bash
+        run: python3 -B "$TASK_EVIDENCE/check-source.py" after
+      - name: Remove only databases and login owned by this execution
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          if [ -f "$TASK_EVIDENCE/role-created" ]; then
+            sudo -u postgres /usr/lib/postgresql/16/bin/psql -X -v ON_ERROR_STOP=1               -h /var/run/postgresql -p 5432 -d postgres -v task_pg_role="$TASK_PG_ROLE"               > "$TASK_EVIDENCE/postgres-cleanup.log" <<'SQL'
+          SELECT format('DROP DATABASE %I WITH (FORCE)', datname)
+            FROM pg_database
+           WHERE datdba = (SELECT oid FROM pg_roles WHERE rolname = :'task_pg_role')
+             AND NOT datistemplate
+          \gexec
+          DROP ROLE :"task_pg_role";
+          SQL
+          fi
+      - name: Print original receipt and both complete Go JSONL streams
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          python3 -B - <<'PY'
+          import hashlib, os, sys
+          from pathlib import Path
+          root = Path(os.environ["TASK_EVIDENCE"])
+          # runner.stdout is the only printed full comparison receipt. The saved
+          # comparison.json remains an artifact and is not printed a second time.
+          for name in ("postgres-service.log", "postgres-create-role.log",
+                       "postgres-create-database.log", "postgres-cleanup.log",
+                       "runner.exit", "runner.stdout", "runner.stderr",
+                       "original-run/baseline/go-test.jsonl",
+                       "original-run/baseline/go-test.stderr",
+                       "original-run/candidate/go-test.jsonl",
+                       "original-run/candidate/go-test.stderr"):
+              path = root / name
+              if path.is_file():
+                  data = path.read_bytes()
+                  print("R2_REFRESH_EVIDENCE_BEGIN " + name + " bytes=" + str(len(data))
+                        + " sha256=" + hashlib.sha256(data).hexdigest(), flush=True)
+                  sys.stdout.flush()
+                  sys.stdout.buffer.write(data)
+                  if not data.endswith(b"\n"):
+                      sys.stdout.buffer.write(b"\n")
+                  sys.stdout.buffer.flush()
+                  print("R2_REFRESH_EVIDENCE_END " + name, flush=True)
+          PY
+      - name: Preserve original execution and source evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: next1010-r2-refresh-preinstalled-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.TASK_EVIDENCE }}/check-source.py
+            ${{ env.TASK_EVIDENCE }}/source-*.json
+            ${{ env.TASK_EVIDENCE }}/postgres-*.json
+            ${{ env.TASK_EVIDENCE }}/postgres-*.log
+            ${{ env.TASK_EVIDENCE }}/postgres-client-version.txt
+            ${{ env.TASK_EVIDENCE }}/go-version.txt
+            ${{ env.TASK_EVIDENCE }}/runner.*
+            ${{ env.TASK_EVIDENCE }}/original-run/comparison.json
+            ${{ env.TASK_EVIDENCE }}/original-run/baseline/summary.json
+            ${{ env.TASK_EVIDENCE }}/original-run/baseline/go-test.jsonl
+            ${{ env.TASK_EVIDENCE }}/original-run/baseline/go-test.stderr
+            ${{ env.TASK_EVIDENCE }}/original-run/candidate/summary.json
+            ${{ env.TASK_EVIDENCE }}/original-run/candidate/go-test.jsonl
+            ${{ env.TASK_EVIDENCE }}/original-run/candidate/go-test.stderr
+          if-no-files-found: error
+          retention-days: 14
