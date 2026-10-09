@@ -10,6 +10,7 @@ import subprocess
 
 BASELINE = "74d5fc72f7ad2e086bd3060b78c548dc302d0408"
 CASES = {
+    "activation-sponsor": (["internal/store/postgres/r5_activation_sponsor_test.go"], "./internal/store/postgres", "^TestR5ActivationSponsorPostgres", 11),
     "refresh-issuance": (["internal/api/handlers/r5_refresh_issuance_pg_test.go", "internal/api/handlers/r5_refresh_issuance_test.go"], "./internal/api/handlers", "^TestR5RefreshIssuancePostgres", 9),
     "permission-audit": (["internal/store/postgres/r5_permission_audit_visibility_test.go"], "./internal/store/postgres", "^TestR5PermissionAudit", 10),
 }

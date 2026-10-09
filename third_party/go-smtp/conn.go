@@ -339,6 +339,12 @@ func (c *Conn) handleMail(arg string) {
 		c.writeResponse(502, EnhancedCode{5, 5, 1}, "MAIL not allowed during message transfer")
 		return
 	}
+	if c.fromReceived {
+		// RFC 5321 section 4.1.4: MAIL cannot open another transaction
+		// while one is active. Keep its sender, recipients and options.
+		c.writeResponse(503, EnhancedCode{5, 5, 1}, "Sender already specified")
+		return
+	}
 
 	arg, ok := cutPrefixFold(arg, "FROM:")
 	if !ok {
