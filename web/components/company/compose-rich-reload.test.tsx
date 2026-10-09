@@ -67,7 +67,7 @@ async function mount() {
   const onSent = vi.fn();
   const view = render(<Compose initial={draft()} mailboxes={[mailbox]} onClose={vi.fn()} onSent={onSent} />);
   await waitFor(() => expect(screen.getByLabelText("Published template")).toBeEnabled());
-  click("Formatting editor");
+  if (screen.queryByRole("button", { name: "Formatting editor" })) click("Formatting editor");
   const editor = screen.getByRole("textbox", { name: "Formatted message" });
   editor.focus();
   expect(document.activeElement).toBe(editor);

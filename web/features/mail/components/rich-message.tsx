@@ -40,8 +40,13 @@ export function RichMessage({ id, text, html, disabled, resetKey = 0, onChange }
     }) => void;
 }) {
     const t = useText();
-    // Plain text remains first-class and backwards compatible, including RFC quotes.
-    const [rich, setRich] = useState(false);
+    // Stored formatting must be visible before the first edit. An explicit
+    // server reload can introduce HTML; existing rich mode stays selected when
+    // that reload contains plain text, so its DOM/caret reset rules still apply.
+    const [mode, setMode] = useState({ rich: Boolean(html), resetKey });
+    const rich = mode.rich || (mode.resetKey !== resetKey && Boolean(html));
+    if (mode.resetKey !== resetKey)
+        setMode({ rich, resetKey });
     const editor = useRef<HTMLDivElement>(null);
     const lastReset = useRef(resetKey);
     useEffect(() => {
@@ -80,7 +85,7 @@ export function RichMessage({ id, text, html, disabled, resetKey = 0, onChange }
                 return;
             if (rich)
                 onChange({ text_body: text, html_body: undefined });
-            setRich(!rich);
+            setMode({ rich: !rich, resetKey });
         }}>{rich ? t("切换纯文本", "Use plain text") : t("格式化编辑", "Formatting editor")}</ActionButton>
       {rich && (["strong", "em", "u"] as const).map((tag, i) => <ActionButton key={tag} disabled={disabled} onMouseDown={e => e.preventDefault()} onClick={() => format(tag)}>{[t("粗体", "Bold"), t("斜体", "Italic"), t("下划线", "Underline")][i]}</ActionButton>)}
     </div>

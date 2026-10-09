@@ -24,20 +24,20 @@ jobs:
       - name: Record actual source
         run: |
           mkdir exec-evidence
-          git rev-parse HEAD HEAD^{tree} > exec-evidence/source.txt
+          git rev-parse HEAD HEAD^{tree} | tee exec-evidence/source.txt
           go version > exec-evidence/go-version.txt
       - name: Template and SMTP affected packages
         run: |
           set -euo pipefail
           go test -mod=readonly -race -p 1 -count=1 -timeout=120s -json \
-            ./internal/company ./internal/app/templates ./internal/smtp \
+            ./internal/company ./internal/app/templates ./internal/app/admin ./internal/smtp \
             github.com/emersion/go-smtp/... | tee exec-evidence/packages.jsonl
       - name: Real HTTP policy and template validation
         run: |
           set -euo pipefail
           go test -mod=readonly -race -p 1 -count=1 -timeout=120s -json \
             ./internal/api/handlers \
-            -run '^(TestR5(SMTPPolicy|TemplateNUL)|TestAdminHandlerSMTPPolicyFallbackAndUpdate$)' | tee exec-evidence/http.jsonl
+            -run '^(TestR5(SMTPPolicy|TemplateNUL|AdminName)|TestAdminHandlerSMTPPolicyFallbackAndUpdate$)' | tee exec-evidence/http.jsonl
       - name: Template name before the SQL boundary
         run: |
           set -euo pipefail
@@ -66,15 +66,16 @@ jobs:
       - name: Record actual source
         run: |
           mkdir exec-web-evidence
-          git rev-parse HEAD HEAD^{tree} > exec-web-evidence/source.txt
+          git rev-parse HEAD HEAD^{tree} | tee exec-web-evidence/source.txt
       - run: npm ci
         working-directory: web
       - name: Complete TypeScript check
         working-directory: web
         run: npx tsc --noEmit --incremental false
-      - name: Mailbox lifecycle and ownership regressions
+      - name: Mailbox lifecycle, ownership and rich draft regressions
         working-directory: web
         run: |
+          set -euo pipefail
           npx vitest run \
             components/company/grants-conflict-review.test.tsx \
             components/company/grants.test.tsx \
@@ -82,7 +83,12 @@ jobs:
             features/company/mailbox-create-ownership.test.tsx \
             features/company/mailbox-owner-freshness.test.tsx \
             features/company/mailbox-retention.test.tsx \
+            components/company/compose-rich-initial.test.tsx \
+            components/company/compose-rich-reload.test.tsx \
+            features/mail/components/rich-message-paste.test.tsx \
+            features/mail/components/rich-message.test.tsx \
             --reporter=json --outputFile=../exec-web-evidence/vitest.json
+          cat ../exec-web-evidence/vitest.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
