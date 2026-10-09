@@ -4,7 +4,9 @@ import "github.com/google/uuid"
 
 // RefreshTokenIssuance binds a new session to the precise credentials observed
 // by authentication. Adapters check it while holding current user ownership
-// until the refresh token commits. It is neither persisted nor serialized.
+// until the refresh token commits. A successful rotation returns the snapshot
+// it observed under that same user lock, so a later read cannot adopt a newer
+// authenticated session. It is neither persisted nor serialized.
 type RefreshTokenIssuance struct {
 	UserID         uuid.UUID `json:"-" db:"-"`
 	TenantID       uuid.UUID `json:"-" db:"-"`

@@ -373,6 +373,11 @@ func (s *Service) ensureWorker() *workqueue.Worker[*outboundJob] {
 		s.cfg.PollInterval,
 		s.cfg.BatchSize,
 		s.logger,
+		// The store leases one row at a time. Keep that safety boundary while
+		// allowing BatchSize completed jobs per poll, without an idle poll
+		// interval between rows already waiting in the queue.
+		workqueue.WithSerialClaims(),
+		workqueue.WithStopOnFailure(),
 	)
 	return s.worker
 }

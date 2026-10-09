@@ -36,8 +36,8 @@ type User struct {
 }
 
 type RefreshToken struct {
-	// Issuance is an ephemeral command precondition, never a stored token field.
-	// Interactive login/registration must provide the authenticated snapshot.
+	// Issuance is an ephemeral authentication snapshot, never a stored token
+	// field. Login/registration provide it; successful rotation returns it.
 	Issuance  *RefreshTokenIssuance `json:"-" db:"-"`
 	FamilyID  uuid.UUID             `json:"-" db:"family_id"`
 	ID        uuid.UUID             `json:"id" db:"id"`
