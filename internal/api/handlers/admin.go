@@ -286,12 +286,12 @@ func (h *AdminHandler) GetSMTPPolicy(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) UpdateSMTPPolicy(w http.ResponseWriter, r *http.Request) {
-	var body models.SMTPPolicy
-	if err := decodeBody(r, &body); err != nil {
+	body, err := decodeSMTPPolicyInput(r)
+	if err != nil {
 		errBadRequest(w, "invalid body")
 		return
 	}
-	item, err := h.service.UpdateSMTPPolicy(r.Context(), &body, middleware.ActorFromContext(r.Context()).AuditLabel())
+	item, err := h.service.UpdateSMTPPolicy(r.Context(), body, middleware.ActorFromContext(r.Context()).AuditLabel())
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return

@@ -6,7 +6,8 @@ import { company, workPath, type WorkGrantInput, type WorkMailbox, type MailboxG
 import type { AdminUser } from "@/lib/types";
 import { isConflict } from "@/lib/error-code";
 import { EmployeeField } from "./employee-field";
-import { ActionButton, Field, inputClass, LoadError, useAction, useText } from "./common";
+import { ActionButton, LoadError, useAction, useText } from "./common";
+import { MailboxLifecycleEditor } from "./mailbox-lifecycle";
 
 export function GrantEditor({
   mailbox,
@@ -36,8 +37,6 @@ export function GrantEditor({
   };
   const [grant, setGrant] = useState(empty);
   const stale = conflictRevision !== null || (grantRevision !== null && grants.data?.revision !== grantRevision);
-  const [nextOwner, setNextOwner] = useState("");
-  const [reason, setReason] = useState("");
   const reloadGrants = () => run(async () => {
     setReviewError(null);
     const minimumRevision = Math.max(grantRevision ?? 0, conflictRevision ?? 0, grants.data?.revision ?? 0);
@@ -154,78 +153,7 @@ export function GrantEditor({
           {v.template_only ? t("仅模板", "template only") : ""}
         </p>
       ))}
-      {mailbox.mailbox.kind === "personal" && (
-        <EmployeeField
-          label={t("新属主", "New owner")}
-          value={nextOwner}
-          employees={employees.filter(
-            (v) => v.id !== mailbox.mailbox.owner_user_id,
-          )}
-          onChange={setNextOwner}
-        />
-      )}
-      {(mailbox.mailbox.kind === "personal" ||
-        mailbox.mailbox.kind === "legacy") && (
-        <>
-          <Field
-            label={t(
-              "资源变更原因（至少 8 个字符）",
-              "Resource-change reason (8+ characters)",
-            )}
-          >
-            {(id) => (
-              <input
-                id={id}
-                className={inputClass}
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-              />
-            )}
-          </Field>
-          <ActionButton
-            disabled={
-              busy ||
-              reason.trim().length < 8 ||
-              (mailbox.mailbox.kind === "personal" && !nextOwner)
-            }
-            onClick={() =>
-              run(async () => {
-                if (mailbox.mailbox.kind === "personal")
-                  await company(`${workPath(mailbox.mailbox.id)}/handover`, {
-                    method: "POST",
-                    body: {
-                      owner_user_id: nextOwner,
-                      revision: mailbox.revision,
-                      reason,
-                    },
-                  });
-                else
-                  await company(
-                    `${workPath(mailbox.mailbox.id)}/convert-shared`,
-                    {
-                      method: "POST",
-                      body: { revision: mailbox.revision, reason },
-                    },
-                  );
-                await refresh();
-                toast.success(
-                  t("邮箱生命周期已更新", "Mailbox lifecycle updated"),
-                );
-              })
-            }
-          >
-            {mailbox.mailbox.kind === "personal"
-              ? t(
-                  "移交邮箱（不删除邮件）",
-                  "Transfer mailbox (preserve messages)",
-                )
-              : t(
-                  "迁移为私有共享邮箱并永久保留",
-                  "Convert to private, permanently retained shared mailbox",
-                )}
-          </ActionButton>
-        </>
-      )}
+      <MailboxLifecycleEditor mailbox={mailbox} employees={employees} refresh={refresh} busy={busy} run={run} />
     </div>
   );
 }
