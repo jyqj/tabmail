@@ -1,23 +1,32 @@
 "use client";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAPI } from "@/hooks/use-api";
 import { company, workPath, type WorkGrantInput, type WorkMailbox, type MailboxGrantSnapshot } from "@/lib/company";
 import type { AdminUser } from "@/lib/types";
 import { isConflict } from "@/lib/error-code";
+import { sessionScope, useSessionScope } from "@/lib/session";
 import { EmployeeField } from "./employee-field";
 import { ActionButton, LoadError, useAction, useText } from "./common";
 import { MailboxLifecycleEditor } from "./mailbox-lifecycle";
 
-export function GrantEditor({
-  mailbox,
-  employees,
-  refresh,
-}: {
+type GrantEditorProps = {
   mailbox: WorkMailbox;
   employees: AdminUser[];
   refresh: () => Promise<unknown>;
-}) {
+};
+
+export function GrantEditor(props: GrantEditorProps) {
+  const scope = useSessionScope();
+  return <GrantEditorSession key={`${scope}:${props.mailbox.mailbox.id}`} {...props} scope={scope} />;
+}
+
+function GrantEditorSession({
+  mailbox,
+  employees,
+  refresh,
+  scope,
+}: GrantEditorProps & { scope: string }) {
   const t = useText();
   const { busy, run } = useAction();
   const grants = useAPI(["mailbox-grants", mailbox.mailbox.id], () =>
@@ -25,7 +34,20 @@ export function GrantEditor({
   );
   const [grantRevision, setGrantRevision] = useState<number | null>(null);
   const [conflictRevision, setConflictRevision] = useState<number | null>(null);
+  const [savedRevision, setSavedRevision] = useState<number | null>(null);
   const [reviewError, setReviewError] = useState<unknown>(null);
+  const lifetime = useRef<object | null>(null);
+  const draftIntent = useRef<object>({});
+  const highestRevision = useRef(0);
+  useLayoutEffect(() => {
+    lifetime.current = {};
+    return () => { lifetime.current = null; };
+  }, []);
+  useLayoutEffect(() => {
+    if (Number.isSafeInteger(grants.data?.revision))
+      highestRevision.current = Math.max(highestRevision.current, grants.data!.revision);
+  }, [grants.data]);
+  const owns = (owner: object) => lifetime.current === owner && scope === sessionScope();
   const loadError = reviewError ?? grants.error;
   const readReady = Boolean(grants.data) && !loadError && !grants.isLoading && !grants.isValidating;
   const empty: WorkGrantInput = {
@@ -36,30 +58,39 @@ export function GrantEditor({
     template_only: false,
   };
   const [grant, setGrant] = useState(empty);
-  const stale = conflictRevision !== null || (grantRevision !== null && grants.data?.revision !== grantRevision);
+  const stale = conflictRevision !== null || savedRevision !== null || (grantRevision !== null && grants.data?.revision !== grantRevision);
+  const readSnapshot = (owner: object, minimumRevision: number) => grants.mutate(async () => {
+    const snapshot = await company<MailboxGrantSnapshot>(`${workPath(mailbox.mailbox.id)}/grants`);
+    if (!owns(owner)) throw new DOMException("Mailbox grant editor changed", "AbortError");
+    if (!snapshot || !Number.isSafeInteger(snapshot.revision) ||
+      snapshot.revision < Math.max(minimumRevision, highestRevision.current) || !Array.isArray(snapshot.grants)) {
+      throw new Error(t("无法确认当前权限版本，请重新加载权限。", "Could not confirm the current permission version. Reload permissions."));
+    }
+    return snapshot;
+  }, { revalidate: false });
   const reloadGrants = () => run(async () => {
+    const owner = lifetime.current;
+    if (!owner || !owns(owner)) return;
     setReviewError(null);
-    const minimumRevision = Math.max(grantRevision ?? 0, conflictRevision ?? 0, grants.data?.revision ?? 0);
+    const minimumRevision = Math.max(grantRevision ?? 0, conflictRevision ?? 0, savedRevision ?? 0, grants.data?.revision ?? 0, highestRevision.current);
     try {
       // mutate() without data may resolve with the old cache after a failed
       // revalidation. An explicit fetch mutation must succeed before review
       // can discard the form or release a conflict.
-      const latest = await grants.mutate(async () => {
-        const snapshot = await company<MailboxGrantSnapshot>(`${workPath(mailbox.mailbox.id)}/grants`);
-        if (!snapshot || !Number.isSafeInteger(snapshot.revision) ||
-          snapshot.revision < minimumRevision || !Array.isArray(snapshot.grants)) {
-          throw new Error(t("无法确认当前权限版本，请重新加载权限。", "Could not confirm the current permission version. Reload permissions."));
-        }
-        return snapshot;
-      }, { revalidate: false });
+      const latest = await readSnapshot(owner, minimumRevision);
+      if (!owns(owner)) return;
       if (!latest) throw new Error(t("权限读取未完成，请重新加载。", "Permission read did not complete. Reload permissions."));
       await refresh();
+      if (!owns(owner)) return;
+      draftIntent.current = {};
       setGrant(empty);
       setGrantRevision(null);
       // A fresh same-revision read is valid after a transient lock conflict.
       // Selecting a member from the pre-conflict cache is never a review.
       setConflictRevision(null);
+      setSavedRevision(null);
     } catch (error) {
+      if (!owns(owner)) return;
       setReviewError(error);
       throw error;
     }
@@ -80,6 +111,8 @@ export function GrantEditor({
           (v) => v.id !== mailbox.mailbox.owner_user_id,
         )}
         onChange={(id) => {
+          if (scope !== sessionScope()) return;
+          draftIntent.current = {};
           setGrant(grants.data?.grants.find((v) => v.user_id === id) ?? { ...empty, user_id: id });
           setGrantRevision(readReady ? grants.data?.revision ?? null : null);
         }}
@@ -93,6 +126,8 @@ export function GrantEditor({
               type="checkbox"
               checked={grant[key]}
               onChange={(e) => {
+                if (scope !== sessionScope()) return;
+                draftIntent.current = {};
                 const next = { ...grant, [key]: e.target.checked };
                 if (key === "can_organize" && next.can_organize)
                   next.can_read = true;
@@ -122,7 +157,9 @@ export function GrantEditor({
         disabled={busy || stale || !readReady || grantRevision === null || !grant.user_id}
         onClick={() =>
           run(async () => {
-            if (stale || !readReady || grantRevision === null || !grant.user_id) return;
+            const owner = lifetime.current;
+            if (!owner || !owns(owner) || stale || !readReady || grantRevision === null || !grant.user_id) return;
+            const intent = draftIntent.current;
             try {
               await company(`${workPath(mailbox.mailbox.id)}/grants`, {
                 method: "PUT",
@@ -131,14 +168,38 @@ export function GrantEditor({
                   template_only: grant.template_only, revision: grantRevision },
               });
             } catch (error) {
+              if (!owns(owner)) return;
               if (isConflict(error)) setConflictRevision(grantRevision);
+              if (error instanceof SyntaxError) {
+                // Parsing can fail after a successful HTTP status. Preserve
+                // the draft and require a real read before another write.
+                const uncertain = new Error(t("无法确认授权保存结果，请重新加载权限核对后再试。", "Could not confirm the grant save result. Reload permissions before trying again."));
+                setConflictRevision(grantRevision);
+                setReviewError(uncertain);
+                throw uncertain;
+              }
               throw error;
             }
-            setGrant(empty);
-            setGrantRevision(null);
-            await grants.mutate();
-            await refresh();
+            if (!owns(owner)) return;
+            // This PUT has committed even if a following GET fails. A newer
+            // member/rights draft remains pinned to its observed revision.
+            const minimumRevision = Math.max(grantRevision + 1, highestRevision.current);
+            setSavedRevision(minimumRevision);
+            if (draftIntent.current === intent) {
+              draftIntent.current = {};
+              setGrant(empty);
+              setGrantRevision(null);
+            }
             toast.success(t("授权已更新", "Grant updated"));
+            try {
+              const fresh = await readSnapshot(owner, minimumRevision);
+              if (!owns(owner)) return;
+              if (!fresh) throw new Error("Grant readback did not complete");
+              await refresh();
+              if (owns(owner)) { setSavedRevision(null); setReviewError(null); }
+            } catch {
+              if (owns(owner)) setReviewError(new Error(t("授权已保存，但无法刷新当前权限。请重新加载权限核对。", "The grant was saved, but current permissions could not be refreshed. Reload permissions to review.")));
+            }
           })
         }
       >

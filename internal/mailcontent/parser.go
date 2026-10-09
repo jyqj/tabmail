@@ -186,9 +186,9 @@ func (p *Parser) Document(ctx context.Context, id uuid.UUID, key string) (*compa
 	if e != nil {
 		return nil, e
 	}
-	d := &company.ParsedMessage{MessageID: id, SourceKey: key, SourceSHA256: v.hash, ParserVersion: Version, TextBody: v.env.Text, Parts: []company.ParsedAttachment{}}
+	d := &company.ParsedMessage{MessageID: id, SourceKey: key, SourceSHA256: v.hash, ParserVersion: Version, TextBody: derivedText(v.env.Text), Parts: []company.ParsedAttachment{}}
 	if v.env.HTML != "" {
-		d.HTMLBody, e = sanitize.HTML(v.env.HTML)
+		d.HTMLBody, e = sanitize.HTML(derivedText(v.env.HTML))
 		if e != nil {
 			d.HTMLBody = ""
 			d.BodyAccess = "sanitize_failed"
@@ -218,6 +218,15 @@ func (p *Parser) Document(ctx context.Context, id uuid.UUID, key string) (*compa
 	d.ThreadKey = company.Hash(root)
 	return d, nil
 }
+
+// MIME transfer decoding can produce arbitrary octets even for a declared
+// textual part. Project them to representable UTF-8 before persistence and
+// HTML sanitization. The raw source, its digest, shared envelope and binary
+// attachment bytes retain their exact original identities.
+func derivedText(value string) string {
+	return strings.ReplaceAll(strings.ToValidUTF8(value, "\ufffd"), "\x00", "\ufffd")
+}
+
 func (p *Parser) Attachment(ctx context.Context, message uuid.UUID, key, id string) (*company.ParsedAttachment, []byte, error) {
 	v, e := p.load(ctx, key)
 	if e != nil {

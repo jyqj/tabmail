@@ -16,6 +16,11 @@ CASES = {
         "^TestR5FrozenMailboxGrantRevocation$",
         14,
     ),
+    "derived-text": (
+        "internal/store/postgres/r5_derived_text_persistence_test.go",
+        "^TestR5DerivedTextPersistence$",
+        8,
+    ),
 }
 
 

@@ -18,7 +18,7 @@ type RecipientAddress struct {
 // identity while serializing the local part with exactly the quoting it needs.
 // Display names remain excluded from the durable envelope, as before.
 func ParseRecipientAddress(value string) (RecipientAddress, error) {
-	parsed, err := mail.ParseAddress(value)
+	parsed, err := parseRecipientMailbox(value)
 	if err != nil {
 		return RecipientAddress{}, err
 	}
