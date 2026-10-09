@@ -367,6 +367,23 @@ func (s *PgStore) ActivateEmployee(ctx context.Context, hash, passwordHash strin
 	if e = companyAudit(ctx, tx, a, "employee.activate", "user", uid, map[string]any{"invitation_id": id, "mailbox": address}); e != nil {
 		return e
 	}
+	// A super administrator may sponsor an invitation from another home
+	// company. The target tenant lock does not fence that user's own account
+	// administration while required audit/outbox writes wait. Recheck current
+	// sponsorship and hold its user row through commit; a late conflicting
+	// writer must be retried rather than adding a reverse-order lock wait.
+	var currentSponsor uuid.UUID
+	e = tx.QueryRow(ctx, `SELECT id FROM users WHERE id=$1 AND is_active AND (role='super_admin' OR (tenant_id=$2 AND role='admin')) FOR SHARE NOWAIT`, inviter, tenant).Scan(&currentSponsor)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return app.Forbidden("inviting administrator is no longer authorized")
+	}
+	if e != nil {
+		var pg *pgconn.PgError
+		if errors.As(e, &pg) && pg.Code == "55P03" {
+			return &app.Error{Kind: app.KindConflict, Message: "inviting administrator is changing; try again", Err: e}
+		}
+		return e
+	}
 	// Zone verification uses independent non-key updates. Mailbox FK key
 	// protection alone does not fence those updates while mandatory audit waits.
 	// Recheck the original company/domain and protect it through this commit;

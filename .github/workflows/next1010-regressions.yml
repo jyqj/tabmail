@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        case: [refresh-issuance, permission-audit]
+        case: [refresh-issuance, permission-audit, activation-sponsor]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     services:

@@ -475,14 +475,15 @@ func (s *session) Mail(from string, opts *gosmtp.MailOptions) error {
 	if senderDomainHasEmptyLabel(addr) {
 		return smtpErr(501, "invalid sender domain")
 	}
-	s.from = addr
 	pol, err := s.backend.ingest.CurrentPolicy(ctx)
 	if err != nil {
 		return smtpErr(451, "temporary policy lookup failure")
 	}
-	if policy.ShouldRejectOrigin(s.from, pol.RejectOriginDomains) {
+	if policy.ShouldRejectOrigin(addr, pol.RejectOriginDomains) {
 		return smtpErr(550, "sender domain rejected by policy")
 	}
+	// A rejected command must leave the previously accepted envelope intact.
+	s.from = addr
 	return nil
 }
 

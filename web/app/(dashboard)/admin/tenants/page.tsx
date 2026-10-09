@@ -120,6 +120,12 @@ export default function TenantsPage() {
   const currentReadback = useRef<object | null>(null);
   const [readbackFailure, setReadbackFailure] = useState<{ view: object; error: Error } | null>(null);
   const readbackError = readbackFailure?.view === view ? readbackFailure.error : null;
+  const deletionRows = useRef(tenants);
+  useLayoutEffect(() => { deletionRows.current = tenantsRes?.data ?? []; }, [tenantsRes]);
+  const activeDeletes = useRef(new Map<string, { view: object }>());
+  const [pendingDeletes, setPendingDeletes] = useState<{ view: object; ids: string[] }>({ view, ids: [] });
+  const deleting = (id: string) => pendingDeletes.view === view && pendingDeletes.ids.includes(id);
+  const deletable = (id: string) => deletionRows.current.some(tenant => tenant.id === id && !tenant.is_super);
   async function refreshTenants(owner: object) {
     if (!ownsView(owner)) return;
     const observation = {};
@@ -184,13 +190,34 @@ export default function TenantsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!safeConfirm(t("tenants.confirmDelete"))) return;
+    if (!ownsView(view) || !deletable(id) || readbackError || activeDeletes.current.get(id)?.view === view) return;
+    const operation = { view };
+    // Reserve the row before opening confirmation; a reentrant activation
+    // must not open a second dialog or dispatch the same destructive command.
+    activeDeletes.current.set(id, operation);
+    setPendingDeletes(current => ({ view, ids: [...(current.view === view ? current.ids : []), id] }));
     try {
+      if (!safeConfirm(t("tenants.confirmDelete"))) return;
+      // The confirmation can outlive this page or the identity that saw the
+      // selected tenant. A token-only rotation retains the same scope.
+      if (!ownsView(view) || !deletable(id)) return;
       await deleteTenant(id);
+      if (!ownsView(view)) return;
       toast.success(t("tenants.tenantDeleted"));
-      mutateTenants();
+      try { await refreshTenants(view); } catch {
+        if (ownsView(view)) setReadbackFailure({ view, error: new Error(text(
+          "租户已删除，但租户列表刷新失败。请重试加载以核对当前列表。",
+          "The tenant was deleted, but the tenant list could not be refreshed. Retry loading to check the current list.",
+        )) });
+      }
     } catch {
-      toast.error(t("tenants.deleteFailed"));
+      if (ownsView(view)) toast.error(t("tenants.deleteFailed"));
+    } finally {
+      if (activeDeletes.current.get(id) === operation) {
+        activeDeletes.current.delete(id);
+        if (ownsView(view)) setPendingDeletes(current => current.view === view
+          ? { view, ids: current.ids.filter(pending => pending !== id) } : current);
+      }
     }
   };
 
@@ -335,7 +362,7 @@ export default function TenantsPage() {
                             <DropdownMenuItem
                               onClick={() => handleDelete(tenant.id)}
                               className="text-destructive focus:text-destructive"
-                              disabled={tenant.is_super}
+                              disabled={tenant.is_super || deleting(tenant.id) || !!readbackError}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               {t("tenants.delete")}
