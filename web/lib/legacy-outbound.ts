@@ -1,17 +1,26 @@
 import { request } from "./api/base";
 import { assertSession, sessionScope } from "./session";
 import { parseReceiptListResponse, parseReceiptResponse, type OrdinaryReceipt } from "./receipt-types";
+import type { APIListResponse } from "./types";
 
 // Compatibility paths have the SAME closed aggregate DTO, never raw queue jobs.
 export type LegacyOutboundReceipt = OrdinaryReceipt;
 function currentTenant() {
   return typeof window === "undefined" ? undefined : localStorage.getItem("tabmail_tenant_id");
 }
-export async function legacyOutboundReceipts(page = 1): Promise<LegacyOutboundReceipt[]> {
+export async function legacyOutboundReceiptPage(page = 1): Promise<APIListResponse<LegacyOutboundReceipt>> {
+  if (!Number.isSafeInteger(page) || page < 1) throw new Error("Invalid or out-of-scope receipt response");
   const scope = sessionScope(), tenantId = currentTenant();
   const result = await request<unknown>("/api/v1/outbound", { params: { page, per_page: 20 } });
   assertSession(scope);
-  return parseReceiptListResponse(result, { tenantId }).data;
+  const parsed = parseReceiptListResponse(result, { tenantId });
+  // The page number belongs to the request. A stale page-one response must
+  // never acquire a new label merely because the user clicked Next.
+  if (parsed.meta.page !== page) throw new Error("Invalid or out-of-scope receipt response");
+  return parsed;
+}
+export async function legacyOutboundReceipts(page = 1): Promise<LegacyOutboundReceipt[]> {
+  return (await legacyOutboundReceiptPage(page)).data;
 }
 async function aggregate(id: string, suffix = "", signal?: AbortSignal): Promise<LegacyOutboundReceipt> {
   const scope = sessionScope(), tenantId = currentTenant();

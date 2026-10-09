@@ -83,7 +83,7 @@ type HTTP struct {
 type DB struct {
 	DSN             string        `default:"postgres://tabmail:tabmail@localhost:5432/tabmail?sslmode=disable" desc:"PostgreSQL connection string"`
 	MaxOpenConns    int           `default:"25" desc:"Max open connections"`
-	MaxIdleConns    int           `default:"5" desc:"Max idle connections"`
+	MaxIdleConns    int           `default:"5" desc:"Minimum pool size (0 through MaxOpenConns)"`
 	ConnMaxLifetime time.Duration `default:"300s" desc:"Connection max lifetime"`
 }
 
@@ -202,6 +202,9 @@ func (c *Root) Validate() error {
 	}
 	if strings.TrimSpace(c.DB.DSN) == "" {
 		return fmt.Errorf("config: TABMAIL_DB_DSN is required")
+	}
+	if err := c.DB.Validate(); err != nil {
+		return err
 	}
 	if strings.TrimSpace(c.Redis.Addr) == "" {
 		return fmt.Errorf("config: TABMAIL_REDIS_ADDR is required")

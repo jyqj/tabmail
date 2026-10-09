@@ -93,6 +93,9 @@ func (m Message) EnvelopeRecipients() []string {
 // Build renders the message to a complete MIME wire form. It returns an error if
 // the body cannot be encoded, rather than silently emitting a truncated message.
 func Build(m Message) ([]byte, error) {
+	if err := validateCustomHeaders(m.Headers); err != nil {
+		return nil, err
+	}
 	var buf bytes.Buffer
 
 	writeHeader(&buf, "From", m.From)
@@ -272,6 +275,32 @@ func parseCustomHeaders(raw json.RawMessage) map[string]string {
 // sanitizeHeaderValue removes CR and LF characters to prevent header injection.
 func sanitizeHeaderValue(v string) string {
 	return strings.NewReplacer("\r", "", "\n", "").Replace(v)
+}
+
+// Keep custom field validation shared by submission and legacy job rebuilding.
+// CR/LF stripping and ignored names retain their existing behavior. Other
+// controls cannot be generated in a field body (RFC 5322 section 2.2); a field
+// we do not parse cannot be safely folded inside an arbitrary structured token,
+// so reject a physical line beyond the 998-octet wire limit before enqueue.
+func validateCustomHeaders(headers map[string]string) error {
+	for name, value := range headers {
+		if _, blocked := forbiddenCustomHeaders[strings.ToLower(name)]; blocked || !isValidHeaderName(name) {
+			continue
+		}
+		value = sanitizeHeaderValue(value)
+		if !utf8.ValidString(value) {
+			return fmt.Errorf("custom header %s contains invalid UTF-8", name)
+		}
+		for i := 0; i < len(value); i++ {
+			if (value[i] < 32 && value[i] != '\t') || value[i] == 127 {
+				return fmt.Errorf("custom header %s contains an invalid control character", name)
+			}
+		}
+		if len(name)+2+len(value) > 998 {
+			return fmt.Errorf("custom header %s exceeds the 998-byte line limit", name)
+		}
+	}
+	return nil
 }
 
 // SafeDisplayHeaders projects the stored custom-header map onto the subset
