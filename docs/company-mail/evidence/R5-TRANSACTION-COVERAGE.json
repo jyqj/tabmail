@@ -1,6 +1,6 @@
 {
   "schema": "r5-transaction-coverage-v1",
-  "baseline_commit": "17be458fb9d36e135a95962638b68ce105c16518",
+  "baseline_commit": "177ee571b194836678cc9a473f178c655326ba7c",
   "task": "R5-P0-070",
   "task_complete": false,
   "runtime_verified": false,
@@ -13,6 +13,10 @@
     "Historical linked tests remain bounded historical references. Changed bodies have source-only evidence; no current runtime or parent acceptance."
   ],
   "postgres_files": [
+    {
+      "path": "internal/store/postgres/activation_errors.go",
+      "sha256": "22f7e59af658f383f872a46182d686dd24b57ec823457eb1af825ddec17787ee"
+    },
     {
       "path": "internal/store/postgres/apikeys.go",
       "sha256": "8b62e7af8dd8aa1790c93297059fb17c5156a5791a9cb703951b054a69fc85fc"
@@ -39,7 +43,7 @@
     },
     {
       "path": "internal/store/postgres/company_console.go",
-      "sha256": "6ac404ba0e4e8003909a3bcd51ce3f3bfd1a202e2bde890f5a0af6090bded038"
+      "sha256": "3c38a9c199bd41214a96b689200ad33c48cc382f76f2927d88bfb9101f8bfa7f"
     },
     {
       "path": "internal/store/postgres/company_mail.go",
@@ -47,7 +51,7 @@
     },
     {
       "path": "internal/store/postgres/company_members.go",
-      "sha256": "d52c28079a66ddf32e39da1c35d1f0c2b4aa59fb825f60e155befca6ec741297"
+      "sha256": "d7e538f0a1154feac1c3545eb98fdf5914685416efbab765105ac174c62df476"
     },
     {
       "path": "internal/store/postgres/company_message_read.go",
@@ -211,7 +215,7 @@
     },
     {
       "path": "internal/store/postgres/refresh_rotation.go",
-      "sha256": "1481bce6ba738ab41ab961797449d130f58c7e82f7d48c61a03cb727597b9d03"
+      "sha256": "5a0a4c902b8f016fb5ec8c9b3f6f788f71c43362c012e7a8b6800f03d0a94c76"
     },
     {
       "path": "internal/store/postgres/send_identities.go",
@@ -304,7 +308,27 @@
     "internal/store/postgres/company_console.go": {
       "group": "CTX28",
       "review": "companyReadTx→actor SHARE/profile SHARE NOWAIT→overview/audit读取；没有强制T锁",
-      "remaining": "多语句overview跨资源快照不是REPEATABLE READ；读取helper不能推定没有隐式锁"
+      "remaining": "多语句overview跨资源快照不是REPEATABLE READ；读取helper不能推定没有隐式锁",
+      "revision18_additions": {
+        "source_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+        "source_sha256": "3c38a9c199bd41214a96b689200ad33c48cc382f76f2927d88bfb9101f8bfa7f",
+        "changed_functions": [
+          "internal/store/postgres/company_console.go:*PgStore:ListCompanyAudit"
+        ],
+        "added_functions": [],
+        "reviews": {
+          "internal/store/postgres/company_console.go:*PgStore:ListCompanyAudit": {
+            "base_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+            "source_sha256": "538efc7815ca2e8264626793815016a6a738138bd878d020a162bb55c4a7a971",
+            "role": "tenant-administration-audit-reader",
+            "trace": "companyReadTx(admin=true) uses companyNoTenantLock and currentMemberActor user FOR SHARE, rechecking current interactive tenant/active/session authority. A current administrator does not enter the non-admin effectivePermissionSnapshot branch; no profile SHARE lock is asserted for this path. The identical tenant-bounded filter feeds both count and ordered page reads, adding only permission.profile.create, permission.profile.update, permission.profile.delete, permission.profile.assign and permission.override.patch to the existing action families. Safe projected fields, ordering and pagination remain; no permission wildcard or direct data write is introduced. The two READ COMMITTED statements are not one repeatable snapshot.",
+            "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+            "review": "docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md"
+          }
+        },
+        "note": "Earlier family reviews and unknown fields remain unchanged; this addition describes the reviewed current path.",
+        "qualification": "source-only"
+      }
     },
     "internal/store/postgres/company_mail.go": {
       "group": "PR23-STRUCTURE",
@@ -333,6 +357,26 @@
           }
         },
         "note": "Unchanged functions may move within the file; their old manual fields are preserved.",
+        "qualification": "source-only"
+      },
+      "revision18_additions": {
+        "source_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+        "source_sha256": "d7e538f0a1154feac1c3545eb98fdf5914685416efbab765105ac174c62df476",
+        "changed_functions": [
+          "internal/store/postgres/company_members.go:*PgStore:ActivateEmployee"
+        ],
+        "added_functions": [],
+        "reviews": {
+          "internal/store/postgres/company_members.go:*PgStore:ActivateEmployee": {
+            "base_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+            "source_sha256": "b7ac7978144a2e720d5639934b4169e8dbb2b1dfa49ea109f8441b3d9d65097f",
+            "role": "invitation-activation-transaction-writer",
+            "trace": "The independent activation transaction retains tenant UPDATE, invitation UPDATE, deadline checks, early sponsor/domain reads, profile creation, user/mailbox inserts and invitation consumption. Each INSERT now classifies only its own address unique constraint and retains the original cause; unrelated failures and late audit errors remain original errors. After required audit/outbox writes, a new current sponsor users FOR SHARE NOWAIT checks active super-admin or same-tenant admin authority and holds that row through Commit. Missing authority is forbidden; busy sponsor 55P03 is conflict with its cause. The pre-existing final company/domain NOWAIT fence and final elapsed-deadline check still follow. Any failure uses the original rollback for user, mailbox, profile, invitation, audit and outbox effects; no automatic activation retry is added.",
+            "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+            "review": "docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md"
+          }
+        },
+        "note": "Earlier family reviews and unknown fields remain unchanged; this addition describes the reviewed current path.",
         "qualification": "source-only"
       }
     },
@@ -561,7 +605,27 @@
     "internal/store/postgres/refresh_rotation.go": {
       "group": "TX16",
       "review": "family探测→advisory→user SHARE→R UPDATE→撤销/后代；logout/GC family→R，无user-first family等待",
-      "remaining": "family gc/用户删除/改密交叉依历史回归，Commit不明与客户端重放不能靠inventory证明"
+      "remaining": "family gc/用户删除/改密交叉依历史回归，Commit不明与客户端重放不能靠inventory证明",
+      "revision18_additions": {
+        "source_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+        "source_sha256": "5a0a4c902b8f016fb5ec8c9b3f6f788f71c43362c012e7a8b6800f03d0a94c76",
+        "changed_functions": [
+          "internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken"
+        ],
+        "added_functions": [],
+        "reviews": {
+          "internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken": {
+            "base_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+            "source_sha256": "0a0796b2e461476e655ed669e26a1c8fbbfc23a78f4156ae81e63fc8def81abc",
+            "role": "refresh-authentication-snapshot-writer",
+            "trace": "The existing family advisory transaction lock, user SHARE lock and old-token UPDATE lock retain their family/user/token order. The user read now combines the existing userSelect constant with a token-user subquery and FOR SHARE, then scanUser captures the complete user under that existing lock. This changes the lexical dynamic-SQL classification, not the user lock level. Expiry, replay-family revocation, descendant insert and Commit remain. Only successful Commit publishes the in-memory Issuance UserID/TenantID/PasswordHash/SessionVersion proof for the subsequent HTTP identity comparison. No proof is persisted as a refresh-token column or JSON field.",
+            "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+            "review": "docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md"
+          }
+        },
+        "note": "Earlier family reviews and unknown fields remain unchanged; this addition describes the reviewed current path.",
+        "qualification": "source-only"
+      }
     },
     "internal/store/postgres/send_identities.go": {
       "group": "CTX36",
@@ -705,6 +769,25 @@
       "group": "TX01",
       "review": "仅errors.As得到非nil *pgconn.PgError且SQLSTATE=23505、ConstraintName=mailboxes_full_address_key时，返回带原始err原因链的app.KindConflict。所有其他错误原样返回；不匹配本地化诊断文本，不执行SQL、不加锁、不发起事务或重试。生产调用仅位于CreateWorkMailbox的mailboxes INSERT失败分支，审计/后续错误不进入该分类器。",
       "remaining": "本轮是精确源码审查；错误分类变化不建立新的锁序、重试、跨事务授权或全局无死锁证明。CreateWorkMailbox的固定PG10用例为另行记录的有限证据，不升级此目录runtime_verified或R5-P0-070完成。既有callback/隐式FK/并发等待及其他工作流风险保留。"
+    },
+    "internal/store/postgres/activation_errors.go": {
+      "group": "TX01",
+      "review": "This pure helper is called only at the users and mailboxes INSERT failure sites. It preserves errors unless errors.As finds a non-nil PostgreSQL diagnostic. A 23505 matches only the supplied address constraint; 40001 and 55P03 become retryable conflicts. Both wrappers retain Err. Unrelated constraints, 23503/23514/40P01, cancellation and nil return unchanged. There is no SQL, transaction, lock, network, callback or automatic retry. The caller, not this helper, identifies the INSERT stage.",
+      "remaining": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+      "source_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+      "source_sha256": "22f7e59af658f383f872a46182d686dd24b57ec823457eb1af825ddec17787ee",
+      "added_functions": [
+        "internal/store/postgres/activation_errors.go::classifyActivationInsertError"
+      ],
+      "source_review": {
+        "base_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+        "source_sha256": "9652084ea51a2bc4c1d2aabf712a2697296cfef3445e80b0d1906dcc0b0ed599",
+        "role": "activation-insert-error-classifier",
+        "trace": "This pure helper is called only at the users and mailboxes INSERT failure sites. It preserves errors unless errors.As finds a non-nil PostgreSQL diagnostic. A 23505 matches only the supplied address constraint; 40001 and 55P03 become retryable conflicts. Both wrappers retain Err. Unrelated constraints, 23503/23514/40P01, cancellation and nil return unchanged. There is no SQL, transaction, lock, network, callback or automatic retry. The caller, not this helper, identifies the INSERT stage.",
+        "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md"
+      },
+      "qualification": "source-only"
     }
   },
   "entries": [
@@ -4684,8 +4767,8 @@
         "name": "ListCompanyAudit",
         "receiver": "*PgStore",
         "line": 24,
-        "end": 48,
-        "sha256": "3e45d11581d4928bbf26d7e59c88a7322c04dda4be91de0f99b84c685100e77f",
+        "end": 51,
+        "sha256": "538efc7815ca2e8264626793815016a6a738138bd878d020a162bb55c4a7a971",
         "calls": [
           {
             "line": 25,
@@ -4698,68 +4781,68 @@
             "name": "companyReadTx"
           },
           {
-            "line": 30,
+            "line": 33,
             "expr": "tx.QueryRow(ctx, `SELECT count(*) FROM audit_log WHERE `+filter, a.TenantID).Scan",
             "name": "Scan"
           },
           {
-            "line": 30,
+            "line": 33,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT count(*) FROM audit_log WHERE ` + filter"
           },
           {
-            "line": 33,
+            "line": 36,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "`SELECT id,COALESCE(actor,''),action,COALESCE(resource_type,''),resource_id,COALESCE(details->>'reason',''),created_at FROM audit_log WHERE ` + filter + ` ORDER BY created_at DESC,id DESC LIMIT $2 OFFSET $3`"
           },
           {
-            "line": 33,
+            "line": 36,
             "expr": "p.Offset",
             "name": "Offset"
           },
           {
-            "line": 37,
+            "line": 40,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 38,
+            "line": 41,
             "expr": "rows.Next",
             "name": "Next"
           },
           {
-            "line": 40,
+            "line": 43,
             "expr": "rows.Scan",
             "name": "Scan"
           },
           {
-            "line": 43,
+            "line": 46,
             "expr": "append",
             "name": "append"
           },
           {
-            "line": 45,
+            "line": 48,
             "expr": "rows.Err",
             "name": "Err"
           }
         ],
         "strings": [
           {
-            "line": 29,
-            "value": "tenant_id=$1 AND (action LIKE 'company.%' OR action LIKE 'employee.%' OR action LIKE 'mailbox.%' OR action LIKE 'template.%' OR action LIKE 'domain.%')"
+            "line": 32,
+            "value": "tenant_id=$1 AND (action LIKE 'company.%' OR action LIKE 'employee.%' OR action LIKE 'mailbox.%' OR action LIKE 'template.%' OR action LIKE 'domain.%' OR action IN ('permission.profile.create','permission.profile.update','permission.profile.delete','permission.profile.assign','permission.override.patch'))"
           },
           {
-            "line": 30,
+            "line": 33,
             "value": "SELECT count(*) FROM audit_log WHERE "
           },
           {
-            "line": 33,
+            "line": 36,
             "value": "SELECT id,COALESCE(actor,''),action,COALESCE(resource_type,''),resource_id,COALESCE(details->>'reason',''),created_at FROM audit_log WHERE "
           },
           {
-            "line": 33,
+            "line": 36,
             "value": " ORDER BY created_at DESC,id DESC LIMIT $2 OFFSET $3"
           }
         ],
@@ -4776,7 +4859,7 @@
         }
       ],
       "lock_fk_wait_fence": {
-        "boundary": "本函数委托companyReadTx，实际helper锁见其entry",
+        "boundary": "companyReadTx(admin=true) uses companyNoTenantLock and currentMemberActor user FOR SHARE, rechecking current interactive tenant/active/session authority. A current administrator does not enter the non-admin effectivePermissionSnapshot branch; no profile SHARE lock is asserted for this path. The identical tenant-bounded filter feeds both count and ordered page reads, adding only permission.profile.create, permission.profile.update, permission.profile.delete, permission.profile.assign and permission.override.patch to the existing action families. Safe projected fields, ordering and pagination remain; no permission wildcard or direct data write is introduced. The two READ COMMITTED statements are not one repeatable snapshot.",
         "local_operations": [
           {
             "line": 28,
@@ -4785,27 +4868,28 @@
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
           },
           {
-            "line": 30,
+            "line": 33,
             "operation": "tx.QueryRow",
             "sql_expression": "`SELECT count(*) FROM audit_log WHERE ` + filter",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
           },
           {
-            "line": 33,
+            "line": 36,
             "operation": "tx.Query",
             "sql_expression": "`SELECT id,COALESCE(actor,''),action,COALESCE(resource_type,''),resource_id,COALESCE(details->>'reason',''),created_at FROM audit_log WHERE ` + filter + ` ORDER BY created_at DESC,id DESC LIMIT $2 OFFSET $3`",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
           }
         ],
         "direct_lock_fragments": [],
-        "implicit_fk": "SQL所写表的migration REFERENCES与trigger定义需展开；见migrations及对应组，不推定未修改键也必取得所有父键锁"
+        "implicit_fk": "There is no direct SQL lock or new FK action in ListCompanyAudit. Its current-user lock is owned by the existing helper transaction; no forced tenant lock is added."
       },
       "evidence": [
-        "internal/store/postgres/company_console.go:24-48 sha256=3e45d11581d4928bbf26d7e59c88a7322c04dda4be91de0f99b84c685100e77f",
-        "migration source definitions; no current runtime catalog claim"
+        "internal/store/postgres/company_console.go:24-51 sha256=538efc7815ca2e8264626793815016a6a738138bd878d020a162bb55c4a7a971",
+        "Original syntax producers; execution and CI qualification remain separately source-bound."
       ],
       "unverified_risks": [
-        "多语句overview跨资源快照不是REPEATABLE READ；读取helper不能推定没有隐式锁"
+        "多语句overview跨资源快照不是REPEATABLE READ；读取helper不能推定没有隐式锁",
+        "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance."
       ],
       "review_status": "static-type-review",
       "followup_tasks": [
@@ -4824,13 +4908,13 @@
         ],
         "sql_execution_expressions": [
           {
-            "line": 30,
+            "line": 33,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT count(*) FROM audit_log WHERE ` + filter"
           },
           {
-            "line": 33,
+            "line": 36,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "`SELECT id,COALESCE(actor,''),action,COALESCE(resource_type,''),resource_id,COALESCE(details->>'reason',''),created_at FROM audit_log WHERE ` + filter + ` ORDER BY created_at DESC,id DESC LIMIT $2 OFFSET $3`"
@@ -4840,8 +4924,51 @@
         "callback_effect": "无声明式函数/Validator参数；调用的事务helper副作用见对应entry",
         "entry_role": "store-exported-interface-candidate"
       },
-      "file_family_context": "companyReadTx→actor SHARE/profile SHARE NOWAIT→overview/audit读取；没有强制T锁",
-      "evidence_level": "source-only"
+      "file_family_context": "companyReadTx(admin=true) uses companyNoTenantLock and currentMemberActor user FOR SHARE, rechecking current interactive tenant/active/session authority. A current administrator does not enter the non-admin effectivePermissionSnapshot branch; no profile SHARE lock is asserted for this path. The identical tenant-bounded filter feeds both count and ordered page reads, adding only permission.profile.create, permission.profile.update, permission.profile.delete, permission.profile.assign and permission.override.patch to the existing action families. Safe projected fields, ordering and pagination remain; no permission wildcard or direct data write is introduced. The two READ COMMITTED statements are not one repeatable snapshot.",
+      "evidence_level": "source-only",
+      "historical_revision17_review": {
+        "lock_fk_wait_fence": {
+          "boundary": "本函数委托companyReadTx，实际helper锁见其entry",
+          "local_operations": [
+            {
+              "line": 28,
+              "operation": "s.companyReadTx",
+              "sql_expression": "",
+              "status": "lexical-order-with-branches-not-single-total-runtime-order"
+            },
+            {
+              "line": 30,
+              "operation": "tx.QueryRow",
+              "sql_expression": "`SELECT count(*) FROM audit_log WHERE ` + filter",
+              "status": "lexical-order-with-branches-not-single-total-runtime-order"
+            },
+            {
+              "line": 33,
+              "operation": "tx.Query",
+              "sql_expression": "`SELECT id,COALESCE(actor,''),action,COALESCE(resource_type,''),resource_id,COALESCE(details->>'reason',''),created_at FROM audit_log WHERE ` + filter + ` ORDER BY created_at DESC,id DESC LIMIT $2 OFFSET $3`",
+              "status": "lexical-order-with-branches-not-single-total-runtime-order"
+            }
+          ],
+          "direct_lock_fragments": [],
+          "implicit_fk": "SQL所写表的migration REFERENCES与trigger定义需展开；见migrations及对应组，不推定未修改键也必取得所有父键锁"
+        },
+        "evidence": [
+          "internal/store/postgres/company_console.go:24-48 sha256=3e45d11581d4928bbf26d7e59c88a7322c04dda4be91de0f99b84c685100e77f",
+          "migration source definitions; no current runtime catalog claim"
+        ],
+        "unverified_risks": [
+          "多语句overview跨资源快照不是REPEATABLE READ；读取helper不能推定没有隐式锁"
+        ],
+        "file_family_context": "companyReadTx→actor SHARE/profile SHARE NOWAIT→overview/audit读取；没有强制T锁"
+      },
+      "source_review": {
+        "base_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+        "source_sha256": "538efc7815ca2e8264626793815016a6a738138bd878d020a162bb55c4a7a971",
+        "role": "tenant-administration-audit-reader",
+        "trace": "companyReadTx(admin=true) uses companyNoTenantLock and currentMemberActor user FOR SHARE, rechecking current interactive tenant/active/session authority. A current administrator does not enter the non-admin effectivePermissionSnapshot branch; no profile SHARE lock is asserted for this path. The identical tenant-bounded filter feeds both count and ordered page reads, adding only permission.profile.create, permission.profile.update, permission.profile.delete, permission.profile.assign and permission.override.patch to the existing action families. Safe projected fields, ordering and pagination remain; no permission wildcard or direct data write is introduced. The two READ COMMITTED statements are not one repeatable snapshot.",
+        "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md"
+      }
     },
     {
       "id": "internal/store/postgres/company_mail.go:*PgStore:DeleteMailDraft",
@@ -8700,8 +8827,8 @@
         "name": "ActivateEmployee",
         "receiver": "*PgStore",
         "line": 282,
-        "end": 390,
-        "sha256": "4adcbd4f8d20768e522f62aabd4df97ff751dab8ce7a7d2535dba8ad6b50f874",
+        "end": 407,
+        "sha256": "b7ac7978144a2e720d5639934b4169e8dbb2b1dfa49ea109f8441b3d9d65097f",
         "calls": [
           {
             "line": 283,
@@ -8867,8 +8994,8 @@
           },
           {
             "line": 358,
-            "expr": "app.Conflict",
-            "name": "Conflict"
+            "expr": "classifyActivationInsertError",
+            "name": "classifyActivationInsertError"
           },
           {
             "line": 360,
@@ -8883,8 +9010,8 @@
           },
           {
             "line": 361,
-            "expr": "app.Conflict",
-            "name": "Conflict"
+            "expr": "classifyActivationInsertError",
+            "name": "classifyActivationInsertError"
           },
           {
             "line": 363,
@@ -8898,43 +9025,69 @@
             "name": "companyAudit"
           },
           {
-            "line": 375,
+            "line": 376,
+            "expr": "tx.QueryRow(ctx, `SELECT id FROM users WHERE id=$1 AND is_active AND (role='super_admin' OR (tenant_id=$2 AND role='admin')) FOR SHARE NOWAIT`, inviter, tenant).Scan",
+            "name": "Scan"
+          },
+          {
+            "line": 376,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT id FROM users WHERE id=$1 AND is_active AND (role='super_admin' OR (tenant_id=$2 AND role='admin')) FOR SHARE NOWAIT`"
+          },
+          {
+            "line": 377,
+            "expr": "errors.Is",
+            "name": "Is"
+          },
+          {
+            "line": 378,
+            "expr": "app.Forbidden",
+            "name": "Forbidden"
+          },
+          {
+            "line": 382,
+            "expr": "errors.As",
+            "name": "As"
+          },
+          {
+            "line": 392,
             "expr": "tx.QueryRow(ctx, `SELECT z.id FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id AND z.tenant_id=c.tenant_id WHERE c.tenant_id=$1 AND z.id=$2 AND z.domain=$3 AND z.is_verified AND z.mx_verified FOR SHARE OF c,z NOWAIT`, tenant, zone, domain).Scan",
             "name": "Scan"
           },
           {
-            "line": 375,
+            "line": 392,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT z.id FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id AND z.tenant_id=c.tenant_id WHERE c.tenant_id=$1 AND z.id=$2 AND z.domain=$3 AND z.is_verified AND z.mx_verified FOR SHARE OF c,z NOWAIT`"
           },
           {
-            "line": 376,
+            "line": 393,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 377,
+            "line": 394,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 381,
+            "line": 398,
             "expr": "errors.As",
             "name": "As"
           },
           {
-            "line": 382,
+            "line": 399,
             "expr": "app.Conflict",
             "name": "Conflict"
           },
           {
-            "line": 386,
+            "line": 403,
             "expr": "checkDeadline",
             "name": "checkDeadline"
           },
           {
-            "line": 389,
+            "line": 406,
             "expr": "tx.Commit",
             "name": "Commit"
           }
@@ -8998,11 +9151,19 @@
           },
           {
             "line": 358,
+            "value": "idx_users_email"
+          },
+          {
+            "line": 358,
             "value": "employee email already exists"
           },
           {
             "line": 360,
             "value": "INSERT INTO mailboxes(id,tenant_id,zone_id,local_part,resolved_domain,full_address,access_mode,owner_user_id,mailbox_kind,retention_hours_override) VALUES($1,$2,$3,$4,$5,$6,'token',$7,'personal',0)"
+          },
+          {
+            "line": 361,
+            "value": "mailboxes_full_address_key"
           },
           {
             "line": 361,
@@ -9029,19 +9190,35 @@
             "value": "mailbox"
           },
           {
-            "line": 375,
-            "value": "SELECT z.id FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id AND z.tenant_id=c.tenant_id WHERE c.tenant_id=$1 AND z.id=$2 AND z.domain=$3 AND z.is_verified AND z.mx_verified FOR SHARE OF c,z NOWAIT"
+            "line": 376,
+            "value": "SELECT id FROM users WHERE id=$1 AND is_active AND (role='super_admin' OR (tenant_id=$2 AND role='admin')) FOR SHARE NOWAIT"
           },
           {
-            "line": 377,
-            "value": "configure a verified primary company domain first"
-          },
-          {
-            "line": 381,
-            "value": "55P03"
+            "line": 378,
+            "value": "inviting administrator is no longer authorized"
           },
           {
             "line": 382,
+            "value": "55P03"
+          },
+          {
+            "line": 383,
+            "value": "inviting administrator is changing; try again"
+          },
+          {
+            "line": 392,
+            "value": "SELECT z.id FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id AND z.tenant_id=c.tenant_id WHERE c.tenant_id=$1 AND z.id=$2 AND z.domain=$3 AND z.is_verified AND z.mx_verified FOR SHARE OF c,z NOWAIT"
+          },
+          {
+            "line": 394,
+            "value": "configure a verified primary company domain first"
+          },
+          {
+            "line": 398,
+            "value": "55P03"
+          },
+          {
+            "line": 399,
             "value": "company domain is changing; try again"
           }
         ],
@@ -9065,15 +9242,117 @@
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
-      "lock_fk_wait_fence": "独立Begin→普通invitation定位tenant（不授信）→T UPDATE→hash+tenant绑定invitation UPDATE锁/原expires_at→锁后DB clock期限→当前sponsor/domain/profile资格→U/M/consumption→audit/outbox→原primary/zone/domain verified+mx SHARE NOWAIT→最终原expires DBclock→Commit；late无资格400/busy409均整体rollback，不新增T锁。",
+      "lock_fk_wait_fence": {
+        "boundary": "The independent activation transaction retains tenant UPDATE, invitation UPDATE, deadline checks, early sponsor/domain reads, profile creation, user/mailbox inserts and invitation consumption. Each INSERT now classifies only its own address unique constraint and retains the original cause; unrelated failures and late audit errors remain original errors. After required audit/outbox writes, a new current sponsor users FOR SHARE NOWAIT checks active super-admin or same-tenant admin authority and holds that row through Commit. Missing authority is forbidden; busy sponsor 55P03 is conflict with its cause. The pre-existing final company/domain NOWAIT fence and final elapsed-deadline check still follow. Any failure uses the original rollback for user, mailbox, profile, invitation, audit and outbox effects; no automatic activation retry is added.",
+        "local_operations": [
+          {
+            "line": 283,
+            "operation": "s.pool.Begin",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 287,
+            "operation": "tx.Rollback",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 289,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`SELECT tenant_id FROM employee_invitations WHERE token_hash=$1`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 303,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`SELECT id,email,display_name,mailbox_address,permission_profile_id,invited_by,expires_at FROM employee_invitations WHERE token_hash=$1 AND tenant_id=$2 AND expires_at>clock_timestamp() AND consumed_at IS NULL AND revoked_at IS NULL FOR UPDATE`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 314,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`SELECT clock_timestamp()`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 326,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`SELECT EXISTS(SELECT 1 FROM users WHERE id=$1 AND is_active AND (role='super_admin' OR (tenant_id=$2 AND role='admin')))`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 342,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`INSERT INTO permission_profiles(id,tenant_id,name,description,can_send,daily_send_quota,daily_receive_quota,max_mailboxes,max_domains,can_create_domains,can_create_routes,can_create_api_keys) VALUES($1,$2,'Company employee','Employee mailbox access; no infrastructure administration',true,200,0,1,0,false,false,false) ON CONFLICT(tenant_id,name) WHERE tenant_id IS NOT NULL DO UPDATE SET name=EXCLUDED.name RETURNING id`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 349,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`SELECT EXISTS(SELECT 1 FROM permission_profiles WHERE id=$1 AND (tenant_id=$2 OR tenant_id IS NULL))`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 357,
+            "operation": "tx.Exec",
+            "sql_expression": "`INSERT INTO users(id,tenant_id,email,password_hash,display_name,role,is_active,permission_profile_id) VALUES($1,$2,$3,$4,$5,'user',true,$6)`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 360,
+            "operation": "tx.Exec",
+            "sql_expression": "`INSERT INTO mailboxes(id,tenant_id,zone_id,local_part,resolved_domain,full_address,access_mode,owner_user_id,mailbox_kind,retention_hours_override) VALUES($1,$2,$3,$4,$5,$6,'token',$7,'personal',0)`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 363,
+            "operation": "tx.Exec",
+            "sql_expression": "`UPDATE employee_invitations SET consumed_at=now() WHERE id=$1`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 376,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`SELECT id FROM users WHERE id=$1 AND is_active AND (role='super_admin' OR (tenant_id=$2 AND role='admin')) FOR SHARE NOWAIT`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 392,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`SELECT z.id FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id AND z.tenant_id=c.tenant_id WHERE c.tenant_id=$1 AND z.id=$2 AND z.domain=$3 AND z.is_verified AND z.mx_verified FOR SHARE OF c,z NOWAIT`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 406,
+            "operation": "tx.Commit",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [
+          {
+            "line": 303,
+            "sql_fragment": "SELECT id,email,display_name,mailbox_address,permission_profile_id,invited_by,expires_at FROM employee_invitations WHERE token_hash=$1 AND tenant_id=$2 AND expires_at>clock_timestamp() AND consumed_at IS NULL AND revoked_at IS NULL FOR UPDATE"
+          },
+          {
+            "line": 376,
+            "sql_fragment": "SELECT id FROM users WHERE id=$1 AND is_active AND (role='super_admin' OR (tenant_id=$2 AND role='admin')) FOR SHARE NOWAIT"
+          },
+          {
+            "line": 392,
+            "sql_fragment": "SELECT z.id FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id AND z.tenant_id=c.tenant_id WHERE c.tenant_id=$1 AND z.id=$2 AND z.domain=$3 AND z.is_verified AND z.mx_verified FOR SHARE OF c,z NOWAIT"
+          }
+        ],
+        "implicit_fk": "Existing user/profile/mailbox/domain foreign keys can still wait before the final sponsor fence. NOWAIT avoids adding a reverse-order wait after audit/outbox; it does not establish that all earlier FK waits are deadlock-free."
+      },
       "evidence": [
-        "internal/store/postgres/company_members.go:279-387 sha256=4adcbd4f8d20768e522f62aabd4df97ff751dab8ce7a7d2535dba8ad6b50f874",
-        "migration source definitions; no current runtime catalog claim",
-        "integration factual correction: company_members.go:283 ordinary locator SELECT; :290 tenant lock; :296 invitation FOR UPDATE. Production source unchanged.",
-        "Y final same-test baseline5 14 events 6pass8fail; candidate4-6 each14pass; see activation_relationship_evidence. Old13 results are historical, not reused."
+        "internal/store/postgres/company_members.go:282-407 sha256=b7ac7978144a2e720d5639934b4169e8dbb2b1dfa49ea109f8441b3d9d65097f",
+        "Original syntax producers; execution and CI qualification remain separately source-bound."
       ],
       "unverified_risks": [
-        "Y最终同14事件基线6pass8fail/候选三轮14pass，busy409由正式UpdateZone+test-only advisory屏障实测，400/409均完整state rollback。其它sponsor/profile独立旧写caller、commit-unknown及整图运行未因本关系证明。"
+        "Y最终同14事件基线6pass8fail/候选三轮14pass，busy409由正式UpdateZone+test-only advisory屏障实测，400/409均完整state rollback。其它sponsor/profile独立旧写caller、commit-unknown及整图运行未因本关系证明。",
+        "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance."
       ],
       "review_status": "static-type-review",
       "followup_tasks": [
@@ -9105,7 +9384,11 @@
             "sql_fragment": "SELECT id,email,display_name,mailbox_address,permission_profile_id,invited_by,expires_at FROM employee_invitations WHERE token_hash=$1 AND tenant_id=$2 AND expires_at>clock_timestamp() AND consumed_at IS NULL AND revoked_at IS NULL FOR UPDATE"
           },
           {
-            "line": 375,
+            "line": 376,
+            "sql_fragment": "SELECT id FROM users WHERE id=$1 AND is_active AND (role='super_admin' OR (tenant_id=$2 AND role='admin')) FOR SHARE NOWAIT"
+          },
+          {
+            "line": 392,
             "sql_fragment": "SELECT z.id FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id AND z.tenant_id=c.tenant_id WHERE c.tenant_id=$1 AND z.id=$2 AND z.domain=$3 AND z.is_verified AND z.mx_verified FOR SHARE OF c,z NOWAIT"
           }
         ],
@@ -9172,7 +9455,13 @@
             "sql_expr": "`UPDATE employee_invitations SET consumed_at=now() WHERE id=$1`"
           },
           {
-            "line": 375,
+            "line": 376,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT id FROM users WHERE id=$1 AND is_active AND (role='super_admin' OR (tenant_id=$2 AND role='admin')) FOR SHARE NOWAIT`"
+          },
+          {
+            "line": 392,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT z.id FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id AND z.tenant_id=c.tenant_id WHERE c.tenant_id=$1 AND z.id=$2 AND z.domain=$3 AND z.is_verified AND z.mx_verified FOR SHARE OF c,z NOWAIT`"
@@ -9182,8 +9471,29 @@
         "callback_effect": "无外部函数参数；checkDeadline内部闭包仅使用当前tx查询DB clock，无对象或网络I/O。",
         "entry_role": "store-exported-interface-candidate"
       },
-      "file_family_context": "companyTxScope三种T模式：UPDATE/KEY SHARE/无T→actor SHARE→profile SHARE NOWAIT→callback→Commit；grant/移交先mailbox revision；Activate独立事务",
-      "evidence_level": "actual-batch-linked-relationship"
+      "file_family_context": "The independent activation transaction retains tenant UPDATE, invitation UPDATE, deadline checks, early sponsor/domain reads, profile creation, user/mailbox inserts and invitation consumption. Each INSERT now classifies only its own address unique constraint and retains the original cause; unrelated failures and late audit errors remain original errors. After required audit/outbox writes, a new current sponsor users FOR SHARE NOWAIT checks active super-admin or same-tenant admin authority and holds that row through Commit. Missing authority is forbidden; busy sponsor 55P03 is conflict with its cause. The pre-existing final company/domain NOWAIT fence and final elapsed-deadline check still follow. Any failure uses the original rollback for user, mailbox, profile, invitation, audit and outbox effects; no automatic activation retry is added.",
+      "evidence_level": "actual-batch-linked-relationship",
+      "historical_revision17_review": {
+        "lock_fk_wait_fence": "独立Begin→普通invitation定位tenant（不授信）→T UPDATE→hash+tenant绑定invitation UPDATE锁/原expires_at→锁后DB clock期限→当前sponsor/domain/profile资格→U/M/consumption→audit/outbox→原primary/zone/domain verified+mx SHARE NOWAIT→最终原expires DBclock→Commit；late无资格400/busy409均整体rollback，不新增T锁。",
+        "evidence": [
+          "internal/store/postgres/company_members.go:279-387 sha256=4adcbd4f8d20768e522f62aabd4df97ff751dab8ce7a7d2535dba8ad6b50f874",
+          "migration source definitions; no current runtime catalog claim",
+          "integration factual correction: company_members.go:283 ordinary locator SELECT; :290 tenant lock; :296 invitation FOR UPDATE. Production source unchanged.",
+          "Y final same-test baseline5 14 events 6pass8fail; candidate4-6 each14pass; see activation_relationship_evidence. Old13 results are historical, not reused."
+        ],
+        "unverified_risks": [
+          "Y最终同14事件基线6pass8fail/候选三轮14pass，busy409由正式UpdateZone+test-only advisory屏障实测，400/409均完整state rollback。其它sponsor/profile独立旧写caller、commit-unknown及整图运行未因本关系证明。"
+        ],
+        "file_family_context": "companyTxScope三种T模式：UPDATE/KEY SHARE/无T→actor SHARE→profile SHARE NOWAIT→callback→Commit；grant/移交先mailbox revision；Activate独立事务"
+      },
+      "source_review": {
+        "base_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+        "source_sha256": "b7ac7978144a2e720d5639934b4169e8dbb2b1dfa49ea109f8441b3d9d65097f",
+        "role": "invitation-activation-transaction-writer",
+        "trace": "The independent activation transaction retains tenant UPDATE, invitation UPDATE, deadline checks, early sponsor/domain reads, profile creation, user/mailbox inserts and invitation consumption. Each INSERT now classifies only its own address unique constraint and retains the original cause; unrelated failures and late audit errors remain original errors. After required audit/outbox writes, a new current sponsor users FOR SHARE NOWAIT checks active super-admin or same-tenant admin authority and holds that row through Commit. Missing authority is forbidden; busy sponsor 55P03 is conflict with its cause. The pre-existing final company/domain NOWAIT fence and final elapsed-deadline check still follow. Any failure uses the original rollback for user, mailbox, profile, invitation, audit and outbox effects; no automatic activation retry is added.",
+        "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md"
+      }
     },
     {
       "id": "internal/store/postgres/company_members.go:*PgStore:ConfigureCompany",
@@ -9482,112 +9792,112 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "ConvertSharedMailbox",
         "receiver": "*PgStore",
-        "line": 808,
-        "end": 842,
+        "line": 825,
+        "end": 859,
         "sha256": "53575e11a2ed0edb920f3db7eb7766e793c319e7536b0310af2c809dc813da33",
         "calls": [
           {
-            "line": 809,
+            "line": 826,
             "expr": "credentials.AuditReason",
             "name": "AuditReason"
           },
           {
-            "line": 811,
+            "line": 828,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 813,
+            "line": 830,
             "expr": "s.companyTx",
             "name": "companyTx"
           },
           {
-            "line": 817,
+            "line": 834,
             "expr": "tx.QueryRow(ctx, `SELECT mailbox_kind,owner_user_id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE`, a.TenantID, id).Scan",
             "name": "Scan"
           },
           {
-            "line": 817,
+            "line": 834,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT mailbox_kind,owner_user_id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE`"
           },
           {
-            "line": 818,
+            "line": 835,
             "expr": "app.NotFound",
             "name": "NotFound"
           },
           {
-            "line": 821,
+            "line": 838,
             "expr": "app.Conflict",
             "name": "Conflict"
           },
           {
-            "line": 825,
+            "line": 842,
             "expr": "claimMailboxRevision",
             "name": "claimMailboxRevision"
           },
           {
-            "line": 828,
+            "line": 845,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1`"
           },
           {
-            "line": 834,
+            "line": 851,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL`"
           },
           {
-            "line": 840,
+            "line": 857,
             "expr": "companyAudit",
             "name": "companyAudit"
           }
         ],
         "strings": [
           {
-            "line": 811,
+            "line": 828,
             "value": "reason must be 8-1000 bytes"
           },
           {
-            "line": 817,
+            "line": 834,
             "value": "SELECT mailbox_kind,owner_user_id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE"
           },
           {
-            "line": 818,
+            "line": 835,
             "value": "mailbox not found"
           },
           {
-            "line": 820,
+            "line": 837,
             "value": "legacy"
           },
           {
-            "line": 821,
+            "line": 838,
             "value": "only an unchanged ownerless legacy mailbox may be converted"
           },
           {
-            "line": 828,
+            "line": 845,
             "value": "UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1"
           },
           {
-            "line": 834,
+            "line": 851,
             "value": "WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL"
           },
           {
-            "line": 840,
+            "line": 857,
             "value": "mailbox.convert_shared"
           },
           {
-            "line": 840,
+            "line": 857,
             "value": "mailbox"
           },
           {
-            "line": 840,
+            "line": 857,
             "value": "reason"
           },
           {
-            "line": 840,
+            "line": 857,
             "value": "revision"
           }
         ],
@@ -9620,46 +9930,46 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 828,
+            "line": 845,
             "sql_fragment": "UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1"
           },
           {
-            "line": 834,
+            "line": 851,
             "sql_fragment": "WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL"
           }
         ],
         "direct_lock_fragments": [
           {
-            "line": 817,
+            "line": 834,
             "sql_fragment": "SELECT mailbox_kind,owner_user_id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE"
           },
           {
-            "line": 834,
+            "line": 851,
             "sql_fragment": "WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL"
           }
         ],
         "transaction_helper_calls": [
           {
-            "line": 813,
+            "line": 830,
             "expr": "s.companyTx",
             "name": "companyTx"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 817,
+            "line": 834,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT mailbox_kind,owner_user_id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE`"
           },
           {
-            "line": 828,
+            "line": 845,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1`"
           },
           {
-            "line": 834,
+            "line": 851,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL`"
@@ -9691,83 +10001,83 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "CreateWorkMailbox",
         "receiver": "*PgStore",
-        "line": 564,
-        "end": 601,
+        "line": 581,
+        "end": 618,
         "sha256": "0c676692f35bdb0c53a6437f3af2e1d432ae4d1db312379aad67887c88a43ab4",
         "calls": [
           {
-            "line": 565,
+            "line": 582,
             "expr": "strings.ToLower",
             "name": "ToLower"
           },
           {
-            "line": 565,
+            "line": 582,
             "expr": "strings.TrimSpace",
             "name": "TrimSpace"
           },
           {
-            "line": 566,
+            "line": 583,
             "expr": "company.ValidLocalPart",
             "name": "ValidLocalPart"
           },
           {
-            "line": 567,
+            "line": 584,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 570,
+            "line": 587,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 573,
+            "line": 590,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 576,
+            "line": 593,
             "expr": "s.companyTxScope",
             "name": "companyTxScope"
           },
           {
-            "line": 577,
+            "line": 594,
             "expr": "companyDomain",
             "name": "companyDomain"
           },
           {
-            "line": 582,
+            "line": 599,
             "expr": "activeCompanyUser",
             "name": "activeCompanyUser"
           },
           {
-            "line": 590,
+            "line": 607,
             "expr": "uuid.New",
             "name": "New"
           },
           {
-            "line": 591,
+            "line": 608,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`INSERT INTO mailboxes(id,tenant_id,zone_id,local_part,resolved_domain,full_address,access_mode,owner_user_id,mailbox_kind,retention_hours_override) VALUES($1,$2,$3,$4,$5,$6,'token',$7,$8,$9)`"
           },
           {
-            "line": 592,
+            "line": 609,
             "expr": "classifyWorkMailboxCreateError",
             "name": "classifyWorkMailboxCreateError"
           },
           {
-            "line": 594,
+            "line": 611,
             "expr": "companyAudit",
             "name": "companyAudit"
           },
           {
-            "line": 597,
+            "line": 614,
             "expr": "s.scanMailbox",
             "name": "scanMailbox"
           },
           {
-            "line": 597,
+            "line": 614,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "mailboxSelect + ` WHERE m.id=$1`"
@@ -9775,51 +10085,51 @@
         ],
         "strings": [
           {
-            "line": 566,
+            "line": 583,
             "value": "personal"
           },
           {
-            "line": 566,
+            "line": 583,
             "value": "shared"
           },
           {
-            "line": 567,
+            "line": 584,
             "value": "invalid mailbox kind, address or retention"
           },
           {
-            "line": 569,
+            "line": 586,
             "value": "personal"
           },
           {
-            "line": 570,
+            "line": 587,
             "value": "personal mailbox requires owner"
           },
           {
-            "line": 572,
+            "line": 589,
             "value": "shared"
           },
           {
-            "line": 573,
+            "line": 590,
             "value": "shared mailbox belongs to company; use grants"
           },
           {
-            "line": 591,
+            "line": 608,
             "value": "INSERT INTO mailboxes(id,tenant_id,zone_id,local_part,resolved_domain,full_address,access_mode,owner_user_id,mailbox_kind,retention_hours_override) VALUES($1,$2,$3,$4,$5,$6,'token',$7,$8,$9)"
           },
           {
-            "line": 591,
+            "line": 608,
             "value": "@"
           },
           {
-            "line": 594,
+            "line": 611,
             "value": "mailbox.provision"
           },
           {
-            "line": 594,
+            "line": 611,
             "value": "mailbox"
           },
           {
-            "line": 597,
+            "line": 614,
             "value": " WHERE m.id=$1"
           }
         ],
@@ -9860,27 +10170,27 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 591,
+            "line": 608,
             "sql_fragment": "INSERT INTO mailboxes(id,tenant_id,zone_id,local_part,resolved_domain,full_address,access_mode,owner_user_id,mailbox_kind,retention_hours_override) VALUES($1,$2,$3,$4,$5,$6,'token',$7,$8,$9)"
           }
         ],
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 576,
+            "line": 593,
             "expr": "s.companyTxScope",
             "name": "companyTxScope"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 591,
+            "line": 608,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`INSERT INTO mailboxes(id,tenant_id,zone_id,local_part,resolved_domain,full_address,access_mode,owner_user_id,mailbox_kind,retention_hours_override) VALUES($1,$2,$3,$4,$5,$6,'token',$7,$8,$9)`"
           },
           {
-            "line": 597,
+            "line": 614,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "mailboxSelect + ` WHERE m.id=$1`"
@@ -10057,29 +10367,29 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "GetWorkMailbox",
         "receiver": "*PgStore",
-        "line": 786,
-        "end": 803,
+        "line": 803,
+        "end": 820,
         "sha256": "c4867bf5ad153a8ab939b91c2dcbe911df986cb1c1a5bf347424fcf87e98d6a0",
         "calls": [
           {
-            "line": 788,
+            "line": 805,
             "expr": "s.companyReadTx",
             "name": "companyReadTx"
           },
           {
-            "line": 790,
+            "line": 807,
             "expr": "s.mailboxAccessTx",
             "name": "mailboxAccessTx"
           },
           {
-            "line": 798,
+            "line": 815,
             "expr": "app.NotFound",
             "name": "NotFound"
           }
         ],
         "strings": [
           {
-            "line": 798,
+            "line": 815,
             "value": "mailbox not found"
           }
         ],
@@ -10157,7 +10467,7 @@
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 788,
+            "line": 805,
             "expr": "s.companyReadTx",
             "name": "companyReadTx"
           }
@@ -10613,55 +10923,55 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "ListWorkGrants",
         "receiver": "*PgStore",
-        "line": 680,
-        "end": 703,
+        "line": 697,
+        "end": 720,
         "sha256": "de7425eb3fe18d00fd0f734600593be04f57b57cad78207d53633c29522e2392",
         "calls": [
           {
-            "line": 682,
+            "line": 699,
             "expr": "s.companyTx",
             "name": "companyTx"
           },
           {
-            "line": 683,
+            "line": 700,
             "expr": "s.mailboxAccessTx",
             "name": "mailboxAccessTx"
           },
           {
-            "line": 688,
+            "line": 705,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "`SELECT tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by,created_at,updated_at FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 ORDER BY user_id`"
           },
           {
-            "line": 692,
+            "line": 709,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 693,
+            "line": 710,
             "expr": "rows.Next",
             "name": "Next"
           },
           {
-            "line": 695,
+            "line": 712,
             "expr": "rows.Scan",
             "name": "Scan"
           },
           {
-            "line": 698,
+            "line": 715,
             "expr": "append",
             "name": "append"
           },
           {
-            "line": 700,
+            "line": 717,
             "expr": "rows.Err",
             "name": "Err"
           }
         ],
         "strings": [
           {
-            "line": 688,
+            "line": 705,
             "value": "SELECT tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by,created_at,updated_at FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 ORDER BY user_id"
           }
         ],
@@ -10713,14 +11023,14 @@
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 682,
+            "line": 699,
             "expr": "s.companyTx",
             "name": "companyTx"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 688,
+            "line": 705,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "`SELECT tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by,created_at,updated_at FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 ORDER BY user_id`"
@@ -10752,70 +11062,70 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "ListWorkMailboxes",
         "receiver": "*PgStore",
-        "line": 517,
-        "end": 553,
+        "line": 534,
+        "end": 570,
         "sha256": "8b0076ddd63dbafd75865621d604307ba1f0363c7b50034aaf9d3d62003adf27",
         "calls": [
           {
-            "line": 519,
+            "line": 536,
             "expr": "s.companyReadTx",
             "name": "companyReadTx"
           },
           {
-            "line": 523,
+            "line": 540,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "`SELECT id FROM mailboxes WHERE tenant_id=$1 AND ($2 OR owner_user_id=$3 OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.mailbox_id=mailboxes.id AND g.user_id=$3 AND (g.can_read OR g.can_send))) ORDER BY full_address LIMIT 500`"
           },
           {
-            "line": 523,
+            "line": 540,
             "expr": "a.IsTenantAdmin",
             "name": "IsTenantAdmin"
           },
           {
-            "line": 528,
+            "line": 545,
             "expr": "rows.Next",
             "name": "Next"
           },
           {
-            "line": 530,
+            "line": 547,
             "expr": "rows.Scan",
             "name": "Scan"
           },
           {
-            "line": 531,
+            "line": 548,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 534,
+            "line": 551,
             "expr": "append",
             "name": "append"
           },
           {
-            "line": 536,
+            "line": 553,
             "expr": "rows.Err",
             "name": "Err"
           },
           {
-            "line": 537,
+            "line": 554,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 541,
+            "line": 558,
             "expr": "s.mailboxAccessBatch",
             "name": "mailboxAccessBatch"
           },
           {
-            "line": 547,
+            "line": 564,
             "expr": "append",
             "name": "append"
           }
         ],
         "strings": [
           {
-            "line": 523,
+            "line": 540,
             "value": "SELECT id FROM mailboxes WHERE tenant_id=$1 AND ($2 OR owner_user_id=$3 OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.mailbox_id=mailboxes.id AND g.user_id=$3 AND (g.can_read OR g.can_send))) ORDER BY full_address LIMIT 500"
           }
         ],
@@ -10867,14 +11177,14 @@
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 519,
+            "line": 536,
             "expr": "s.companyReadTx",
             "name": "companyReadTx"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 523,
+            "line": 540,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "`SELECT id FROM mailboxes WHERE tenant_id=$1 AND ($2 OR owner_user_id=$3 OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.mailbox_id=mailboxes.id AND g.user_id=$3 AND (g.can_read OR g.can_send))) ORDER BY full_address LIMIT 500`"
@@ -10906,43 +11216,43 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "OffboardEmployee",
         "receiver": "*PgStore",
-        "line": 667,
-        "end": 678,
+        "line": 684,
+        "end": 695,
         "sha256": "8fd55857a93cbfcd01d02d6058d718bed506cebd50d0099000665ea122e6b5a9",
         "calls": [
           {
-            "line": 668,
+            "line": 685,
             "expr": "credentials.AuditReason",
             "name": "AuditReason"
           },
           {
-            "line": 670,
+            "line": 687,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 672,
+            "line": 689,
             "expr": "s.companyTx",
             "name": "companyTx"
           },
           {
-            "line": 673,
+            "line": 690,
             "expr": "s.offboardingTarget",
             "name": "offboardingTarget"
           },
           {
-            "line": 676,
+            "line": 693,
             "expr": "s.applyOffboarding",
             "name": "applyOffboarding"
           }
         ],
         "strings": [
           {
-            "line": 670,
+            "line": 687,
             "value": "documented handover reason required"
           },
           {
-            "line": 676,
+            "line": 693,
             "value": "seal"
           }
         ],
@@ -10967,7 +11277,7 @@
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 672,
+            "line": 689,
             "expr": "s.companyTx",
             "name": "companyTx"
           }
@@ -11122,134 +11432,134 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "SetWorkGrant",
         "receiver": "*PgStore",
-        "line": 704,
-        "end": 749,
+        "line": 721,
+        "end": 766,
         "sha256": "0d3a197e8dcb14aa5e25395031490e7bf8986d33aa865a45c15ae825dbd7f7db",
         "calls": [
           {
-            "line": 706,
+            "line": 723,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 709,
+            "line": 726,
             "expr": "s.companyTx",
             "name": "companyTx"
           },
           {
-            "line": 710,
+            "line": 727,
             "expr": "s.mailboxAccessTx",
             "name": "mailboxAccessTx"
           },
           {
-            "line": 715,
+            "line": 732,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 717,
+            "line": 734,
             "expr": "guardMailboxOwner",
             "name": "guardMailboxOwner"
           },
           {
-            "line": 721,
+            "line": 738,
             "expr": "activeCompanyUser",
             "name": "activeCompanyUser"
           },
           {
-            "line": 729,
+            "line": 746,
             "expr": "tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`, a.TenantID, g.UserID).Scan",
             "name": "Scan"
           },
           {
-            "line": 729,
+            "line": 746,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`"
           },
           {
-            "line": 733,
+            "line": 750,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 736,
+            "line": 753,
             "expr": "claimMailboxRevision",
             "name": "claimMailboxRevision"
           },
           {
-            "line": 740,
+            "line": 757,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`"
           },
           {
-            "line": 742,
+            "line": 759,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`INSERT INTO mailbox_grants(tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(mailbox_id,user_id) DO UPDATE SET can_read=EXCLUDED.can_read,can_organize=EXCLUDED.can_organize,can_send=EXCLUDED.can_send,template_only=EXCLUDED.template_only,granted_by=EXCLUDED.granted_by,updated_at=now()`"
           },
           {
-            "line": 747,
+            "line": 764,
             "expr": "companyAudit",
             "name": "companyAudit"
           }
         ],
         "strings": [
           {
-            "line": 706,
+            "line": 723,
             "value": "organize requires read; template-only requires send"
           },
           {
-            "line": 715,
+            "line": 732,
             "value": "owner rights are intrinsic; use handover"
           },
           {
-            "line": 729,
+            "line": 746,
             "value": "SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)"
           },
           {
-            "line": 733,
+            "line": 750,
             "value": "same-company employee required"
           },
           {
-            "line": 740,
+            "line": 757,
             "value": "DELETE FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3"
           },
           {
-            "line": 742,
+            "line": 759,
             "value": "INSERT INTO mailbox_grants(tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(mailbox_id,user_id) DO UPDATE SET can_read=EXCLUDED.can_read,can_organize=EXCLUDED.can_organize,can_send=EXCLUDED.can_send,template_only=EXCLUDED.template_only,granted_by=EXCLUDED.granted_by,updated_at=now()"
           },
           {
-            "line": 747,
+            "line": 764,
             "value": "mailbox.grant"
           },
           {
-            "line": 747,
+            "line": 764,
             "value": "mailbox"
           },
           {
-            "line": 747,
+            "line": 764,
             "value": "revision"
           },
           {
-            "line": 747,
+            "line": 764,
             "value": "user_id"
           },
           {
-            "line": 747,
+            "line": 764,
             "value": "read"
           },
           {
-            "line": 747,
+            "line": 764,
             "value": "organize"
           },
           {
-            "line": 747,
+            "line": 764,
             "value": "send"
           },
           {
-            "line": 747,
+            "line": 764,
             "value": "template_only"
           }
         ],
@@ -11320,37 +11630,37 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 740,
+            "line": 757,
             "sql_fragment": "DELETE FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3"
           },
           {
-            "line": 742,
+            "line": 759,
             "sql_fragment": "INSERT INTO mailbox_grants(tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(mailbox_id,user_id) DO UPDATE SET can_read=EXCLUDED.can_read,can_organize=EXCLUDED.can_organize,can_send=EXCLUDED.can_send,template_only=EXCLUDED.template_only,granted_by=EXCLUDED.granted_by,updated_at=now()"
           }
         ],
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 709,
+            "line": 726,
             "expr": "s.companyTx",
             "name": "companyTx"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 729,
+            "line": 746,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`"
           },
           {
-            "line": 740,
+            "line": 757,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`"
           },
           {
-            "line": 742,
+            "line": 759,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`INSERT INTO mailbox_grants(tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(mailbox_id,user_id) DO UPDATE SET can_read=EXCLUDED.can_read,can_organize=EXCLUDED.can_organize,can_send=EXCLUDED.can_send,template_only=EXCLUDED.template_only,granted_by=EXCLUDED.granted_by,updated_at=now()`"
@@ -11401,92 +11711,92 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "SetWorkMailboxSendPolicy",
         "receiver": "*PgStore",
-        "line": 760,
-        "end": 784,
+        "line": 777,
+        "end": 801,
         "sha256": "f6595ace54ed6ef6127bee7b6150a6b971cd3abbf8c8e610b9e50ee8fcaf0bca",
         "calls": [
           {
-            "line": 763,
+            "line": 780,
             "expr": "strings.TrimSpace",
             "name": "TrimSpace"
           },
           {
-            "line": 765,
+            "line": 782,
             "expr": "validSendPolicy",
             "name": "validSendPolicy"
           },
           {
-            "line": 766,
+            "line": 783,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 768,
+            "line": 785,
             "expr": "s.companyTx",
             "name": "companyTx"
           },
           {
-            "line": 769,
+            "line": 786,
             "expr": "s.mailboxAccessTx",
             "name": "mailboxAccessTx"
           },
           {
-            "line": 773,
+            "line": 790,
             "expr": "guardMailboxOwner",
             "name": "guardMailboxOwner"
           },
           {
-            "line": 776,
+            "line": 793,
             "expr": "claimMailboxRevision",
             "name": "claimMailboxRevision"
           },
           {
-            "line": 779,
+            "line": 796,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE mailboxes SET send_policy=NULLIF($2,'') WHERE id=$1 AND tenant_id=$3`"
           },
           {
-            "line": 782,
+            "line": 799,
             "expr": "companyAudit",
             "name": "companyAudit"
           }
         ],
         "strings": [
           {
-            "line": 761,
+            "line": 778,
             "value": ""
           },
           {
-            "line": 765,
+            "line": 782,
             "value": ""
           },
           {
-            "line": 766,
+            "line": 783,
             "value": "send_policy must be one of "
           },
           {
-            "line": 766,
+            "line": 783,
             "value": "; null inherits the company default"
           },
           {
-            "line": 779,
+            "line": 796,
             "value": "UPDATE mailboxes SET send_policy=NULLIF($2,'') WHERE id=$1 AND tenant_id=$3"
           },
           {
-            "line": 782,
+            "line": 799,
             "value": "mailbox.send_policy"
           },
           {
-            "line": 782,
+            "line": 799,
             "value": "mailbox"
           },
           {
-            "line": 782,
+            "line": 799,
             "value": "send_policy"
           },
           {
-            "line": 782,
+            "line": 799,
             "value": "revision"
           }
         ],
@@ -11518,21 +11828,21 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 779,
+            "line": 796,
             "sql_fragment": "UPDATE mailboxes SET send_policy=NULLIF($2,'') WHERE id=$1 AND tenant_id=$3"
           }
         ],
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 768,
+            "line": 785,
             "expr": "s.companyTx",
             "name": "companyTx"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 779,
+            "line": 796,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE mailboxes SET send_policy=NULLIF($2,'') WHERE id=$1 AND tenant_id=$3`"
@@ -11564,131 +11874,131 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "TransferWorkMailbox",
         "receiver": "*PgStore",
-        "line": 621,
-        "end": 662,
+        "line": 638,
+        "end": 679,
         "sha256": "80be45a5ac861bbc473fe508013a29f461e846a31017b3f2662b079dbabdfddb",
         "calls": [
           {
-            "line": 622,
+            "line": 639,
             "expr": "credentials.AuditReason",
             "name": "AuditReason"
           },
           {
-            "line": 624,
+            "line": 641,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 626,
+            "line": 643,
             "expr": "s.companyTx",
             "name": "companyTx"
           },
           {
-            "line": 627,
+            "line": 644,
             "expr": "activeCompanyUser",
             "name": "activeCompanyUser"
           },
           {
-            "line": 633,
+            "line": 650,
             "expr": "tx.QueryRow(ctx, `SELECT owner_user_id,mailbox_kind,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE`, a.TenantID, id).Scan",
             "name": "Scan"
           },
           {
-            "line": 633,
+            "line": 650,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT owner_user_id,mailbox_kind,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE`"
           },
           {
-            "line": 634,
+            "line": 651,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 635,
+            "line": 652,
             "expr": "app.NotFound",
             "name": "NotFound"
           },
           {
-            "line": 641,
+            "line": 658,
             "expr": "app.Conflict",
             "name": "Conflict"
           },
           {
-            "line": 643,
+            "line": 660,
             "expr": "guardMailboxOwner",
             "name": "guardMailboxOwner"
           },
           {
-            "line": 649,
+            "line": 666,
             "expr": "claimMailboxRevision",
             "name": "claimMailboxRevision"
           },
           {
-            "line": 652,
+            "line": 669,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE mailboxes SET owner_user_id=$3 WHERE tenant_id=$1 AND id=$2`"
           },
           {
-            "line": 656,
+            "line": 673,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM mailbox_grants WHERE mailbox_id=$1 AND user_id=$2`"
           },
           {
-            "line": 660,
+            "line": 677,
             "expr": "companyAudit",
             "name": "companyAudit"
           }
         ],
         "strings": [
           {
-            "line": 624,
+            "line": 641,
             "value": "handover reason must be 8-1000 bytes"
           },
           {
-            "line": 633,
+            "line": 650,
             "value": "SELECT owner_user_id,mailbox_kind,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE"
           },
           {
-            "line": 635,
+            "line": 652,
             "value": "mailbox not found"
           },
           {
-            "line": 640,
+            "line": 657,
             "value": "personal"
           },
           {
-            "line": 641,
+            "line": 658,
             "value": "only unchanged personal mailboxes can be handed over"
           },
           {
-            "line": 652,
+            "line": 669,
             "value": "UPDATE mailboxes SET owner_user_id=$3 WHERE tenant_id=$1 AND id=$2"
           },
           {
-            "line": 656,
+            "line": 673,
             "value": "DELETE FROM mailbox_grants WHERE mailbox_id=$1 AND user_id=$2"
           },
           {
-            "line": 660,
+            "line": 677,
             "value": "mailbox.handover"
           },
           {
-            "line": 660,
+            "line": 677,
             "value": "mailbox"
           },
           {
-            "line": 660,
+            "line": 677,
             "value": "old_owner"
           },
           {
-            "line": 660,
+            "line": 677,
             "value": "new_owner"
           },
           {
-            "line": 660,
+            "line": 677,
             "value": "reason"
           }
         ],
@@ -11720,42 +12030,42 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 652,
+            "line": 669,
             "sql_fragment": "UPDATE mailboxes SET owner_user_id=$3 WHERE tenant_id=$1 AND id=$2"
           },
           {
-            "line": 656,
+            "line": 673,
             "sql_fragment": "DELETE FROM mailbox_grants WHERE mailbox_id=$1 AND user_id=$2"
           }
         ],
         "direct_lock_fragments": [
           {
-            "line": 633,
+            "line": 650,
             "sql_fragment": "SELECT owner_user_id,mailbox_kind,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE"
           }
         ],
         "transaction_helper_calls": [
           {
-            "line": 626,
+            "line": 643,
             "expr": "s.companyTx",
             "name": "companyTx"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 633,
+            "line": 650,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT owner_user_id,mailbox_kind,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE`"
           },
           {
-            "line": 652,
+            "line": 669,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE mailboxes SET owner_user_id=$3 WHERE tenant_id=$1 AND id=$2`"
           },
           {
-            "line": 656,
+            "line": 673,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM mailbox_grants WHERE mailbox_id=$1 AND user_id=$2`"
@@ -11893,7 +12203,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:GetWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "GetWorkMailbox",
-          "line": 788,
+          "line": 805,
           "expression": "s.companyReadTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -11909,7 +12219,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ListWorkMailboxes",
           "file": "internal/store/postgres/company_members.go",
           "function": "ListWorkMailboxes",
-          "line": 519,
+          "line": 536,
           "expression": "s.companyReadTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12343,7 +12653,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ConvertSharedMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "ConvertSharedMailbox",
-          "line": 813,
+          "line": 830,
           "expression": "s.companyTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12359,7 +12669,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ListWorkGrants",
           "file": "internal/store/postgres/company_members.go",
           "function": "ListWorkGrants",
-          "line": 682,
+          "line": 699,
           "expression": "s.companyTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12367,7 +12677,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:OffboardEmployee",
           "file": "internal/store/postgres/company_members.go",
           "function": "OffboardEmployee",
-          "line": 672,
+          "line": 689,
           "expression": "s.companyTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12383,7 +12693,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkGrant",
-          "line": 709,
+          "line": 726,
           "expression": "s.companyTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12391,7 +12701,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkMailboxSendPolicy",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkMailboxSendPolicy",
-          "line": 768,
+          "line": 785,
           "expression": "s.companyTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12399,7 +12709,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:TransferWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "TransferWorkMailbox",
-          "line": 626,
+          "line": 643,
           "expression": "s.companyTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12721,7 +13031,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:CreateWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "CreateWorkMailbox",
-          "line": 576,
+          "line": 593,
           "expression": "s.companyTxScope",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12832,155 +13142,155 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "mailboxAccessBatch",
         "receiver": "*PgStore",
-        "line": 445,
-        "end": 516,
+        "line": 462,
+        "end": 533,
         "sha256": "07bc413ebf8876c787fafd6bfedfc6dee3832fbd589bbb50511711a29ce7c320",
         "calls": [
           {
-            "line": 446,
+            "line": 463,
             "expr": "make",
             "name": "make"
           },
           {
-            "line": 446,
+            "line": 463,
             "expr": "len",
             "name": "len"
           },
           {
-            "line": 447,
+            "line": 464,
             "expr": "len",
             "name": "len"
           },
           {
-            "line": 451,
+            "line": 468,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "mailboxSelect + ` WHERE m.tenant_id=$1 AND m.id=ANY($2::uuid[])`"
           },
           {
-            "line": 455,
+            "line": 472,
             "expr": "rows.Next",
             "name": "Next"
           },
           {
-            "line": 456,
+            "line": 473,
             "expr": "s.scanMailbox",
             "name": "scanMailbox"
           },
           {
-            "line": 458,
+            "line": 475,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 463,
+            "line": 480,
             "expr": "rows.Err",
             "name": "Err"
           },
           {
-            "line": 464,
+            "line": 481,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 467,
-            "expr": "rows.Close",
-            "name": "Close"
-          },
-          {
-            "line": 469,
-            "expr": "tx.Query",
-            "name": "Query",
-            "sql_expr": "`SELECT id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=ANY($2::uuid[])`"
-          },
-          {
-            "line": 473,
-            "expr": "rows.Next",
-            "name": "Next"
-          },
-          {
-            "line": 476,
-            "expr": "rows.Scan",
-            "name": "Scan"
-          },
-          {
-            "line": 477,
-            "expr": "rows.Close",
-            "name": "Close"
-          },
-          {
-            "line": 482,
-            "expr": "rows.Err",
-            "name": "Err"
-          },
-          {
-            "line": 483,
+            "line": 484,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
             "line": 486,
-            "expr": "rows.Close",
-            "name": "Close"
-          },
-          {
-            "line": 488,
             "expr": "tx.Query",
             "name": "Query",
-            "sql_expr": "`SELECT mailbox_id,tenant_id,user_id,can_read,can_organize,can_send,template_only FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2 AND mailbox_id=ANY($3::uuid[])`"
+            "sql_expr": "`SELECT id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=ANY($2::uuid[])`"
           },
           {
-            "line": 492,
+            "line": 490,
             "expr": "rows.Next",
             "name": "Next"
           },
           {
-            "line": 494,
+            "line": 493,
             "expr": "rows.Scan",
             "name": "Scan"
           },
           {
-            "line": 495,
+            "line": 494,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 500,
+            "line": 499,
             "expr": "rows.Err",
             "name": "Err"
           },
           {
-            "line": 501,
+            "line": 500,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 504,
+            "line": 503,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
             "line": 505,
+            "expr": "tx.Query",
+            "name": "Query",
+            "sql_expr": "`SELECT mailbox_id,tenant_id,user_id,can_read,can_organize,can_send,template_only FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2 AND mailbox_id=ANY($3::uuid[])`"
+          },
+          {
+            "line": 509,
+            "expr": "rows.Next",
+            "name": "Next"
+          },
+          {
+            "line": 511,
+            "expr": "rows.Scan",
+            "name": "Scan"
+          },
+          {
+            "line": 512,
+            "expr": "rows.Close",
+            "name": "Close"
+          },
+          {
+            "line": 517,
+            "expr": "rows.Err",
+            "name": "Err"
+          },
+          {
+            "line": 518,
+            "expr": "rows.Close",
+            "name": "Close"
+          },
+          {
+            "line": 521,
+            "expr": "rows.Close",
+            "name": "Close"
+          },
+          {
+            "line": 522,
             "expr": "a.EffectiveUserID",
             "name": "EffectiveUserID"
           },
           {
-            "line": 512,
+            "line": 529,
             "expr": "authz.EvaluateMailboxAccess",
             "name": "EvaluateMailboxAccess"
           }
         ],
         "strings": [
           {
-            "line": 451,
+            "line": 468,
             "value": " WHERE m.tenant_id=$1 AND m.id=ANY($2::uuid[])"
           },
           {
-            "line": 469,
+            "line": 486,
             "value": "SELECT id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=ANY($2::uuid[])"
           },
           {
-            "line": 488,
+            "line": 505,
             "value": "SELECT mailbox_id,tenant_id,user_id,can_read,can_organize,can_send,template_only FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2 AND mailbox_id=ANY($3::uuid[])"
           }
         ],
@@ -12991,7 +13301,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ListWorkMailboxes",
           "file": "internal/store/postgres/company_members.go",
           "function": "ListWorkMailboxes",
-          "line": 541,
+          "line": 558,
           "expression": "s.mailboxAccessBatch",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13047,19 +13357,19 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 451,
+            "line": 468,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "mailboxSelect + ` WHERE m.tenant_id=$1 AND m.id=ANY($2::uuid[])`"
           },
           {
-            "line": 469,
+            "line": 486,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "`SELECT id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=ANY($2::uuid[])`"
           },
           {
-            "line": 488,
+            "line": 505,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "`SELECT mailbox_id,tenant_id,user_id,can_read,can_organize,can_send,template_only FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2 AND mailbox_id=ANY($3::uuid[])`"
@@ -13091,12 +13401,12 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "mailboxAccessTx",
         "receiver": "*PgStore",
-        "line": 396,
-        "end": 399,
+        "line": 413,
+        "end": 416,
         "sha256": "101017e0e85cf440745c992b79d1000f9908259ca99c6c988dac8665e2115358",
         "calls": [
           {
-            "line": 397,
+            "line": 414,
             "expr": "s.mailboxAccessWithSourceTx",
             "name": "mailboxAccessWithSourceTx"
           }
@@ -13157,7 +13467,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:GetWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "GetWorkMailbox",
-          "line": 790,
+          "line": 807,
           "expression": "s.mailboxAccessTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13165,7 +13475,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ListWorkGrants",
           "file": "internal/store/postgres/company_members.go",
           "function": "ListWorkGrants",
-          "line": 683,
+          "line": 700,
           "expression": "s.mailboxAccessTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13173,7 +13483,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkGrant",
-          "line": 710,
+          "line": 727,
           "expression": "s.mailboxAccessTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13181,7 +13491,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkMailboxSendPolicy",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkMailboxSendPolicy",
-          "line": 769,
+          "line": 786,
           "expression": "s.mailboxAccessTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13283,107 +13593,107 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "mailboxAccessWithSourceTx",
         "receiver": "*PgStore",
-        "line": 404,
-        "end": 437,
+        "line": 421,
+        "end": 454,
         "sha256": "6eb6e4fcd94fb9fa72070d9cefc89b9492eebbec518bae35150dee97e63fc845",
         "calls": [
           {
-            "line": 405,
+            "line": 422,
             "expr": "s.scanMailbox",
             "name": "scanMailbox"
           },
           {
-            "line": 405,
+            "line": 422,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "mailboxSelect + ` WHERE m.tenant_id=$1 AND m.id=$2`"
           },
           {
-            "line": 410,
+            "line": 427,
             "expr": "app.NotFound",
             "name": "NotFound"
           },
           {
-            "line": 413,
+            "line": 430,
             "expr": "tx.QueryRow(ctx, `SELECT lifecycle_revision FROM mailboxes WHERE id=$1`, id).Scan",
             "name": "Scan"
           },
           {
-            "line": 413,
+            "line": 430,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT lifecycle_revision FROM mailboxes WHERE id=$1`"
           },
           {
-            "line": 416,
+            "line": 433,
             "expr": "a.EffectiveUserID",
             "name": "EffectiveUserID"
           },
           {
-            "line": 424,
+            "line": 441,
             "expr": "tx.QueryRow(ctx, `SELECT tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`, a.TenantID, id, a.ID).Scan",
             "name": "Scan"
           },
           {
-            "line": 424,
+            "line": 441,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`"
           },
           {
-            "line": 425,
+            "line": 442,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 434,
+            "line": 451,
             "expr": "authz.EvaluateMailboxAccess",
             "name": "EvaluateMailboxAccess"
           }
         ],
         "strings": [
           {
-            "line": 405,
+            "line": 422,
             "value": " WHERE m.tenant_id=$1 AND m.id=$2"
           },
           {
-            "line": 407,
+            "line": 424,
             "value": ""
           },
           {
-            "line": 410,
+            "line": 427,
             "value": ""
           },
           {
-            "line": 410,
+            "line": 427,
             "value": "mailbox not found"
           },
           {
-            "line": 413,
+            "line": 430,
             "value": "SELECT lifecycle_revision FROM mailboxes WHERE id=$1"
           },
           {
-            "line": 414,
+            "line": 431,
             "value": ""
           },
           {
-            "line": 418,
+            "line": 435,
             "value": "none"
           },
           {
-            "line": 421,
+            "line": 438,
             "value": "owner"
           },
           {
-            "line": 424,
+            "line": 441,
             "value": "SELECT tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3"
           },
           {
-            "line": 428,
+            "line": 445,
             "value": ""
           },
           {
-            "line": 431,
+            "line": 448,
             "value": "grant"
           }
         ],
@@ -13402,7 +13712,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessTx",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessTx",
-          "line": 397,
+          "line": 414,
           "expression": "s.mailboxAccessWithSourceTx",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -13450,19 +13760,19 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 405,
+            "line": 422,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "mailboxSelect + ` WHERE m.tenant_id=$1 AND m.id=$2`"
           },
           {
-            "line": 413,
+            "line": 430,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT lifecycle_revision FROM mailboxes WHERE id=$1`"
           },
           {
-            "line": 424,
+            "line": 441,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`"
@@ -13494,34 +13804,34 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "activeCompanyUser",
         "receiver": "",
-        "line": 554,
-        "end": 563,
+        "line": 571,
+        "end": 580,
         "sha256": "c93b4fc1fc8a49b744a421c485b1ad6dfd98b3bad8ba01d1c42de633e2b27887",
         "calls": [
           {
-            "line": 556,
+            "line": 573,
             "expr": "tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2 AND is_active)`, tenant, id).Scan",
             "name": "Scan"
           },
           {
-            "line": 556,
+            "line": 573,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2 AND is_active)`"
           },
           {
-            "line": 560,
+            "line": 577,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           }
         ],
         "strings": [
           {
-            "line": 556,
+            "line": 573,
             "value": "SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2 AND is_active)"
           },
           {
-            "line": 560,
+            "line": 577,
             "value": "active same-company employee required"
           }
         ],
@@ -13532,7 +13842,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:CreateWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "CreateWorkMailbox",
-          "line": 582,
+          "line": 599,
           "expression": "activeCompanyUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13540,7 +13850,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkGrant",
-          "line": 721,
+          "line": 738,
           "expression": "activeCompanyUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13548,7 +13858,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:TransferWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "TransferWorkMailbox",
-          "line": 627,
+          "line": 644,
           "expression": "activeCompanyUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13592,7 +13902,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 556,
+            "line": 573,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2 AND is_active)`"
@@ -13738,7 +14048,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ConvertSharedMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "ConvertSharedMailbox",
-          "line": 840,
+          "line": 857,
           "expression": "companyAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13746,7 +14056,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:CreateWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "CreateWorkMailbox",
-          "line": 594,
+          "line": 611,
           "expression": "companyAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13770,7 +14080,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkGrant",
-          "line": 747,
+          "line": 764,
           "expression": "companyAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13778,7 +14088,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkMailboxSendPolicy",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkMailboxSendPolicy",
-          "line": 782,
+          "line": 799,
           "expression": "companyAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13786,7 +14096,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:TransferWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "TransferWorkMailbox",
-          "line": 660,
+          "line": 677,
           "expression": "companyAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -14062,7 +14372,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:CreateWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "CreateWorkMailbox",
-          "line": 577,
+          "line": 594,
           "expression": "companyDomain",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -14138,39 +14448,39 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "guardMailboxOwner",
         "receiver": "",
-        "line": 607,
-        "end": 619,
+        "line": 624,
+        "end": 636,
         "sha256": "bfa28af718bdd45b6f893b7683dd9f25a59258989581d6b714582629af2c47a0",
         "calls": [
           {
-            "line": 612,
+            "line": 629,
             "expr": "tx.QueryRow(ctx, `SELECT role FROM users WHERE id=$1 AND tenant_id=$2`, *owner, a.TenantID).Scan",
             "name": "Scan"
           },
           {
-            "line": 612,
+            "line": 629,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT role FROM users WHERE id=$1 AND tenant_id=$2`"
           },
           {
-            "line": 615,
+            "line": 632,
             "expr": "authz.CanManageTenantMember",
             "name": "CanManageTenantMember"
           },
           {
-            "line": 616,
+            "line": 633,
             "expr": "app.Forbidden",
             "name": "Forbidden"
           }
         ],
         "strings": [
           {
-            "line": 612,
+            "line": 629,
             "value": "SELECT role FROM users WHERE id=$1 AND tenant_id=$2"
           },
           {
-            "line": 616,
+            "line": 633,
             "value": "mailbox owner is outside your management scope"
           }
         ],
@@ -14181,7 +14491,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkGrant",
-          "line": 717,
+          "line": 734,
           "expression": "guardMailboxOwner",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -14189,7 +14499,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkMailboxSendPolicy",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkMailboxSendPolicy",
-          "line": 773,
+          "line": 790,
           "expression": "guardMailboxOwner",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -14197,7 +14507,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:TransferWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "TransferWorkMailbox",
-          "line": 643,
+          "line": 660,
           "expression": "guardMailboxOwner",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -14233,7 +14543,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 612,
+            "line": 629,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT role FROM users WHERE id=$1 AND tenant_id=$2`"
@@ -14363,7 +14673,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkMailboxSendPolicy",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkMailboxSendPolicy",
-          "line": 765,
+          "line": 782,
           "expression": "validSendPolicy",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -21558,7 +21868,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:OffboardEmployee",
           "file": "internal/store/postgres/company_members.go",
           "function": "OffboardEmployee",
-          "line": 676,
+          "line": 693,
           "expression": "s.applyOffboarding",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -21965,7 +22275,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:OffboardEmployee",
           "file": "internal/store/postgres/company_members.go",
           "function": "OffboardEmployee",
-          "line": 673,
+          "line": 690,
           "expression": "s.offboardingTarget",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -26297,7 +26607,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:CreateWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "CreateWorkMailbox",
-          "line": 592,
+          "line": 609,
           "expression": "classifyWorkMailboxCreateError",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -26741,7 +27051,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ConvertSharedMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "ConvertSharedMailbox",
-          "line": 825,
+          "line": 842,
           "expression": "claimMailboxRevision",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -26749,7 +27059,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkGrant",
-          "line": 736,
+          "line": 753,
           "expression": "claimMailboxRevision",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -26757,7 +27067,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkMailboxSendPolicy",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkMailboxSendPolicy",
-          "line": 776,
+          "line": 793,
           "expression": "claimMailboxRevision",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -26765,7 +27075,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:TransferWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "TransferWorkMailbox",
-          "line": 649,
+          "line": 666,
           "expression": "claimMailboxRevision",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -28604,7 +28914,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:CreateWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "CreateWorkMailbox",
-          "line": 597,
+          "line": 614,
           "expression": "s.scanMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -28612,7 +28922,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessBatch",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessBatch",
-          "line": 456,
+          "line": 473,
           "expression": "s.scanMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -28620,7 +28930,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessWithSourceTx",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessWithSourceTx",
-          "line": 405,
+          "line": 422,
           "expression": "s.scanMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -30930,7 +31240,7 @@
           "caller_id": "internal/ingest/service.go:*Service:reserveTenantDaily",
           "file": "internal/ingest/service.go",
           "function": "reserveTenantDaily",
-          "line": 536,
+          "line": 541,
           "expression": "s.store.CountTenantMessagesSince",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -31638,7 +31948,7 @@
           "caller_id": "internal/ingest/service.go:*Service:deleteRawObjectIfOrphaned",
           "file": "internal/ingest/service.go",
           "function": "deleteRawObjectIfOrphaned",
-          "line": 516,
+          "line": 521,
           "expression": "s.store.EnqueueOrphanRetry",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -35157,7 +35467,7 @@
           "caller_id": "internal/outbound/service.go:*Service:processOne",
           "file": "internal/outbound/service.go",
           "function": "processOne",
-          "line": 396,
+          "line": 401,
           "expression": "s.store.MarkOutboundJobFailed",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39284,7 +39594,7 @@
           "caller_id": "internal/store/postgres/company_console.go:*PgStore:ListCompanyAudit",
           "file": "internal/store/postgres/company_console.go",
           "function": "ListCompanyAudit",
-          "line": 30,
+          "line": 33,
           "expression": "tx.QueryRow(ctx, `SELECT count(*) FROM audit_log WHERE `+filter, a.TenantID).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39292,7 +39602,7 @@
           "caller_id": "internal/store/postgres/company_console.go:*PgStore:ListCompanyAudit",
           "file": "internal/store/postgres/company_console.go",
           "function": "ListCompanyAudit",
-          "line": 40,
+          "line": 43,
           "expression": "rows.Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39516,7 +39826,15 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ActivateEmployee",
           "file": "internal/store/postgres/company_members.go",
           "function": "ActivateEmployee",
-          "line": 375,
+          "line": 376,
+          "expression": "tx.QueryRow(ctx, `SELECT id FROM users WHERE id=$1 AND is_active AND (role='super_admin' OR (tenant_id=$2 AND role='admin')) FOR SHARE NOWAIT`, inviter, tenant).Scan",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/store/postgres/company_members.go:*PgStore:ActivateEmployee",
+          "file": "internal/store/postgres/company_members.go",
+          "function": "ActivateEmployee",
+          "line": 392,
           "expression": "tx.QueryRow(ctx, `SELECT z.id FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id AND z.tenant_id=c.tenant_id WHERE c.tenant_id=$1 AND z.id=$2 AND z.domain=$3 AND z.is_verified AND z.mx_verified FOR SHARE OF c,z NOWAIT`, tenant, zone, domain).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39548,7 +39866,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ConvertSharedMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "ConvertSharedMailbox",
-          "line": 817,
+          "line": 834,
           "expression": "tx.QueryRow(ctx, `SELECT mailbox_kind,owner_user_id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE`, a.TenantID, id).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39588,7 +39906,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ListWorkGrants",
           "file": "internal/store/postgres/company_members.go",
           "function": "ListWorkGrants",
-          "line": 695,
+          "line": 712,
           "expression": "rows.Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39596,7 +39914,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ListWorkMailboxes",
           "file": "internal/store/postgres/company_members.go",
           "function": "ListWorkMailboxes",
-          "line": 530,
+          "line": 547,
           "expression": "rows.Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39604,7 +39922,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkGrant",
-          "line": 729,
+          "line": 746,
           "expression": "tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`, a.TenantID, g.UserID).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39612,7 +39930,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:TransferWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "TransferWorkMailbox",
-          "line": 633,
+          "line": 650,
           "expression": "tx.QueryRow(ctx, `SELECT owner_user_id,mailbox_kind,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE`, a.TenantID, id).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39628,7 +39946,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessBatch",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessBatch",
-          "line": 476,
+          "line": 493,
           "expression": "rows.Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39636,7 +39954,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessBatch",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessBatch",
-          "line": 494,
+          "line": 511,
           "expression": "rows.Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39644,7 +39962,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessWithSourceTx",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessWithSourceTx",
-          "line": 413,
+          "line": 430,
           "expression": "tx.QueryRow(ctx, `SELECT lifecycle_revision FROM mailboxes WHERE id=$1`, id).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39652,7 +39970,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessWithSourceTx",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessWithSourceTx",
-          "line": 424,
+          "line": 441,
           "expression": "tx.QueryRow(ctx, `SELECT tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`, a.TenantID, id, a.ID).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39660,7 +39978,7 @@
           "caller_id": "internal/store/postgres/company_members.go::activeCompanyUser",
           "file": "internal/store/postgres/company_members.go",
           "function": "activeCompanyUser",
-          "line": 556,
+          "line": 573,
           "expression": "tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2 AND is_active)`, tenant, id).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39676,7 +39994,7 @@
           "caller_id": "internal/store/postgres/company_members.go::guardMailboxOwner",
           "file": "internal/store/postgres/company_members.go",
           "function": "guardMailboxOwner",
-          "line": 612,
+          "line": 629,
           "expression": "tx.QueryRow(ctx, `SELECT role FROM users WHERE id=$1 AND tenant_id=$2`, *owner, a.TenantID).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -40980,15 +41298,7 @@
           "caller_id": "internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken",
           "file": "internal/store/postgres/refresh_rotation.go",
           "function": "RotateRefreshToken",
-          "line": 49,
-          "expression": "tx.QueryRow(ctx, `SELECT u.id,u.is_active FROM users u JOIN refresh_tokens r ON r.user_id=u.id WHERE r.token_hash=$1 FOR SHARE OF u`, oldHash).Scan",
-          "status": "name-match-candidate-not-dispatch-proof"
-        },
-        {
-          "caller_id": "internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken",
-          "file": "internal/store/postgres/refresh_rotation.go",
-          "function": "RotateRefreshToken",
-          "line": 59,
+          "line": 58,
           "expression": "tx.QueryRow(ctx, `SELECT id,revoked_at,expires_at<=clock_timestamp() FROM refresh_tokens WHERE token_hash=$1 AND family_id=$2 FOR UPDATE`, oldHash, family).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -42882,7 +43192,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 497,
+          "line": 503,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -42890,7 +43200,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 384,
+          "line": 390,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -43189,7 +43499,7 @@
           "caller_id": "internal/outbound/service.go:*Service:processOne",
           "file": "internal/outbound/service.go",
           "function": "processOne",
-          "line": 407,
+          "line": 412,
           "expression": "s.store.GetZone",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -51141,7 +51451,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverDirectMXTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverDirectMXTLS",
-          "line": 198,
+          "line": 200,
           "expression": "client.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51149,7 +51459,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverDirectMXTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverDirectMXTLS",
-          "line": 209,
+          "line": 211,
           "expression": "client.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51157,7 +51467,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverRelayTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverRelayTLS",
-          "line": 47,
+          "line": 49,
           "expression": "conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51165,7 +51475,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverRelayTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverRelayTLS",
-          "line": 50,
+          "line": 52,
           "expression": "client.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51173,7 +51483,7 @@
           "caller_id": "internal/outbound/delivery.go::sendSMTP",
           "file": "internal/outbound/delivery.go",
           "function": "sendSMTP",
-          "line": 266,
+          "line": 268,
           "expression": "w.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51421,7 +51731,7 @@
           "caller_id": "internal/store/postgres/company_console.go:*PgStore:ListCompanyAudit",
           "file": "internal/store/postgres/company_console.go",
           "function": "ListCompanyAudit",
-          "line": 37,
+          "line": 40,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51461,7 +51771,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ListWorkGrants",
           "file": "internal/store/postgres/company_members.go",
           "function": "ListWorkGrants",
-          "line": 692,
+          "line": 709,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51469,7 +51779,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ListWorkMailboxes",
           "file": "internal/store/postgres/company_members.go",
           "function": "ListWorkMailboxes",
-          "line": 531,
+          "line": 548,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51477,7 +51787,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ListWorkMailboxes",
           "file": "internal/store/postgres/company_members.go",
           "function": "ListWorkMailboxes",
-          "line": 537,
+          "line": 554,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51485,7 +51795,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessBatch",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessBatch",
-          "line": 458,
+          "line": 475,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51493,7 +51803,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessBatch",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessBatch",
-          "line": 464,
+          "line": 481,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51501,7 +51811,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessBatch",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessBatch",
-          "line": 467,
+          "line": 484,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51509,7 +51819,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessBatch",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessBatch",
-          "line": 477,
+          "line": 494,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51517,7 +51827,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessBatch",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessBatch",
-          "line": 483,
+          "line": 500,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51525,7 +51835,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessBatch",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessBatch",
-          "line": 486,
+          "line": 503,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51533,7 +51843,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessBatch",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessBatch",
-          "line": 495,
+          "line": 512,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51541,7 +51851,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessBatch",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessBatch",
-          "line": 501,
+          "line": 518,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51549,7 +51859,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:mailboxAccessBatch",
           "file": "internal/store/postgres/company_members.go",
           "function": "mailboxAccessBatch",
-          "line": 504,
+          "line": 521,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52784,7 +53094,7 @@
           "caller_id": "internal/outbound/delivery.go::sendSMTP",
           "file": "internal/outbound/delivery.go",
           "function": "sendSMTP",
-          "line": 247,
+          "line": 249,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -53000,7 +53310,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:CreateWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "CreateWorkMailbox",
-          "line": 590,
+          "line": 607,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -53208,7 +53518,7 @@
           "caller_id": "internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken",
           "file": "internal/store/postgres/refresh_rotation.go",
           "function": "RotateRefreshToken",
-          "line": 86,
+          "line": 85,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -57615,45 +57925,45 @@
         "file": "internal/store/postgres/refresh_rotation.go",
         "name": "RevokeRefreshTokenByHash",
         "receiver": "*PgStore",
-        "line": 108,
-        "end": 125,
+        "line": 111,
+        "end": 128,
         "sha256": "12d3bf5c5d867f306157345dd349dbc6ad07212875caa812ec7f792130f21a75",
         "calls": [
           {
-            "line": 109,
+            "line": 112,
             "expr": "s.pool.Begin",
             "name": "Begin"
           },
           {
-            "line": 113,
+            "line": 116,
             "expr": "tx.Rollback",
             "name": "Rollback"
           },
           {
-            "line": 114,
+            "line": 117,
             "expr": "lockRefreshFamily",
             "name": "lockRefreshFamily"
           },
           {
-            "line": 115,
+            "line": 118,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 121,
+            "line": 124,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE family_id=$1 AND revoked_at IS NULL`"
           },
           {
-            "line": 124,
+            "line": 127,
             "expr": "tx.Commit",
             "name": "Commit"
           }
         ],
         "strings": [
           {
-            "line": 121,
+            "line": 124,
             "value": "UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE family_id=$1 AND revoked_at IS NULL"
           }
         ],
@@ -57664,7 +57974,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Logout",
           "file": "internal/api/handlers/auth.go",
           "function": "Logout",
-          "line": 418,
+          "line": 424,
           "expression": "h.store.RevokeRefreshTokenByHash",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -57672,7 +57982,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 390,
+          "line": 396,
           "expression": "h.store.RevokeRefreshTokenByHash",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -57693,21 +58003,21 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 121,
+            "line": 124,
             "sql_fragment": "UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE family_id=$1 AND revoked_at IS NULL"
           }
         ],
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 109,
+            "line": 112,
             "expr": "s.pool.Begin",
             "name": "Begin"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 121,
+            "line": 124,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE family_id=$1 AND revoked_at IS NULL`"
@@ -57732,7 +58042,7 @@
         "explicit_lock": true,
         "transaction_calls": true,
         "callback_parameter": false,
-        "dynamic_sql_expression": false
+        "dynamic_sql_expression": true
       },
       "syntax": {
         "id": "internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken",
@@ -57740,8 +58050,8 @@
         "name": "RotateRefreshToken",
         "receiver": "*PgStore",
         "line": 30,
-        "end": 104,
-        "sha256": "cf75a65ba284e7a9fa7a9ff7c60fcc5fcada1e0d6a2f0750a29df7b13b08b726",
+        "end": 107,
+        "sha256": "0a0796b2e461476e655ed669e26a1c8fbbfc23a78f4156ae81e63fc8def81abc",
         "calls": [
           {
             "line": 32,
@@ -57769,92 +58079,87 @@
             "name": "Is"
           },
           {
-            "line": 49,
-            "expr": "tx.QueryRow(ctx, `SELECT u.id,u.is_active FROM users u JOIN refresh_tokens r ON r.user_id=u.id WHERE r.token_hash=$1 FOR SHARE OF u`, oldHash).Scan",
-            "name": "Scan"
+            "line": 47,
+            "expr": "scanUser",
+            "name": "scanUser"
           },
           {
-            "line": 49,
+            "line": 47,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
-            "sql_expr": "`SELECT u.id,u.is_active FROM users u JOIN refresh_tokens r ON r.user_id=u.id WHERE r.token_hash=$1 FOR SHARE OF u`"
+            "sql_expr": "userSelect + ` WHERE id=(SELECT user_id FROM refresh_tokens WHERE token_hash=$1) FOR SHARE`"
           },
           {
-            "line": 50,
-            "expr": "errors.Is",
-            "name": "Is"
-          },
-          {
-            "line": 59,
+            "line": 58,
             "expr": "tx.QueryRow(ctx, `SELECT id,revoked_at,expires_at<=clock_timestamp() FROM refresh_tokens WHERE token_hash=$1 AND family_id=$2 FOR UPDATE`, oldHash, family).Scan",
             "name": "Scan"
           },
           {
-            "line": 59,
+            "line": 58,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT id,revoked_at,expires_at<=clock_timestamp() FROM refresh_tokens WHERE token_hash=$1 AND family_id=$2 FOR UPDATE`"
           },
           {
-            "line": 60,
+            "line": 59,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 67,
+            "line": 66,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE family_id=$1 AND revoked_at IS NULL`"
           },
           {
-            "line": 70,
+            "line": 69,
             "expr": "tx.Commit",
             "name": "Commit"
           },
           {
-            "line": 78,
+            "line": 77,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE id=$1 AND revoked_at IS NULL AND expires_at>clock_timestamp()`"
           },
           {
-            "line": 82,
+            "line": 81,
             "expr": "tag.RowsAffected",
             "name": "RowsAffected"
           },
           {
-            "line": 86,
+            "line": 85,
             "expr": "uuid.New",
             "name": "New"
           },
           {
-            "line": 91,
+            "line": 90,
             "expr": "time.Now().UTC",
             "name": "UTC"
           },
           {
-            "line": 91,
+            "line": 90,
             "expr": "time.Now",
             "name": "Now"
           },
           {
-            "line": 92,
+            "line": 91,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`INSERT INTO refresh_tokens(id,user_id,token_hash,expires_at,created_at,family_id)\n SELECT $1,$2,$3,$4,clock_timestamp(),$5 WHERE $4>clock_timestamp()`"
           },
           {
-            "line": 97,
+            "line": 96,
             "expr": "tag.RowsAffected",
             "name": "RowsAffected"
           },
           {
-            "line": 98,
+            "line": 97,
             "expr": "fmt.Errorf",
             "name": "Errorf"
           },
           {
-            "line": 100,
+            "line": 99,
             "expr": "tx.Commit",
             "name": "Commit"
           }
@@ -57869,27 +58174,27 @@
             "value": "invalid refresh replacement"
           },
           {
-            "line": 49,
-            "value": "SELECT u.id,u.is_active FROM users u JOIN refresh_tokens r ON r.user_id=u.id WHERE r.token_hash=$1 FOR SHARE OF u"
+            "line": 47,
+            "value": " WHERE id=(SELECT user_id FROM refresh_tokens WHERE token_hash=$1) FOR SHARE"
           },
           {
-            "line": 59,
+            "line": 58,
             "value": "SELECT id,revoked_at,expires_at<=clock_timestamp() FROM refresh_tokens WHERE token_hash=$1 AND family_id=$2 FOR UPDATE"
           },
           {
-            "line": 67,
+            "line": 66,
             "value": "UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE family_id=$1 AND revoked_at IS NULL"
           },
           {
-            "line": 78,
+            "line": 77,
             "value": "UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE id=$1 AND revoked_at IS NULL AND expires_at>clock_timestamp()"
           },
           {
-            "line": 92,
+            "line": 91,
             "value": "INSERT INTO refresh_tokens(id,user_id,token_hash,expires_at,created_at,family_id)\n SELECT $1,$2,$3,$4,clock_timestamp(),$5 WHERE $4>clock_timestamp()"
           },
           {
-            "line": 98,
+            "line": 97,
             "value": "replacement refresh token already expired"
           }
         ],
@@ -57905,13 +58210,83 @@
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
-      "lock_fk_wait_fence": "Begin→普通family查找→family advisory→U SHARE/active→旧R UPDATE→重放族撤销或单token撤销+后代INSERT→Commit。",
+      "lock_fk_wait_fence": {
+        "boundary": "The existing family advisory transaction lock, user SHARE lock and old-token UPDATE lock retain their family/user/token order. The user read now combines the existing userSelect constant with a token-user subquery and FOR SHARE, then scanUser captures the complete user under that existing lock. This changes the lexical dynamic-SQL classification, not the user lock level. Expiry, replay-family revocation, descendant insert and Commit remain. Only successful Commit publishes the in-memory Issuance UserID/TenantID/PasswordHash/SessionVersion proof for the subsequent HTTP identity comparison. No proof is persisted as a refresh-token column or JSON field.",
+        "local_operations": [
+          {
+            "line": 34,
+            "operation": "s.pool.Begin",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 38,
+            "operation": "tx.Rollback",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 47,
+            "operation": "tx.QueryRow",
+            "sql_expression": "userSelect + ` WHERE id=(SELECT user_id FROM refresh_tokens WHERE token_hash=$1) FOR SHARE`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 58,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`SELECT id,revoked_at,expires_at<=clock_timestamp() FROM refresh_tokens WHERE token_hash=$1 AND family_id=$2 FOR UPDATE`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 66,
+            "operation": "tx.Exec",
+            "sql_expression": "`UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE family_id=$1 AND revoked_at IS NULL`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 69,
+            "operation": "tx.Commit",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 77,
+            "operation": "tx.Exec",
+            "sql_expression": "`UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE id=$1 AND revoked_at IS NULL AND expires_at>clock_timestamp()`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 91,
+            "operation": "tx.Exec",
+            "sql_expression": "`INSERT INTO refresh_tokens(id,user_id,token_hash,expires_at,created_at,family_id)\n SELECT $1,$2,$3,$4,clock_timestamp(),$5 WHERE $4>clock_timestamp()`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 99,
+            "operation": "tx.Commit",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [
+          {
+            "line": 47,
+            "sql_fragment": " WHERE id=(SELECT user_id FROM refresh_tokens WHERE token_hash=$1) FOR SHARE"
+          },
+          {
+            "line": 58,
+            "sql_fragment": "SELECT id,revoked_at,expires_at<=clock_timestamp() FROM refresh_tokens WHERE token_hash=$1 AND family_id=$2 FOR UPDATE"
+          }
+        ],
+        "implicit_fk": "Existing refresh-token user/FK and family constraints remain. The literal lock fragment is only the suffix of userSelect; the resolved constant selects users. Commit uncertainty and all cross-writer schedules require separate executed evidence."
+      },
       "evidence": [
-        "internal/store/postgres/refresh_rotation.go:30-104 sha256=cf75a65ba284e7a9fa7a9ff7c60fcc5fcada1e0d6a2f0750a29df7b13b08b726",
-        "migration source definitions; no current runtime catalog claim"
+        "internal/store/postgres/refresh_rotation.go:30-107 sha256=0a0796b2e461476e655ed669e26a1c8fbbfc23a78f4156ae81e63fc8def81abc",
+        "Original syntax producers; execution and CI qualification remain separately source-bound."
       ],
       "unverified_risks": [
-        "family gc/用户删除/改密交叉依历史回归，Commit不明与客户端重放不能靠inventory证明"
+        "family gc/用户删除/改密交叉依历史回归，Commit不明与客户端重放不能靠inventory证明",
+        "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance."
       ],
       "review_status": "static-type-review",
       "followup_tasks": [
@@ -57921,25 +58296,25 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 67,
+            "line": 66,
             "sql_fragment": "UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE family_id=$1 AND revoked_at IS NULL"
           },
           {
-            "line": 78,
+            "line": 77,
             "sql_fragment": "UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE id=$1 AND revoked_at IS NULL AND expires_at>clock_timestamp()"
           },
           {
-            "line": 92,
+            "line": 91,
             "sql_fragment": "INSERT INTO refresh_tokens(id,user_id,token_hash,expires_at,created_at,family_id)\n SELECT $1,$2,$3,$4,clock_timestamp(),$5 WHERE $4>clock_timestamp()"
           }
         ],
         "direct_lock_fragments": [
           {
-            "line": 49,
-            "sql_fragment": "SELECT u.id,u.is_active FROM users u JOIN refresh_tokens r ON r.user_id=u.id WHERE r.token_hash=$1 FOR SHARE OF u"
+            "line": 47,
+            "sql_fragment": " WHERE id=(SELECT user_id FROM refresh_tokens WHERE token_hash=$1) FOR SHARE"
           },
           {
-            "line": 59,
+            "line": 58,
             "sql_fragment": "SELECT id,revoked_at,expires_at<=clock_timestamp() FROM refresh_tokens WHERE token_hash=$1 AND family_id=$2 FOR UPDATE"
           }
         ],
@@ -57952,31 +58327,31 @@
         ],
         "sql_execution_expressions": [
           {
-            "line": 49,
+            "line": 47,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
-            "sql_expr": "`SELECT u.id,u.is_active FROM users u JOIN refresh_tokens r ON r.user_id=u.id WHERE r.token_hash=$1 FOR SHARE OF u`"
+            "sql_expr": "userSelect + ` WHERE id=(SELECT user_id FROM refresh_tokens WHERE token_hash=$1) FOR SHARE`"
           },
           {
-            "line": 59,
+            "line": 58,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT id,revoked_at,expires_at<=clock_timestamp() FROM refresh_tokens WHERE token_hash=$1 AND family_id=$2 FOR UPDATE`"
           },
           {
-            "line": 67,
+            "line": 66,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE family_id=$1 AND revoked_at IS NULL`"
           },
           {
-            "line": 78,
+            "line": 77,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE id=$1 AND revoked_at IS NULL AND expires_at>clock_timestamp()`"
           },
           {
-            "line": 92,
+            "line": 91,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`INSERT INTO refresh_tokens(id,user_id,token_hash,expires_at,created_at,family_id)\n SELECT $1,$2,$3,$4,clock_timestamp(),$5 WHERE $4>clock_timestamp()`"
@@ -57986,8 +58361,27 @@
         "callback_effect": "无声明式函数/Validator参数；调用的事务helper副作用见对应entry",
         "entry_role": "store-exported-interface-candidate"
       },
-      "file_family_context": "family探测→advisory→user SHARE→R UPDATE→撤销/后代；logout/GC family→R，无user-first family等待",
-      "evidence_level": "source-only"
+      "file_family_context": "The existing family advisory transaction lock, user SHARE lock and old-token UPDATE lock retain their family/user/token order. The user read now combines the existing userSelect constant with a token-user subquery and FOR SHARE, then scanUser captures the complete user under that existing lock. This changes the lexical dynamic-SQL classification, not the user lock level. Expiry, replay-family revocation, descendant insert and Commit remain. Only successful Commit publishes the in-memory Issuance UserID/TenantID/PasswordHash/SessionVersion proof for the subsequent HTTP identity comparison. No proof is persisted as a refresh-token column or JSON field.",
+      "evidence_level": "source-only",
+      "historical_revision17_review": {
+        "lock_fk_wait_fence": "Begin→普通family查找→family advisory→U SHARE/active→旧R UPDATE→重放族撤销或单token撤销+后代INSERT→Commit。",
+        "evidence": [
+          "internal/store/postgres/refresh_rotation.go:30-104 sha256=cf75a65ba284e7a9fa7a9ff7c60fcc5fcada1e0d6a2f0750a29df7b13b08b726",
+          "migration source definitions; no current runtime catalog claim"
+        ],
+        "unverified_risks": [
+          "family gc/用户删除/改密交叉依历史回归，Commit不明与客户端重放不能靠inventory证明"
+        ],
+        "file_family_context": "family探测→advisory→user SHARE→R UPDATE→撤销/后代；logout/GC family→R，无user-first family等待"
+      },
+      "source_review": {
+        "base_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+        "source_sha256": "0a0796b2e461476e655ed669e26a1c8fbbfc23a78f4156ae81e63fc8def81abc",
+        "role": "refresh-authentication-snapshot-writer",
+        "trace": "The existing family advisory transaction lock, user SHARE lock and old-token UPDATE lock retain their family/user/token order. The user read now combines the existing userSelect constant with a token-user subquery and FOR SHARE, then scanUser captures the complete user under that existing lock. This changes the lexical dynamic-SQL classification, not the user lock level. Expiry, replay-family revocation, descendant insert and Commit remain. Only successful Commit publishes the in-memory Issuance UserID/TenantID/PasswordHash/SessionVersion proof for the subsequent HTTP identity comparison. No proof is persisted as a refresh-token column or JSON field.",
+        "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md"
+      }
     },
     {
       "id": "internal/store/postgres/refresh_rotation.go:*PgStore:deleteExpiredRefreshFamily",
@@ -58008,54 +58402,54 @@
         "file": "internal/store/postgres/refresh_rotation.go",
         "name": "deleteExpiredRefreshFamily",
         "receiver": "*PgStore",
-        "line": 127,
-        "end": 142,
+        "line": 130,
+        "end": 145,
         "sha256": "04f469cf895fcecbc78e7df817976fea6a3732a375e14d358025d0a8ef0b76ae",
         "calls": [
           {
-            "line": 128,
+            "line": 131,
             "expr": "s.pool.Begin",
             "name": "Begin"
           },
           {
-            "line": 132,
+            "line": 135,
             "expr": "tx.Rollback",
             "name": "Rollback"
-          },
-          {
-            "line": 133,
-            "expr": "tx.Exec",
-            "name": "Exec",
-            "sql_expr": "`SELECT pg_advisory_xact_lock(hashtextextended($1,0))`"
-          },
-          {
-            "line": 133,
-            "expr": "family.String",
-            "name": "String"
           },
           {
             "line": 136,
             "expr": "tx.Exec",
             "name": "Exec",
+            "sql_expr": "`SELECT pg_advisory_xact_lock(hashtextextended($1,0))`"
+          },
+          {
+            "line": 136,
+            "expr": "family.String",
+            "name": "String"
+          },
+          {
+            "line": 139,
+            "expr": "tx.Exec",
+            "name": "Exec",
             "sql_expr": "`DELETE FROM refresh_tokens WHERE family_id=$1 AND NOT EXISTS (\n        SELECT 1 FROM refresh_tokens WHERE family_id=$1 AND expires_at>clock_timestamp()\n    )`"
           },
           {
-            "line": 141,
+            "line": 144,
             "expr": "tx.Commit",
             "name": "Commit"
           }
         ],
         "strings": [
           {
-            "line": 133,
+            "line": 136,
             "value": "SELECT pg_advisory_xact_lock(hashtextextended($1,0))"
           },
           {
-            "line": 133,
+            "line": 136,
             "value": "tabmail:refresh-family:"
           },
           {
-            "line": 136,
+            "line": 139,
             "value": "DELETE FROM refresh_tokens WHERE family_id=$1 AND NOT EXISTS (\n        SELECT 1 FROM refresh_tokens WHERE family_id=$1 AND expires_at>clock_timestamp()\n    )"
           }
         ],
@@ -58087,32 +58481,32 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 136,
+            "line": 139,
             "sql_fragment": "DELETE FROM refresh_tokens WHERE family_id=$1 AND NOT EXISTS (\n        SELECT 1 FROM refresh_tokens WHERE family_id=$1 AND expires_at>clock_timestamp()\n    )"
           }
         ],
         "direct_lock_fragments": [
           {
-            "line": 133,
+            "line": 136,
             "sql_fragment": "SELECT pg_advisory_xact_lock(hashtextextended($1,0))"
           }
         ],
         "transaction_helper_calls": [
           {
-            "line": 128,
+            "line": 131,
             "expr": "s.pool.Begin",
             "name": "Begin"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 133,
+            "line": 136,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`SELECT pg_advisory_xact_lock(hashtextextended($1,0))`"
           },
           {
-            "line": 136,
+            "line": 139,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM refresh_tokens WHERE family_id=$1 AND NOT EXISTS (\n        SELECT 1 FROM refresh_tokens WHERE family_id=$1 AND expires_at>clock_timestamp()\n    )`"
@@ -58192,7 +58586,7 @@
           "caller_id": "internal/store/postgres/refresh_rotation.go:*PgStore:RevokeRefreshTokenByHash",
           "file": "internal/store/postgres/refresh_rotation.go",
           "function": "RevokeRefreshTokenByHash",
-          "line": 114,
+          "line": 117,
           "expression": "lockRefreshFamily",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -63455,7 +63849,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 486,
+          "line": 492,
           "expression": "atomic.ChangePasswordAtomic",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -63758,7 +64152,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:issueTokenPair",
           "file": "internal/api/handlers/auth.go",
           "function": "issueTokenPair",
-          "line": 539,
+          "line": 545,
           "expression": "h.store.CreateRefreshToken",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -64470,7 +64864,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 497,
+          "line": 503,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -64478,7 +64872,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 384,
+          "line": 390,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -65197,7 +65591,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 511,
+          "line": 517,
           "expression": "h.store.RevokeUserRefreshTokens",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -65205,7 +65599,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Logout",
           "file": "internal/api/handlers/auth.go",
           "function": "Logout",
-          "line": 420,
+          "line": 426,
           "expression": "h.store.RevokeUserRefreshTokens",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -65507,7 +65901,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:updatePasswordHash",
           "file": "internal/api/handlers/auth.go",
           "function": "updatePasswordHash",
-          "line": 547,
+          "line": 553,
           "expression": "h.store.UpdateUserPassword",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -65771,6 +66165,14 @@
           "file": "internal/store/postgres/permission_editor_snapshot.go",
           "function": "permissionEditorSnapshotTx",
           "line": 37,
+          "expression": "scanUser",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken",
+          "file": "internal/store/postgres/refresh_rotation.go",
+          "function": "RotateRefreshToken",
+          "line": 47,
           "expression": "scanUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -67088,7 +67490,7 @@
           "caller_id": "internal/outbound/service.go:*Service:processOne",
           "file": "internal/outbound/service.go",
           "function": "processOne",
-          "line": 407,
+          "line": 412,
           "expression": "s.store.GetZone",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -68640,6 +69042,111 @@
         "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
         "review": "docs/company-mail/evidence/R5-CATALOG-REVISION17-20261009/README.md"
       }
+    },
+    {
+      "id": "internal/store/postgres/activation_errors.go::classifyActivationInsertError",
+      "owner": "postgres.PgStore/activation_errors.go",
+      "entry": "classifyActivationInsertError",
+      "group": "TX01",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "syntax": {
+        "id": "internal/store/postgres/activation_errors.go::classifyActivationInsertError",
+        "file": "internal/store/postgres/activation_errors.go",
+        "name": "classifyActivationInsertError",
+        "receiver": "",
+        "line": 13,
+        "end": 25,
+        "sha256": "9652084ea51a2bc4c1d2aabf712a2697296cfef3445e80b0d1906dcc0b0ed599",
+        "calls": [
+          {
+            "line": 15,
+            "expr": "errors.As",
+            "name": "As"
+          }
+        ],
+        "strings": [
+          {
+            "line": 18,
+            "value": "23505"
+          },
+          {
+            "line": 21,
+            "value": "40001"
+          },
+          {
+            "line": 21,
+            "value": "55P03"
+          },
+          {
+            "line": 22,
+            "value": "activation resources changed; try again"
+          }
+        ],
+        "params": "func(err error, addressConstraint, duplicateMessage string) error"
+      },
+      "callers": [
+        {
+          "caller_id": "internal/store/postgres/company_members.go:*PgStore:ActivateEmployee",
+          "file": "internal/store/postgres/company_members.go",
+          "function": "ActivateEmployee",
+          "line": 358,
+          "expression": "classifyActivationInsertError",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/store/postgres/company_members.go:*PgStore:ActivateEmployee",
+          "file": "internal/store/postgres/company_members.go",
+          "function": "ActivateEmployee",
+          "line": 361,
+          "expression": "classifyActivationInsertError",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ],
+      "lock_fk_wait_fence": {
+        "boundary": "This pure helper is called only at the users and mailboxes INSERT failure sites. It preserves errors unless errors.As finds a non-nil PostgreSQL diagnostic. A 23505 matches only the supplied address constraint; 40001 and 55P03 become retryable conflicts. Both wrappers retain Err. Unrelated constraints, 23503/23514/40P01, cancellation and nil return unchanged. There is no SQL, transaction, lock, network, callback or automatic retry. The caller, not this helper, identifies the INSERT stage.",
+        "local_operations": [],
+        "direct_lock_fragments": [],
+        "implicit_fk": "No implicit FK or database wait is performed by this error classifier."
+      },
+      "evidence": [
+        "internal/store/postgres/activation_errors.go:13-25 sha256=9652084ea51a2bc4c1d2aabf712a2697296cfef3445e80b0d1906dcc0b0ed599",
+        "Original syntax producers; execution and CI qualification remain separately source-bound."
+      ],
+      "unverified_risks": [
+        "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance."
+      ],
+      "file_family_context": "This pure helper is called only at the users and mailboxes INSERT failure sites. It preserves errors unless errors.As finds a non-nil PostgreSQL diagnostic. A 23505 matches only the supplied address constraint; 40001 and 55P03 become retryable conflicts. Both wrappers retain Err. Unrelated constraints, 23503/23514/40P01, cancellation and nil return unchanged. There is no SQL, transaction, lock, network, callback or automatic retry. The caller, not this helper, identifies the INSERT stage.",
+      "source_review": {
+        "base_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+        "source_sha256": "9652084ea51a2bc4c1d2aabf712a2697296cfef3445e80b0d1906dcc0b0ed599",
+        "role": "activation-insert-error-classifier",
+        "trace": "This pure helper is called only at the users and mailboxes INSERT failure sites. It preserves errors unless errors.As finds a non-nil PostgreSQL diagnostic. A 23505 matches only the supplied address constraint; 40001 and 55P03 become retryable conflicts. Both wrappers retain Err. Unrelated constraints, 23503/23514/40P01, cancellation and nil return unchanged. There is no SQL, transaction, lock, network, callback or automatic retry. The caller, not this helper, identifies the INSERT stage.",
+        "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md"
+      },
+      "review_status": "static-type-review",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-030"
+      ],
+      "evidence_level": "source-only",
+      "assertions": {
+        "direct_sql_effects": [],
+        "direct_lock_fragments": [],
+        "transaction_helper_calls": [],
+        "sql_execution_expressions": [],
+        "effect_status": "Pure error classification; no SQL or automatic retry.",
+        "callback_effect": "No callback; two INSERT callers retain their transaction and error stage.",
+        "entry_role": "Preserve storage causes and classify only the supplied activation address constraint."
+      }
     }
   ],
   "migrations": [
@@ -69731,16 +70238,16 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "17be458fb9d36e135a95962638b68ce105c16518",
-  "current_review_boundary": "Revision 17 binds the final ten-task product source. SetWorkGrant permits same-tenant full revocation for frozen employees while positive grants remain active-only; ReconcileOutbound locks and validates its complete bounded recipient ledger before any recovery write; New validates pool bounds before connection side effects. All prior manual fields and optional source_review values are archived exactly. The new ledger helper is a lock reader, not a data writer. Existing file-level reviews are retained with additive revision17 notes. Other body hashes, classifications, manual fields and unknown fields are unchanged; fresh syntax, derived assertions, name-match callers and finite compatibility facts are reconciled. Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+  "last_review_base_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+  "current_review_boundary": "Revision 18 reviews the authentication snapshot, exact permission-audit actions, late invitation sponsor fence and INSERT-specific cause-preserving classifier. Existing manual fields and optional source_review presence are archived exactly. The new file/helper is pure, not a lock reader. The refresh user lock is pre-existing; only its full-row read and dynamic SQL form change. Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
   "inventory_revision": {
-    "revision": 17,
-    "source_commit": "17be458fb9d36e135a95962638b68ce105c16518",
+    "revision": 18,
+    "source_commit": "177ee571b194836678cc9a473f178c655326ba7c",
     "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
-    "previous_snapshot_commit": "30d2d05ab6ddcc23f47d9b9786885817aef50a0f",
-    "previous_snapshot_blob": "668fc73bb22b9bede6ab9ef533ba8680a0241941",
-    "previous_sha256": "856a9377a8b327c9ce7e4f91cf290bc15a45bf832c3af327a7739d3599ce43c6",
+    "previous_snapshot_commit": "ffb22b64698e4ff168a8d622018d3e169b3cdf07",
+    "previous_snapshot_blob": "487cacb05965d30ed7a8751ddaa641806e943e98",
+    "previous_sha256": "86e39488c2800ded657eda75e09ed7f3e523ec49b5faebf90f4e0867a70fe354",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION17-20261009/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md"
   }
 }

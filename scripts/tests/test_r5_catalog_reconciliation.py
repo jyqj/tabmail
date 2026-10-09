@@ -1,4 +1,4 @@
-"""Frozen revision-1 through revision-16 reviews and current revision-17 facts."""
+"""Frozen revision-1 through revision-17 reviews and current revision-18 facts."""
 import ast
 from contextlib import contextmanager, ExitStack
 import copy
@@ -26,7 +26,7 @@ REVISION7_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION7-202
 REVISION8_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION8-20261008'
 REVISION9_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION9-20261008'
 REVISION10_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION10-20261008'
-CURRENT_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION17-20261009'
+CURRENT_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010'
 REVISION10_COMMIT = '20c39ab3ebaee46e5ac51e25d90a455166c9a31d'
 REVISION10_SOURCE_COMMIT = '703a572864296120fff3efe0880c560ad9c74d57'
 REVISION10_SOURCE_TREE = '40e1d2d16258e0e2bc3afea29553dbb148920e4e'
@@ -36,10 +36,10 @@ REVISION9_SOURCE_TREE = 'db7c422fcdd63405706a2f2cb7631a5380f87fd6'
 REVISION8_COMMIT = '1d856bd8a552c30dfb48b4902858edad7e53aaf5'
 REVISION8_SOURCE_COMMIT = 'e0cd175996ca4ee314d7d8b8cf836023b680346c'
 REVISION8_SOURCE_TREE = '5307be3cf057104d1bf1529e38235bbaf0c2bcdf'
-SOURCE_COMMIT = '17be458fb9d36e135a95962638b68ce105c16518'
+SOURCE_COMMIT = '177ee571b194836678cc9a473f178c655326ba7c'
 REVISION7_COMMIT = 'f77c31e2da38bb926dfe6fa134eabad652e94f8c'
 REVISION7_SOURCE_COMMIT = '9b12c93cb03285298267e27893f74aebe742a8a2'
-SOURCE_TREE = 'fd362eed901840f23f58b477104a642f2a6cbf51'
+SOURCE_TREE = '2d5d2c44680f6a6cb2b2d1166e2923806beafcc8'
 REVISION7_SOURCE_TREE = '87c87a0db72ac444050b43fbe67d906f45c4a2ac'
 REVISION6_COMMIT = 'c3e1419e6245baf0190291ea868787cb2b0177ca'
 REVISION6_SOURCE_COMMIT = 'f413a9138d305cf154ed2cecaddcf9b9a2397666'
@@ -6600,6 +6600,2825 @@ REVISION17_EXPECTED = {'transaction': {'status': 'PASS',
                    'web/lib/legacy-outbound.ts']}
 
 
+REVISION17_COMMIT = 'ffb22b64698e4ff168a8d622018d3e169b3cdf07'
+REVISION17_TREE = '13f6a9825fcaac82c29dec5bbcac3677fd53371f'
+REVISION17_SOURCE_COMMIT = '17be458fb9d36e135a95962638b68ce105c16518'
+REVISION17_SOURCE_TREE = 'fd362eed901840f23f58b477104a642f2a6cbf51'
+REVISION17_SNAPSHOTS = {'transaction': {'path': 'docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json',
+                 'blob': '487cacb05965d30ed7a8751ddaa641806e943e98',
+                 'sha256': '86e39488c2800ded657eda75e09ed7f3e523ec49b5faebf90f4e0867a70fe354',
+                 'bytes': 2970167},
+ 'compatibility': {'path': 'docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json',
+                   'blob': '0a7589f5418cdd2aacf87d5928eca235094bba21',
+                   'sha256': 'e27227e2fc60bc74dbb0524cf1d142ca6147c804caf1337e6fa95fc0eb94917d',
+                   'bytes': 411980},
+ 'clients': {'path': 'docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json',
+             'blob': '1959adcc9fd996a61adeedb4e4954f55cc7b2b6f',
+             'sha256': '6225c9a6133e1a0204db79a78da870cf82f0fd08f633af5915cb2dfec4e84133',
+             'bytes': 41493},
+ 'client_routes': {'path': 'docs/company-mail/evidence/R5-CLIENT-CALLS.json',
+                   'blob': '1081a96cbfc2438b7529e3c080e7a7e647d0658a',
+                   'sha256': 'c48d008eea62a6b7afcb223ef092164071b675f041035fec8c1724626d7aea83',
+                   'bytes': 50414}}
+
+
+REVISION18_EXPECTED = {'transaction': {'status': 'PASS',
+                 'postgres_files': 65,
+                 'functions': 407,
+                 'sql_execution_calls': 509,
+                 'direct_write_functions': 140,
+                 'write_closure_functions': 161,
+                 'migration_files': 19,
+                 'task_complete': False,
+                 'runtime_verified': False,
+                 'meaning': 'syntax inventory current; no concurrency or behavior equivalence claim'},
+ 'compatibility': {'wire_validation_scope': 'not_checked_current_wire_required',
+                   'historical_wire_reference': {'artifact_ref': 'docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json',
+                                                 'sha256': '61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22',
+                                                 'qualification': 'historical_metadata_only_not_current_wire'},
+                   'status': 'source_inventory_and_upgrade_plan_checked',
+                   'task_complete': False,
+                   'product_green': False,
+                   'routes': 133,
+                   'client_branches': 137,
+                   'source_files': 97,
+                   'openapi_missing': ['DELETE /api/v1/suppression/{id}',
+                                       'GET /api/v1/suppression',
+                                       'GET /docs-assets/*'],
+                   'no_shipped_client': ['DELETE /api/v1/suppression/{id}',
+                                         'GET /api/v1/admin/status',
+                                         'GET /api/v1/auth/me',
+                                         'GET /api/v1/company/outbound/{id}/recipients',
+                                         'GET /api/v1/suppression',
+                                         'GET /docs',
+                                         'GET /docs-assets/*',
+                                         'GET /metrics',
+                                         'GET /openapi.yaml',
+                                         'GET /ready',
+                                         'GET /redoc'],
+                   'runtime_boundary': 'No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency '
+                                       'review remain required.'},
+ 'review_field_sha256': {'transaction_callers': 'c317051c27e7d5021e146677204ddad45e870e61b76ad8902feb309b62d2a00b',
+                         'compatibility_route_changes': 'd140c430598df6f2991c9c1228a2a0fc7b99c9f4f26df55888dd7e7ff533eba1',
+                         'closure_changes': '17196f361781647bc028a3b0099d61de0b67f72cb7c6a443d08cc17e91750c99',
+                         'source_changes': 'd204d0cc25d5b1accf6b2ca1ed522b9cfe53127cea359517f036878687e170d7',
+                         'current_rejections': 'a12d37818e488be8677456dc629b38a7714769254d57881c007674a707c99712',
+                         'generated_catalogs': '238833ce27bead2ea998d9bef82d14329627860e7b5ad1d37ccb43cc7613fc6c',
+                         'additional_api_schema_changes': '37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570',
+                         'additional_build_metadata_changes': '37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570',
+                         'transaction_body_changes': 'ac643265ea7bc2ec0b405426b70c11258afbb8f93b49fc2b0230d201de0a2c29',
+                         'transaction_classification_changes': 'b805cc581a74c51376c5649141d6aa7bac12160cf7167c8a78b82c0e9506e2cb',
+                         'transaction_entry_changes': '7c60bb4f4039607bf1020f109048ed932bf5b02af32b5f4059389b8eca109929',
+                         'transaction_added_entries': '8c2ccd9a03053f999bac4a3545b099d6e40149e2ae1ea31d4d4290d236d4b2df',
+                         'transaction_removed_entries': '37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570',
+                         'manual_review_fields': 'dbce67e360577331682531b801cb6d47951e5deb019a8588daf75744c703ec58',
+                         'transaction_file_review_additions': '39cb72f2085df5ed5838355cb3e0c998c0efaa46d450d5de42804bd54023e3d3',
+                         'transaction_new_file_reviews': '3e246b621e46568f188ee6940c2c32f57f82770679b8e88b24484b06dcc30556',
+                         'baseline_validation': '160f4250f4c724559dfdacc453f4aef6f5369d8830dbd48d7e97a94c671a1961',
+                         'original_unapproved_methods': '562cd164aca8d2334dc386cf226d7b848759cab08fb7b5d846fb96981124f409'},
+ 'historical_manifest_sha256': 'ff0202f701ad3abfda70c790a2b74f8120012a09d1b8fd94da220453b0bb336c',
+ 'protected_source_manifest_sha256': '39d3c4ea3d6f4e564714605ee21c6ee18e858e5b5199bcdf93008a8b8e7d3067',
+ 'maintenance_source_pins': {'scripts/prepare_r5_catalog_revision18.py': {'path': 'scripts/prepare_r5_catalog_revision18.py',
+                                                                          'blob': '3fd59b9d38873348869d618a1674304546fb4aa3',
+                                                                          'sha256': '1ab15802bd4252c6abcc26c592c4e7d94cf3bc4f6d3423dad3aaee8e46f8b716',
+                                                                          'bytes': 50000}},
+ 'file_review_additions': {'internal/store/postgres/company_console.go': {'source_commit': '177ee571b194836678cc9a473f178c655326ba7c',
+                                                                          'source_sha256': '3c38a9c199bd41214a96b689200ad33c48cc382f76f2927d88bfb9101f8bfa7f',
+                                                                          'changed_functions': ['internal/store/postgres/company_console.go:*PgStore:ListCompanyAudit'],
+                                                                          'added_functions': [],
+                                                                          'reviews': {'internal/store/postgres/company_console.go:*PgStore:ListCompanyAudit': {'base_commit': '177ee571b194836678cc9a473f178c655326ba7c',
+                                                                                                                                                               'source_sha256': '538efc7815ca2e8264626793815016a6a738138bd878d020a162bb55c4a7a971',
+                                                                                                                                                               'role': 'tenant-administration-audit-reader',
+                                                                                                                                                               'trace': 'companyReadTx(admin=true) '
+                                                                                                                                                                        'uses '
+                                                                                                                                                                        'companyNoTenantLock '
+                                                                                                                                                                        'and '
+                                                                                                                                                                        'currentMemberActor '
+                                                                                                                                                                        'user '
+                                                                                                                                                                        'FOR '
+                                                                                                                                                                        'SHARE, '
+                                                                                                                                                                        'rechecking '
+                                                                                                                                                                        'current '
+                                                                                                                                                                        'interactive '
+                                                                                                                                                                        'tenant/active/session '
+                                                                                                                                                                        'authority. '
+                                                                                                                                                                        'A '
+                                                                                                                                                                        'current '
+                                                                                                                                                                        'administrator '
+                                                                                                                                                                        'does '
+                                                                                                                                                                        'not '
+                                                                                                                                                                        'enter '
+                                                                                                                                                                        'the '
+                                                                                                                                                                        'non-admin '
+                                                                                                                                                                        'effectivePermissionSnapshot '
+                                                                                                                                                                        'branch; '
+                                                                                                                                                                        'no '
+                                                                                                                                                                        'profile '
+                                                                                                                                                                        'SHARE '
+                                                                                                                                                                        'lock '
+                                                                                                                                                                        'is '
+                                                                                                                                                                        'asserted '
+                                                                                                                                                                        'for '
+                                                                                                                                                                        'this '
+                                                                                                                                                                        'path. '
+                                                                                                                                                                        'The '
+                                                                                                                                                                        'identical '
+                                                                                                                                                                        'tenant-bounded '
+                                                                                                                                                                        'filter '
+                                                                                                                                                                        'feeds '
+                                                                                                                                                                        'both '
+                                                                                                                                                                        'count '
+                                                                                                                                                                        'and '
+                                                                                                                                                                        'ordered '
+                                                                                                                                                                        'page '
+                                                                                                                                                                        'reads, '
+                                                                                                                                                                        'adding '
+                                                                                                                                                                        'only '
+                                                                                                                                                                        'permission.profile.create, '
+                                                                                                                                                                        'permission.profile.update, '
+                                                                                                                                                                        'permission.profile.delete, '
+                                                                                                                                                                        'permission.profile.assign '
+                                                                                                                                                                        'and '
+                                                                                                                                                                        'permission.override.patch '
+                                                                                                                                                                        'to '
+                                                                                                                                                                        'the '
+                                                                                                                                                                        'existing '
+                                                                                                                                                                        'action '
+                                                                                                                                                                        'families. '
+                                                                                                                                                                        'Safe '
+                                                                                                                                                                        'projected '
+                                                                                                                                                                        'fields, '
+                                                                                                                                                                        'ordering '
+                                                                                                                                                                        'and '
+                                                                                                                                                                        'pagination '
+                                                                                                                                                                        'remain; '
+                                                                                                                                                                        'no '
+                                                                                                                                                                        'permission '
+                                                                                                                                                                        'wildcard '
+                                                                                                                                                                        'or '
+                                                                                                                                                                        'direct '
+                                                                                                                                                                        'data '
+                                                                                                                                                                        'write '
+                                                                                                                                                                        'is '
+                                                                                                                                                                        'introduced. '
+                                                                                                                                                                        'The '
+                                                                                                                                                                        'two '
+                                                                                                                                                                        'READ '
+                                                                                                                                                                        'COMMITTED '
+                                                                                                                                                                        'statements '
+                                                                                                                                                                        'are '
+                                                                                                                                                                        'not '
+                                                                                                                                                                        'one '
+                                                                                                                                                                        'repeatable '
+                                                                                                                                                                        'snapshot.',
+                                                                                                                                                               'unverified': 'Original '
+                                                                                                                                                                             'syntax '
+                                                                                                                                                                             'producers '
+                                                                                                                                                                             'only; '
+                                                                                                                                                                             'SQL '
+                                                                                                                                                                             'fragments, '
+                                                                                                                                                                             'name-match '
+                                                                                                                                                                             'callers '
+                                                                                                                                                                             'and '
+                                                                                                                                                                             'local '
+                                                                                                                                                                             'operation '
+                                                                                                                                                                             'order '
+                                                                                                                                                                             'do '
+                                                                                                                                                                             'not '
+                                                                                                                                                                             'prove '
+                                                                                                                                                                             'resolved '
+                                                                                                                                                                             'dispatch, '
+                                                                                                                                                                             'executed '
+                                                                                                                                                                             'SQL '
+                                                                                                                                                                             'or '
+                                                                                                                                                                             'concurrency '
+                                                                                                                                                                             'correctness. '
+                                                                                                                                                                             'Separately '
+                                                                                                                                                                             'bound '
+                                                                                                                                                                             'EXEC '
+                                                                                                                                                                             'product '
+                                                                                                                                                                             'regressions '
+                                                                                                                                                                             'retain '
+                                                                                                                                                                             'their '
+                                                                                                                                                                             'own '
+                                                                                                                                                                             'source '
+                                                                                                                                                                             'identities '
+                                                                                                                                                                             'and '
+                                                                                                                                                                             'limited '
+                                                                                                                                                                             'qualification. '
+                                                                                                                                                                             'This '
+                                                                                                                                                                             'maintenance '
+                                                                                                                                                                             'adds '
+                                                                                                                                                                             'zero '
+                                                                                                                                                                             'implementation '
+                                                                                                                                                                             'TODOs '
+                                                                                                                                                                             'and '
+                                                                                                                                                                             'grants '
+                                                                                                                                                                             'no '
+                                                                                                                                                                             'runtime, '
+                                                                                                                                                                             'release '
+                                                                                                                                                                             'or '
+                                                                                                                                                                             'parent '
+                                                                                                                                                                             'acceptance.',
+                                                                                                                                                               'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md'}},
+                                                                          'note': 'Earlier family reviews and unknown '
+                                                                                  'fields remain unchanged; this '
+                                                                                  'addition describes the reviewed '
+                                                                                  'current path.',
+                                                                          'qualification': 'source-only'},
+                           'internal/store/postgres/company_members.go': {'source_commit': '177ee571b194836678cc9a473f178c655326ba7c',
+                                                                          'source_sha256': 'd7e538f0a1154feac1c3545eb98fdf5914685416efbab765105ac174c62df476',
+                                                                          'changed_functions': ['internal/store/postgres/company_members.go:*PgStore:ActivateEmployee'],
+                                                                          'added_functions': [],
+                                                                          'reviews': {'internal/store/postgres/company_members.go:*PgStore:ActivateEmployee': {'base_commit': '177ee571b194836678cc9a473f178c655326ba7c',
+                                                                                                                                                               'source_sha256': 'b7ac7978144a2e720d5639934b4169e8dbb2b1dfa49ea109f8441b3d9d65097f',
+                                                                                                                                                               'role': 'invitation-activation-transaction-writer',
+                                                                                                                                                               'trace': 'The '
+                                                                                                                                                                        'independent '
+                                                                                                                                                                        'activation '
+                                                                                                                                                                        'transaction '
+                                                                                                                                                                        'retains '
+                                                                                                                                                                        'tenant '
+                                                                                                                                                                        'UPDATE, '
+                                                                                                                                                                        'invitation '
+                                                                                                                                                                        'UPDATE, '
+                                                                                                                                                                        'deadline '
+                                                                                                                                                                        'checks, '
+                                                                                                                                                                        'early '
+                                                                                                                                                                        'sponsor/domain '
+                                                                                                                                                                        'reads, '
+                                                                                                                                                                        'profile '
+                                                                                                                                                                        'creation, '
+                                                                                                                                                                        'user/mailbox '
+                                                                                                                                                                        'inserts '
+                                                                                                                                                                        'and '
+                                                                                                                                                                        'invitation '
+                                                                                                                                                                        'consumption. '
+                                                                                                                                                                        'Each '
+                                                                                                                                                                        'INSERT '
+                                                                                                                                                                        'now '
+                                                                                                                                                                        'classifies '
+                                                                                                                                                                        'only '
+                                                                                                                                                                        'its '
+                                                                                                                                                                        'own '
+                                                                                                                                                                        'address '
+                                                                                                                                                                        'unique '
+                                                                                                                                                                        'constraint '
+                                                                                                                                                                        'and '
+                                                                                                                                                                        'retains '
+                                                                                                                                                                        'the '
+                                                                                                                                                                        'original '
+                                                                                                                                                                        'cause; '
+                                                                                                                                                                        'unrelated '
+                                                                                                                                                                        'failures '
+                                                                                                                                                                        'and '
+                                                                                                                                                                        'late '
+                                                                                                                                                                        'audit '
+                                                                                                                                                                        'errors '
+                                                                                                                                                                        'remain '
+                                                                                                                                                                        'original '
+                                                                                                                                                                        'errors. '
+                                                                                                                                                                        'After '
+                                                                                                                                                                        'required '
+                                                                                                                                                                        'audit/outbox '
+                                                                                                                                                                        'writes, '
+                                                                                                                                                                        'a '
+                                                                                                                                                                        'new '
+                                                                                                                                                                        'current '
+                                                                                                                                                                        'sponsor '
+                                                                                                                                                                        'users '
+                                                                                                                                                                        'FOR '
+                                                                                                                                                                        'SHARE '
+                                                                                                                                                                        'NOWAIT '
+                                                                                                                                                                        'checks '
+                                                                                                                                                                        'active '
+                                                                                                                                                                        'super-admin '
+                                                                                                                                                                        'or '
+                                                                                                                                                                        'same-tenant '
+                                                                                                                                                                        'admin '
+                                                                                                                                                                        'authority '
+                                                                                                                                                                        'and '
+                                                                                                                                                                        'holds '
+                                                                                                                                                                        'that '
+                                                                                                                                                                        'row '
+                                                                                                                                                                        'through '
+                                                                                                                                                                        'Commit. '
+                                                                                                                                                                        'Missing '
+                                                                                                                                                                        'authority '
+                                                                                                                                                                        'is '
+                                                                                                                                                                        'forbidden; '
+                                                                                                                                                                        'busy '
+                                                                                                                                                                        'sponsor '
+                                                                                                                                                                        '55P03 '
+                                                                                                                                                                        'is '
+                                                                                                                                                                        'conflict '
+                                                                                                                                                                        'with '
+                                                                                                                                                                        'its '
+                                                                                                                                                                        'cause. '
+                                                                                                                                                                        'The '
+                                                                                                                                                                        'pre-existing '
+                                                                                                                                                                        'final '
+                                                                                                                                                                        'company/domain '
+                                                                                                                                                                        'NOWAIT '
+                                                                                                                                                                        'fence '
+                                                                                                                                                                        'and '
+                                                                                                                                                                        'final '
+                                                                                                                                                                        'elapsed-deadline '
+                                                                                                                                                                        'check '
+                                                                                                                                                                        'still '
+                                                                                                                                                                        'follow. '
+                                                                                                                                                                        'Any '
+                                                                                                                                                                        'failure '
+                                                                                                                                                                        'uses '
+                                                                                                                                                                        'the '
+                                                                                                                                                                        'original '
+                                                                                                                                                                        'rollback '
+                                                                                                                                                                        'for '
+                                                                                                                                                                        'user, '
+                                                                                                                                                                        'mailbox, '
+                                                                                                                                                                        'profile, '
+                                                                                                                                                                        'invitation, '
+                                                                                                                                                                        'audit '
+                                                                                                                                                                        'and '
+                                                                                                                                                                        'outbox '
+                                                                                                                                                                        'effects; '
+                                                                                                                                                                        'no '
+                                                                                                                                                                        'automatic '
+                                                                                                                                                                        'activation '
+                                                                                                                                                                        'retry '
+                                                                                                                                                                        'is '
+                                                                                                                                                                        'added.',
+                                                                                                                                                               'unverified': 'Original '
+                                                                                                                                                                             'syntax '
+                                                                                                                                                                             'producers '
+                                                                                                                                                                             'only; '
+                                                                                                                                                                             'SQL '
+                                                                                                                                                                             'fragments, '
+                                                                                                                                                                             'name-match '
+                                                                                                                                                                             'callers '
+                                                                                                                                                                             'and '
+                                                                                                                                                                             'local '
+                                                                                                                                                                             'operation '
+                                                                                                                                                                             'order '
+                                                                                                                                                                             'do '
+                                                                                                                                                                             'not '
+                                                                                                                                                                             'prove '
+                                                                                                                                                                             'resolved '
+                                                                                                                                                                             'dispatch, '
+                                                                                                                                                                             'executed '
+                                                                                                                                                                             'SQL '
+                                                                                                                                                                             'or '
+                                                                                                                                                                             'concurrency '
+                                                                                                                                                                             'correctness. '
+                                                                                                                                                                             'Separately '
+                                                                                                                                                                             'bound '
+                                                                                                                                                                             'EXEC '
+                                                                                                                                                                             'product '
+                                                                                                                                                                             'regressions '
+                                                                                                                                                                             'retain '
+                                                                                                                                                                             'their '
+                                                                                                                                                                             'own '
+                                                                                                                                                                             'source '
+                                                                                                                                                                             'identities '
+                                                                                                                                                                             'and '
+                                                                                                                                                                             'limited '
+                                                                                                                                                                             'qualification. '
+                                                                                                                                                                             'This '
+                                                                                                                                                                             'maintenance '
+                                                                                                                                                                             'adds '
+                                                                                                                                                                             'zero '
+                                                                                                                                                                             'implementation '
+                                                                                                                                                                             'TODOs '
+                                                                                                                                                                             'and '
+                                                                                                                                                                             'grants '
+                                                                                                                                                                             'no '
+                                                                                                                                                                             'runtime, '
+                                                                                                                                                                             'release '
+                                                                                                                                                                             'or '
+                                                                                                                                                                             'parent '
+                                                                                                                                                                             'acceptance.',
+                                                                                                                                                               'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md'}},
+                                                                          'note': 'Earlier family reviews and unknown '
+                                                                                  'fields remain unchanged; this '
+                                                                                  'addition describes the reviewed '
+                                                                                  'current path.',
+                                                                          'qualification': 'source-only'},
+                           'internal/store/postgres/refresh_rotation.go': {'source_commit': '177ee571b194836678cc9a473f178c655326ba7c',
+                                                                           'source_sha256': '5a0a4c902b8f016fb5ec8c9b3f6f788f71c43362c012e7a8b6800f03d0a94c76',
+                                                                           'changed_functions': ['internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken'],
+                                                                           'added_functions': [],
+                                                                           'reviews': {'internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken': {'base_commit': '177ee571b194836678cc9a473f178c655326ba7c',
+                                                                                                                                                                   'source_sha256': '0a0796b2e461476e655ed669e26a1c8fbbfc23a78f4156ae81e63fc8def81abc',
+                                                                                                                                                                   'role': 'refresh-authentication-snapshot-writer',
+                                                                                                                                                                   'trace': 'The '
+                                                                                                                                                                            'existing '
+                                                                                                                                                                            'family '
+                                                                                                                                                                            'advisory '
+                                                                                                                                                                            'transaction '
+                                                                                                                                                                            'lock, '
+                                                                                                                                                                            'user '
+                                                                                                                                                                            'SHARE '
+                                                                                                                                                                            'lock '
+                                                                                                                                                                            'and '
+                                                                                                                                                                            'old-token '
+                                                                                                                                                                            'UPDATE '
+                                                                                                                                                                            'lock '
+                                                                                                                                                                            'retain '
+                                                                                                                                                                            'their '
+                                                                                                                                                                            'family/user/token '
+                                                                                                                                                                            'order. '
+                                                                                                                                                                            'The '
+                                                                                                                                                                            'user '
+                                                                                                                                                                            'read '
+                                                                                                                                                                            'now '
+                                                                                                                                                                            'combines '
+                                                                                                                                                                            'the '
+                                                                                                                                                                            'existing '
+                                                                                                                                                                            'userSelect '
+                                                                                                                                                                            'constant '
+                                                                                                                                                                            'with '
+                                                                                                                                                                            'a '
+                                                                                                                                                                            'token-user '
+                                                                                                                                                                            'subquery '
+                                                                                                                                                                            'and '
+                                                                                                                                                                            'FOR '
+                                                                                                                                                                            'SHARE, '
+                                                                                                                                                                            'then '
+                                                                                                                                                                            'scanUser '
+                                                                                                                                                                            'captures '
+                                                                                                                                                                            'the '
+                                                                                                                                                                            'complete '
+                                                                                                                                                                            'user '
+                                                                                                                                                                            'under '
+                                                                                                                                                                            'that '
+                                                                                                                                                                            'existing '
+                                                                                                                                                                            'lock. '
+                                                                                                                                                                            'This '
+                                                                                                                                                                            'changes '
+                                                                                                                                                                            'the '
+                                                                                                                                                                            'lexical '
+                                                                                                                                                                            'dynamic-SQL '
+                                                                                                                                                                            'classification, '
+                                                                                                                                                                            'not '
+                                                                                                                                                                            'the '
+                                                                                                                                                                            'user '
+                                                                                                                                                                            'lock '
+                                                                                                                                                                            'level. '
+                                                                                                                                                                            'Expiry, '
+                                                                                                                                                                            'replay-family '
+                                                                                                                                                                            'revocation, '
+                                                                                                                                                                            'descendant '
+                                                                                                                                                                            'insert '
+                                                                                                                                                                            'and '
+                                                                                                                                                                            'Commit '
+                                                                                                                                                                            'remain. '
+                                                                                                                                                                            'Only '
+                                                                                                                                                                            'successful '
+                                                                                                                                                                            'Commit '
+                                                                                                                                                                            'publishes '
+                                                                                                                                                                            'the '
+                                                                                                                                                                            'in-memory '
+                                                                                                                                                                            'Issuance '
+                                                                                                                                                                            'UserID/TenantID/PasswordHash/SessionVersion '
+                                                                                                                                                                            'proof '
+                                                                                                                                                                            'for '
+                                                                                                                                                                            'the '
+                                                                                                                                                                            'subsequent '
+                                                                                                                                                                            'HTTP '
+                                                                                                                                                                            'identity '
+                                                                                                                                                                            'comparison. '
+                                                                                                                                                                            'No '
+                                                                                                                                                                            'proof '
+                                                                                                                                                                            'is '
+                                                                                                                                                                            'persisted '
+                                                                                                                                                                            'as '
+                                                                                                                                                                            'a '
+                                                                                                                                                                            'refresh-token '
+                                                                                                                                                                            'column '
+                                                                                                                                                                            'or '
+                                                                                                                                                                            'JSON '
+                                                                                                                                                                            'field.',
+                                                                                                                                                                   'unverified': 'Original '
+                                                                                                                                                                                 'syntax '
+                                                                                                                                                                                 'producers '
+                                                                                                                                                                                 'only; '
+                                                                                                                                                                                 'SQL '
+                                                                                                                                                                                 'fragments, '
+                                                                                                                                                                                 'name-match '
+                                                                                                                                                                                 'callers '
+                                                                                                                                                                                 'and '
+                                                                                                                                                                                 'local '
+                                                                                                                                                                                 'operation '
+                                                                                                                                                                                 'order '
+                                                                                                                                                                                 'do '
+                                                                                                                                                                                 'not '
+                                                                                                                                                                                 'prove '
+                                                                                                                                                                                 'resolved '
+                                                                                                                                                                                 'dispatch, '
+                                                                                                                                                                                 'executed '
+                                                                                                                                                                                 'SQL '
+                                                                                                                                                                                 'or '
+                                                                                                                                                                                 'concurrency '
+                                                                                                                                                                                 'correctness. '
+                                                                                                                                                                                 'Separately '
+                                                                                                                                                                                 'bound '
+                                                                                                                                                                                 'EXEC '
+                                                                                                                                                                                 'product '
+                                                                                                                                                                                 'regressions '
+                                                                                                                                                                                 'retain '
+                                                                                                                                                                                 'their '
+                                                                                                                                                                                 'own '
+                                                                                                                                                                                 'source '
+                                                                                                                                                                                 'identities '
+                                                                                                                                                                                 'and '
+                                                                                                                                                                                 'limited '
+                                                                                                                                                                                 'qualification. '
+                                                                                                                                                                                 'This '
+                                                                                                                                                                                 'maintenance '
+                                                                                                                                                                                 'adds '
+                                                                                                                                                                                 'zero '
+                                                                                                                                                                                 'implementation '
+                                                                                                                                                                                 'TODOs '
+                                                                                                                                                                                 'and '
+                                                                                                                                                                                 'grants '
+                                                                                                                                                                                 'no '
+                                                                                                                                                                                 'runtime, '
+                                                                                                                                                                                 'release '
+                                                                                                                                                                                 'or '
+                                                                                                                                                                                 'parent '
+                                                                                                                                                                                 'acceptance.',
+                                                                                                                                                                   'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md'}},
+                                                                           'note': 'Earlier family reviews and unknown '
+                                                                                   'fields remain unchanged; this '
+                                                                                   'addition describes the reviewed '
+                                                                                   'current path.',
+                                                                           'qualification': 'source-only'}},
+ 'new_file_reviews': {'internal/store/postgres/activation_errors.go': {'group': 'TX01',
+                                                                       'review': 'This pure helper is called only at '
+                                                                                 'the users and mailboxes INSERT '
+                                                                                 'failure sites. It preserves errors '
+                                                                                 'unless errors.As finds a non-nil '
+                                                                                 'PostgreSQL diagnostic. A 23505 '
+                                                                                 'matches only the supplied address '
+                                                                                 'constraint; 40001 and 55P03 become '
+                                                                                 'retryable conflicts. Both wrappers '
+                                                                                 'retain Err. Unrelated constraints, '
+                                                                                 '23503/23514/40P01, cancellation and '
+                                                                                 'nil return unchanged. There is no '
+                                                                                 'SQL, transaction, lock, network, '
+                                                                                 'callback or automatic retry. The '
+                                                                                 'caller, not this helper, identifies '
+                                                                                 'the INSERT stage.',
+                                                                       'remaining': 'Original syntax producers only; '
+                                                                                    'SQL fragments, name-match callers '
+                                                                                    'and local operation order do not '
+                                                                                    'prove resolved dispatch, executed '
+                                                                                    'SQL or concurrency correctness. '
+                                                                                    'Separately bound EXEC product '
+                                                                                    'regressions retain their own '
+                                                                                    'source identities and limited '
+                                                                                    'qualification. This maintenance '
+                                                                                    'adds zero implementation TODOs '
+                                                                                    'and grants no runtime, release or '
+                                                                                    'parent acceptance.',
+                                                                       'source_commit': '177ee571b194836678cc9a473f178c655326ba7c',
+                                                                       'source_sha256': '22f7e59af658f383f872a46182d686dd24b57ec823457eb1af825ddec17787ee',
+                                                                       'added_functions': ['internal/store/postgres/activation_errors.go::classifyActivationInsertError'],
+                                                                       'source_review': {'base_commit': '177ee571b194836678cc9a473f178c655326ba7c',
+                                                                                         'source_sha256': '9652084ea51a2bc4c1d2aabf712a2697296cfef3445e80b0d1906dcc0b0ed599',
+                                                                                         'role': 'activation-insert-error-classifier',
+                                                                                         'trace': 'This pure helper is '
+                                                                                                  'called only at the '
+                                                                                                  'users and mailboxes '
+                                                                                                  'INSERT failure '
+                                                                                                  'sites. It preserves '
+                                                                                                  'errors unless '
+                                                                                                  'errors.As finds a '
+                                                                                                  'non-nil PostgreSQL '
+                                                                                                  'diagnostic. A 23505 '
+                                                                                                  'matches only the '
+                                                                                                  'supplied address '
+                                                                                                  'constraint; 40001 '
+                                                                                                  'and 55P03 become '
+                                                                                                  'retryable '
+                                                                                                  'conflicts. Both '
+                                                                                                  'wrappers retain '
+                                                                                                  'Err. Unrelated '
+                                                                                                  'constraints, '
+                                                                                                  '23503/23514/40P01, '
+                                                                                                  'cancellation and '
+                                                                                                  'nil return '
+                                                                                                  'unchanged. There is '
+                                                                                                  'no SQL, '
+                                                                                                  'transaction, lock, '
+                                                                                                  'network, callback '
+                                                                                                  'or automatic retry. '
+                                                                                                  'The caller, not '
+                                                                                                  'this helper, '
+                                                                                                  'identifies the '
+                                                                                                  'INSERT stage.',
+                                                                                         'unverified': 'Original '
+                                                                                                       'syntax '
+                                                                                                       'producers '
+                                                                                                       'only; SQL '
+                                                                                                       'fragments, '
+                                                                                                       'name-match '
+                                                                                                       'callers and '
+                                                                                                       'local '
+                                                                                                       'operation '
+                                                                                                       'order do not '
+                                                                                                       'prove resolved '
+                                                                                                       'dispatch, '
+                                                                                                       'executed SQL '
+                                                                                                       'or concurrency '
+                                                                                                       'correctness. '
+                                                                                                       'Separately '
+                                                                                                       'bound EXEC '
+                                                                                                       'product '
+                                                                                                       'regressions '
+                                                                                                       'retain their '
+                                                                                                       'own source '
+                                                                                                       'identities and '
+                                                                                                       'limited '
+                                                                                                       'qualification. '
+                                                                                                       'This '
+                                                                                                       'maintenance '
+                                                                                                       'adds zero '
+                                                                                                       'implementation '
+                                                                                                       'TODOs and '
+                                                                                                       'grants no '
+                                                                                                       'runtime, '
+                                                                                                       'release or '
+                                                                                                       'parent '
+                                                                                                       'acceptance.',
+                                                                                         'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md'},
+                                                                       'qualification': 'source-only'}},
+ 'added_entries': {'internal/store/postgres/activation_errors.go::classifyActivationInsertError': {'id': 'internal/store/postgres/activation_errors.go::classifyActivationInsertError',
+                                                                                                   'owner': 'postgres.PgStore/activation_errors.go',
+                                                                                                   'entry': 'classifyActivationInsertError',
+                                                                                                   'group': 'TX01',
+                                                                                                   'classification': {'kind': 'read-or-pure',
+                                                                                                                      'direct_write': False,
+                                                                                                                      'write_closure': False,
+                                                                                                                      'explicit_lock': False,
+                                                                                                                      'transaction_calls': False,
+                                                                                                                      'callback_parameter': False,
+                                                                                                                      'dynamic_sql_expression': False},
+                                                                                                   'syntax': {'id': 'internal/store/postgres/activation_errors.go::classifyActivationInsertError',
+                                                                                                              'file': 'internal/store/postgres/activation_errors.go',
+                                                                                                              'name': 'classifyActivationInsertError',
+                                                                                                              'receiver': '',
+                                                                                                              'line': 13,
+                                                                                                              'end': 25,
+                                                                                                              'sha256': '9652084ea51a2bc4c1d2aabf712a2697296cfef3445e80b0d1906dcc0b0ed599',
+                                                                                                              'calls': [{'line': 15,
+                                                                                                                         'expr': 'errors.As',
+                                                                                                                         'name': 'As'}],
+                                                                                                              'strings': [{'line': 18,
+                                                                                                                           'value': '23505'},
+                                                                                                                          {'line': 21,
+                                                                                                                           'value': '40001'},
+                                                                                                                          {'line': 21,
+                                                                                                                           'value': '55P03'},
+                                                                                                                          {'line': 22,
+                                                                                                                           'value': 'activation '
+                                                                                                                                    'resources '
+                                                                                                                                    'changed; '
+                                                                                                                                    'try '
+                                                                                                                                    'again'}],
+                                                                                                              'params': 'func(err '
+                                                                                                                        'error, '
+                                                                                                                        'addressConstraint, '
+                                                                                                                        'duplicateMessage '
+                                                                                                                        'string) '
+                                                                                                                        'error'},
+                                                                                                   'callers': [{'caller_id': 'internal/store/postgres/company_members.go:*PgStore:ActivateEmployee',
+                                                                                                                'file': 'internal/store/postgres/company_members.go',
+                                                                                                                'function': 'ActivateEmployee',
+                                                                                                                'line': 358,
+                                                                                                                'expression': 'classifyActivationInsertError',
+                                                                                                                'status': 'name-match-candidate-not-dispatch-proof'},
+                                                                                                               {'caller_id': 'internal/store/postgres/company_members.go:*PgStore:ActivateEmployee',
+                                                                                                                'file': 'internal/store/postgres/company_members.go',
+                                                                                                                'function': 'ActivateEmployee',
+                                                                                                                'line': 361,
+                                                                                                                'expression': 'classifyActivationInsertError',
+                                                                                                                'status': 'name-match-candidate-not-dispatch-proof'}],
+                                                                                                   'lock_fk_wait_fence': {'boundary': 'This '
+                                                                                                                                      'pure '
+                                                                                                                                      'helper '
+                                                                                                                                      'is '
+                                                                                                                                      'called '
+                                                                                                                                      'only '
+                                                                                                                                      'at '
+                                                                                                                                      'the '
+                                                                                                                                      'users '
+                                                                                                                                      'and '
+                                                                                                                                      'mailboxes '
+                                                                                                                                      'INSERT '
+                                                                                                                                      'failure '
+                                                                                                                                      'sites. '
+                                                                                                                                      'It '
+                                                                                                                                      'preserves '
+                                                                                                                                      'errors '
+                                                                                                                                      'unless '
+                                                                                                                                      'errors.As '
+                                                                                                                                      'finds '
+                                                                                                                                      'a '
+                                                                                                                                      'non-nil '
+                                                                                                                                      'PostgreSQL '
+                                                                                                                                      'diagnostic. '
+                                                                                                                                      'A '
+                                                                                                                                      '23505 '
+                                                                                                                                      'matches '
+                                                                                                                                      'only '
+                                                                                                                                      'the '
+                                                                                                                                      'supplied '
+                                                                                                                                      'address '
+                                                                                                                                      'constraint; '
+                                                                                                                                      '40001 '
+                                                                                                                                      'and '
+                                                                                                                                      '55P03 '
+                                                                                                                                      'become '
+                                                                                                                                      'retryable '
+                                                                                                                                      'conflicts. '
+                                                                                                                                      'Both '
+                                                                                                                                      'wrappers '
+                                                                                                                                      'retain '
+                                                                                                                                      'Err. '
+                                                                                                                                      'Unrelated '
+                                                                                                                                      'constraints, '
+                                                                                                                                      '23503/23514/40P01, '
+                                                                                                                                      'cancellation '
+                                                                                                                                      'and '
+                                                                                                                                      'nil '
+                                                                                                                                      'return '
+                                                                                                                                      'unchanged. '
+                                                                                                                                      'There '
+                                                                                                                                      'is '
+                                                                                                                                      'no '
+                                                                                                                                      'SQL, '
+                                                                                                                                      'transaction, '
+                                                                                                                                      'lock, '
+                                                                                                                                      'network, '
+                                                                                                                                      'callback '
+                                                                                                                                      'or '
+                                                                                                                                      'automatic '
+                                                                                                                                      'retry. '
+                                                                                                                                      'The '
+                                                                                                                                      'caller, '
+                                                                                                                                      'not '
+                                                                                                                                      'this '
+                                                                                                                                      'helper, '
+                                                                                                                                      'identifies '
+                                                                                                                                      'the '
+                                                                                                                                      'INSERT '
+                                                                                                                                      'stage.',
+                                                                                                                          'local_operations': [],
+                                                                                                                          'direct_lock_fragments': [],
+                                                                                                                          'implicit_fk': 'No '
+                                                                                                                                         'implicit '
+                                                                                                                                         'FK '
+                                                                                                                                         'or '
+                                                                                                                                         'database '
+                                                                                                                                         'wait '
+                                                                                                                                         'is '
+                                                                                                                                         'performed '
+                                                                                                                                         'by '
+                                                                                                                                         'this '
+                                                                                                                                         'error '
+                                                                                                                                         'classifier.'},
+                                                                                                   'evidence': ['internal/store/postgres/activation_errors.go:13-25 '
+                                                                                                                'sha256=9652084ea51a2bc4c1d2aabf712a2697296cfef3445e80b0d1906dcc0b0ed599',
+                                                                                                                'Original '
+                                                                                                                'syntax '
+                                                                                                                'producers; '
+                                                                                                                'execution '
+                                                                                                                'and '
+                                                                                                                'CI '
+                                                                                                                'qualification '
+                                                                                                                'remain '
+                                                                                                                'separately '
+                                                                                                                'source-bound.'],
+                                                                                                   'unverified_risks': ['Original '
+                                                                                                                        'syntax '
+                                                                                                                        'producers '
+                                                                                                                        'only; '
+                                                                                                                        'SQL '
+                                                                                                                        'fragments, '
+                                                                                                                        'name-match '
+                                                                                                                        'callers '
+                                                                                                                        'and '
+                                                                                                                        'local '
+                                                                                                                        'operation '
+                                                                                                                        'order '
+                                                                                                                        'do '
+                                                                                                                        'not '
+                                                                                                                        'prove '
+                                                                                                                        'resolved '
+                                                                                                                        'dispatch, '
+                                                                                                                        'executed '
+                                                                                                                        'SQL '
+                                                                                                                        'or '
+                                                                                                                        'concurrency '
+                                                                                                                        'correctness. '
+                                                                                                                        'Separately '
+                                                                                                                        'bound '
+                                                                                                                        'EXEC '
+                                                                                                                        'product '
+                                                                                                                        'regressions '
+                                                                                                                        'retain '
+                                                                                                                        'their '
+                                                                                                                        'own '
+                                                                                                                        'source '
+                                                                                                                        'identities '
+                                                                                                                        'and '
+                                                                                                                        'limited '
+                                                                                                                        'qualification. '
+                                                                                                                        'This '
+                                                                                                                        'maintenance '
+                                                                                                                        'adds '
+                                                                                                                        'zero '
+                                                                                                                        'implementation '
+                                                                                                                        'TODOs '
+                                                                                                                        'and '
+                                                                                                                        'grants '
+                                                                                                                        'no '
+                                                                                                                        'runtime, '
+                                                                                                                        'release '
+                                                                                                                        'or '
+                                                                                                                        'parent '
+                                                                                                                        'acceptance.'],
+                                                                                                   'file_family_context': 'This '
+                                                                                                                          'pure '
+                                                                                                                          'helper '
+                                                                                                                          'is '
+                                                                                                                          'called '
+                                                                                                                          'only '
+                                                                                                                          'at '
+                                                                                                                          'the '
+                                                                                                                          'users '
+                                                                                                                          'and '
+                                                                                                                          'mailboxes '
+                                                                                                                          'INSERT '
+                                                                                                                          'failure '
+                                                                                                                          'sites. '
+                                                                                                                          'It '
+                                                                                                                          'preserves '
+                                                                                                                          'errors '
+                                                                                                                          'unless '
+                                                                                                                          'errors.As '
+                                                                                                                          'finds '
+                                                                                                                          'a '
+                                                                                                                          'non-nil '
+                                                                                                                          'PostgreSQL '
+                                                                                                                          'diagnostic. '
+                                                                                                                          'A '
+                                                                                                                          '23505 '
+                                                                                                                          'matches '
+                                                                                                                          'only '
+                                                                                                                          'the '
+                                                                                                                          'supplied '
+                                                                                                                          'address '
+                                                                                                                          'constraint; '
+                                                                                                                          '40001 '
+                                                                                                                          'and '
+                                                                                                                          '55P03 '
+                                                                                                                          'become '
+                                                                                                                          'retryable '
+                                                                                                                          'conflicts. '
+                                                                                                                          'Both '
+                                                                                                                          'wrappers '
+                                                                                                                          'retain '
+                                                                                                                          'Err. '
+                                                                                                                          'Unrelated '
+                                                                                                                          'constraints, '
+                                                                                                                          '23503/23514/40P01, '
+                                                                                                                          'cancellation '
+                                                                                                                          'and '
+                                                                                                                          'nil '
+                                                                                                                          'return '
+                                                                                                                          'unchanged. '
+                                                                                                                          'There '
+                                                                                                                          'is '
+                                                                                                                          'no '
+                                                                                                                          'SQL, '
+                                                                                                                          'transaction, '
+                                                                                                                          'lock, '
+                                                                                                                          'network, '
+                                                                                                                          'callback '
+                                                                                                                          'or '
+                                                                                                                          'automatic '
+                                                                                                                          'retry. '
+                                                                                                                          'The '
+                                                                                                                          'caller, '
+                                                                                                                          'not '
+                                                                                                                          'this '
+                                                                                                                          'helper, '
+                                                                                                                          'identifies '
+                                                                                                                          'the '
+                                                                                                                          'INSERT '
+                                                                                                                          'stage.',
+                                                                                                   'source_review': {'base_commit': '177ee571b194836678cc9a473f178c655326ba7c',
+                                                                                                                     'source_sha256': '9652084ea51a2bc4c1d2aabf712a2697296cfef3445e80b0d1906dcc0b0ed599',
+                                                                                                                     'role': 'activation-insert-error-classifier',
+                                                                                                                     'trace': 'This '
+                                                                                                                              'pure '
+                                                                                                                              'helper '
+                                                                                                                              'is '
+                                                                                                                              'called '
+                                                                                                                              'only '
+                                                                                                                              'at '
+                                                                                                                              'the '
+                                                                                                                              'users '
+                                                                                                                              'and '
+                                                                                                                              'mailboxes '
+                                                                                                                              'INSERT '
+                                                                                                                              'failure '
+                                                                                                                              'sites. '
+                                                                                                                              'It '
+                                                                                                                              'preserves '
+                                                                                                                              'errors '
+                                                                                                                              'unless '
+                                                                                                                              'errors.As '
+                                                                                                                              'finds '
+                                                                                                                              'a '
+                                                                                                                              'non-nil '
+                                                                                                                              'PostgreSQL '
+                                                                                                                              'diagnostic. '
+                                                                                                                              'A '
+                                                                                                                              '23505 '
+                                                                                                                              'matches '
+                                                                                                                              'only '
+                                                                                                                              'the '
+                                                                                                                              'supplied '
+                                                                                                                              'address '
+                                                                                                                              'constraint; '
+                                                                                                                              '40001 '
+                                                                                                                              'and '
+                                                                                                                              '55P03 '
+                                                                                                                              'become '
+                                                                                                                              'retryable '
+                                                                                                                              'conflicts. '
+                                                                                                                              'Both '
+                                                                                                                              'wrappers '
+                                                                                                                              'retain '
+                                                                                                                              'Err. '
+                                                                                                                              'Unrelated '
+                                                                                                                              'constraints, '
+                                                                                                                              '23503/23514/40P01, '
+                                                                                                                              'cancellation '
+                                                                                                                              'and '
+                                                                                                                              'nil '
+                                                                                                                              'return '
+                                                                                                                              'unchanged. '
+                                                                                                                              'There '
+                                                                                                                              'is '
+                                                                                                                              'no '
+                                                                                                                              'SQL, '
+                                                                                                                              'transaction, '
+                                                                                                                              'lock, '
+                                                                                                                              'network, '
+                                                                                                                              'callback '
+                                                                                                                              'or '
+                                                                                                                              'automatic '
+                                                                                                                              'retry. '
+                                                                                                                              'The '
+                                                                                                                              'caller, '
+                                                                                                                              'not '
+                                                                                                                              'this '
+                                                                                                                              'helper, '
+                                                                                                                              'identifies '
+                                                                                                                              'the '
+                                                                                                                              'INSERT '
+                                                                                                                              'stage.',
+                                                                                                                     'unverified': 'Original '
+                                                                                                                                   'syntax '
+                                                                                                                                   'producers '
+                                                                                                                                   'only; '
+                                                                                                                                   'SQL '
+                                                                                                                                   'fragments, '
+                                                                                                                                   'name-match '
+                                                                                                                                   'callers '
+                                                                                                                                   'and '
+                                                                                                                                   'local '
+                                                                                                                                   'operation '
+                                                                                                                                   'order '
+                                                                                                                                   'do '
+                                                                                                                                   'not '
+                                                                                                                                   'prove '
+                                                                                                                                   'resolved '
+                                                                                                                                   'dispatch, '
+                                                                                                                                   'executed '
+                                                                                                                                   'SQL '
+                                                                                                                                   'or '
+                                                                                                                                   'concurrency '
+                                                                                                                                   'correctness. '
+                                                                                                                                   'Separately '
+                                                                                                                                   'bound '
+                                                                                                                                   'EXEC '
+                                                                                                                                   'product '
+                                                                                                                                   'regressions '
+                                                                                                                                   'retain '
+                                                                                                                                   'their '
+                                                                                                                                   'own '
+                                                                                                                                   'source '
+                                                                                                                                   'identities '
+                                                                                                                                   'and '
+                                                                                                                                   'limited '
+                                                                                                                                   'qualification. '
+                                                                                                                                   'This '
+                                                                                                                                   'maintenance '
+                                                                                                                                   'adds '
+                                                                                                                                   'zero '
+                                                                                                                                   'implementation '
+                                                                                                                                   'TODOs '
+                                                                                                                                   'and '
+                                                                                                                                   'grants '
+                                                                                                                                   'no '
+                                                                                                                                   'runtime, '
+                                                                                                                                   'release '
+                                                                                                                                   'or '
+                                                                                                                                   'parent '
+                                                                                                                                   'acceptance.',
+                                                                                                                     'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md'},
+                                                                                                   'review_status': 'static-type-review',
+                                                                                                   'followup_tasks': ['R5-P0-070',
+                                                                                                                      'R5-P1-030'],
+                                                                                                   'evidence_level': 'source-only',
+                                                                                                   'assertions': {'direct_sql_effects': [],
+                                                                                                                  'direct_lock_fragments': [],
+                                                                                                                  'transaction_helper_calls': [],
+                                                                                                                  'sql_execution_expressions': [],
+                                                                                                                  'effect_status': 'Pure '
+                                                                                                                                   'error '
+                                                                                                                                   'classification; '
+                                                                                                                                   'no '
+                                                                                                                                   'SQL '
+                                                                                                                                   'or '
+                                                                                                                                   'automatic '
+                                                                                                                                   'retry.',
+                                                                                                                  'callback_effect': 'No '
+                                                                                                                                     'callback; '
+                                                                                                                                     'two '
+                                                                                                                                     'INSERT '
+                                                                                                                                     'callers '
+                                                                                                                                     'retain '
+                                                                                                                                     'their '
+                                                                                                                                     'transaction '
+                                                                                                                                     'and '
+                                                                                                                                     'error '
+                                                                                                                                     'stage.',
+                                                                                                                  'entry_role': 'Preserve '
+                                                                                                                                'storage '
+                                                                                                                                'causes '
+                                                                                                                                'and '
+                                                                                                                                'classify '
+                                                                                                                                'only '
+                                                                                                                                'the '
+                                                                                                                                'supplied '
+                                                                                                                                'activation '
+                                                                                                                                'address '
+                                                                                                                                'constraint.'}}},
+ 'body_changes': [{'id': 'internal/store/postgres/company_console.go:*PgStore:ListCompanyAudit',
+                   'before_sha256': '3e45d11581d4928bbf26d7e59c88a7322c04dda4be91de0f99b84c685100e77f',
+                   'after_sha256': '538efc7815ca2e8264626793815016a6a738138bd878d020a162bb55c4a7a971'},
+                  {'id': 'internal/store/postgres/company_members.go:*PgStore:ActivateEmployee',
+                   'before_sha256': '4adcbd4f8d20768e522f62aabd4df97ff751dab8ce7a7d2535dba8ad6b50f874',
+                   'after_sha256': 'b7ac7978144a2e720d5639934b4169e8dbb2b1dfa49ea109f8441b3d9d65097f'},
+                  {'id': 'internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken',
+                   'before_sha256': 'cf75a65ba284e7a9fa7a9ff7c60fcc5fcada1e0d6a2f0750a29df7b13b08b726',
+                   'after_sha256': '0a0796b2e461476e655ed669e26a1c8fbbfc23a78f4156ae81e63fc8def81abc'}],
+ 'classification_changes': [{'id': 'internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken',
+                             'before': {'kind': 'direct-write',
+                                        'direct_write': True,
+                                        'write_closure': True,
+                                        'explicit_lock': True,
+                                        'transaction_calls': True,
+                                        'callback_parameter': False,
+                                        'dynamic_sql_expression': False},
+                             'after': {'kind': 'direct-write',
+                                       'direct_write': True,
+                                       'write_closure': True,
+                                       'explicit_lock': True,
+                                       'transaction_calls': True,
+                                       'callback_parameter': False,
+                                       'dynamic_sql_expression': True}}],
+ 'manual_review_fields': {'internal/store/postgres/company_console.go:*PgStore:ListCompanyAudit': {'lock_fk_wait_fence': {'boundary': 'companyReadTx(admin=true) '
+                                                                                                                                      'uses '
+                                                                                                                                      'companyNoTenantLock '
+                                                                                                                                      'and '
+                                                                                                                                      'currentMemberActor '
+                                                                                                                                      'user '
+                                                                                                                                      'FOR '
+                                                                                                                                      'SHARE, '
+                                                                                                                                      'rechecking '
+                                                                                                                                      'current '
+                                                                                                                                      'interactive '
+                                                                                                                                      'tenant/active/session '
+                                                                                                                                      'authority. '
+                                                                                                                                      'A '
+                                                                                                                                      'current '
+                                                                                                                                      'administrator '
+                                                                                                                                      'does '
+                                                                                                                                      'not '
+                                                                                                                                      'enter '
+                                                                                                                                      'the '
+                                                                                                                                      'non-admin '
+                                                                                                                                      'effectivePermissionSnapshot '
+                                                                                                                                      'branch; '
+                                                                                                                                      'no '
+                                                                                                                                      'profile '
+                                                                                                                                      'SHARE '
+                                                                                                                                      'lock '
+                                                                                                                                      'is '
+                                                                                                                                      'asserted '
+                                                                                                                                      'for '
+                                                                                                                                      'this '
+                                                                                                                                      'path. '
+                                                                                                                                      'The '
+                                                                                                                                      'identical '
+                                                                                                                                      'tenant-bounded '
+                                                                                                                                      'filter '
+                                                                                                                                      'feeds '
+                                                                                                                                      'both '
+                                                                                                                                      'count '
+                                                                                                                                      'and '
+                                                                                                                                      'ordered '
+                                                                                                                                      'page '
+                                                                                                                                      'reads, '
+                                                                                                                                      'adding '
+                                                                                                                                      'only '
+                                                                                                                                      'permission.profile.create, '
+                                                                                                                                      'permission.profile.update, '
+                                                                                                                                      'permission.profile.delete, '
+                                                                                                                                      'permission.profile.assign '
+                                                                                                                                      'and '
+                                                                                                                                      'permission.override.patch '
+                                                                                                                                      'to '
+                                                                                                                                      'the '
+                                                                                                                                      'existing '
+                                                                                                                                      'action '
+                                                                                                                                      'families. '
+                                                                                                                                      'Safe '
+                                                                                                                                      'projected '
+                                                                                                                                      'fields, '
+                                                                                                                                      'ordering '
+                                                                                                                                      'and '
+                                                                                                                                      'pagination '
+                                                                                                                                      'remain; '
+                                                                                                                                      'no '
+                                                                                                                                      'permission '
+                                                                                                                                      'wildcard '
+                                                                                                                                      'or '
+                                                                                                                                      'direct '
+                                                                                                                                      'data '
+                                                                                                                                      'write '
+                                                                                                                                      'is '
+                                                                                                                                      'introduced. '
+                                                                                                                                      'The '
+                                                                                                                                      'two '
+                                                                                                                                      'READ '
+                                                                                                                                      'COMMITTED '
+                                                                                                                                      'statements '
+                                                                                                                                      'are '
+                                                                                                                                      'not '
+                                                                                                                                      'one '
+                                                                                                                                      'repeatable '
+                                                                                                                                      'snapshot.',
+                                                                                                                          'local_operations': [{'line': 28,
+                                                                                                                                                'operation': 's.companyReadTx',
+                                                                                                                                                'sql_expression': '',
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 33,
+                                                                                                                                                'operation': 'tx.QueryRow',
+                                                                                                                                                'sql_expression': '`SELECT '
+                                                                                                                                                                  'count(*) '
+                                                                                                                                                                  'FROM '
+                                                                                                                                                                  'audit_log '
+                                                                                                                                                                  'WHERE '
+                                                                                                                                                                  '` '
+                                                                                                                                                                  '+ '
+                                                                                                                                                                  'filter',
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 36,
+                                                                                                                                                'operation': 'tx.Query',
+                                                                                                                                                'sql_expression': '`SELECT '
+                                                                                                                                                                  "id,COALESCE(actor,''),action,COALESCE(resource_type,''),resource_id,COALESCE(details->>'reason',''),created_at "
+                                                                                                                                                                  'FROM '
+                                                                                                                                                                  'audit_log '
+                                                                                                                                                                  'WHERE '
+                                                                                                                                                                  '` '
+                                                                                                                                                                  '+ '
+                                                                                                                                                                  'filter '
+                                                                                                                                                                  '+ '
+                                                                                                                                                                  '` '
+                                                                                                                                                                  'ORDER '
+                                                                                                                                                                  'BY '
+                                                                                                                                                                  'created_at '
+                                                                                                                                                                  'DESC,id '
+                                                                                                                                                                  'DESC '
+                                                                                                                                                                  'LIMIT '
+                                                                                                                                                                  '$2 '
+                                                                                                                                                                  'OFFSET '
+                                                                                                                                                                  '$3`',
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'}],
+                                                                                                                          'direct_lock_fragments': [],
+                                                                                                                          'implicit_fk': 'There '
+                                                                                                                                         'is '
+                                                                                                                                         'no '
+                                                                                                                                         'direct '
+                                                                                                                                         'SQL '
+                                                                                                                                         'lock '
+                                                                                                                                         'or '
+                                                                                                                                         'new '
+                                                                                                                                         'FK '
+                                                                                                                                         'action '
+                                                                                                                                         'in '
+                                                                                                                                         'ListCompanyAudit. '
+                                                                                                                                         'Its '
+                                                                                                                                         'current-user '
+                                                                                                                                         'lock '
+                                                                                                                                         'is '
+                                                                                                                                         'owned '
+                                                                                                                                         'by '
+                                                                                                                                         'the '
+                                                                                                                                         'existing '
+                                                                                                                                         'helper '
+                                                                                                                                         'transaction; '
+                                                                                                                                         'no '
+                                                                                                                                         'forced '
+                                                                                                                                         'tenant '
+                                                                                                                                         'lock '
+                                                                                                                                         'is '
+                                                                                                                                         'added.'},
+                                                                                                   'evidence': ['internal/store/postgres/company_console.go:24-51 '
+                                                                                                                'sha256=538efc7815ca2e8264626793815016a6a738138bd878d020a162bb55c4a7a971',
+                                                                                                                'Original '
+                                                                                                                'syntax '
+                                                                                                                'producers; '
+                                                                                                                'execution '
+                                                                                                                'and '
+                                                                                                                'CI '
+                                                                                                                'qualification '
+                                                                                                                'remain '
+                                                                                                                'separately '
+                                                                                                                'source-bound.'],
+                                                                                                   'unverified_risks': ['多语句overview跨资源快照不是REPEATABLE '
+                                                                                                                        'READ；读取helper不能推定没有隐式锁',
+                                                                                                                        'Original '
+                                                                                                                        'syntax '
+                                                                                                                        'producers '
+                                                                                                                        'only; '
+                                                                                                                        'SQL '
+                                                                                                                        'fragments, '
+                                                                                                                        'name-match '
+                                                                                                                        'callers '
+                                                                                                                        'and '
+                                                                                                                        'local '
+                                                                                                                        'operation '
+                                                                                                                        'order '
+                                                                                                                        'do '
+                                                                                                                        'not '
+                                                                                                                        'prove '
+                                                                                                                        'resolved '
+                                                                                                                        'dispatch, '
+                                                                                                                        'executed '
+                                                                                                                        'SQL '
+                                                                                                                        'or '
+                                                                                                                        'concurrency '
+                                                                                                                        'correctness. '
+                                                                                                                        'Separately '
+                                                                                                                        'bound '
+                                                                                                                        'EXEC '
+                                                                                                                        'product '
+                                                                                                                        'regressions '
+                                                                                                                        'retain '
+                                                                                                                        'their '
+                                                                                                                        'own '
+                                                                                                                        'source '
+                                                                                                                        'identities '
+                                                                                                                        'and '
+                                                                                                                        'limited '
+                                                                                                                        'qualification. '
+                                                                                                                        'This '
+                                                                                                                        'maintenance '
+                                                                                                                        'adds '
+                                                                                                                        'zero '
+                                                                                                                        'implementation '
+                                                                                                                        'TODOs '
+                                                                                                                        'and '
+                                                                                                                        'grants '
+                                                                                                                        'no '
+                                                                                                                        'runtime, '
+                                                                                                                        'release '
+                                                                                                                        'or '
+                                                                                                                        'parent '
+                                                                                                                        'acceptance.'],
+                                                                                                   'file_family_context': 'companyReadTx(admin=true) '
+                                                                                                                          'uses '
+                                                                                                                          'companyNoTenantLock '
+                                                                                                                          'and '
+                                                                                                                          'currentMemberActor '
+                                                                                                                          'user '
+                                                                                                                          'FOR '
+                                                                                                                          'SHARE, '
+                                                                                                                          'rechecking '
+                                                                                                                          'current '
+                                                                                                                          'interactive '
+                                                                                                                          'tenant/active/session '
+                                                                                                                          'authority. '
+                                                                                                                          'A '
+                                                                                                                          'current '
+                                                                                                                          'administrator '
+                                                                                                                          'does '
+                                                                                                                          'not '
+                                                                                                                          'enter '
+                                                                                                                          'the '
+                                                                                                                          'non-admin '
+                                                                                                                          'effectivePermissionSnapshot '
+                                                                                                                          'branch; '
+                                                                                                                          'no '
+                                                                                                                          'profile '
+                                                                                                                          'SHARE '
+                                                                                                                          'lock '
+                                                                                                                          'is '
+                                                                                                                          'asserted '
+                                                                                                                          'for '
+                                                                                                                          'this '
+                                                                                                                          'path. '
+                                                                                                                          'The '
+                                                                                                                          'identical '
+                                                                                                                          'tenant-bounded '
+                                                                                                                          'filter '
+                                                                                                                          'feeds '
+                                                                                                                          'both '
+                                                                                                                          'count '
+                                                                                                                          'and '
+                                                                                                                          'ordered '
+                                                                                                                          'page '
+                                                                                                                          'reads, '
+                                                                                                                          'adding '
+                                                                                                                          'only '
+                                                                                                                          'permission.profile.create, '
+                                                                                                                          'permission.profile.update, '
+                                                                                                                          'permission.profile.delete, '
+                                                                                                                          'permission.profile.assign '
+                                                                                                                          'and '
+                                                                                                                          'permission.override.patch '
+                                                                                                                          'to '
+                                                                                                                          'the '
+                                                                                                                          'existing '
+                                                                                                                          'action '
+                                                                                                                          'families. '
+                                                                                                                          'Safe '
+                                                                                                                          'projected '
+                                                                                                                          'fields, '
+                                                                                                                          'ordering '
+                                                                                                                          'and '
+                                                                                                                          'pagination '
+                                                                                                                          'remain; '
+                                                                                                                          'no '
+                                                                                                                          'permission '
+                                                                                                                          'wildcard '
+                                                                                                                          'or '
+                                                                                                                          'direct '
+                                                                                                                          'data '
+                                                                                                                          'write '
+                                                                                                                          'is '
+                                                                                                                          'introduced. '
+                                                                                                                          'The '
+                                                                                                                          'two '
+                                                                                                                          'READ '
+                                                                                                                          'COMMITTED '
+                                                                                                                          'statements '
+                                                                                                                          'are '
+                                                                                                                          'not '
+                                                                                                                          'one '
+                                                                                                                          'repeatable '
+                                                                                                                          'snapshot.',
+                                                                                                   'source_review': {'base_commit': '177ee571b194836678cc9a473f178c655326ba7c',
+                                                                                                                     'source_sha256': '538efc7815ca2e8264626793815016a6a738138bd878d020a162bb55c4a7a971',
+                                                                                                                     'role': 'tenant-administration-audit-reader',
+                                                                                                                     'trace': 'companyReadTx(admin=true) '
+                                                                                                                              'uses '
+                                                                                                                              'companyNoTenantLock '
+                                                                                                                              'and '
+                                                                                                                              'currentMemberActor '
+                                                                                                                              'user '
+                                                                                                                              'FOR '
+                                                                                                                              'SHARE, '
+                                                                                                                              'rechecking '
+                                                                                                                              'current '
+                                                                                                                              'interactive '
+                                                                                                                              'tenant/active/session '
+                                                                                                                              'authority. '
+                                                                                                                              'A '
+                                                                                                                              'current '
+                                                                                                                              'administrator '
+                                                                                                                              'does '
+                                                                                                                              'not '
+                                                                                                                              'enter '
+                                                                                                                              'the '
+                                                                                                                              'non-admin '
+                                                                                                                              'effectivePermissionSnapshot '
+                                                                                                                              'branch; '
+                                                                                                                              'no '
+                                                                                                                              'profile '
+                                                                                                                              'SHARE '
+                                                                                                                              'lock '
+                                                                                                                              'is '
+                                                                                                                              'asserted '
+                                                                                                                              'for '
+                                                                                                                              'this '
+                                                                                                                              'path. '
+                                                                                                                              'The '
+                                                                                                                              'identical '
+                                                                                                                              'tenant-bounded '
+                                                                                                                              'filter '
+                                                                                                                              'feeds '
+                                                                                                                              'both '
+                                                                                                                              'count '
+                                                                                                                              'and '
+                                                                                                                              'ordered '
+                                                                                                                              'page '
+                                                                                                                              'reads, '
+                                                                                                                              'adding '
+                                                                                                                              'only '
+                                                                                                                              'permission.profile.create, '
+                                                                                                                              'permission.profile.update, '
+                                                                                                                              'permission.profile.delete, '
+                                                                                                                              'permission.profile.assign '
+                                                                                                                              'and '
+                                                                                                                              'permission.override.patch '
+                                                                                                                              'to '
+                                                                                                                              'the '
+                                                                                                                              'existing '
+                                                                                                                              'action '
+                                                                                                                              'families. '
+                                                                                                                              'Safe '
+                                                                                                                              'projected '
+                                                                                                                              'fields, '
+                                                                                                                              'ordering '
+                                                                                                                              'and '
+                                                                                                                              'pagination '
+                                                                                                                              'remain; '
+                                                                                                                              'no '
+                                                                                                                              'permission '
+                                                                                                                              'wildcard '
+                                                                                                                              'or '
+                                                                                                                              'direct '
+                                                                                                                              'data '
+                                                                                                                              'write '
+                                                                                                                              'is '
+                                                                                                                              'introduced. '
+                                                                                                                              'The '
+                                                                                                                              'two '
+                                                                                                                              'READ '
+                                                                                                                              'COMMITTED '
+                                                                                                                              'statements '
+                                                                                                                              'are '
+                                                                                                                              'not '
+                                                                                                                              'one '
+                                                                                                                              'repeatable '
+                                                                                                                              'snapshot.',
+                                                                                                                     'unverified': 'Original '
+                                                                                                                                   'syntax '
+                                                                                                                                   'producers '
+                                                                                                                                   'only; '
+                                                                                                                                   'SQL '
+                                                                                                                                   'fragments, '
+                                                                                                                                   'name-match '
+                                                                                                                                   'callers '
+                                                                                                                                   'and '
+                                                                                                                                   'local '
+                                                                                                                                   'operation '
+                                                                                                                                   'order '
+                                                                                                                                   'do '
+                                                                                                                                   'not '
+                                                                                                                                   'prove '
+                                                                                                                                   'resolved '
+                                                                                                                                   'dispatch, '
+                                                                                                                                   'executed '
+                                                                                                                                   'SQL '
+                                                                                                                                   'or '
+                                                                                                                                   'concurrency '
+                                                                                                                                   'correctness. '
+                                                                                                                                   'Separately '
+                                                                                                                                   'bound '
+                                                                                                                                   'EXEC '
+                                                                                                                                   'product '
+                                                                                                                                   'regressions '
+                                                                                                                                   'retain '
+                                                                                                                                   'their '
+                                                                                                                                   'own '
+                                                                                                                                   'source '
+                                                                                                                                   'identities '
+                                                                                                                                   'and '
+                                                                                                                                   'limited '
+                                                                                                                                   'qualification. '
+                                                                                                                                   'This '
+                                                                                                                                   'maintenance '
+                                                                                                                                   'adds '
+                                                                                                                                   'zero '
+                                                                                                                                   'implementation '
+                                                                                                                                   'TODOs '
+                                                                                                                                   'and '
+                                                                                                                                   'grants '
+                                                                                                                                   'no '
+                                                                                                                                   'runtime, '
+                                                                                                                                   'release '
+                                                                                                                                   'or '
+                                                                                                                                   'parent '
+                                                                                                                                   'acceptance.',
+                                                                                                                     'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md'}},
+                          'internal/store/postgres/company_members.go:*PgStore:ActivateEmployee': {'lock_fk_wait_fence': {'boundary': 'The '
+                                                                                                                                      'independent '
+                                                                                                                                      'activation '
+                                                                                                                                      'transaction '
+                                                                                                                                      'retains '
+                                                                                                                                      'tenant '
+                                                                                                                                      'UPDATE, '
+                                                                                                                                      'invitation '
+                                                                                                                                      'UPDATE, '
+                                                                                                                                      'deadline '
+                                                                                                                                      'checks, '
+                                                                                                                                      'early '
+                                                                                                                                      'sponsor/domain '
+                                                                                                                                      'reads, '
+                                                                                                                                      'profile '
+                                                                                                                                      'creation, '
+                                                                                                                                      'user/mailbox '
+                                                                                                                                      'inserts '
+                                                                                                                                      'and '
+                                                                                                                                      'invitation '
+                                                                                                                                      'consumption. '
+                                                                                                                                      'Each '
+                                                                                                                                      'INSERT '
+                                                                                                                                      'now '
+                                                                                                                                      'classifies '
+                                                                                                                                      'only '
+                                                                                                                                      'its '
+                                                                                                                                      'own '
+                                                                                                                                      'address '
+                                                                                                                                      'unique '
+                                                                                                                                      'constraint '
+                                                                                                                                      'and '
+                                                                                                                                      'retains '
+                                                                                                                                      'the '
+                                                                                                                                      'original '
+                                                                                                                                      'cause; '
+                                                                                                                                      'unrelated '
+                                                                                                                                      'failures '
+                                                                                                                                      'and '
+                                                                                                                                      'late '
+                                                                                                                                      'audit '
+                                                                                                                                      'errors '
+                                                                                                                                      'remain '
+                                                                                                                                      'original '
+                                                                                                                                      'errors. '
+                                                                                                                                      'After '
+                                                                                                                                      'required '
+                                                                                                                                      'audit/outbox '
+                                                                                                                                      'writes, '
+                                                                                                                                      'a '
+                                                                                                                                      'new '
+                                                                                                                                      'current '
+                                                                                                                                      'sponsor '
+                                                                                                                                      'users '
+                                                                                                                                      'FOR '
+                                                                                                                                      'SHARE '
+                                                                                                                                      'NOWAIT '
+                                                                                                                                      'checks '
+                                                                                                                                      'active '
+                                                                                                                                      'super-admin '
+                                                                                                                                      'or '
+                                                                                                                                      'same-tenant '
+                                                                                                                                      'admin '
+                                                                                                                                      'authority '
+                                                                                                                                      'and '
+                                                                                                                                      'holds '
+                                                                                                                                      'that '
+                                                                                                                                      'row '
+                                                                                                                                      'through '
+                                                                                                                                      'Commit. '
+                                                                                                                                      'Missing '
+                                                                                                                                      'authority '
+                                                                                                                                      'is '
+                                                                                                                                      'forbidden; '
+                                                                                                                                      'busy '
+                                                                                                                                      'sponsor '
+                                                                                                                                      '55P03 '
+                                                                                                                                      'is '
+                                                                                                                                      'conflict '
+                                                                                                                                      'with '
+                                                                                                                                      'its '
+                                                                                                                                      'cause. '
+                                                                                                                                      'The '
+                                                                                                                                      'pre-existing '
+                                                                                                                                      'final '
+                                                                                                                                      'company/domain '
+                                                                                                                                      'NOWAIT '
+                                                                                                                                      'fence '
+                                                                                                                                      'and '
+                                                                                                                                      'final '
+                                                                                                                                      'elapsed-deadline '
+                                                                                                                                      'check '
+                                                                                                                                      'still '
+                                                                                                                                      'follow. '
+                                                                                                                                      'Any '
+                                                                                                                                      'failure '
+                                                                                                                                      'uses '
+                                                                                                                                      'the '
+                                                                                                                                      'original '
+                                                                                                                                      'rollback '
+                                                                                                                                      'for '
+                                                                                                                                      'user, '
+                                                                                                                                      'mailbox, '
+                                                                                                                                      'profile, '
+                                                                                                                                      'invitation, '
+                                                                                                                                      'audit '
+                                                                                                                                      'and '
+                                                                                                                                      'outbox '
+                                                                                                                                      'effects; '
+                                                                                                                                      'no '
+                                                                                                                                      'automatic '
+                                                                                                                                      'activation '
+                                                                                                                                      'retry '
+                                                                                                                                      'is '
+                                                                                                                                      'added.',
+                                                                                                                          'local_operations': [{'line': 283,
+                                                                                                                                                'operation': 's.pool.Begin',
+                                                                                                                                                'sql_expression': '',
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 287,
+                                                                                                                                                'operation': 'tx.Rollback',
+                                                                                                                                                'sql_expression': '',
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 289,
+                                                                                                                                                'operation': 'tx.QueryRow',
+                                                                                                                                                'sql_expression': '`SELECT '
+                                                                                                                                                                  'tenant_id '
+                                                                                                                                                                  'FROM '
+                                                                                                                                                                  'employee_invitations '
+                                                                                                                                                                  'WHERE '
+                                                                                                                                                                  'token_hash=$1`',
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 303,
+                                                                                                                                                'operation': 'tx.QueryRow',
+                                                                                                                                                'sql_expression': '`SELECT '
+                                                                                                                                                                  'id,email,display_name,mailbox_address,permission_profile_id,invited_by,expires_at '
+                                                                                                                                                                  'FROM '
+                                                                                                                                                                  'employee_invitations '
+                                                                                                                                                                  'WHERE '
+                                                                                                                                                                  'token_hash=$1 '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  'tenant_id=$2 '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  'expires_at>clock_timestamp() '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  'consumed_at '
+                                                                                                                                                                  'IS '
+                                                                                                                                                                  'NULL '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  'revoked_at '
+                                                                                                                                                                  'IS '
+                                                                                                                                                                  'NULL '
+                                                                                                                                                                  'FOR '
+                                                                                                                                                                  'UPDATE`',
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 314,
+                                                                                                                                                'operation': 'tx.QueryRow',
+                                                                                                                                                'sql_expression': '`SELECT '
+                                                                                                                                                                  'clock_timestamp()`',
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 326,
+                                                                                                                                                'operation': 'tx.QueryRow',
+                                                                                                                                                'sql_expression': '`SELECT '
+                                                                                                                                                                  'EXISTS(SELECT '
+                                                                                                                                                                  '1 '
+                                                                                                                                                                  'FROM '
+                                                                                                                                                                  'users '
+                                                                                                                                                                  'WHERE '
+                                                                                                                                                                  'id=$1 '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  'is_active '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  "(role='super_admin' "
+                                                                                                                                                                  'OR '
+                                                                                                                                                                  '(tenant_id=$2 '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  "role='admin')))`",
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 342,
+                                                                                                                                                'operation': 'tx.QueryRow',
+                                                                                                                                                'sql_expression': '`INSERT '
+                                                                                                                                                                  'INTO '
+                                                                                                                                                                  'permission_profiles(id,tenant_id,name,description,can_send,daily_send_quota,daily_receive_quota,max_mailboxes,max_domains,can_create_domains,can_create_routes,can_create_api_keys) '
+                                                                                                                                                                  "VALUES($1,$2,'Company "
+                                                                                                                                                                  "employee','Employee "
+                                                                                                                                                                  'mailbox '
+                                                                                                                                                                  'access; '
+                                                                                                                                                                  'no '
+                                                                                                                                                                  'infrastructure '
+                                                                                                                                                                  "administration',true,200,0,1,0,false,false,false) "
+                                                                                                                                                                  'ON '
+                                                                                                                                                                  'CONFLICT(tenant_id,name) '
+                                                                                                                                                                  'WHERE '
+                                                                                                                                                                  'tenant_id '
+                                                                                                                                                                  'IS '
+                                                                                                                                                                  'NOT '
+                                                                                                                                                                  'NULL '
+                                                                                                                                                                  'DO '
+                                                                                                                                                                  'UPDATE '
+                                                                                                                                                                  'SET '
+                                                                                                                                                                  'name=EXCLUDED.name '
+                                                                                                                                                                  'RETURNING '
+                                                                                                                                                                  'id`',
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 349,
+                                                                                                                                                'operation': 'tx.QueryRow',
+                                                                                                                                                'sql_expression': '`SELECT '
+                                                                                                                                                                  'EXISTS(SELECT '
+                                                                                                                                                                  '1 '
+                                                                                                                                                                  'FROM '
+                                                                                                                                                                  'permission_profiles '
+                                                                                                                                                                  'WHERE '
+                                                                                                                                                                  'id=$1 '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  '(tenant_id=$2 '
+                                                                                                                                                                  'OR '
+                                                                                                                                                                  'tenant_id '
+                                                                                                                                                                  'IS '
+                                                                                                                                                                  'NULL))`',
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 357,
+                                                                                                                                                'operation': 'tx.Exec',
+                                                                                                                                                'sql_expression': '`INSERT '
+                                                                                                                                                                  'INTO '
+                                                                                                                                                                  'users(id,tenant_id,email,password_hash,display_name,role,is_active,permission_profile_id) '
+                                                                                                                                                                  "VALUES($1,$2,$3,$4,$5,'user',true,$6)`",
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 360,
+                                                                                                                                                'operation': 'tx.Exec',
+                                                                                                                                                'sql_expression': '`INSERT '
+                                                                                                                                                                  'INTO '
+                                                                                                                                                                  'mailboxes(id,tenant_id,zone_id,local_part,resolved_domain,full_address,access_mode,owner_user_id,mailbox_kind,retention_hours_override) '
+                                                                                                                                                                  "VALUES($1,$2,$3,$4,$5,$6,'token',$7,'personal',0)`",
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 363,
+                                                                                                                                                'operation': 'tx.Exec',
+                                                                                                                                                'sql_expression': '`UPDATE '
+                                                                                                                                                                  'employee_invitations '
+                                                                                                                                                                  'SET '
+                                                                                                                                                                  'consumed_at=now() '
+                                                                                                                                                                  'WHERE '
+                                                                                                                                                                  'id=$1`',
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 376,
+                                                                                                                                                'operation': 'tx.QueryRow',
+                                                                                                                                                'sql_expression': '`SELECT '
+                                                                                                                                                                  'id '
+                                                                                                                                                                  'FROM '
+                                                                                                                                                                  'users '
+                                                                                                                                                                  'WHERE '
+                                                                                                                                                                  'id=$1 '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  'is_active '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  "(role='super_admin' "
+                                                                                                                                                                  'OR '
+                                                                                                                                                                  '(tenant_id=$2 '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  "role='admin')) "
+                                                                                                                                                                  'FOR '
+                                                                                                                                                                  'SHARE '
+                                                                                                                                                                  'NOWAIT`',
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 392,
+                                                                                                                                                'operation': 'tx.QueryRow',
+                                                                                                                                                'sql_expression': '`SELECT '
+                                                                                                                                                                  'z.id '
+                                                                                                                                                                  'FROM '
+                                                                                                                                                                  'company_settings '
+                                                                                                                                                                  'c '
+                                                                                                                                                                  'JOIN '
+                                                                                                                                                                  'domain_zones '
+                                                                                                                                                                  'z '
+                                                                                                                                                                  'ON '
+                                                                                                                                                                  'z.id=c.primary_zone_id '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  'z.tenant_id=c.tenant_id '
+                                                                                                                                                                  'WHERE '
+                                                                                                                                                                  'c.tenant_id=$1 '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  'z.id=$2 '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  'z.domain=$3 '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  'z.is_verified '
+                                                                                                                                                                  'AND '
+                                                                                                                                                                  'z.mx_verified '
+                                                                                                                                                                  'FOR '
+                                                                                                                                                                  'SHARE '
+                                                                                                                                                                  'OF '
+                                                                                                                                                                  'c,z '
+                                                                                                                                                                  'NOWAIT`',
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                               {'line': 406,
+                                                                                                                                                'operation': 'tx.Commit',
+                                                                                                                                                'sql_expression': '',
+                                                                                                                                                'status': 'lexical-order-with-branches-not-single-total-runtime-order'}],
+                                                                                                                          'direct_lock_fragments': [{'line': 303,
+                                                                                                                                                     'sql_fragment': 'SELECT '
+                                                                                                                                                                     'id,email,display_name,mailbox_address,permission_profile_id,invited_by,expires_at '
+                                                                                                                                                                     'FROM '
+                                                                                                                                                                     'employee_invitations '
+                                                                                                                                                                     'WHERE '
+                                                                                                                                                                     'token_hash=$1 '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     'tenant_id=$2 '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     'expires_at>clock_timestamp() '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     'consumed_at '
+                                                                                                                                                                     'IS '
+                                                                                                                                                                     'NULL '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     'revoked_at '
+                                                                                                                                                                     'IS '
+                                                                                                                                                                     'NULL '
+                                                                                                                                                                     'FOR '
+                                                                                                                                                                     'UPDATE'},
+                                                                                                                                                    {'line': 376,
+                                                                                                                                                     'sql_fragment': 'SELECT '
+                                                                                                                                                                     'id '
+                                                                                                                                                                     'FROM '
+                                                                                                                                                                     'users '
+                                                                                                                                                                     'WHERE '
+                                                                                                                                                                     'id=$1 '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     'is_active '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     "(role='super_admin' "
+                                                                                                                                                                     'OR '
+                                                                                                                                                                     '(tenant_id=$2 '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     "role='admin')) "
+                                                                                                                                                                     'FOR '
+                                                                                                                                                                     'SHARE '
+                                                                                                                                                                     'NOWAIT'},
+                                                                                                                                                    {'line': 392,
+                                                                                                                                                     'sql_fragment': 'SELECT '
+                                                                                                                                                                     'z.id '
+                                                                                                                                                                     'FROM '
+                                                                                                                                                                     'company_settings '
+                                                                                                                                                                     'c '
+                                                                                                                                                                     'JOIN '
+                                                                                                                                                                     'domain_zones '
+                                                                                                                                                                     'z '
+                                                                                                                                                                     'ON '
+                                                                                                                                                                     'z.id=c.primary_zone_id '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     'z.tenant_id=c.tenant_id '
+                                                                                                                                                                     'WHERE '
+                                                                                                                                                                     'c.tenant_id=$1 '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     'z.id=$2 '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     'z.domain=$3 '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     'z.is_verified '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     'z.mx_verified '
+                                                                                                                                                                     'FOR '
+                                                                                                                                                                     'SHARE '
+                                                                                                                                                                     'OF '
+                                                                                                                                                                     'c,z '
+                                                                                                                                                                     'NOWAIT'}],
+                                                                                                                          'implicit_fk': 'Existing '
+                                                                                                                                         'user/profile/mailbox/domain '
+                                                                                                                                         'foreign '
+                                                                                                                                         'keys '
+                                                                                                                                         'can '
+                                                                                                                                         'still '
+                                                                                                                                         'wait '
+                                                                                                                                         'before '
+                                                                                                                                         'the '
+                                                                                                                                         'final '
+                                                                                                                                         'sponsor '
+                                                                                                                                         'fence. '
+                                                                                                                                         'NOWAIT '
+                                                                                                                                         'avoids '
+                                                                                                                                         'adding '
+                                                                                                                                         'a '
+                                                                                                                                         'reverse-order '
+                                                                                                                                         'wait '
+                                                                                                                                         'after '
+                                                                                                                                         'audit/outbox; '
+                                                                                                                                         'it '
+                                                                                                                                         'does '
+                                                                                                                                         'not '
+                                                                                                                                         'establish '
+                                                                                                                                         'that '
+                                                                                                                                         'all '
+                                                                                                                                         'earlier '
+                                                                                                                                         'FK '
+                                                                                                                                         'waits '
+                                                                                                                                         'are '
+                                                                                                                                         'deadlock-free.'},
+                                                                                                   'evidence': ['internal/store/postgres/company_members.go:282-407 '
+                                                                                                                'sha256=b7ac7978144a2e720d5639934b4169e8dbb2b1dfa49ea109f8441b3d9d65097f',
+                                                                                                                'Original '
+                                                                                                                'syntax '
+                                                                                                                'producers; '
+                                                                                                                'execution '
+                                                                                                                'and '
+                                                                                                                'CI '
+                                                                                                                'qualification '
+                                                                                                                'remain '
+                                                                                                                'separately '
+                                                                                                                'source-bound.'],
+                                                                                                   'unverified_risks': ['Y最终同14事件基线6pass8fail/候选三轮14pass，busy409由正式UpdateZone+test-only '
+                                                                                                                        'advisory屏障实测，400/409均完整state '
+                                                                                                                        'rollback。其它sponsor/profile独立旧写caller、commit-unknown及整图运行未因本关系证明。',
+                                                                                                                        'Original '
+                                                                                                                        'syntax '
+                                                                                                                        'producers '
+                                                                                                                        'only; '
+                                                                                                                        'SQL '
+                                                                                                                        'fragments, '
+                                                                                                                        'name-match '
+                                                                                                                        'callers '
+                                                                                                                        'and '
+                                                                                                                        'local '
+                                                                                                                        'operation '
+                                                                                                                        'order '
+                                                                                                                        'do '
+                                                                                                                        'not '
+                                                                                                                        'prove '
+                                                                                                                        'resolved '
+                                                                                                                        'dispatch, '
+                                                                                                                        'executed '
+                                                                                                                        'SQL '
+                                                                                                                        'or '
+                                                                                                                        'concurrency '
+                                                                                                                        'correctness. '
+                                                                                                                        'Separately '
+                                                                                                                        'bound '
+                                                                                                                        'EXEC '
+                                                                                                                        'product '
+                                                                                                                        'regressions '
+                                                                                                                        'retain '
+                                                                                                                        'their '
+                                                                                                                        'own '
+                                                                                                                        'source '
+                                                                                                                        'identities '
+                                                                                                                        'and '
+                                                                                                                        'limited '
+                                                                                                                        'qualification. '
+                                                                                                                        'This '
+                                                                                                                        'maintenance '
+                                                                                                                        'adds '
+                                                                                                                        'zero '
+                                                                                                                        'implementation '
+                                                                                                                        'TODOs '
+                                                                                                                        'and '
+                                                                                                                        'grants '
+                                                                                                                        'no '
+                                                                                                                        'runtime, '
+                                                                                                                        'release '
+                                                                                                                        'or '
+                                                                                                                        'parent '
+                                                                                                                        'acceptance.'],
+                                                                                                   'file_family_context': 'The '
+                                                                                                                          'independent '
+                                                                                                                          'activation '
+                                                                                                                          'transaction '
+                                                                                                                          'retains '
+                                                                                                                          'tenant '
+                                                                                                                          'UPDATE, '
+                                                                                                                          'invitation '
+                                                                                                                          'UPDATE, '
+                                                                                                                          'deadline '
+                                                                                                                          'checks, '
+                                                                                                                          'early '
+                                                                                                                          'sponsor/domain '
+                                                                                                                          'reads, '
+                                                                                                                          'profile '
+                                                                                                                          'creation, '
+                                                                                                                          'user/mailbox '
+                                                                                                                          'inserts '
+                                                                                                                          'and '
+                                                                                                                          'invitation '
+                                                                                                                          'consumption. '
+                                                                                                                          'Each '
+                                                                                                                          'INSERT '
+                                                                                                                          'now '
+                                                                                                                          'classifies '
+                                                                                                                          'only '
+                                                                                                                          'its '
+                                                                                                                          'own '
+                                                                                                                          'address '
+                                                                                                                          'unique '
+                                                                                                                          'constraint '
+                                                                                                                          'and '
+                                                                                                                          'retains '
+                                                                                                                          'the '
+                                                                                                                          'original '
+                                                                                                                          'cause; '
+                                                                                                                          'unrelated '
+                                                                                                                          'failures '
+                                                                                                                          'and '
+                                                                                                                          'late '
+                                                                                                                          'audit '
+                                                                                                                          'errors '
+                                                                                                                          'remain '
+                                                                                                                          'original '
+                                                                                                                          'errors. '
+                                                                                                                          'After '
+                                                                                                                          'required '
+                                                                                                                          'audit/outbox '
+                                                                                                                          'writes, '
+                                                                                                                          'a '
+                                                                                                                          'new '
+                                                                                                                          'current '
+                                                                                                                          'sponsor '
+                                                                                                                          'users '
+                                                                                                                          'FOR '
+                                                                                                                          'SHARE '
+                                                                                                                          'NOWAIT '
+                                                                                                                          'checks '
+                                                                                                                          'active '
+                                                                                                                          'super-admin '
+                                                                                                                          'or '
+                                                                                                                          'same-tenant '
+                                                                                                                          'admin '
+                                                                                                                          'authority '
+                                                                                                                          'and '
+                                                                                                                          'holds '
+                                                                                                                          'that '
+                                                                                                                          'row '
+                                                                                                                          'through '
+                                                                                                                          'Commit. '
+                                                                                                                          'Missing '
+                                                                                                                          'authority '
+                                                                                                                          'is '
+                                                                                                                          'forbidden; '
+                                                                                                                          'busy '
+                                                                                                                          'sponsor '
+                                                                                                                          '55P03 '
+                                                                                                                          'is '
+                                                                                                                          'conflict '
+                                                                                                                          'with '
+                                                                                                                          'its '
+                                                                                                                          'cause. '
+                                                                                                                          'The '
+                                                                                                                          'pre-existing '
+                                                                                                                          'final '
+                                                                                                                          'company/domain '
+                                                                                                                          'NOWAIT '
+                                                                                                                          'fence '
+                                                                                                                          'and '
+                                                                                                                          'final '
+                                                                                                                          'elapsed-deadline '
+                                                                                                                          'check '
+                                                                                                                          'still '
+                                                                                                                          'follow. '
+                                                                                                                          'Any '
+                                                                                                                          'failure '
+                                                                                                                          'uses '
+                                                                                                                          'the '
+                                                                                                                          'original '
+                                                                                                                          'rollback '
+                                                                                                                          'for '
+                                                                                                                          'user, '
+                                                                                                                          'mailbox, '
+                                                                                                                          'profile, '
+                                                                                                                          'invitation, '
+                                                                                                                          'audit '
+                                                                                                                          'and '
+                                                                                                                          'outbox '
+                                                                                                                          'effects; '
+                                                                                                                          'no '
+                                                                                                                          'automatic '
+                                                                                                                          'activation '
+                                                                                                                          'retry '
+                                                                                                                          'is '
+                                                                                                                          'added.',
+                                                                                                   'source_review': {'base_commit': '177ee571b194836678cc9a473f178c655326ba7c',
+                                                                                                                     'source_sha256': 'b7ac7978144a2e720d5639934b4169e8dbb2b1dfa49ea109f8441b3d9d65097f',
+                                                                                                                     'role': 'invitation-activation-transaction-writer',
+                                                                                                                     'trace': 'The '
+                                                                                                                              'independent '
+                                                                                                                              'activation '
+                                                                                                                              'transaction '
+                                                                                                                              'retains '
+                                                                                                                              'tenant '
+                                                                                                                              'UPDATE, '
+                                                                                                                              'invitation '
+                                                                                                                              'UPDATE, '
+                                                                                                                              'deadline '
+                                                                                                                              'checks, '
+                                                                                                                              'early '
+                                                                                                                              'sponsor/domain '
+                                                                                                                              'reads, '
+                                                                                                                              'profile '
+                                                                                                                              'creation, '
+                                                                                                                              'user/mailbox '
+                                                                                                                              'inserts '
+                                                                                                                              'and '
+                                                                                                                              'invitation '
+                                                                                                                              'consumption. '
+                                                                                                                              'Each '
+                                                                                                                              'INSERT '
+                                                                                                                              'now '
+                                                                                                                              'classifies '
+                                                                                                                              'only '
+                                                                                                                              'its '
+                                                                                                                              'own '
+                                                                                                                              'address '
+                                                                                                                              'unique '
+                                                                                                                              'constraint '
+                                                                                                                              'and '
+                                                                                                                              'retains '
+                                                                                                                              'the '
+                                                                                                                              'original '
+                                                                                                                              'cause; '
+                                                                                                                              'unrelated '
+                                                                                                                              'failures '
+                                                                                                                              'and '
+                                                                                                                              'late '
+                                                                                                                              'audit '
+                                                                                                                              'errors '
+                                                                                                                              'remain '
+                                                                                                                              'original '
+                                                                                                                              'errors. '
+                                                                                                                              'After '
+                                                                                                                              'required '
+                                                                                                                              'audit/outbox '
+                                                                                                                              'writes, '
+                                                                                                                              'a '
+                                                                                                                              'new '
+                                                                                                                              'current '
+                                                                                                                              'sponsor '
+                                                                                                                              'users '
+                                                                                                                              'FOR '
+                                                                                                                              'SHARE '
+                                                                                                                              'NOWAIT '
+                                                                                                                              'checks '
+                                                                                                                              'active '
+                                                                                                                              'super-admin '
+                                                                                                                              'or '
+                                                                                                                              'same-tenant '
+                                                                                                                              'admin '
+                                                                                                                              'authority '
+                                                                                                                              'and '
+                                                                                                                              'holds '
+                                                                                                                              'that '
+                                                                                                                              'row '
+                                                                                                                              'through '
+                                                                                                                              'Commit. '
+                                                                                                                              'Missing '
+                                                                                                                              'authority '
+                                                                                                                              'is '
+                                                                                                                              'forbidden; '
+                                                                                                                              'busy '
+                                                                                                                              'sponsor '
+                                                                                                                              '55P03 '
+                                                                                                                              'is '
+                                                                                                                              'conflict '
+                                                                                                                              'with '
+                                                                                                                              'its '
+                                                                                                                              'cause. '
+                                                                                                                              'The '
+                                                                                                                              'pre-existing '
+                                                                                                                              'final '
+                                                                                                                              'company/domain '
+                                                                                                                              'NOWAIT '
+                                                                                                                              'fence '
+                                                                                                                              'and '
+                                                                                                                              'final '
+                                                                                                                              'elapsed-deadline '
+                                                                                                                              'check '
+                                                                                                                              'still '
+                                                                                                                              'follow. '
+                                                                                                                              'Any '
+                                                                                                                              'failure '
+                                                                                                                              'uses '
+                                                                                                                              'the '
+                                                                                                                              'original '
+                                                                                                                              'rollback '
+                                                                                                                              'for '
+                                                                                                                              'user, '
+                                                                                                                              'mailbox, '
+                                                                                                                              'profile, '
+                                                                                                                              'invitation, '
+                                                                                                                              'audit '
+                                                                                                                              'and '
+                                                                                                                              'outbox '
+                                                                                                                              'effects; '
+                                                                                                                              'no '
+                                                                                                                              'automatic '
+                                                                                                                              'activation '
+                                                                                                                              'retry '
+                                                                                                                              'is '
+                                                                                                                              'added.',
+                                                                                                                     'unverified': 'Original '
+                                                                                                                                   'syntax '
+                                                                                                                                   'producers '
+                                                                                                                                   'only; '
+                                                                                                                                   'SQL '
+                                                                                                                                   'fragments, '
+                                                                                                                                   'name-match '
+                                                                                                                                   'callers '
+                                                                                                                                   'and '
+                                                                                                                                   'local '
+                                                                                                                                   'operation '
+                                                                                                                                   'order '
+                                                                                                                                   'do '
+                                                                                                                                   'not '
+                                                                                                                                   'prove '
+                                                                                                                                   'resolved '
+                                                                                                                                   'dispatch, '
+                                                                                                                                   'executed '
+                                                                                                                                   'SQL '
+                                                                                                                                   'or '
+                                                                                                                                   'concurrency '
+                                                                                                                                   'correctness. '
+                                                                                                                                   'Separately '
+                                                                                                                                   'bound '
+                                                                                                                                   'EXEC '
+                                                                                                                                   'product '
+                                                                                                                                   'regressions '
+                                                                                                                                   'retain '
+                                                                                                                                   'their '
+                                                                                                                                   'own '
+                                                                                                                                   'source '
+                                                                                                                                   'identities '
+                                                                                                                                   'and '
+                                                                                                                                   'limited '
+                                                                                                                                   'qualification. '
+                                                                                                                                   'This '
+                                                                                                                                   'maintenance '
+                                                                                                                                   'adds '
+                                                                                                                                   'zero '
+                                                                                                                                   'implementation '
+                                                                                                                                   'TODOs '
+                                                                                                                                   'and '
+                                                                                                                                   'grants '
+                                                                                                                                   'no '
+                                                                                                                                   'runtime, '
+                                                                                                                                   'release '
+                                                                                                                                   'or '
+                                                                                                                                   'parent '
+                                                                                                                                   'acceptance.',
+                                                                                                                     'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md'}},
+                          'internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken': {'lock_fk_wait_fence': {'boundary': 'The '
+                                                                                                                                         'existing '
+                                                                                                                                         'family '
+                                                                                                                                         'advisory '
+                                                                                                                                         'transaction '
+                                                                                                                                         'lock, '
+                                                                                                                                         'user '
+                                                                                                                                         'SHARE '
+                                                                                                                                         'lock '
+                                                                                                                                         'and '
+                                                                                                                                         'old-token '
+                                                                                                                                         'UPDATE '
+                                                                                                                                         'lock '
+                                                                                                                                         'retain '
+                                                                                                                                         'their '
+                                                                                                                                         'family/user/token '
+                                                                                                                                         'order. '
+                                                                                                                                         'The '
+                                                                                                                                         'user '
+                                                                                                                                         'read '
+                                                                                                                                         'now '
+                                                                                                                                         'combines '
+                                                                                                                                         'the '
+                                                                                                                                         'existing '
+                                                                                                                                         'userSelect '
+                                                                                                                                         'constant '
+                                                                                                                                         'with '
+                                                                                                                                         'a '
+                                                                                                                                         'token-user '
+                                                                                                                                         'subquery '
+                                                                                                                                         'and '
+                                                                                                                                         'FOR '
+                                                                                                                                         'SHARE, '
+                                                                                                                                         'then '
+                                                                                                                                         'scanUser '
+                                                                                                                                         'captures '
+                                                                                                                                         'the '
+                                                                                                                                         'complete '
+                                                                                                                                         'user '
+                                                                                                                                         'under '
+                                                                                                                                         'that '
+                                                                                                                                         'existing '
+                                                                                                                                         'lock. '
+                                                                                                                                         'This '
+                                                                                                                                         'changes '
+                                                                                                                                         'the '
+                                                                                                                                         'lexical '
+                                                                                                                                         'dynamic-SQL '
+                                                                                                                                         'classification, '
+                                                                                                                                         'not '
+                                                                                                                                         'the '
+                                                                                                                                         'user '
+                                                                                                                                         'lock '
+                                                                                                                                         'level. '
+                                                                                                                                         'Expiry, '
+                                                                                                                                         'replay-family '
+                                                                                                                                         'revocation, '
+                                                                                                                                         'descendant '
+                                                                                                                                         'insert '
+                                                                                                                                         'and '
+                                                                                                                                         'Commit '
+                                                                                                                                         'remain. '
+                                                                                                                                         'Only '
+                                                                                                                                         'successful '
+                                                                                                                                         'Commit '
+                                                                                                                                         'publishes '
+                                                                                                                                         'the '
+                                                                                                                                         'in-memory '
+                                                                                                                                         'Issuance '
+                                                                                                                                         'UserID/TenantID/PasswordHash/SessionVersion '
+                                                                                                                                         'proof '
+                                                                                                                                         'for '
+                                                                                                                                         'the '
+                                                                                                                                         'subsequent '
+                                                                                                                                         'HTTP '
+                                                                                                                                         'identity '
+                                                                                                                                         'comparison. '
+                                                                                                                                         'No '
+                                                                                                                                         'proof '
+                                                                                                                                         'is '
+                                                                                                                                         'persisted '
+                                                                                                                                         'as '
+                                                                                                                                         'a '
+                                                                                                                                         'refresh-token '
+                                                                                                                                         'column '
+                                                                                                                                         'or '
+                                                                                                                                         'JSON '
+                                                                                                                                         'field.',
+                                                                                                                             'local_operations': [{'line': 34,
+                                                                                                                                                   'operation': 's.pool.Begin',
+                                                                                                                                                   'sql_expression': '',
+                                                                                                                                                   'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                                  {'line': 38,
+                                                                                                                                                   'operation': 'tx.Rollback',
+                                                                                                                                                   'sql_expression': '',
+                                                                                                                                                   'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                                  {'line': 47,
+                                                                                                                                                   'operation': 'tx.QueryRow',
+                                                                                                                                                   'sql_expression': 'userSelect '
+                                                                                                                                                                     '+ '
+                                                                                                                                                                     '` '
+                                                                                                                                                                     'WHERE '
+                                                                                                                                                                     'id=(SELECT '
+                                                                                                                                                                     'user_id '
+                                                                                                                                                                     'FROM '
+                                                                                                                                                                     'refresh_tokens '
+                                                                                                                                                                     'WHERE '
+                                                                                                                                                                     'token_hash=$1) '
+                                                                                                                                                                     'FOR '
+                                                                                                                                                                     'SHARE`',
+                                                                                                                                                   'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                                  {'line': 58,
+                                                                                                                                                   'operation': 'tx.QueryRow',
+                                                                                                                                                   'sql_expression': '`SELECT '
+                                                                                                                                                                     'id,revoked_at,expires_at<=clock_timestamp() '
+                                                                                                                                                                     'FROM '
+                                                                                                                                                                     'refresh_tokens '
+                                                                                                                                                                     'WHERE '
+                                                                                                                                                                     'token_hash=$1 '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     'family_id=$2 '
+                                                                                                                                                                     'FOR '
+                                                                                                                                                                     'UPDATE`',
+                                                                                                                                                   'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                                  {'line': 66,
+                                                                                                                                                   'operation': 'tx.Exec',
+                                                                                                                                                   'sql_expression': '`UPDATE '
+                                                                                                                                                                     'refresh_tokens '
+                                                                                                                                                                     'SET '
+                                                                                                                                                                     'revoked_at=clock_timestamp() '
+                                                                                                                                                                     'WHERE '
+                                                                                                                                                                     'family_id=$1 '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     'revoked_at '
+                                                                                                                                                                     'IS '
+                                                                                                                                                                     'NULL`',
+                                                                                                                                                   'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                                  {'line': 69,
+                                                                                                                                                   'operation': 'tx.Commit',
+                                                                                                                                                   'sql_expression': '',
+                                                                                                                                                   'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                                  {'line': 77,
+                                                                                                                                                   'operation': 'tx.Exec',
+                                                                                                                                                   'sql_expression': '`UPDATE '
+                                                                                                                                                                     'refresh_tokens '
+                                                                                                                                                                     'SET '
+                                                                                                                                                                     'revoked_at=clock_timestamp() '
+                                                                                                                                                                     'WHERE '
+                                                                                                                                                                     'id=$1 '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     'revoked_at '
+                                                                                                                                                                     'IS '
+                                                                                                                                                                     'NULL '
+                                                                                                                                                                     'AND '
+                                                                                                                                                                     'expires_at>clock_timestamp()`',
+                                                                                                                                                   'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                                  {'line': 91,
+                                                                                                                                                   'operation': 'tx.Exec',
+                                                                                                                                                   'sql_expression': '`INSERT '
+                                                                                                                                                                     'INTO '
+                                                                                                                                                                     'refresh_tokens(id,user_id,token_hash,expires_at,created_at,family_id)\n'
+                                                                                                                                                                     ' '
+                                                                                                                                                                     'SELECT '
+                                                                                                                                                                     '$1,$2,$3,$4,clock_timestamp(),$5 '
+                                                                                                                                                                     'WHERE '
+                                                                                                                                                                     '$4>clock_timestamp()`',
+                                                                                                                                                   'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                                  {'line': 99,
+                                                                                                                                                   'operation': 'tx.Commit',
+                                                                                                                                                   'sql_expression': '',
+                                                                                                                                                   'status': 'lexical-order-with-branches-not-single-total-runtime-order'}],
+                                                                                                                             'direct_lock_fragments': [{'line': 47,
+                                                                                                                                                        'sql_fragment': ' '
+                                                                                                                                                                        'WHERE '
+                                                                                                                                                                        'id=(SELECT '
+                                                                                                                                                                        'user_id '
+                                                                                                                                                                        'FROM '
+                                                                                                                                                                        'refresh_tokens '
+                                                                                                                                                                        'WHERE '
+                                                                                                                                                                        'token_hash=$1) '
+                                                                                                                                                                        'FOR '
+                                                                                                                                                                        'SHARE'},
+                                                                                                                                                       {'line': 58,
+                                                                                                                                                        'sql_fragment': 'SELECT '
+                                                                                                                                                                        'id,revoked_at,expires_at<=clock_timestamp() '
+                                                                                                                                                                        'FROM '
+                                                                                                                                                                        'refresh_tokens '
+                                                                                                                                                                        'WHERE '
+                                                                                                                                                                        'token_hash=$1 '
+                                                                                                                                                                        'AND '
+                                                                                                                                                                        'family_id=$2 '
+                                                                                                                                                                        'FOR '
+                                                                                                                                                                        'UPDATE'}],
+                                                                                                                             'implicit_fk': 'Existing '
+                                                                                                                                            'refresh-token '
+                                                                                                                                            'user/FK '
+                                                                                                                                            'and '
+                                                                                                                                            'family '
+                                                                                                                                            'constraints '
+                                                                                                                                            'remain. '
+                                                                                                                                            'The '
+                                                                                                                                            'literal '
+                                                                                                                                            'lock '
+                                                                                                                                            'fragment '
+                                                                                                                                            'is '
+                                                                                                                                            'only '
+                                                                                                                                            'the '
+                                                                                                                                            'suffix '
+                                                                                                                                            'of '
+                                                                                                                                            'userSelect; '
+                                                                                                                                            'the '
+                                                                                                                                            'resolved '
+                                                                                                                                            'constant '
+                                                                                                                                            'selects '
+                                                                                                                                            'users. '
+                                                                                                                                            'Commit '
+                                                                                                                                            'uncertainty '
+                                                                                                                                            'and '
+                                                                                                                                            'all '
+                                                                                                                                            'cross-writer '
+                                                                                                                                            'schedules '
+                                                                                                                                            'require '
+                                                                                                                                            'separate '
+                                                                                                                                            'executed '
+                                                                                                                                            'evidence.'},
+                                                                                                      'evidence': ['internal/store/postgres/refresh_rotation.go:30-107 '
+                                                                                                                   'sha256=0a0796b2e461476e655ed669e26a1c8fbbfc23a78f4156ae81e63fc8def81abc',
+                                                                                                                   'Original '
+                                                                                                                   'syntax '
+                                                                                                                   'producers; '
+                                                                                                                   'execution '
+                                                                                                                   'and '
+                                                                                                                   'CI '
+                                                                                                                   'qualification '
+                                                                                                                   'remain '
+                                                                                                                   'separately '
+                                                                                                                   'source-bound.'],
+                                                                                                      'unverified_risks': ['family '
+                                                                                                                           'gc/用户删除/改密交叉依历史回归，Commit不明与客户端重放不能靠inventory证明',
+                                                                                                                           'Original '
+                                                                                                                           'syntax '
+                                                                                                                           'producers '
+                                                                                                                           'only; '
+                                                                                                                           'SQL '
+                                                                                                                           'fragments, '
+                                                                                                                           'name-match '
+                                                                                                                           'callers '
+                                                                                                                           'and '
+                                                                                                                           'local '
+                                                                                                                           'operation '
+                                                                                                                           'order '
+                                                                                                                           'do '
+                                                                                                                           'not '
+                                                                                                                           'prove '
+                                                                                                                           'resolved '
+                                                                                                                           'dispatch, '
+                                                                                                                           'executed '
+                                                                                                                           'SQL '
+                                                                                                                           'or '
+                                                                                                                           'concurrency '
+                                                                                                                           'correctness. '
+                                                                                                                           'Separately '
+                                                                                                                           'bound '
+                                                                                                                           'EXEC '
+                                                                                                                           'product '
+                                                                                                                           'regressions '
+                                                                                                                           'retain '
+                                                                                                                           'their '
+                                                                                                                           'own '
+                                                                                                                           'source '
+                                                                                                                           'identities '
+                                                                                                                           'and '
+                                                                                                                           'limited '
+                                                                                                                           'qualification. '
+                                                                                                                           'This '
+                                                                                                                           'maintenance '
+                                                                                                                           'adds '
+                                                                                                                           'zero '
+                                                                                                                           'implementation '
+                                                                                                                           'TODOs '
+                                                                                                                           'and '
+                                                                                                                           'grants '
+                                                                                                                           'no '
+                                                                                                                           'runtime, '
+                                                                                                                           'release '
+                                                                                                                           'or '
+                                                                                                                           'parent '
+                                                                                                                           'acceptance.'],
+                                                                                                      'file_family_context': 'The '
+                                                                                                                             'existing '
+                                                                                                                             'family '
+                                                                                                                             'advisory '
+                                                                                                                             'transaction '
+                                                                                                                             'lock, '
+                                                                                                                             'user '
+                                                                                                                             'SHARE '
+                                                                                                                             'lock '
+                                                                                                                             'and '
+                                                                                                                             'old-token '
+                                                                                                                             'UPDATE '
+                                                                                                                             'lock '
+                                                                                                                             'retain '
+                                                                                                                             'their '
+                                                                                                                             'family/user/token '
+                                                                                                                             'order. '
+                                                                                                                             'The '
+                                                                                                                             'user '
+                                                                                                                             'read '
+                                                                                                                             'now '
+                                                                                                                             'combines '
+                                                                                                                             'the '
+                                                                                                                             'existing '
+                                                                                                                             'userSelect '
+                                                                                                                             'constant '
+                                                                                                                             'with '
+                                                                                                                             'a '
+                                                                                                                             'token-user '
+                                                                                                                             'subquery '
+                                                                                                                             'and '
+                                                                                                                             'FOR '
+                                                                                                                             'SHARE, '
+                                                                                                                             'then '
+                                                                                                                             'scanUser '
+                                                                                                                             'captures '
+                                                                                                                             'the '
+                                                                                                                             'complete '
+                                                                                                                             'user '
+                                                                                                                             'under '
+                                                                                                                             'that '
+                                                                                                                             'existing '
+                                                                                                                             'lock. '
+                                                                                                                             'This '
+                                                                                                                             'changes '
+                                                                                                                             'the '
+                                                                                                                             'lexical '
+                                                                                                                             'dynamic-SQL '
+                                                                                                                             'classification, '
+                                                                                                                             'not '
+                                                                                                                             'the '
+                                                                                                                             'user '
+                                                                                                                             'lock '
+                                                                                                                             'level. '
+                                                                                                                             'Expiry, '
+                                                                                                                             'replay-family '
+                                                                                                                             'revocation, '
+                                                                                                                             'descendant '
+                                                                                                                             'insert '
+                                                                                                                             'and '
+                                                                                                                             'Commit '
+                                                                                                                             'remain. '
+                                                                                                                             'Only '
+                                                                                                                             'successful '
+                                                                                                                             'Commit '
+                                                                                                                             'publishes '
+                                                                                                                             'the '
+                                                                                                                             'in-memory '
+                                                                                                                             'Issuance '
+                                                                                                                             'UserID/TenantID/PasswordHash/SessionVersion '
+                                                                                                                             'proof '
+                                                                                                                             'for '
+                                                                                                                             'the '
+                                                                                                                             'subsequent '
+                                                                                                                             'HTTP '
+                                                                                                                             'identity '
+                                                                                                                             'comparison. '
+                                                                                                                             'No '
+                                                                                                                             'proof '
+                                                                                                                             'is '
+                                                                                                                             'persisted '
+                                                                                                                             'as '
+                                                                                                                             'a '
+                                                                                                                             'refresh-token '
+                                                                                                                             'column '
+                                                                                                                             'or '
+                                                                                                                             'JSON '
+                                                                                                                             'field.',
+                                                                                                      'source_review': {'base_commit': '177ee571b194836678cc9a473f178c655326ba7c',
+                                                                                                                        'source_sha256': '0a0796b2e461476e655ed669e26a1c8fbbfc23a78f4156ae81e63fc8def81abc',
+                                                                                                                        'role': 'refresh-authentication-snapshot-writer',
+                                                                                                                        'trace': 'The '
+                                                                                                                                 'existing '
+                                                                                                                                 'family '
+                                                                                                                                 'advisory '
+                                                                                                                                 'transaction '
+                                                                                                                                 'lock, '
+                                                                                                                                 'user '
+                                                                                                                                 'SHARE '
+                                                                                                                                 'lock '
+                                                                                                                                 'and '
+                                                                                                                                 'old-token '
+                                                                                                                                 'UPDATE '
+                                                                                                                                 'lock '
+                                                                                                                                 'retain '
+                                                                                                                                 'their '
+                                                                                                                                 'family/user/token '
+                                                                                                                                 'order. '
+                                                                                                                                 'The '
+                                                                                                                                 'user '
+                                                                                                                                 'read '
+                                                                                                                                 'now '
+                                                                                                                                 'combines '
+                                                                                                                                 'the '
+                                                                                                                                 'existing '
+                                                                                                                                 'userSelect '
+                                                                                                                                 'constant '
+                                                                                                                                 'with '
+                                                                                                                                 'a '
+                                                                                                                                 'token-user '
+                                                                                                                                 'subquery '
+                                                                                                                                 'and '
+                                                                                                                                 'FOR '
+                                                                                                                                 'SHARE, '
+                                                                                                                                 'then '
+                                                                                                                                 'scanUser '
+                                                                                                                                 'captures '
+                                                                                                                                 'the '
+                                                                                                                                 'complete '
+                                                                                                                                 'user '
+                                                                                                                                 'under '
+                                                                                                                                 'that '
+                                                                                                                                 'existing '
+                                                                                                                                 'lock. '
+                                                                                                                                 'This '
+                                                                                                                                 'changes '
+                                                                                                                                 'the '
+                                                                                                                                 'lexical '
+                                                                                                                                 'dynamic-SQL '
+                                                                                                                                 'classification, '
+                                                                                                                                 'not '
+                                                                                                                                 'the '
+                                                                                                                                 'user '
+                                                                                                                                 'lock '
+                                                                                                                                 'level. '
+                                                                                                                                 'Expiry, '
+                                                                                                                                 'replay-family '
+                                                                                                                                 'revocation, '
+                                                                                                                                 'descendant '
+                                                                                                                                 'insert '
+                                                                                                                                 'and '
+                                                                                                                                 'Commit '
+                                                                                                                                 'remain. '
+                                                                                                                                 'Only '
+                                                                                                                                 'successful '
+                                                                                                                                 'Commit '
+                                                                                                                                 'publishes '
+                                                                                                                                 'the '
+                                                                                                                                 'in-memory '
+                                                                                                                                 'Issuance '
+                                                                                                                                 'UserID/TenantID/PasswordHash/SessionVersion '
+                                                                                                                                 'proof '
+                                                                                                                                 'for '
+                                                                                                                                 'the '
+                                                                                                                                 'subsequent '
+                                                                                                                                 'HTTP '
+                                                                                                                                 'identity '
+                                                                                                                                 'comparison. '
+                                                                                                                                 'No '
+                                                                                                                                 'proof '
+                                                                                                                                 'is '
+                                                                                                                                 'persisted '
+                                                                                                                                 'as '
+                                                                                                                                 'a '
+                                                                                                                                 'refresh-token '
+                                                                                                                                 'column '
+                                                                                                                                 'or '
+                                                                                                                                 'JSON '
+                                                                                                                                 'field.',
+                                                                                                                        'unverified': 'Original '
+                                                                                                                                      'syntax '
+                                                                                                                                      'producers '
+                                                                                                                                      'only; '
+                                                                                                                                      'SQL '
+                                                                                                                                      'fragments, '
+                                                                                                                                      'name-match '
+                                                                                                                                      'callers '
+                                                                                                                                      'and '
+                                                                                                                                      'local '
+                                                                                                                                      'operation '
+                                                                                                                                      'order '
+                                                                                                                                      'do '
+                                                                                                                                      'not '
+                                                                                                                                      'prove '
+                                                                                                                                      'resolved '
+                                                                                                                                      'dispatch, '
+                                                                                                                                      'executed '
+                                                                                                                                      'SQL '
+                                                                                                                                      'or '
+                                                                                                                                      'concurrency '
+                                                                                                                                      'correctness. '
+                                                                                                                                      'Separately '
+                                                                                                                                      'bound '
+                                                                                                                                      'EXEC '
+                                                                                                                                      'product '
+                                                                                                                                      'regressions '
+                                                                                                                                      'retain '
+                                                                                                                                      'their '
+                                                                                                                                      'own '
+                                                                                                                                      'source '
+                                                                                                                                      'identities '
+                                                                                                                                      'and '
+                                                                                                                                      'limited '
+                                                                                                                                      'qualification. '
+                                                                                                                                      'This '
+                                                                                                                                      'maintenance '
+                                                                                                                                      'adds '
+                                                                                                                                      'zero '
+                                                                                                                                      'implementation '
+                                                                                                                                      'TODOs '
+                                                                                                                                      'and '
+                                                                                                                                      'grants '
+                                                                                                                                      'no '
+                                                                                                                                      'runtime, '
+                                                                                                                                      'release '
+                                                                                                                                      'or '
+                                                                                                                                      'parent '
+                                                                                                                                      'acceptance.',
+                                                                                                                        'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md'}}},
+ 'product_paths': ['internal/api/handlers/auth.go',
+                   'internal/ingest/service.go',
+                   'internal/models/models.go',
+                   'internal/models/refresh_issuance.go',
+                   'internal/outbound/delivery.go',
+                   'internal/outbound/service.go',
+                   'internal/smtp/server.go',
+                   'internal/store/member_guard.go',
+                   'internal/store/postgres/activation_errors.go',
+                   'internal/store/postgres/company_console.go',
+                   'internal/store/postgres/company_members.go',
+                   'internal/store/postgres/refresh_rotation.go',
+                   'internal/testutil/fake_store_refresh.go',
+                   'internal/workqueue/worker.go',
+                   'third_party/go-smtp/conn.go',
+                   'web/app/(dashboard)/admin/tenants/page.tsx',
+                   'web/features/company/overview.tsx']}
+
+
+def revision17_snapshot(name):
+    pin = REVISION17_SNAPSHOTS[name]
+    ref = REVISION17_COMMIT + ':' + pin['path']
+    raw = git('show', ref)
+    if git('rev-parse', ref).decode().strip() != pin['blob'] or hashlib.sha256(raw).hexdigest() != pin['sha256'] or len(raw) != pin['bytes']:
+        raise ValueError('revision17 public historical catalog identity drift: ' + name)
+    return json.loads(raw)
+
+
 def revision16_snapshot(name):
     pin = REVISION16_SNAPSHOTS[name]
     ref = REVISION16_COMMIT + ':' + pin['path']
@@ -6812,6 +9631,9 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         cls.revision16 = {name: revision16_snapshot(name) for name in REVISION16_SNAPSHOTS}
         cls.rev16_tx = cls.revision16['transaction']
         cls.rev16_compat = cls.revision16['compatibility']
+        cls.revision17 = {name: revision17_snapshot(name) for name in REVISION17_SNAPSHOTS}
+        cls.rev17_tx = cls.revision17['transaction']
+        cls.rev17_compat = cls.revision17['compatibility']
         cls.ast = tx.extract()
         cls.migrations = tx.migration_inventory()
         cls.routes, cls.clients = gate.collect()
@@ -7070,17 +9892,59 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                 patches.enter_context(mock.patch.object(self, name, value))
             yield
 
+    @classmethod
+    def frozen_revision17_root(cls):
+        if '_revision17_root' not in cls.__dict__:
+            temporary = tempfile.TemporaryDirectory(prefix='r5-catalog-revision17-')
+            cls.addClassCleanup(temporary.cleanup)
+            root = Path(temporary.name) / 'source'
+            subprocess.run(['git', 'clone', '--quiet', '--no-hardlinks', '--no-checkout', str(ROOT), str(root)], check=True)
+            subprocess.run(['git', '-C', str(root), 'checkout', '--quiet', '--detach', REVISION17_COMMIT], check=True)
+            def frozen_git(*args):
+                return subprocess.check_output(['git', '-C', str(root), *args]).decode().strip()
+            if frozen_git('rev-parse', 'HEAD') != REVISION17_COMMIT or frozen_git('rev-parse', 'HEAD^{tree}') != REVISION17_TREE or frozen_git('status', '--porcelain', '--untracked-files=all'):
+                raise ValueError('revision17 source checkout is not the exact clean public snapshot')
+            # Reuse only the installed compiler. All historical Go/TypeScript
+            # inputs and original assertion bodies come from public revision17.
+            compiler = ROOT / 'web/node_modules/typescript'
+            if not compiler.is_dir():
+                raise ValueError('TypeScript required for historical original collection')
+            (root / 'web/node_modules').mkdir()
+            (root / 'web/node_modules/typescript').symlink_to(compiler.resolve(), target_is_directory=True)
+            cls.revision17_ast = tx.extract(root)
+            cls.revision17_migrations = tx.migration_inventory(root)
+            with mock.patch.object(gate, 'ROOT', root):
+                cls.revision17_routes, cls.revision17_clients = gate.collect()
+            if frozen_git('rev-parse', 'HEAD') != REVISION17_COMMIT or frozen_git('rev-parse', 'HEAD^{tree}') != REVISION17_TREE or frozen_git('status', '--porcelain', '--untracked-files=all'):
+                raise ValueError('revision17 public checkout changed during original collection')
+            cls._revision17_root = root
+        return cls._revision17_root
+
+    @contextmanager
+    def revision17_context(self):
+        root = self.frozen_revision17_root()
+        with ExitStack() as patches:
+            patches.enter_context(mock.patch.dict(globals(), ROOT=root,
+                CURRENT_EVIDENCE=root / 'docs/company-mail/evidence/R5-CATALOG-REVISION17-20261009',
+                SOURCE_COMMIT=REVISION17_SOURCE_COMMIT, SOURCE_TREE=REVISION17_SOURCE_TREE))
+            patches.enter_context(mock.patch.object(gate, 'ROOT', root))
+            for name, value in dict(tx=self.rev17_tx, compat=self.rev17_compat,
+                    ast=self.revision17_ast, migrations=self.revision17_migrations,
+                    routes=self.revision17_routes, clients=self.revision17_clients).items():
+                patches.enter_context(mock.patch.object(self, name, value))
+            yield
+
     def test_old_pins_reject_and_current_revision_passes_same_actual_facts(self):
         review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
         expected = review['current_rejections']
         self.assertEqual(hashlib.sha256(gate.canonical_bytes(expected)).hexdigest(),
-                         REVISION17_EXPECTED['review_field_sha256']['current_rejections'])
+                         REVISION18_EXPECTED['review_field_sha256']['current_rejections'])
         historical = [('revision1', self.old_tx, self.old_compat),
                       ('revision2', self.rev2_tx, self.rev2_compat), ('revision3', self.rev3_tx, self.rev3_compat),
                       ('revision4', self.rev4_tx, self.rev4_compat), ('revision5', self.rev5_tx, self.rev5_compat),
                       ('revision6', self.rev6_tx, self.rev6_compat), ('revision7', self.rev7_tx, self.rev7_compat),
                       ('revision8', self.rev8_tx, self.rev8_compat), ('revision9', self.rev9_tx, self.rev9_compat),
-                      ('revision10', self.rev10_tx, self.rev10_compat), ('revision11', self.rev11_tx, self.rev11_compat), ('revision12', self.rev12_tx, self.rev12_compat), ('revision13', self.rev13_tx, self.rev13_compat), ('revision14', self.rev14_tx, self.rev14_compat), ('revision15', self.rev15_tx, self.rev15_compat), ('revision16', self.rev16_tx, self.rev16_compat)]
+                      ('revision10', self.rev10_tx, self.rev10_compat), ('revision11', self.rev11_tx, self.rev11_compat), ('revision12', self.rev12_tx, self.rev12_compat), ('revision13', self.rev13_tx, self.rev13_compat), ('revision14', self.rev14_tx, self.rev14_compat), ('revision15', self.rev15_tx, self.rev15_compat), ('revision16', self.rev16_tx, self.rev16_compat), ('revision17', self.rev17_tx, self.rev17_compat)]
         for revision, transaction, compatibility in historical:
             with self.assertRaises(ValueError) as rejected:
                 tx.validate(transaction, self.ast, self.migrations)
@@ -7092,10 +9956,10 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         self.assertFalse(gate.validate(self.compat, self.routes, self.clients)['product_green'])
         for name, current in (('transaction', self.tx), ('compatibility', self.compat)):
             revision = current['inventory_revision']
-            pin = REVISION16_SNAPSHOTS[name]
-            self.assertEqual(revision['revision'], 17)
+            pin = REVISION17_SNAPSHOTS[name]
+            self.assertEqual(revision['revision'], 18)
             self.assertEqual(revision['source_commit'], SOURCE_COMMIT)
-            self.assertEqual(revision['previous_snapshot_commit'], REVISION16_COMMIT)
+            self.assertEqual(revision['previous_snapshot_commit'], REVISION17_COMMIT)
             self.assertEqual(revision['previous_snapshot'], pin['path'])
             self.assertEqual(revision['previous_snapshot_blob'], pin['blob'])
             self.assertEqual(revision['previous_sha256'], pin['sha256'])
@@ -10305,54 +13169,373 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                     self.assertEqual(ast.get_source_segment(before_raw, value), ast.get_source_segment(after_raw, new_values[name]))
 
     def test_revision17_binds_actual_source_facts_and_preserves_manual_reviews(self):
+        with self.revision17_context():
+            review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+            self.assertEqual(review['inventory_revision'], 17)
+            self.assertEqual(review['source_commit'], SOURCE_COMMIT)
+            self.assertEqual(review['source_tree'], SOURCE_TREE)
+            self.assertEqual(git('rev-parse', SOURCE_COMMIT + '^{tree}').decode().strip(), SOURCE_TREE)
+            self.assertEqual(review['previous_catalog_commit'], REVISION16_COMMIT)
+            self.assertEqual(review['previous_product_source_commit'], REVISION16_SOURCE_COMMIT)
+            self.assertEqual(review['revision16_snapshots'],
+                             {name: dict(commit=REVISION16_COMMIT, **pin) for name, pin in REVISION16_SNAPSHOTS.items()})
+            for field, expected in REVISION17_EXPECTED['review_field_sha256'].items():
+                self.assertEqual(hashlib.sha256(gate.canonical_bytes(review[field])).hexdigest(), expected)
+            self.assertEqual(tx.validate(self.tx, self.ast, self.migrations), review['transaction'])
+            self.assertEqual(gate.validate(self.compat, self.routes, self.clients), review['compatibility'])
+            self.assertEqual(review['transaction'], REVISION17_EXPECTED['transaction'])
+            self.assertEqual(review['compatibility'], REVISION17_EXPECTED['compatibility'])
+            actual_files = [dict(path=item['path'], sha256=item['sha256']) for item in self.ast['files'] if item['path'].startswith(tx.PG)]
+            self.assertEqual(self.tx['postgres_files'], actual_files)
+            before_files = {item['path']: item['sha256'] for item in self.rev16_tx['postgres_files']}
+            after_files = {item['path']: item['sha256'] for item in self.tx['postgres_files']}
+            self.assertEqual(set(after_files), set(before_files))
+            self.assertEqual((len(before_files), len(after_files)), (64, 64))
+            changed_files = set(REVISION17_EXPECTED['file_review_additions'])
+            self.assertEqual([path for path in before_files if before_files[path] != after_files[path]],
+                             sorted(changed_files))
+            self.assertEqual(set(self.tx['reviewed_file_types']), set(self.rev16_tx['reviewed_file_types']))
+            for path, before in self.rev16_tx['reviewed_file_types'].items():
+                after = self.tx['reviewed_file_types'][path]
+                if path in changed_files:
+                    self.assertEqual(set(after), set(before) | {'revision17_additions'})
+                    self.assertEqual({key: value for key, value in after.items() if key != 'revision17_additions'}, before)
+                    self.assertEqual(after['revision17_additions'], REVISION17_EXPECTED['file_review_additions'][path])
+                else:
+                    self.assertEqual(after, before)
+            self.assertEqual(review['transaction_file_review_additions'], REVISION17_EXPECTED['file_review_additions'])
+            self.assertEqual(self.tx['migrations'], self.rev16_tx['migrations'])
+            self.assertEqual(self.tx['historical_review_metadata'], self.rev16_tx['historical_review_metadata'])
+            mutable_transaction = {'inventory_revision', 'baseline_commit', 'last_review_base_commit', 'current_review_boundary', 'postgres_files', 'reviewed_file_types', 'entries'}
+            self.assertEqual({key: value for key, value in self.rev16_tx.items() if key not in mutable_transaction},
+                             {key: value for key, value in self.tx.items() if key not in mutable_transaction})
+            functions = {item['id']: item for item in self.ast['functions'] if item['file'].startswith(tx.PG)}
+            classes = tx.classify(self.ast)
+            old = {entry['id']: entry for entry in self.rev16_tx['entries']}
+            current = {entry['id']: entry for entry in self.tx['entries']}
+            added_ids = set(REVISION17_EXPECTED['added_entries'])
+            reviewed = {row['id']: row for row in REVISION17_EXPECTED['body_changes']}
+            self.assertEqual(set(current), set(old) | added_ids)
+            self.assertEqual(set(current), set(functions))
+            self.assertEqual((len(old), len(current)), (405, REVISION17_EXPECTED['transaction']['functions']))
+            fingerprint = lambda value: hashlib.sha256(gate.canonical_bytes(value)).hexdigest()
+            def derived_assertions(function):
+                return {
+                    'direct_sql_effects': [dict(line=item['line'], sql_fragment=item['value']) for item in function['strings'] if tx.MUTATION.search(item['value'])],
+                    'direct_lock_fragments': [dict(line=item['line'], sql_fragment=item['value']) for item in function['strings'] if tx.LOCK.search(item['value'])],
+                    'transaction_helper_calls': [call for call in function['calls'] if call['name'] in tx.TX],
+                    'sql_execution_expressions': [call for call in function['calls'] if call['name'] in tx.SQL_CALLS],
+                }
+            def actual_callers(function):
+                return [dict(caller_id=item['id'], file=item['file'], function=item['name'],
+                    line=call['line'], expression=call['expr'], status='name-match-candidate-not-dispatch-proof')
+                    for item in self.ast['functions'] for call in item['calls'] if call['name'] == function['name']]
+            caller_changes, body_changes, classification_changes, entry_changes = [], [], [], []
+            for identity, before in old.items():
+                after, function = current[identity], functions[identity]
+                self.assertEqual(after['syntax'], function)
+                self.assertEqual(after['classification'], classes[identity])
+                self.assertEqual(after['callers'], actual_callers(function))
+                derived = derived_assertions(function)
+                self.assertEqual({key: after['assertions'][key] for key in derived}, derived)
+                self.assertEqual({key: value for key, value in before['assertions'].items() if key not in derived},
+                                 {key: value for key, value in after['assertions'].items() if key not in derived})
+                mutable = {'syntax', 'classification', 'callers', 'assertions'}
+                if identity in reviewed:
+                    self.assertEqual(before['syntax']['sha256'], reviewed[identity]['before_sha256'])
+                    self.assertEqual(function['sha256'], reviewed[identity]['after_sha256'])
+                    manual = ('lock_fk_wait_fence', 'evidence', 'unverified_risks', 'file_family_context')
+                    self.assertEqual(after['historical_revision16_review'], {key: before[key] for key in (*manual, 'source_review') if key in before})
+                    self.assertEqual({key: after[key] for key in (*manual, 'source_review')},
+                                     REVISION17_EXPECTED['manual_review_fields'][identity])
+                    self.assertEqual(after['source_review']['base_commit'], SOURCE_COMMIT)
+                    self.assertEqual(after['source_review']['source_sha256'], function['sha256'])
+                    mutable.update((*manual, 'historical_revision16_review', 'source_review'))
+                else:
+                    self.assertEqual(before['syntax']['sha256'], function['sha256'])
+                    if before['syntax'] != function:
+                        self.assertIn(function['file'], changed_files)
+                self.assertEqual({key: value for key, value in before.items() if key not in mutable},
+                                 {key: value for key, value in after.items() if key not in mutable})
+                if before['callers'] != after['callers']:
+                    caller_changes.append(dict(id=identity, before=before['callers'], after=after['callers'],
+                        before_sha256=fingerprint(before['callers']), after_sha256=fingerprint(after['callers'])))
+                if before['syntax']['sha256'] != function['sha256']:
+                    body_changes.append(dict(id=identity, before_sha256=before['syntax']['sha256'], after_sha256=function['sha256']))
+                if before['classification'] != after['classification']:
+                    classification_changes.append(dict(id=identity, before=before['classification'], after=after['classification']))
+                if before != after:
+                    entry_changes.append(dict(id=identity,
+                        changed_fields=[key for key in sorted(set(before) | set(after)) if before.get(key) != after.get(key)],
+                        before_sha256=fingerprint(before), after_sha256=fingerprint(after)))
+            for identity in sorted(added_ids):
+                added, function = current[identity], functions[identity]
+                self.assertEqual(added, REVISION17_EXPECTED['added_entries'][identity])
+                self.assertEqual(added['syntax'], function)
+                self.assertEqual(added['classification'], classes[identity])
+                self.assertEqual(added['classification']['kind'], 'lock-reader')
+                self.assertTrue(added['classification']['explicit_lock'])
+                self.assertFalse(added['classification']['direct_write'])
+                self.assertEqual(added['callers'], actual_callers(function))
+                self.assertEqual({key: added['assertions'][key] for key in derived_assertions(function)}, derived_assertions(function))
+                self.assertEqual(added['source_review']['base_commit'], SOURCE_COMMIT)
+                self.assertEqual(added['source_review']['source_sha256'], function['sha256'])
+            self.assertEqual(caller_changes, review['transaction_callers'])
+            self.assertEqual(body_changes, review['transaction_body_changes'])
+            self.assertEqual(classification_changes, review['transaction_classification_changes'])
+            self.assertEqual(entry_changes, review['transaction_entry_changes'])
+            self.assertEqual(body_changes, REVISION17_EXPECTED['body_changes'])
+            self.assertEqual(classification_changes, REVISION17_EXPECTED['classification_changes'])
+            self.assertEqual(review['transaction_added_entries'], [dict(id=identity, entry_sha256=fingerprint(current[identity])) for identity in sorted(added_ids)])
+            self.assertEqual(review['transaction_removed_entries'], [])
+            self.assertEqual(review['manual_review_fields'], REVISION17_EXPECTED['manual_review_fields'])
+            self.assertEqual(review['migration_changes'], [])
+            self.assertEqual(review['client_before'], self.revision16['clients'])
+            self.assertEqual(review['client_after'], self.clients)
+            self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.revision16['clients'])).hexdigest(), review['client_before_sha256'])
+            self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.clients)).hexdigest(), review['client_after_sha256'])
+            old_routes = {row['route']: row for row in self.rev16_compat['routes']}
+            new_routes = {row['route']: row for row in self.compat['routes']}
+            fresh_routes = {row['route']: row for row in gate.source_facts(self.routes, self.clients)}
+            self.assertEqual(set(old_routes), set(new_routes))
+            route_changes = []
+            for identity, before in old_routes.items():
+                after = new_routes[identity]
+                fact_keys = set(fresh_routes[identity])
+                self.assertEqual({key: value for key, value in before.items() if key not in fact_keys},
+                                 {key: value for key, value in after.items() if key not in fact_keys})
+                changed = [key for key in sorted(set(before) | set(after)) if before.get(key) != after.get(key)]
+                if changed:
+                    route_changes.append(dict(route=identity, changed_fields=changed,
+                        before_sha256=hashlib.sha256(gate.canonical_bytes(before)).hexdigest(),
+                        after_sha256=hashlib.sha256(gate.canonical_bytes(after)).hexdigest()))
+            self.assertEqual(route_changes, review['compatibility_route_changes'])
+            old_closure, new_closure = self.rev16_compat['source_closure'], self.compat['source_closure']
+            closure_changes = [dict(path=path, before_sha256=old_closure.get(path), after_sha256=new_closure.get(path))
+                               for path in sorted(set(old_closure) | set(new_closure)) if old_closure.get(path) != new_closure.get(path)]
+            self.assertEqual(closure_changes, review['closure_changes'])
+            mutable = {'inventory_revision', 'acquisition', 'routes', 'source_closure'}
+            self.assertEqual({k: v for k, v in self.rev16_compat.items() if k not in mutable},
+                             {k: v for k, v in self.compat.items() if k not in mutable})
+            self.assertEqual(self.compat['acquisition'], dict(self.rev16_compat['acquisition'], base_commit=SOURCE_COMMIT))
+            for name, pin in review['generated_catalogs'].items():
+                self.assertEqual(pin['path'], REVISION16_SNAPSHOTS[name]['path'])
+                raw = (ROOT / pin['path']).read_bytes()
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), pin['sha256'])
+                self.assertEqual(len(raw), pin['bytes'])
+            self.assertEqual(set(review['generated_catalogs']), set(REVISION16_SNAPSHOTS))
+            route_map = {(row['method'], gate.norm(row['path'])): row['method'] + ' ' + row['path'] for row in self.routes}
+            documented = json.loads((ROOT / REVISION16_SNAPSHOTS['client_routes']['path']).read_text())
+            self.assertEqual(documented, [dict(row, routes=[] if row['forwarding'] else
+                             [route_map[(method, gate.norm(row['path']))] for method in row['methods']]) for row in self.clients])
+            changed = git('diff', '--name-only', REVISION16_SOURCE_COMMIT, SOURCE_COMMIT, '--', 'internal', 'cmd', 'web').decode().splitlines()
+            product_paths = [p for p in changed if (p.endswith('.go') and not p.endswith('_test.go')) or
+                             (p.endswith(('.ts', '.tsx', '.css')) and '.test.' not in p) or
+                             (p.startswith('web/locales/') and p.endswith('.json'))]
+            self.assertEqual(product_paths, [row['path'] for row in review['source_changes']])
+            self.assertEqual(product_paths, REVISION17_EXPECTED['product_paths'])
+            self.assertEqual(review['excluded_closure_product_paths'], [path for path in product_paths if path not in new_closure])
+            build_paths = [path for path in ('web/package.json', 'web/package-lock.json')
+                           if git('show', REVISION16_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
+            self.assertEqual(build_paths, [row['path'] for row in review['additional_build_metadata_changes']])
+            schema_paths = [path for path in ('internal/api/openapi.yaml',)
+                            if git('show', REVISION16_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
+            self.assertEqual(schema_paths, [row['path'] for row in review['additional_api_schema_changes']])
+            for row in review['source_changes'] + review['additional_build_metadata_changes'] + review['additional_api_schema_changes']:
+                self.assertEqual(row['before_commit'], REVISION16_SOURCE_COMMIT)
+                self.assertEqual(row['after_commit'], SOURCE_COMMIT)
+                for prefix, commit in (('before', REVISION16_SOURCE_COMMIT), ('after', SOURCE_COMMIT)):
+                    if row[prefix + '_blob'] is None:
+                        self.assertFalse(git('ls-tree', commit, '--', row['path']))
+                        self.assertIsNone(row[prefix + '_sha256'])
+                        self.assertIsNone(row[prefix + '_bytes'])
+                    else:
+                        ref = commit + ':' + row['path']
+                        raw = git('show', ref)
+                        self.assertEqual(git('rev-parse', ref).decode().strip(), row[prefix + '_blob'])
+                        self.assertEqual(hashlib.sha256(raw).hexdigest(), row[prefix + '_sha256'])
+                        self.assertEqual(len(raw), row[prefix + '_bytes'])
+                self.assertEqual((ROOT / row['path']).read_bytes(), git('show', SOURCE_COMMIT + ':' + row['path']))
+            self.assertFalse(review['runtime_verified'])
+            self.assertFalse(review['product_green'])
+            self.assertFalse(review['task_complete'])
+            self.assertEqual(review['implementation_todos_completed'], 0)
+            self.assertEqual(review['parent_tasks'], dict(accepted=10, total=171, remaining=161))
+
+    def test_revision17_preserves_public_history_collectors_and_original_rejections(self):
+        with self.revision17_context():
+            review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+            self.assertEqual(git('rev-parse', REVISION16_COMMIT + '^{tree}').decode().strip(), REVISION16_TREE)
+            historical = []
+            for directory in review['historical_directories']:
+                names = git('ls-tree', '-r', '--name-only', REVISION16_COMMIT, '--', directory).decode().splitlines()
+                self.assertTrue(names)
+                self.assertEqual({str(path.relative_to(ROOT)) for path in (ROOT / directory).rglob('*') if path.is_file()}, set(names))
+                for path in names:
+                    ref = REVISION16_COMMIT + ':' + path
+                    raw = git('show', ref)
+                    self.assertEqual((ROOT / path).read_bytes(), raw)
+                    historical.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
+                                           sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
+            self.assertEqual(historical, review['historical_manifest'])
+            self.assertEqual(hashlib.sha256(gate.canonical_bytes(historical)).hexdigest(), REVISION17_EXPECTED['historical_manifest_sha256'])
+            roots = ('scripts', '.github/workflows', 'cmd/r5txinventory', 'internal/architecture/route_inventory_test.go')
+            mutable = ['scripts/tests/test_r5_catalog_reconciliation.py', 'scripts/tests/test_r5_transactions.py', 'scripts/tests/test_r5_compatibility.py']
+            self.assertEqual(review['mutable_current_positive_test_paths'], mutable)
+            paths = git('ls-tree', '-r', '--name-only', SOURCE_COMMIT, '--', *roots).decode().splitlines()
+            additions = REVISION17_EXPECTED['maintenance_source_pins']
+            self.assertEqual(set(additions), {'scripts/prepare_r5_catalog_revision17.py'})
+            self.assertTrue(set(paths).isdisjoint(additions))
+            self.assertEqual({str(path.relative_to(ROOT)) for folder in ('scripts', '.github/workflows', 'cmd/r5txinventory')
+                              for path in (ROOT / folder).rglob('*') if path.is_file() and '__pycache__' not in str(path) and path.suffix != '.pyc'} |
+                             {'internal/architecture/route_inventory_test.go'}, set(paths) | set(additions))
+            protected = []
+            for path in paths:
+                if path in mutable:
+                    continue
+                ref = SOURCE_COMMIT + ':' + path
+                raw = git('show', ref)
+                self.assertEqual((ROOT / path).read_bytes(), raw)
+                protected.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
+                                      sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
+            for path, pin in sorted(additions.items()):
+                raw = (ROOT / path).read_bytes()
+                self.assertEqual(pin['path'], path)
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), pin['sha256'])
+                self.assertEqual(len(raw), pin['bytes'])
+                self.assertEqual(hashlib.sha1(b'blob ' + str(len(raw)).encode() + b'\0' + raw).hexdigest(), pin['blob'])
+                self.assertEqual(raw, git('cat-file', 'blob', pin['blob']))
+                protected.append(pin)
+            self.assertEqual(protected, review['protected_source_manifest'])
+            self.assertEqual(hashlib.sha256(gate.canonical_bytes(protected)).hexdigest(), REVISION17_EXPECTED['protected_source_manifest_sha256'])
+            for path, expected in review['unchanged_validators_and_collectors'].items():
+                raw = git('show', REVISION16_COMMIT + ':' + path)
+                self.assertEqual((ROOT / path).read_bytes(), raw)
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), expected)
+            for path, replacements in (
+                ('scripts/tests/test_r5_transactions.py', [("result['functions'], 405", "result['functions'], %d" % REVISION17_EXPECTED['transaction']['functions']),
+                    ("result['postgres_files'], 64", "result['postgres_files'], %d" % REVISION17_EXPECTED['transaction']['postgres_files'])]),
+                ('scripts/tests/test_r5_compatibility.py', [("result['routes'],133", "result['routes'],%d" % REVISION17_EXPECTED['compatibility']['routes']),
+                    ("result['client_branches'],136", "result['client_branches'],%d" % REVISION17_EXPECTED['compatibility']['client_branches'])]),
+            ):
+                expected = git('show', REVISION16_COMMIT + ':' + path).decode()
+                for before, after in replacements:
+                    self.assertEqual(expected.count(before), 1)
+                    expected = expected.replace(before, after)
+                self.assertEqual((ROOT / path).read_text(), expected)
+            path = 'scripts/tests/test_r5_catalog_reconciliation.py'
+            before_raw = git('show', REVISION16_COMMIT + ':' + path).decode()
+            after_raw = (ROOT / path).read_text()
+            def methods(raw):
+                return {node.name: node for node in ast.walk(ast.parse(raw))
+                        if isinstance(node, ast.FunctionDef) and node.name.startswith('test_')}
+            before, after = methods(before_raw), methods(after_raw)
+            self.assertEqual((len(before), len(after)), (35, 37))
+            self.assertTrue(set(before).issubset(after))
+            self.assertEqual(set(after) - set(before), {'test_revision17_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision17_preserves_public_history_collectors_and_original_rejections'})
+            frozen = {'test_revision16_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision16_preserves_public_history_collectors_and_original_rejections'}
+            allowed = frozen | {'test_old_pins_reject_and_current_revision_passes_same_actual_facts'}
+            for name in before:
+                if name not in allowed:
+                    self.assertEqual(ast.dump(before[name], include_attributes=False), ast.dump(after[name], include_attributes=False))
+                    self.assertEqual(ast.get_source_segment(before_raw, before[name]), ast.get_source_segment(after_raw, after[name]))
+            for name in frozen:
+                self.assertEqual(len(after[name].body), 1)
+                wrapper = after[name].body[0]
+                self.assertIsInstance(wrapper, ast.With)
+                self.assertEqual(ast.unparse(wrapper.items[0].context_expr), 'self.revision16_context()')
+                self.assertEqual([ast.dump(node, include_attributes=False) for node in before[name].body],
+                                 [ast.dump(node, include_attributes=False) for node in wrapper.body])
+                original_body = ''.join(before_raw.splitlines(keepends=True)[before[name].lineno:before[name].end_lineno])
+                wrapped_body = ''.join(after_raw.splitlines(keepends=True)[after[name].lineno + 1:after[name].end_lineno])
+                self.assertEqual(''.join(line[4:] if line.strip() else line for line in wrapped_body.splitlines(keepends=True)), original_body)
+            current_name = 'test_old_pins_reject_and_current_revision_passes_same_actual_facts'
+            expected_current = ast.get_source_segment(before_raw, before[current_name])
+            for previous, replacement in (
+                ("REVISION16_EXPECTED", "REVISION17_EXPECTED"),
+                ("('revision15', self.rev15_tx, self.rev15_compat)]", "('revision15', self.rev15_tx, self.rev15_compat), ('revision16', self.rev16_tx, self.rev16_compat)]"),
+                ("pin = REVISION15_SNAPSHOTS[name]", "pin = REVISION16_SNAPSHOTS[name]"),
+                ("revision['revision'], 16", "revision['revision'], 17"),
+                ("revision['previous_snapshot_commit'], REVISION15_COMMIT", "revision['previous_snapshot_commit'], REVISION16_COMMIT"),
+            ):
+                self.assertEqual(expected_current.count(previous), 1)
+                expected_current = expected_current.replace(previous, replacement, 1)
+            self.assertEqual(ast.get_source_segment(after_raw, after[current_name]), expected_current)
+            guards = {name for name in before if name.startswith('test_unapproved_')}
+            self.assertEqual(len(guards), 5)
+            for name in guards:
+                self.assertEqual(hashlib.sha256(ast.get_source_segment(after_raw, after[name]).encode()).hexdigest(),
+                                 review['original_unapproved_methods'][name]['source_sha256'])
+                self.assertEqual(hashlib.sha256(ast.dump(after[name], include_attributes=False).encode()).hexdigest(),
+                                 review['original_unapproved_methods'][name]['ast_sha256'])
+            # Fixed revision16 values and all earlier review constants are retained;
+            # only the fresh root/source identifiers advance to revision17.
+            def assignments(raw):
+                return {target.id: node.value for node in ast.parse(raw).body if isinstance(node, ast.Assign)
+                        for target in node.targets if isinstance(target, ast.Name)}
+            old_values, new_values = assignments(before_raw), assignments(after_raw)
+            self.assertEqual(len(old_values), 90)
+            self.assertTrue(set(old_values).issubset(new_values))
+            for name, value in old_values.items():
+                if name not in {'CURRENT_EVIDENCE', 'SOURCE_COMMIT', 'SOURCE_TREE'}:
+                    self.assertEqual(ast.dump(value, include_attributes=False), ast.dump(new_values[name], include_attributes=False))
+                    self.assertEqual(ast.get_source_segment(before_raw, value), ast.get_source_segment(after_raw, new_values[name]))
+
+    def test_revision18_binds_actual_source_facts_and_preserves_manual_reviews(self):
         review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
-        self.assertEqual(review['inventory_revision'], 17)
+        self.assertEqual(review['inventory_revision'], 18)
         self.assertEqual(review['source_commit'], SOURCE_COMMIT)
         self.assertEqual(review['source_tree'], SOURCE_TREE)
         self.assertEqual(git('rev-parse', SOURCE_COMMIT + '^{tree}').decode().strip(), SOURCE_TREE)
-        self.assertEqual(review['previous_catalog_commit'], REVISION16_COMMIT)
-        self.assertEqual(review['previous_product_source_commit'], REVISION16_SOURCE_COMMIT)
-        self.assertEqual(review['revision16_snapshots'],
-                         {name: dict(commit=REVISION16_COMMIT, **pin) for name, pin in REVISION16_SNAPSHOTS.items()})
-        for field, expected in REVISION17_EXPECTED['review_field_sha256'].items():
+        self.assertEqual(review['previous_catalog_commit'], REVISION17_COMMIT)
+        self.assertEqual(review['previous_product_source_commit'], REVISION17_SOURCE_COMMIT)
+        self.assertEqual(review['revision17_snapshots'],
+                         {name: dict(commit=REVISION17_COMMIT, **pin) for name, pin in REVISION17_SNAPSHOTS.items()})
+        for field, expected in REVISION18_EXPECTED['review_field_sha256'].items():
             self.assertEqual(hashlib.sha256(gate.canonical_bytes(review[field])).hexdigest(), expected)
         self.assertEqual(tx.validate(self.tx, self.ast, self.migrations), review['transaction'])
         self.assertEqual(gate.validate(self.compat, self.routes, self.clients), review['compatibility'])
-        self.assertEqual(review['transaction'], REVISION17_EXPECTED['transaction'])
-        self.assertEqual(review['compatibility'], REVISION17_EXPECTED['compatibility'])
+        self.assertEqual(review['transaction'], REVISION18_EXPECTED['transaction'])
+        self.assertEqual(review['compatibility'], REVISION18_EXPECTED['compatibility'])
         actual_files = [dict(path=item['path'], sha256=item['sha256']) for item in self.ast['files'] if item['path'].startswith(tx.PG)]
         self.assertEqual(self.tx['postgres_files'], actual_files)
-        before_files = {item['path']: item['sha256'] for item in self.rev16_tx['postgres_files']}
+        before_files = {item['path']: item['sha256'] for item in self.rev17_tx['postgres_files']}
         after_files = {item['path']: item['sha256'] for item in self.tx['postgres_files']}
-        self.assertEqual(set(after_files), set(before_files))
-        self.assertEqual((len(before_files), len(after_files)), (64, 64))
-        changed_files = set(REVISION17_EXPECTED['file_review_additions'])
+        self.assertEqual(set(after_files), set(before_files) | set(REVISION18_EXPECTED['new_file_reviews']))
+        self.assertEqual((len(before_files), len(after_files)), (64, REVISION18_EXPECTED['transaction']['postgres_files']))
+        changed_files = set(REVISION18_EXPECTED['file_review_additions'])
         self.assertEqual([path for path in before_files if before_files[path] != after_files[path]],
                          sorted(changed_files))
-        self.assertEqual(set(self.tx['reviewed_file_types']), set(self.rev16_tx['reviewed_file_types']))
-        for path, before in self.rev16_tx['reviewed_file_types'].items():
+        self.assertEqual(set(self.tx['reviewed_file_types']), set(self.rev17_tx['reviewed_file_types']) | set(REVISION18_EXPECTED['new_file_reviews']))
+        for path, before in self.rev17_tx['reviewed_file_types'].items():
             after = self.tx['reviewed_file_types'][path]
             if path in changed_files:
-                self.assertEqual(set(after), set(before) | {'revision17_additions'})
-                self.assertEqual({key: value for key, value in after.items() if key != 'revision17_additions'}, before)
-                self.assertEqual(after['revision17_additions'], REVISION17_EXPECTED['file_review_additions'][path])
+                self.assertEqual(set(after), set(before) | {'revision18_additions'})
+                self.assertEqual({key: value for key, value in after.items() if key != 'revision18_additions'}, before)
+                self.assertEqual(after['revision18_additions'], REVISION18_EXPECTED['file_review_additions'][path])
             else:
                 self.assertEqual(after, before)
-        self.assertEqual(review['transaction_file_review_additions'], REVISION17_EXPECTED['file_review_additions'])
-        self.assertEqual(self.tx['migrations'], self.rev16_tx['migrations'])
-        self.assertEqual(self.tx['historical_review_metadata'], self.rev16_tx['historical_review_metadata'])
+        self.assertEqual(review['transaction_file_review_additions'], REVISION18_EXPECTED['file_review_additions'])
+        self.assertEqual(review['transaction_new_file_reviews'], REVISION18_EXPECTED['new_file_reviews'])
+        self.assertEqual(set(REVISION18_EXPECTED['new_file_reviews']), {'internal/store/postgres/activation_errors.go'})
+        for path, expected in REVISION18_EXPECTED['new_file_reviews'].items():
+            self.assertEqual(self.tx['reviewed_file_types'][path], expected)
+            self.assertEqual(expected['source_commit'], SOURCE_COMMIT)
+            self.assertEqual(expected['source_sha256'], after_files[path])
+        self.assertEqual(self.tx['migrations'], self.rev17_tx['migrations'])
+        self.assertEqual(self.tx['historical_review_metadata'], self.rev17_tx['historical_review_metadata'])
         mutable_transaction = {'inventory_revision', 'baseline_commit', 'last_review_base_commit', 'current_review_boundary', 'postgres_files', 'reviewed_file_types', 'entries'}
-        self.assertEqual({key: value for key, value in self.rev16_tx.items() if key not in mutable_transaction},
+        self.assertEqual({key: value for key, value in self.rev17_tx.items() if key not in mutable_transaction},
                          {key: value for key, value in self.tx.items() if key not in mutable_transaction})
         functions = {item['id']: item for item in self.ast['functions'] if item['file'].startswith(tx.PG)}
         classes = tx.classify(self.ast)
-        old = {entry['id']: entry for entry in self.rev16_tx['entries']}
+        old = {entry['id']: entry for entry in self.rev17_tx['entries']}
         current = {entry['id']: entry for entry in self.tx['entries']}
-        added_ids = set(REVISION17_EXPECTED['added_entries'])
-        reviewed = {row['id']: row for row in REVISION17_EXPECTED['body_changes']}
+        added_ids = set(REVISION18_EXPECTED['added_entries'])
+        reviewed = {row['id']: row for row in REVISION18_EXPECTED['body_changes']}
         self.assertEqual(set(current), set(old) | added_ids)
         self.assertEqual(set(current), set(functions))
-        self.assertEqual((len(old), len(current)), (405, REVISION17_EXPECTED['transaction']['functions']))
+        self.assertEqual((len(old), len(current)), (406, REVISION18_EXPECTED['transaction']['functions']))
         fingerprint = lambda value: hashlib.sha256(gate.canonical_bytes(value)).hexdigest()
         def derived_assertions(function):
             return {
@@ -10380,12 +13563,12 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                 self.assertEqual(before['syntax']['sha256'], reviewed[identity]['before_sha256'])
                 self.assertEqual(function['sha256'], reviewed[identity]['after_sha256'])
                 manual = ('lock_fk_wait_fence', 'evidence', 'unverified_risks', 'file_family_context')
-                self.assertEqual(after['historical_revision16_review'], {key: before[key] for key in (*manual, 'source_review') if key in before})
+                self.assertEqual(after['historical_revision17_review'], {key: before[key] for key in (*manual, 'source_review') if key in before})
                 self.assertEqual({key: after[key] for key in (*manual, 'source_review')},
-                                 REVISION17_EXPECTED['manual_review_fields'][identity])
+                                 REVISION18_EXPECTED['manual_review_fields'][identity])
                 self.assertEqual(after['source_review']['base_commit'], SOURCE_COMMIT)
                 self.assertEqual(after['source_review']['source_sha256'], function['sha256'])
-                mutable.update((*manual, 'historical_revision16_review', 'source_review'))
+                mutable.update((*manual, 'historical_revision17_review', 'source_review'))
             else:
                 self.assertEqual(before['syntax']['sha256'], function['sha256'])
                 if before['syntax'] != function:
@@ -10405,12 +13588,19 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                     before_sha256=fingerprint(before), after_sha256=fingerprint(after)))
         for identity in sorted(added_ids):
             added, function = current[identity], functions[identity]
-            self.assertEqual(added, REVISION17_EXPECTED['added_entries'][identity])
+            self.assertEqual(added, REVISION18_EXPECTED['added_entries'][identity])
             self.assertEqual(added['syntax'], function)
             self.assertEqual(added['classification'], classes[identity])
-            self.assertEqual(added['classification']['kind'], 'lock-reader')
-            self.assertTrue(added['classification']['explicit_lock'])
+            self.assertEqual(added['classification']['kind'], 'read-or-pure')
+            self.assertFalse(added['classification']['explicit_lock'])
             self.assertFalse(added['classification']['direct_write'])
+            self.assertFalse(added['classification']['write_closure'])
+            self.assertFalse(added['classification']['transaction_calls'])
+            self.assertFalse(added['classification']['callback_parameter'])
+            self.assertFalse(added['classification']['dynamic_sql_expression'])
+            self.assertEqual(derived_assertions(function), {key: [] for key in derived_assertions(function)})
+            self.assertEqual(len(added['callers']), 2)
+            self.assertEqual({row['caller_id'] for row in added['callers']}, {'internal/store/postgres/company_members.go:*PgStore:ActivateEmployee'})
             self.assertEqual(added['callers'], actual_callers(function))
             self.assertEqual({key: added['assertions'][key] for key in derived_assertions(function)}, derived_assertions(function))
             self.assertEqual(added['source_review']['base_commit'], SOURCE_COMMIT)
@@ -10419,17 +13609,17 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         self.assertEqual(body_changes, review['transaction_body_changes'])
         self.assertEqual(classification_changes, review['transaction_classification_changes'])
         self.assertEqual(entry_changes, review['transaction_entry_changes'])
-        self.assertEqual(body_changes, REVISION17_EXPECTED['body_changes'])
-        self.assertEqual(classification_changes, REVISION17_EXPECTED['classification_changes'])
+        self.assertEqual(body_changes, REVISION18_EXPECTED['body_changes'])
+        self.assertEqual(classification_changes, REVISION18_EXPECTED['classification_changes'])
         self.assertEqual(review['transaction_added_entries'], [dict(id=identity, entry_sha256=fingerprint(current[identity])) for identity in sorted(added_ids)])
         self.assertEqual(review['transaction_removed_entries'], [])
-        self.assertEqual(review['manual_review_fields'], REVISION17_EXPECTED['manual_review_fields'])
+        self.assertEqual(review['manual_review_fields'], REVISION18_EXPECTED['manual_review_fields'])
         self.assertEqual(review['migration_changes'], [])
-        self.assertEqual(review['client_before'], self.revision16['clients'])
+        self.assertEqual(review['client_before'], self.revision17['clients'])
         self.assertEqual(review['client_after'], self.clients)
-        self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.revision16['clients'])).hexdigest(), review['client_before_sha256'])
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.revision17['clients'])).hexdigest(), review['client_before_sha256'])
         self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.clients)).hexdigest(), review['client_after_sha256'])
-        old_routes = {row['route']: row for row in self.rev16_compat['routes']}
+        old_routes = {row['route']: row for row in self.rev17_compat['routes']}
         new_routes = {row['route']: row for row in self.compat['routes']}
         fresh_routes = {row['route']: row for row in gate.source_facts(self.routes, self.clients)}
         self.assertEqual(set(old_routes), set(new_routes))
@@ -10445,41 +13635,41 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                     before_sha256=hashlib.sha256(gate.canonical_bytes(before)).hexdigest(),
                     after_sha256=hashlib.sha256(gate.canonical_bytes(after)).hexdigest()))
         self.assertEqual(route_changes, review['compatibility_route_changes'])
-        old_closure, new_closure = self.rev16_compat['source_closure'], self.compat['source_closure']
+        old_closure, new_closure = self.rev17_compat['source_closure'], self.compat['source_closure']
         closure_changes = [dict(path=path, before_sha256=old_closure.get(path), after_sha256=new_closure.get(path))
                            for path in sorted(set(old_closure) | set(new_closure)) if old_closure.get(path) != new_closure.get(path)]
         self.assertEqual(closure_changes, review['closure_changes'])
         mutable = {'inventory_revision', 'acquisition', 'routes', 'source_closure'}
-        self.assertEqual({k: v for k, v in self.rev16_compat.items() if k not in mutable},
+        self.assertEqual({k: v for k, v in self.rev17_compat.items() if k not in mutable},
                          {k: v for k, v in self.compat.items() if k not in mutable})
-        self.assertEqual(self.compat['acquisition'], dict(self.rev16_compat['acquisition'], base_commit=SOURCE_COMMIT))
+        self.assertEqual(self.compat['acquisition'], dict(self.rev17_compat['acquisition'], base_commit=SOURCE_COMMIT))
         for name, pin in review['generated_catalogs'].items():
-            self.assertEqual(pin['path'], REVISION16_SNAPSHOTS[name]['path'])
+            self.assertEqual(pin['path'], REVISION17_SNAPSHOTS[name]['path'])
             raw = (ROOT / pin['path']).read_bytes()
             self.assertEqual(hashlib.sha256(raw).hexdigest(), pin['sha256'])
             self.assertEqual(len(raw), pin['bytes'])
-        self.assertEqual(set(review['generated_catalogs']), set(REVISION16_SNAPSHOTS))
+        self.assertEqual(set(review['generated_catalogs']), set(REVISION17_SNAPSHOTS))
         route_map = {(row['method'], gate.norm(row['path'])): row['method'] + ' ' + row['path'] for row in self.routes}
-        documented = json.loads((ROOT / REVISION16_SNAPSHOTS['client_routes']['path']).read_text())
+        documented = json.loads((ROOT / REVISION17_SNAPSHOTS['client_routes']['path']).read_text())
         self.assertEqual(documented, [dict(row, routes=[] if row['forwarding'] else
                          [route_map[(method, gate.norm(row['path']))] for method in row['methods']]) for row in self.clients])
-        changed = git('diff', '--name-only', REVISION16_SOURCE_COMMIT, SOURCE_COMMIT, '--', 'internal', 'cmd', 'web').decode().splitlines()
+        changed = git('diff', '--name-only', REVISION17_SOURCE_COMMIT, SOURCE_COMMIT, '--', 'internal', 'cmd', 'web', 'third_party').decode().splitlines()
         product_paths = [p for p in changed if (p.endswith('.go') and not p.endswith('_test.go')) or
                          (p.endswith(('.ts', '.tsx', '.css')) and '.test.' not in p) or
                          (p.startswith('web/locales/') and p.endswith('.json'))]
         self.assertEqual(product_paths, [row['path'] for row in review['source_changes']])
-        self.assertEqual(product_paths, REVISION17_EXPECTED['product_paths'])
+        self.assertEqual(product_paths, REVISION18_EXPECTED['product_paths'])
         self.assertEqual(review['excluded_closure_product_paths'], [path for path in product_paths if path not in new_closure])
-        build_paths = [path for path in ('web/package.json', 'web/package-lock.json')
-                       if git('show', REVISION16_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
+        build_paths = [path for path in ('go.mod', 'go.sum', 'web/package.json', 'web/package-lock.json')
+                       if git('show', REVISION17_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
         self.assertEqual(build_paths, [row['path'] for row in review['additional_build_metadata_changes']])
         schema_paths = [path for path in ('internal/api/openapi.yaml',)
-                        if git('show', REVISION16_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
+                        if git('show', REVISION17_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
         self.assertEqual(schema_paths, [row['path'] for row in review['additional_api_schema_changes']])
         for row in review['source_changes'] + review['additional_build_metadata_changes'] + review['additional_api_schema_changes']:
-            self.assertEqual(row['before_commit'], REVISION16_SOURCE_COMMIT)
+            self.assertEqual(row['before_commit'], REVISION17_SOURCE_COMMIT)
             self.assertEqual(row['after_commit'], SOURCE_COMMIT)
-            for prefix, commit in (('before', REVISION16_SOURCE_COMMIT), ('after', SOURCE_COMMIT)):
+            for prefix, commit in (('before', REVISION17_SOURCE_COMMIT), ('after', SOURCE_COMMIT)):
                 if row[prefix + '_blob'] is None:
                     self.assertFalse(git('ls-tree', commit, '--', row['path']))
                     self.assertIsNone(row[prefix + '_sha256'])
@@ -10497,28 +13687,28 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         self.assertEqual(review['implementation_todos_completed'], 0)
         self.assertEqual(review['parent_tasks'], dict(accepted=10, total=171, remaining=161))
 
-    def test_revision17_preserves_public_history_collectors_and_original_rejections(self):
+    def test_revision18_preserves_public_history_collectors_and_original_rejections(self):
         review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
-        self.assertEqual(git('rev-parse', REVISION16_COMMIT + '^{tree}').decode().strip(), REVISION16_TREE)
+        self.assertEqual(git('rev-parse', REVISION17_COMMIT + '^{tree}').decode().strip(), REVISION17_TREE)
         historical = []
         for directory in review['historical_directories']:
-            names = git('ls-tree', '-r', '--name-only', REVISION16_COMMIT, '--', directory).decode().splitlines()
+            names = git('ls-tree', '-r', '--name-only', REVISION17_COMMIT, '--', directory).decode().splitlines()
             self.assertTrue(names)
             self.assertEqual({str(path.relative_to(ROOT)) for path in (ROOT / directory).rglob('*') if path.is_file()}, set(names))
             for path in names:
-                ref = REVISION16_COMMIT + ':' + path
+                ref = REVISION17_COMMIT + ':' + path
                 raw = git('show', ref)
                 self.assertEqual((ROOT / path).read_bytes(), raw)
                 historical.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
                                        sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
         self.assertEqual(historical, review['historical_manifest'])
-        self.assertEqual(hashlib.sha256(gate.canonical_bytes(historical)).hexdigest(), REVISION17_EXPECTED['historical_manifest_sha256'])
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(historical)).hexdigest(), REVISION18_EXPECTED['historical_manifest_sha256'])
         roots = ('scripts', '.github/workflows', 'cmd/r5txinventory', 'internal/architecture/route_inventory_test.go')
         mutable = ['scripts/tests/test_r5_catalog_reconciliation.py', 'scripts/tests/test_r5_transactions.py', 'scripts/tests/test_r5_compatibility.py']
         self.assertEqual(review['mutable_current_positive_test_paths'], mutable)
         paths = git('ls-tree', '-r', '--name-only', SOURCE_COMMIT, '--', *roots).decode().splitlines()
-        additions = REVISION17_EXPECTED['maintenance_source_pins']
-        self.assertEqual(set(additions), {'scripts/prepare_r5_catalog_revision17.py'})
+        additions = REVISION18_EXPECTED['maintenance_source_pins']
+        self.assertEqual(set(additions), {'scripts/prepare_r5_catalog_revision18.py'})
         self.assertTrue(set(paths).isdisjoint(additions))
         self.assertEqual({str(path.relative_to(ROOT)) for folder in ('scripts', '.github/workflows', 'cmd/r5txinventory')
                           for path in (ROOT / folder).rglob('*') if path.is_file() and '__pycache__' not in str(path) and path.suffix != '.pyc'} |
@@ -10541,33 +13731,33 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
             self.assertEqual(raw, git('cat-file', 'blob', pin['blob']))
             protected.append(pin)
         self.assertEqual(protected, review['protected_source_manifest'])
-        self.assertEqual(hashlib.sha256(gate.canonical_bytes(protected)).hexdigest(), REVISION17_EXPECTED['protected_source_manifest_sha256'])
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(protected)).hexdigest(), REVISION18_EXPECTED['protected_source_manifest_sha256'])
         for path, expected in review['unchanged_validators_and_collectors'].items():
-            raw = git('show', REVISION16_COMMIT + ':' + path)
+            raw = git('show', REVISION17_COMMIT + ':' + path)
             self.assertEqual((ROOT / path).read_bytes(), raw)
             self.assertEqual(hashlib.sha256(raw).hexdigest(), expected)
         for path, replacements in (
-            ('scripts/tests/test_r5_transactions.py', [("result['functions'], 405", "result['functions'], %d" % REVISION17_EXPECTED['transaction']['functions']),
-                ("result['postgres_files'], 64", "result['postgres_files'], %d" % REVISION17_EXPECTED['transaction']['postgres_files'])]),
-            ('scripts/tests/test_r5_compatibility.py', [("result['routes'],133", "result['routes'],%d" % REVISION17_EXPECTED['compatibility']['routes']),
-                ("result['client_branches'],136", "result['client_branches'],%d" % REVISION17_EXPECTED['compatibility']['client_branches'])]),
+            ('scripts/tests/test_r5_transactions.py', [("result['functions'], 406", "result['functions'], %d" % REVISION18_EXPECTED['transaction']['functions']),
+                ("result['postgres_files'], 64", "result['postgres_files'], %d" % REVISION18_EXPECTED['transaction']['postgres_files'])]),
+            ('scripts/tests/test_r5_compatibility.py', [("result['routes'],133", "result['routes'],%d" % REVISION18_EXPECTED['compatibility']['routes']),
+                ("result['client_branches'],136", "result['client_branches'],%d" % REVISION18_EXPECTED['compatibility']['client_branches'])]),
         ):
-            expected = git('show', REVISION16_COMMIT + ':' + path).decode()
+            expected = git('show', REVISION17_COMMIT + ':' + path).decode()
             for before, after in replacements:
                 self.assertEqual(expected.count(before), 1)
                 expected = expected.replace(before, after)
             self.assertEqual((ROOT / path).read_text(), expected)
         path = 'scripts/tests/test_r5_catalog_reconciliation.py'
-        before_raw = git('show', REVISION16_COMMIT + ':' + path).decode()
+        before_raw = git('show', REVISION17_COMMIT + ':' + path).decode()
         after_raw = (ROOT / path).read_text()
         def methods(raw):
             return {node.name: node for node in ast.walk(ast.parse(raw))
                     if isinstance(node, ast.FunctionDef) and node.name.startswith('test_')}
         before, after = methods(before_raw), methods(after_raw)
-        self.assertEqual((len(before), len(after)), (35, 37))
+        self.assertEqual((len(before), len(after)), (37, 39))
         self.assertTrue(set(before).issubset(after))
-        self.assertEqual(set(after) - set(before), {'test_revision17_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision17_preserves_public_history_collectors_and_original_rejections'})
-        frozen = {'test_revision16_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision16_preserves_public_history_collectors_and_original_rejections'}
+        self.assertEqual(set(after) - set(before), {'test_revision18_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision18_preserves_public_history_collectors_and_original_rejections'})
+        frozen = {'test_revision17_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision17_preserves_public_history_collectors_and_original_rejections'}
         allowed = frozen | {'test_old_pins_reject_and_current_revision_passes_same_actual_facts'}
         for name in before:
             if name not in allowed:
@@ -10577,7 +13767,7 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
             self.assertEqual(len(after[name].body), 1)
             wrapper = after[name].body[0]
             self.assertIsInstance(wrapper, ast.With)
-            self.assertEqual(ast.unparse(wrapper.items[0].context_expr), 'self.revision16_context()')
+            self.assertEqual(ast.unparse(wrapper.items[0].context_expr), 'self.revision17_context()')
             self.assertEqual([ast.dump(node, include_attributes=False) for node in before[name].body],
                              [ast.dump(node, include_attributes=False) for node in wrapper.body])
             original_body = ''.join(before_raw.splitlines(keepends=True)[before[name].lineno:before[name].end_lineno])
@@ -10586,11 +13776,11 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         current_name = 'test_old_pins_reject_and_current_revision_passes_same_actual_facts'
         expected_current = ast.get_source_segment(before_raw, before[current_name])
         for previous, replacement in (
-            ("REVISION16_EXPECTED", "REVISION17_EXPECTED"),
-            ("('revision15', self.rev15_tx, self.rev15_compat)]", "('revision15', self.rev15_tx, self.rev15_compat), ('revision16', self.rev16_tx, self.rev16_compat)]"),
-            ("pin = REVISION15_SNAPSHOTS[name]", "pin = REVISION16_SNAPSHOTS[name]"),
-            ("revision['revision'], 16", "revision['revision'], 17"),
-            ("revision['previous_snapshot_commit'], REVISION15_COMMIT", "revision['previous_snapshot_commit'], REVISION16_COMMIT"),
+            ("REVISION17_EXPECTED", "REVISION18_EXPECTED"),
+            ("('revision16', self.rev16_tx, self.rev16_compat)]", "('revision16', self.rev16_tx, self.rev16_compat), ('revision17', self.rev17_tx, self.rev17_compat)]"),
+            ("pin = REVISION16_SNAPSHOTS[name]", "pin = REVISION17_SNAPSHOTS[name]"),
+            ("revision['revision'], 17", "revision['revision'], 18"),
+            ("revision['previous_snapshot_commit'], REVISION16_COMMIT", "revision['previous_snapshot_commit'], REVISION17_COMMIT"),
         ):
             self.assertEqual(expected_current.count(previous), 1)
             expected_current = expected_current.replace(previous, replacement, 1)
@@ -10602,13 +13792,13 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                              review['original_unapproved_methods'][name]['source_sha256'])
             self.assertEqual(hashlib.sha256(ast.dump(after[name], include_attributes=False).encode()).hexdigest(),
                              review['original_unapproved_methods'][name]['ast_sha256'])
-        # Fixed revision16 values and all earlier review constants are retained;
-        # only the fresh root/source identifiers advance to revision17.
+        # Fixed revision17 values and all earlier review constants are retained;
+        # only the fresh root/source identifiers advance to revision18.
         def assignments(raw):
             return {target.id: node.value for node in ast.parse(raw).body if isinstance(node, ast.Assign)
                     for target in node.targets if isinstance(target, ast.Name)}
         old_values, new_values = assignments(before_raw), assignments(after_raw)
-        self.assertEqual(len(old_values), 90)
+        self.assertEqual(len(old_values), 96)
         self.assertTrue(set(old_values).issubset(new_values))
         for name, value in old_values.items():
             if name not in {'CURRENT_EVIDENCE', 'SOURCE_COMMIT', 'SOURCE_TREE'}:

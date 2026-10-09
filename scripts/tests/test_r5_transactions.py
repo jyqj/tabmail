@@ -26,8 +26,8 @@ class TransactionInventoryTests(unittest.TestCase):
 
     def test_current_inventory_is_only_structure_evidence(self):
         result = tx.validate(self.data, self.ast, self.migrations)
-        self.assertEqual(result['functions'], 406)
-        self.assertEqual(result['postgres_files'], 64)
+        self.assertEqual(result['functions'], 407)
+        self.assertEqual(result['postgres_files'], 65)
         self.assertEqual(result['migration_files'], 19)
         self.assertFalse(result['runtime_verified'])
         self.assertFalse(result['task_complete'])

@@ -19,7 +19,7 @@ class CompatibilityGateTests(unittest.TestCase):
     def test_current_source_map_is_not_product_or_dependency_completion(self):
         result=gate.validate(self.data,self.routes,self.clients)
         self.assertEqual(result['routes'],133)
-        self.assertEqual(result['client_branches'],136)
+        self.assertEqual(result['client_branches'],137)
         self.assertEqual(sum(x['forwarding'] for x in self.clients),7)
         self.assertEqual(result['wire_validation_scope'],'not_checked_current_wire_required')
         self.assertFalse(result['task_complete']);self.assertFalse(result['product_green'])
