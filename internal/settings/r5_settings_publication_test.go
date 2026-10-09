@@ -51,6 +51,33 @@ func (s *publicationStore) UpsertSetting(_ context.Context, key, value, _ string
 	return nil
 }
 
+func (s *publicationStore) SeedSetting(ctx context.Context, key, value, _ string) (bool, error) {
+	s.mu.Lock()
+	if err := ctx.Err(); err != nil {
+		s.mu.Unlock()
+		return false, err
+	}
+	if _, exists := s.values[key]; exists {
+		s.mu.Unlock()
+		return false, nil
+	}
+	if s.writeErr != nil {
+		err := s.writeErr
+		s.mu.Unlock()
+		return false, err
+	}
+	if s.values == nil {
+		s.values = make(map[string]string)
+	}
+	s.values[key] = value
+	after := s.afterCommit
+	s.mu.Unlock()
+	if after != nil {
+		after(key, value)
+	}
+	return true, nil
+}
+
 func (s *publicationStore) ListSettings(context.Context) ([]*models.SystemSetting, error) {
 	s.mu.Lock()
 	s.lists++

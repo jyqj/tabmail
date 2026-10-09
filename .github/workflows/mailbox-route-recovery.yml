@@ -1,0 +1,97 @@
+name: EXEC08 mailbox route recovery qualification
+on:
+  pull_request:
+    branches:
+      - main
+      - integration/company-mail-r5-*
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: exec08-mailbox-route-recovery-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  identical-route-fixture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      R5_CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      R5_ROUTE_EVIDENCE: ${{ runner.temp }}/exec08-route-evidence
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: candidate
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check out fixed public R2 baseline
+        uses: actions/checkout@v4
+        with:
+          ref: ff43326e81f262daaac7b3dfd8b3047a8f51743b
+          path: baseline
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            candidate/web/package-lock.json
+            baseline/web/package-lock.json
+      - name: Check verifier counterexamples
+        run: |
+          python3 -B - <<'PY'
+          import json, os, pathlib, subprocess, sys, time
+          root = pathlib.Path(os.environ["R5_ROUTE_EVIDENCE"])
+          root.mkdir(mode=0o700)
+          command = [sys.executable, "-B", "-m", "unittest", "discover",
+                     "-s", "candidate/scripts/tests", "-p", "test_r5_mailbox_route_recovery.py", "-v"]
+          row = {"command": command, "started_at": time.time(), "timed_out": False}
+          with (root / "verifier.stdout").open("wb") as out, (root / "verifier.stderr").open("wb") as err:
+              try:
+                  result = subprocess.run(command, stdout=out, stderr=err, timeout=60, check=False)
+                  row["returncode"] = result.returncode
+              except subprocess.TimeoutExpired:
+                  row["returncode"], row["timed_out"] = 124, True
+          row["finished_at"] = time.time()
+          (root / "verifier.execution.json").write_text(json.dumps(row, indent=2) + "\n")
+          raise SystemExit(row["returncode"])
+          PY
+      - name: Execute unchanged new fixture on both sources
+        run: |
+          python3 -B candidate/scripts/run_r5_mailbox_route_recovery.py \
+            --baseline "$GITHUB_WORKSPACE/baseline" \
+            --candidate "$GITHUB_WORKSPACE/candidate" \
+            --candidate-sha "$R5_CANDIDATE_SHA" \
+            --output "$R5_ROUTE_EVIDENCE/dual-source"
+      - name: Print every raw result and execution record
+        if: always()
+        run: |
+          python3 -B - <<'PY'
+          import json, os, pathlib, sys, uuid
+          root = pathlib.Path(os.environ["R5_ROUTE_EVIDENCE"])
+          token = uuid.uuid4().hex
+          print("::stop-commands::" + token, flush=True)
+          try:
+              if not root.exists():
+                  print(json.dumps({"missing_evidence_directory": str(root)}))
+              else:
+                  for path in sorted(root.rglob("*")):
+                      if path.is_file() and path.suffix in {".stdout", ".stderr", ".json"}:
+                          content = path.read_bytes()
+                          print(json.dumps({"evidence_file": str(path.relative_to(root)),
+                                            "bytes": len(content)}), flush=True)
+                          sys.stdout.write(content.decode("utf-8", errors="replace"))
+                          sys.stdout.write("\n")
+                          sys.stdout.flush()
+          finally:
+              print("::" + token + "::", flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exec08-mailbox-route-recovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/exec08-route-evidence
+          if-no-files-found: error
+          retention-days: 14

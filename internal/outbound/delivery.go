@@ -1,6 +1,7 @@
 package outbound
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"errors"
@@ -228,6 +229,13 @@ func deliverDirectMXTLS(ctx context.Context, host, addr, from string, to []strin
 func sendSMTP(client *smtp.Client, from string, to []string, mime []byte) error {
 	reader, responseError := guardSMTPReplyReader(client.Text.Reader.R)
 	client.Text.Reader.R = reader
+	// Hello and any STARTTLS negotiation have already completed in the
+	// adapters. Check the current capabilities before sending any envelope.
+	if requiresSMTPUTF8(from, to, mime) {
+		if ok, _ := client.Extension("SMTPUTF8"); !ok {
+			return errors.New("smtp: server does not support SMTPUTF8 required by envelope or headers")
+		}
+	}
 	if err := responseError(client.Mail(from)); err != nil {
 		return fmt.Errorf("MAIL FROM: %w", err)
 	}
@@ -258,6 +266,39 @@ func sendSMTP(client *smtp.Client, from string, to []string, mime []byte) error 
 	// DATA final reply was successful; QUIT is merely connection cleanup.
 	_ = client.Quit()
 	return nil
+}
+
+func requiresSMTPUTF8(from string, to []string, message []byte) bool {
+	containsNonASCII := func(value string) bool {
+		for i := 0; i < len(value); i++ {
+			if value[i] >= 0x80 {
+				return true
+			}
+		}
+		return false
+	}
+	if containsNonASCII(from) {
+		return true
+	}
+	for _, address := range to {
+		if containsNonASCII(address) {
+			return true
+		}
+	}
+	// Build emits ASCII MIME part headers. Inspect its top-level headers,
+	// stopping at the empty line so UTF-8 body content remains compatible.
+	// Encoded words and encoded attachment names are ASCII on the wire.
+	for len(message) > 0 {
+		line, rest, _ := bytes.Cut(message, []byte("\n"))
+		if len(line) == 0 || (len(line) == 1 && line[0] == '\r') {
+			break
+		}
+		if containsNonASCII(string(line)) {
+			return true
+		}
+		message = rest
+	}
+	return false
 }
 
 func groupByDomain(addrs []string) map[string][]string {

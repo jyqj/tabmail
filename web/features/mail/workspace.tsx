@@ -35,7 +35,10 @@ export function MailWorkspace() {
     } | null>(null);
     const boxes = useAPI("work-mailboxes", workMailboxes, { refreshInterval: 15000 });
     const usable = (boxes.error ? [] : boxes.data ?? []).filter(m => m.can_read || m.can_send);
-    const mailbox = usable.find(m => m.mailbox.id === params.get("mailbox")) ?? usable[0];
+    // Only an absent parameter opts into the ordinary first-mailbox default.
+    const requestedMailbox = params.get("mailbox");
+    const mailbox = requestedMailbox === null ? usable[0] : usable.find(m => m.mailbox.id === requestedMailbox);
+    const sender = requestedMailbox !== null && !mailbox ? undefined : composeIdentity(usable, mailbox);
     const folder: Folder = folders.includes(params.get("folder") as Folder) ? params.get("folder") as Folder : "inbox";
     const page = Math.max(1, Number.parseInt(params.get("page") ?? "1", 10) || 1);
     const q = params.get("q") ?? "";
@@ -43,7 +46,7 @@ export function MailWorkspace() {
     const archiveSent = folder === "sent" || (["archive", "trash"].includes(folder) && params.get("source") === "sent");
     // Editor/send ownership survives query-only navigation. The permission to
     // redirect after sending belongs to the originating committed mail view.
-    const navigationKey = JSON.stringify([scope, pathname, mailbox?.mailbox.id, folder, page, q, selected, archiveSent]);
+    const navigationKey = JSON.stringify([scope, pathname, requestedMailbox, mailbox?.mailbox.id, folder, page, q, selected, archiveSent]);
     const [navigation, setNavigation] = useState({ key: navigationKey });
     if (navigation.key !== navigationKey) setNavigation({ key: navigationKey });
     // Opening an editor is a separate intent from completing an existing send.
@@ -77,8 +80,7 @@ export function MailWorkspace() {
         return; const abort = new AbortController(); void streamEvents(`/api/v1/company/mailboxes/${encodeURIComponent(id)}/events`, { signal: abort.signal, onEvent: event => { if (event.type !== "ping")
             refresh(); } }).catch(() => { }); return () => abort.abort(); }, [id, refresh]);
     function newDraft(payload: DraftPayload): MailDraftEditor | null {
-        const from = composeIdentity(usable, mailbox);
-        return from ? { mailbox_id: from.mailbox.id, revision: 0, payload } : null;
+        return sender ? { mailbox_id: sender.mailbox.id, revision: 0, payload } : null;
     }
     function start() {
         // Supersede pending preparation immediately, before the new editor commits.
@@ -104,7 +106,7 @@ export function MailWorkspace() {
     const onPage = (p: number) => setQuery({ page: String(p), message: null });
     const onSelect = (message: string) => setQuery({ message });
     return <LiveContentRefresh value={contentRefresh}><main className="mx-auto w-full max-w-screen-2xl space-y-4 p-4 md:p-6">
-  <header className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-semibold">{t("公司邮箱", "Company mail")}</h1><p className="text-sm text-muted-foreground">{t("个人与共享邮箱 · 邮件资产与投递状态分离", "Personal and shared mailboxes · message content and delivery status are separate")}</p></div><div className="flex gap-2"><ActionButton onClick={refresh}>{t("刷新", "Refresh")}</ActionButton><ActionButton disabled={Boolean(editor) || !composeIdentity(usable, mailbox)} onClick={() => start()}>{t("写邮件", "Compose")}</ActionButton></div></header>
+  <header className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-semibold">{t("公司邮箱", "Company mail")}</h1><p className="text-sm text-muted-foreground">{t("个人与共享邮箱 · 邮件资产与投递状态分离", "Personal and shared mailboxes · message content and delivery status are separate")}</p></div><div className="flex gap-2"><ActionButton onClick={refresh}>{t("刷新", "Refresh")}</ActionButton><ActionButton disabled={Boolean(editor) || !sender} onClick={() => start()}>{t("写邮件", "Compose")}</ActionButton></div></header>
   <LoadError error={boxes.error} onRetry={() => void boxes.mutate()}/>
   {editor ? <Compose key={editor.key} initial={editor.draft} mailboxes={usable} onClose={() => { setEditor(null); refresh(); }} onSent={() => {
       const current = completion.current;
@@ -124,7 +126,9 @@ export function MailWorkspace() {
       {folder === "trash" && <p className="text-xs text-muted-foreground">{t("邮件删除后进入 30 天回收站；共享整理影响同邮箱所有成员。", "Deleted mail is recoverable for 30 days; shared organizing affects everyone in the mailbox.")}</p>}
       <SearchMail key={`${mailbox?.mailbox.id}:${folder}:${q}`} value={q} onSearch={q => setQuery({ q, message: null, page: null })}/>
     </>}
-    {folder === "receipts" ? <ReceiptFolder page={page} selected={selected} onPage={onPage} onSelect={onSelect} includeCompatibility/> : folder === "drafts" ? <DraftFolder page={page} mailboxes={usable} onPage={onPage} onEdit={openEditor}/> : !mailbox?.can_read ? <p role="status">{t("当前没有可阅读的邮箱；代发身份仍可用于写信。", "No readable mailbox is selected; authorized send identities remain available for composing.")}</p> : archiveSent ? <SentFolder key={`${mailbox.mailbox.id}:${folder}`} mailbox={mailbox} folder={folder} q={q} page={page} selected={selected} onPage={onPage} onSelect={onSelect}/> : <ReceivedFolder key={`${mailbox.mailbox.id}:${folder}`} mailbox={mailbox} mailboxes={usable} folder={folder} q={q} page={page} selected={selected} onPage={onPage} onSelect={onSelect} onCompose={compose}/>}
+    {folder === "receipts" ? <ReceiptFolder page={page} selected={selected} onPage={onPage} onSelect={onSelect} includeCompatibility/> : folder === "drafts" ? <DraftFolder page={page} mailboxes={usable} onPage={onPage} onEdit={openEditor}/> : !mailbox?.can_read ? <p role="status">{boxes.isLoading ? t("正在加载邮箱…", "Loading mailboxes…")
+      : requestedMailbox !== null && !mailbox && !boxes.error ? t("指定邮箱当前不可用。请刷新重试或选择其他邮箱。", "The requested mailbox is unavailable. Refresh or choose another mailbox.")
+      : t("当前没有可阅读的邮箱；代发身份仍可用于写信。", "No readable mailbox is selected; authorized send identities remain available for composing.")}</p> : archiveSent ? <SentFolder key={`${mailbox.mailbox.id}:${folder}`} mailbox={mailbox} folder={folder} q={q} page={page} selected={selected} onPage={onPage} onSelect={onSelect}/> : <ReceivedFolder key={`${mailbox.mailbox.id}:${folder}`} mailbox={mailbox} mailboxes={usable} folder={folder} q={q} page={page} selected={selected} onPage={onPage} onSelect={onSelect} onCompose={compose}/>}
     </section>
   </div>}
  </main></LiveContentRefresh>;
