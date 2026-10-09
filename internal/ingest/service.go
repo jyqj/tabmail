@@ -279,6 +279,11 @@ func (s *Service) ensureWorker() *workqueue.Worker[*ingestJob] {
 		s.pollInterval,
 		s.batchSize,
 		s.logger,
+		// ClaimIngress deliberately leases one receipt. Process up to the
+		// configured batch budget by claiming again only after its predecessor
+		// finishes, so later receipts do not spend their leases waiting.
+		workqueue.WithSerialClaims(),
+		workqueue.WithStopOnFailure(),
 	)
 	return s.worker
 }

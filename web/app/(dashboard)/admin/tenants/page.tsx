@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,12 +60,14 @@ import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
 import { safeConfirm } from "@/lib/utils";
 import { useAPI } from "@/hooks/use-api";
+import { LoadError, useText } from "@/components/company/common";
 import { sessionScope, useSessionScope } from "@/lib/session";
 import { TenantAPIKeysDialog } from "./api-keys-dialog";
 import { TenantOverridesDialog } from "./overrides-dialog";
 
 export default function TenantsPage() {
   const { t } = useI18n();
+  const text = useText();
 
   const { data: tenantsRes, isLoading: tenantsLoading, error: tenantsError, mutate: mutateTenants } = useAPI(
     "tenants",
@@ -87,11 +89,54 @@ export default function TenantsPage() {
   }, [tenantsError, plansError, t]);
 
   const [createOpen, setCreateOpen] = useState(false);
-  const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [newPlanId, setNewPlanId] = useState("");
 
   const scope = useSessionScope();
+  const [view, setView] = useState({ scope });
+  if (view.scope !== scope) {
+    setView({ scope });
+    // A draft is a decision by the identity that opened it. Token rotation
+    // preserves that identity; account, role and tenant changes do not.
+    setCreateOpen(false);
+    setNewName("");
+    setNewPlanId("");
+  }
+  const currentView = useRef<object | null>(null);
+  useLayoutEffect(() => {
+    currentView.current = view;
+    return () => { currentView.current = null; };
+  }, [view]);
+  const ownsView = (owner: object) => currentView.current === owner && scope === sessionScope();
+  const createDialog = useRef<object>({});
+  const createDraft = useRef<object>({});
+  const activeCreate = useRef<{ view: object; dialog: object } | null>(null);
+  const [pendingCreate, setPendingCreate] = useState<{ view: object; dialog: object } | null>(null);
+  const creating = pendingCreate?.view === view && pendingCreate.dialog === createDialog.current;
+  const changeCreateOpen = (open: boolean) => {
+    if (open !== createOpen) createDialog.current = {};
+    setCreateOpen(open);
+  };
+  const currentReadback = useRef<object | null>(null);
+  const [readbackFailure, setReadbackFailure] = useState<{ view: object; error: Error } | null>(null);
+  const readbackError = readbackFailure?.view === view ? readbackFailure.error : null;
+  async function refreshTenants(owner: object) {
+    if (!ownsView(owner)) return;
+    const observation = {};
+    currentReadback.current = observation;
+    try {
+      // A plain SWR revalidation can resolve with cached data after GET fails.
+      // Observe the actual read before acknowledging a recovered list.
+      await mutateTenants(async () => {
+        const response = await listTenants();
+        if (!ownsView(owner)) throw new DOMException("Tenant page changed", "AbortError");
+        return response;
+      }, { revalidate: false });
+      if (ownsView(owner) && currentReadback.current === observation) setReadbackFailure(null);
+    } catch (error) {
+      if (ownsView(owner) && currentReadback.current === observation) throw error;
+    }
+  }
   const keysSequence = useRef(0);
   const [keysDialog, setKeysDialog] = useState<{
     tenantId: string; scope: string; instance: number;
@@ -103,20 +148,38 @@ export default function TenantsPage() {
   } | null>(null);
 
   const handleCreate = async () => {
-    if (!newName.trim() || !newPlanId) return;
-    setCreating(true);
+    if (!newName.trim() || !newPlanId || !ownsView(view) ||
+      (activeCreate.current?.view === view && activeCreate.current.dialog === createDialog.current)) return;
+    const operation = { view, dialog: createDialog.current };
+    const submittedDraft = createDraft.current;
+    // Claim synchronously; two activations can precede the disabled render.
+    activeCreate.current = operation;
+    setPendingCreate(operation);
     try {
       await createTenant({ name: newName.trim(), plan_id: newPlanId });
-      setNewName("");
-      setNewPlanId("");
-      setCreateOpen(false);
+      if (!ownsView(view)) return;
+      if (createDialog.current === operation.dialog && createDraft.current === submittedDraft) {
+        createDraft.current = {};
+        setNewName("");
+        setNewPlanId("");
+        changeCreateOpen(false);
+      }
       toast.success(t("tenants.tenantCreated"));
-      mutateTenants();
+      try { await refreshTenants(view); } catch {
+        if (ownsView(view)) setReadbackFailure({ view, error: new Error(text(
+          "租户已创建，但租户列表刷新失败。请重试加载以核对当前列表。",
+          "The tenant was created, but the tenant list could not be refreshed. Retry loading to check the current list.",
+        )) });
+      }
     } catch (e: unknown) {
+      if (!ownsView(view) || createDialog.current !== operation.dialog) return;
       const err = e as { error?: { message?: string } };
       toast.error(err?.error?.message || t("tenants.createFailed"));
     } finally {
-      setCreating(false);
+      if (activeCreate.current === operation) {
+        activeCreate.current = null;
+        if (ownsView(view)) setPendingCreate(null);
+      }
     }
   };
 
@@ -147,7 +210,7 @@ export default function TenantsPage() {
         title={t("tenants.title")}
         description={t("tenants.count", { count: total })}
         actions={
-          <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+          <Dialog open={createOpen} onOpenChange={changeCreateOpen}>
             <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
               <Plus className="h-3.5 w-3.5" />
               {t("tenants.createTenant")}
@@ -165,14 +228,18 @@ export default function TenantsPage() {
                   <Input
                     placeholder={t("tenants.placeholder")}
                     value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
+                    onChange={(e) => { createDraft.current = {}; setNewName(e.target.value); }}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>{t("tenants.plan")}</Label>
-                  <Select value={newPlanId} onValueChange={(v) => v && setNewPlanId(v)}>
+                  <Select value={newPlanId} onValueChange={(v) => {
+                    if (v) { createDraft.current = {}; setNewPlanId(v); }
+                  }}>
                     <SelectTrigger>
-                      <SelectValue placeholder={t("tenants.selectPlan")} />
+                      <SelectValue placeholder={t("tenants.selectPlan")}>
+                        {newPlanId ? plans.find(plan => plan.id === newPlanId)?.name ?? newPlanId : undefined}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {plans.map((p) => (
@@ -198,6 +265,7 @@ export default function TenantsPage() {
       />
 
       <div className="p-4 space-y-4">
+        <LoadError error={readbackError} onRetry={() => { void refreshTenants(view).catch(() => undefined); }} />
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">{t("tenants.allTenants")}</CardTitle>

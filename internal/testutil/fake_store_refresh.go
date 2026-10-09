@@ -141,5 +141,6 @@ func (s *FakeStore) RotateRefreshToken(_ context.Context, hash string, next *mod
 	}
 	now := time.Now().UTC()
 	old.RevokedAt = &now
+	next.Issuance = &models.RefreshTokenIssuance{UserID: u.ID, TenantID: u.TenantID, PasswordHash: u.PasswordHash, SessionVersion: u.SessionVersion}
 	return true, false, nil
 }

@@ -197,7 +197,8 @@ type Handler[T any] func(ctx context.Context, job *Job[T]) error
 
 // Option selects a worker dispatch policy at construction time.
 type Option struct {
-	serialClaims bool
+	serialClaims  bool
+	stopOnFailure bool
 }
 
 // WithSerialClaims claims each job immediately before processing it. BatchSize
@@ -206,19 +207,26 @@ type Option struct {
 // that would otherwise already be running on later, unstarted rows.
 func WithSerialClaims() Option { return Option{serialClaims: true} }
 
+// WithStopOnFailure ends the current poll after a failed handler or mark.
+// Consumers that formerly claimed one row use this with serial claims to
+// increase successful throughput without retrying a just-failed row in the
+// same poll, even when its configured retry delay is very short.
+func WithStopOnFailure() Option { return Option{stopOnFailure: true} }
+
 // Worker drives a claim loop against one Store. Run blocks until ctx is
 // cancelled (ingest/hooks shape); Start launches a goroutine. Stop preserves
 // the legacy graceful batch join; StopContext cancels and bounds the join.
 type Worker[T any] struct {
-	store        Store[T]
-	handler      Handler[T]
-	policy       RetryPolicy[T]
-	hooks        Hooks[T]
-	leaseTTL     time.Duration // informational; claim SQL owns the real lease
-	pollInterval time.Duration
-	batchSize    int
-	serialClaims bool
-	logger       zerolog.Logger
+	store         Store[T]
+	handler       Handler[T]
+	policy        RetryPolicy[T]
+	hooks         Hooks[T]
+	leaseTTL      time.Duration // informational; claim SQL owns the real lease
+	pollInterval  time.Duration
+	batchSize     int
+	serialClaims  bool
+	stopOnFailure bool
+	logger        zerolog.Logger
 
 	// lifecycleMu protects generation membership and admission, never I/O.
 	lifecycleMu sync.Mutex
@@ -277,6 +285,7 @@ func NewWorker[T any](
 	}
 	for _, option := range options {
 		w.serialClaims = w.serialClaims || option.serialClaims
+		w.stopOnFailure = w.stopOnFailure || option.stopOnFailure
 	}
 	return w
 }
@@ -456,7 +465,9 @@ func (w *Worker[T]) processManagedBatch(ctx context.Context, g *workerGeneration
 		if !w.admit(ctx, g, false) {
 			return
 		}
-		w.processOne(ctx, job)
+		if !w.processOne(ctx, job) && w.stopOnFailure {
+			return
+		}
 	}
 }
 
@@ -483,7 +494,9 @@ func (w *Worker[T]) processSerialBatch(ctx context.Context, g *workerGeneration)
 		if !w.admit(ctx, g, false) {
 			return
 		}
-		w.processOne(ctx, jobs[0])
+		if !w.processOne(ctx, jobs[0]) && w.stopOnFailure {
+			return
+		}
 	}
 }
 
@@ -491,46 +504,49 @@ func (w *Worker[T]) processSerialBatch(ctx context.Context, g *workerGeneration)
 // result through RetryPolicy to MarkDone / MarkRetry / MarkDead, invoking the
 // matching Hook. A lease-lost error from a mark is logged and skipped without
 // panicking (the job was re-claimed by another worker).
-func (w *Worker[T]) processOne(ctx context.Context, job *Job[T]) {
+// Its result reports handler-and-mark success to the optional poll boundary;
+// retry/dead marks are still persisted before returning false.
+func (w *Worker[T]) processOne(ctx context.Context, job *Job[T]) bool {
 	err := w.handler(ctx, job)
 	// Cancellation is not a terminal job outcome. A handler may have returned
 	// nil despite cancellation, or may have performed its own durable checkpoint.
 	// Do not invent a completion/retry/dead mark; leave recovery to the lease owner.
 	if ctx.Err() != nil {
-		return
+		return false
 	}
 	if err == nil {
 		if markErr := w.store.MarkDone(ctx, job); markErr != nil {
 			if errors.Is(markErr, ErrLeaseLost) {
 				w.logger.Warn().Str("job_id", job.ID.String()).Msg("workqueue: lease lost on mark-done")
-				return
+				return false
 			}
 			w.logger.Error().Err(markErr).Str("job_id", job.ID.String()).Msg("workqueue: mark done")
-			return
+			return false
 		}
 		w.hooks.OnDone(ctx, job)
-		return
+		return true
 	}
 	if w.policy.Dead(job) {
 		if markErr := w.store.MarkDead(ctx, job, err.Error()); markErr != nil {
 			if errors.Is(markErr, ErrLeaseLost) {
 				w.logger.Warn().Str("job_id", job.ID.String()).Msg("workqueue: lease lost on mark-dead")
-				return
+				return false
 			}
 			w.logger.Error().Err(markErr).Str("job_id", job.ID.String()).Msg("workqueue: mark dead")
-			return
+			return false
 		}
 		w.hooks.OnDead(ctx, job, err)
-		return
+		return false
 	}
 	next := time.Now().UTC().Add(w.policy.NextAttempt(job))
 	if markErr := w.store.MarkRetry(ctx, job, err.Error(), next); markErr != nil {
 		if errors.Is(markErr, ErrLeaseLost) {
 			w.logger.Warn().Str("job_id", job.ID.String()).Msg("workqueue: lease lost on mark-retry")
-			return
+			return false
 		}
 		w.logger.Error().Err(markErr).Str("job_id", job.ID.String()).Msg("workqueue: mark retry")
-		return
+		return false
 	}
 	w.hooks.OnRetry(ctx, job, err)
+	return false
 }

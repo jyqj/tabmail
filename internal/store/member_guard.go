@@ -23,6 +23,8 @@ type MemberGuardStore interface {
 }
 
 type RefreshRotationStore interface {
+	// Successful rotation returns the current authentication snapshot in next.Issuance,
+	// captured while holding user ownership through the token commit.
 	RotateRefreshToken(context.Context, string, *models.RefreshToken) (rotated bool, familyRevoked bool, err error)
 	RevokeRefreshTokenByHash(context.Context, string) error
 }

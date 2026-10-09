@@ -125,6 +125,9 @@ func TestR5JSONSessionResponsesDoNotStore(t *testing.T) {
 	for _, valid := range []bool{true, false} {
 		t.Run(map[bool]string{true: "rotated-token", false: "rejected-token"}[valid], func(t *testing.T) {
 			st := &authBodyLimitStore{rotationSucceeds: valid, user: &models.User{ID: uuid.New(), TenantID: uuid.New(), IsActive: true, Email: "user@example.test"}}
+			if valid {
+				st.user.PasswordHash = "synthetic-cache-policy-hash"
+			}
 			h := newAuthBodyLimitHandler(t, st)
 			rr := httptest.NewRecorder()
 			h.Refresh(rr, httptest.NewRequest(http.MethodPost, "/api/v1/auth/refresh", strings.NewReader(`{"refresh_token":"synthetic-token"}`)))

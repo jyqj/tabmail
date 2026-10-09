@@ -381,12 +381,18 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	// subsequent read temporarily fails. Never strand the browser on its consumed
 	// ancestor or issue an access token without a current active user.
 	h.setRefreshCookie(w, nextRaw)
+	if next.Issuance == nil {
+		h.logger.Error().Msg("refresh: rotation omitted authentication snapshot")
+		errInternal(w)
+		return
+	}
+	authenticated := *next.Issuance
 	user, err := h.store.GetUser(r.Context(), next.UserID)
 	if err != nil {
 		errInternal(w)
 		return
 	}
-	if user == nil || !user.IsActive {
+	if !authenticated.MatchesUser(next.UserID, user) {
 		_ = h.store.RevokeRefreshTokenByHash(r.Context(), nextHash)
 		h.clearRefreshCookie(w)
 		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "user unavailable"}})

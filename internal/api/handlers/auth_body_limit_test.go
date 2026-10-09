@@ -40,6 +40,7 @@ func (s *authBodyLimitStore) RotateRefreshToken(_ context.Context, hash string, 
 	s.lastHash = hash
 	if s.rotationSucceeds {
 		next.UserID = s.user.ID
+		next.Issuance = &models.RefreshTokenIssuance{UserID: s.user.ID, TenantID: s.user.TenantID, PasswordHash: s.user.PasswordHash, SessionVersion: s.user.SessionVersion}
 	}
 	return s.rotationSucceeds, false, nil
 }
@@ -277,7 +278,7 @@ func TestAuthOptionalBodyCompatibility(t *testing.T) {
 				{"oversized_trailer", `{}` + strings.Repeat(" ", maxAuthBodyBytes+1024), true},
 			} {
 				t.Run(tc.name, func(t *testing.T) {
-					st := &authBodyLimitStore{rotationSucceeds: true, user: &models.User{ID: uuid.New(), TenantID: uuid.New(), IsActive: true}}
+					st := &authBodyLimitStore{rotationSucceeds: true, user: &models.User{ID: uuid.New(), TenantID: uuid.New(), IsActive: true, PasswordHash: "synthetic-body-limit-hash"}}
 					h := newAuthBodyLimitHandler(t, st)
 					fn := h.Refresh
 					wantStatus := http.StatusOK
@@ -314,7 +315,7 @@ func TestAuthBodyLimitEmptyAuthenticatedLogout(t *testing.T) {
 
 func TestAuthBodyLimitBodyTokenFallback(t *testing.T) {
 	for _, logout := range []bool{false, true} {
-		st := &authBodyLimitStore{rotationSucceeds: true, user: &models.User{ID: uuid.New(), TenantID: uuid.New(), IsActive: true}}
+		st := &authBodyLimitStore{rotationSucceeds: true, user: &models.User{ID: uuid.New(), TenantID: uuid.New(), IsActive: true, PasswordHash: "synthetic-body-limit-hash"}}
 		h := newAuthBodyLimitHandler(t, st)
 		body := `{"refresh_token":"synthetic-body-token"}`
 		r, reader := authBodyLimitRequest(body, true)
