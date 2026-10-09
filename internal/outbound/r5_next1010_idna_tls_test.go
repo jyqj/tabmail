@@ -171,7 +171,7 @@ func TestNext1010IDNASubmissionTLSAndRecipientIdentity(t *testing.T) {
 				if route == "explicit-mx" {
 					dns.mx, wantHost = "mx.xn--fsqu00a.test.", "mx.xn--fsqu00a.test"
 				}
-				rv := dns.resolver(t)
+				rv := dns.resolver(t, "xn--fsqu00a.test")
 				sessions := 0
 				var wire next1010IDNAWire
 				svc.adapter = r5QuotedAdapter(func(ctx context.Context, current *models.OutboundJob, raw []byte) (*DeliveryResult, error) {

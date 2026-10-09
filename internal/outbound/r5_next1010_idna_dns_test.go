@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/textproto"
 	"reflect"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -23,7 +24,41 @@ type next1010IDNADNS struct {
 	questions         []dnsmessage.Question
 }
 
-func (d *next1010IDNADNS) resolver(t *testing.T) *net.Resolver {
+// A custom net.Resolver.Dial still uses the host's DNS search list. Check the
+// exact A-label input before making this private fixture's lookup absolute;
+// this isolates that search list without doing IDNA conversion in the fixture.
+type next1010IDNAResolver struct {
+	resolver *net.Resolver
+	input    string
+}
+
+func (r next1010IDNAResolver) lookupName(domain string) (string, error) {
+	if domain != r.input {
+		return "", fmt.Errorf("DNS input = %q, want exact A-label %q", domain, r.input)
+	}
+	if !strings.HasSuffix(domain, ".") {
+		domain += "."
+	}
+	return domain, nil
+}
+
+func (r next1010IDNAResolver) LookupMX(ctx context.Context, domain string) ([]*net.MX, error) {
+	name, err := r.lookupName(domain)
+	if err != nil {
+		return nil, err
+	}
+	return r.resolver.LookupMX(ctx, name)
+}
+
+func (r next1010IDNAResolver) LookupIPAddr(ctx context.Context, domain string) ([]net.IPAddr, error) {
+	name, err := r.lookupName(domain)
+	if err != nil {
+		return nil, err
+	}
+	return r.resolver.LookupIPAddr(ctx, name)
+}
+
+func (d *next1010IDNADNS) resolver(t *testing.T, input string) smtpDNSResolver {
 	t.Helper()
 	conn, err := net.ListenPacket("udp", "127.0.0.1:0")
 	if err != nil {
@@ -79,11 +114,12 @@ func (d *next1010IDNADNS) resolver(t *testing.T) *net.Resolver {
 		}
 	}()
 	t.Cleanup(func() { _ = conn.Close(); <-done })
-	return &net.Resolver{PreferGo: true, StrictErrors: true,
+	raw := &net.Resolver{PreferGo: true, StrictErrors: true,
 		Dial: func(ctx context.Context, _, _ string) (net.Conn, error) {
 			return (&net.Dialer{}).DialContext(ctx, "udp", conn.LocalAddr().String())
 		},
 	}
+	return next1010IDNAResolver{resolver: raw, input: input}
 }
 
 func (d *next1010IDNADNS) verify(t *testing.T, addressLookup bool) {
@@ -126,7 +162,11 @@ func TestNext1010IDNARealDNSRouting(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			dns := &next1010IDNADNS{name: tc.ascii, mx: tc.mx, address: tc.address}
-			rv := dns.resolver(t)
+			input := tc.ascii
+			if !strings.HasSuffix(tc.domain, ".") {
+				input = strings.TrimSuffix(input, ".")
+			}
+			rv := dns.resolver(t, input)
 			ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 			defer cancel()
 			from := "sender@example.test"
