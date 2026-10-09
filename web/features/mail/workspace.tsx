@@ -20,7 +20,7 @@ type Folder = typeof folders[number];
 // Reconnect resync and manual refresh must cover mounted readers as well as
 // folder lists. Compatibility receipts do not poll; aggregate details carry
 // current capabilities. Private live readers receive a separate local signal.
-const mailKeys = new Set(["work-messages", "work-message", "inbound-attachments", "mail-conversation", "sent-assets", "work-drafts", "work-submissions", "submission", "legacy-outbound-receipt", "mail-index-status"]);
+const mailKeys = new Set(["work-messages", "work-message", "inbound-attachments", "mail-conversation", "sent-assets", "work-drafts", "work-submissions", "submission", "legacy-outbound-receipt", "legacy-outbound-receipts", "mail-index-status"]);
 export function MailWorkspace() {
     const t = useText();
     const router = useRouter();

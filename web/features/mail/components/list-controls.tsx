@@ -28,16 +28,17 @@ export function ListFeedback({ list, loading, refreshing, empty }: {
         }}/>;
     return listReady(list) && empty ? <p role="status" className="text-sm text-muted-foreground">{empty}</p> : null;
 }
-export function Pager({ page, total, onPage }: {
+export function Pager({ page, total, pageSize = 30, onPage }: {
     page: number;
     total: number;
+    pageSize?: number;
     onPage: (page: number) => void;
 }) {
     const t = useText();
     return <nav aria-label={t("分页", "Pagination")} className="flex items-center justify-center gap-3 py-3">
   <ActionButton disabled={page <= 1} onClick={() => onPage(page - 1)}>{t("上一页", "Previous")}</ActionButton>
-  <span className="text-sm">{page} / {Math.max(1, Math.ceil(total / 30))} · {total}</span>
-  <ActionButton disabled={page * 30 >= total} onClick={() => onPage(page + 1)}>{t("下一页", "Next")}</ActionButton>
+  <span className="text-sm">{page} / {Math.max(1, Math.ceil(total / pageSize))} · {total}</span>
+  <ActionButton disabled={page * pageSize >= total} onClick={() => onPage(page + 1)}>{t("下一页", "Next")}</ActionButton>
  </nav>;
 }
 export function SearchMail({ value, onSearch }: {

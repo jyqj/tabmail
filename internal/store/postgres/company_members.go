@@ -705,6 +705,7 @@ func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.Mail
 	if g.CanOrganize && !g.CanRead || g.TemplateOnly && !g.CanSend {
 		return app.BadRequest("organize requires read; template-only requires send")
 	}
+	granting := g.CanRead || g.CanSend || g.CanOrganize
 	return s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
 		v, e := s.mailboxAccessTx(ctx, tx, a, g.MailboxID)
 		if e != nil {
@@ -716,13 +717,26 @@ func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.Mail
 		if e = guardMailboxOwner(ctx, tx, a, v.Mailbox.OwnerUserID); e != nil {
 			return e
 		}
-		if e = activeCompanyUser(ctx, tx, a.TenantID, g.UserID); e != nil {
-			return e
+		if granting {
+			if e = activeCompanyUser(ctx, tx, a.TenantID, g.UserID); e != nil {
+				return e
+			}
+		} else {
+			// Freezing suspends use, but administrators must still be able to
+			// remove the grant before a later reactivation. Retain the same
+			// tenant boundary, mailbox CAS and required audit for this revoke.
+			var exists bool
+			if e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`, a.TenantID, g.UserID).Scan(&exists); e != nil {
+				return e
+			}
+			if !exists {
+				return app.BadRequest("same-company employee required")
+			}
 		}
 		if e = claimMailboxRevision(ctx, tx, a.TenantID, g.MailboxID, revision); e != nil {
 			return e
 		}
-		if !g.CanRead && !g.CanSend && !g.CanOrganize {
+		if !granting {
 			_, e = tx.Exec(ctx, `DELETE FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`, a.TenantID, g.MailboxID, g.UserID)
 		} else {
 			_, e = tx.Exec(ctx, `INSERT INTO mailbox_grants(tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(mailbox_id,user_id) DO UPDATE SET can_read=EXCLUDED.can_read,can_organize=EXCLUDED.can_organize,can_send=EXCLUDED.can_send,template_only=EXCLUDED.template_only,granted_by=EXCLUDED.granted_by,updated_at=now()`, a.TenantID, g.MailboxID, g.UserID, g.CanRead, g.CanOrganize, g.CanSend, g.TemplateOnly, a.ID)
