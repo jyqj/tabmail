@@ -209,7 +209,7 @@
   },
   {
     "source": "web/components/company/grants.tsx",
-    "line": 23,
+    "line": 24,
     "branch": 0,
     "callee": "company",
     "owner": "grants",
@@ -222,7 +222,7 @@
   },
   {
     "source": "web/components/company/grants.tsx",
-    "line": 49,
+    "line": 48,
     "branch": 0,
     "callee": "company",
     "owner": "snapshot",
@@ -235,7 +235,7 @@
   },
   {
     "source": "web/components/company/grants.tsx",
-    "line": 128,
+    "line": 127,
     "branch": 0,
     "callee": "company",
     "owner": "GrantEditor",
@@ -247,12 +247,12 @@
     "forwarding": false
   },
   {
-    "source": "web/components/company/grants.tsx",
-    "line": 194,
+    "source": "web/components/company/mailbox-lifecycle.tsx",
+    "line": 107,
     "branch": 0,
     "callee": "company",
-    "owner": "GrantEditor",
-    "expression": "`${workPath(mailbox.mailbox.id)}/handover`",
+    "owner": "submit",
+    "expression": "`${workPath(current.mailbox.id)}/handover`",
     "path": "/api/v1/company/mailboxes/{id}/handover",
     "methods": [
       "POST"
@@ -260,12 +260,12 @@
     "forwarding": false
   },
   {
-    "source": "web/components/company/grants.tsx",
-    "line": 203,
+    "source": "web/components/company/mailbox-lifecycle.tsx",
+    "line": 111,
     "branch": 0,
     "callee": "company",
-    "owner": "GrantEditor",
-    "expression": "`${workPath(mailbox.mailbox.id)}/convert-shared`",
+    "owner": "submit",
+    "expression": "`${workPath(current.mailbox.id)}/convert-shared`",
     "path": "/api/v1/company/mailboxes/{id}/convert-shared",
     "methods": [
       "POST"
@@ -742,7 +742,7 @@
   },
   {
     "source": "web/features/mail/workspace.tsx",
-    "line": 77,
+    "line": 80,
     "branch": 0,
     "callee": "streamEvents",
     "owner": "MailWorkspace",

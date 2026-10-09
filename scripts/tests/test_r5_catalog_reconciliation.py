@@ -1,4 +1,4 @@
-"""Frozen revision-1 through revision-14 reviews and current revision-15 facts."""
+"""Frozen revision-1 through revision-15 reviews and current revision-16 facts."""
 import ast
 from contextlib import contextmanager, ExitStack
 import copy
@@ -26,7 +26,7 @@ REVISION7_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION7-202
 REVISION8_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION8-20261008'
 REVISION9_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION9-20261008'
 REVISION10_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION10-20261008'
-CURRENT_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION15-20261009'
+CURRENT_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009'
 REVISION10_COMMIT = '20c39ab3ebaee46e5ac51e25d90a455166c9a31d'
 REVISION10_SOURCE_COMMIT = '703a572864296120fff3efe0880c560ad9c74d57'
 REVISION10_SOURCE_TREE = '40e1d2d16258e0e2bc3afea29553dbb148920e4e'
@@ -36,10 +36,10 @@ REVISION9_SOURCE_TREE = 'db7c422fcdd63405706a2f2cb7631a5380f87fd6'
 REVISION8_COMMIT = '1d856bd8a552c30dfb48b4902858edad7e53aaf5'
 REVISION8_SOURCE_COMMIT = 'e0cd175996ca4ee314d7d8b8cf836023b680346c'
 REVISION8_SOURCE_TREE = '5307be3cf057104d1bf1529e38235bbaf0c2bcdf'
-SOURCE_COMMIT = '26a30e3c6963d553efdd8a8b33c095feb924c758'
+SOURCE_COMMIT = 'b6516f9ac873f4464894933b5c3a0e046bc9a4a5'
 REVISION7_COMMIT = 'f77c31e2da38bb926dfe6fa134eabad652e94f8c'
 REVISION7_SOURCE_COMMIT = '9b12c93cb03285298267e27893f74aebe742a8a2'
-SOURCE_TREE = '437de0716fc9247e188f0409654f4f178905dc33'
+SOURCE_TREE = '4034b36faa89a421f2a21b525cf35e93da4a1670'
 REVISION7_SOURCE_TREE = '87c87a0db72ac444050b43fbe67d906f45c4a2ac'
 REVISION6_COMMIT = 'c3e1419e6245baf0190291ea868787cb2b0177ca'
 REVISION6_SOURCE_COMMIT = 'f413a9138d305cf154ed2cecaddcf9b9a2397666'
@@ -3340,6 +3340,941 @@ REVISION15_SNAPSHOTS = {
 }
 
 
+REVISION16_EXPECTED = {'transaction': {'status': 'PASS',
+                 'postgres_files': 64,
+                 'functions': 405,
+                 'sql_execution_calls': 506,
+                 'direct_write_functions': 140,
+                 'write_closure_functions': 161,
+                 'migration_files': 19,
+                 'task_complete': False,
+                 'runtime_verified': False,
+                 'meaning': 'syntax inventory current; no concurrency or behavior equivalence claim'},
+ 'compatibility': {'wire_validation_scope': 'not_checked_current_wire_required',
+                   'historical_wire_reference': {'artifact_ref': 'docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json',
+                                                 'sha256': '61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22',
+                                                 'qualification': 'historical_metadata_only_not_current_wire'},
+                   'status': 'source_inventory_and_upgrade_plan_checked',
+                   'task_complete': False,
+                   'product_green': False,
+                   'routes': 133,
+                   'client_branches': 136,
+                   'source_files': 97,
+                   'openapi_missing': ['DELETE /api/v1/suppression/{id}',
+                                       'GET /api/v1/suppression',
+                                       'GET /docs-assets/*'],
+                   'no_shipped_client': ['DELETE /api/v1/suppression/{id}',
+                                         'GET /api/v1/admin/status',
+                                         'GET /api/v1/auth/me',
+                                         'GET /api/v1/company/outbound/{id}/recipients',
+                                         'GET /api/v1/suppression',
+                                         'GET /docs',
+                                         'GET /docs-assets/*',
+                                         'GET /metrics',
+                                         'GET /openapi.yaml',
+                                         'GET /ready',
+                                         'GET /redoc'],
+                   'runtime_boundary': 'No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency '
+                                       'review remain required.'},
+ 'review_field_sha256': {'transaction_callers': '47b09a451fbb64e2bc265a6dfb2cded1771653ae0c1e61efd5510ce714248d69',
+                         'compatibility_route_changes': '4b7108ec39976a7a73c4308da956843299df6373b4843e95918d0a1e58634e44',
+                         'closure_changes': '10657a6acfb0e626b90f237ec0e632bb5cad9e3457c2d5b8cb94060bfcd9549b',
+                         'source_changes': 'a44782ffde55cd8c5e9e8ab26feb71a3be1dfc8c8cee392ba1dbd6c6e047149a',
+                         'current_rejections': 'a3c61bccf873702e07ee67d7c4ccdd4d1b5270f8980b22fa953c278bc5b78ddf',
+                         'generated_catalogs': '7bd3b5b80442f353205f8d6ba364d9fc563b3ab7cef4609e962a8b26c4f09434',
+                         'additional_api_schema_changes': 'd77360517d078c68a782edf7771fc641ff184bb1f02519a19e33fb993a9a9d1a',
+                         'additional_build_metadata_changes': '37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570',
+                         'transaction_body_changes': '77a3414665cdeef81b1f80d6841ec982140e4552806f158f78b3e070c46c7033',
+                         'transaction_classification_changes': '37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570',
+                         'transaction_entry_changes': '453f796c169f05d94fa3f7ca90b2e9c0f1193c3d51df893bd5c31f6d008137c3',
+                         'transaction_added_entries': '56bcf26505c32438a95d66a2e462443e3b9b236d993af09ec030e3044b272609',
+                         'transaction_removed_entries': '37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570',
+                         'manual_review_fields': '16eafb0680b87295189ddd8e0cf2e23cf53e339dff8701710cf28e0a0972b0e2',
+                         'transaction_file_review_additions': '42aeb577f636bf0823530984bb59b4173fb2b17e51e5477042e9e7bf875786a9',
+                         'baseline_validation': 'ee7912a268e84fe6a55c2d3973f35a7586f67927f3716ad680927ea558e4ce09',
+                         'original_unapproved_methods': '562cd164aca8d2334dc386cf226d7b848759cab08fb7b5d846fb96981124f409'},
+ 'historical_manifest_sha256': '7b335634e1f73f9002b25ed0f85af54f99a0444ecf174f0547db41c3d968e1cf',
+ 'protected_source_manifest_sha256': '5b4c4a874f9840c6706a7d66d6d9f5080f7cccf7f00abfac03f3c106ca7b878e',
+ 'maintenance_source_pins': {'.github/workflows/catalog-reconciliation.yml': {'path': '.github/workflows/catalog-reconciliation.yml',
+                                                                              'blob': '8a5062757f983961c656fcb8b64ef371e250b994',
+                                                                              'sha256': 'd83dac79c447a597179ba0763d77c583156c0d5f874fcecae8b634d7201e420f',
+                                                                              'bytes': 18633},
+                             'scripts/prepare_r5_catalog_revision16.py': {'path': 'scripts/prepare_r5_catalog_revision16.py',
+                                                                          'blob': '25dd6e59fa5303c80144bb555afdd0a60b6ee37e',
+                                                                          'sha256': 'be61cf8805029906c14fe41c9daf111d98583f1a59a874c1bea8fd863033de1a',
+                                                                          'bytes': 83371}},
+ 'file_review_additions': {'internal/store/postgres/company_templates.go': {'source_commit': 'b6516f9ac873f4464894933b5c3a0e046bc9a4a5',
+                                                                            'source_sha256': 'c6759117c22885f90207a01090cdd63602e561fa6bc903985d995da4f23b8f38',
+                                                                            'changed_functions': ['internal/store/postgres/company_templates.go:*PgStore:SaveMailTemplate'],
+                                                                            'added_functions': [],
+                                                                            'review': {'base_commit': 'b6516f9ac873f4464894933b5c3a0e046bc9a4a5',
+                                                                                       'source_sha256': 'bbe9e0f9a355b76791ea350b36e32a992f450b81b2d18fec2cbdcfc3dcf45b0d',
+                                                                                       'role': 'input-checked-template-transaction-writer',
+                                                                                       'trace': 'TrimSpace(name) then '
+                                                                                                'reject empty, '
+                                                                                                'over-120-byte or '
+                                                                                                'NUL-bearing names '
+                                                                                                'before '
+                                                                                                'ValidateTemplate, '
+                                                                                                'JSON encoding or SQL. '
+                                                                                                'The accepted branch '
+                                                                                                'retains '
+                                                                                                'companyReferencedTx: '
+                                                                                                'tenant KEY SHARE then '
+                                                                                                'actor/profile '
+                                                                                                'authorization, new '
+                                                                                                'template INSERT or '
+                                                                                                'tenant/id/revision '
+                                                                                                'CAS UPDATE, required '
+                                                                                                'template.save audit '
+                                                                                                'and outer commit. The '
+                                                                                                'name check adds no '
+                                                                                                'database operation or '
+                                                                                                'lock.',
+                                                                                       'unverified': 'Original syntax '
+                                                                                                     'producers only; '
+                                                                                                     'SQL fragments, '
+                                                                                                     'name-match '
+                                                                                                     'callers and '
+                                                                                                     'local operation '
+                                                                                                     'order do not '
+                                                                                                     'prove resolved '
+                                                                                                     'dispatch, '
+                                                                                                     'executed SQL or '
+                                                                                                     'concurrency '
+                                                                                                     'correctness. '
+                                                                                                     'Separately bound '
+                                                                                                     'EXEC product '
+                                                                                                     'regressions '
+                                                                                                     'retain their own '
+                                                                                                     'source '
+                                                                                                     'identities and '
+                                                                                                     'limited '
+                                                                                                     'qualification. '
+                                                                                                     'This maintenance '
+                                                                                                     'adds zero '
+                                                                                                     'implementation '
+                                                                                                     'TODOs and grants '
+                                                                                                     'no runtime, '
+                                                                                                     'release or '
+                                                                                                     'parent '
+                                                                                                     'acceptance.',
+                                                                                       'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/README.md'},
+                                                                            'qualification': 'source-only'},
+                           'internal/store/postgres/settings.go': {'source_commit': 'b6516f9ac873f4464894933b5c3a0e046bc9a4a5',
+                                                                   'source_sha256': '567388e56f2374cebfb7bfc0d051dd362723c3eeef67d736641544a1bb9d720e',
+                                                                   'changed_functions': [],
+                                                                   'added_functions': ['internal/store/postgres/settings.go:*PgStore:SeedSetting'],
+                                                                   'review': {'base_commit': 'b6516f9ac873f4464894933b5c3a0e046bc9a4a5',
+                                                                              'source_sha256': '1ac3664fd7874220598410ce4ee0fd002ff69b9db6f331f4c91e58ba8627234d',
+                                                                              'role': 'insert-only-default-statement',
+                                                                              'trace': 'A single pool.Exec issues '
+                                                                                       'INSERT INTO system_settings '
+                                                                                       '(...) VALUES (...) ON CONFLICT '
+                                                                                       '(key) DO NOTHING. An existing '
+                                                                                       'key keeps value, description '
+                                                                                       'and updated_at verbatim. The '
+                                                                                       'function returns true only '
+                                                                                       'when RowsAffected() == 1; an '
+                                                                                       'existing key returns false and '
+                                                                                       'database errors propagate. '
+                                                                                       'There is no read-then-upsert '
+                                                                                       'window, explicit transaction, '
+                                                                                       'extra lock SQL or callback.',
+                                                                              'unverified': 'Original syntax producers '
+                                                                                            'only; SQL fragments, '
+                                                                                            'name-match callers and '
+                                                                                            'local operation order do '
+                                                                                            'not prove resolved '
+                                                                                            'dispatch, executed SQL or '
+                                                                                            'concurrency correctness. '
+                                                                                            'Separately bound EXEC '
+                                                                                            'product regressions '
+                                                                                            'retain their own source '
+                                                                                            'identities and limited '
+                                                                                            'qualification. This '
+                                                                                            'maintenance adds zero '
+                                                                                            'implementation TODOs and '
+                                                                                            'grants no runtime, '
+                                                                                            'release or parent '
+                                                                                            'acceptance.',
+                                                                              'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/README.md'},
+                                                                   'note': 'ListSettings moves in this file without a '
+                                                                           'function-body change; old manual fields '
+                                                                           'are retained.',
+                                                                   'qualification': 'source-only'}},
+ 'added_entries': {'internal/store/postgres/settings.go:*PgStore:SeedSetting': {'id': 'internal/store/postgres/settings.go:*PgStore:SeedSetting',
+                                                                                'owner': 'postgres.PgStore/settings.go',
+                                                                                'entry': 'SeedSetting',
+                                                                                'group': 'CTX37',
+                                                                                'classification': {'kind': 'direct-write',
+                                                                                                   'direct_write': True,
+                                                                                                   'write_closure': True,
+                                                                                                   'explicit_lock': False,
+                                                                                                   'transaction_calls': False,
+                                                                                                   'callback_parameter': False,
+                                                                                                   'dynamic_sql_expression': False},
+                                                                                'syntax': {'id': 'internal/store/postgres/settings.go:*PgStore:SeedSetting',
+                                                                                           'file': 'internal/store/postgres/settings.go',
+                                                                                           'name': 'SeedSetting',
+                                                                                           'receiver': '*PgStore',
+                                                                                           'line': 35,
+                                                                                           'end': 44,
+                                                                                           'sha256': '1ac3664fd7874220598410ce4ee0fd002ff69b9db6f331f4c91e58ba8627234d',
+                                                                                           'calls': [{'line': 36,
+                                                                                                      'expr': 's.pool.Exec',
+                                                                                                      'name': 'Exec',
+                                                                                                      'sql_expr': '`\n'
+                                                                                                                  '\t\t'
+                                                                                                                  'INSERT '
+                                                                                                                  'INTO '
+                                                                                                                  'system_settings '
+                                                                                                                  '(key, '
+                                                                                                                  'value, '
+                                                                                                                  'description, '
+                                                                                                                  'updated_at)\n'
+                                                                                                                  '\t\t'
+                                                                                                                  'VALUES '
+                                                                                                                  '($1, '
+                                                                                                                  '$2, '
+                                                                                                                  '$3, '
+                                                                                                                  '$4)\n'
+                                                                                                                  '\t\t'
+                                                                                                                  'ON '
+                                                                                                                  'CONFLICT '
+                                                                                                                  '(key) '
+                                                                                                                  'DO '
+                                                                                                                  'NOTHING`'},
+                                                                                                     {'line': 39,
+                                                                                                      'expr': 'time.Now().UTC',
+                                                                                                      'name': 'UTC'},
+                                                                                                     {'line': 39,
+                                                                                                      'expr': 'time.Now',
+                                                                                                      'name': 'Now'},
+                                                                                                     {'line': 43,
+                                                                                                      'expr': 'result.RowsAffected',
+                                                                                                      'name': 'RowsAffected'}],
+                                                                                           'strings': [{'line': 36,
+                                                                                                        'value': '\n'
+                                                                                                                 '\t\t'
+                                                                                                                 'INSERT '
+                                                                                                                 'INTO '
+                                                                                                                 'system_settings '
+                                                                                                                 '(key, '
+                                                                                                                 'value, '
+                                                                                                                 'description, '
+                                                                                                                 'updated_at)\n'
+                                                                                                                 '\t\t'
+                                                                                                                 'VALUES '
+                                                                                                                 '($1, '
+                                                                                                                 '$2, '
+                                                                                                                 '$3, '
+                                                                                                                 '$4)\n'
+                                                                                                                 '\t\t'
+                                                                                                                 'ON '
+                                                                                                                 'CONFLICT '
+                                                                                                                 '(key) '
+                                                                                                                 'DO '
+                                                                                                                 'NOTHING'}],
+                                                                                           'params': 'func(ctx '
+                                                                                                     'context.Context, '
+                                                                                                     'key, value, '
+                                                                                                     'description '
+                                                                                                     'string) (bool, '
+                                                                                                     'error)'},
+                                                                                'callers': [{'caller_id': 'internal/settings/settings.go:*Manager:Seed',
+                                                                                             'file': 'internal/settings/settings.go',
+                                                                                             'function': 'Seed',
+                                                                                             'line': 45,
+                                                                                             'expression': 'm.store.SeedSetting',
+                                                                                             'status': 'name-match-candidate-not-dispatch-proof'}],
+                                                                                'lock_fk_wait_fence': {'boundary': 'A '
+                                                                                                                   'single '
+                                                                                                                   'pool.Exec '
+                                                                                                                   'issues '
+                                                                                                                   'INSERT '
+                                                                                                                   'INTO '
+                                                                                                                   'system_settings '
+                                                                                                                   '(...) '
+                                                                                                                   'VALUES '
+                                                                                                                   '(...) '
+                                                                                                                   'ON '
+                                                                                                                   'CONFLICT '
+                                                                                                                   '(key) '
+                                                                                                                   'DO '
+                                                                                                                   'NOTHING. '
+                                                                                                                   'An '
+                                                                                                                   'existing '
+                                                                                                                   'key '
+                                                                                                                   'keeps '
+                                                                                                                   'value, '
+                                                                                                                   'description '
+                                                                                                                   'and '
+                                                                                                                   'updated_at '
+                                                                                                                   'verbatim. '
+                                                                                                                   'The '
+                                                                                                                   'function '
+                                                                                                                   'returns '
+                                                                                                                   'true '
+                                                                                                                   'only '
+                                                                                                                   'when '
+                                                                                                                   'RowsAffected() '
+                                                                                                                   '== '
+                                                                                                                   '1; '
+                                                                                                                   'an '
+                                                                                                                   'existing '
+                                                                                                                   'key '
+                                                                                                                   'returns '
+                                                                                                                   'false '
+                                                                                                                   'and '
+                                                                                                                   'database '
+                                                                                                                   'errors '
+                                                                                                                   'propagate. '
+                                                                                                                   'There '
+                                                                                                                   'is '
+                                                                                                                   'no '
+                                                                                                                   'read-then-upsert '
+                                                                                                                   'window, '
+                                                                                                                   'explicit '
+                                                                                                                   'transaction, '
+                                                                                                                   'extra '
+                                                                                                                   'lock '
+                                                                                                                   'SQL '
+                                                                                                                   'or '
+                                                                                                                   'callback.',
+                                                                                                       'local_operations': [{'line': 36,
+                                                                                                                             'operation': 's.pool.Exec',
+                                                                                                                             'sql_expression': '`\n'
+                                                                                                                                               '\t\t'
+                                                                                                                                               'INSERT '
+                                                                                                                                               'INTO '
+                                                                                                                                               'system_settings '
+                                                                                                                                               '(key, '
+                                                                                                                                               'value, '
+                                                                                                                                               'description, '
+                                                                                                                                               'updated_at)\n'
+                                                                                                                                               '\t\t'
+                                                                                                                                               'VALUES '
+                                                                                                                                               '($1, '
+                                                                                                                                               '$2, '
+                                                                                                                                               '$3, '
+                                                                                                                                               '$4)\n'
+                                                                                                                                               '\t\t'
+                                                                                                                                               'ON '
+                                                                                                                                               'CONFLICT '
+                                                                                                                                               '(key) '
+                                                                                                                                               'DO '
+                                                                                                                                               'NOTHING`',
+                                                                                                                             'status': 'lexical-order-with-branches-not-single-total-runtime-order'}],
+                                                                                                       'direct_lock_fragments': [],
+                                                                                                       'implicit_fk': 'system_settings.key '
+                                                                                                                      'is '
+                                                                                                                      'the '
+                                                                                                                      'existing '
+                                                                                                                      'primary '
+                                                                                                                      'key; '
+                                                                                                                      'this '
+                                                                                                                      'table '
+                                                                                                                      'has '
+                                                                                                                      'no '
+                                                                                                                      'tenant '
+                                                                                                                      'foreign '
+                                                                                                                      'key. '
+                                                                                                                      'The '
+                                                                                                                      'unique-key '
+                                                                                                                      'conflict '
+                                                                                                                      'may '
+                                                                                                                      'wait '
+                                                                                                                      'for '
+                                                                                                                      'another '
+                                                                                                                      'transaction. '
+                                                                                                                      'No '
+                                                                                                                      'row '
+                                                                                                                      'is '
+                                                                                                                      'overwritten '
+                                                                                                                      'on '
+                                                                                                                      'conflict.'},
+                                                                                'evidence': ['internal/store/postgres/settings.go:35-44 '
+                                                                                             'sha256=1ac3664fd7874220598410ce4ee0fd002ff69b9db6f331f4c91e58ba8627234d',
+                                                                                             'Original syntax '
+                                                                                             'producers; actual '
+                                                                                             'PostgreSQL seed '
+                                                                                             'regressions remain '
+                                                                                             'separately '
+                                                                                             'source-bound.'],
+                                                                                'unverified_risks': ['Multiple setting '
+                                                                                                     'keys are '
+                                                                                                     'separate '
+                                                                                                     'autocommit '
+                                                                                                     'statements, not '
+                                                                                                     'one atomic '
+                                                                                                     'settings '
+                                                                                                     'transaction.',
+                                                                                                     'Cache refresh '
+                                                                                                     'and concurrent '
+                                                                                                     'administrative '
+                                                                                                     'writes outside '
+                                                                                                     'this single '
+                                                                                                     'insertion '
+                                                                                                     'require their '
+                                                                                                     'own review.',
+                                                                                                     'Original syntax '
+                                                                                                     'producers only; '
+                                                                                                     'SQL fragments, '
+                                                                                                     'name-match '
+                                                                                                     'callers and '
+                                                                                                     'local operation '
+                                                                                                     'order do not '
+                                                                                                     'prove resolved '
+                                                                                                     'dispatch, '
+                                                                                                     'executed SQL or '
+                                                                                                     'concurrency '
+                                                                                                     'correctness. '
+                                                                                                     'Separately bound '
+                                                                                                     'EXEC product '
+                                                                                                     'regressions '
+                                                                                                     'retain their own '
+                                                                                                     'source '
+                                                                                                     'identities and '
+                                                                                                     'limited '
+                                                                                                     'qualification. '
+                                                                                                     'This maintenance '
+                                                                                                     'adds zero '
+                                                                                                     'implementation '
+                                                                                                     'TODOs and grants '
+                                                                                                     'no runtime, '
+                                                                                                     'release or '
+                                                                                                     'parent '
+                                                                                                     'acceptance.'],
+                                                                                'review_status': 'static-type-review',
+                                                                                'followup_tasks': ['R5-P1-030'],
+                                                                                'assertions': {'direct_sql_effects': [{'line': 36,
+                                                                                                                       'sql_fragment': '\n'
+                                                                                                                                       '\t\t'
+                                                                                                                                       'INSERT '
+                                                                                                                                       'INTO '
+                                                                                                                                       'system_settings '
+                                                                                                                                       '(key, '
+                                                                                                                                       'value, '
+                                                                                                                                       'description, '
+                                                                                                                                       'updated_at)\n'
+                                                                                                                                       '\t\t'
+                                                                                                                                       'VALUES '
+                                                                                                                                       '($1, '
+                                                                                                                                       '$2, '
+                                                                                                                                       '$3, '
+                                                                                                                                       '$4)\n'
+                                                                                                                                       '\t\t'
+                                                                                                                                       'ON '
+                                                                                                                                       'CONFLICT '
+                                                                                                                                       '(key) '
+                                                                                                                                       'DO '
+                                                                                                                                       'NOTHING'}],
+                                                                                               'direct_lock_fragments': [],
+                                                                                               'transaction_helper_calls': [],
+                                                                                               'sql_execution_expressions': [{'line': 36,
+                                                                                                                              'expr': 's.pool.Exec',
+                                                                                                                              'name': 'Exec',
+                                                                                                                              'sql_expr': '`\n'
+                                                                                                                                          '\t\t'
+                                                                                                                                          'INSERT '
+                                                                                                                                          'INTO '
+                                                                                                                                          'system_settings '
+                                                                                                                                          '(key, '
+                                                                                                                                          'value, '
+                                                                                                                                          'description, '
+                                                                                                                                          'updated_at)\n'
+                                                                                                                                          '\t\t'
+                                                                                                                                          'VALUES '
+                                                                                                                                          '($1, '
+                                                                                                                                          '$2, '
+                                                                                                                                          '$3, '
+                                                                                                                                          '$4)\n'
+                                                                                                                                          '\t\t'
+                                                                                                                                          'ON '
+                                                                                                                                          'CONFLICT '
+                                                                                                                                          '(key) '
+                                                                                                                                          'DO '
+                                                                                                                                          'NOTHING`'}],
+                                                                                               'effect_status': 'source-fragments-not-evaluated-SQL',
+                                                                                               'callback_effect': 'No '
+                                                                                                                  'function '
+                                                                                                                  'or '
+                                                                                                                  'Validator '
+                                                                                                                  'parameter '
+                                                                                                                  'and '
+                                                                                                                  'no '
+                                                                                                                  'external '
+                                                                                                                  'callback; '
+                                                                                                                  'pool.Exec '
+                                                                                                                  'is '
+                                                                                                                  'the '
+                                                                                                                  'single '
+                                                                                                                  'database '
+                                                                                                                  'operation.',
+                                                                                               'entry_role': 'store-exported-interface-candidate'},
+                                                                                'file_family_context': 'A single '
+                                                                                                       'pool.Exec '
+                                                                                                       'issues INSERT '
+                                                                                                       'INTO '
+                                                                                                       'system_settings '
+                                                                                                       '(...) VALUES '
+                                                                                                       '(...) ON '
+                                                                                                       'CONFLICT (key) '
+                                                                                                       'DO NOTHING. An '
+                                                                                                       'existing key '
+                                                                                                       'keeps value, '
+                                                                                                       'description '
+                                                                                                       'and updated_at '
+                                                                                                       'verbatim. The '
+                                                                                                       'function '
+                                                                                                       'returns true '
+                                                                                                       'only when '
+                                                                                                       'RowsAffected() '
+                                                                                                       '== 1; an '
+                                                                                                       'existing key '
+                                                                                                       'returns false '
+                                                                                                       'and database '
+                                                                                                       'errors '
+                                                                                                       'propagate. '
+                                                                                                       'There is no '
+                                                                                                       'read-then-upsert '
+                                                                                                       'window, '
+                                                                                                       'explicit '
+                                                                                                       'transaction, '
+                                                                                                       'extra lock SQL '
+                                                                                                       'or callback.',
+                                                                                'evidence_level': 'source-only',
+                                                                                'source_review': {'base_commit': 'b6516f9ac873f4464894933b5c3a0e046bc9a4a5',
+                                                                                                  'source_sha256': '1ac3664fd7874220598410ce4ee0fd002ff69b9db6f331f4c91e58ba8627234d',
+                                                                                                  'role': 'insert-only-default-statement',
+                                                                                                  'trace': 'A single '
+                                                                                                           'pool.Exec '
+                                                                                                           'issues '
+                                                                                                           'INSERT '
+                                                                                                           'INTO '
+                                                                                                           'system_settings '
+                                                                                                           '(...) '
+                                                                                                           'VALUES '
+                                                                                                           '(...) ON '
+                                                                                                           'CONFLICT '
+                                                                                                           '(key) DO '
+                                                                                                           'NOTHING. '
+                                                                                                           'An '
+                                                                                                           'existing '
+                                                                                                           'key keeps '
+                                                                                                           'value, '
+                                                                                                           'description '
+                                                                                                           'and '
+                                                                                                           'updated_at '
+                                                                                                           'verbatim. '
+                                                                                                           'The '
+                                                                                                           'function '
+                                                                                                           'returns '
+                                                                                                           'true only '
+                                                                                                           'when '
+                                                                                                           'RowsAffected() '
+                                                                                                           '== 1; an '
+                                                                                                           'existing '
+                                                                                                           'key '
+                                                                                                           'returns '
+                                                                                                           'false and '
+                                                                                                           'database '
+                                                                                                           'errors '
+                                                                                                           'propagate. '
+                                                                                                           'There is '
+                                                                                                           'no '
+                                                                                                           'read-then-upsert '
+                                                                                                           'window, '
+                                                                                                           'explicit '
+                                                                                                           'transaction, '
+                                                                                                           'extra lock '
+                                                                                                           'SQL or '
+                                                                                                           'callback.',
+                                                                                                  'unverified': 'Original '
+                                                                                                                'syntax '
+                                                                                                                'producers '
+                                                                                                                'only; '
+                                                                                                                'SQL '
+                                                                                                                'fragments, '
+                                                                                                                'name-match '
+                                                                                                                'callers '
+                                                                                                                'and '
+                                                                                                                'local '
+                                                                                                                'operation '
+                                                                                                                'order '
+                                                                                                                'do '
+                                                                                                                'not '
+                                                                                                                'prove '
+                                                                                                                'resolved '
+                                                                                                                'dispatch, '
+                                                                                                                'executed '
+                                                                                                                'SQL '
+                                                                                                                'or '
+                                                                                                                'concurrency '
+                                                                                                                'correctness. '
+                                                                                                                'Separately '
+                                                                                                                'bound '
+                                                                                                                'EXEC '
+                                                                                                                'product '
+                                                                                                                'regressions '
+                                                                                                                'retain '
+                                                                                                                'their '
+                                                                                                                'own '
+                                                                                                                'source '
+                                                                                                                'identities '
+                                                                                                                'and '
+                                                                                                                'limited '
+                                                                                                                'qualification. '
+                                                                                                                'This '
+                                                                                                                'maintenance '
+                                                                                                                'adds '
+                                                                                                                'zero '
+                                                                                                                'implementation '
+                                                                                                                'TODOs '
+                                                                                                                'and '
+                                                                                                                'grants '
+                                                                                                                'no '
+                                                                                                                'runtime, '
+                                                                                                                'release '
+                                                                                                                'or '
+                                                                                                                'parent '
+                                                                                                                'acceptance.',
+                                                                                                  'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/README.md'}}},
+ 'body_changes': [{'id': 'internal/store/postgres/company_templates.go:*PgStore:SaveMailTemplate',
+                   'before_sha256': '2a1e100ed7c2de664f94313abb028a6f05d8f328aeefa8be246a81cfdb41f51f',
+                   'after_sha256': 'bbe9e0f9a355b76791ea350b36e32a992f450b81b2d18fec2cbdcfc3dcf45b0d'}],
+ 'classification_changes': [],
+ 'manual_review_fields': {'internal/store/postgres/company_templates.go:*PgStore:SaveMailTemplate': {'lock_fk_wait_fence': {'boundary': 'TrimSpace(name) '
+                                                                                                                                        'then '
+                                                                                                                                        'reject '
+                                                                                                                                        'empty, '
+                                                                                                                                        'over-120-byte '
+                                                                                                                                        'or '
+                                                                                                                                        'NUL-bearing '
+                                                                                                                                        'names '
+                                                                                                                                        'before '
+                                                                                                                                        'ValidateTemplate, '
+                                                                                                                                        'JSON '
+                                                                                                                                        'encoding '
+                                                                                                                                        'or '
+                                                                                                                                        'SQL. '
+                                                                                                                                        'The '
+                                                                                                                                        'accepted '
+                                                                                                                                        'branch '
+                                                                                                                                        'retains '
+                                                                                                                                        'companyReferencedTx: '
+                                                                                                                                        'tenant '
+                                                                                                                                        'KEY '
+                                                                                                                                        'SHARE '
+                                                                                                                                        'then '
+                                                                                                                                        'actor/profile '
+                                                                                                                                        'authorization, '
+                                                                                                                                        'new '
+                                                                                                                                        'template '
+                                                                                                                                        'INSERT '
+                                                                                                                                        'or '
+                                                                                                                                        'tenant/id/revision '
+                                                                                                                                        'CAS '
+                                                                                                                                        'UPDATE, '
+                                                                                                                                        'required '
+                                                                                                                                        'template.save '
+                                                                                                                                        'audit '
+                                                                                                                                        'and '
+                                                                                                                                        'outer '
+                                                                                                                                        'commit. '
+                                                                                                                                        'The '
+                                                                                                                                        'name '
+                                                                                                                                        'check '
+                                                                                                                                        'adds '
+                                                                                                                                        'no '
+                                                                                                                                        'database '
+                                                                                                                                        'operation '
+                                                                                                                                        'or '
+                                                                                                                                        'lock.',
+                                                                                                                            'local_operations': [{'line': 85,
+                                                                                                                                                  'operation': 's.companyReferencedTx',
+                                                                                                                                                  'sql_expression': '',
+                                                                                                                                                  'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                                 {'line': 91,
+                                                                                                                                                  'operation': 'tx.QueryRow',
+                                                                                                                                                  'sql_expression': '`INSERT '
+                                                                                                                                                                    'INTO '
+                                                                                                                                                                    'mail_templates(id,tenant_id,name,draft,created_by) '
+                                                                                                                                                                    'VALUES($1,$2,$3,$4,$5) '
+                                                                                                                                                                    'RETURNING '
+                                                                                                                                                                    'revision,updated_at`',
+                                                                                                                                                  'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                                 {'line': 95,
+                                                                                                                                                  'operation': 'tx.QueryRow',
+                                                                                                                                                  'sql_expression': '`UPDATE '
+                                                                                                                                                                    'mail_templates '
+                                                                                                                                                                    'SET '
+                                                                                                                                                                    'name=$3,draft=$4,revision=revision+1,updated_at=now() '
+                                                                                                                                                                    'WHERE '
+                                                                                                                                                                    'tenant_id=$1 '
+                                                                                                                                                                    'AND '
+                                                                                                                                                                    'id=$2 '
+                                                                                                                                                                    'AND '
+                                                                                                                                                                    'revision=$5 '
+                                                                                                                                                                    'RETURNING '
+                                                                                                                                                                    'revision,updated_at,retired`',
+                                                                                                                                                  'status': 'lexical-order-with-branches-not-single-total-runtime-order'}],
+                                                                                                                            'direct_lock_fragments': [],
+                                                                                                                            'implicit_fk': 'Existing '
+                                                                                                                                           'template '
+                                                                                                                                           'tenant '
+                                                                                                                                           'and '
+                                                                                                                                           'version/grant '
+                                                                                                                                           'foreign-key '
+                                                                                                                                           'definitions '
+                                                                                                                                           'are '
+                                                                                                                                           'unchanged; '
+                                                                                                                                           'unique '
+                                                                                                                                           'template '
+                                                                                                                                           'names '
+                                                                                                                                           'can '
+                                                                                                                                           'wait. '
+                                                                                                                                           'Static '
+                                                                                                                                           'syntax '
+                                                                                                                                           'does '
+                                                                                                                                           'not '
+                                                                                                                                           'establish '
+                                                                                                                                           'a '
+                                                                                                                                           'global '
+                                                                                                                                           'lock '
+                                                                                                                                           'order.'},
+                                                                                                     'evidence': ['internal/store/postgres/company_templates.go:74-106 '
+                                                                                                                  'sha256=bbe9e0f9a355b76791ea350b36e32a992f450b81b2d18fec2cbdcfc3dcf45b0d',
+                                                                                                                  'Original '
+                                                                                                                  'syntax '
+                                                                                                                  'producers; '
+                                                                                                                  'bounded '
+                                                                                                                  'product '
+                                                                                                                  'regressions '
+                                                                                                                  'are '
+                                                                                                                  'recorded '
+                                                                                                                  'by '
+                                                                                                                  'their '
+                                                                                                                  'own '
+                                                                                                                  'EXEC '
+                                                                                                                  'source '
+                                                                                                                  'receipts.'],
+                                                                                                     'unverified_risks': ['版本revoke先version→template，publish先template→version '
+                                                                                                                          'INSERT；不同版本/反向等待及旧模板资格跨语句需专项验证',
+                                                                                                                          'Original '
+                                                                                                                          'syntax '
+                                                                                                                          'producers '
+                                                                                                                          'only; '
+                                                                                                                          'SQL '
+                                                                                                                          'fragments, '
+                                                                                                                          'name-match '
+                                                                                                                          'callers '
+                                                                                                                          'and '
+                                                                                                                          'local '
+                                                                                                                          'operation '
+                                                                                                                          'order '
+                                                                                                                          'do '
+                                                                                                                          'not '
+                                                                                                                          'prove '
+                                                                                                                          'resolved '
+                                                                                                                          'dispatch, '
+                                                                                                                          'executed '
+                                                                                                                          'SQL '
+                                                                                                                          'or '
+                                                                                                                          'concurrency '
+                                                                                                                          'correctness. '
+                                                                                                                          'Separately '
+                                                                                                                          'bound '
+                                                                                                                          'EXEC '
+                                                                                                                          'product '
+                                                                                                                          'regressions '
+                                                                                                                          'retain '
+                                                                                                                          'their '
+                                                                                                                          'own '
+                                                                                                                          'source '
+                                                                                                                          'identities '
+                                                                                                                          'and '
+                                                                                                                          'limited '
+                                                                                                                          'qualification. '
+                                                                                                                          'This '
+                                                                                                                          'maintenance '
+                                                                                                                          'adds '
+                                                                                                                          'zero '
+                                                                                                                          'implementation '
+                                                                                                                          'TODOs '
+                                                                                                                          'and '
+                                                                                                                          'grants '
+                                                                                                                          'no '
+                                                                                                                          'runtime, '
+                                                                                                                          'release '
+                                                                                                                          'or '
+                                                                                                                          'parent '
+                                                                                                                          'acceptance.'],
+                                                                                                     'file_family_context': 'TrimSpace(name) '
+                                                                                                                            'then '
+                                                                                                                            'reject '
+                                                                                                                            'empty, '
+                                                                                                                            'over-120-byte '
+                                                                                                                            'or '
+                                                                                                                            'NUL-bearing '
+                                                                                                                            'names '
+                                                                                                                            'before '
+                                                                                                                            'ValidateTemplate, '
+                                                                                                                            'JSON '
+                                                                                                                            'encoding '
+                                                                                                                            'or '
+                                                                                                                            'SQL. '
+                                                                                                                            'The '
+                                                                                                                            'accepted '
+                                                                                                                            'branch '
+                                                                                                                            'retains '
+                                                                                                                            'companyReferencedTx: '
+                                                                                                                            'tenant '
+                                                                                                                            'KEY '
+                                                                                                                            'SHARE '
+                                                                                                                            'then '
+                                                                                                                            'actor/profile '
+                                                                                                                            'authorization, '
+                                                                                                                            'new '
+                                                                                                                            'template '
+                                                                                                                            'INSERT '
+                                                                                                                            'or '
+                                                                                                                            'tenant/id/revision '
+                                                                                                                            'CAS '
+                                                                                                                            'UPDATE, '
+                                                                                                                            'required '
+                                                                                                                            'template.save '
+                                                                                                                            'audit '
+                                                                                                                            'and '
+                                                                                                                            'outer '
+                                                                                                                            'commit. '
+                                                                                                                            'The '
+                                                                                                                            'name '
+                                                                                                                            'check '
+                                                                                                                            'adds '
+                                                                                                                            'no '
+                                                                                                                            'database '
+                                                                                                                            'operation '
+                                                                                                                            'or '
+                                                                                                                            'lock.',
+                                                                                                     'source_review': {'base_commit': 'b6516f9ac873f4464894933b5c3a0e046bc9a4a5',
+                                                                                                                       'source_sha256': 'bbe9e0f9a355b76791ea350b36e32a992f450b81b2d18fec2cbdcfc3dcf45b0d',
+                                                                                                                       'role': 'input-checked-template-transaction-writer',
+                                                                                                                       'trace': 'TrimSpace(name) '
+                                                                                                                                'then '
+                                                                                                                                'reject '
+                                                                                                                                'empty, '
+                                                                                                                                'over-120-byte '
+                                                                                                                                'or '
+                                                                                                                                'NUL-bearing '
+                                                                                                                                'names '
+                                                                                                                                'before '
+                                                                                                                                'ValidateTemplate, '
+                                                                                                                                'JSON '
+                                                                                                                                'encoding '
+                                                                                                                                'or '
+                                                                                                                                'SQL. '
+                                                                                                                                'The '
+                                                                                                                                'accepted '
+                                                                                                                                'branch '
+                                                                                                                                'retains '
+                                                                                                                                'companyReferencedTx: '
+                                                                                                                                'tenant '
+                                                                                                                                'KEY '
+                                                                                                                                'SHARE '
+                                                                                                                                'then '
+                                                                                                                                'actor/profile '
+                                                                                                                                'authorization, '
+                                                                                                                                'new '
+                                                                                                                                'template '
+                                                                                                                                'INSERT '
+                                                                                                                                'or '
+                                                                                                                                'tenant/id/revision '
+                                                                                                                                'CAS '
+                                                                                                                                'UPDATE, '
+                                                                                                                                'required '
+                                                                                                                                'template.save '
+                                                                                                                                'audit '
+                                                                                                                                'and '
+                                                                                                                                'outer '
+                                                                                                                                'commit. '
+                                                                                                                                'The '
+                                                                                                                                'name '
+                                                                                                                                'check '
+                                                                                                                                'adds '
+                                                                                                                                'no '
+                                                                                                                                'database '
+                                                                                                                                'operation '
+                                                                                                                                'or '
+                                                                                                                                'lock.',
+                                                                                                                       'unverified': 'Original '
+                                                                                                                                     'syntax '
+                                                                                                                                     'producers '
+                                                                                                                                     'only; '
+                                                                                                                                     'SQL '
+                                                                                                                                     'fragments, '
+                                                                                                                                     'name-match '
+                                                                                                                                     'callers '
+                                                                                                                                     'and '
+                                                                                                                                     'local '
+                                                                                                                                     'operation '
+                                                                                                                                     'order '
+                                                                                                                                     'do '
+                                                                                                                                     'not '
+                                                                                                                                     'prove '
+                                                                                                                                     'resolved '
+                                                                                                                                     'dispatch, '
+                                                                                                                                     'executed '
+                                                                                                                                     'SQL '
+                                                                                                                                     'or '
+                                                                                                                                     'concurrency '
+                                                                                                                                     'correctness. '
+                                                                                                                                     'Separately '
+                                                                                                                                     'bound '
+                                                                                                                                     'EXEC '
+                                                                                                                                     'product '
+                                                                                                                                     'regressions '
+                                                                                                                                     'retain '
+                                                                                                                                     'their '
+                                                                                                                                     'own '
+                                                                                                                                     'source '
+                                                                                                                                     'identities '
+                                                                                                                                     'and '
+                                                                                                                                     'limited '
+                                                                                                                                     'qualification. '
+                                                                                                                                     'This '
+                                                                                                                                     'maintenance '
+                                                                                                                                     'adds '
+                                                                                                                                     'zero '
+                                                                                                                                     'implementation '
+                                                                                                                                     'TODOs '
+                                                                                                                                     'and '
+                                                                                                                                     'grants '
+                                                                                                                                     'no '
+                                                                                                                                     'runtime, '
+                                                                                                                                     'release '
+                                                                                                                                     'or '
+                                                                                                                                     'parent '
+                                                                                                                                     'acceptance.',
+                                                                                                                       'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/README.md'}}},
+ 'product_paths': ['internal/api/handlers/admin.go',
+                   'internal/api/handlers/smtp_policy_input.go',
+                   'internal/app/admin/names.go',
+                   'internal/app/admin/service.go',
+                   'internal/company/templates.go',
+                   'internal/outbound/delivery.go',
+                   'internal/settings/settings.go',
+                   'internal/store/postgres/company_templates.go',
+                   'internal/store/postgres/settings.go',
+                   'internal/store/store.go',
+                   'internal/testutil/fake_store_misc.go',
+                   'web/components/company/grants.tsx',
+                   'web/components/company/mailbox-lifecycle.tsx',
+                   'web/features/mail/components/rich-message.tsx',
+                   'web/features/mail/workspace.tsx']}
+
+
 def revision15_snapshot(name):
     pin = REVISION15_SNAPSHOTS[name]
     ref = REVISION15_COMMIT + ':' + pin['path']
@@ -3760,13 +4695,13 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
         expected = review['current_rejections']
         self.assertEqual(hashlib.sha256(gate.canonical_bytes(expected)).hexdigest(),
-                         REVISION15_EXPECTED['review_field_sha256']['current_rejections'])
+                         REVISION16_EXPECTED['review_field_sha256']['current_rejections'])
         historical = [('revision1', self.old_tx, self.old_compat),
                       ('revision2', self.rev2_tx, self.rev2_compat), ('revision3', self.rev3_tx, self.rev3_compat),
                       ('revision4', self.rev4_tx, self.rev4_compat), ('revision5', self.rev5_tx, self.rev5_compat),
                       ('revision6', self.rev6_tx, self.rev6_compat), ('revision7', self.rev7_tx, self.rev7_compat),
                       ('revision8', self.rev8_tx, self.rev8_compat), ('revision9', self.rev9_tx, self.rev9_compat),
-                      ('revision10', self.rev10_tx, self.rev10_compat), ('revision11', self.rev11_tx, self.rev11_compat), ('revision12', self.rev12_tx, self.rev12_compat), ('revision13', self.rev13_tx, self.rev13_compat), ('revision14', self.rev14_tx, self.rev14_compat)]
+                      ('revision10', self.rev10_tx, self.rev10_compat), ('revision11', self.rev11_tx, self.rev11_compat), ('revision12', self.rev12_tx, self.rev12_compat), ('revision13', self.rev13_tx, self.rev13_compat), ('revision14', self.rev14_tx, self.rev14_compat), ('revision15', self.rev15_tx, self.rev15_compat)]
         for revision, transaction, compatibility in historical:
             with self.assertRaises(ValueError) as rejected:
                 tx.validate(transaction, self.ast, self.migrations)
@@ -3778,10 +4713,10 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         self.assertFalse(gate.validate(self.compat, self.routes, self.clients)['product_green'])
         for name, current in (('transaction', self.tx), ('compatibility', self.compat)):
             revision = current['inventory_revision']
-            pin = REVISION14_SNAPSHOTS[name]
-            self.assertEqual(revision['revision'], 15)
+            pin = REVISION15_SNAPSHOTS[name]
+            self.assertEqual(revision['revision'], 16)
             self.assertEqual(revision['source_commit'], SOURCE_COMMIT)
-            self.assertEqual(revision['previous_snapshot_commit'], REVISION14_COMMIT)
+            self.assertEqual(revision['previous_snapshot_commit'], REVISION15_COMMIT)
             self.assertEqual(revision['previous_snapshot'], pin['path'])
             self.assertEqual(revision['previous_snapshot_blob'], pin['blob'])
             self.assertEqual(revision['previous_sha256'], pin['sha256'])
@@ -6676,3 +7611,314 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                 if name.startswith('REVISION'):
                     self.assertEqual(ast.dump(value, include_attributes=False), ast.dump(new_values[name], include_attributes=False))
                     self.assertEqual(ast.get_source_segment(before_raw, value), ast.get_source_segment(after_raw, new_values[name]))
+
+    def test_revision16_binds_actual_source_facts_and_preserves_manual_reviews(self):
+        review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+        self.assertEqual(review['inventory_revision'], 16)
+        self.assertEqual(review['source_commit'], SOURCE_COMMIT)
+        self.assertEqual(review['source_tree'], SOURCE_TREE)
+        self.assertEqual(git('rev-parse', SOURCE_COMMIT + '^{tree}').decode().strip(), SOURCE_TREE)
+        self.assertEqual(review['previous_catalog_commit'], REVISION15_COMMIT)
+        self.assertEqual(review['previous_product_source_commit'], REVISION15_SOURCE_COMMIT)
+        self.assertEqual(review['revision15_snapshots'],
+                         {name: dict(commit=REVISION15_COMMIT, **pin) for name, pin in REVISION15_SNAPSHOTS.items()})
+        for field, expected in REVISION16_EXPECTED['review_field_sha256'].items():
+            self.assertEqual(hashlib.sha256(gate.canonical_bytes(review[field])).hexdigest(), expected)
+        self.assertEqual(tx.validate(self.tx, self.ast, self.migrations), review['transaction'])
+        self.assertEqual(gate.validate(self.compat, self.routes, self.clients), review['compatibility'])
+        self.assertEqual(review['transaction'], REVISION16_EXPECTED['transaction'])
+        self.assertEqual(review['compatibility'], REVISION16_EXPECTED['compatibility'])
+        actual_files = [dict(path=item['path'], sha256=item['sha256']) for item in self.ast['files'] if item['path'].startswith(tx.PG)]
+        self.assertEqual(self.tx['postgres_files'], actual_files)
+        before_files = {item['path']: item['sha256'] for item in self.rev15_tx['postgres_files']}
+        after_files = {item['path']: item['sha256'] for item in self.tx['postgres_files']}
+        self.assertEqual(set(after_files), set(before_files))
+        self.assertEqual((len(before_files), len(after_files)), (64, 64))
+        changed_files = set(REVISION16_EXPECTED['file_review_additions'])
+        self.assertEqual([path for path in before_files if before_files[path] != after_files[path]],
+                         sorted(changed_files))
+        self.assertEqual(set(self.tx['reviewed_file_types']), set(self.rev15_tx['reviewed_file_types']))
+        for path, before in self.rev15_tx['reviewed_file_types'].items():
+            after = self.tx['reviewed_file_types'][path]
+            if path in changed_files:
+                self.assertEqual(set(after), set(before) | {'revision16_additions'})
+                self.assertEqual({key: value for key, value in after.items() if key != 'revision16_additions'}, before)
+                self.assertEqual(after['revision16_additions'], REVISION16_EXPECTED['file_review_additions'][path])
+            else:
+                self.assertEqual(after, before)
+        self.assertEqual(review['transaction_file_review_additions'], REVISION16_EXPECTED['file_review_additions'])
+        self.assertEqual(self.tx['migrations'], self.rev15_tx['migrations'])
+        self.assertEqual(self.tx['historical_review_metadata'], self.rev15_tx['historical_review_metadata'])
+        mutable_transaction = {'inventory_revision', 'baseline_commit', 'last_review_base_commit', 'current_review_boundary', 'postgres_files', 'reviewed_file_types', 'entries'}
+        self.assertEqual({key: value for key, value in self.rev15_tx.items() if key not in mutable_transaction},
+                         {key: value for key, value in self.tx.items() if key not in mutable_transaction})
+        functions = {item['id']: item for item in self.ast['functions'] if item['file'].startswith(tx.PG)}
+        classes = tx.classify(self.ast)
+        old = {entry['id']: entry for entry in self.rev15_tx['entries']}
+        current = {entry['id']: entry for entry in self.tx['entries']}
+        added_ids = set(REVISION16_EXPECTED['added_entries'])
+        reviewed = {row['id']: row for row in REVISION16_EXPECTED['body_changes']}
+        self.assertEqual(set(current), set(old) | added_ids)
+        self.assertEqual(set(current), set(functions))
+        self.assertEqual((len(old), len(current)), (404, REVISION16_EXPECTED['transaction']['functions']))
+        fingerprint = lambda value: hashlib.sha256(gate.canonical_bytes(value)).hexdigest()
+        def derived_assertions(function):
+            return {
+                'direct_sql_effects': [dict(line=item['line'], sql_fragment=item['value']) for item in function['strings'] if tx.MUTATION.search(item['value'])],
+                'direct_lock_fragments': [dict(line=item['line'], sql_fragment=item['value']) for item in function['strings'] if tx.LOCK.search(item['value'])],
+                'transaction_helper_calls': [call for call in function['calls'] if call['name'] in tx.TX],
+                'sql_execution_expressions': [call for call in function['calls'] if call['name'] in tx.SQL_CALLS],
+            }
+        def actual_callers(function):
+            return [dict(caller_id=item['id'], file=item['file'], function=item['name'],
+                line=call['line'], expression=call['expr'], status='name-match-candidate-not-dispatch-proof')
+                for item in self.ast['functions'] for call in item['calls'] if call['name'] == function['name']]
+        caller_changes, body_changes, classification_changes, entry_changes = [], [], [], []
+        for identity, before in old.items():
+            after, function = current[identity], functions[identity]
+            self.assertEqual(after['syntax'], function)
+            self.assertEqual(after['classification'], classes[identity])
+            self.assertEqual(after['callers'], actual_callers(function))
+            derived = derived_assertions(function)
+            self.assertEqual({key: after['assertions'][key] for key in derived}, derived)
+            self.assertEqual({key: value for key, value in before['assertions'].items() if key not in derived},
+                             {key: value for key, value in after['assertions'].items() if key not in derived})
+            mutable = {'syntax', 'classification', 'callers', 'assertions'}
+            if identity in reviewed:
+                self.assertEqual(before['syntax']['sha256'], reviewed[identity]['before_sha256'])
+                self.assertEqual(function['sha256'], reviewed[identity]['after_sha256'])
+                self.assertNotIn('source_review', before)
+                manual = ('lock_fk_wait_fence', 'evidence', 'unverified_risks', 'file_family_context')
+                self.assertEqual(after['historical_revision15_review'], {key: before[key] for key in manual})
+                self.assertEqual({key: after[key] for key in (*manual, 'source_review')},
+                                 REVISION16_EXPECTED['manual_review_fields'][identity])
+                self.assertEqual(after['source_review']['base_commit'], SOURCE_COMMIT)
+                self.assertEqual(after['source_review']['source_sha256'], function['sha256'])
+                mutable.update((*manual, 'historical_revision15_review', 'source_review'))
+            else:
+                self.assertEqual(before['syntax']['sha256'], function['sha256'])
+                if before['syntax'] != function:
+                    self.assertIn(function['file'], changed_files)
+            self.assertEqual({key: value for key, value in before.items() if key not in mutable},
+                             {key: value for key, value in after.items() if key not in mutable})
+            if before['callers'] != after['callers']:
+                caller_changes.append(dict(id=identity, before=before['callers'], after=after['callers'],
+                    before_sha256=fingerprint(before['callers']), after_sha256=fingerprint(after['callers'])))
+            if before['syntax']['sha256'] != function['sha256']:
+                body_changes.append(dict(id=identity, before_sha256=before['syntax']['sha256'], after_sha256=function['sha256']))
+            if before['classification'] != after['classification']:
+                classification_changes.append(dict(id=identity, before=before['classification'], after=after['classification']))
+            if before != after:
+                entry_changes.append(dict(id=identity,
+                    changed_fields=[key for key in sorted(set(before) | set(after)) if before.get(key) != after.get(key)],
+                    before_sha256=fingerprint(before), after_sha256=fingerprint(after)))
+        for identity in sorted(added_ids):
+            added, function = current[identity], functions[identity]
+            self.assertEqual(added, REVISION16_EXPECTED['added_entries'][identity])
+            self.assertEqual(added['syntax'], function)
+            self.assertEqual(added['classification'], classes[identity])
+            self.assertEqual(added['classification']['kind'], 'direct-write')
+            self.assertTrue(added['classification']['direct_write'])
+            self.assertEqual(added['callers'], actual_callers(function))
+            self.assertEqual({key: added['assertions'][key] for key in derived_assertions(function)}, derived_assertions(function))
+            self.assertEqual(added['source_review']['base_commit'], SOURCE_COMMIT)
+            self.assertEqual(added['source_review']['source_sha256'], function['sha256'])
+        self.assertEqual(caller_changes, review['transaction_callers'])
+        self.assertEqual(body_changes, review['transaction_body_changes'])
+        self.assertEqual(classification_changes, review['transaction_classification_changes'])
+        self.assertEqual(entry_changes, review['transaction_entry_changes'])
+        self.assertEqual(body_changes, REVISION16_EXPECTED['body_changes'])
+        self.assertEqual(classification_changes, REVISION16_EXPECTED['classification_changes'])
+        self.assertEqual(review['transaction_added_entries'], [dict(id=identity, entry_sha256=fingerprint(current[identity])) for identity in sorted(added_ids)])
+        self.assertEqual(review['transaction_removed_entries'], [])
+        self.assertEqual(review['manual_review_fields'], REVISION16_EXPECTED['manual_review_fields'])
+        self.assertEqual(review['migration_changes'], [])
+        self.assertEqual(review['client_before'], self.revision15['clients'])
+        self.assertEqual(review['client_after'], self.clients)
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.revision15['clients'])).hexdigest(), review['client_before_sha256'])
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.clients)).hexdigest(), review['client_after_sha256'])
+        old_routes = {row['route']: row for row in self.rev15_compat['routes']}
+        new_routes = {row['route']: row for row in self.compat['routes']}
+        fresh_routes = {row['route']: row for row in gate.source_facts(self.routes, self.clients)}
+        self.assertEqual(set(old_routes), set(new_routes))
+        route_changes = []
+        for identity, before in old_routes.items():
+            after = new_routes[identity]
+            fact_keys = set(fresh_routes[identity])
+            self.assertEqual({key: value for key, value in before.items() if key not in fact_keys},
+                             {key: value for key, value in after.items() if key not in fact_keys})
+            changed = [key for key in sorted(set(before) | set(after)) if before.get(key) != after.get(key)]
+            if changed:
+                route_changes.append(dict(route=identity, changed_fields=changed,
+                    before_sha256=hashlib.sha256(gate.canonical_bytes(before)).hexdigest(),
+                    after_sha256=hashlib.sha256(gate.canonical_bytes(after)).hexdigest()))
+        self.assertEqual(route_changes, review['compatibility_route_changes'])
+        old_closure, new_closure = self.rev15_compat['source_closure'], self.compat['source_closure']
+        closure_changes = [dict(path=path, before_sha256=old_closure.get(path), after_sha256=new_closure.get(path))
+                           for path in sorted(set(old_closure) | set(new_closure)) if old_closure.get(path) != new_closure.get(path)]
+        self.assertEqual(closure_changes, review['closure_changes'])
+        mutable = {'inventory_revision', 'acquisition', 'routes', 'source_closure'}
+        self.assertEqual({k: v for k, v in self.rev15_compat.items() if k not in mutable},
+                         {k: v for k, v in self.compat.items() if k not in mutable})
+        self.assertEqual(self.compat['acquisition'], dict(self.rev15_compat['acquisition'], base_commit=SOURCE_COMMIT))
+        for name, pin in review['generated_catalogs'].items():
+            self.assertEqual(pin['path'], REVISION15_SNAPSHOTS[name]['path'])
+            raw = (ROOT / pin['path']).read_bytes()
+            self.assertEqual(hashlib.sha256(raw).hexdigest(), pin['sha256'])
+            self.assertEqual(len(raw), pin['bytes'])
+        self.assertEqual(set(review['generated_catalogs']), set(REVISION15_SNAPSHOTS))
+        route_map = {(row['method'], gate.norm(row['path'])): row['method'] + ' ' + row['path'] for row in self.routes}
+        documented = json.loads((ROOT / REVISION15_SNAPSHOTS['client_routes']['path']).read_text())
+        self.assertEqual(documented, [dict(row, routes=[] if row['forwarding'] else
+                         [route_map[(method, gate.norm(row['path']))] for method in row['methods']]) for row in self.clients])
+        changed = git('diff', '--name-only', REVISION15_SOURCE_COMMIT, SOURCE_COMMIT, '--', 'internal', 'cmd', 'web').decode().splitlines()
+        product_paths = [p for p in changed if (p.endswith('.go') and not p.endswith('_test.go')) or
+                         (p.endswith(('.ts', '.tsx', '.css')) and '.test.' not in p) or
+                         (p.startswith('web/locales/') and p.endswith('.json'))]
+        self.assertEqual(product_paths, [row['path'] for row in review['source_changes']])
+        self.assertEqual(product_paths, REVISION16_EXPECTED['product_paths'])
+        self.assertEqual(review['excluded_closure_product_paths'], [path for path in product_paths if path not in new_closure])
+        build_paths = [path for path in ('web/package.json', 'web/package-lock.json')
+                       if git('show', REVISION15_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
+        self.assertEqual(build_paths, [row['path'] for row in review['additional_build_metadata_changes']])
+        schema_paths = [path for path in ('internal/api/openapi.yaml',)
+                        if git('show', REVISION15_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
+        self.assertEqual(schema_paths, [row['path'] for row in review['additional_api_schema_changes']])
+        for row in review['source_changes'] + review['additional_build_metadata_changes'] + review['additional_api_schema_changes']:
+            self.assertEqual(row['before_commit'], REVISION15_SOURCE_COMMIT)
+            self.assertEqual(row['after_commit'], SOURCE_COMMIT)
+            for prefix, commit in (('before', REVISION15_SOURCE_COMMIT), ('after', SOURCE_COMMIT)):
+                if row[prefix + '_blob'] is None:
+                    self.assertFalse(git('ls-tree', commit, '--', row['path']))
+                    self.assertIsNone(row[prefix + '_sha256'])
+                    self.assertIsNone(row[prefix + '_bytes'])
+                else:
+                    ref = commit + ':' + row['path']
+                    raw = git('show', ref)
+                    self.assertEqual(git('rev-parse', ref).decode().strip(), row[prefix + '_blob'])
+                    self.assertEqual(hashlib.sha256(raw).hexdigest(), row[prefix + '_sha256'])
+                    self.assertEqual(len(raw), row[prefix + '_bytes'])
+            self.assertEqual((ROOT / row['path']).read_bytes(), git('show', SOURCE_COMMIT + ':' + row['path']))
+        self.assertFalse(review['runtime_verified'])
+        self.assertFalse(review['product_green'])
+        self.assertFalse(review['task_complete'])
+        self.assertEqual(review['implementation_todos_completed'], 0)
+        self.assertEqual(review['parent_tasks'], dict(accepted=10, total=171, remaining=161))
+
+    def test_revision16_preserves_public_history_collectors_and_original_rejections(self):
+        review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+        self.assertEqual(git('rev-parse', REVISION15_COMMIT + '^{tree}').decode().strip(), REVISION15_TREE)
+        historical = []
+        for directory in review['historical_directories']:
+            names = git('ls-tree', '-r', '--name-only', REVISION15_COMMIT, '--', directory).decode().splitlines()
+            self.assertTrue(names)
+            self.assertEqual({str(path.relative_to(ROOT)) for path in (ROOT / directory).rglob('*') if path.is_file()}, set(names))
+            for path in names:
+                ref = REVISION15_COMMIT + ':' + path
+                raw = git('show', ref)
+                self.assertEqual((ROOT / path).read_bytes(), raw)
+                historical.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
+                                       sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
+        self.assertEqual(historical, review['historical_manifest'])
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(historical)).hexdigest(), REVISION16_EXPECTED['historical_manifest_sha256'])
+        roots = ('scripts', '.github/workflows', 'cmd/r5txinventory', 'internal/architecture/route_inventory_test.go')
+        mutable = ['scripts/tests/test_r5_catalog_reconciliation.py', 'scripts/tests/test_r5_transactions.py', 'scripts/tests/test_r5_compatibility.py']
+        self.assertEqual(review['mutable_current_positive_test_paths'], mutable)
+        paths = git('ls-tree', '-r', '--name-only', SOURCE_COMMIT, '--', *roots).decode().splitlines()
+        additions = REVISION16_EXPECTED['maintenance_source_pins']
+        self.assertEqual(set(additions), {'.github/workflows/catalog-reconciliation.yml', 'scripts/prepare_r5_catalog_revision16.py'})
+        self.assertTrue(set(paths).isdisjoint(additions))
+        self.assertEqual({str(path.relative_to(ROOT)) for folder in ('scripts', '.github/workflows', 'cmd/r5txinventory')
+                          for path in (ROOT / folder).rglob('*') if path.is_file() and '__pycache__' not in str(path) and path.suffix != '.pyc'} |
+                         {'internal/architecture/route_inventory_test.go'}, set(paths) | set(additions))
+        protected = []
+        for path in paths:
+            if path in mutable:
+                continue
+            ref = SOURCE_COMMIT + ':' + path
+            raw = git('show', ref)
+            self.assertEqual((ROOT / path).read_bytes(), raw)
+            protected.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
+                                  sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
+        for path, pin in sorted(additions.items()):
+            raw = (ROOT / path).read_bytes()
+            self.assertEqual(pin['path'], path)
+            self.assertEqual(hashlib.sha256(raw).hexdigest(), pin['sha256'])
+            self.assertEqual(len(raw), pin['bytes'])
+            self.assertEqual(hashlib.sha1(b'blob ' + str(len(raw)).encode() + b'\0' + raw).hexdigest(), pin['blob'])
+            self.assertEqual(raw, git('cat-file', 'blob', pin['blob']))
+            protected.append(pin)
+        self.assertEqual(protected, review['protected_source_manifest'])
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(protected)).hexdigest(), REVISION16_EXPECTED['protected_source_manifest_sha256'])
+        for path, expected in review['unchanged_validators_and_collectors'].items():
+            raw = git('show', REVISION15_COMMIT + ':' + path)
+            self.assertEqual((ROOT / path).read_bytes(), raw)
+            self.assertEqual(hashlib.sha256(raw).hexdigest(), expected)
+        for path, replacements in (
+            ('scripts/tests/test_r5_transactions.py', [("result['functions'], 404", "result['functions'], %d" % REVISION16_EXPECTED['transaction']['functions']),
+                ("result['postgres_files'], 64", "result['postgres_files'], %d" % REVISION16_EXPECTED['transaction']['postgres_files'])]),
+            ('scripts/tests/test_r5_compatibility.py', [("result['routes'],133", "result['routes'],%d" % REVISION16_EXPECTED['compatibility']['routes']),
+                ("result['client_branches'],136", "result['client_branches'],%d" % REVISION16_EXPECTED['compatibility']['client_branches'])]),
+        ):
+            expected = git('show', REVISION15_COMMIT + ':' + path).decode()
+            for before, after in replacements:
+                self.assertEqual(expected.count(before), 1)
+                expected = expected.replace(before, after)
+            self.assertEqual((ROOT / path).read_text(), expected)
+        path = 'scripts/tests/test_r5_catalog_reconciliation.py'
+        before_raw = git('show', REVISION15_COMMIT + ':' + path).decode()
+        after_raw = (ROOT / path).read_text()
+        def methods(raw):
+            return {node.name: node for node in ast.walk(ast.parse(raw))
+                    if isinstance(node, ast.FunctionDef) and node.name.startswith('test_')}
+        before, after = methods(before_raw), methods(after_raw)
+        self.assertEqual((len(before), len(after)), (33, 35))
+        self.assertTrue(set(before).issubset(after))
+        self.assertEqual(set(after) - set(before), {'test_revision16_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision16_preserves_public_history_collectors_and_original_rejections'})
+        frozen = {'test_revision15_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision15_preserves_public_history_collectors_and_original_rejections'}
+        allowed = frozen | {'test_old_pins_reject_and_current_revision_passes_same_actual_facts'}
+        for name in before:
+            if name not in allowed:
+                self.assertEqual(ast.dump(before[name], include_attributes=False), ast.dump(after[name], include_attributes=False))
+                self.assertEqual(ast.get_source_segment(before_raw, before[name]), ast.get_source_segment(after_raw, after[name]))
+        for name in frozen:
+            self.assertEqual(len(after[name].body), 1)
+            wrapper = after[name].body[0]
+            self.assertIsInstance(wrapper, ast.With)
+            self.assertEqual(ast.unparse(wrapper.items[0].context_expr), 'self.revision15_context()')
+            self.assertEqual([ast.dump(node, include_attributes=False) for node in before[name].body],
+                             [ast.dump(node, include_attributes=False) for node in wrapper.body])
+            original_body = ''.join(before_raw.splitlines(keepends=True)[before[name].lineno:before[name].end_lineno])
+            wrapped_body = ''.join(after_raw.splitlines(keepends=True)[after[name].lineno + 1:after[name].end_lineno])
+            self.assertEqual(''.join(line[4:] if line.strip() else line for line in wrapped_body.splitlines(keepends=True)), original_body)
+        current_name = 'test_old_pins_reject_and_current_revision_passes_same_actual_facts'
+        expected_current = ast.get_source_segment(before_raw, before[current_name])
+        for previous, replacement in (
+            ("REVISION15_EXPECTED", "REVISION16_EXPECTED"),
+            ("('revision14', self.rev14_tx, self.rev14_compat)]", "('revision14', self.rev14_tx, self.rev14_compat), ('revision15', self.rev15_tx, self.rev15_compat)]"),
+            ("pin = REVISION14_SNAPSHOTS[name]", "pin = REVISION15_SNAPSHOTS[name]"),
+            ("revision['revision'], 15", "revision['revision'], 16"),
+            ("revision['previous_snapshot_commit'], REVISION14_COMMIT", "revision['previous_snapshot_commit'], REVISION15_COMMIT"),
+        ):
+            self.assertEqual(expected_current.count(previous), 1)
+            expected_current = expected_current.replace(previous, replacement, 1)
+        self.assertEqual(ast.get_source_segment(after_raw, after[current_name]), expected_current)
+        guards = {name for name in before if name.startswith('test_unapproved_')}
+        self.assertEqual(len(guards), 5)
+        for name in guards:
+            self.assertEqual(hashlib.sha256(ast.get_source_segment(after_raw, after[name]).encode()).hexdigest(),
+                             review['original_unapproved_methods'][name]['source_sha256'])
+            self.assertEqual(hashlib.sha256(ast.dump(after[name], include_attributes=False).encode()).hexdigest(),
+                             review['original_unapproved_methods'][name]['ast_sha256'])
+        # Fixed revision15 values and all earlier review constants are retained;
+        # only the fresh root/source identifiers advance to revision16.
+        def assignments(raw):
+            return {target.id: node.value for node in ast.parse(raw).body if isinstance(node, ast.Assign)
+                    for target in node.targets if isinstance(target, ast.Name)}
+        old_values, new_values = assignments(before_raw), assignments(after_raw)
+        self.assertEqual(len(old_values), 84)
+        self.assertTrue(set(old_values).issubset(new_values))
+        for name, value in old_values.items():
+            if name not in {'CURRENT_EVIDENCE', 'SOURCE_COMMIT', 'SOURCE_TREE'}:
+                self.assertEqual(ast.dump(value, include_attributes=False), ast.dump(new_values[name], include_attributes=False))
+                self.assertEqual(ast.get_source_segment(before_raw, value), ast.get_source_segment(after_raw, new_values[name]))
