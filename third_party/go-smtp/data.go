@@ -52,7 +52,7 @@ type dataReader struct {
 	state int
 
 	limited bool
-	n       int64 // Maximum bytes remaining
+	n       int64 // Maximum bytes remaining; negative after the limit is exceeded
 }
 
 func newDataReader(c *Conn) *dataReader {
@@ -69,11 +69,18 @@ func newDataReader(c *Conn) *dataReader {
 }
 
 func (r *dataReader) Read(b []byte) (n int, err error) {
+	var extra [1]byte
+	probeLimit := false
 	if r.limited {
-		if r.n <= 0 {
+		if r.n < 0 {
 			return 0, ErrDataTooLarge
 		}
-		if int64(len(b)) > r.n {
+		if r.n == 0 && len(b) > 0 {
+			// The end marker carries no original bytes. Probe through the same
+			// decoder, without exposing an extra body byte to the backend.
+			b = extra[:]
+			probeLimit = true
+		} else if int64(len(b)) > r.n {
 			b = b[0:r.n]
 		}
 	}
@@ -142,6 +149,10 @@ func (r *dataReader) Read(b []byte) (n int, err error) {
 	}
 
 	if r.limited {
+		if probeLimit && n > 0 {
+			r.n = -1 // Further reads must retain the size failure until drained.
+			return 0, ErrDataTooLarge
+		}
 		r.n -= int64(n)
 	}
 	return

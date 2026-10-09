@@ -245,6 +245,9 @@ func (s *Service) BulkUpdateSettings(ctx context.Context, updates map[string]str
 }
 
 func (s *Service) CreateTenant(ctx context.Context, name string, planID uuid.UUID, actor string) (*models.Tenant, error) {
+	if err := validateAdminName(name, tenantNameMaxCharacters); err != nil {
+		return nil, err
+	}
 	plan, err := s.store.GetPlan(ctx, planID)
 	if err != nil {
 		return nil, app.Internal(err)
@@ -312,6 +315,9 @@ func (s *Service) DeleteTenant(ctx context.Context, id uuid.UUID, actor string) 
 }
 
 func (s *Service) CreatePlan(ctx context.Context, p *models.Plan, actor string) (*models.Plan, error) {
+	if err := validateAdminName(p.Name, planNameMaxCharacters); err != nil {
+		return nil, err
+	}
 	if err := validatePlanIntegers(p); err != nil {
 		return nil, err
 	}
@@ -332,6 +338,9 @@ func (s *Service) CreatePlan(ctx context.Context, p *models.Plan, actor string) 
 }
 
 func (s *Service) UpdatePlan(ctx context.Context, p *models.Plan, actor string) (*models.Plan, error) {
+	if err := validateAdminName(p.Name, planNameMaxCharacters); err != nil {
+		return nil, err
+	}
 	if err := validatePlanIntegers(p); err != nil {
 		return nil, err
 	}

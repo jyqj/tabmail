@@ -19,7 +19,7 @@ function mount(text = "abcdef", html?: string, second = false) {
     return <><button onClick={() => setDisabled(true)}>Disable editor</button><button onClick={() => setDisabled(false)}>Enable editor</button>{view(disabled)}</>;
   }
   const result = render(<Host />);
-  for (const button of screen.getAllByRole("button", { name: "Formatting editor" })) fireEvent.click(button);
+  for (const button of screen.queryAllByRole("button", { name: "Formatting editor" })) fireEvent.click(button);
   const editor = screen.getAllByRole("textbox", { name: "Formatted message" })[0];
   expect(editor).toHaveAttribute("contenteditable", "true");
   return { ...result, editor, onChange, onOtherChange, host: screen.getByTestId("host"),
