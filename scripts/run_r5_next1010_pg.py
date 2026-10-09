@@ -10,6 +10,7 @@ import subprocess
 
 BASELINE = "74d5fc72f7ad2e086bd3060b78c548dc302d0408"
 CASES = {
+    "activation-errors": (["internal/store/postgres/r5_activation_errors_test.go"], "./internal/store/postgres", "^TestR5ActivationErrorsPostgres", 20),
     "activation-sponsor": (["internal/store/postgres/r5_activation_sponsor_test.go"], "./internal/store/postgres", "^TestR5ActivationSponsorPostgres", 11),
     "refresh-issuance": (["internal/api/handlers/r5_refresh_issuance_pg_test.go", "internal/api/handlers/r5_refresh_issuance_test.go"], "./internal/api/handlers", "^TestR5RefreshIssuancePostgres", 9),
     "permission-audit": (["internal/store/postgres/r5_permission_audit_visibility_test.go"], "./internal/store/postgres", "^TestR5PermissionAudit", 10),
@@ -37,6 +38,8 @@ def execute(root, output, paths, package, pattern):
     started = {row["Test"] for row in rows if row.get("Test") and row["Action"] == "run"}
     terminal = {row["Test"]: row["Action"] for row in rows
                 if row.get("Test") and row["Action"] in ("pass", "fail", "skip")}
+    package_events = [{"package": row.get("Package"), "action": row["Action"]} for row in rows
+                      if not row.get("Test") and row["Action"] in ("start", "pass", "fail", "skip")]
     leaves = {name: state for name, state in terminal.items()
               if not any(other.startswith(name + "/") for other in terminal)}
     failures = {name: "".join(row.get("Output", "") for row in rows if row.get("Test") == name)[-3000:]
@@ -48,6 +51,7 @@ def execute(root, output, paths, package, pattern):
                "fail": sum(state == "fail" for state in leaves.values()),
                "all_skips": sum(row["Action"] == "skip" for row in rows),
                "missing_terminals": sorted(started - terminal.keys()),
+               "package_events": package_events,
                "failure_output": failures,
                "stderr_tail": (output / "go-test.stderr").read_text()[-3000:],
                "log_sha256": hashlib.sha256((output / "go-test.jsonl").read_bytes()).hexdigest()}
@@ -60,12 +64,15 @@ def execute(root, output, paths, package, pattern):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--candidate", required=True, type=Path)
+    parser.add_argument("--expected-commit", help="require this exact checked-out commit when invoked by CI")
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--case", required=True, choices=CASES)
     args = parser.parse_args()
     if not os.environ.get("TABMAIL_TEST_DB_DSN"):
         parser.error("an explicit disposable TABMAIL_TEST_DB_DSN is required")
     root, output = args.candidate.resolve(), args.output.resolve()
+    if args.expected_commit and git(root, "rev-parse", "HEAD") != args.expected_commit:
+        parser.error("candidate does not match the expected reviewed commit")
     if git(root, "status", "--porcelain", "--untracked-files=all"):
         parser.error("candidate must be the exact clean committed source")
     output.mkdir(parents=True, exist_ok=False)
@@ -89,6 +96,11 @@ def main():
             raise RuntimeError("baseline and candidate did not execute the same test leaves")
         if old["all_skips"] or new["all_skips"] or old["missing_terminals"] or new["missing_terminals"]:
             raise RuntimeError("skipped or missing tests cannot establish acceptance")
+        expected_package = "tabmail/" + package.removeprefix("./")
+        for label, result, state in (("baseline", old, "fail"), ("candidate", new, "pass")):
+            if result["package_events"] != [{"package": expected_package, "action": "start"},
+                                             {"package": expected_package, "action": state}]:
+                raise RuntimeError(f"{label} must have exactly the expected package start and {state} terminal")
         if new["exit_code"] or new["fail"] or new["failure_output"]:
             raise RuntimeError("candidate regression suite failed")
     finally:

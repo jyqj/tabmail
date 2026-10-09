@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        case: [refresh-issuance, permission-audit, activation-sponsor]
+        case: [refresh-issuance, permission-audit, activation-sponsor, activation-errors]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     services:
@@ -35,14 +35,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
           fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
       - name: Compare fixed baseline and exact candidate
+        env:
+          NEXT1010_EXPECTED_COMMIT: ${{ github.event.pull_request.head.sha }}
         run: |
           python3 -B scripts/run_r5_next1010_pg.py --candidate . \
+            --expected-commit "$NEXT1010_EXPECTED_COMMIT" \
             --case "${{ matrix.case }}" --output "$RUNNER_TEMP/next1010-${{ matrix.case }}"
       - name: Preserve original execution evidence
         if: always()
