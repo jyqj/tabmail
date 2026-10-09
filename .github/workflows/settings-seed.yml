@@ -1,0 +1,72 @@
+name: Atomic settings seed with PostgreSQL
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches:
+      - main
+      - integration/company-mail-r5-*
+permissions:
+  contents: read
+concurrency:
+  group: settings-seed-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  settings-seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tabmail_test
+          POSTGRES_PASSWORD: disposable-test-password
+          POSTGRES_DB: tabmail_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      GOSUMDB: sum.golang.org
+      GODEBUG: asynctimerchan=0
+      TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify the execution checker rejects incomplete or unrelated results
+        run: python3 -B -m unittest discover -s scripts/tests -p test_r5_settings_seed.py -v
+      - name: Fixed baseline and candidate settings seed regression
+        run: |
+          set -euo pipefail
+          git worktree add --detach "$RUNNER_TEMP/tabmail-settings-seed-baseline" eae219951c6f9cbf17eb4062b69464c731807be7
+          python3 -B scripts/run_r5_settings_seed.py \
+            --baseline "$RUNNER_TEMP/tabmail-settings-seed-baseline" --candidate . \
+            --output "$RUNNER_TEMP/tabmail-settings-seed-evidence"
+      - name: Show complete original execution evidence
+        if: always()
+        run: |
+          python3 -B - <<'PY'
+          import os
+          from pathlib import Path
+          import sys
+          root = Path(os.environ["RUNNER_TEMP"]) / "tabmail-settings-seed-evidence"
+          for path in sorted(root.rglob("*")):
+              if path.is_file():
+                  print("EXEC07_RAW_BEGIN " + str(path.relative_to(root)), flush=True)
+                  sys.stdout.buffer.write(path.read_bytes())
+                  sys.stdout.buffer.flush()
+                  print("\nEXEC07_RAW_END " + str(path.relative_to(root)), flush=True)
+          PY
+      - name: Retain both actual PostgreSQL executions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: settings-seed-evidence
+          path: ${{ runner.temp }}/tabmail-settings-seed-evidence
+          if-no-files-found: error
+          retention-days: 14

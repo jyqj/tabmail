@@ -1,0 +1,315 @@
+{
+  "schema_version": 1,
+  "batch": "R5-EXEC-20261009",
+  "round": 3,
+  "status": "candidate_prepared_public_execution_pending",
+  "completed_bounded_tasks": 7,
+  "remaining_bounded_tasks": 3,
+  "parent_todos": {
+    "complete": 10,
+    "total": 171,
+    "remaining": 161
+  },
+  "actual_public_parent": "ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+  "actual_parent_tree": "a5d05c981558239810bb4dd1022fc52b32e16c90",
+  "recovery": {
+    "reason": "Shared exec-server disconnected and recovery timed out. GitHub API remained available.",
+    "local_original_final_commit": "f48f470e9ff0a6cb13bbdf310ff50b7596de8447",
+    "local_original_final_tree": "3805bb159ceba39bbc21f3513b409da445565839",
+    "claims_complete_local_tree_restoration": false,
+    "exact_original_blobs_recovered": [
+      {
+        "path": "internal/settings/settings.go",
+        "sha": "fc7d169b24df889823a053c95eddac8eee152e60",
+        "mode": "100644",
+        "type": "blob"
+      },
+      {
+        "path": "internal/store/postgres/settings.go",
+        "sha": "1566afe9446572f5d690d137c395e0615a8723d1",
+        "mode": "100644",
+        "type": "blob"
+      },
+      {
+        "path": "internal/store/store.go",
+        "sha": "7798510c39cbb7d4922f8c26867bc379d85637f7",
+        "mode": "100644",
+        "type": "blob"
+      },
+      {
+        "path": "internal/testutil/fake_store_misc.go",
+        "sha": "df6ba53e7e613a7cdee36c29b7337e2e2ab6eb71",
+        "mode": "100644",
+        "type": "blob"
+      },
+      {
+        "path": "internal/settings/r5_settings_publication_test.go",
+        "sha": "6b884aed6ad13529335c6524b61982d3bf604a38",
+        "mode": "100644",
+        "type": "blob"
+      },
+      {
+        "path": "internal/app/admin/r5_setting_integer_test.go",
+        "sha": "4f809f67aa7cacf81ee1d58f2bd412aee889b7f3",
+        "mode": "100644",
+        "type": "blob"
+      },
+      {
+        "path": "internal/settings/r5_settings_seed_pg_test.go",
+        "sha": "8b95e7f155caa896fdf792fe6a019fa0d83c7793",
+        "mode": "100644",
+        "type": "blob"
+      },
+      {
+        "path": "internal/outbound/delivery.go",
+        "sha": "fe98dbfef57c861c5925355fd7b05c973f60cc71",
+        "mode": "100644",
+        "type": "blob"
+      },
+      {
+        "path": "internal/outbound/r5_exec_smtputf8_test.go",
+        "sha": "b80718d42c37e0c6ec47b90c37991d13c8843a27",
+        "mode": "100644",
+        "type": "blob"
+      }
+    ],
+    "mailbox_regression": {
+      "old_path": "web/features/mail/workspace-mailbox-route.test.tsx",
+      "old_sha256": "02d92c4cd070b399a719026456a3802b54406f7b2d627142054571a10d195091",
+      "old_bytes_recoverable": false,
+      "old_execution_is_new_fixture_evidence": false,
+      "new_test": {
+        "path": "web/features/mail/workspace-mailbox-route-recovery.test.tsx",
+        "sha": "e804a36ac4aa9ed824b6fc5b852db05d7862361a",
+        "mode": "100644",
+        "type": "blob"
+      },
+      "new_sha256": "39ba0a348019f730b741ce479b16a1b201ec60efb75fab172b28c0a14691fb0f",
+      "new_bytes": 13603,
+      "new_lines": 251,
+      "production": {
+        "path": "web/features/mail/workspace.tsx",
+        "sha": "8fcfc75b215fc35a1e4f237d6da19e1bdb22aebf",
+        "mode": "100644",
+        "type": "blob"
+      },
+      "production_sha256": "05791de0349d24e23478dafe92af22a47f288c4db21e20a05e2db0c3c60fe962",
+      "independent_static_review": "root and pr_audit ACCEPT; exact original R2 workspace compared; actual new execution remains required"
+    },
+    "pg_fixture": {
+      "path": "internal/settings/r5_settings_seed_pg_test.go",
+      "blob": "8b95e7f155caa896fdf792fe6a019fa0d83c7793",
+      "sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a",
+      "expected_baseline": {
+        "pass": 6,
+        "fail": 2
+      },
+      "expected_candidate": {
+        "pass": 8,
+        "fail": 0
+      },
+      "real_pg_executed_at_preparation": false
+    },
+    "smtp_fixture": {
+      "path": "internal/outbound/r5_exec_smtputf8_test.go",
+      "blob": "b80718d42c37e0c6ec47b90c37991d13c8843a27",
+      "sha256": "03047b4ba6b9c4590e032dfc58eeada6750e3b2e4c7aa80b96859ab98354e372",
+      "bytes": 18819,
+      "lines": 527,
+      "original_actual_results": {
+        "baseline": {
+          "pass": 71,
+          "fail": 38,
+          "skip": 0
+        },
+        "candidate": {
+          "pass": 109,
+          "fail": 0,
+          "skip": 0
+        },
+        "whole_outbound": {
+          "pass": 952,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "original_raw_logs_currently_accessible": false,
+      "new_public_dual_source_execution_required": true,
+      "historical_raw_sha256": {
+        "baseline": "11bf60aec48774ee4af53d655b97d38d87f1edee61e228f28c6fd97f1eb0202e",
+        "candidate": "c159e5afb4d97ababe74d8c69db18b31bfcc3a365013e4f475b5a0b0be228a28",
+        "whole": "992e9abbf41b4064ae50ac1c8c6af32cadd1037f2d17e8af802f63f4c261296c"
+      }
+    }
+  },
+  "historical_combined_execution": {
+    "commit": "7bf8c1222c93fc7a2f6f6f7a5055f80b455923e5",
+    "tree": "85f4ef0d3d3d3f677a4b08e67b53e0d10c768af2",
+    "before_after_clean_equal": true,
+    "go": {
+      "distinct_leaf_pass": 1863,
+      "fail": 0,
+      "skip": 0,
+      "build_failure": 0,
+      "real_settings_pg_not_executed": true
+    },
+    "ui": {
+      "exit_code": 1,
+      "actual_assertion_pass": 223,
+      "actual_assertion_pending": 6,
+      "complete_pass": false,
+      "misleading_summary": {
+        "success": true,
+        "numPendingTests": 0
+      },
+      "second_diagnostic_completion_observed": false
+    },
+    "raw_currently_accessible": false
+  },
+  "newly_prepared_verification_files": [
+    {
+      "path": ".github/workflows/exec-regressions.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10a02654af6255c3a3ee88342e1e1aa2e87b572f"
+    },
+    {
+      "path": ".github/workflows/settings-seed.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e689c1ccf21c71dfbf971ceb58d50e1d3e0410d8"
+    },
+    {
+      "path": "scripts/run_r5_settings_seed.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4de5f837ed294489e276fcc62a479c4e41ea5036"
+    },
+    {
+      "path": "scripts/tests/test_r5_settings_seed.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1917cf661597450d07a2055e615ed55fa5756622"
+    },
+    {
+      "path": "scripts/run_r5_mailbox_route_recovery.py",
+      "sha": "327dce9d950a42aab0e639d100f5d916977e34c0",
+      "type": "blob",
+      "mode": "100644"
+    },
+    {
+      "path": "scripts/tests/test_r5_mailbox_route_recovery.py",
+      "sha": "e1680e7a987ea203146c4ad9067cd141b341892e",
+      "type": "blob",
+      "mode": "100644"
+    },
+    {
+      "path": ".github/workflows/mailbox-route-recovery.yml",
+      "sha": "6e9da393258bcbbed2fc15c300a6ea7ad0a08883",
+      "type": "blob",
+      "mode": "100644"
+    },
+    {
+      "path": "scripts/run_r5_smtputf8_recovery.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0b7bdb094da2e9bf61d775ac226383be99e046bb"
+    },
+    {
+      "path": "scripts/tests/test_r5_smtputf8_recovery.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc521f151a0d92a1af22bbc428bcf54afc1b4b12"
+    },
+    {
+      "path": ".github/workflows/smtputf8-recovery.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "64bde7306c08bc69e5e547815046f10f3aad53ba"
+    }
+  ],
+  "public_execution_requirements": {
+    "settings_pg_same_test": "6 PASS / 2 declared stale overwrites -> 8 PASS; live PostgreSQL 16, no skip; actual clean source identities",
+    "mailbox_new_same_test": "5 PASS / 13 declared UI defects -> 18 PASS; exact IDs, actual exit, Node22, independent run-end errors, no pending",
+    "smtp_same_test": "71 PASS / 38 declared actual wire defects -> 109 PASS; same frozen bytes; actual source identity/exit/no skip",
+    "cumulative_go_expected_leaf_pass": 1668,
+    "cumulative_ui_expected_assertion_pass": 229,
+    "complete_nonincremental_typescript_required": true,
+    "merge_and_actual_tree_parent_verification_required": true
+  },
+  "round2_actual_delivery": {
+    "pr": 223,
+    "merge": "ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+    "public_head": "419848e51b2d5e509898c355ace1c0deffe47fd4",
+    "ci_checkout": "872d7c4a885e0b3879f250f7e5d07455792a5a08",
+    "tree": "a5d05c981558239810bb4dd1022fc52b32e16c90",
+    "workflow_run": 37878613080,
+    "go_leaf_counts": {
+      "tabmail/internal/company": {
+        "pass": 194,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/app/templates": {
+        "pass": 107,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/app/admin": {
+        "pass": 28,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/smtp": {
+        "pass": 172,
+        "fail": 0,
+        "skip": 0
+      },
+      "github.com/emersion/go-smtp": {
+        "pass": 103,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/api/handlers": {
+        "pass": 89,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/store/postgres": {
+        "pass": 12,
+        "fail": 0,
+        "skip": 0
+      }
+    },
+    "ui_actual_assertion_pass": 157,
+    "full_nonincremental_typescript": "success",
+    "raw_job_logs": [
+      {
+        "path": "docs/company-mail/evidence/R5-EXEC-20261009/round2-ci-go.log",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e900b928ace3c4092ca295c1150a0d915f5456c5",
+        "sha256": "183f8b6ea450229ec825ea0b7cb13e9972e8caf4a6ab6eb90473e545bbcac410",
+        "bytes": 811409,
+        "job_id": 113652841919
+      },
+      {
+        "path": "docs/company-mail/evidence/R5-EXEC-20261009/round2-ci-web.log",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "7198138e5ad26456a16ab33592f1368bc6ee8fc6",
+        "sha256": "2b1d1c3a5057f2e99836091a48ac3d8f1dc8dfb158632081885dfc38ee876cce",
+        "bytes": 76367,
+        "job_id": 113652841719
+      }
+    ]
+  },
+  "scope": {
+    "catalog_revision16_maintenance_pending": true,
+    "maintenance_counts_as_new_task": false,
+    "full_company_ci_qualified": false,
+    "release_qualified": false,
+    "main_merged": false,
+    "integration_pr56_stays_draft": true
+  }
+}

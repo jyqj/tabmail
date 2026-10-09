@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"sync"
 	"testing"
 
 	"github.com/rs/zerolog"
@@ -16,6 +17,7 @@ import (
 // integer. A accepted prefix must never turn into a different runtime default.
 type settingIntegerStore struct {
 	Store
+	mu     sync.Mutex
 	values map[string]string
 	writes int
 	audits int
@@ -23,6 +25,8 @@ type settingIntegerStore struct {
 }
 
 func (s *settingIntegerStore) UpsertSetting(_ context.Context, key, value, _ string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.writes++
 	if s.fail != nil {
 		return s.fail
@@ -31,7 +35,29 @@ func (s *settingIntegerStore) UpsertSetting(_ context.Context, key, value, _ str
 	return nil
 }
 
+func (s *settingIntegerStore) SeedSetting(ctx context.Context, key, value, _ string) (bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return false, err
+	}
+	if _, exists := s.values[key]; exists {
+		return false, nil
+	}
+	s.writes++
+	if s.fail != nil {
+		return false, s.fail
+	}
+	if s.values == nil {
+		s.values = make(map[string]string)
+	}
+	s.values[key] = value
+	return true, nil
+}
+
 func (s *settingIntegerStore) ListSettings(context.Context) ([]*models.SystemSetting, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	var out []*models.SystemSetting
 	for key, value := range s.values {
 		out = append(out, &models.SystemSetting{Key: key, Value: value})

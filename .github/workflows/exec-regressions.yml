@@ -26,12 +26,18 @@ jobs:
           mkdir exec-evidence
           git rev-parse HEAD HEAD^{tree} | tee exec-evidence/source.txt
           go version > exec-evidence/go-version.txt
-      - name: Template and SMTP affected packages
+      - name: Template, settings consumers and SMTP affected packages
         run: |
           set -euo pipefail
           go test -mod=readonly -race -p 1 -count=1 -timeout=120s -json \
-            ./internal/company ./internal/app/templates ./internal/app/admin ./internal/smtp \
+            ./internal/company ./internal/app/templates ./internal/app/admin ./internal/smtp ./internal/outbound \
             github.com/emersion/go-smtp/... | tee exec-evidence/packages.jsonl
+      - name: Existing settings publication regressions
+        run: |
+          set -euo pipefail
+          go test -mod=readonly -race -p 1 -count=1 -timeout=120s -json \
+            ./internal/settings \
+            -run '^TestR5Settings(DelayedWriteResponseCannotRevertNewerCommit|ReadFailureKeepsLastObservedSnapshot|FailedWritePreservesCache|RefreshAndInvalidationKeepCommittedValues|WarmCacheAndDistinctWrites)$' | tee exec-evidence/settings.jsonl
       - name: Real HTTP policy and template validation
         run: |
           set -euo pipefail
@@ -72,7 +78,7 @@ jobs:
       - name: Complete TypeScript check
         working-directory: web
         run: npx tsc --noEmit --incremental false
-      - name: Mailbox lifecycle, ownership and rich draft regressions
+      - name: Mailbox lifecycle, ownership, rich drafts and explicit route regressions
         working-directory: web
         run: |
           set -euo pipefail
@@ -87,8 +93,18 @@ jobs:
             components/company/compose-rich-reload.test.tsx \
             features/mail/components/rich-message-paste.test.tsx \
             features/mail/components/rich-message.test.tsx \
+            features/mail/workspace-mailbox-route-recovery.test.tsx \
+            features/mail/workspace-editor-opening.test.tsx \
+            features/mail/workspace-compose-navigation.test.tsx \
+            features/mail/workspace-events.test.tsx \
+            lib/compose-identity.test.ts \
             --reporter=json --outputFile=../exec-web-evidence/vitest.json
-          cat ../exec-web-evidence/vitest.json
+      - name: Show complete original Vitest results
+        if: always()
+        run: |
+          if test -f exec-web-evidence/vitest.json; then
+            cat exec-web-evidence/vitest.json
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:

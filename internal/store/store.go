@@ -380,6 +380,7 @@ type OutboundStore interface {
 // SettingsStore persists system settings.
 type SettingsStore interface {
 	GetSetting(ctx context.Context, key string) (*models.SystemSetting, error)
+	SeedSetting(ctx context.Context, key, value, description string) (bool, error)
 	UpsertSetting(ctx context.Context, key, value, description string) error
 	ListSettings(ctx context.Context) ([]*models.SystemSetting, error)
 }
