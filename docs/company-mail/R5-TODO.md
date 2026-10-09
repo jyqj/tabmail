@@ -1,11 +1,13 @@
 # R5 全版本深度重构与优化任务清单
 
 <!-- R5-NEXT-1543-20261009:BEGIN -->
-## NEXT-1543-20261009：多轮实施进行中
+## NEXT-1543-20261009：三轮十项已验收并合入
 
-从 `30d2d05ab6ddcc23f47d9b9786885817aef50a0f` 起，root 与三个原生 subagent 在独立工作区推进十项新实施，按每项固定回归、独立复核和实际集成验收关闭。范围与逐轮记录见 [本批账本](R5-NEXT-1543-20261009.md)，各项已在 Issue 登记归属，避免并行重复。
+从 `30d2d05ab6ddcc23f47d9b9786885817aef50a0f` 继续，root 与 backend/frontend/transport 三个原生 subagent 按 **4＋3＋3** 实施、固定失败复现、同字节回归、交叉复核与精确树合入。三轮 [#235](https://github.com/jyqj/tabmail/pull/235)、[#237](https://github.com/jyqj/tabmail/pull/237)、[#238](https://github.com/jyqj/tabmail/pull/238) 均已实际合并，十个 Issue 均为 closed/completed、40/40 验收项已勾选。**本批完成 10/10，剩余 0；逐轮剩余 6 → 3 → 0。** 完整范围和原始证据见 [本批账本](R5-NEXT-1543-20261009.md)。
 
-当前本批 **0/10 完成，剩余 10**；原父任务 **10/171 已验收，剩余 161**。历史批次、PR 管理、目录和报告不重复计数；完整发布门槛继续依据对应源码的真实结果。
+最终产品 merge `509a7dec2009486f10fa18c0f401fdbb7cdf3f4d` / tree `fd362eed901840f23f58b477104a642f2a6cbf51` 与精确公开候选 `17be458` 一致。真实 PostgreSQL 16.15 三组固定回归分别为 **11P/3F → 14P、2P/6F → 8P、12P/7F → 19P**，候选共41叶全通过、所有层级零跳过，原始日志与源码身份经独立核对。最终组合 Go race 1896 PASS / 0 FAIL / 10 个既有 PG recovery SKIP；前端371项通过、非增量TypeScript与改动lint通过，整仓Go build通过。重叠集、编译与跳过项不混入通过总数。
+
+三个新产品分支的自动删除已逐一核实；临时执行PR #239关闭而未合并，verify分支保留为来源记录。[目录维护 #240](https://github.com/jyqj/tabmail/pull/240) 的原三CLI和104项守护测试通过，完整source-version原CI仍独立待验收；目录与报告计0项。#56继续draft。**原父任务仍10/171已验收、剩余161**；以下全部历史内容与本批起点逐字节一致，不因限定子项完成改写父项验收。
 <!-- R5-NEXT-1543-20261009:END -->
 
 <!-- R5-EXEC-20261009:BEGIN -->
