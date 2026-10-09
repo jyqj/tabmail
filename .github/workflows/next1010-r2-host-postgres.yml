@@ -113,7 +113,7 @@ jobs:
           SQL
           TASK_PG_DSN="postgres://$TASK_PG_ROLE:$TASK_PG_PASSWORD@localhost:5432/$TASK_PG_DB?sslmode=disable"
           printf 'TABMAIL_TEST_DB_DSN=%s\n' "$TASK_PG_DSN" >> "$GITHUB_ENV"
-          /usr/lib/postgresql/16/bin/psql "$TASK_PG_DSN" -X -v ON_ERROR_STOP=1 -At             -c "SELECT json_build_object('database',current_database(),'role',current_user,'server_version_num',current_setting('server_version_num')::integer,'version',version(),'server_encoding',current_setting('server_encoding'),'lc_collate',current_setting('lc_collate'),'transaction_isolation',current_setting('default_transaction_isolation'),'superuser',(SELECT rolsuper FROM pg_roles WHERE rolname=current_user),'createdb',(SELECT rolcreatedb FROM pg_roles WHERE rolname=current_user));"             > "$TASK_EVIDENCE/postgres-test-session.json"
+          /usr/lib/postgresql/16/bin/psql "$TASK_PG_DSN" -X -v ON_ERROR_STOP=1 -At             -c "SELECT json_build_object('database',current_database(),'role',current_user,'server_version_num',current_setting('server_version_num')::integer,'version',version(),'server_encoding',current_setting('server_encoding'),'lc_collate',(SELECT datcollate FROM pg_database WHERE datname=current_database()),'transaction_isolation',current_setting('default_transaction_isolation'),'superuser',(SELECT rolsuper FROM pg_roles WHERE rolname=current_user),'createdb',(SELECT rolcreatedb FROM pg_roles WHERE rolname=current_user));"             > "$TASK_EVIDENCE/postgres-test-session.json"
           python3 -B - <<'PY'
           import json, os
           from pathlib import Path
