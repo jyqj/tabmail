@@ -355,10 +355,10 @@ func (s *PgStore) ActivateEmployee(ctx context.Context, hash, passwordHash strin
 	}
 	uid := uuid.New()
 	if _, e = tx.Exec(ctx, `INSERT INTO users(id,tenant_id,email,password_hash,display_name,role,is_active,permission_profile_id) VALUES($1,$2,$3,$4,$5,'user',true,$6)`, uid, tenant, email, passwordHash, name, profile); e != nil {
-		return app.Conflict("employee email already exists")
+		return classifyActivationInsertError(e, "idx_users_email", "employee email already exists")
 	}
 	if _, e = tx.Exec(ctx, `INSERT INTO mailboxes(id,tenant_id,zone_id,local_part,resolved_domain,full_address,access_mode,owner_user_id,mailbox_kind,retention_hours_override) VALUES($1,$2,$3,$4,$5,$6,'token',$7,'personal',0)`, uuid.New(), tenant, zone, parts[0], domain, address, uid); e != nil {
-		return app.Conflict("employee mailbox already exists")
+		return classifyActivationInsertError(e, "mailboxes_full_address_key", "employee mailbox already exists")
 	}
 	if _, e = tx.Exec(ctx, `UPDATE employee_invitations SET consumed_at=now() WHERE id=$1`, id); e != nil {
 		return e

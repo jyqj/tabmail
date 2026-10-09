@@ -11,9 +11,11 @@ import (
 	"net/textproto"
 	"strconv"
 	"strings"
-	"tabmail/internal/store"
+	"unicode/utf8"
 
+	"golang.org/x/net/idna"
 	"tabmail/internal/config"
+	"tabmail/internal/store"
 )
 
 // DeliverRelay sends email through a configured SMTP relay.
@@ -331,6 +333,24 @@ func lookupMXWithResolver(ctx context.Context, domain string, resolve func(conte
 			return nil, &textproto.Error{Code: 553, Msg: "5.1.3 Invalid recipient address literal"}
 		}
 		return []string{host}, nil
+	}
+	// RFC 6531 requires A-labels at the DNS boundary. Keep the original
+	// envelope and the established ASCII route spelling unchanged; use the
+	// same converted domain for MX lookup and the implicit MX/TLS hostname.
+	// Validate UTF-8 first: the IDNA mapping may otherwise repair bad bytes.
+	if !utf8.ValidString(domain) {
+		return nil, &textproto.Error{Code: 553, Msg: "5.1.3 Invalid internationalized recipient domain"}
+	}
+	for i := 0; i < len(domain); i++ {
+		if domain[i] < 0x80 {
+			continue
+		}
+		ascii, err := idna.Lookup.ToASCII(domain)
+		if err != nil {
+			return nil, &textproto.Error{Code: 553, Msg: "5.1.3 Invalid internationalized recipient domain"}
+		}
+		domain = ascii
+		break
 	}
 	records, err := resolve(ctx, domain)
 	if err != nil {
