@@ -242,7 +242,13 @@ func (s *PgStore) ListOutboundRecipients(ctx context.Context, tenant, job uuid.U
 	}
 	return out, rows.Err()
 }
-func (s *PgStore) ReconcileOutbound(ctx context.Context, a authz.Actor, id uuid.UUID, version time.Time, results []company.Recipient, reason string) error {
+func (s *PgStore) ReconcileOutbound(ctx context.Context, a authz.Actor, id uuid.UUID, version time.Time, results []company.Recipient, reason string) (err error) {
+	defer func() {
+		var pg *pgconn.PgError
+		if errors.As(err, &pg) && (pg.Code == "55P03" || pg.Code == "40001") {
+			err = app.Conflict("send job or recipient ledger is changing; inspect again")
+		}
+	}()
 	reason, reasonErr := credentials.AuditReason(reason)
 	if reasonErr != nil || len(results) == 0 || len(results) > 50 {
 		return app.BadRequest("explicit confirmed outcomes and reason required")
@@ -259,7 +265,8 @@ func (s *PgStore) ReconcileOutbound(ctx context.Context, a authz.Actor, id uuid.
 	var state, marker string
 	var updated time.Time
 	var managed bool
-	e = tx.QueryRow(ctx, `SELECT state,in_flight_domain,updated_at,recipient_ledger FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT`, a.TenantID, id).Scan(&state, &marker, &updated, &managed)
+	var envelope []string
+	e = tx.QueryRow(ctx, `SELECT state,in_flight_domain,updated_at,recipient_ledger,rcpt_to FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT`, a.TenantID, id).Scan(&state, &marker, &updated, &managed, &envelope)
 	if errors.Is(e, pgx.ErrNoRows) {
 		return app.NotFound("send job not found")
 	}
@@ -268,6 +275,9 @@ func (s *PgStore) ReconcileOutbound(ctx context.Context, a authz.Actor, id uuid.
 	}
 	if state == string(models.OutboundProcessing) || !updated.Equal(version) || !managed {
 		return app.Conflict("job changed or needs legacy manual investigation")
+	}
+	if e = lockReconciliationLedger(ctx, tx, a.TenantID, id, envelope); e != nil {
+		return e
 	}
 	seen := map[string]bool{}
 	for _, v := range results {
@@ -310,6 +320,50 @@ func (s *PgStore) ReconcileOutbound(ctx context.Context, a authz.Actor, id uuid.
 	}
 	return tx.Commit(ctx)
 }
+
+// The job lock fixes the envelope and excludes new FK-bound ledger rows. Fence
+// every existing recipient before any outcome changes, including unselected
+// rows: a partial or mismatched ledger cannot prove whole-envelope completion.
+// Use the existing recovery cap and NOWAIT order instead of waiting on a child
+// row while holding the current administrator and job.
+func lockReconciliationLedger(ctx context.Context, tx pgx.Tx, tenant, job uuid.UUID, envelope []string) error {
+	if len(envelope) == 0 || len(envelope) > outboundInspectionMaxRecipients {
+		return app.Conflict("recipient ledger is incomplete or exceeds recovery bounds; investigate separately")
+	}
+	expected := make(map[string]bool, len(envelope))
+	for _, address := range envelope {
+		if address == "" {
+			return app.Conflict("recipient ledger does not match the envelope; investigate separately")
+		}
+		// The historical migration and inspection projection use one row per
+		// exact stored identity, even if a legacy envelope repeats it.
+		expected[address] = true
+	}
+	rows, e := tx.Query(ctx, `SELECT address FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2 ORDER BY address LIMIT $3 FOR UPDATE NOWAIT`, tenant, job, outboundInspectionMaxRecipients+1)
+	if e != nil {
+		return e
+	}
+	defer rows.Close()
+	count := 0
+	for rows.Next() {
+		var address string
+		if e = rows.Scan(&address); e != nil {
+			return e
+		}
+		count++
+		if count > outboundInspectionMaxRecipients || !expected[address] {
+			return app.Conflict("recipient ledger does not match the envelope; investigate separately")
+		}
+	}
+	if e = rows.Err(); e != nil {
+		return e
+	}
+	if count != len(expected) {
+		return app.Conflict("recipient ledger does not match the envelope; investigate separately")
+	}
+	return nil
+}
+
 func (s *PgStore) Readiness(ctx context.Context) error { return s.pool.Ping(ctx) }
 func (s *PgStore) Heartbeat(ctx context.Context, id, role string) error {
 	_, e := s.pool.Exec(ctx, `INSERT INTO runtime_instances(id,role,last_seen) VALUES($1,$2,clock_timestamp()) ON CONFLICT(id) DO UPDATE SET role=EXCLUDED.role,last_seen=EXCLUDED.last_seen`, id, role)

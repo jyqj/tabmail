@@ -81,10 +81,11 @@ func main() {
 
 	// --- Redis ---
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.Redis.Addr,
-		Password: cfg.Redis.Password,
-		DB:       cfg.Redis.DB,
-		PoolSize: cfg.Redis.PoolSize,
+		ContextTimeoutEnabled: true,
+		Addr:                  cfg.Redis.Addr,
+		Password:              cfg.Redis.Password,
+		DB:                    cfg.Redis.DB,
+		PoolSize:              cfg.Redis.PoolSize,
 	})
 	if err := rdb.Ping(ctx).Err(); err != nil {
 		logger.Fatal().Err(err).Msg("connecting to redis")

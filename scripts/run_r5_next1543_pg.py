@@ -21,6 +21,11 @@ CASES = {
         "^TestR5DerivedTextPersistence$",
         8,
     ),
+    "reconcile-ledger": (
+        "internal/store/postgres/r5_reconcile_ledger_coverage_test.go",
+        "^TestR5ReconciliationRequiresCompleteLedger$",
+        19,
+    ),
 }
 
 
