@@ -194,7 +194,7 @@ func TestMailboxAdministrationHTTPRequiresObservedVersion(t *testing.T) {
 	admin := r3Token(t, f.admin)
 	path := "/api/v1/company/mailboxes/" + f.shared.ID.String() + "/grants"
 	snapshot := r3Data[company.MailboxGrantSnapshot](t, r3HTTP(t, h, admin, "GET", path, nil, 200))
-	body := map[string]any{"user_id": f.employee.ID, "can_read": true}
+	body := map[string]any{"user_id": f.employee.ID, "can_read": true, "can_organize": false, "can_send": false, "template_only": false}
 	r3HTTP(t, h, admin, "PUT", path, body, 400)
 	body["revision"] = snapshot.Revision
 	r3HTTP(t, h, admin, "PUT", path, body, 200)

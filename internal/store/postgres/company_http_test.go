@@ -105,7 +105,7 @@ func TestR3CompanyHTTPJourney(t *testing.T) {
 	shared := f.shared.ID.String()
 	grantPath := "/api/v1/company/mailboxes/" + shared + "/grants"
 	grantSnapshot := r3Data[company.MailboxGrantSnapshot](t, r3HTTP(t, h, admin, "GET", grantPath, nil, 200))
-	r3HTTP(t, h, admin, "PUT", grantPath, map[string]any{"user_id": f.employee.ID, "can_send": true, "template_only": true, "revision": grantSnapshot.Revision}, 200)
+	r3HTTP(t, h, admin, "PUT", grantPath, map[string]any{"user_id": f.employee.ID, "can_read": false, "can_organize": false, "can_send": true, "template_only": true, "revision": grantSnapshot.Revision}, 200)
 	r3HTTP(t, h, employee, "GET", "/api/v1/company/mailboxes/"+shared+"/messages", nil, 403)
 	tpl := r3Data[company.Template](t, r3HTTP(t, h, admin, "POST", "/api/v1/company/templates", company.Template{Name: "HTTP template", Draft: templateDraft()}, 200))
 	version := r3Data[company.TemplateVersion](t, r3HTTP(t, h, admin, "POST", "/api/v1/company/templates/"+tpl.ID.String()+"/publish", map[string]int{"revision": tpl.Revision}, 200))

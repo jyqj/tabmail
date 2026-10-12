@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "suites": {
+    "frontend-owned-fixture": {
+      "required_tests": [
+        ["tabmail/internal/testpg", "TestR5FrontendOwnedFixture"]
+      ],
+      "allowed_skips": []
+    }
+  }
+}

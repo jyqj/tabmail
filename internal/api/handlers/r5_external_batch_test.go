@@ -4,7 +4,6 @@ package handlers_test
 
 import (
 	"context"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -12,8 +11,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"net/http"
-	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -220,40 +217,16 @@ func TestR5ExternalBatchIsolationProbe(t *testing.T) {
 				_, pool, _ := testpg.NewPostgres(leaf)
 				ctx, cancel := context.WithTimeout(context.Background(), 75*time.Second)
 				defer cancel()
-				privateBytes := make([]byte, 24)
-				_, err := rand.Read(privateBytes)
-				r5UIMust(leaf, err)
-				token := hex.EncodeToString(privateBytes)
-				_, err = pool.Exec(ctx, "CREATE TABLE r5_batch_probe (identity text NOT NULL)")
-				r5UIMust(leaf, err)
-				_, err = pool.Exec(ctx, "INSERT INTO r5_batch_probe VALUES ($1)", key)
-				r5UIMust(leaf, err)
-				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					if r.Header.Get("Authorization") != "Bearer "+token {
-						w.WriteHeader(http.StatusUnauthorized)
-						return
-					}
-					var identity string
-					if err := pool.QueryRow(r.Context(), "SELECT identity FROM r5_batch_probe").Scan(&identity); err != nil {
-						w.WriteHeader(500)
-						return
-					}
-					_ = json.NewEncoder(w).Encode(map[string]string{"identity": identity})
-				}))
-				leaf.Cleanup(server.Close)
-				fixture := filepath.Join(leaf.TempDir(), "fixture.json")
-				bytes, err := json.Marshal(map[string]string{"case_id": key, "api_url": server.URL, "token": token})
-				r5UIMust(leaf, err)
-				r5UIMust(leaf, os.WriteFile(fixture, bytes, 0600))
+				fixture := testpg.NewR5LoopbackProbe(leaf, ctx, pool, key)
 				report := filepath.Join(leaf.TempDir(), "report.json")
-				_, err = r5BatchExecute(ctx, key, fixture, report)
+				_, err := r5BatchExecute(ctx, key, fixture, report)
 				r5UIMust(leaf, err)
 				var result struct {
 					Success bool
 					Total   int `json:"numTotalTests"`
 					Passed  int `json:"numPassedTests"`
 				}
-				bytes, err = os.ReadFile(report)
+				bytes, err := os.ReadFile(report)
 				r5UIMust(leaf, err)
 				r5UIMust(leaf, json.Unmarshal(bytes, &result))
 				if !result.Success || result.Total != 1 || result.Passed != 1 {

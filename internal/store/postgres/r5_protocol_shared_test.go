@@ -312,7 +312,7 @@ func TestR5ProtocolRetentionSharedCases(t *testing.T) {
 					grantCase := c
 					grantCase.Expected.Status = 400
 					grantCase.Expected.Wire.Code = "BAD_REQUEST"
-					r5Wire(t, h, r3Token(t, f.admin), "PUT", "/api/v1/company/mailboxes/"+mb.ID.String()+"/grants", map[string]any{"user_id": f.employee.ID, "can_read": false, "can_organize": true, "revision": snapshot.Revision}, grantCase)
+					r5Wire(t, h, r3Token(t, f.admin), "PUT", "/api/v1/company/mailboxes/"+mb.ID.String()+"/grants", map[string]any{"user_id": f.employee.ID, "can_read": false, "can_organize": true, "can_send": false, "template_only": false, "revision": snapshot.Revision}, grantCase)
 				}
 				if mb.OwnerUserID == nil || *mb.OwnerUserID != f.employee.ID {
 					must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: mb.ID, UserID: f.employee.ID, CanRead: read, CanOrganize: organize}))
@@ -1783,7 +1783,7 @@ func TestR5ProtocolDraftGrantOrderingSharedCases(t *testing.T) {
 			saved := make(chan *httptest.ResponseRecorder, 1)
 			go func() { w := httptest.NewRecorder(); h.ServeHTTP(w, req); saved <- w }()
 			writer := r5WaitBlockedBy(t, f, ctx, hold.Conn().PgConn().PID(), "UPDATE mail_drafts SET mailbox_id")
-			grantBody := map[string]any{"user_id": f.employee.ID, "can_read": true, "can_send": false, "revision": snapshot.Revision}
+			grantBody := map[string]any{"user_id": f.employee.ID, "can_read": true, "can_organize": false, "can_send": false, "template_only": false, "revision": snapshot.Revision}
 			grantRaw, e := json.Marshal(grantBody)
 			must(t, e)
 			grantReq := httptest.NewRequest("PUT", "/api/v1/company/mailboxes/"+f.shared.ID.String()+"/grants", bytes.NewReader(grantRaw)).WithContext(ctx)

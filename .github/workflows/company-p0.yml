@@ -198,6 +198,17 @@ jobs:
   frontend:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tabmail_test
+          POSTGRES_PASSWORD: disposable-test-password
+          POSTGRES_DB: tabmail_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
     steps:
       - uses: actions/checkout@v4
         with:
@@ -244,9 +255,17 @@ jobs:
       - run: npx tsc --noEmit
         if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
-      - run: npm test -- --reporter=default --reporter=json --outputFile=../frontend-vitest.json
+      - name: Complete default frontend with an owned PostgreSQL fixture
         if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
+        env:
+          GODEBUG: asynctimerchan=0
+          TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
+        run: |
+          python3 -B ../scripts/run_r5_frontend_fixture.py \
+            --output-dir "$RUNNER_TEMP/tabmail-frontend-fixture" \
+            --source-sha "$(cat ../frontend-source-sha.txt)" \
+            -- npm test -- --reporter=default --reporter=json --outputFile=../frontend-vitest.json
       - run: npm run lint
         if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
@@ -262,6 +281,7 @@ jobs:
             frontend-source-sha.txt
             frontend-source-version-tests.json
             frontend-vitest.json
+            ${{ runner.temp }}/tabmail-frontend-fixture
           if-no-files-found: error
           retention-days: 14
 
