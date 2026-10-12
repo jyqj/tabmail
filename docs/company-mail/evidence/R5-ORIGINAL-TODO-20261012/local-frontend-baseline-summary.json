@@ -1,0 +1,18 @@
+{
+  "source_sha": "af1444807e1018c95b963b8c5b74e2b2e5060b9a",
+  "scope": "complete_default_frontend_local_baseline",
+  "raw_report_sha256": "f381d960093c6081563b3ead62e566d37b202433e6f9300c97ae5a99ec472c87",
+  "counts": {
+    "numTotalTests": 2196,
+    "numPassedTests": 2192,
+    "numFailedTests": 1,
+    "numPendingTests": 3,
+    "numTodoTests": 0,
+    "success": false
+  },
+  "limitations": [
+    "Private fixture missing in original default workflow: one failed probe.",
+    "Go1.25.7 was installed under an absolute toolchain path, but not in npm child PATH for this baseline: three pending assertions due to beforeAll spawnSync go ENOENT. This is a local setup failure, not three demonstrated product failures.",
+    "This baseline is not candidate validation; CI still must run full default frontend with the real owned fixture."
+  ]
+}

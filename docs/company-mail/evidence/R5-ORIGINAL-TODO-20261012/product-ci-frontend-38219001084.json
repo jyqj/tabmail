@@ -1,0 +1,292 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-10-12T07:55:50.953479+00:00",
+  "repository": "jyqj/tabmail",
+  "pull_request": 260,
+  "head_sha": "311593e6a837287f58d8f10d559dc0b8991be55e",
+  "workflow_run_id": 38219001084,
+  "workflow_run_attempt": 1,
+  "frontend_job_id": 114710434945,
+  "frontend_job_conclusion": "failure",
+  "frontend_artifact": {
+    "id": 11733950869,
+    "name": "company-frontend-evidence",
+    "size_in_bytes": 564744,
+    "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11733950869",
+    "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11733950869/zip",
+    "expired": false,
+    "created_at": "2026-10-12T07:53:28Z",
+    "expires_at": "2026-10-26T07:53:27Z",
+    "updated_at": "2026-10-12T07:53:28Z",
+    "digest": "sha256:82cf8a1ceed19035b6299cdf79951aa7defbf576d829b5e86c372dea4644cc50",
+    "workflow_run": {
+      "id": 38219001084,
+      "repository_id": 1188928152,
+      "head_repository_id": 1188928152,
+      "head_branch": "fix/r5-validation-fixtures-20261012",
+      "head_sha": "311593e6a837287f58d8f10d559dc0b8991be55e"
+    }
+  },
+  "audit_artifact": {
+    "id": 11733194835,
+    "name": "dependency-audit",
+    "size_in_bytes": 1064,
+    "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11733194835",
+    "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11733194835/zip",
+    "expired": false,
+    "created_at": "2026-10-12T07:47:56Z",
+    "expires_at": "2026-10-26T07:47:55Z",
+    "updated_at": "2026-10-12T07:47:56Z",
+    "digest": "sha256:75010d745447317e1885b102b1e6ed332105369dfa65bf154284be4fbd43b880",
+    "workflow_run": {
+      "id": 38219001084,
+      "repository_id": 1188928152,
+      "head_repository_id": 1188928152,
+      "head_branch": "fix/r5-validation-fixtures-20261012",
+      "head_sha": "311593e6a837287f58d8f10d559dc0b8991be55e"
+    }
+  },
+  "tested_source_before": {
+    "head": "55c12ad0c693d3379f1a55b9c442fa88aaa6f48a",
+    "tree": "6ff0a4fca8116e1f4955e443f03007f7bf83c7bc",
+    "tracked_clean": true,
+    "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tested_source_after": {
+    "head": "55c12ad0c693d3379f1a55b9c442fa88aaa6f48a",
+    "tree": "6ff0a4fca8116e1f4955e443f03007f7bf83c7bc",
+    "tracked_clean": true,
+    "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "source_unchanged": true,
+  "frontend_command": [
+    "npm",
+    "test",
+    "--",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=../frontend-vitest.json"
+  ],
+  "go_execution": {
+    "exit_code": 0,
+    "timeout": false,
+    "tail": false,
+    "processes_joined": true
+  },
+  "vitest_execution": {
+    "exit_code": 0,
+    "timeout": false,
+    "tail": false,
+    "processes_joined": true
+  },
+  "go_evidence": {
+    "status": "pass",
+    "events": 12,
+    "packages": 1,
+    "tests_started": 2,
+    "tests_passed": 2,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "mandatory_tests": 1,
+    "mandatory_missing_or_not_passed": 0,
+    "allowed_skips_observed": [],
+    "errors": [],
+    "source_sha": "55c12ad0c693d3379f1a55b9c442fa88aaa6f48a",
+    "log_sha256": "94a03e83a9efaa3115949e8d2a9e1cbe8bec2734410ac9b97a3762d7562347a9",
+    "scope": "complete_default_frontend_with_one_owned_fixture",
+    "external_batch_qualified": false,
+    "task_complete": false,
+    "source_unchanged": true
+  },
+  "frontend_evidence": {
+    "status": "pass",
+    "errors": [],
+    "scope": "complete_default_frontend_with_one_owned_fixture",
+    "external_batch_qualified": false,
+    "task_complete": false
+  },
+  "go_actual_terminal_events": [
+    {
+      "Time": "2026-10-12T07:52:44.395475075Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/testpg",
+      "Test": "TestR5FrontendOwnedFixture/default-suite",
+      "Elapsed": 266.16
+    },
+    {
+      "Time": "2026-10-12T07:52:44.39549947Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/testpg",
+      "Test": "TestR5FrontendOwnedFixture",
+      "Elapsed": 266.16
+    },
+    {
+      "Time": "2026-10-12T07:52:45.399068753Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/testpg",
+      "Elapsed": 267.192
+    }
+  ],
+  "vitest_counts": {
+    "success": true,
+    "numTotalTests": 2196,
+    "numPassedTests": 2196,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTodoTests": 0
+  },
+  "vitest_test_files": 129,
+  "original_probe": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "R5 batch independent realm loopback PostgreSQL",
+          "status": "passed",
+          "title": "R5 batch independent realm loopback PostgreSQL",
+          "duration": 84.03204099999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1791791562708,
+      "endTime": 1791791562792.032,
+      "status": "passed",
+      "message": "",
+      "name": "/home/runner/work/tabmail/tabmail/web/r5-external-batch-probe.test.tsx"
+    }
+  ],
+  "vitest_report_copies_identical": true,
+  "independent_raw_replay": {
+    "complete_vitest_errors": [],
+    "go_evidence_status": "pass",
+    "validator_commit": "fec134b3422b1ab44a311dca10d802d4aeb6984c",
+    "runtime_reexecuted": false
+  },
+  "source_version": {
+    "status": "failed",
+    "preparation_error": null,
+    "unknown_build_tag_blocker_cleared": true,
+    "discovered_tests": 889,
+    "no_missing": true,
+    "no_overlap": true,
+    "groups": [
+      {
+        "group": "current",
+        "source_sha": "55c12ad0c693d3379f1a55b9c442fa88aaa6f48a",
+        "exit": 1,
+        "tests_run": 885,
+        "actual_tests": 885,
+        "failures": [
+          "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision18_preserves_public_history_collectors_and_original_rejections"
+        ],
+        "errors": [
+          "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_old_pins_reject_and_current_revision_passes_same_actual_facts",
+          "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision18_binds_actual_source_facts_and_preserves_manual_reviews",
+          "test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion",
+          "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_real_receipt_roundtrip",
+          "test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence"
+        ],
+        "skips": []
+      },
+      {
+        "group": "frozen-v1",
+        "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+        "exit": 0,
+        "tests_run": 4,
+        "actual_tests": 4,
+        "failures": [],
+        "errors": [],
+        "skips": []
+      }
+    ],
+    "additional_failure_outside_catalog": {
+      "test_id": "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_real_receipt_roundtrip",
+      "error": "ValueError: boundary root ancestor identity changed",
+      "classification": "Unresolved actual source-boundary failure; not included in catalog reconciliation fixes.",
+      "log_file": "frontend-job.log",
+      "log_sha256": "eb827e0d5f1cb2fa23cdbbf83ee243e1127761558131f85809445872e251bd69",
+      "line_start_1_based": 1578,
+      "line_end_1_based_inclusive": 1607,
+      "raw_trace_lines": [
+        "2026-10-12T07:47:30.5956939Z ERROR: test_real_receipt_roundtrip (test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_real_receipt_roundtrip)",
+        "2026-10-12T07:47:30.5958145Z ----------------------------------------------------------------------",
+        "2026-10-12T07:47:30.5958800Z Traceback (most recent call last):",
+        "2026-10-12T07:47:30.5960072Z   File \"/tmp/r5-version-8x5vroet/current/scripts/tests/test_r5_selected_source_binding_v2.py\", line 84, in test_real_receipt_roundtrip",
+        "2026-10-12T07:47:30.5961965Z     self.assertEqual(binding.validate(r,ROOT,GO,cache=CACHE,modulecache=MODULECACHE)['attestation_sha256'],r['attestation_sha256'])",
+        "2026-10-12T07:47:30.5963684Z                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-12T07:47:30.5964777Z   File \"/tmp/r5-version-8x5vroet/current/scripts/r5_selected_source_binding_v2.py\", line 351, in validate",
+        "2026-10-12T07:47:30.5966586Z     observed = capture(root,go,cache=cache,modulecache=modulecache,context=receipt.get('base_source',{}).get('build_context'))",
+        "2026-10-12T07:47:30.5968421Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-12T07:47:30.5969564Z   File \"/tmp/r5-version-8x5vroet/current/scripts/r5_selected_source_binding_v2.py\", line 261, in capture",
+        "2026-10-12T07:47:30.5970981Z     return _capture(root, go, cache=cache, modulecache=modulecache, context=context, diagnostics=diagnostics)",
+        "2026-10-12T07:47:30.5972461Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-12T07:47:30.5973563Z   File \"/tmp/r5-version-8x5vroet/current/scripts/r5_selected_source_binding_v2.py\", line 330, in _capture",
+        "2026-10-12T07:47:30.5975107Z     after = inventory.capture_current_source(root,purpose='selected',policy=inventory.ARCHIVE_POLICY,build_context=context)",
+        "2026-10-12T07:47:30.5976968Z             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-12T07:47:30.5978143Z   File \"/tmp/r5-version-8x5vroet/current/scripts/r5_source_inventory.py\", line 602, in capture_current_source",
+        "2026-10-12T07:47:30.5979524Z     return _capture_archive_v4(root, purpose=purpose, policy=policy, build_context=build_context)",
+        "2026-10-12T07:47:30.5980823Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-12T07:47:30.5981893Z   File \"/tmp/r5-version-8x5vroet/current/scripts/r5_source_inventory.py\", line 589, in _capture_archive_v4",
+        "2026-10-12T07:47:30.5983401Z     if any(hashlib.sha256(boundary.read(root,p)).hexdigest() != h for p,h in files.items()):",
+        "2026-10-12T07:47:30.5984495Z        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-12T07:47:30.5985799Z   File \"/tmp/r5-version-8x5vroet/current/scripts/r5_source_inventory.py\", line 589, in <genexpr>",
+        "2026-10-12T07:47:30.5986986Z     if any(hashlib.sha256(boundary.read(root,p)).hexdigest() != h for p,h in files.items()):",
+        "2026-10-12T07:47:30.5988024Z                           ^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-12T07:47:30.5988854Z   File \"/tmp/r5-version-8x5vroet/current/scripts/r5_archive_boundary.py\", line 52, in read",
+        "2026-10-12T07:47:30.5989561Z     fd = root_fd(root)",
+        "2026-10-12T07:47:30.5989984Z          ^^^^^^^^^^^^^",
+        "2026-10-12T07:47:30.5990778Z   File \"/tmp/r5-version-8x5vroet/current/scripts/r5_archive_boundary.py\", line 41, in root_fd",
+        "2026-10-12T07:47:30.5991770Z     raise ValueError('boundary root ancestor identity changed')",
+        "2026-10-12T07:47:30.5992485Z ValueError: boundary root ancestor identity changed"
+      ],
+      "gate_or_test_modified": false,
+      "new_head_requires_its_own_execution": true
+    }
+  },
+  "audit_vulnerabilities": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 8,
+    "critical": 0,
+    "total": 8
+  },
+  "artifact_digest_checks": {
+    "frontend_zip_matches_github": true,
+    "audit_zip_matches_github": true
+  },
+  "scope": "complete_default_frontend_with_one_owned_fixture",
+  "external_batch_qualified": false,
+  "original_todo_newly_completed": 0,
+  "task_complete": false,
+  "product_green": false,
+  "files_sha256": {
+    "frontend-evidence.zip": "82cf8a1ceed19035b6299cdf79951aa7defbf576d829b5e86c372dea4644cc50",
+    "dependency-audit.zip": "75010d745447317e1885b102b1e6ed332105369dfa65bf154284be4fbd43b880",
+    "frontend-job.log": "eb827e0d5f1cb2fa23cdbbf83ee243e1127761558131f85809445872e251bd69",
+    "frontend-job-terminal.json": "bd94725ae214fc5b5c25466688691771bcfee97a63e828f3d697d358494a91ed",
+    "frontend-artifact-metadata.json": "84f781ef86962bab5d373ed6c80dcbb81e141750723a77e737d5563ed43a9432",
+    "dependency-audit-metadata.json": "f7f115035c44788b35cc56fa8f1d798c116853fb6ee09acb699f54bb030d2da2",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/command.json": "a1b3ef2ccad246f5024329fedb70f6b0ce42a5c290f78394cb2fc4b9d04e3da0",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/source-after.json": "eb20c87e71d49d610f4c2a5c7155e07825fdb7c5122795066b1e5a9c714b6634",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/go-execution.json": "38a162f48d3b57be94a9eeb1cbae0407694110dddf23908673409fcde3d0e83e",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/source-before.json": "eb20c87e71d49d610f4c2a5c7155e07825fdb7c5122795066b1e5a9c714b6634",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/vitest.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/source-sha.txt": "e56b94d2eebe7159bc9245f8abd719197534234b803155716637be8ead817ddf",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/go-test-evidence.json": "8912b26b11f1100a63010295b5797d316cce8e93f5d4bf8ab03f2e5f98eab029",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/vitest-execution.json": "38a162f48d3b57be94a9eeb1cbae0407694110dddf23908673409fcde3d0e83e",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/vitest.stdout": "8d86d1c712f5dbd4cde254153970b6f590cdde22cec4f3bb8253e3a3399c2474",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/go.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/frontend-vitest.json": "30928bf919a6bc45eabf78bc2324cd5cbe55ad42c33ee0354acff77ad76452b0",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/vitest.stderr": "0f596599eb84cca8eaadb00b39d16c1ab366632eb1c99c38e60ae1826ba88c05",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/go.stdout": "94a03e83a9efaa3115949e8d2a9e1cbe8bec2734410ac9b97a3762d7562347a9",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/frontend-result.json": "0fc134c11100b484ca9ef736d104d81119004186bf48d3633fa1211a32ecde45",
+    "frontend-evidence/tabmail/tabmail/frontend-source-sha.txt": "e56b94d2eebe7159bc9245f8abd719197534234b803155716637be8ead817ddf",
+    "frontend-evidence/tabmail/tabmail/frontend-source-version-tests.json": "b2971e3a80b01d3a32f45884a2f5011786bb17befeb83522f172aaea4de7de39",
+    "frontend-evidence/tabmail/tabmail/frontend-vitest.json": "30928bf919a6bc45eabf78bc2324cd5cbe55ad42c33ee0354acff77ad76452b0",
+    "dependency-audit/tabmail-npm-audit.json": "25640721d10de42f8e1e400ed01017ee858e388aa63331388715f2a2adcd395e"
+  }
+}

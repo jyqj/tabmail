@@ -1,0 +1,73 @@
+{
+  "status": "ACCEPT_SOURCE_REVIEW_ONLY",
+  "commit": "29ee9ed4d77c141fb5c118bbf6dfd3eaa005d066",
+  "parent": "af1444807e1018c95b963b8c5b74e2b2e5060b9a",
+  "tree": "808b4b34a57181da670c9068814b8e82bd85f32e",
+  "changed_files": [
+    "internal/store/postgres/company_http_test.go",
+    "internal/store/postgres/company_safety_contracts_test.go",
+    "internal/store/postgres/r5_protocol_shared_test.go"
+  ],
+  "diff_sha256": "2ce57a05b3892c6a25f5df8f907945fcf18be19a0550687bd7921b3a4670864c",
+  "reviewed_changes": [
+    {
+      "test": "TestR3CompanyHTTPJourney",
+      "change": "Add explicit can_read=false and can_organize=false to existing template-sender grant. Original sending/read-denial journey assertions unchanged."
+    },
+    {
+      "test": "TestMailboxAdministrationHTTPRequiresObservedVersion",
+      "change": "Add explicit can_organize=false/can_send=false/template_only=false. Original missing-revision 400, valid 200, stale 409 sequence preserved."
+    },
+    {
+      "test": "TestR5ProtocolRetentionSharedCases",
+      "change": "Organizer-without-read negative request now supplies can_send=false/template_only=false, retaining original 400/BAD_REQUEST and restore/cross-scope protocol assertions."
+    },
+    {
+      "test": "TestR5ProtocolDraftGrantOrderingSharedCases",
+      "change": "Revocation supplies can_organize=false/template_only=false. Both write/revoke scheduling branches, actual locks, revision/payload/access assertions and original PE05 target marker preserved."
+    }
+  ],
+  "contract_origin": {
+    "pr": "https://github.com/jyqj/tabmail/pull/193",
+    "head": "ad4bbfd60801a58d05a3d2ef50cfeb0a623bbe0c",
+    "merge": "c4ea7bbcdcd232d22a6aa62a6f6615bed810c9f2",
+    "behavior": "Full replacement requires four non-null explicit permission booleans and positive observed revision; missing/null fields fail before storage."
+  },
+  "unchanged_boundaries": [
+    "Production handler/store",
+    "Fixed protocol cases JSON",
+    "Original test names/selectors/assertions/statuses",
+    "timeouts/budgets/skips",
+    "Original omitted/null permission negative tests"
+  ],
+  "required_execution": [
+    "TestR3CompanyHTTPJourney with real owned PostgreSQL",
+    "TestMailboxAdministrationHTTPRequiresObservedVersion with real owned PostgreSQL",
+    "TestR5ProtocolRetentionSharedCases with original r5protocol tag and real owned PostgreSQL",
+    "TestR5ProtocolDraftGrantOrderingSharedCases with original r5protocol tag and real owned PostgreSQL",
+    "Unchanged TestR5MailboxGrantExplicitIntent and TestR5MailboxWriteIntentKeepsRepositoryRefusals",
+    "Original full Company mail security and release checks and original shared-db verifier"
+  ],
+  "ci_evidence": {
+    "run": "https://github.com/jyqj/tabmail/actions/runs/37996234403",
+    "backend_job": "https://github.com/jyqj/tabmail/actions/runs/37996234403/job/114043038380",
+    "source": "c635fa7213adeaf0af1c6534327ee092dab4e046",
+    "artifact_id": 11648565915,
+    "artifact_sha256": "a86af5376963964c05b8d6f069c9415e0ca1d9b54bb2e270f166bcf9e24d4088"
+  },
+  "source_version_failure_evidence": {
+    "failure_id": "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_live_capture_control_and_archive_mutations",
+    "current_tests_run": 871,
+    "failures": 1,
+    "errors": 0,
+    "skips": 0,
+    "frozen_tests_passed": 4,
+    "traceback_in_downloaded_artifact": false,
+    "raw_workflow_log_retrieved": false,
+    "raw_log_tool_attempts": 2,
+    "raw_log_tool_error": "Transport closed",
+    "boundary": "Only the verified artifact lacks traceback; GitHub job log may retain it, but not retrieved. No assertion point or backend npm root cause inferred."
+  },
+  "original_todo_closures": [],
+  "original_todo_completed_increment": 0
+}

@@ -1,0 +1,219 @@
+{
+  "schema_version": 1,
+  "reviewed_at_utc": "2026-10-12T07:40:07.304033+00:00",
+  "reviewer": "todo_audit independent source review",
+  "verdict": "pass_with_source_and_selection_scope_only",
+  "reviewed_git_head": "fec134b3422b1ab44a311dca10d802d4aeb6984c",
+  "reviewed_git_tree": "6ff0a4fca8116e1f4955e443f03007f7bf83c7bc",
+  "base_head": "7524e650378487e8d32e70252cf1bd77010260b5",
+  "final_checkout_status": "",
+  "changed_paths": [
+    "internal/testpg/r5_frontend_fixture_test.go",
+    "scripts/run_r5_frontend_fixture.py",
+    "scripts/tests/test_r5_frontend_fixture.py",
+    "scripts/tests/test_r5_frontend_fixture_source_inputs.py"
+  ],
+  "reason": "The new frontend owner reused the existing r5fixtures PG/HTTP compilation context. The source inventory did not expand any allowed tag or historical policy. The existing complete directory input inventory binds the owner and runtime inputs.",
+  "independent_controls": {
+    "argv": [
+      "timeout",
+      "45s",
+      "python3",
+      "-B",
+      "-m",
+      "unittest",
+      "scripts.tests.test_r5_frontend_fixture",
+      "scripts.tests.test_r5_frontend_fixture_source_inputs",
+      "scripts.tests.test_r5_ci_wiring",
+      "scripts.tests.test_r5_frontend_evidence_continuation",
+      "-v"
+    ],
+    "cwd": "/workspace/scratch/c5e5c3c93beb/tabmail-frontend-inputs",
+    "started_at": "2026-10-12T07:37:23.447806+00:00",
+    "finished_at": "2026-10-12T07:37:29.538530+00:00",
+    "exit_code": 0,
+    "source_before": {
+      "head": "fec134b3422b1ab44a311dca10d802d4aeb6984c",
+      "tree": "6ff0a4fca8116e1f4955e443f03007f7bf83c7bc",
+      "status": ""
+    },
+    "source_after": {
+      "head": "fec134b3422b1ab44a311dca10d802d4aeb6984c",
+      "tree": "6ff0a4fca8116e1f4955e443f03007f7bf83c7bc",
+      "status": ""
+    },
+    "source_unchanged": true,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "bab23513ecc90fc380d10380ca82381b25843d9778204920e65012232a68835b",
+    "tests_run": 22,
+    "passed": 22,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "stdout": "controls.stdout",
+    "stderr": "controls.stderr",
+    "boundary": "Includes 11 frontend admission controls, 3 source-input controls, 5 original CI-wiring controls, and 3 original frontend-evidence continuation controls; author 17 overlaps these 22 and is not additive."
+  },
+  "source_preservation": {
+    "scripts/r5_source_inventory.py": {
+      "unchanged": true,
+      "sha256": "306cfcae043925d656d13b08bd439015e23348df255b363ceb8c10b6890488b2"
+    },
+    "scripts/prepare_r5_protocol_source.py": {
+      "unchanged": true,
+      "sha256": "989a3b57fe79a7fb93956596781801b5adbd3d1f973268f65245c594f2008ce3"
+    },
+    "scripts/r5_source_runner_prepare.py": {
+      "unchanged": true,
+      "sha256": "5bed12d036a1201c370e283a084f47b53a8286783ea2ebcf0d5ff95ee738d03c"
+    },
+    "scripts/run_r5_source_version_tests.py": {
+      "unchanged": true,
+      "sha256": "f0c3f43ba9596ab5aa9563325858fbfa4f51944a445042579c7b208e3ba16303"
+    },
+    "scripts/required_go_tests.json": {
+      "unchanged": true,
+      "sha256": "145aee37b301d24c8f4ae6ba1ba6ac2175ef26a949905816b0a46cfefeaf864c"
+    },
+    ".github/workflows/company-p0.yml": {
+      "unchanged": true,
+      "sha256": "262362e17de63d7df2c2902ff06ea92480c04947c8f2cb4abd28661f59c61b8c"
+    },
+    "scripts/required_frontend_fixture_tests.json": {
+      "unchanged": true,
+      "sha256": "a82b234260078f18a0820d50876d22109474aa01344843e4fa3db2abfd41c895"
+    },
+    "scripts/preparation/r5_external_batch.py": {
+      "unchanged": true,
+      "sha256": "83ff36965120115c6365e40df0eef8da2df20eb33129faba81def89261cd5a12"
+    },
+    "scripts/preparation/r5_external_runtime.py": {
+      "unchanged": true,
+      "sha256": "524245ff11084f170d7cd3c41b51d28f7bcde101db3373d961f5c46f2503eb51"
+    },
+    "owner_function_body_unchanged": true,
+    "frontend_old_test_methods": {
+      "before": 10,
+      "after": 11,
+      "missing": [],
+      "changed_old": [],
+      "added": [
+        "test_go_dispatch_keeps_exact_owner_selection_under_existing_fixture_tag"
+      ]
+    }
+  },
+  "selector_review": {
+    "original_fixture_files": 7,
+    "original_required_top_level_tests": 12,
+    "original_selector": "^TestR5Fixture",
+    "new_owner_selector": "^TestR5FrontendOwnedFixture$",
+    "disjoint": true,
+    "original_required_manifest_unchanged": true,
+    "new_owner_function_body_unchanged": true,
+    "init_or_testmain_added": false,
+    "actual_go_list_author_receipt": "/workspace/scratch/c5e5c3c93beb/release-frontend-input-fix/focused-checks.json",
+    "author_go_list_exit_code": 0,
+    "author_go_list_original_top_levels": 12,
+    "author_go_list_new_owner_top_levels": 1,
+    "boundary": "Go compilation/listing verifies discovery and selection, not PG or frontend execution. No extra full Go compilation was rerun by the independent reviewer."
+  },
+  "conditional_and_input_boundary": {
+    "unknown_tag_and_context_still_rejected": [
+      "r5frontendfixture",
+      "unregistered_fixture_input"
+    ],
+    "inventory_tags_and_v2_v3_v4_policy_bytes_unchanged": true,
+    "actual_archive_superset_runtime_inputs_checked": 19,
+    "all_migration_sql_files_checked": true,
+    "omitted_manifest_input_rejected": true,
+    "independent_source_validation": {
+      "reviewed_git_head": "fec134b3422b1ab44a311dca10d802d4aeb6984c",
+      "reviewed_git_tree": "6ff0a4fca8116e1f4955e443f03007f7bf83c7bc",
+      "tracked_and_untracked_status": "",
+      "manifest_path": "/workspace/scratch/c5e5c3c93beb/release-frontend-input-fix/protocol-source/source-manifest.json",
+      "manifest_sha256": "1051c0e93cd388065d8f8cf2adf1bdf53e470b98598b90f5a36706bef0c227b3",
+      "manifest_pin_matches": true,
+      "source_identity_kind": "policy_bound_local_input_superset_archive_boundary_sha1_v4",
+      "source_fingerprint": "51a1d5709fc442db4a1f7dbc8f884e5f4d0d4410",
+      "source_fingerprint_is_not_a_git_commit": true,
+      "files": 1505,
+      "owner_file_sha256": "16e51840e4deb646c08300f849e98a7c282ca8862146c316253945781c6b7c52",
+      "independently_revalidated": true,
+      "boundary": "Original v4 directory superset producer/validator only. This does not run shared-db or attest Go-selected inputs, external module/toolchain bytes or PG/frontend runtime.",
+      "validation_return_matches_supplied_manifest": true
+    },
+    "historical_evidence_paths_modified": false
+  },
+  "author_actual_source_preparation_review": {
+    "summary_path": "/workspace/scratch/c5e5c3c93beb/release-frontend-input-fix/source-version-preparation-summary.json",
+    "summary_sha256": "dd6972059ad96ed71b272650ed59e825cdf7ab5099a5356b68fce77cf65e7acb",
+    "receipt_path": "/workspace/scratch/c5e5c3c93beb/release-frontend-input-fix/source-version-preparation/preparation.json",
+    "receipt_sha256": "18ebee358dad10c0698c3d2ee18cfd9616e7f4567f749afaeb05c2595719b6c9",
+    "source_sha": "fec134b3422b1ab44a311dca10d802d4aeb6984c",
+    "go_version": "go1.25.7",
+    "go_selection_unchanged": true,
+    "run_exit_code": 0,
+    "execution_binding": "linux_parent_proc_fd_pinned_inode",
+    "terminal_events": [
+      {
+        "Time": "2026-10-12T00:38:21.827617006-07:00",
+        "Action": "run",
+        "Package": "tabmail/internal/api/handlers",
+        "Test": "TestOrdinaryReceiptOpenAPIWireFixtures"
+      },
+      {
+        "Time": "2026-10-12T00:38:21.82829711-07:00",
+        "Action": "pass",
+        "Package": "tabmail/internal/api/handlers",
+        "Test": "TestOrdinaryReceiptOpenAPIWireFixtures",
+        "Elapsed": 0
+      },
+      {
+        "Time": "2026-10-12T00:38:21.828439484-07:00",
+        "Action": "pass",
+        "Package": "tabmail/internal/api/handlers",
+        "Elapsed": 0.007
+      }
+    ],
+    "verified_raw_file_hashes": {
+      "ordinary-receipt-wire.json": {
+        "sha256": "9fdd0d734a549733a89fb9cb5f85035a137e9c5ff452276363579cf65b0950f3",
+        "matches_preparation_receipt": true
+      },
+      "ordinary-receipt.test": {
+        "sha256": "ffa997bcc5940c7b7c6cfe37cae84c4692d7a1e4555e874d7f5fca3ef46b6b5b",
+        "matches_preparation_receipt": true
+      },
+      "run.stdout": {
+        "sha256": "321e6f32f4615ec37dc753001471aa1a3812937a840e484a68c6be384b478e7b",
+        "matches_preparation_receipt": true
+      },
+      "run.stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "matches_preparation_receipt": true
+      }
+    },
+    "boundary": "Original preparation generated and ran the pinned typed-wire binary for TestOrdinaryReceiptOpenAPIWireFixtures only. The complete source-version test groups, shared-db protocol, and frontend suite were not executed by this preparation."
+  },
+  "limits": {
+    "frontend_on_reviewed_head_executed": false,
+    "postgres_on_reviewed_head_executed": false,
+    "shared_db_pe05_on_reviewed_head_executed": false,
+    "complete_source_version_groups_on_reviewed_head_executed": false,
+    "runtime_qualified": false,
+    "product_green": false,
+    "task_complete": false,
+    "prior_full_frontend_2196_result_head": "7524e650378487e8d32e70252cf1bd77010260b5",
+    "prior_full_frontend_result_inherited_to_reviewed_head": false,
+    "github_review_submitted": false,
+    "remote_mutations_by_reviewer": false
+  },
+  "original_todo_progress": {
+    "newly_closed_ids": [],
+    "newly_completed": 0,
+    "cumulative_newly_completed_this_execution": 0,
+    "total": 171,
+    "accepted": 10,
+    "remaining": 161
+  }
+}

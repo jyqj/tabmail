@@ -1,0 +1,17 @@
+{
+  "base": "af1444807e1018c95b963b8c5b74e2b2e5060b9a",
+  "files": {
+    "internal/store/postgres/company_http_test.go": {
+      "before_sha256": "8f21511bba2d3092e1cc98b6968e093d308462405e227c43763e71ce234a57be",
+      "after_sha256": "1d849b6b5f64035fc4b9ec41256471509528ac6e445a1bedd1cba341e4b0ef63"
+    },
+    "internal/store/postgres/company_safety_contracts_test.go": {
+      "before_sha256": "7cbc66e6a93d533a384bd4cef8bea9ff0a9636403ffe39b0b573e3a3831b4bef",
+      "after_sha256": "a35c7ed55e58c3656676f7699f3a3013921e091b4a42592dd0ed1b17b4c5b2df"
+    },
+    "internal/store/postgres/r5_protocol_shared_test.go": {
+      "before_sha256": "c3a961063e532cdf41957edbc85455dc2a142ad1d664741da43b07afab83e6b8",
+      "after_sha256": "7d17a2055b5282ce113a489615a804ba790e7abc0392336bc0d408afd0df0289"
+    }
+  }
+}
