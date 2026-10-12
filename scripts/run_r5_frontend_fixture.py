@@ -176,7 +176,7 @@ def run(output, source_sha, command=FRONTEND_COMMAND):
     env = dict(os.environ, TABMAIL_R5_FRONTEND_OUTPUT=str(output),
                TABMAIL_R5_FRONTEND_PYTHON=str(Path(sys.executable).resolve()))
     command = ['go', 'test', '-mod=readonly', '-json', '-race', '-count=1',
-               '-timeout=' + str(GO_TEST_SECONDS) + 's', '-tags=r5frontendfixture', '-run', '^' + TEST + '$',
+               '-timeout=' + str(GO_TEST_SECONDS) + 's', '-tags=r5fixtures', '-run', '^' + TEST + '$',
                './internal/testpg']
     result = run_owned(command, cwd=ROOT, env=env, seconds=OWNER_SECONDS)
     raw = result['stdout']

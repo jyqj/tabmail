@@ -105,6 +105,30 @@ class FrontendFixtureAdmissionTests(unittest.TestCase):
             self.assertFalse(result['source_unchanged'])
             self.assertIn('frontend source changed during execution', result['errors'])
 
+    def test_go_dispatch_keeps_exact_owner_selection_under_existing_fixture_tag(self):
+        package = 'tabmail/internal/testpg'
+        events = [dict(Action='start', Package=package),
+                  dict(Action='run', Package=package, Test=runner.TEST),
+                  dict(Action='pass', Package=package, Test=runner.TEST),
+                  dict(Action='pass', Package=package)]
+        raw = ('\n'.join(json.dumps(event) for event in events) + '\n').encode()
+        source = dict(head='a' * 40, tree='b' * 40, tracked_clean=True, tracked_diff_sha256='c' * 64)
+        execution = dict(stdout=raw, stderr=b'', exit_code=0, timeout=False, tail=False, processes_joined=True)
+        with tempfile.TemporaryDirectory() as temporary, \
+                patch.dict(os.environ, {'TABMAIL_TEST_DB_DSN': 'synthetic-control'}, clear=True), \
+                patch.object(runner, 'source_state', return_value=source), \
+                patch.object(runner, 'run_owned', return_value=execution) as dispatch, redirect_stdout(io.StringIO()):
+            output = Path(temporary)
+            runner.write_json(output / 'frontend-result.json', {'status': 'pass'})
+            runner.write_json(output / 'frontend-vitest.json', report())
+            (output / 'vitest.exit').write_text('0\n')
+            self.assertEqual(runner.run(output, source['head']), 0)
+            self.assertEqual(dispatch.call_args.args[0], [
+                'go', 'test', '-mod=readonly', '-json', '-race', '-count=1',
+                '-timeout=360s', '-tags=r5fixtures', '-run', '^TestR5FrontendOwnedFixture$',
+                './internal/testpg'])
+            self.assertEqual(dispatch.call_args.kwargs['seconds'], 390)
+
     def test_original_go_checker_rejects_empty_skipped_and_nonzero_owner(self):
         required, allowed = runner.evidence.load_suite(runner.SUITE, 'frontend-owned-fixture')
         self.assertFalse(allowed)

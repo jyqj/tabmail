@@ -1,4 +1,4 @@
-//go:build r5frontendfixture
+//go:build r5fixtures
 
 package testpg_test
 
@@ -17,6 +17,9 @@ import (
 
 // This owner supplies one real fixture to the complete default frontend suite.
 // It does not qualify the separate eight-owner external batch or its catalog.
+// r5fixtures is the existing explicit PG/HTTP fixture compilation context.
+// The supervisor selects this exact test; the original ^TestR5Fixture suite
+// retains its separate twelve required top-level tests.
 func TestR5FrontendOwnedFixture(t *testing.T) {
 	if os.Getenv("TABMAIL_TEST_DB_DSN") == "" {
 		t.Fatal("explicit disposable PostgreSQL DSN required")
