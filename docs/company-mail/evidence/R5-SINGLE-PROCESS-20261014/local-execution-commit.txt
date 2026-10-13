@@ -1,0 +1,6 @@
+tree c7aa5f16e57f423407a5e73f56898442807cd9f1
+parent 68fb19f235d2f13c01732a29da8db2b35f6b9be5
+author 金亦求金 <jyj20040616@gmail.com> 1791914824 +0800
+committer 金亦求金 <jyj20040616@gmail.com> 1791914824 +0800
+
+test(postgres): preserve internal-package fixture isolation
