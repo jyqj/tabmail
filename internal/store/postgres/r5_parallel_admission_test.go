@@ -17,11 +17,6 @@ func r5ParallelFreshDBAllowed(name string) bool {
 		"TestR5AccessExplanationOrdersPermissionChanges",
 		"TestR5AccessExplanationPreservesCanonicalDecisions",
 		"TestR5AccessExplanationWaitsForTargetWrites",
-		"TestR5ActivationErrorsPostgresCancellationDuringInsertWait",
-		"TestR5ActivationErrorsPostgresInsertFailures",
-		"TestR5ActivationErrorsPostgresLateAuditUniqueIsInternal",
-		"TestR5ActivationErrorsPostgresRelatedUniqueConflicts",
-		"TestR5ActivationErrorsPostgresSuccessfulActivation",
 		"TestR5ActivationExpiryAfterRealWaitRollsBack",
 		"TestR5AtomicRetryAuditWaitExpiryAndCancellation",
 		"TestR5AtomicRetryKeyExpiryDuringJobWait",
@@ -66,7 +61,6 @@ func r5ParallelFreshDBAllowed(name string) bool {
 		"TestR5SentMutationRollsBackExpiryDuringAuditWait",
 		"TestR5SentReadUsesTimeAfterIdentityWait",
 		"TestR5SentRecipientSnapshotRejectsDeadlineAfterMailboxWait",
-		"TestR5WebhookClaimCompletionChecksLeaseAfterRowWait",
 		"TestR5WebhookFanoutCompleteCommandsURLLockOrder":
 		return true
 	default:
@@ -117,11 +111,6 @@ func TestR5PGAdmissionExactWhitelist(t *testing.T) {
 		"TestR5AccessExplanationOrdersPermissionChanges",
 		"TestR5AccessExplanationPreservesCanonicalDecisions",
 		"TestR5AccessExplanationWaitsForTargetWrites",
-		"TestR5ActivationErrorsPostgresCancellationDuringInsertWait",
-		"TestR5ActivationErrorsPostgresInsertFailures",
-		"TestR5ActivationErrorsPostgresLateAuditUniqueIsInternal",
-		"TestR5ActivationErrorsPostgresRelatedUniqueConflicts",
-		"TestR5ActivationErrorsPostgresSuccessfulActivation",
 		"TestR5ActivationExpiryAfterRealWaitRollsBack",
 		"TestR5AtomicRetryAuditWaitExpiryAndCancellation",
 		"TestR5AtomicRetryKeyExpiryDuringJobWait",
@@ -166,7 +155,6 @@ func TestR5PGAdmissionExactWhitelist(t *testing.T) {
 		"TestR5SentMutationRollsBackExpiryDuringAuditWait",
 		"TestR5SentReadUsesTimeAfterIdentityWait",
 		"TestR5SentRecipientSnapshotRejectsDeadlineAfterMailboxWait",
-		"TestR5WebhookClaimCompletionChecksLeaseAfterRowWait",
 		"TestR5WebhookFanoutCompleteCommandsURLLockOrder",
 	} {
 		if !r5ParallelFreshDBAllowed(name) {

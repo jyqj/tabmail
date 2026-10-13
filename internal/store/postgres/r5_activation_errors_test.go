@@ -163,7 +163,6 @@ func r5ActivationErrorsFault(t *testing.T, s *r5ActivationErrorsFixture, stage, 
 }
 
 func TestR5ActivationErrorsPostgresInsertFailures(t *testing.T) {
-	r5ParallelFreshDB(t)
 	for _, stage := range []string{"users", "mailboxes"} {
 		t.Run(stage, func(t *testing.T) {
 			for _, mode := range []string{"check", "foreign_key", "primary_key", "other_stage_unique", "serialization_diagnostic", "lock_diagnostic", "deadlock_diagnostic"} {
@@ -191,7 +190,6 @@ func TestR5ActivationErrorsPostgresInsertFailures(t *testing.T) {
 }
 
 func TestR5ActivationErrorsPostgresRelatedUniqueConflicts(t *testing.T) {
-	r5ParallelFreshDB(t)
 	for _, stage := range []string{"users", "mailboxes"} {
 		t.Run(stage, func(t *testing.T) {
 			s := r5ActivationErrorsSeed(t)
@@ -219,7 +217,6 @@ func TestR5ActivationErrorsPostgresRelatedUniqueConflicts(t *testing.T) {
 }
 
 func TestR5ActivationErrorsPostgresCancellationDuringInsertWait(t *testing.T) {
-	r5ParallelFreshDB(t)
 	for _, stage := range []string{"users", "mailboxes"} {
 		t.Run(stage, func(t *testing.T) {
 			s := r5ActivationErrorsSeed(t)
@@ -253,7 +250,6 @@ func TestR5ActivationErrorsPostgresCancellationDuringInsertWait(t *testing.T) {
 }
 
 func TestR5ActivationErrorsPostgresLateAuditUniqueIsInternal(t *testing.T) {
-	r5ParallelFreshDB(t)
 	s := r5ActivationErrorsSeed(t)
 	_, err := s.f.pool.Exec(t.Context(), `CREATE FUNCTION r5_activation_audit_fault() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.action='employee.activate' THEN RAISE EXCEPTION 'private activation audit diagnostic' USING ERRCODE='23505', CONSTRAINT='idx_users_email'; END IF; RETURN NEW; END $$;
  CREATE TRIGGER r5_activation_audit_fault BEFORE INSERT ON audit_log FOR EACH ROW EXECUTE FUNCTION r5_activation_audit_fault()`)
@@ -271,7 +267,6 @@ func TestR5ActivationErrorsPostgresLateAuditUniqueIsInternal(t *testing.T) {
 }
 
 func TestR5ActivationErrorsPostgresSuccessfulActivation(t *testing.T) {
-	r5ParallelFreshDB(t)
 	s := r5ActivationErrorsSeed(t)
 	r5ActivationErrorsHTTP(t, s, http.StatusOK, `"activated":true`)
 	u, err := s.f.st.GetUserByEmail(t.Context(), s.invite.Email)

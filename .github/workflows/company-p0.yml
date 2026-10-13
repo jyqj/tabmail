@@ -243,7 +243,7 @@ jobs:
           TABMAIL_LF01_OWNED_PROBE: '1'
         run: |
           set -euo pipefail
-          PGDATABASE="$TABMAIL_TEST_DB_DSN" psql -Atc "SELECT name||'='||setting FROM pg_settings WHERE name IN ('fsync','synchronous_commit','full_page_writes') ORDER BY name" > backend-pg-settings.txt
+          psql --dbname="$TABMAIL_TEST_DB_DSN" -Atc "SELECT name||'='||setting FROM pg_settings WHERE name IN ('fsync','synchronous_commit','full_page_writes') ORDER BY name" > backend-pg-settings.txt
           python3 -c 'from pathlib import Path; assert Path("backend-pg-settings.txt").read_text().splitlines() == ["fsync=on", "full_page_writes=on", "synchronous_commit=on"]'
           python3 -B -m unittest discover -s tools/ci -p 'test_*.py' -v
           python3 -B tools/ci/backend_single.py \

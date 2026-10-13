@@ -223,7 +223,6 @@ func TestR5WebhookClaimCompletionPreservesCancellationAndDatabaseFailure(t *test
 }
 
 func TestR5WebhookClaimCompletionChecksLeaseAfterRowWait(t *testing.T) {
-	r5ParallelFreshDB(t)
 	st, pool, _ := testpg.NewPostgres(t)
 	for _, tc := range r5QueueCompletionCases {
 		t.Run(tc.name, func(t *testing.T) {
