@@ -2,10 +2,10 @@
   "revision": 20,
   "base_commit": "c056f28b0c811a87a95ddc8c3f7e9ff3f7a338a7",
   "base_tree": "0a46bee4a7b3271233b76983b10ea8a0378d8ee5",
-  "source_commit": "67861f5c2da6441d797a8f0c2dc4db4e7dc82a58",
-  "source_tree": "256027278290213b1822831adca6bed420cd1617",
+  "source_commit": "f66a6b455407ff77f155524d7e426eaf8aa4f534",
+  "source_tree": "6c0dd851e9288e47f133e9ed27d78776e161687f",
   "previous_catalog_sha256": "25bb0f0cd3d9294171b4ec8719220399e13798d0d5aaced9995d620d1831f4b0",
-  "current_catalog_sha256": "5cda36ee719c97edce7e37aeb881517f5dcfd49a1ebf2a1d1e7d856f03e40f92",
+  "current_catalog_sha256": "1f943b0021acc54504c33e716f58272e8c81b3cdf0bfcebe7ecc0be745c553df",
   "transaction_callers": [
     {
       "id": "internal/store/postgres/postgres.go:*PgStore:Close",
@@ -5524,7 +5524,7 @@
     {
       "path": "internal/store/postgres/lf01_selector_regression_test.go",
       "deleted": false,
-      "sha256": "5438df847727cf0bfeb407049b76f3bdc417791177d46db2b52b8bd6de95516e"
+      "sha256": "63f3968598b7706323d8b3ce674adc05c001f52c69032037a3a44a9c11cd62bc"
     },
     {
       "path": "internal/store/postgres/mailbox_predicate_test.go",
@@ -5535,6 +5535,16 @@
       "path": "internal/store/postgres/message_user_state_test.go",
       "deleted": false,
       "sha256": "1bbbe5220e6579d32e450366dbd81c51b2b14098052d2220b4c72f0c57eb543f"
+    },
+    {
+      "path": "internal/store/postgres/offboarding_successor_authz_test.go",
+      "deleted": false,
+      "sha256": "34af2d977308b962dddaf4d754ce8cd983a6d76fc757f5966c7ca81c3b2e1ef3"
+    },
+    {
+      "path": "internal/store/postgres/pair_independent_review_test.go",
+      "deleted": false,
+      "sha256": "f83ed93eafcc5b380d0d49cceeac552a93e00369178cbf04aa919fd9d95e91bf"
     },
     {
       "path": "internal/store/postgres/r5_access_explanation_snapshot_test.go",
@@ -5649,7 +5659,7 @@
     {
       "path": "internal/store/postgres/r5_parallel_admission_test.go",
       "deleted": false,
-      "sha256": "9c1ddd129d8319e6ca637d453dc0c42ac0bf73f36901848d2df765a132938c70"
+      "sha256": "eb24eb44206b151372d5015926e26277b14b0a8ac59c6ab92f78b3821b3d9a15"
     },
     {
       "path": "internal/store/postgres/r5_password_parent_test.go",
