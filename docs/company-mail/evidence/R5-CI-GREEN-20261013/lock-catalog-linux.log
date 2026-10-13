@@ -1,0 +1,14 @@
+test_exact_reviewed_alias_preserves_typescript_and_other_versions (test_r5_reviewed_web_locks.BracesSecurityPatchLockTests.test_exact_reviewed_alias_preserves_typescript_and_other_versions) ... ok
+test_all_existing_preparation_functions_and_original_assertions_are_preserved (test_r5_reviewed_web_locks.NextSecurityPatchLockTests.test_all_existing_preparation_functions_and_original_assertions_are_preserved) ... ok
+test_exact_new_complete_lock_passes_original_preparation_boundary (test_r5_reviewed_web_locks.NextSecurityPatchLockTests.test_exact_new_complete_lock_passes_original_preparation_boundary) ... ok
+test_new_lock_mutations_reject_before_archive_or_filesystem_changes (test_r5_reviewed_web_locks.NextSecurityPatchLockTests.test_new_lock_mutations_reject_before_archive_or_filesystem_changes) ... ok
+test_only_reviewed_direct_pair_and_matching_release_packages_change (test_r5_reviewed_web_locks.NextSecurityPatchLockTests.test_only_reviewed_direct_pair_and_matching_release_packages_change) ... ok
+test_previous_and_updated_complete_locks_report_their_actual_hash (test_r5_reviewed_web_locks.ReviewedWebLockTests.test_previous_and_updated_complete_locks_report_their_actual_hash) ... ok
+test_unreviewed_lock_bytes_reject_before_archive_or_filesystem_changes (test_r5_reviewed_web_locks.ReviewedWebLockTests.test_unreviewed_lock_bytes_reject_before_archive_or_filesystem_changes) ... ok
+test_update_preserves_direct_requirements_and_typescript_identity (test_r5_reviewed_web_locks.ReviewedWebLockTests.test_update_preserves_direct_requirements_and_typescript_identity) ... ok
+test_revision19_preserves_public_history_collectors_and_original_rejections (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision19_preserves_public_history_collectors_and_original_rejections) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 8.976s
+
+OK

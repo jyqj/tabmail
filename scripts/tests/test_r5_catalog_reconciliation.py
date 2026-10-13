@@ -14148,6 +14148,13 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                 approved = git('show', approved_commit + ':' + path)
                 self.assertEqual(hashlib.sha256(approved).hexdigest(), approved_boundary_delta[path])
                 self.assertEqual((ROOT / path).read_bytes(), approved)
+            elif path in {'scripts/r5_source_runner_prepare.py': ('adfefe0263ca220b2494b433e2ae9ff86a9e352b', 'af1f050d6284217efe30aca1bd6b32458d1b9df14744aaaf2e8302be7188c86c'), 'scripts/tests/test_r5_reviewed_web_locks.py': ('085ae957661b83df9ecc223e516058c7d924a8b3', '459b68bd0023dbfc57022a13b3b7893c5b9d90c683ef3340d8dc3c8b840ffbe2')}:
+                # Exact reviewed lock-admission delta, not a live hash refresh.
+                pin = {'scripts/r5_source_runner_prepare.py': ('adfefe0263ca220b2494b433e2ae9ff86a9e352b', 'af1f050d6284217efe30aca1bd6b32458d1b9df14744aaaf2e8302be7188c86c'), 'scripts/tests/test_r5_reviewed_web_locks.py': ('085ae957661b83df9ecc223e516058c7d924a8b3', '459b68bd0023dbfc57022a13b3b7893c5b9d90c683ef3340d8dc3c8b840ffbe2')}[path]
+                self.assertEqual(raw, git('show', '0caf139ff8aaf4243cd12fdc9b1fc702f632e5c0:' + path))
+                approved = git('cat-file', 'blob', pin[0])
+                self.assertEqual(hashlib.sha256(approved).hexdigest(), pin[1])
+                self.assertEqual((ROOT / path).read_bytes(), approved)
             else:
                 self.assertEqual((ROOT / path).read_bytes(), raw)
             protected.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
