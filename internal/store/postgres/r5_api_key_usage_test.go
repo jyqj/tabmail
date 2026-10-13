@@ -234,7 +234,6 @@ func r5UsageExpect(t *testing.T, st *PgStore, key uuid.UUID, at time.Time, ip st
 }
 
 func TestR5APIKeyUsageCreateAtomicAndMissing(t *testing.T) {
-	r5ParallelFreshDB(t)
 	for _, mode := range []string{"create_usage_failure_rolls_back_authority", "missing_usage_is_not_recreated", "touch_never_locks_authority"} {
 		t.Run(mode, func(t *testing.T) {
 			f, st, k := r5UsageSeed(t)
@@ -291,7 +290,6 @@ CREATE TRIGGER r5_usage_reject BEFORE INSERT ON tenant_api_key_usage FOR EACH RO
 }
 
 func TestR5APIKeyUsageObservationPairOrder(t *testing.T) {
-	r5ParallelFreshDB(t)
 	f, st, key := r5UsageSeed(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -327,7 +325,6 @@ func TestR5APIKeyUsageObservationPairOrder(t *testing.T) {
 }
 
 func TestR5APIKeyUsageTwoPoolsLateObservation(t *testing.T) {
-	r5ParallelFreshDB(t)
 	f, newer, key := r5UsageSeed(t)
 	older := f.open(t, "r5_usage_delayed")
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -357,7 +354,6 @@ CREATE TRIGGER r5_usage_delay BEFORE UPDATE ON tenant_api_key_usage FOR EACH STA
 }
 
 func TestR5APIKeyUsageDeleteRaces(t *testing.T) {
-	r5ParallelFreshDB(t)
 	for _, first := range []string{"usage_update_first", "authority_delete_first"} {
 		t.Run(first, func(t *testing.T) {
 			f, st, key := r5UsageSeed(t)
@@ -405,7 +401,6 @@ CREATE TRIGGER r5_usage_hold AFTER UPDATE ON tenant_api_key_usage FOR EACH ROW E
 }
 
 func TestR5APIKeyUsageMigration19(t *testing.T) {
-	r5ParallelFreshDB(t)
 	for _, mode := range []string{"fresh19", "exact18_upgrade_backfill"} {
 		t.Run(mode, func(t *testing.T) {
 			f := r5UsageEmptyDB(t)
