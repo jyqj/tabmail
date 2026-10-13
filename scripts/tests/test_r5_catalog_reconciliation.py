@@ -14134,7 +14134,22 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                 continue
             ref = SOURCE_COMMIT + ':' + path
             raw = git('show', ref)
-            self.assertEqual((ROOT / path).read_bytes(), raw)
+            # PR #261 changed only directory identity binding and its two
+            # adversarial tests. Keep the revision19 manifest historical, but
+            # bind live bytes to that exact reviewed child, never an allowlist
+            # of arbitrary future edits or a hash regenerated from live input.
+            approved_boundary_delta = {
+                'scripts/r5_archive_boundary.py': '6bc97ea325ff7086f43fc76f7b12a5b6c6790c594bad901172e808a5ee3b2191',
+                'scripts/tests/test_r5_archive_boundary.py': '4630cf8b28021fc601abbb6adc51bcfb517e117128ef36257b5a5998b745056d',
+            }
+            if path in approved_boundary_delta:
+                approved_commit = '5128fc9dbe80fc1fd61c5bcc0bb5aeb3cc83b99b'
+                self.assertEqual(git('show', approved_commit + '^:' + path), raw)
+                approved = git('show', approved_commit + ':' + path)
+                self.assertEqual(hashlib.sha256(approved).hexdigest(), approved_boundary_delta[path])
+                self.assertEqual((ROOT / path).read_bytes(), approved)
+            else:
+                self.assertEqual((ROOT / path).read_bytes(), raw)
             protected.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
                                   sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
         for path, pin in sorted(additions.items()):
