@@ -7,14 +7,17 @@ test in another package. Each raw process log is validated separately. Never
 concatenate multiple process lifecycles into a purported single invocation.
 """
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 import hashlib
 import json
 import os
 from pathlib import Path
 import re
 import signal
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -25,7 +28,35 @@ TOP = re.compile(r'(?:Test|Example|Fuzz)[A-Za-z0-9_]*\Z')
 SHARDS = 16
 WORKERS = 4
 PROCESS_SECONDS = 180
-TOTAL_SECONDS = 720
+TOTAL_SECONDS = 660  # Leave 60 seconds before the 12-minute step timeout for cleanup.
+
+
+@contextmanager
+def owned_ui_dependencies(output, deadline):
+    """Give real PG/UI probes dependencies without traversable Go npm sources.
+
+    A source-local npm install contains flatted's unrelated Go package. Keep
+    dependencies in a private external directory, expose only a temporary
+    node_modules symlink, and remove exactly our link before later source gates.
+    """
+    link = ROOT / 'web/node_modules'
+    if link.exists() or link.is_symlink():
+        raise ValueError('backend UI preparation requires absent node_modules')
+    with tempfile.TemporaryDirectory(prefix='tabmail-backend-ui-', dir=os.environ.get('RUNNER_TEMP')) as temp:
+        directory = Path(temp)
+        for name in ('package.json', 'package-lock.json'):
+            shutil.copyfile(ROOT / 'web' / name, directory / name)
+        installed = run(['npm', 'ci'], output / 'npm-ci', deadline, cwd=directory, suffix='.log')
+        if installed['exit_code'] or installed['timeout']:
+            raise ValueError('owned backend UI dependency installation failed')
+        target = directory / 'node_modules'
+        link.symlink_to(target, target_is_directory=True)
+        try:
+            yield
+        finally:
+            if not link.is_symlink() or Path(os.readlink(link)) != target:
+                raise ValueError('owned node_modules link was replaced')
+            link.unlink()
 
 
 def discover(lines, expected_packages):
@@ -71,7 +102,7 @@ def partition(tests, count=SHARDS):
 
 
 def validate(lines, planned, allowed, exit_code):
-    report = evaluate(lines, planned, allowed, exit_code)
+    report = evaluate(lines, planned - set(allowed), allowed, exit_code)
     actual = []
     for line in lines:
         event = json.loads(line, object_pairs_hook=unique_object)
@@ -86,13 +117,13 @@ def validate(lines, planned, allowed, exit_code):
     return report
 
 
-def run(argv, prefix, deadline):
+def run(argv, prefix, deadline, *, cwd=ROOT, suffix='.jsonl'):
     started = time.monotonic()
     remaining = deadline - started
     if remaining <= 0:
         raise TimeoutError('backend total lifecycle budget exhausted')
-    with prefix.with_suffix('.jsonl').open('wb') as stdout, prefix.with_suffix('.stderr').open('wb') as stderr:
-        child = subprocess.Popen(argv, cwd=ROOT, stdout=stdout, stderr=stderr, start_new_session=True)
+    with prefix.with_suffix(suffix).open('wb') as stdout, prefix.with_suffix('.stderr').open('wb') as stderr:
+        child = subprocess.Popen(argv, cwd=cwd, stdout=stdout, stderr=stderr, start_new_session=True)
         timed_out = False
         try:
             child.wait(timeout=min(PROCESS_SECONDS + 15, remaining))
@@ -123,6 +154,14 @@ def main():
     output = args.output_dir.resolve()
     output.mkdir(parents=True, exist_ok=False)
     deadline = time.monotonic() + TOTAL_SECONDS
+    for flag in ('TABMAIL_PAIR_REVIEW', 'TABMAIL_SUCCESSOR_AUTHZ_OWNED', 'TABMAIL_LF01_OWNED_PROBE'):
+        if os.environ.get(flag) != '1':
+            raise ValueError('explicit owned PG/UI probe flag required: ' + flag)
+    with owned_ui_dependencies(output, deadline):
+        return execute_suite(args, output, deadline)
+
+
+def execute_suite(args, output, deadline):
     required, allowed = load_suite(ROOT / 'scripts/required_go_tests.json', 'backend')
     # Package enumeration is independent of the executable test listing.
     packages = set(subprocess.check_output(['go', 'list', './...'], cwd=ROOT, text=True, timeout=180).splitlines())
@@ -160,6 +199,8 @@ def main():
     passed = all(report['status'] == 'pass' for report in reports)
     passed = passed and len(seen) == len(set(seen)) and set(seen) == planned
     source_unchanged = not subprocess.check_output(['git', 'diff', 'HEAD', '--'], cwd=ROOT)
+    source_unchanged = source_unchanged and subprocess.check_output(
+        ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip() == args.source_sha
     passed = passed and source_unchanged
     result = dict(status='pass' if passed else 'fail', mode='independent_bounded_shards', source_sha=args.source_sha,
         source_unchanged=source_unchanged, discovered_top_level_tests=len(planned), actual_top_level_tests=len(seen),

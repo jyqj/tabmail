@@ -37,3 +37,29 @@ count=1、原 mandatory/skip 规则，逐份调用原证据检查器，并验证
 
 本目录保留 npm 原审计和制品匹配记录。完整 CI 仍需精确最终源码实际执行。
 旧失败不被本地专项成功抵销；目录、依赖和测试设施修复不关闭原父任务。
+
+## PG 全覆盖实测与正式接线候选
+
+Linux ARM64 / Go 1.25.7 / PostgreSQL 16 独立临时集群，源
+`ce971c3412776200a733ad705f73483055c800e0`：发现并执行 1478 个顶层测试，
+247 个 mandatory 全通过，11927 个唯一叶通过。唯一 skip 是原清单明确允许、
+在独立 browser-journey job 执行的 `TestR3BrowserJourney`，未新增允许项。
+原 v2 汇总器把这个既有允许项误列入动态必过集合而失败；原日志和失败保留，
+修正为计划集合扣除原 allowed 集合后，对同一原始日志重新检查为 16/16 分片通过。
+这是对该源原始执行的后验检查，不冒充最终接线源码已经重跑通过。
+
+首次全覆盖发现两个旧夹具问题：refresh 已使用无别名的完整 userSelect，原观察器
+仍搜索 `FOR SHARE OF u`；restore 夹具使用已过期 purge_after，当前契约应拒绝。
+修复只调整查询观察器、restore-first 的有效期限和显式扫描 cutoff，保留真实等待、
+源/索引/原件/计数/审计/回执断言，且不清除原 expires_at。相关 28 个叶全部通过。
+
+完整 PG 现在显式启用原 owned 离职/交接探针，并使用其要求的独立 loopback
+55447 端口。UI 依赖正常 npm ci 到私有外部目录，临时链接后精确清理；避免
+node_modules 中 flatted 的无关 Go 文件混入 ./...，不删除依赖文件或过滤 Go 包。
+候选 workflow 保持 4 jobs、backend 20 分钟、每个 Go 进程 180 秒和原全部门禁。
+分片共用 660 秒内部预算并预留 60 秒清理，单独上传每次调用的原始日志与计划；
+不把多进程日志拼成一次调用。原证据检查器、mandatory 清单和 skip 清单没有修改。
+
+新增覆盖控制 8 项及 workflow/原制品边界控制 12 项通过。精确修复后完整 CI
+仍需等待，不据本段合入 main。前一个公开源 `0d584522` 的 frontend、production-web、
+browser-journey 与 catalog 已成功，backend 仍保留原全包 race 失败。

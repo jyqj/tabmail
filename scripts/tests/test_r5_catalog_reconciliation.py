@@ -17,6 +17,40 @@ import r5_go_environment
 import check_r5_compatibility as gate
 
 ROOT = Path(__file__).resolve().parents[2]
+# Exact CI deltas reviewed on 2026-10-13. Historical revision19 manifests stay
+# immutable; these pins authorize no other byte changes or runtime acceptance.
+CI_REVIEWED_DELTAS = {'.github/workflows/company-p0.yml': {'before_commit': '0d58452206048a08c9d8d7137804762faf4d68ef',
+                                      'blob': '0e15ae697741884b55d28384c66a25ab8f2623da',
+                                      'sha256': 'bd2ed324e1995d42a2a176d2fdce2b582ae6238f9ae045d4e2aed1bc6b3f535b'},
+ 'scripts/r5_archive_boundary.py': {'before_commit': 'b50831c2de9c6ac6d825e0d64d8637aab3854487',
+                                    'blob': '5d047afa2b307979e9a175ebfb5c8302545dcaba',
+                                    'sha256': '6bc97ea325ff7086f43fc76f7b12a5b6c6790c594bad901172e808a5ee3b2191'},
+ 'scripts/r5_source_runner_prepare.py': {'before_commit': '0caf139ff8aaf4243cd12fdc9b1fc702f632e5c0',
+                                         'blob': 'adfefe0263ca220b2494b433e2ae9ff86a9e352b',
+                                         'sha256': 'af1f050d6284217efe30aca1bd6b32458d1b9df14744aaaf2e8302be7188c86c'},
+ 'scripts/tests/test_r5_archive_boundary.py': {'before_commit': 'b50831c2de9c6ac6d825e0d64d8637aab3854487',
+                                               'blob': 'befec07b7b20b8287a3c3a1fe223f93d4008dbc0',
+                                               'sha256': '4630cf8b28021fc601abbb6adc51bcfb517e117128ef36257b5a5998b745056d'},
+ 'scripts/tests/test_r5_backend_evidence_continuation.py': {'before_commit': '0d58452206048a08c9d8d7137804762faf4d68ef',
+                                                            'blob': 'f8f866a88a0335263e5d565fbb7dc37560060bcc',
+                                                            'sha256': 'c82875ebbac459d9d21b1b3719762835f16ab0309dd07412fd62442455576b9b'},
+ 'scripts/tests/test_r5_reviewed_web_locks.py': {'before_commit': '0caf139ff8aaf4243cd12fdc9b1fc702f632e5c0',
+                                                 'blob': '085ae957661b83df9ecc223e516058c7d924a8b3',
+                                                 'sha256': '459b68bd0023dbfc57022a13b3b7893c5b9d90c683ef3340d8dc3c8b840ffbe2'}}
+
+
+def reviewed_live_bytes(path, baseline):
+    pin = CI_REVIEWED_DELTAS.get(path)
+    if pin is None:
+        return baseline
+    if git('show', pin['before_commit'] + ':' + path) != baseline:
+        raise ValueError('reviewed CI delta does not descend from preserved source: ' + path)
+    approved = git('cat-file', 'blob', pin['blob'])
+    if hashlib.sha256(approved).hexdigest() != pin['sha256']:
+        raise ValueError('reviewed CI delta blob changed: ' + path)
+    return approved
+
+
 EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004'
 REVISION3_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007'
 REVISION4_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007'
@@ -14089,7 +14123,7 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                         self.assertEqual(git('rev-parse', ref).decode().strip(), row[prefix + '_blob'])
                         self.assertEqual(hashlib.sha256(raw).hexdigest(), row[prefix + '_sha256'])
                         self.assertEqual(len(raw), row[prefix + '_bytes'])
-                self.assertEqual((ROOT / row['path']).read_bytes(), git('show', SOURCE_COMMIT + ':' + row['path']))
+                self.assertEqual((ROOT / row['path']).read_bytes(), reviewed_live_bytes(row['path'], git('show', SOURCE_COMMIT + ':' + row['path'])))
         baseline = review['baseline_validation']
         self.assertEqual(baseline['source'], dict(commit=SOURCE_COMMIT, tree=SOURCE_TREE, status=''))
         self.assertEqual([(row['label'], row['exit_code']) for row in baseline['commands']], [('transactions', 1), ('compatibility', 1), ('clients', 0)])
@@ -14134,29 +14168,7 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                 continue
             ref = SOURCE_COMMIT + ':' + path
             raw = git('show', ref)
-            # PR #261 changed only directory identity binding and its two
-            # adversarial tests. Keep the revision19 manifest historical, but
-            # bind live bytes to that exact reviewed child, never an allowlist
-            # of arbitrary future edits or a hash regenerated from live input.
-            approved_boundary_delta = {
-                'scripts/r5_archive_boundary.py': '6bc97ea325ff7086f43fc76f7b12a5b6c6790c594bad901172e808a5ee3b2191',
-                'scripts/tests/test_r5_archive_boundary.py': '4630cf8b28021fc601abbb6adc51bcfb517e117128ef36257b5a5998b745056d',
-            }
-            if path in approved_boundary_delta:
-                approved_commit = '5128fc9dbe80fc1fd61c5bcc0bb5aeb3cc83b99b'
-                self.assertEqual(git('show', approved_commit + '^:' + path), raw)
-                approved = git('show', approved_commit + ':' + path)
-                self.assertEqual(hashlib.sha256(approved).hexdigest(), approved_boundary_delta[path])
-                self.assertEqual((ROOT / path).read_bytes(), approved)
-            elif path in {'scripts/r5_source_runner_prepare.py': ('adfefe0263ca220b2494b433e2ae9ff86a9e352b', 'af1f050d6284217efe30aca1bd6b32458d1b9df14744aaaf2e8302be7188c86c'), 'scripts/tests/test_r5_reviewed_web_locks.py': ('085ae957661b83df9ecc223e516058c7d924a8b3', '459b68bd0023dbfc57022a13b3b7893c5b9d90c683ef3340d8dc3c8b840ffbe2')}:
-                # Exact reviewed lock-admission delta, not a live hash refresh.
-                pin = {'scripts/r5_source_runner_prepare.py': ('adfefe0263ca220b2494b433e2ae9ff86a9e352b', 'af1f050d6284217efe30aca1bd6b32458d1b9df14744aaaf2e8302be7188c86c'), 'scripts/tests/test_r5_reviewed_web_locks.py': ('085ae957661b83df9ecc223e516058c7d924a8b3', '459b68bd0023dbfc57022a13b3b7893c5b9d90c683ef3340d8dc3c8b840ffbe2')}[path]
-                self.assertEqual(raw, git('show', '0caf139ff8aaf4243cd12fdc9b1fc702f632e5c0:' + path))
-                approved = git('cat-file', 'blob', pin[0])
-                self.assertEqual(hashlib.sha256(approved).hexdigest(), pin[1])
-                self.assertEqual((ROOT / path).read_bytes(), approved)
-            else:
-                self.assertEqual((ROOT / path).read_bytes(), raw)
+            self.assertEqual((ROOT / path).read_bytes(), reviewed_live_bytes(path, raw))
             protected.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
                                   sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
         for path, pin in sorted(additions.items()):

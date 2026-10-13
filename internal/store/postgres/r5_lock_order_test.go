@@ -153,7 +153,9 @@ func TestR5LockMapRefreshFamilyThenUserThenToken(t *testing.T) {
 		}
 		done <- err
 	}()
-	r5WaitBlockedBy(t, f, ctx, hold.Conn().PgConn().PID(), "FOR SHARE OF u")
+	// Rotation now selects the complete userSelect snapshot (without alias u).
+	// Still observe its real user SHARE wait before probing token/family locks.
+	r5WaitBlockedBy(t, f, ctx, hold.Conn().PgConn().PID(), "FROM refresh_tokens WHERE token_hash=$1) FOR SHARE")
 	probe, e := f.pool.Begin(ctx)
 	must(t, e)
 	defer probe.Rollback(context.Background())

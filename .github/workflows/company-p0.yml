@@ -23,14 +23,14 @@ jobs:
           POSTGRES_USER: tabmail_test
           POSTGRES_PASSWORD: disposable-test-password
           POSTGRES_DB: tabmail_test
-        ports: ['5432:5432']
+        ports: ['55447:5432']
         options: >-
           --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
           --health-interval 5s --health-timeout 5s --health-retries 12
     env:
       GOSUMDB: sum.golang.org
       GODEBUG: asynctimerchan=0
-      TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
+      TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@127.0.0.1:55447/tabmail_test?sslmode=disable
     steps:
       - uses: actions/checkout@v4
         id: backend_checkout
@@ -67,15 +67,16 @@ jobs:
         run: go build ./...
       - name: Race tests with PostgreSQL
         if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' && steps.backend_pg_client.outcome == 'success' }}
+        timeout-minutes: 12
+        env:
+          TABMAIL_PAIR_REVIEW: '1'
+          TABMAIL_SUCCESSOR_AUTHZ_OWNED: '1'
+          TABMAIL_LF01_OWNED_PROBE: '1'
         run: |
           set -euo pipefail
-          set +e
-          go test -json -race -count=1 -timeout=180s ./... | tee go-test.jsonl
-          test_exit=$?
-          set -e
-          python3 -B scripts/check_go_test_evidence.py --suite backend \
-            --log go-test.jsonl --exit-code "$test_exit" \
-            --source-sha "$(cat go-test-source-sha.txt)" | tee go-test-evidence.json
+          python3 -B -m unittest discover -s tools/ci -p 'test_*.py' -v
+          python3 -B tools/ci/backend_shards.py \
+            --source-sha "$(cat go-test-source-sha.txt)" --output-dir backend-shards
       - name: Template grant revocation with PostgreSQL
         id: backend_template_grant
         if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
@@ -177,6 +178,14 @@ jobs:
             !http-contract-evidence/responses.json
             protocol-baseline-evidence
             backend-typescript-preparation.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload independent backend shard evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-backend-shards
+          path: backend-shards
           if-no-files-found: error
           retention-days: 14
       - name: Upload protocol source manifest

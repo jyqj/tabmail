@@ -69,6 +69,11 @@ class CoverageTests(unittest.TestCase):
                      dict(Action='pass', Test='TestA'), dict(Action='pass'))
         self.assertEqual(validate(events, {('p', 'TestA')}, {}, 0)['status'], 'fail')
 
+    def test_only_an_original_explicit_skip_rule_can_allow_a_skip(self):
+        events = log(dict(Action='start'), dict(Action='run', Test='TestA'),
+                     dict(Action='skip', Test='TestA'), dict(Action='pass'))
+        self.assertEqual(validate(events, {('p', 'TestA')}, {('p', 'TestA'): 'existing rule'}, 0)['status'], 'pass')
+
 
 if __name__ == '__main__':
     unittest.main()
