@@ -28,6 +28,7 @@ func r5CacheParents(t *testing.T, f *companyFixture, ctx context.Context) {
 // Plain cache insertion intentionally does not need the audited-write parent
 // fence. The audited recovery command does, and must acquire it before actor.
 func TestR5CachePlainAndAuditedRecoveryParentClassification(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, audited := range []bool{false, true} {
 		name := "plain_cache"
 		if audited {
@@ -83,6 +84,7 @@ func TestR5CachePlainAndAuditedRecoveryParentClassification(t *testing.T) {
 // recursive tenant lock would form a real cycle here. Existing UPSERT is a
 // separate control; admin and member use their real authorization branches.
 func TestR5CacheWriteAndIngressDoNotAcquireAncestorFK(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, existing := range []bool{false, true} {
 		for _, admin := range []bool{false, true} {
 			name := "insert/member"
@@ -158,6 +160,7 @@ func TestR5CacheWriteAndIngressDoNotAcquireAncestorFK(t *testing.T) {
 // An SQL failure after cache authorization must not manufacture partial derived
 // data or audit/outbox effects; do not label this injected constraint as 40P01.
 func TestR5CacheConstraintFailureRollsBackDerivedWrite(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	_, d := r5IndexFixture(t, f, false)
 	ctx := context.Background()
@@ -332,6 +335,7 @@ func r5CacheDeleteWait(t *testing.T, f *companyFixture, ctx context.Context, tab
 // A cache call may read the old MVCC source, but must reject the busy source
 // with Conflict before the mailbox controller is released, not wait on its FK.
 func TestR5CacheBusySourceRejectsBeforePhysicalDeleteCounterRelease(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"single", "expired", "purge"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)

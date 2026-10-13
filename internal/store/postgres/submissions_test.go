@@ -63,6 +63,7 @@ func assertSubmissionReceiptDTO(t *testing.T, v company.Submission, private ...s
 }
 
 func TestSubmissionProjectionScopeAndDTO(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	employeeActor := authz.Actor{Type: authz.PrincipalUser, ID: f.employee.ID, TenantID: f.tenant.ID, Role: models.RoleUser}
@@ -175,6 +176,7 @@ func TestSubmissionProjectionScopeAndDTO(t *testing.T) {
 // Uncertainty must surface to the employee: a job stuck in an ambiguous SMTP
 // attempt maps to needs_attention, never to a clean terminal state.
 func TestSubmissionUncertaintyMapsToNeedsAttention(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	employeeActor := authz.Actor{Type: authz.PrincipalUser, ID: f.employee.ID, TenantID: f.tenant.ID, Role: models.RoleUser}

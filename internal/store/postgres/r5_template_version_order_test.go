@@ -16,6 +16,7 @@ import (
 // revoke takes T KEY SHARE before version/template. Opposite downstream names
 // are not evidence of a cycle: observe the real parent serialization first.
 func TestR5TemplatePublishRevokeCompleteCommandsParentOrder(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, first := range []string{"publish-first", "revoke-first"} {
 		t.Run(first, func(t *testing.T) {
 			f := seedCompany(t)
@@ -98,6 +99,7 @@ func TestR5TemplatePublishRevokeCompleteCommandsParentOrder(t *testing.T) {
 }
 
 func TestR5TemplateVersionRequiredAuditFailureRollsBack(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, operation := range []string{"publish", "revoke"} {
 		t.Run(operation, func(t *testing.T) {
 			f := seedCompany(t)
@@ -134,6 +136,7 @@ func TestR5TemplateVersionRequiredAuditFailureRollsBack(t *testing.T) {
 }
 
 func TestR5TemplateVersionAlreadyRevokedIsNoOp(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	tpl, v1 := r5VersionOrderFixture(t, f)
 	ctx := context.Background()

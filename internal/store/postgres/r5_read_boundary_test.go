@@ -41,6 +41,7 @@ func r5ReadFixture(t *testing.T, f *companyFixture) (*models.Message, *r5ReadObj
 	return m, o, companymail.NewService(f.st, o)
 }
 func TestR5ReadCachedContentRejectsNewRequestsAfterRevoke(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	m, o, svc := r5ReadFixture(t, f)
 	ctx := context.Background()
@@ -94,6 +95,7 @@ func TestR5ReadCachedContentRejectsNewRequestsAfterRevoke(t *testing.T) {
 	t.Log("existing cache/raw bytes retained; new requests denied before object access")
 }
 func TestR5ReadAdminAndWrongMailboxDoNotOpenObject(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	m, o, svc := r5ReadFixture(t, f)
 	ctx := context.Background()
@@ -113,6 +115,7 @@ func TestR5ReadAdminAndWrongMailboxDoNotOpenObject(t *testing.T) {
 	}
 }
 func TestR5ReadWaitingIdentityReloadRejectsFrozenActor(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	m, o, svc := r5ReadFixture(t, f)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)

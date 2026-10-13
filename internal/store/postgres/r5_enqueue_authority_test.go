@@ -143,6 +143,7 @@ func TestR5EnqueueRechecksAuthorityAfterParentWait(t *testing.T) {
 // only in this disposable database. A concurrent revoker either waits behind
 // this enqueue or commits first and forces a clean denial, never stale accept.
 func TestR5EnqueueProtectsAuthorityThroughInsert(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"profile", "override-insert", "key-scope", "mailbox-grant", "template-grant"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)
@@ -319,6 +320,7 @@ func TestR5EnqueueAuditWaitExpiryAndCancellation(t *testing.T) {
 }
 
 func TestR5EnqueueRequiredAuditFailureRollsBack(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	r5SnapshotProfile(t, f, true, false)
 	req, draft := r5EnqueueDraftRequest(t, f)
@@ -351,6 +353,7 @@ func TestR5EnqueueRequiredAuditFailureRollsBack(t *testing.T) {
 }
 
 func TestR5EnqueueAuthorizedIndependentSubmissionsShareParent(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	r5SnapshotProfile(t, f, true, false)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)

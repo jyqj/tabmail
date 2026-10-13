@@ -66,6 +66,7 @@ func newPolicyService(t *testing.T, f *companyFixture) *outbound.Service {
 // (tenant default 'free', mailbox override NULL) and that the store delivers
 // the COALESCE'd effective policy on every mailbox row.
 func TestSendPolicyDefaultsAndEffectiveResolution(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 
@@ -103,6 +104,7 @@ func TestSendPolicyDefaultsAndEffectiveResolution(t *testing.T) {
 // maps the refusal onto the MailboxSenderErr channel (WorkerFailure priority
 // unchanged, no worker-side code touched).
 func TestSendPolicyGatesEnqueuedJobAtNextAttempt(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	svc := newPolicyService(t, f)
@@ -152,6 +154,7 @@ func TestSendPolicyGatesEnqueuedJobAtNextAttempt(t *testing.T) {
 // granted send right too: the grant works under the 'free' default and is
 // refused outright once the tenant flips to 'disabled'.
 func TestSendPolicyBindsAdminGrant(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	svc := newPolicyService(t, f)
@@ -191,6 +194,7 @@ func TestSendPolicyBindsAdminGrant(t *testing.T) {
 // template_required refuses it at the next authorization, disabled refuses
 // outright — and every change lands in the audit log.
 func TestSendPolicyAdminCompanyDefaultLifecycle(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	svc := newPolicyService(t, f)
@@ -235,6 +239,7 @@ func TestSendPolicyAdminCompanyDefaultLifecycle(t *testing.T) {
 // override API: the override beats the company default, clearing it inherits
 // again, and the effective value reaches MailboxAccess views.
 func TestSendPolicyMailboxOverrideAdminLifecycle(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 
@@ -285,6 +290,7 @@ func TestSendPolicyMailboxOverrideAdminLifecycle(t *testing.T) {
 // TestSendPolicyAdminValidationAndGuards pins the admin-only and validation
 // boundaries of both new configuration paths.
 func TestSendPolicyAdminValidationAndGuards(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 
@@ -317,6 +323,7 @@ func TestSendPolicyAdminValidationAndGuards(t *testing.T) {
 // middleware plus in-transaction admin check both refuse an employee, an
 // invalid body is a 400, and the mailbox views carry the effective policy.
 func TestSendPolicyAdminHTTPJourney(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	obj := testutil.NewMemoryObjectStore()
 	svc := newPolicyService(t, f)

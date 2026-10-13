@@ -19,6 +19,7 @@ func archJob(t *testing.T, f *companyFixture, state models.OutboundState) *model
 	return j
 }
 func TestArchitectureSentAssetsOutliveQueueAndRemainPrivate(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	j := archJob(t, f, models.OutboundSent)
@@ -57,6 +58,7 @@ func TestArchitectureSentAssetsOutliveQueueAndRemainPrivate(t *testing.T) {
 	must(t, f.st.MutateArchivedMail(ctx, f.u, f.personal.ID, j.ID, 3, "restore"))
 }
 func TestArchitectureSentAssetCreationRollsBackWithJob(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	_, e := f.pool.Exec(ctx, `ALTER TABLE mailbox_event_log ADD CONSTRAINT reject_sent CHECK(event_type<>'sent.created')`)
@@ -72,6 +74,7 @@ func TestArchitectureSentAssetCreationRollsBackWithJob(t *testing.T) {
 	}
 }
 func TestArchitectureDraftCreationReplayAndTombstone(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	input := company.Draft{ID: uuid.New(), MailboxID: f.personal.ID, Payload: company.DraftPayload{Subject: "initial", TextBody: "keep"}}
@@ -93,6 +96,7 @@ func TestArchitectureDraftCreationReplayAndTombstone(t *testing.T) {
 	}
 }
 func TestArchitectureDraftAuthorizationBeforePagination(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	// A large newer set of inaccessible shared drafts must not hide the older
@@ -113,6 +117,7 @@ func TestArchitectureDraftAuthorizationBeforePagination(t *testing.T) {
 	}
 }
 func TestArchitectureOffboardingPreviewFencesChangesAndReplay(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	draft, e := f.st.SaveMailDraft(ctx, f.u, company.Draft{MailboxID: f.personal.ID, Payload: company.DraftPayload{Subject: "private draft"}})
@@ -158,6 +163,7 @@ func TestArchitectureOffboardingPreviewFencesChangesAndReplay(t *testing.T) {
 	}
 }
 func TestArchitectureOffboardingDispositionAndQueueEvidence(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"transfer_owned", "discard"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)
@@ -207,6 +213,7 @@ func TestArchitectureOffboardingDispositionAndQueueEvidence(t *testing.T) {
 	}
 }
 func TestArchitectureIndexLeaseSearchAndConversation(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	for i := 0; i < 2; i++ {
@@ -258,6 +265,7 @@ func TestArchitectureIndexLeaseSearchAndConversation(t *testing.T) {
 	}
 }
 func TestArchitectureOffboardingExpiryAndAuditRollback(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	p, e := f.st.PreviewOffboarding(ctx, f.a, f.employee.ID, f.other.ID, company.OffboardingOptions{Drafts: "seal"}, "Documented private asset preservation")

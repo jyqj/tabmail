@@ -130,6 +130,7 @@ func TestR5SentMutationRollsBackExpiryDuringAuditWait(t *testing.T) {
 }
 
 func TestR5SentMutationOrdersGrantRevocation(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
@@ -169,6 +170,7 @@ func TestR5SentMutationOrdersGrantRevocation(t *testing.T) {
 }
 
 func TestR5SentMutationCancellationAndAuditFailureRollBack(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range []string{"cancel", "audit"} {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -273,6 +275,7 @@ func TestR5SentReadUsesTimeAfterIdentityWait(t *testing.T) {
 }
 
 func TestR5ContentReadsFenceMailboxSnapshot(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, operation := range []string{"message", "parsed", "save-parsed"} {
 		t.Run(operation, func(t *testing.T) {
 			f := seedCompany(t)

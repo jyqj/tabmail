@@ -83,7 +83,7 @@ class R5CIWiringTests(unittest.TestCase):
         race = next(s for s in jobs['backend-race']['steps'] if s.get('name') == 'Race tests with PostgreSQL')
         self.assertIn('python3 -B tools/ci/backend_single.py', race['run'])
         single_runner = (ROOT / 'tools/ci/backend_single.py').read_text()
-        self.assertIn("['go', 'test', '-json', '-race', '-count=1', '-timeout=180s', './...']", single_runner)
+        self.assertIn("['go', 'test', '-json', '-race', '-count=1', '-timeout=180s', '-parallel=4', './...']", single_runner)
         self.assertNotIn("'-run'", single_runner)
         self.assertNotIn('matrix', single_runner)
         self.assertIn('"fsync=on", "full_page_writes=on", "synchronous_commit=on"', race['run'])

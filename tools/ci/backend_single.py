@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the original whole-repository Go race command exactly once, never shard.
+"""Run the whole-repository Go race command once, with bounded in-process parallelism.
 
 Temporary UI dependencies serve the existing owned PG/UI probes. All Go events
 are retained in one original-format log and validated by the unchanged checker.
@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from check_go_test_evidence import evaluate, load_suite
 
-GO_ARGV = ['go', 'test', '-json', '-race', '-count=1', '-timeout=180s', './...']
+GO_ARGV = ['go', 'test', '-json', '-race', '-count=1', '-timeout=180s', '-parallel=4', './...']
 
 
 def run(argv, prefix, *, cwd=ROOT, timeout):
@@ -105,7 +105,7 @@ def main(argv=None):
     if process['timeout'] or source_identity() != args.source_sha:
         report['status'] = 'fail'
         report['errors'].append('outer process timeout or changed source')
-    report.update(source_sha=args.source_sha, process=process, mode='single_original_go_invocation',
+    report.update(source_sha=args.source_sha, process=process, mode='single_whole_repository_go_invocation',
                   log_sha256=hashlib.sha256(raw).hexdigest())
     (output / 'go-test-evidence.json').write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps(report, indent=2), flush=True)

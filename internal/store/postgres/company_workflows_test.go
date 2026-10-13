@@ -66,6 +66,7 @@ func seedCompany(t *testing.T) *companyFixture {
 	return f
 }
 func TestR3EmployeeActivationSingleUseAndPrivateProvisioning(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	hash := company.Hash("new-hire")
@@ -107,6 +108,7 @@ func TestR3EmployeeActivationSingleUseAndPrivateProvisioning(t *testing.T) {
 	}
 }
 func TestR3EmployeeInvitationRevocationExpiryAndAuditRollback(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	hash := company.Hash("rollback")
@@ -147,6 +149,7 @@ func TestR3EmployeeInvitationRevocationExpiryAndAuditRollback(t *testing.T) {
 	}
 }
 func TestR3SharedMailboxRightsAndGrantAuditRollback(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	g := models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true}
@@ -195,6 +198,7 @@ func TestR3SharedMailboxRightsAndGrantAuditRollback(t *testing.T) {
 // stays owner-or-grant only — the role itself unlocks nothing until an
 // explicit grant is recorded.
 func TestAdminVisibilityIsNotContentAccess(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 
@@ -242,6 +246,7 @@ func TestAdminVisibilityIsNotContentAccess(t *testing.T) {
 	}
 }
 func TestR3OffboardingAndOptimisticHandover(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	v, e := f.st.GetWorkMailbox(ctx, f.a, f.personal.ID)
@@ -278,6 +283,7 @@ func TestR3OffboardingAndOptimisticHandover(t *testing.T) {
 // reassign or regrant a mailbox only when they manage its owner (or own it
 // themselves). Personal mailboxes owned by a peer administrator are protected.
 func TestMailboxAdministrationFollowsMemberHierarchy(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	peer := &models.User{TenantID: f.tenant.ID, Email: "peer-admin@contact.test", DisplayName: "Peer Admin", Role: models.RoleAdmin, IsActive: true, PasswordHash: "not-a-production-password"}
@@ -308,6 +314,7 @@ func TestMailboxAdministrationFollowsMemberHierarchy(t *testing.T) {
 	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.personal.ID, UserID: f.other.ID, CanRead: true}))
 }
 func TestR3SoftDeleteRestoreRetentionAndEvents(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true, CanOrganize: true}))
@@ -373,6 +380,7 @@ func TestR3SoftDeleteRestoreRetentionAndEvents(t *testing.T) {
 	}
 }
 func TestR3DraftRevisionAndAttachmentAuthorization(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	att, e := f.st.ReserveMailAttachment(ctx, f.u, company.Attachment{MailboxID: f.personal.ID, Filename: "proposal.pdf", Size: 10})
@@ -400,6 +408,7 @@ func templateDraft() company.TemplateDraft {
 	return company.TemplateDraft{Subject: "Hello {{.customer}}", TextBody: "From {{.employee_name}} at {{.company_name}}", HTMLBody: "<p>Hello {{.customer}}</p>", Variables: []company.Variable{{Name: "customer", Type: "text", Required: true, MaxLength: 100}}}
 }
 func TestR3TemplateImmutableVersionsAndCurrentGrants(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	tpl, e := f.st.SaveMailTemplate(ctx, f.a, company.Template{Name: "Welcome", Draft: templateDraft()})
@@ -434,6 +443,7 @@ func TestR3TemplateImmutableVersionsAndCurrentGrants(t *testing.T) {
 // for every new submission. Template-level retire is a different lever and is
 // not exercised here (see TestR3TemplateImmutableVersionsAndCurrentGrants).
 func TestR3TemplateVersionRevocationStopsUndeliveredSends(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	tpl, e := f.st.SaveMailTemplate(ctx, f.a, company.Template{Name: "Blast", Draft: templateDraft()})
@@ -544,6 +554,7 @@ func TestR3TemplateVersionRevocationStopsUndeliveredSends(t *testing.T) {
 	}
 }
 func TestR3SubmissionIdempotencyTemplateOnlyAndCodec(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	tpl, e := f.st.SaveMailTemplate(ctx, f.a, company.Template{Name: "Reply", Draft: templateDraft()})
@@ -626,6 +637,7 @@ func TestR3SubmissionIdempotencyTemplateOnlyAndCodec(t *testing.T) {
 	}
 }
 func TestR3MessageMutationAuditRollback(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	m := &models.Message{TenantID: f.tenant.ID, MailboxID: f.personal.ID, ZoneID: f.zone.ID, Recipients: []string{f.personal.FullAddress}, Subject: "keep"}
@@ -645,6 +657,7 @@ func TestR3MessageMutationAuditRollback(t *testing.T) {
 }
 
 func TestR3AttachmentCleanupRespectsLiveDraftReferences(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	a, e := f.st.ReserveMailAttachment(ctx, f.u, company.Attachment{MailboxID: f.personal.ID, Filename: "retained.txt", Size: 3})
@@ -676,6 +689,7 @@ func TestR3AttachmentCleanupRespectsLiveDraftReferences(t *testing.T) {
 // submission still references: the sent asset is the employee's record of what
 // went out, so the outbound_attachments pin exempts the row from the sweep.
 func TestP4AttachmentCleanupRespectsSentJobReferences(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	a, e := f.st.ReserveMailAttachment(ctx, f.u, company.Attachment{MailboxID: f.personal.ID, Filename: "sent.txt", Size: 3})
@@ -718,6 +732,7 @@ func TestP4AttachmentCleanupRespectsSentJobReferences(t *testing.T) {
 // input rather than a save error, and every non-usable status keeps
 // TemplateForSend's single denial message byte-identical.
 func TestR3DraftTemplateVersionEligibilityContract(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	publish := func(name string) (*company.Template, *company.TemplateVersion) {

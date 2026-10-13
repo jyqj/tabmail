@@ -44,6 +44,7 @@ func r5LegacyKey(t *testing.T, f *companyFixture) (*models.TenantAPIKey, authz.A
 }
 
 func TestR5LegacyContentLifecycleMatchesArchive(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"live", "trash-live", "expires", "purge", "missing-item", "missing-asset"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)
@@ -107,6 +108,7 @@ func TestR5LegacyContentLifecycleMatchesArchive(t *testing.T) {
 }
 
 func TestR5LegacyContentRechecksKeyAndOwner(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"live", "expired-key", "deleted-key", "changed-owner", "scope-revoked", "key-zone", "owner-zone", "owner-frozen", "ownerless", "unknown-principal"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)
@@ -150,6 +152,7 @@ func TestR5LegacyContentRechecksKeyAndOwner(t *testing.T) {
 }
 
 func TestR5LegacyContentReloadsPermissionAfterIdentityWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, key := range []bool{false, true} {
 		name := "user"
 		if key {
@@ -193,6 +196,7 @@ func TestR5LegacyContentReloadsPermissionAfterIdentityWait(t *testing.T) {
 }
 
 func TestR5LegacyOutboundHTTPDoesNotResurrectExpiredContent(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	j := r5LegacyJob(t, f)
@@ -282,6 +286,7 @@ func r5LegacyKeyHTTP(t *testing.T, h http.Handler, token, path string, status in
 }
 
 func TestR5LegacyContentKeyHTTPPreservesSafeReceipt(t *testing.T) {
+	r5ParallelFreshDB(t)
 	if os.Getenv("TABMAIL_TEST_DB_DSN") == "" {
 		t.Fatal("legacy key HTTP contract requires owned TABMAIL_TEST_DB_DSN")
 	}
@@ -406,6 +411,7 @@ func TestR5LegacyContentKeyHTTPPreservesSafeReceipt(t *testing.T) {
 }
 
 func TestR5LegacyContentRejectsBusyKeyWithoutDeadlock(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	j := r5LegacyJob(t, f)
 	k, a := r5LegacyKey(t, f)
@@ -466,6 +472,7 @@ func TestR5LegacyContentKeyExpiryAfterMailboxWait(t *testing.T) {
 }
 
 func TestR5LegacyRecipientProjectionRechecksAfterLedgerWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	j := r5ReceiptBoundaryFiniteJob(t, f)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
@@ -506,6 +513,7 @@ func TestR5LegacyRecipientProjectionRechecksAfterLedgerWait(t *testing.T) {
 }
 
 func TestR5LegacyContentPropagatesStorageFailure(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	j := r5LegacyJob(t, f)
 	ctx, cancel := context.WithCancel(context.Background())

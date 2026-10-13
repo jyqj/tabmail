@@ -12,6 +12,7 @@ import (
 )
 
 func TestSubmissionAuthorLosesContentButKeepsReceiptAfterReadRevocation(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true, CanSend: true}))
@@ -68,6 +69,7 @@ func TestSubmissionAuthorLosesContentButKeepsReceiptAfterReadRevocation(t *testi
 }
 
 func TestCompanyMessageDetailMatchesPersonalListStateAndImmutableScope(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	for _, id := range []uuid.UUID{f.employee.ID, f.other.ID} {

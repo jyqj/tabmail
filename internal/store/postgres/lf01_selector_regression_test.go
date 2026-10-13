@@ -82,6 +82,7 @@ func TestLF01OwnedShippingSelector(t *testing.T) {
 }
 
 func TestLF01OwnedHTTPNegativeBoundaries(t *testing.T) {
+	r5ParallelFreshDB(t)
 	if os.Getenv("TABMAIL_LF01_OWNED_PROBE") != "1" {
 		t.Skip("opt-in dedicated owned PG/HTTP probe")
 	}

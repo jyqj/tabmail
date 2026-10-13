@@ -12,6 +12,7 @@ import (
 )
 
 func TestAR04LegacyRecipientMigrationPreservesEvidence(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	// This is an isolated fixture database, not a downgrade of an existing

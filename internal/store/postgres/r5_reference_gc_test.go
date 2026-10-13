@@ -28,6 +28,7 @@ func r5ReferenceCounts(t *testing.T, f *companyFixture, ctx context.Context, a *
 }
 
 func TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
@@ -62,6 +63,7 @@ func TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal(t *testing.T) {
 }
 
 func TestR5ReferenceGCRollsBackIfOrphanRegistrationFails(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -82,6 +84,7 @@ func TestR5ReferenceGCRollsBackIfOrphanRegistrationFails(t *testing.T) {
 }
 
 func TestR5ReferenceGCKeepsSentPinAfterQueueCleanup(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -104,6 +107,7 @@ func TestR5ReferenceGCKeepsSentPinAfterQueueCleanup(t *testing.T) {
 }
 
 func TestR5ReferenceObjectCallbackCancellationReleasesKey(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -141,6 +145,7 @@ func TestR5ReferenceObjectCallbackCancellationReleasesKey(t *testing.T) {
 }
 
 func TestR5ReferenceObjectGCWaitsForCommittedMessage(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

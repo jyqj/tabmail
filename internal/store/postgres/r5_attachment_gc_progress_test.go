@@ -71,6 +71,7 @@ func r5GCProgressExpire(t *testing.T, f *companyFixture, ctx context.Context) {
 }
 
 func TestR5AttachmentGCProgressPastProtectedPrefix(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range []string{"draft", "outbound", "sent"} {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -93,6 +94,7 @@ func TestR5AttachmentGCProgressPastProtectedPrefix(t *testing.T) {
 }
 
 func TestR5AttachmentGCProgressAllProtectedTerminates(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
@@ -106,6 +108,7 @@ func TestR5AttachmentGCProgressAllProtectedTerminates(t *testing.T) {
 }
 
 func TestR5AttachmentGCProgressBusyRowsAndBatchLimit(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
@@ -180,6 +183,7 @@ func TestR5AttachmentGCProgressConcurrentDraftFence(t *testing.T) {
 }
 
 func TestR5AttachmentGCProgressOrphanFailureRollsBackBatch(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
@@ -207,6 +211,7 @@ func TestR5AttachmentGCProgressOrphanFailureRollsBackBatch(t *testing.T) {
 }
 
 func TestR5AttachmentGCProgressReferenceLookupFailureIsClosed(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -227,6 +232,7 @@ func TestR5AttachmentGCProgressReferenceLookupFailureIsClosed(t *testing.T) {
 }
 
 func TestR5AttachmentGCProgressHeldOriginalSurvivesMetadataCollection(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

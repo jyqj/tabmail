@@ -13,6 +13,7 @@ import (
 // lists must agree with the Go read decision when submitter visibility cannot
 // independently admit the viewer.
 func TestAR02ReadableMailboxQueryParity(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	viewer := authz.Actor{Type: authz.PrincipalUser, ID: f.other.ID, TenantID: f.tenant.ID, Role: models.RoleUser}

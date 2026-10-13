@@ -15,6 +15,7 @@ import (
 // (user_id, or the sender_user_id / sender_mailbox_id provenance chain) must
 // never surface in the member's submission list or detail views.
 func TestSubmissionScopeRejectsCrossTenantRows(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	employeeActor := authz.Actor{Type: authz.PrincipalUser, ID: f.employee.ID, TenantID: f.tenant.ID, Role: models.RoleUser}
@@ -75,6 +76,7 @@ func TestSubmissionScopeRejectsCrossTenantRows(t *testing.T) {
 // isolation is asserted at the predicate level in
 // TestSubmissionScopeKeepsTenantConjunct. This documents the gate.
 func TestSubmissionListRejectsAPIKeyPrincipal(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	keyActor := authz.Actor{Type: authz.PrincipalAPIKey, ID: uuid.New(), TenantID: f.tenant.ID, TenantWide: true}

@@ -13,6 +13,7 @@ import (
 // by messageOutbox/companyAudit and CreateWebhookDeliveries in production.
 // Never repair the fixture to hide an adapter's NULL decoding failure.
 func TestR5QueueNullableDiagnosticsClaimAndRead(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"outbox", "webhook", "dead-webhook", "ingest"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)

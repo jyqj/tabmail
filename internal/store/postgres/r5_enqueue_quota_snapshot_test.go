@@ -65,6 +65,7 @@ func r5QuotaRequireEffects(t *testing.T, f *companyFixture, d *company.Draft, jo
 }
 
 func TestR5EnqueueQuotaUsesCurrentPermissionAfterParentWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"profile-lower", "unlimited-to-finite", "finite-to-unlimited", "override-insert", "override-delete-finite", "override-delete-unlimited"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)
@@ -129,6 +130,7 @@ func TestR5EnqueueQuotaUsesCurrentPermissionAfterParentWait(t *testing.T) {
 }
 
 func TestR5EnqueueQuotaChangeOrdersThroughInsert(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, initial := range []int{31, 0} {
 		t.Run(fmt.Sprintf("initial-%d", initial), func(t *testing.T) {
 			f := seedCompany(t)
@@ -169,6 +171,7 @@ func TestR5EnqueueQuotaChangeOrdersThroughInsert(t *testing.T) {
 }
 
 func TestR5EnqueueQuotaUnlimitedToFiniteSharedUser(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	p := r5SnapshotProfile(t, f, true, false)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -233,6 +236,7 @@ func TestR5EnqueueQuotaUnlimitedToFiniteSharedUser(t *testing.T) {
 // freeze historical job timestamps immediately before/at UTC midnight and
 // prove the current Router uses that boundary, not a local calendar day.
 func TestR5EnqueueQuotaUTCMidnightCountingBoundary(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, boundary := range []string{"before", "at"} {
 		t.Run(boundary, func(t *testing.T) {
 			f := seedCompany(t)

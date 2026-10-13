@@ -12,8 +12,8 @@ import backend_single as runner
 
 
 class SingleProcessTests(unittest.TestCase):
-    def test_whole_repository_command_is_unchanged(self):
-        self.assertEqual(runner.GO_ARGV, ['go', 'test', '-json', '-race', '-count=1', '-timeout=180s', './...'])
+    def test_whole_repository_and_timeout_are_preserved(self):
+        self.assertEqual(runner.GO_ARGV, ['go', 'test', '-json', '-race', '-count=1', '-timeout=180s', '-parallel=4', './...'])
 
     def test_original_checker_and_exit_status_reject_every_false_green(self):
         for mode in ('pass', 'failed', 'skip', 'missing', 'nonzero', 'timeout'):

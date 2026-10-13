@@ -43,6 +43,7 @@ func r5AttachmentRejection(t *testing.T, err error) {
 }
 
 func TestR5AttachmentFinishRejectsConcurrentRemoval(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	a := r5UploadingAttachment(t, f, f.personal.ID)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
@@ -67,6 +68,7 @@ func TestR5AttachmentFinishRejectsConcurrentRemoval(t *testing.T) {
 }
 
 func TestR5AttachmentFinishRejectsExpiryAfterWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	a := r5UploadingAttachment(t, f, f.personal.ID)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
@@ -137,6 +139,7 @@ func TestR5AttachmentFinishUsesTimeAfterLockWait(t *testing.T) {
 }
 
 func TestR5AttachmentFinishOnlyOneChecksumWins(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	a := r5UploadingAttachment(t, f, f.personal.ID)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
@@ -196,6 +199,7 @@ func TestR5AttachmentFinishOnlyOneChecksumWins(t *testing.T) {
 }
 
 func TestR5AttachmentFinishOrdersMailboxRevocation(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
@@ -263,6 +267,7 @@ observe:
 }
 
 func TestR5AttachmentFinishCanonicalChecksumAndReplay(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	a := r5UploadingAttachment(t, f, f.personal.ID)
 	ctx := context.Background()
@@ -281,6 +286,7 @@ func TestR5AttachmentFinishCanonicalChecksumAndReplay(t *testing.T) {
 }
 
 func TestR5AttachmentFinishCancellationRollsBack(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	a := r5UploadingAttachment(t, f, f.personal.ID)
 	ctx, stop := context.WithTimeout(context.Background(), 12*time.Second)
@@ -307,6 +313,7 @@ func TestR5AttachmentFinishCancellationRollsBack(t *testing.T) {
 }
 
 func TestR5AttachmentFinishRejectsNonHexChecksum(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	a := r5UploadingAttachment(t, f, f.personal.ID)
 	err := f.st.FinishMailAttachment(context.Background(), f.u, a.ID, strings.Repeat("z", 64))

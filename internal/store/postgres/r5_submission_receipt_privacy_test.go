@@ -139,6 +139,7 @@ func TestR5SubmissionReceiptPrivacyPGCompleteLedger(t *testing.T) {
 }
 
 func TestR5SubmissionReceiptPrivacyPGClassification(t *testing.T) {
+	r5ParallelFreshDB(t)
 	cases := []struct {
 		name                      string
 		to, cc, bcc, ledger, want []string

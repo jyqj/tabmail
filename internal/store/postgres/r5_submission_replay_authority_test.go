@@ -61,6 +61,7 @@ func r5ReplaySafeReceipt(t *testing.T, rr *httptest.ResponseRecorder, id uuid.UU
 // A lookup-table barrier is after GetMailDraft's authorization transaction,
 // so this checks identity again after middleware and the initial user fence.
 func TestR5SubmissionConsumedReplayRechecksIdentity(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"live", "session-revoke", "freeze-reactivate"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)
@@ -113,6 +114,7 @@ func TestR5SubmissionConsumedReplayRechecksIdentity(t *testing.T) {
 }
 
 func TestR5SubmissionReplayExpiresContentWithoutReenqueuing(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, branch := range []string{"consumed", "outer-found"} {
 		t.Run(branch, func(t *testing.T) {
 			f := seedCompany(t)
@@ -152,6 +154,7 @@ func TestR5SubmissionReplayExpiresContentWithoutReenqueuing(t *testing.T) {
 }
 
 func TestR5SubmissionReplayRejectsChangedIntent(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"consumed-different-key", "outer-different-payload"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)
@@ -188,6 +191,7 @@ func TestR5SubmissionReplayRejectsChangedIntent(t *testing.T) {
 // its tenant parent. One creates the job; the other takes the inner existing
 // receipt branch. An isolated trigger expires the newly-created sent item.
 func TestR5SubmissionInnerConcurrentReplayUsesSafeReceipt(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	h := seedDraftSubmit(t, f)
 	d := r5ReplayDraft(t, f)
@@ -235,6 +239,7 @@ func TestR5SubmissionInnerConcurrentReplayUsesSafeReceipt(t *testing.T) {
 }
 
 func TestR5SubmissionCompanyPostRejectsAPIKeyReplay(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	h := seedDraftSubmit(t, f)
 	d := r5ReplayDraft(t, f)
