@@ -52427,7 +52427,7 @@
           "caller_id": "internal/testpg/fixture.go::NewPostgres",
           "file": "internal/testpg/fixture.go",
           "function": "NewPostgres",
-          "line": 66,
+          "line": 56,
           "expression": "st.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52435,7 +52435,7 @@
           "caller_id": "internal/testpg/fixture.go::NewPostgres",
           "file": "internal/testpg/fixture.go",
           "function": "NewPostgres",
-          "line": 90,
+          "line": 111,
           "expression": "st.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52467,7 +52467,7 @@
           "caller_id": "internal/testpg/template.go:*databaseTemplate:close",
           "file": "internal/testpg/template.go",
           "function": "close",
-          "line": 143,
+          "line": 154,
           "expression": "d.admin.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -53638,15 +53638,7 @@
           "caller_id": "internal/testpg/fixture.go::NewPostgres",
           "file": "internal/testpg/fixture.go",
           "function": "NewPostgres",
-          "line": 46,
-          "expression": "pgxpool.New",
-          "status": "name-match-candidate-not-dispatch-proof"
-        },
-        {
-          "caller_id": "internal/testpg/fixture.go::NewPostgres",
-          "file": "internal/testpg/fixture.go",
-          "function": "NewPostgres",
-          "line": 59,
+          "line": 49,
           "expression": "postgres.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -53654,7 +53646,15 @@
           "caller_id": "internal/testpg/fixture.go::NewPostgres",
           "file": "internal/testpg/fixture.go",
           "function": "NewPostgres",
-          "line": 91,
+          "line": 68,
+          "expression": "pgxpool.New",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/testpg/fixture.go::NewPostgres",
+          "file": "internal/testpg/fixture.go",
+          "function": "NewPostgres",
+          "line": 112,
           "expression": "pgxpool.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -53686,7 +53686,7 @@
           "caller_id": "internal/testpg/template.go:*databaseTemplate:prepare",
           "file": "internal/testpg/template.go",
           "function": "prepare",
-          "line": 98,
+          "line": 109,
           "expression": "pgxpool.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -70270,11 +70270,11 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "52f6927a3d22af16e2b58f5fe6ca2bae31224a6b",
+  "last_review_base_commit": "80f233308ab69e0d7a1445837195cd11e0badf59",
   "current_review_boundary": "Revision 20 records only external lexical New/Close caller additions and locations from the suite-owned test database template. PostgreSQL production syntax, migrations, classifications, assertions and manual reviews are unchanged. Name matches are not resolved dispatch or concurrency proof. This inventory maintenance grants no runtime, release, dependency or parent-task acceptance.",
   "inventory_revision": {
     "revision": 20,
-    "source_commit": "52f6927a3d22af16e2b58f5fe6ca2bae31224a6b",
+    "source_commit": "80f233308ab69e0d7a1445837195cd11e0badf59",
     "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
     "previous_snapshot_commit": "c056f28b0c811a87a95ddc8c3f7e9ff3f7a338a7",
     "previous_snapshot_blob": "b701d77e83bdb27f2dcca55996b9b907d97b025b",

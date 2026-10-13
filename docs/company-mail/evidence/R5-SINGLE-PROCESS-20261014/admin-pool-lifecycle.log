@@ -1,0 +1,35 @@
+=== RUN   TestPostgresFixtureCleanupPartialInitialization
+=== RUN   TestPostgresFixtureCleanupPartialInitialization/nothing_acquired
+=== RUN   TestPostgresFixtureCleanupPartialInitialization/admin_only_create_failed
+=== RUN   TestPostgresFixtureCleanupPartialInitialization/owned_database_store_failed
+=== RUN   TestPostgresFixtureCleanupPartialInitialization/store_acquired_observer_failed
+=== RUN   TestPostgresFixtureCleanupPartialInitialization/fully_initialized
+--- PASS: TestPostgresFixtureCleanupPartialInitialization (0.00s)
+    --- PASS: TestPostgresFixtureCleanupPartialInitialization/nothing_acquired (0.00s)
+    --- PASS: TestPostgresFixtureCleanupPartialInitialization/admin_only_create_failed (0.00s)
+    --- PASS: TestPostgresFixtureCleanupPartialInitialization/owned_database_store_failed (0.00s)
+    --- PASS: TestPostgresFixtureCleanupPartialInitialization/store_acquired_observer_failed (0.00s)
+    --- PASS: TestPostgresFixtureCleanupPartialInitialization/fully_initialized (0.00s)
+=== RUN   TestPostgresFixtureCleanupDropFailureStillClosesAdmin
+--- PASS: TestPostgresFixtureCleanupDropFailureStillClosesAdmin (0.00s)
+=== RUN   TestPostgresFixtureSetupDeadlineAndCancellation
+=== RUN   TestPostgresFixtureSetupDeadlineAndCancellation/deadline
+=== RUN   TestPostgresFixtureSetupDeadlineAndCancellation/cancelled-parent
+--- PASS: TestPostgresFixtureSetupDeadlineAndCancellation (2.06s)
+    --- PASS: TestPostgresFixtureSetupDeadlineAndCancellation/deadline (2.03s)
+    --- PASS: TestPostgresFixtureSetupDeadlineAndCancellation/cancelled-parent (0.03s)
+=== RUN   TestDatabaseTemplateCancelledBeforeInitialization
+--- PASS: TestDatabaseTemplateCancelledBeforeInitialization (0.00s)
+=== RUN   TestDatabaseTemplateCopiesAreIsolatedAndOwned
+=== RUN   TestDatabaseTemplateCopiesAreIsolatedAndOwned/cold-migration-reference
+=== RUN   TestDatabaseTemplateCopiesAreIsolatedAndOwned/write-first-copy
+=== RUN   TestDatabaseTemplateCopiesAreIsolatedAndOwned/independent-second-copy
+testpg_fixture_totals: clones=2 create_ms=18.569 open_ms=11.748 drop_ms=8.649
+--- PASS: TestDatabaseTemplateCopiesAreIsolatedAndOwned (0.47s)
+    --- PASS: TestDatabaseTemplateCopiesAreIsolatedAndOwned/cold-migration-reference (0.21s)
+    --- PASS: TestDatabaseTemplateCopiesAreIsolatedAndOwned/write-first-copy (0.22s)
+    --- PASS: TestDatabaseTemplateCopiesAreIsolatedAndOwned/independent-second-copy (0.03s)
+=== RUN   TestDatabaseTemplateFailedMigrationNeverPublished
+--- PASS: TestDatabaseTemplateFailedMigrationNeverPublished (0.01s)
+PASS
+ok  	tabmail/internal/testpg	3.565s

@@ -2,10 +2,10 @@
   "revision": 20,
   "base_commit": "c056f28b0c811a87a95ddc8c3f7e9ff3f7a338a7",
   "base_tree": "0a46bee4a7b3271233b76983b10ea8a0378d8ee5",
-  "source_commit": "52f6927a3d22af16e2b58f5fe6ca2bae31224a6b",
-  "source_tree": "dd35d2d24b0c84e4cc77e0e47af69659a5221dce",
+  "source_commit": "80f233308ab69e0d7a1445837195cd11e0badf59",
+  "source_tree": "d5313c764f28e1229aa1da28f443ccfc3f032308",
   "previous_catalog_sha256": "25bb0f0cd3d9294171b4ec8719220399e13798d0d5aaced9995d620d1831f4b0",
-  "current_catalog_sha256": "4b8d4b8427923ba775cdeea82cb8eb3aca9bddae20e0cf09cf06cb6e53392716",
+  "current_catalog_sha256": "a06c86653bfb7edd808c4609155456535f750eb89369d193ec31071afaae697f",
   "transaction_callers": [
     {
       "id": "internal/store/postgres/postgres.go:*PgStore:Close",
@@ -2424,7 +2424,7 @@
           "caller_id": "internal/testpg/fixture.go::NewPostgres",
           "file": "internal/testpg/fixture.go",
           "function": "NewPostgres",
-          "line": 66,
+          "line": 56,
           "expression": "st.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2432,7 +2432,7 @@
           "caller_id": "internal/testpg/fixture.go::NewPostgres",
           "file": "internal/testpg/fixture.go",
           "function": "NewPostgres",
-          "line": 90,
+          "line": 111,
           "expression": "st.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2464,7 +2464,7 @@
           "caller_id": "internal/testpg/template.go:*databaseTemplate:close",
           "file": "internal/testpg/template.go",
           "function": "close",
-          "line": 143,
+          "line": 154,
           "expression": "d.admin.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -4983,15 +4983,7 @@
           "caller_id": "internal/testpg/fixture.go::NewPostgres",
           "file": "internal/testpg/fixture.go",
           "function": "NewPostgres",
-          "line": 46,
-          "expression": "pgxpool.New",
-          "status": "name-match-candidate-not-dispatch-proof"
-        },
-        {
-          "caller_id": "internal/testpg/fixture.go::NewPostgres",
-          "file": "internal/testpg/fixture.go",
-          "function": "NewPostgres",
-          "line": 59,
+          "line": 49,
           "expression": "postgres.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -4999,7 +4991,15 @@
           "caller_id": "internal/testpg/fixture.go::NewPostgres",
           "file": "internal/testpg/fixture.go",
           "function": "NewPostgres",
-          "line": 91,
+          "line": 68,
+          "expression": "pgxpool.New",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/testpg/fixture.go::NewPostgres",
+          "file": "internal/testpg/fixture.go",
+          "function": "NewPostgres",
+          "line": 112,
           "expression": "pgxpool.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -5031,7 +5031,7 @@
           "caller_id": "internal/testpg/template.go:*databaseTemplate:prepare",
           "file": "internal/testpg/template.go",
           "function": "prepare",
-          "line": 98,
+          "line": 109,
           "expression": "pgxpool.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -5554,12 +5554,12 @@
     {
       "path": "internal/testpg/fixture.go",
       "deleted": false,
-      "sha256": "2e37c5d807c87fc332fc1161f39e4efd4b40ddd36ed2c7f19f10d8806594bdbf"
+      "sha256": "3e2f20f741b9e17776e9eaa019672932a18d6bc3ff9fbd6c3cdd87fa83e3f5d0"
     },
     {
       "path": "internal/testpg/template.go",
       "deleted": false,
-      "sha256": "1514adfc9fd89931835eb3b3d68001f7aea6737bc10056ffdd9a29563b7d01ff"
+      "sha256": "4c244897b15c8dc50105bb328b51ecdc0f2f9543118e95da2e290a3ab974a7d5"
     },
     {
       "path": "internal/testpg/template_test.go",
