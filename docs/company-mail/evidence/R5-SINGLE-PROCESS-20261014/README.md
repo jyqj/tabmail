@@ -124,3 +124,15 @@ PostgreSQL认证、fsync或任何失败检查。套件结束记录创建/打开/
 总数248，上限仍为4。冻结激活/Webhook回归、进程恢复控制保持串行且原断言不变。
 单次Go调用、180秒预算、mandatory/skip规则均未放宽；本次源绑定的两项目录
 回归已通过，原始输出见 revision20-s7-tests.log，完整运行结果仍以新head CI为准。
+
+## 包装 fixture 的进程内准入
+
+`9e5f330` 的远端原始证据 ZIP `11845226856` SHA256
+`e190d760178e9a67c0749c5952221471182787ad8b23d8657f796e1f242e060d`
+已核验。串行阶段138秒，后续并发阶段仍耗尽预算，保留为失败而非验收。
+检查点 `857f90360faa103d73e608c08ee734d278538c4c` 将31个由包装helper持有私有
+数据库的 offboarding、atomic retry、permission authority/profile 及两项 stage
+用例纳入名单，总数279、上限4。没有新增子测试并发或改变断言/截止时间；
+冻结激活/Webhook文件及独立进程恢复仍不改动。相关组在Linux真实PG16下
+`-race -count=1 -timeout=180s -parallel=4` 通过（9.684秒），见 wrapped-fixture-tests.log。
+完整CI尚待确认，局部通过不替代整包验收。

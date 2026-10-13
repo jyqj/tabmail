@@ -2,10 +2,10 @@
   "revision": 20,
   "base_commit": "c056f28b0c811a87a95ddc8c3f7e9ff3f7a338a7",
   "base_tree": "0a46bee4a7b3271233b76983b10ea8a0378d8ee5",
-  "source_commit": "f66a6b455407ff77f155524d7e426eaf8aa4f534",
-  "source_tree": "6c0dd851e9288e47f133e9ed27d78776e161687f",
+  "source_commit": "857f90360faa103d73e608c08ee734d278538c4c",
+  "source_tree": "cfe79f41540f6eccf5ad64645ed52fe8209e19aa",
   "previous_catalog_sha256": "25bb0f0cd3d9294171b4ec8719220399e13798d0d5aaced9995d620d1831f4b0",
-  "current_catalog_sha256": "1f943b0021acc54504c33e716f58272e8c81b3cdf0bfcebe7ecc0be745c553df",
+  "current_catalog_sha256": "98534dafbca8b26a406120ab06eb9fad71abed93ff0d9c794e3c7d174540b61b",
   "transaction_callers": [
     {
       "id": "internal/store/postgres/postgres.go:*PgStore:Close",
@@ -5559,7 +5559,7 @@
     {
       "path": "internal/store/postgres/r5_atomic_retry_test.go",
       "deleted": false,
-      "sha256": "311a0e4b11acd88e8025c771cec0381db33f600aaa4f7f7bfba13397d3f78797"
+      "sha256": "5551b7839543358194d2fc5a76d2072119d8e32c79a9eca0ce38f8467b649108"
     },
     {
       "path": "internal/store/postgres/r5_attachment_finish_test.go",
@@ -5652,6 +5652,11 @@
       "sha256": "3ca21d15b45982c82b95dfd55fb061b21c07cb3f6f7151355f673a71017df5a1"
     },
     {
+      "path": "internal/store/postgres/r5_offboarding_lifecycle_test.go",
+      "deleted": false,
+      "sha256": "d36bf835ed12921d0fc0111bc60353027ed13c2e37cefa3b34e59cf209906655"
+    },
+    {
       "path": "internal/store/postgres/r5_outbound_receipt_test.go",
       "deleted": false,
       "sha256": "a8cc69ca136474dc845b3dc0da1e61400d06e20e277bb766547c6c2f81baa58d"
@@ -5659,12 +5664,22 @@
     {
       "path": "internal/store/postgres/r5_parallel_admission_test.go",
       "deleted": false,
-      "sha256": "eb24eb44206b151372d5015926e26277b14b0a8ac59c6ab92f78b3821b3d9a15"
+      "sha256": "0bc0a99f68b19724b75947041b2c6df9a558f93ca2bbd9c77f7e3fff58bf5a4c"
     },
     {
       "path": "internal/store/postgres/r5_password_parent_test.go",
       "deleted": false,
       "sha256": "e586516fc7961ab4f93a1a6d2096458995eadc0ff9965dd74dce21d36acec49b"
+    },
+    {
+      "path": "internal/store/postgres/r5_permission_authority_matrix_test.go",
+      "deleted": false,
+      "sha256": "3898ad029736351d8669b9faf691741a3c3701e8c7106ac04714093d342e3fc9"
+    },
+    {
+      "path": "internal/store/postgres/r5_permission_profile_create_test.go",
+      "deleted": false,
+      "sha256": "772fca54b5defe6ab79523c7eaede7043a27dfb66538655d68344d44d11e894f"
     },
     {
       "path": "internal/store/postgres/r5_permission_snapshot_test.go",
@@ -5674,7 +5689,7 @@
     {
       "path": "internal/store/postgres/r5_permission_stage_matrix_test.go",
       "deleted": false,
-      "sha256": "5246fb2777dea79f7bef96e690475c3b661f5518df4ead679bdd91f423b29757"
+      "sha256": "eb794a5fb876fcd63380b8828981ab96734825afc56d191e80f4dc0b2e725ee5"
     },
     {
       "path": "internal/store/postgres/r5_personal_message_state_order_test.go",

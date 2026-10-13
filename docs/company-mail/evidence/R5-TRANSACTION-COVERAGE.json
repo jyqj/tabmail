@@ -70270,11 +70270,11 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "f66a6b455407ff77f155524d7e426eaf8aa4f534",
+  "last_review_base_commit": "857f90360faa103d73e608c08ee734d278538c4c",
   "current_review_boundary": "Revision 20 records only external lexical New/Close caller additions and locations from the suite-owned test database template. PostgreSQL production syntax, migrations, classifications, assertions and manual reviews are unchanged. Name matches are not resolved dispatch or concurrency proof. This inventory maintenance grants no runtime, release, dependency or parent-task acceptance.",
   "inventory_revision": {
     "revision": 20,
-    "source_commit": "f66a6b455407ff77f155524d7e426eaf8aa4f534",
+    "source_commit": "857f90360faa103d73e608c08ee734d278538c4c",
     "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
     "previous_snapshot_commit": "c056f28b0c811a87a95ddc8c3f7e9ff3f7a338a7",
     "previous_snapshot_blob": "b701d77e83bdb27f2dcca55996b9b907d97b025b",
