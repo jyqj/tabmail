@@ -19,9 +19,9 @@ import check_r5_compatibility as gate
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_REVIEW_BASE = 'c056f28b0c811a87a95ddc8c3f7e9ff3f7a338a7'
 FIXTURE_REVIEW_TREE = '0a46bee4a7b3271233b76983b10ea8a0378d8ee5'
-FIXTURE_REVIEW_SOURCE = 'da40ce9114920920a1d039b7f4ec3ad9e5373ce3'
-FIXTURE_REVIEW_SOURCE_TREE = 'c7aa5f16e57f423407a5e73f56898442807cd9f1'
-FIXTURE_REVIEW_CATALOG_SHA = '9094fc35067c94c8e8d88764d43eb596b7e286e09fecfe1921dad193cb6028fa'
+FIXTURE_REVIEW_SOURCE = '52f6927a3d22af16e2b58f5fe6ca2bae31224a6b'
+FIXTURE_REVIEW_SOURCE_TREE = 'dd35d2d24b0c84e4cc77e0e47af69659a5221dce'
+FIXTURE_REVIEW_CATALOG_SHA = '4b8d4b8427923ba775cdeea82cb8eb3aca9bddae20e0cf09cf06cb6e53392716'
 FIXTURE_REVIEW_DIRECTORY = 'docs/company-mail/evidence/R5-SINGLE-PROCESS-20261014'
 
 # Exact CI deltas reviewed on 2026-10-13. Historical revision19 manifests stay
@@ -14354,6 +14354,11 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
     def test_revision20_preserves_history_oracles_and_reviewed_source(self):
         review = json.loads((ROOT / FIXTURE_REVIEW_DIRECTORY / 'reconciliation.json').read_text())
         changed = git('diff', '--name-only', FIXTURE_REVIEW_BASE, FIXTURE_REVIEW_SOURCE).decode().splitlines()
+        # Generated review outputs bind inputs; they cannot recursively pin themselves.
+        changed = [name for name in changed if name not in {
+            'docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json',
+            'scripts/tests/test_r5_catalog_reconciliation.py'}
+            and not name.startswith(FIXTURE_REVIEW_DIRECTORY + '/')]
         self.assertEqual([row['path'] for row in review['source_bindings']], changed)
         for row in review['source_bindings']:
             target = ROOT / row['path']

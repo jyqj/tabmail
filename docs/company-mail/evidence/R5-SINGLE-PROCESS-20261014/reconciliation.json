@@ -2,10 +2,10 @@
   "revision": 20,
   "base_commit": "c056f28b0c811a87a95ddc8c3f7e9ff3f7a338a7",
   "base_tree": "0a46bee4a7b3271233b76983b10ea8a0378d8ee5",
-  "source_commit": "da40ce9114920920a1d039b7f4ec3ad9e5373ce3",
-  "source_tree": "c7aa5f16e57f423407a5e73f56898442807cd9f1",
+  "source_commit": "52f6927a3d22af16e2b58f5fe6ca2bae31224a6b",
+  "source_tree": "dd35d2d24b0c84e4cc77e0e47af69659a5221dce",
   "previous_catalog_sha256": "25bb0f0cd3d9294171b4ec8719220399e13798d0d5aaced9995d620d1831f4b0",
-  "current_catalog_sha256": "9094fc35067c94c8e8d88764d43eb596b7e286e09fecfe1921dad193cb6028fa",
+  "current_catalog_sha256": "4b8d4b8427923ba775cdeea82cb8eb3aca9bddae20e0cf09cf06cb6e53392716",
   "transaction_callers": [
     {
       "id": "internal/store/postgres/postgres.go:*PgStore:Close",
@@ -5474,17 +5474,12 @@
     {
       "path": ".github/workflows/company-p0.yml",
       "deleted": false,
-      "sha256": "886cdcb42ad1e0962c99109ee776f4f9aea171d780171ccd3777bffa1007777a"
+      "sha256": "8ff800e1fc867ddfc32982e8fb63681d0ed60b3f4b30bad8dfa93c06eb37bd8c"
     },
     {
       "path": "internal/store/postgres/company_lock_test.go",
       "deleted": false,
       "sha256": "c55af4ad0938a30928f52e992a177f5ae1d61d08bbc5c79f05eddbf43ff1515b"
-    },
-    {
-      "path": "internal/store/postgres/r5_activation_errors_test.go",
-      "deleted": false,
-      "sha256": "d4016ae4117ee4c031f105873e3cf573795337859dc52b7cd5efc9b61b1e95f8"
     },
     {
       "path": "internal/store/postgres/r5_atomic_retry_test.go",
@@ -5524,7 +5519,7 @@
     {
       "path": "internal/store/postgres/r5_parallel_admission_test.go",
       "deleted": false,
-      "sha256": "8335efc590654caaaa048354ab79a32d72764227cb698b571f85a00ed0141039"
+      "sha256": "41c2ab9d7084fabb0dd86d04a9fdb2166600935994363525aef78ff66b884e8d"
     },
     {
       "path": "internal/store/postgres/r5_permission_stage_matrix_test.go",
@@ -5550,11 +5545,6 @@
       "path": "internal/store/postgres/r5_sent_recipient_snapshot_test.go",
       "deleted": false,
       "sha256": "e9fc907d0faf94e54c028bb07516f59d65d63a253e3875b4371eec5825d09583"
-    },
-    {
-      "path": "internal/store/postgres/r5_webhook_claim_completion_test.go",
-      "deleted": false,
-      "sha256": "8ce6c8ef93b6c00a8b3b5d87e6d864cad11a7d11352a16766a048a303771f128"
     },
     {
       "path": "internal/store/postgres/r5_webhook_fanout_order_test.go",
