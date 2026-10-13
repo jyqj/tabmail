@@ -63,3 +63,13 @@ node_modules 中 flatted 的无关 Go 文件混入 ./...，不删除依赖文件
 新增覆盖控制 8 项及 workflow/原制品边界控制 12 项通过。精确修复后完整 CI
 仍需等待，不据本段合入 main。前一个公开源 `0d584522` 的 frontend、production-web、
 browser-journey 与 catalog 已成功，backend 仍保留原全包 race 失败。
+
+### 远端接线后验证
+
+公开 `095b9518` 的 Company run 38415784552 / backend job 115359715004 已实际通过
+新的完整 PG race 步骤。Catalog 原 inventory 通过；完整源码版本测试唯一失败为
+`test_r5_ci_wiring.R5CIWiringTests.test_archive_guard_order_and_version_dispatch`：
+它仍要求 workflow 中出现旧单进程命令，随后还禁止所有 unittest discovery。
+现保留原 archive/build/vet/版本化分派约束，改为要求新的全量覆盖 runner；只允许
+独立 tools/ci 控制套件使用 discovery，原源码套件仍走隔离版本化分派。组合17项通过。
+该修改未删测试、未更改产品源码或原 PG mandatory/skip 清单，最终完整CI仍待验收。

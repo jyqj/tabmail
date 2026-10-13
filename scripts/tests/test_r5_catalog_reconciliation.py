@@ -34,6 +34,9 @@ CI_REVIEWED_DELTAS = {'.github/workflows/company-p0.yml': {'before_commit': '0d5
  'scripts/tests/test_r5_backend_evidence_continuation.py': {'before_commit': '0d58452206048a08c9d8d7137804762faf4d68ef',
                                                             'blob': 'f8f866a88a0335263e5d565fbb7dc37560060bcc',
                                                             'sha256': 'c82875ebbac459d9d21b1b3719762835f16ab0309dd07412fd62442455576b9b'},
+ 'scripts/tests/test_r5_ci_wiring.py': {'before_commit': '095b9518a9142408f6f36a0968feecae50ae4b05',
+                                        'blob': 'fefac3cb19bb42ea0fe0975619d38265ba3685a1',
+                                        'sha256': '1c2d21d4c095ab01c535fe17d5b29baf206a4619059405e74be84b9d6e8edd2d'},
  'scripts/tests/test_r5_reviewed_web_locks.py': {'before_commit': '0caf139ff8aaf4243cd12fdc9b1fc702f632e5c0',
                                                  'blob': '085ae957661b83df9ecc223e516058c7d924a8b3',
                                                  'sha256': '459b68bd0023dbfc57022a13b3b7893c5b9d90c683ef3340d8dc3c8b840ffbe2'}}
