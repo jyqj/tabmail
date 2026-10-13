@@ -77,6 +77,7 @@ func successorAuthzUnchanged(t *testing.T, f *companyFixture, before string) {
 	}
 }
 func TestSuccessorAuthzOwnedDirectHTTPPeerAndSelf(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"peer", "caller-self"} {
 		t.Run(mode, func(t *testing.T) {
 			f := successorAuthzSeed(t)
@@ -94,6 +95,7 @@ func TestSuccessorAuthzOwnedDirectHTTPPeerAndSelf(t *testing.T) {
 }
 
 func TestSuccessorAuthzOwnedPreviewMatrix(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"user", "frozen-target", "admin", "super-admin", "inactive", "foreign", "target-self", "nil", "peer-target", "foreign-target", "ordinary-foreign-selection", "super-selected-user", "super-selected-admin", "super-selected-super", "super-selected-foreign", "super-caller-self"} {
 		t.Run(mode, func(t *testing.T) {
 			f := successorAuthzSeed(t)
@@ -207,6 +209,7 @@ func TestSuccessorAuthzOwnedPreviewMatrix(t *testing.T) {
 }
 
 func TestSuccessorAuthzOwnedCurrentState(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, phase := range []string{"execute", "replay"} {
 		for _, change := range []string{"role-admin", "role-super", "inactive", "allowed-role-change", "caller-demoted", "caller-inactive", "caller-tenant", "target-frozen", "assets-changed"} {
 			t.Run(phase+"/"+change, func(t *testing.T) {
@@ -273,6 +276,7 @@ func TestSuccessorAuthzOwnedCurrentState(t *testing.T) {
 }
 
 func TestSuccessorAuthzOwnedAfterTenantWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, phase := range []string{"preview", "execute", "replay"} {
 		t.Run(phase, func(t *testing.T) {
 			f := successorAuthzSeed(t)
@@ -323,6 +327,7 @@ func TestSuccessorAuthzOwnedAfterTenantWait(t *testing.T) {
 }
 
 func TestSuccessorAuthzOwnedTenantFence(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := successorAuthzSeed(t)
 	ctx := context.Background()
 	// A recipient without mailbox custody isolates the persisted plan FK.
@@ -348,6 +353,7 @@ func TestSuccessorAuthzOwnedTenantFence(t *testing.T) {
 }
 
 func TestSuccessorAuthzOwnedSuccessorFenceThroughCommit(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, phase := range []string{"preview", "execute"} {
 		t.Run(phase, func(t *testing.T) {
 			f := successorAuthzSeed(t)
@@ -396,6 +402,7 @@ func TestSuccessorAuthzOwnedSuccessorFenceThroughCommit(t *testing.T) {
 }
 
 func TestSuccessorAuthzOwnedPersistedCallerSelfAndLegacy(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := successorAuthzSeed(t)
 	ctx := context.Background()
 	a := r5OffboardingActor(t, f)
@@ -420,6 +427,7 @@ func TestSuccessorAuthzOwnedPersistedCallerSelfAndLegacy(t *testing.T) {
 }
 
 func TestSuccessorAuthzOwnedConcurrentExecute(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := successorAuthzSeed(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
