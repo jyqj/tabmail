@@ -462,6 +462,8 @@ func r5TouchDiagnose(t *testing.T, ctx context.Context, f *companyFixture, prima
 // This is additional default-package work; it does not repair/replace the old
 // whole-suite result or justify silently widening/splitting its 180 s budget.
 func TestR5KeyUsageAuthorityAdmissionIsolation(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	if os.Getenv("TABMAIL_TEST_DB_DSN") == "" {
 		t.Fatal("key-touch causality requires an explicit owned TABMAIL_TEST_DB_DSN")
 	}
@@ -715,6 +717,8 @@ func TestR5KeyUsageAuthorityAdmissionIsolation(t *testing.T) {
 // these are actual public store commands, not an assertion that the entire
 // tenant/offboarding graph is free of every pre-existing deadlock.
 func TestR5APIKeyUsageLifecycleCascade(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	r5StageRequirePG(t)
 	for _, mode := range []string{"key_delete", "user_freeze", "guarded_user_delete", "raw_user_delete", "offboard", "minimal_tenant_delete"} {
 		t.Run(mode, func(t *testing.T) {
@@ -766,6 +770,8 @@ func TestR5APIKeyUsageLifecycleCascade(t *testing.T) {
 }
 
 func TestR5APIKeyUsageMetadataStoreAndWire(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	r5StageRequirePG(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)

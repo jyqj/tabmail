@@ -35,6 +35,8 @@ func r5Received404(t *testing.T, err error) {
 // This intentionally retains cached documents and canonical objects. Refusing
 // an expired request by deleting the fixture would not prove authorization.
 func TestR5ReceivedContentEligibilityMatrix(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	r5ReceivedRequirePG(t)
 	for _, cutoff := range []string{"active", "expiry", "equality", "purge", "archive-expiry", "trash-live", "trash-expiry", "null-deadline", "shared-zero-historical", "shared-null-historical"} {
 		t.Run(cutoff, func(t *testing.T) {
@@ -180,6 +182,8 @@ func TestR5ReceivedContentEligibilityMatrix(t *testing.T) {
 }
 
 func TestR5ReceivedPersonalHistoricalExpiryIsExempt(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	r5ReceivedRequirePG(t)
 	f := seedCompany(t)
 	ctx := context.Background()
@@ -204,6 +208,8 @@ func TestR5ReceivedPersonalHistoricalExpiryIsExempt(t *testing.T) {
 // Uses a real identity/mailbox wait edge, then observes the PostgreSQL clock.
 // The transaction began before the deadline, so now() would return stale time.
 func TestR5ReceivedContentRechecksDeadlineAfterAuthorizationWait(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	r5ReceivedRequirePG(t)
 	for _, endpoint := range []string{"detail", "parsed", "save-parsed", "list", "conversation", "summary"} {
 		t.Run(endpoint, func(t *testing.T) {
@@ -298,6 +304,8 @@ func (r *r5ReceivedIOReader) Read(p []byte) (int, error) {
 	return r.ReadCloser.Read(p)
 }
 func TestR5ReceivedContentRechecksExpiryAtObjectBoundaries(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	r5ReceivedRequirePG(t)
 	for _, endpoint := range []string{"detail", "source", "ordinal", "stable-part", "first-byte"} {
 		t.Run(endpoint, func(t *testing.T) {
@@ -372,6 +380,8 @@ func TestR5ReceivedContentRechecksExpiryAtObjectBoundaries(t *testing.T) {
 }
 
 func TestR5ReceivedConversationMembersAndSearchAreEligible(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	r5ReceivedRequirePG(t)
 	f := seedCompany(t)
 	root, _, _ := r5ReadFixture(t, f)
@@ -408,6 +418,8 @@ func TestR5ReceivedConversationMembersAndSearchAreEligible(t *testing.T) {
 // independently cover document UPSERT contention and later relation locks;
 // an initial mailbox-lock test cannot establish these release boundaries.
 func TestR5ReceivedEligibilityAfterLaterWaits(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	r5ReceivedRequirePG(t)
 	for _, axis := range []string{"save-message", "save-mailbox", "save-new-document", "conversation-root", "list-count-page", "summary-shared-mailbox", "summary-personal-mailbox"} {
 		t.Run(axis, func(t *testing.T) {

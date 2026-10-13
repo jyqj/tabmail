@@ -187,10 +187,6 @@ jobs:
   backend-race:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        partition: [0, 1, 2, 3]
     services:
       postgres:
         image: postgres:16
@@ -200,6 +196,7 @@ jobs:
           POSTGRES_DB: tabmail_test
         ports: ['55447:5432']
         options: >-
+          --tmpfs /var/lib/postgresql/data:rw,nosuid,noexec,size=1073741824
           --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
           --health-interval 5s --health-timeout 5s --health-retries 12
     env:
@@ -246,46 +243,19 @@ jobs:
           TABMAIL_LF01_OWNED_PROBE: '1'
         run: |
           set -euo pipefail
+          PGDATABASE="$TABMAIL_TEST_DB_DSN" psql -Atc "SELECT name||'='||setting FROM pg_settings WHERE name IN ('fsync','synchronous_commit','full_page_writes') ORDER BY name" > backend-pg-settings.txt
+          python3 -c 'from pathlib import Path; assert Path("backend-pg-settings.txt").read_text().splitlines() == ["fsync=on", "full_page_writes=on", "synchronous_commit=on"]'
           python3 -B -m unittest discover -s tools/ci -p 'test_*.py' -v
-          python3 -B tools/ci/backend_shards.py \
-            --source-sha "$(cat go-test-source-sha.txt)" --output-dir backend-shards --matrix-index ${{ matrix.partition }}
-      - name: Upload independent backend shard evidence
+          python3 -B tools/ci/backend_single.py \
+            --source-sha "$(cat go-test-source-sha.txt)" --output-dir backend-single
+      - name: Upload single-process backend evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: company-backend-shards-${{ matrix.partition }}
-          path: backend-shards
-          if-no-files-found: error
-          retention-days: 14
-  backend-race-coverage:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: backend-race
-    if: always()
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: company-backend-shards-*
-          path: matrix-artifacts
-          merge-multiple: false
-      - name: Verify independent whole-suite matrix coverage
-        run: |
-          python3 -B -m unittest discover -s tools/ci -p 'test_*.py' -v
-          python3 -B tools/ci/backend_shards.py --source-sha "$(git rev-parse HEAD)" \
-            --verify-matrix matrix-artifacts --output-dir matrix-verification
-      - name: Upload independently verified full backend coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: company-backend-complete-evidence
-          path: matrix-verification
+          name: company-backend-single-evidence
+          path: |
+            backend-single
+            backend-pg-settings.txt
           if-no-files-found: error
           retention-days: 14
   frontend:

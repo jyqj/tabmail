@@ -39,6 +39,8 @@ func r5ActivationKind(t *testing.T, err error, kind app.ErrorKind) {
 // before Begin. The audit case reaches user/mailbox/consumption before waiting,
 // so a late rejection must roll back every state owner, including derived data.
 func TestR5ActivationExpiryAfterRealWaitRollsBack(t *testing.T) {
+	// This fixture owns its DB and clock/lock controllers within one test process.
+	t.Parallel()
 	r5ParallelFreshDB(t)
 	for _, wait := range []string{"tenant", "invitation", "audit"} {
 		t.Run(wait, func(t *testing.T) {

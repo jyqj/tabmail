@@ -22,6 +22,8 @@ import (
 )
 
 func TestR5OutboundReceiptRejectsStalePrincipal(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	for _, mode := range []string{"live-user", "frozen-user", "missing-user", "restricted-user", "demoted-admin", "frozen-admin", "live-key", "deleted-key", "expired-key", "write-only-key", "key-owner-changed", "key-owner-frozen", "key-zone", "owner-zone", "unknown-admin"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)
@@ -221,6 +223,8 @@ func r5ReceiptBoundaryStillWaiting(t *testing.T, done <-chan error) {
 }
 
 func TestR5OutboundReceiptKeyExpiryAfterQueryWait(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	for _, pathMode := range []string{"detail", "list", "attempts"} {
 		t.Run(pathMode, func(t *testing.T) {
 			f := seedCompany(t)
@@ -275,6 +279,8 @@ func TestR5OutboundReceiptKeyExpiryAfterQueryWait(t *testing.T) {
 }
 
 func TestR5OutboundReceiptListOrdersMemberFreeze(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
@@ -317,6 +323,8 @@ func TestR5OutboundReceiptListOrdersMemberFreeze(t *testing.T) {
 }
 
 func TestR5OutboundReceiptListMatchesDetailScope(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	f := seedCompany(t)
 	ctx := context.Background()
 	j := r5ReceiptBoundaryFiniteJob(t, f)
@@ -348,6 +356,8 @@ func TestR5OutboundReceiptListMatchesDetailScope(t *testing.T) {
 }
 
 func TestR5OutboundReceiptOwnerlessKeyAndRetryScope(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	for _, mode := range []string{"ownerless", "write-only-retry"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)
@@ -429,6 +439,8 @@ func TestR5OutboundReceiptOwnerlessKeyAndRetryScope(t *testing.T) {
 }
 
 func TestR5OutboundReceiptStorageErrorAndTenantIsolation(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	f := seedCompany(t)
 	ctx := context.Background()
 	j := r5LegacyJob(t, f)
@@ -458,6 +470,8 @@ func TestR5OutboundReceiptStorageErrorAndTenantIsolation(t *testing.T) {
 }
 
 func TestR5APIKeyLastUsedIPRoundTrips(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	for _, address := range []string{"", "192.0.2.10", "2001:db8::42"} {
 		t.Run(address, func(t *testing.T) {
 			f := seedCompany(t)
@@ -511,6 +525,8 @@ func TestR5APIKeyLastUsedIPRoundTrips(t *testing.T) {
 }
 
 func TestR5OutboundReceiptStablePaginationAndEmptyPage(t *testing.T) {
+	// Each case owns its database; parallelism stays within this one test binary.
+	t.Parallel()
 	f := seedCompany(t)
 	ctx := context.Background()
 	ids := []uuid.UUID{}

@@ -55,8 +55,25 @@ func NewPostgres(t *testing.T) (*postgres.PgStore, *pgxpool.Pool, string) {
 			t.Errorf("owned PostgreSQL database cleanup failed: %T", err)
 		}
 	})
+	openStore := func(databaseDSN string) (*postgres.PgStore, error) {
+		return postgres.New(ctx, config.DB{DSN: databaseDSN, MaxOpenConns: 10, MaxIdleConns: 1, ConnMaxLifetime: time.Minute})
+	}
+	template, err := fixtureTemplate(ctx, dsn, func(templateDSN string) error {
+		st, err := openStore(templateDSN)
+		if err != nil {
+			return err
+		}
+		return st.Close()
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	name := "tm_test_" + strings.ReplaceAll(uuid.NewString(), "-", "")
-	if _, err = admin.Exec(ctx, "CREATE DATABASE "+pgx.Identifier{name}.Sanitize()); err != nil {
+	create := "CREATE DATABASE " + pgx.Identifier{name}.Sanitize()
+	if template != "" {
+		create += " TEMPLATE " + pgx.Identifier{template}.Sanitize()
+	}
+	if _, err = admin.Exec(ctx, create); err != nil {
 		t.Fatal(err)
 	}
 	// A failed CREATE never grants ownership of an existing database name.
@@ -66,7 +83,7 @@ func NewPostgres(t *testing.T) (*postgres.PgStore, *pgxpool.Pool, string) {
 	}
 	u.Path = "/" + name
 	testDSN := u.String()
-	st, err := postgres.New(ctx, config.DB{DSN: testDSN, MaxOpenConns: 10, MaxIdleConns: 1, ConnMaxLifetime: time.Minute})
+	st, err := openStore(testDSN)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,8 +102,8 @@ const (
 )
 
 // Registration is incremental, immediately after each resource is acquired.
-// These closures are fixture-owned, not shared connections or a migrated DB
-// template. Close remains synchronous: a leaked borrower is not hidden by a
+// These closures are fixture-owned, not shared connections. A suite template
+// has a separate TestMain owner. Close remains synchronous: a leaked borrower is not hidden by a
 // background cleanup goroutine.
 type postgresFixtureResources struct {
 	closeObserver func()

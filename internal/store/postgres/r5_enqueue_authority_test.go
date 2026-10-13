@@ -261,6 +261,8 @@ func r5EnqueueRequireRollback(t *testing.T, f *companyFixture, d *company.Draft)
 // authorization check and all archive/recipient/attachment writes succeeded.
 // Deadline checks must use the final database clock and roll back the draft.
 func TestR5EnqueueAuditWaitExpiryAndCancellation(t *testing.T) {
+	// This fixture owns its DB and clock/lock controllers within one test process.
+	t.Parallel()
 	r5ParallelFreshDB(t)
 	for _, mode := range []string{"key-expiry", "mailbox-expiry", "cancel"} {
 		t.Run(mode, func(t *testing.T) {

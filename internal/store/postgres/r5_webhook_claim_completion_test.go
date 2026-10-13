@@ -223,6 +223,8 @@ func TestR5WebhookClaimCompletionPreservesCancellationAndDatabaseFailure(t *test
 }
 
 func TestR5WebhookClaimCompletionChecksLeaseAfterRowWait(t *testing.T) {
+	// This fixture owns its DB and clock/lock controllers within one test process.
+	t.Parallel()
 	st, pool, _ := testpg.NewPostgres(t)
 	for _, tc := range r5QueueCompletionCases {
 		t.Run(tc.name, func(t *testing.T) {
