@@ -20,8 +20,8 @@ ROOT = Path(__file__).resolve().parents[2]
 # Exact CI deltas reviewed on 2026-10-13. Historical revision19 manifests stay
 # immutable; these pins authorize no other byte changes or runtime acceptance.
 CI_REVIEWED_DELTAS = {'.github/workflows/company-p0.yml': {'before_commit': '0d58452206048a08c9d8d7137804762faf4d68ef',
-                                      'blob': '0e15ae697741884b55d28384c66a25ab8f2623da',
-                                      'sha256': 'bd2ed324e1995d42a2a176d2fdce2b582ae6238f9ae045d4e2aed1bc6b3f535b'},
+                                      'blob': '8168de09dfe5c84feece68f6ebb4bdf67efd65ee',
+                                      'sha256': 'b2d8c0e67bdc958da098e3c8b8b8a84675ce08fd9c86e7d1d6c4f1285da8540c'},
  'scripts/r5_archive_boundary.py': {'before_commit': 'b50831c2de9c6ac6d825e0d64d8637aab3854487',
                                     'blob': '5d047afa2b307979e9a175ebfb5c8302545dcaba',
                                     'sha256': '6bc97ea325ff7086f43fc76f7b12a5b6c6790c594bad901172e808a5ee3b2191'},
@@ -32,14 +32,17 @@ CI_REVIEWED_DELTAS = {'.github/workflows/company-p0.yml': {'before_commit': '0d5
                                                'blob': 'befec07b7b20b8287a3c3a1fe223f93d4008dbc0',
                                                'sha256': '4630cf8b28021fc601abbb6adc51bcfb517e117128ef36257b5a5998b745056d'},
  'scripts/tests/test_r5_backend_evidence_continuation.py': {'before_commit': '0d58452206048a08c9d8d7137804762faf4d68ef',
-                                                            'blob': 'f8f866a88a0335263e5d565fbb7dc37560060bcc',
-                                                            'sha256': 'c82875ebbac459d9d21b1b3719762835f16ab0309dd07412fd62442455576b9b'},
+                                                            'blob': 'b62d0f864b3f334474303ef3b4ef1a4e813acd77',
+                                                            'sha256': '021a0477d5dd96e64048451f9646545ecaffea65d5660b8bb8c4d298145c2b19'},
  'scripts/tests/test_r5_ci_wiring.py': {'before_commit': '095b9518a9142408f6f36a0968feecae50ae4b05',
-                                        'blob': 'fefac3cb19bb42ea0fe0975619d38265ba3685a1',
-                                        'sha256': '1c2d21d4c095ab01c535fe17d5b29baf206a4619059405e74be84b9d6e8edd2d'},
+                                        'blob': 'e3cf71bd0975920c0ebc4fcf03cba74de93140be',
+                                        'sha256': '8f402e3c6da3828676843f29b750b75ca4af7d7c82f6422419627908de086f97'},
  'scripts/tests/test_r5_reviewed_web_locks.py': {'before_commit': '0caf139ff8aaf4243cd12fdc9b1fc702f632e5c0',
                                                  'blob': '085ae957661b83df9ecc223e516058c7d924a8b3',
-                                                 'sha256': '459b68bd0023dbfc57022a13b3b7893c5b9d90c683ef3340d8dc3c8b840ffbe2'}}
+                                                 'sha256': '459b68bd0023dbfc57022a13b3b7893c5b9d90c683ef3340d8dc3c8b840ffbe2'},
+ 'scripts/tests/test_r5_template_grant_ci.py': {'before_commit': '0d58452206048a08c9d8d7137804762faf4d68ef',
+                                                'blob': '24706ff11c59914556f41714038b61c99b63928f',
+                                                'sha256': '4daafb98317e2f3fa1088351970d31eb94d62f5374df0a0db4aa513eaeb35339'}}
 
 
 def reviewed_live_bytes(path, baseline):

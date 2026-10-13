@@ -65,18 +65,6 @@ jobs:
       - name: Build
         if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
         run: go build ./...
-      - name: Race tests with PostgreSQL
-        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' && steps.backend_pg_client.outcome == 'success' }}
-        timeout-minutes: 12
-        env:
-          TABMAIL_PAIR_REVIEW: '1'
-          TABMAIL_SUCCESSOR_AUTHZ_OWNED: '1'
-          TABMAIL_LF01_OWNED_PROBE: '1'
-        run: |
-          set -euo pipefail
-          python3 -B -m unittest discover -s tools/ci -p 'test_*.py' -v
-          python3 -B tools/ci/backend_shards.py \
-            --source-sha "$(cat go-test-source-sha.txt)" --output-dir backend-shards
       - name: Template grant revocation with PostgreSQL
         id: backend_template_grant
         if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
@@ -180,14 +168,6 @@ jobs:
             backend-typescript-preparation.json
           if-no-files-found: error
           retention-days: 14
-      - name: Upload independent backend shard evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: company-backend-shards
-          path: backend-shards
-          if-no-files-found: error
-          retention-days: 14
       - name: Upload protocol source manifest
         if: ${{ always() && steps.backend_protocol.outputs.source_directory != '' }}
         uses: actions/upload-artifact@v4
@@ -202,6 +182,110 @@ jobs:
         with:
           name: company-template-grant-postgres-evidence
           path: ${{ steps.backend_template_grant.outputs.evidence_directory }}
+          if-no-files-found: error
+          retention-days: 14
+  backend-race:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        partition: [0, 1, 2, 3]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tabmail_test
+          POSTGRES_PASSWORD: disposable-test-password
+          POSTGRES_DB: tabmail_test
+        ports: ['55447:5432']
+        options: >-
+          --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      GOSUMDB: sum.golang.org
+      GODEBUG: asynctimerchan=0
+      TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@127.0.0.1:55447/tabmail_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        id: backend_checkout
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Record the tested backend checkout
+        id: backend_source
+        if: ${{ !cancelled() && steps.backend_checkout.outcome == 'success' }}
+        run: git rev-parse HEAD > go-test-source-sha.txt
+      - uses: actions/setup-go@v5
+        id: backend_go
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        id: backend_node
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
+        with:
+          node-version: '22'
+      - name: PostgreSQL client for coordinated restore rehearsal
+        id: backend_pg_client
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client-16
+          echo /usr/lib/postgresql/16/bin >> "$GITHUB_PATH"
+      - name: Exact immutable archive boundary
+        id: backend_archive
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
+        run: python3 -B scripts/r5_archive_boundary.py --root .
+      - name: Race tests with PostgreSQL
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' && steps.backend_pg_client.outcome == 'success' }}
+        timeout-minutes: 12
+        env:
+          TABMAIL_PAIR_REVIEW: '1'
+          TABMAIL_SUCCESSOR_AUTHZ_OWNED: '1'
+          TABMAIL_LF01_OWNED_PROBE: '1'
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s tools/ci -p 'test_*.py' -v
+          python3 -B tools/ci/backend_shards.py \
+            --source-sha "$(cat go-test-source-sha.txt)" --output-dir backend-shards --matrix-index ${{ matrix.partition }}
+      - name: Upload independent backend shard evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-backend-shards-${{ matrix.partition }}
+          path: backend-shards
+          if-no-files-found: error
+          retention-days: 14
+  backend-race-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: backend-race
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: company-backend-shards-*
+          path: matrix-artifacts
+          merge-multiple: false
+      - name: Verify independent whole-suite matrix coverage
+        run: |
+          python3 -B -m unittest discover -s tools/ci -p 'test_*.py' -v
+          python3 -B tools/ci/backend_shards.py --source-sha "$(git rev-parse HEAD)" \
+            --verify-matrix matrix-artifacts --output-dir matrix-verification
+      - name: Upload independently verified full backend coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-backend-complete-evidence
+          path: matrix-verification
           if-no-files-found: error
           retention-days: 14
   frontend:

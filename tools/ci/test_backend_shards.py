@@ -1,10 +1,14 @@
 import json
+import hashlib
 from pathlib import Path
 import sys
+import tempfile
+from types import SimpleNamespace
 import unittest
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from backend_shards import discover, partition, validate
+from backend_shards import discover, partition, validate, matrix_indices, test_argv, verify_matrix
 
 
 def log(*events):
@@ -73,6 +77,62 @@ class CoverageTests(unittest.TestCase):
         events = log(dict(Action='start'), dict(Action='run', Test='TestA'),
                      dict(Action='skip', Test='TestA'), dict(Action='pass'))
         self.assertEqual(validate(events, {('p', 'TestA')}, {('p', 'TestA'): 'existing rule'}, 0)['status'], 'pass')
+
+    def test_matrix_partition_is_exact_and_invalid_index_rejected(self):
+        indices = [index for partition in range(4) for index in matrix_indices(partition)]
+        self.assertEqual(sorted(indices), list(range(16)))
+        for index in (-1, 4):
+            with self.assertRaises(ValueError):
+                matrix_indices(index)
+        self.assertEqual(test_argv({('p', 'TestA')}),
+                         ['go', 'test', '-json', '-race', '-count=1', '-timeout=180s', '-run', '^(TestA)$', 'p'])
+
+    def test_matrix_revalidates_all_original_logs_and_rejects_tampering(self):
+        for mode in ('valid', 'missing', 'source', 'command', 'log', 'failure', 'extra', 'mandatory'):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                artifacts, output = root / 'artifacts', root / 'result'
+                artifacts.mkdir(); output.mkdir()
+                source = 'a' * 40
+                args = SimpleNamespace(verify_matrix=artifacts, source_sha=source)
+                parts = [{('p', f'Test{i}')} for i in range(4)]
+                plan = {'source_sha': source}
+                for index, part in enumerate(parts):
+                    folder = artifacts / f'company-backend-shards-{index}'
+                    folder.mkdir()
+                    name = f'Test{index}'
+                    raw = '\n'.join(log(dict(Action='start'), dict(Action='run', Test=name),
+                                         dict(Action='pass', Test=name), dict(Action='pass'))).encode()
+                    for filename, data in {
+                        'plan.json': plan,
+                        'summary.json': dict(source_sha=source, matrix_index=index, shard_indices=[index],
+                                             status='pass', source_unchanged=True),
+                        f'shard-{index:02d}.process.json': dict(argv=test_argv(part), exit_code=0, timeout=False),
+                        f'shard-{index:02d}.evidence.json': dict(source_sha=source, log_sha256=hashlib.sha256(raw).hexdigest()),
+                    }.items():
+                        (folder / filename).write_text(json.dumps(data))
+                    (folder / f'shard-{index:02d}.jsonl').write_bytes(raw)
+                folder = artifacts / 'company-backend-shards-0'
+                if mode == 'missing':
+                    (folder / 'shard-00.jsonl').unlink()
+                elif mode == 'source':
+                    (folder / 'plan.json').write_text(json.dumps({'source_sha': 'b' * 40}))
+                elif mode == 'command':
+                    (folder / 'shard-00.process.json').write_text(json.dumps(dict(argv=['true'], exit_code=0, timeout=False)))
+                elif mode == 'log':
+                    (folder / 'shard-00.jsonl').write_text('')
+                elif mode == 'failure':
+                    (folder / 'summary.json').write_text(json.dumps(dict(source_sha=source, matrix_index=0,
+                        shard_indices=[0], status='fail', source_unchanged=True)))
+                elif mode == 'extra':
+                    (folder / 'shard-99.jsonl').write_text('')
+                required = {('p', 'TestMissing')} if mode == 'mandatory' else {('p', 'Test0')}
+                with mock.patch('backend_shards.subprocess.check_output', side_effect=[b'', source + '\n']):
+                    if mode == 'valid':
+                        self.assertEqual(verify_matrix(args, output, plan, parts, {}, required), 0)
+                    else:
+                        with self.assertRaises(ValueError):
+                            verify_matrix(args, output, plan, parts, {}, required)
 
 
 if __name__ == '__main__':

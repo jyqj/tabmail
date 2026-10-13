@@ -124,7 +124,12 @@ raise SystemExit(int(os.environ.get('CONTROL_GO_EXIT', '0')))
         self.assertNotIn('continue-on-error', step)
         self.assertNotIn('env', step)
         steps = backend()['steps']
-        self.assertLess(steps.index(self.named('Race tests with PostgreSQL')), steps.index(step))
+        self.assertLess(steps.index(self.named('Build')), steps.index(step))
+        # Full race coverage runs independently on dedicated matrix runners;
+        # a failing shard must not suppress this original template-grant gate.
+        workflow = yaml.load((ROOT / '.github/workflows/company-p0.yml').read_text(), Loader=yaml.BaseLoader)
+        self.assertIn('backend-race', workflow['jobs'])
+        self.assertNotIn('needs', workflow['jobs']['backend'])
         self.assertIn('set -euo pipefail\n', step['run'])
         self.assertIn('set +e\n', step['run'])
         for bypass in ['|| true', '--allow', '--skip', '--exclude']:

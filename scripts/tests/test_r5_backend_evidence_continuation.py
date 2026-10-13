@@ -14,7 +14,9 @@ def backend():
 
 
 def by_name(name):
-    return next(step for step in backend()['steps'] if step.get('name') == name)
+    workflow = yaml.load((ROOT / '.github/workflows/company-p0.yml').read_text(), Loader=yaml.BaseLoader)
+    job = 'backend-race' if name in ('Race tests with PostgreSQL', 'Upload independent backend shard evidence') else 'backend'
+    return next(step for step in workflow['jobs'][job]['steps'] if step.get('name') == name)
 
 
 def prerequisites(step):
@@ -111,7 +113,7 @@ class BackendEvidenceContinuationTests(unittest.TestCase):
         self.assertIn('evaluate(lines, planned - set(allowed), allowed, exit_code)', runner)
         self.assertIn("'-race', '-count=1', '-timeout=180s'", runner)
         self.assertIn("load_suite(ROOT / 'scripts/required_go_tests.json', 'backend')", runner)
-        self.assertIn('set(seen) == planned', runner)
+        self.assertIn('set(seen) != planned', runner)
         for bypass in ['--exclude', '-run ', '-skip ', '|| true', '|| :']:
             self.assertNotIn(bypass, race)
         self.assertEqual(by_name('Build')['run'], 'go build ./...')
@@ -122,7 +124,8 @@ class BackendEvidenceContinuationTests(unittest.TestCase):
         source = by_name('Record the tested backend checkout')
         self.assertEqual(source['run'], 'git rev-parse HEAD > go-test-source-sha.txt')
         for name in CHECKS:
-            self.assertLess(steps.index(source), steps.index(by_name(name)))
+            if name != 'Race tests with PostgreSQL':
+                self.assertLess(steps.index(source), steps.index(by_name(name)))
         self.assertEqual(sum('> go-test-source-sha.txt' in step.get('run', '') for step in steps), 1)
         for name in ['Race tests with PostgreSQL', 'Prove missing execution cannot pass',
                      'Actual HTTP response contracts with PostgreSQL']:
@@ -139,7 +142,7 @@ class BackendEvidenceContinuationTests(unittest.TestCase):
             'backend-typescript-preparation.json'})
         shards = by_name('Upload independent backend shard evidence')
         self.assertEqual(shards['if'], 'always()')
-        self.assertEqual(shards['with'], {'name': 'company-backend-shards', 'path': 'backend-shards',
+        self.assertEqual(shards['with'], {'name': 'company-backend-shards-${{ matrix.partition }}', 'path': 'backend-shards',
                                          'if-no-files-found': 'error', 'retention-days': '14'})
 
     def test_typescript_preparation_reuses_the_reviewed_installer_and_receipt(self):
