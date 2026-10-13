@@ -2,10 +2,10 @@
   "revision": 20,
   "base_commit": "c056f28b0c811a87a95ddc8c3f7e9ff3f7a338a7",
   "base_tree": "0a46bee4a7b3271233b76983b10ea8a0378d8ee5",
-  "source_commit": "80f233308ab69e0d7a1445837195cd11e0badf59",
-  "source_tree": "d5313c764f28e1229aa1da28f443ccfc3f032308",
+  "source_commit": "67861f5c2da6441d797a8f0c2dc4db4e7dc82a58",
+  "source_tree": "256027278290213b1822831adca6bed420cd1617",
   "previous_catalog_sha256": "25bb0f0cd3d9294171b4ec8719220399e13798d0d5aaced9995d620d1831f4b0",
-  "current_catalog_sha256": "a06c86653bfb7edd808c4609155456535f750eb89369d193ec31071afaae697f",
+  "current_catalog_sha256": "5cda36ee719c97edce7e37aeb881517f5dcfd49a1ebf2a1d1e7d856f03e40f92",
   "transaction_callers": [
     {
       "id": "internal/store/postgres/postgres.go:*PgStore:Close",
@@ -5477,14 +5477,84 @@
       "sha256": "8ff800e1fc867ddfc32982e8fb63681d0ed60b3f4b30bad8dfa93c06eb37bd8c"
     },
     {
+      "path": "internal/store/postgres/ar09_revision_claim_test.go",
+      "deleted": false,
+      "sha256": "3fd101d349fab0e26b3afeff613bf81883558f35047201d7cf8e280a5125197e"
+    },
+    {
+      "path": "internal/store/postgres/company_architecture_test.go",
+      "deleted": false,
+      "sha256": "8d838f72dcac41f9affb861bc5de8ad75c554bf5d331cb572edca768c820d349"
+    },
+    {
+      "path": "internal/store/postgres/company_console_boundary_test.go",
+      "deleted": false,
+      "sha256": "ee5616aa58ff4aab3a15eef669fadd37057164715818a4104a5812e7290ce60f"
+    },
+    {
+      "path": "internal/store/postgres/company_content_boundary_test.go",
+      "deleted": false,
+      "sha256": "3ee0df9ddaa1f30d6dff2cfbd2dffce58583c0b57f21148331488e0a9887fd59"
+    },
+    {
+      "path": "internal/store/postgres/company_delivery_test.go",
+      "deleted": false,
+      "sha256": "aeac09341fd40de91acf3fbbc2a5fd40dec9a44724a8783c7a37ae0296c727eb"
+    },
+    {
+      "path": "internal/store/postgres/company_draft_submit_test.go",
+      "deleted": false,
+      "sha256": "4b4552d7f220b39ef66a5f05a82146c1ef83b32a4ee907a0939f8846033edebf"
+    },
+    {
+      "path": "internal/store/postgres/company_index_recovery_test.go",
+      "deleted": false,
+      "sha256": "69ea94c03d828fc51a426f70748571c63d928e829115bfeb04ec289255afda52"
+    },
+    {
       "path": "internal/store/postgres/company_lock_test.go",
       "deleted": false,
       "sha256": "c55af4ad0938a30928f52e992a177f5ae1d61d08bbc5c79f05eddbf43ff1515b"
     },
     {
+      "path": "internal/store/postgres/company_workflows_test.go",
+      "deleted": false,
+      "sha256": "1316acf035b5f29a14cb2ed8d739a273deee090e4a2f45c78001957054443e2f"
+    },
+    {
+      "path": "internal/store/postgres/lf01_selector_regression_test.go",
+      "deleted": false,
+      "sha256": "5438df847727cf0bfeb407049b76f3bdc417791177d46db2b52b8bd6de95516e"
+    },
+    {
+      "path": "internal/store/postgres/mailbox_predicate_test.go",
+      "deleted": false,
+      "sha256": "c45646624ee033950affa15bba11129931e8596cbd192376f105cdbf882308b8"
+    },
+    {
+      "path": "internal/store/postgres/message_user_state_test.go",
+      "deleted": false,
+      "sha256": "1bbbe5220e6579d32e450366dbd81c51b2b14098052d2220b4c72f0c57eb543f"
+    },
+    {
+      "path": "internal/store/postgres/r5_access_explanation_snapshot_test.go",
+      "deleted": false,
+      "sha256": "c40e617053903d425c791b1663ea3386e363b696ffb0c6e64cfd0f7756f5b5e1"
+    },
+    {
+      "path": "internal/store/postgres/r5_activation_boundary_test.go",
+      "deleted": false,
+      "sha256": "dd722ab4c957b7336d046108180ee8ddf62bd81edaf8eeaecb2f3f563456ce80"
+    },
+    {
       "path": "internal/store/postgres/r5_atomic_retry_test.go",
       "deleted": false,
       "sha256": "311a0e4b11acd88e8025c771cec0381db33f600aaa4f7f7bfba13397d3f78797"
+    },
+    {
+      "path": "internal/store/postgres/r5_attachment_finish_test.go",
+      "deleted": false,
+      "sha256": "a6db4b180a4e8b96f44900591f44b5f340e05638a9c4df869be1bf279559e396"
     },
     {
       "path": "internal/store/postgres/r5_attachment_gc_process_main_test.go",
@@ -5494,12 +5564,62 @@
     {
       "path": "internal/store/postgres/r5_attachment_gc_progress_test.go",
       "deleted": false,
-      "sha256": "8e0abee6f346f95645c550ae31916573dee18e6f29fe977dab709e76562e048d"
+      "sha256": "84d5054a39ddeb5275d4765efa02328e4f6f92916e6a3b9d0ee7a834d24846bc"
+    },
+    {
+      "path": "internal/store/postgres/r5_audited_parent_test.go",
+      "deleted": false,
+      "sha256": "8bba64f07b69946ee0a07db36829a18980f4e35e222ece20851ccee9d1a36469"
+    },
+    {
+      "path": "internal/store/postgres/r5_audited_writes_test.go",
+      "deleted": false,
+      "sha256": "cf21828747beb0bd1935a3d3653ea80b3957451c6d927e610935399960df75f6"
     },
     {
       "path": "internal/store/postgres/r5_cache_parent_snapshot_test.go",
       "deleted": false,
-      "sha256": "2d2128a3576925d9e3b014bde18806bbc8d1cebedfca33b7ca7475028e081136"
+      "sha256": "4136b3445242dd515f35f2fc7b47037b076f7b7b6823e13904971a444e9458be"
+    },
+    {
+      "path": "internal/store/postgres/r5_company_admin_events_test.go",
+      "deleted": false,
+      "sha256": "59a8a4867e989913a6503caf5a082834b4629c1aa4884258bb3002bbfc02c36e"
+    },
+    {
+      "path": "internal/store/postgres/r5_concurrency_baseline_test.go",
+      "deleted": false,
+      "sha256": "103afbe119eaf825d9d4ef413440895df10161569527dafc9315e5b4af9ebcba"
+    },
+    {
+      "path": "internal/store/postgres/r5_content_wait_test.go",
+      "deleted": false,
+      "sha256": "ee8875afda91285d8f31f60f42e3e1ee596ac3283100adb8c68df2159e3e6b2e"
+    },
+    {
+      "path": "internal/store/postgres/r5_enqueue_authority_test.go",
+      "deleted": false,
+      "sha256": "f5a1e5d111dca6df69b9a90aafae9d35afcd851d2467aaa3d3df9023f212ece6"
+    },
+    {
+      "path": "internal/store/postgres/r5_enqueue_parallel_test.go",
+      "deleted": false,
+      "sha256": "9ca2228ac3d862d39382f92e24dc8616c08970da56eb52f9b8f3a9a467bfbe6b"
+    },
+    {
+      "path": "internal/store/postgres/r5_enqueue_quota_snapshot_test.go",
+      "deleted": false,
+      "sha256": "b953e6ca4b3f0d1af0c2275c56c6850f338c6e4044dc24aea4d85b69fe45d70e"
+    },
+    {
+      "path": "internal/store/postgres/r5_index_boundary_test.go",
+      "deleted": false,
+      "sha256": "c2da334e64194423931f667a861ed510f1e87eab85158a748154c3b9467475a4"
+    },
+    {
+      "path": "internal/store/postgres/r5_ingress_transaction_test.go",
+      "deleted": false,
+      "sha256": "4f54f03413f292ab89ac3d47858c653079e4536f5eab09174cf322f1fe4afc5a"
     },
     {
       "path": "internal/store/postgres/r5_key_touch_admission_test.go",
@@ -5509,7 +5629,17 @@
     {
       "path": "internal/store/postgres/r5_legacy_content_test.go",
       "deleted": false,
-      "sha256": "5aecb791b93e5012a50158c47e15778200adbe2829736c0bcb330a218356503e"
+      "sha256": "008eded8babff599dea4e9e2d538bb8c2f58dfa9dd23740280b87023301dc78e"
+    },
+    {
+      "path": "internal/store/postgres/r5_lock_order_test.go",
+      "deleted": false,
+      "sha256": "4f17bdcb262f8300387419383727b69e43fc6f98576709d1c66b79a1b0957f5d"
+    },
+    {
+      "path": "internal/store/postgres/r5_message_maintenance_order_test.go",
+      "deleted": false,
+      "sha256": "3ca21d15b45982c82b95dfd55fb061b21c07cb3f6f7151355f673a71017df5a1"
     },
     {
       "path": "internal/store/postgres/r5_outbound_receipt_test.go",
@@ -5519,7 +5649,17 @@
     {
       "path": "internal/store/postgres/r5_parallel_admission_test.go",
       "deleted": false,
-      "sha256": "41c2ab9d7084fabb0dd86d04a9fdb2166600935994363525aef78ff66b884e8d"
+      "sha256": "9c1ddd129d8319e6ca637d453dc0c42ac0bf73f36901848d2df765a132938c70"
+    },
+    {
+      "path": "internal/store/postgres/r5_password_parent_test.go",
+      "deleted": false,
+      "sha256": "e586516fc7961ab4f93a1a6d2096458995eadc0ff9965dd74dce21d36acec49b"
+    },
+    {
+      "path": "internal/store/postgres/r5_permission_snapshot_test.go",
+      "deleted": false,
+      "sha256": "441ada273e2e0821777d91f331028a5e1b0ae5336667b062c99c9efd65f73d16"
     },
     {
       "path": "internal/store/postgres/r5_permission_stage_matrix_test.go",
@@ -5527,14 +5667,44 @@
       "sha256": "5246fb2777dea79f7bef96e690475c3b661f5518df4ead679bdd91f423b29757"
     },
     {
+      "path": "internal/store/postgres/r5_personal_message_state_order_test.go",
+      "deleted": false,
+      "sha256": "8b2277479738fbe94e52eb58c79554bd6ddb74df041fef725c41286d3772f3e2"
+    },
+    {
+      "path": "internal/store/postgres/r5_queue_nullable_test.go",
+      "deleted": false,
+      "sha256": "0e37db71301d26c7846dcd791f3885c46e4867cbe57c5966dea157a34b7d68f4"
+    },
+    {
+      "path": "internal/store/postgres/r5_read_boundary_test.go",
+      "deleted": false,
+      "sha256": "8a0da0bff85702be74f5c8b547efb7322c8659041556cbeb1a8fd81f565b7f37"
+    },
+    {
       "path": "internal/store/postgres/r5_received_content_eligibility_test.go",
       "deleted": false,
       "sha256": "af1124a7734504412c60195d71bb01c857da933e865de53325d8d32c212b7586"
     },
     {
+      "path": "internal/store/postgres/r5_recovery_parent_test.go",
+      "deleted": false,
+      "sha256": "58083093d49586c741864b7a34a1fdce80ce294a6b602748aa3684ce405bef92"
+    },
+    {
       "path": "internal/store/postgres/r5_recovery_target_snapshot_test.go",
       "deleted": false,
-      "sha256": "9a88b81c8ea2efe21843b6b0ad50238c576c4bbafa3712ef57a92c689a74841d"
+      "sha256": "53da430567be05371c356e3a2029f55a86b180b3c27ef3f3eb9356dc705f2991"
+    },
+    {
+      "path": "internal/store/postgres/r5_reference_gc_test.go",
+      "deleted": false,
+      "sha256": "46f7c8f728a629739adae28e08218c066687b2d4c2d83f0dd0495e61978e0034"
+    },
+    {
+      "path": "internal/store/postgres/r5_reservation_boundary_test.go",
+      "deleted": false,
+      "sha256": "f6ceba531e3e0d0a42658702e794058e39702a1ce1eb946361bd90a8adc3d6e0"
     },
     {
       "path": "internal/store/postgres/r5_restore_lifecycle_test.go",
@@ -5542,14 +5712,69 @@
       "sha256": "695947d73309f955efd9504ef9afee1060b3a4c63d4b2a781158fb886cda1756"
     },
     {
+      "path": "internal/store/postgres/r5_restore_retention_snapshot_test.go",
+      "deleted": false,
+      "sha256": "894f69fc60096d89e0fcd759db75b8bd2bd6372e381bb07ad40e86e61533e0ba"
+    },
+    {
       "path": "internal/store/postgres/r5_sent_recipient_snapshot_test.go",
       "deleted": false,
       "sha256": "e9fc907d0faf94e54c028bb07516f59d65d63a253e3875b4371eec5825d09583"
     },
     {
+      "path": "internal/store/postgres/r5_session_version_test.go",
+      "deleted": false,
+      "sha256": "cf0b5028a2fc5a0195f5efcbeed0fccce9e907aca07b7fe5218f27d4a41be736"
+    },
+    {
+      "path": "internal/store/postgres/r5_submission_receipt_privacy_test.go",
+      "deleted": false,
+      "sha256": "8f2105aa0c642f332d8478c42dad296d8896c64b30a2edcd6fb2b82c94e6deee"
+    },
+    {
+      "path": "internal/store/postgres/r5_submission_replay_authority_test.go",
+      "deleted": false,
+      "sha256": "c07199d69e2ac21d3bcc28376f1883ac7bb891a9c8bbbcde750df0e90452f3e2"
+    },
+    {
+      "path": "internal/store/postgres/r5_template_version_order_test.go",
+      "deleted": false,
+      "sha256": "ec2d227dd4b713ae3b8546f999f806501b805dacd95acc734eca4909c6600895"
+    },
+    {
+      "path": "internal/store/postgres/r5_tenant_delete_order_test.go",
+      "deleted": false,
+      "sha256": "bc9a3dfca5b5dea81632930c0896856a5ad3d7f9ca08b3c841c88e4599826bb2"
+    },
+    {
       "path": "internal/store/postgres/r5_webhook_fanout_order_test.go",
       "deleted": false,
       "sha256": "19f88f6b4e0671846cd01f5ed53dc1409ca1210ae9b29eb49314088ba1fd4484"
+    },
+    {
+      "path": "internal/store/postgres/recipient_ledger_migration_test.go",
+      "deleted": false,
+      "sha256": "e6003820f9550b153dcb70f62180e50eb99371eb1a50fbb79cce162d29366694"
+    },
+    {
+      "path": "internal/store/postgres/send_policy_test.go",
+      "deleted": false,
+      "sha256": "3042d94a8cffe1f43821c2223dae70987b2297d4238bd705141f77e4674beb5e"
+    },
+    {
+      "path": "internal/store/postgres/submissions_content_test.go",
+      "deleted": false,
+      "sha256": "224cbb6eeab2e9e447662fa99db4214b4aefec4170ff1659cb3034b5b7d31e36"
+    },
+    {
+      "path": "internal/store/postgres/submissions_tenant_leak_test.go",
+      "deleted": false,
+      "sha256": "b788373af0e983827f624fe2ec24c28dbbaf3431539b36d081b21fb56d05c9a1"
+    },
+    {
+      "path": "internal/store/postgres/submissions_test.go",
+      "deleted": false,
+      "sha256": "ed286cc4b614435b63448547c1a1863d57b0c88918ea3ad76547a172e0e96e42"
     },
     {
       "path": "internal/testpg/fixture.go",
@@ -5574,7 +5799,7 @@
     {
       "path": "scripts/tests/test_r5_ci_wiring.py",
       "deleted": false,
-      "sha256": "8f4f88311e88c388fa25c5d32f73b1a9330a5feda3ae9d7cbeec06382bc77bc2"
+      "sha256": "629960d36a148b7ce901ea1e1a3f0160a0874e01ae8519154c728f353f623991"
     },
     {
       "path": "scripts/tests/test_r5_template_grant_ci.py",
@@ -5589,7 +5814,7 @@
     {
       "path": "tools/ci/backend_single.py",
       "deleted": false,
-      "sha256": "350a5ac23daf2e88b7ebdb2a1e57b2906bf94cdb93aaa5a115006829bdeddf59"
+      "sha256": "0a971556a9cf365f3bf4637f8936fa9c64d7609cb0a75ab118668c0ea764fc26"
     },
     {
       "path": "tools/ci/test_backend_shards.py",
@@ -5599,7 +5824,7 @@
     {
       "path": "tools/ci/test_backend_single.py",
       "deleted": false,
-      "sha256": "e083d4e4a7896c947dc24b8a4a9a42290b11d70c2b53d6591a148d8f8ef7f54b"
+      "sha256": "b25d4ecbf10c7053fb5b831ac56a3cd23d68e9d731e03ef40e8ad16e225da5a6"
     }
   ],
   "old_rejection": "caller drift: internal/store/postgres/postgres.go:*PgStore:Close\ncaller drift: internal/store/postgres/postgres.go::New",
