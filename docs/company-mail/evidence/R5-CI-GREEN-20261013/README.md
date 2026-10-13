@@ -92,3 +92,18 @@ job），不是保持原4 jobs的声明。每个 backend相关job仍20分钟；�
 
 矩阵负控10项、接线/制品/模板门禁控制24项、当前目录两项通过。最终远端矩阵CI
 尚待实际运行，不能由这些合成/局部结果宣布完整修绿。
+
+### 前端构建隔离
+
+`ca789c0d` 的4个PG matrix分区、独立全覆盖汇总、backend完整源码/协议、catalog、
+production-web和browser-journey全部成功。汇总job 115391882344 在实际merge
+`f53d4b483a5a2afdf488fb27d9a84558f8fb9557` / tree
+`a10cbfdd661f709d52a3b416e624ba7099b07fd2` 独立验证1478顶层、247 mandatory。
+frontend的源码、完整默认测试、类型、lint、严格audit步骤成功，但最后npm build被原
+15分钟job时限取消；不能登记该workflow成功。
+
+当前把原npm build移入独立frontend-build job：同一checkout/lock、原npm ci和
+npm run build，仍15分钟，失败仍使完整workflow失败。原frontend保留全部验证与
+原证据上传；没有删构建、增大预算或用Docker构建结果顶替它。拓扑现为7个job定义，
+矩阵展开10个实际job。接线/前端独立失败/原制品/模板控制27项、当前目录两项通过；
+最终远端整轮尚待验收。

@@ -1,0 +1,7 @@
+test_revision19_binds_actual_source_facts_and_preserves_manual_reviews (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision19_binds_actual_source_facts_and_preserves_manual_reviews) ... ok
+test_revision19_preserves_public_history_collectors_and_original_rejections (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision19_preserves_public_history_collectors_and_original_rejections) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 7.971s
+
+OK

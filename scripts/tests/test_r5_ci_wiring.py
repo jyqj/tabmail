@@ -59,7 +59,7 @@ class R5CIWiringTests(unittest.TestCase):
     def test_existing_jobs_toolchain_and_timer_mode(self):
         jobs = load('company-p0.yml')['jobs']
         self.assertEqual(set(jobs), {'backend', 'backend-race', 'backend-race-coverage',
-                                     'frontend', 'production-web', 'browser-journey'})
+                                     'frontend', 'frontend-build', 'production-web', 'browser-journey'})
         self.assertEqual(jobs['backend-race']['strategy'],
                          {'fail-fast': 'false', 'matrix': {'partition': ['0', '1', '2', '3']}})
         self.assertEqual(jobs['backend-race-coverage']['needs'], 'backend-race')
@@ -68,7 +68,7 @@ class R5CIWiringTests(unittest.TestCase):
         coverage = next(s for s in jobs['backend-race-coverage']['steps'] if s.get('name') == 'Verify independent whole-suite matrix coverage')
         self.assertIn('--verify-matrix matrix-artifacts', coverage['run'])
         for name, job in jobs.items():
-            self.assertEqual(job['timeout-minutes'], '15' if name == 'frontend' else '20')
+            self.assertEqual(job['timeout-minutes'], '15' if name in ('frontend', 'frontend-build') else '20')
             for step in job['steps']:
                 if step.get('uses') == 'actions/setup-go@v5':
                     self.assertEqual(step['with'], {'go-version-file': 'go.mod'})
