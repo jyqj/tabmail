@@ -1,0 +1,22 @@
+{
+  "execution_source": "ce971c3412776200a733ad705f73483055c800e0",
+  "validator_note": "Revalidated unmodified v2 raw logs with original explicit allowed skips excluded from the dynamically required set; original v2 aggregate failure retained.",
+  "shards_passed": 16,
+  "top_level_discovered": 1478,
+  "mandatory_passed": 247,
+  "mandatory_total": 247,
+  "unique_pass_leaves": 11927,
+  "skips": [
+    [
+      "tabmail/internal/store/postgres",
+      "TestR3BrowserJourney"
+    ]
+  ],
+  "failed": 0,
+  "original_allowed_skips": [
+    [
+      "tabmail/internal/store/postgres",
+      "TestR3BrowserJourney"
+    ]
+  ]
+}

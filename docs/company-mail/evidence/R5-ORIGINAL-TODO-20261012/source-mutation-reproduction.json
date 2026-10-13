@@ -1,0 +1,30 @@
+{
+  "source_commit": "af1444807e1018c95b963b8c5b74e2b2e5060b9a",
+  "source_tree": "ddd5ae6fef29012af00642ae60fd31126ca32a74",
+  "source_status": "",
+  "go_version": "go version go1.25.7 linux/amd64",
+  "files": {
+    "scripts/tests/test_r5_selected_source_binding_v2.py": "4ec1405e5683d7153d345c4c85a82bcd5ba37470f929f14cb2a57c436281feea",
+    "scripts/r5_selected_source_binding_v2.py": "4bafe6a0b146c69aaf76dfaa206a95ac581739e3c0efa4a52bf36613ae817d67",
+    "scripts/r5_source_inventory.py": "306cfcae043925d656d13b08bd439015e23348df255b363ceb8c10b6890488b2",
+    "scripts/r5_archive_boundary.py": "c02acc09dd0f49b28113f99b05ffc6ff996287fb015d60fa08d7de56d92b7f15"
+  },
+  "attempts": [
+    {
+      "log": "mutation-test-baseline.log",
+      "scope": "direct dirty invocation root",
+      "result": "ERROR before tests: npm symlink boundary; 0 tests"
+    },
+    {
+      "log": "mutation-clean-baseline.log",
+      "scope": "exact clean source with shared cache while another build ran",
+      "result": "ERROR before tests: selected metadata drift; 0 tests; concurrency causality not proved"
+    },
+    {
+      "log": "mutation-isolated-baseline.log",
+      "scope": "exact clean source with isolated GOCACHE and existing module cache",
+      "result": "PASS: unchanged original mutation method; 1 method, 4 original mutation targets; no skips"
+    }
+  ],
+  "interpretation": "Latest remote single failure not reproduced; do not substitute local narrow pass for full CI. Both source-version runs used independent clones with internal pinned TypeScript preparation. No evidence justifies installing complete npm in backend or relaxing mutation assertions."
+}

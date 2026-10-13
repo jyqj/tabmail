@@ -84,7 +84,9 @@ class NextSecurityPatchLockTests(unittest.TestCase):
     def setUpClass(cls):
         cls.previous = subprocess.check_output(
             ['git', '-C', str(ROOT), 'show', f'{PRE_NEXT_PATCH}:web/package-lock.json'])
-        cls.current = (ROOT / 'web/package-lock.json').read_bytes()
+        # Keep the earlier Next.js release assertions on their exact old lock.
+        cls.current = subprocess.check_output(['git', '-C', str(ROOT), 'show',
+            'e2825c9e3eccf12c7ba979975b70d9991c4cffa7:web/package-lock.json'])
 
     def test_only_reviewed_direct_pair_and_matching_release_packages_change(self):
         old, current = json.loads(self.previous), json.loads(self.current)
@@ -165,7 +167,51 @@ class NextSecurityPatchLockTests(unittest.TestCase):
                     if isinstance(node, ast.FunctionDef) and node.name.startswith('test_')}
         self.assertEqual(original_assertions(old_tests), original_assertions(Path(__file__).read_bytes()))
         self.assertEqual(preparation.REVIEWED_LOCK_SHA256S,
-                         frozenset({OLD_HASH, NEW_HASH, NEXT_PATCH_HASH}))
+                         frozenset({OLD_HASH, NEW_HASH, NEXT_PATCH_HASH,
+                                    'ee33ca3ab3542a60844949b6999411888963486a2f95ca63a5307d6c5f3d82fd'}))
+
+
+class BracesSecurityPatchLockTests(unittest.TestCase):
+    def test_exact_reviewed_alias_preserves_typescript_and_other_versions(self):
+        raw = subprocess.check_output(['git', '-C', str(ROOT), 'show',
+                                      '0caf139ff8aaf4243cd12fdc9b1fc702f632e5c0:web/package-lock.json'])
+        expected = 'ee33ca3ab3542a60844949b6999411888963486a2f95ca63a5307d6c5f3d82fd'
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), expected)
+        previous = json.loads(subprocess.check_output(['git', '-C', str(ROOT), 'show',
+                             'e2825c9e3eccf12c7ba979975b70d9991c4cffa7:web/package-lock.json']))['packages']
+        current = json.loads(raw)['packages']
+        # npm recomputes peer-placement metadata; the compiler artifact and
+        # every other TypeScript field remain identical.
+        self.assertEqual({k: v for k, v in current['node_modules/typescript'].items() if k != 'peer'},
+                         {k: v for k, v in previous['node_modules/typescript'].items() if k != 'peer'})
+        aliases = [(path, value) for path, value in current.items() if path.endswith('/braces')]
+        self.assertEqual(len(aliases), 1)
+        self.assertEqual(aliases[0][1]['name'], '@dieub/braces-depth-guard')
+        self.assertEqual(aliases[0][1]['version'], '3.0.3-pn.3')
+        self.assertEqual(aliases[0][1]['integrity'], 'sha512-QY+Uq4s42STyIMPoRkBuUZfYyvz0uZuwuUburLwMx5N+lWqnHHaBxcKPtgKVKjTyFnS1q4ivKu9Wxi4VG7FE9Q==')
+        for path in set(current) | set(previous):
+            if path.endswith('/braces'):
+                continue
+            self.assertIn(path, current)
+            self.assertIn(path, previous)
+            for field in ('version', 'resolved', 'integrity'):
+                self.assertEqual(current[path].get(field), previous[path].get(field), (path, field))
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / 'web').mkdir()
+            (root / 'web/package-lock.json').write_bytes(raw)
+            with mock.patch.object(preparation, 'typescript_members',
+                                   return_value={'lib/fixture.js': b'fixture'}):
+                self.assertEqual(preparation.prepare_typescript(root, b'fixture')['lock_sha256'], expected)
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / 'web').mkdir()
+            (root / 'web/package-lock.json').write_bytes(raw + b' ')
+            with mock.patch.object(preparation, 'typescript_members') as archive:
+                with self.assertRaisesRegex(ValueError, 'reviewed complete lock'):
+                    preparation.prepare_typescript(root, b'fixture')
+            archive.assert_not_called()
+            self.assertFalse((root / 'web/node_modules').exists())
 
 
 if __name__ == '__main__':

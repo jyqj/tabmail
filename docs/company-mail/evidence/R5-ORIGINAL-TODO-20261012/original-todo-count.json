@@ -1,0 +1,92 @@
+{
+  "base_sha": "af1444807e1018c95b963b8c5b74e2b2e5060b9a",
+  "summary": {
+    "total": 171,
+    "complete": 10,
+    "remaining": 161,
+    "newly_closed": [],
+    "request_new_complete": 0,
+    "eligible": [
+      "R5-P0-100"
+    ],
+    "done": [
+      "R5-P0-010",
+      "R5-P0-020",
+      "R5-P0-030",
+      "R5-P0-040",
+      "R5-P0-050",
+      "R5-P0-060",
+      "R5-P0-070",
+      "R5-P0-080",
+      "R5-P0-090",
+      "R5-P0-110"
+    ],
+    "stages": {
+      "P0": {
+        "total": 12,
+        "complete": 10,
+        "remaining": 2
+      },
+      "P1": {
+        "total": 14,
+        "complete": 0,
+        "remaining": 14
+      },
+      "P2": {
+        "total": 15,
+        "complete": 0,
+        "remaining": 15
+      },
+      "P3": {
+        "total": 14,
+        "complete": 0,
+        "remaining": 14
+      },
+      "P4": {
+        "total": 14,
+        "complete": 0,
+        "remaining": 14
+      },
+      "P5": {
+        "total": 14,
+        "complete": 0,
+        "remaining": 14
+      },
+      "P6": {
+        "total": 16,
+        "complete": 0,
+        "remaining": 16
+      },
+      "P7": {
+        "total": 14,
+        "complete": 0,
+        "remaining": 14
+      },
+      "P8": {
+        "total": 14,
+        "complete": 0,
+        "remaining": 14
+      },
+      "P9": {
+        "total": 14,
+        "complete": 0,
+        "remaining": 14
+      },
+      "P10": {
+        "total": 14,
+        "complete": 0,
+        "remaining": 14
+      },
+      "P11": {
+        "total": 16,
+        "complete": 0,
+        "remaining": 16
+      }
+    }
+  },
+  "observed_utc": "2026-10-12T07:07:54.957524+00:00",
+  "scope": "original_parent_TODO_only",
+  "newly_closed_ids": [],
+  "request_target": 10,
+  "request_remaining": 10
+}

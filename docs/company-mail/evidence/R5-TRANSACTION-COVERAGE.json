@@ -1,6 +1,6 @@
 {
   "schema": "r5-transaction-coverage-v1",
-  "baseline_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+  "baseline_commit": "311593e6a837287f58d8f10d559dc0b8991be55e",
   "task": "R5-P0-070",
   "task_complete": false,
   "runtime_verified": false,
@@ -41685,6 +41685,14 @@
           "line": 60,
           "expression": "f.Pool.QueryRow(ctx, `SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname='tenant_api_keys_scopes_check' AND conrelid='tenant_api_keys'::regclass`).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/testpg/r5_loopback_probe.go::NewR5LoopbackProbe",
+          "file": "internal/testpg/r5_loopback_probe.go",
+          "function": "NewR5LoopbackProbe",
+          "line": 42,
+          "expression": "pool.QueryRow(r.Context(), \"SELECT identity FROM r5_batch_probe\").Scan",
+          "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
       "lock_fk_wait_fence": {
@@ -70238,16 +70246,16 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "177ee571b194836678cc9a473f178c655326ba7c",
-  "current_review_boundary": "Revision 18 reviews the authentication snapshot, exact permission-audit actions, late invitation sponsor fence and INSERT-specific cause-preserving classifier. Existing manual fields and optional source_review presence are archived exactly. The new file/helper is pure, not a lock reader. The refresh user lock is pre-existing; only its full-row read and dynamic SQL form change. Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+  "last_review_base_commit": "311593e6a837287f58d8f10d559dc0b8991be55e",
+  "current_review_boundary": "Revision 19 records exactly one lexical Scan name-match candidate in the owned loopback fixture. This is not a dispatch edge to outboundReceiptRow.Scan. PostgreSQL production syntax, classifications, assertions and all manual/file reviews remain byte-equivalent as JSON values. Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
   "inventory_revision": {
-    "revision": 18,
-    "source_commit": "177ee571b194836678cc9a473f178c655326ba7c",
+    "revision": 19,
+    "source_commit": "311593e6a837287f58d8f10d559dc0b8991be55e",
     "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
-    "previous_snapshot_commit": "ffb22b64698e4ff168a8d622018d3e169b3cdf07",
-    "previous_snapshot_blob": "487cacb05965d30ed7a8751ddaa641806e943e98",
-    "previous_sha256": "86e39488c2800ded657eda75e09ed7f3e523ec49b5faebf90f4e0867a70fe354",
+    "previous_snapshot_commit": "af1444807e1018c95b963b8c5b74e2b2e5060b9a",
+    "previous_snapshot_blob": "b88a287a63f6d5900ec18f1f8621089b26aa423c",
+    "previous_sha256": "4663cac24efe0ec255214f125bea6afc71df8e808b445cf5c6313419e7f07483",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION19-20261012/README.md"
   }
 }

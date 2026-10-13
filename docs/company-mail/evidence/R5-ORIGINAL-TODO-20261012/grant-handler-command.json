@@ -1,0 +1,1 @@
+["/workspace/scratch/c5e5c3c93beb/toolchains/go/bin/go", "test", "-mod=readonly", "-p=1", "-json", "-race", "-count=1", "-timeout=180s", "./internal/api/handlers", "-run", "^(TestR5MailboxGrantExplicitIntent|TestR5MailboxWriteIntentKeepsRepositoryRefusals|TestR5MailboxSendPolicyExplicitIntent)$"]

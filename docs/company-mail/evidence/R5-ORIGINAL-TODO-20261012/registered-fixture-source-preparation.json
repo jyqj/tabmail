@@ -1,0 +1,32 @@
+{
+  "source_sha": "fec134b3422b1ab44a311dca10d802d4aeb6984c",
+  "run_id": "07ed41bd84ab4061aeeaadf848247db8",
+  "go_version": "go1.25.7",
+  "go_selection_unchanged": true,
+  "fixture": "/workspace/scratch/c5e5c3c93beb/release-frontend-input-fix/source-version-preparation/ordinary-receipt-wire.json",
+  "fixture_sha256": "9fdd0d734a549733a89fb9cb5f85035a137e9c5ff452276363579cf65b0950f3",
+  "actual_started_test_ids": [
+    "TestOrdinaryReceiptOpenAPIWireFixtures"
+  ],
+  "actual_passed_test_ids": [
+    "TestOrdinaryReceiptOpenAPIWireFixtures"
+  ],
+  "exit": 0,
+  "run_sha256": "a1341b13870215c4b36acd5f773165215fb397fcdd307d0be8a1de295d00d3e4",
+  "executed_binary_sha256": "ffa997bcc5940c7b7c6cfe37cae84c4692d7a1e4555e874d7f5fca3ef46b6b5b",
+  "execution_binding": "linux_parent_proc_fd_pinned_inode",
+  "go_selection_identities": {
+    "go_selection_before": {
+      "default": "77d0031d94c0be8ef84ad9e1f4e75ec9d12dda1c7239faa407062f81a91c521a",
+      "race-r5protocol": "841a3798a701c2cf6391b2650ca61f9bbddb3ff1c5f77e4fdb6c6a1caf54828c"
+    },
+    "go_selection_after": {
+      "default": "77d0031d94c0be8ef84ad9e1f4e75ec9d12dda1c7239faa407062f81a91c521a",
+      "race-r5protocol": "841a3798a701c2cf6391b2650ca61f9bbddb3ff1c5f77e4fdb6c6a1caf54828c"
+    }
+  },
+  "preparation_receipt": "/workspace/scratch/c5e5c3c93beb/release-frontend-input-fix/source-version-preparation/preparation.json",
+  "preparation_receipt_sha256": "18ebee358dad10c0698c3d2ee18cfd9616e7f4567f749afaeb05c2595719b6c9",
+  "scope": "source-preparation-only; no frontend or PostgreSQL runtime qualification",
+  "original_todo_newly_completed": 0
+}

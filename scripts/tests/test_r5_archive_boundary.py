@@ -31,6 +31,50 @@ class ArchiveBoundaryTests(unittest.TestCase):
         self.assertEqual(len(value['modules']),6);self.assertEqual(len(value['archive_static']),36)
         self.assertEqual(len(boundary.registry(self.root)['protected_go_files']),21)
 
+    def test_directory_metadata_churn_preserves_opened_ancestor_identity(self):
+        # A busy ancestor can gain an unrelated directory entry between
+        # stat() and open(). The opened directory object is still the same.
+        original_stat = boundary.os.stat
+        changed = []
+
+        def churn(component, *, dir_fd=None, follow_symlinks=False):
+            before = original_stat(component, dir_fd=dir_fd, follow_symlinks=follow_symlinks)
+            if not changed and dir_fd is not None and component == self.root.name:
+                boundary.os.utime(
+                    self.root,
+                    ns=(before.st_atime_ns, before.st_mtime_ns + 2_000_000_000),
+                )
+                changed.append(True)
+            return before
+
+        with mock.patch.object(boundary.os, 'stat', side_effect=churn):
+            descriptor = boundary.root_fd(self.root)
+        os.close(descriptor)
+        self.assertTrue(changed)
+
+    def test_ancestor_directory_replacement_still_rejected(self):
+        parent = self.root / 'swap-parent'
+        parent.mkdir()
+        target = parent / 'target'
+        target.mkdir()
+        replacement = parent / 'replacement'
+        replacement.mkdir()
+        original_stat = boundary.os.stat
+        changed = []
+
+        def swap(component, *, dir_fd=None, follow_symlinks=False):
+            before = original_stat(component, dir_fd=dir_fd, follow_symlinks=follow_symlinks)
+            if not changed and dir_fd is not None and component == target.name:
+                target.rename(parent / 'previous')
+                replacement.rename(target)
+                changed.append(True)
+            return before
+
+        with mock.patch.object(boundary.os, 'stat', side_effect=swap):
+            with self.assertRaisesRegex(ValueError, 'ancestor identity changed'):
+                boundary.root_fd(target)
+        self.assertTrue(changed)
+
     def test_marker_deletion_and_module_in_all_roots(self):
         contract=boundary.registry(self.root)
         marker=self.root/contract['modules'][0]['path'];raw=marker.read_bytes();marker.unlink()

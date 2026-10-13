@@ -1,0 +1,16 @@
+test_default_discovery_includes_fuzz_and_examples_not_benchmarks (test_backend_shards.CoverageTests) ... ok
+test_discovery_rejects_incomplete_missing_duplicate_and_fail (test_backend_shards.CoverageTests) ... ok
+test_empty_partition_rejected (test_backend_shards.CoverageTests) ... ok
+test_exact_execution_passes_original_checker (test_backend_shards.CoverageTests) ... ok
+test_matrix_partition_is_exact_and_invalid_index_rejected (test_backend_shards.CoverageTests) ... ok
+test_matrix_revalidates_all_original_logs_and_rejects_tampering (test_backend_shards.CoverageTests) ... {"status": "pass", "top_level_tests": 4, "mandatory_tests": 1}
+ok
+test_only_an_original_explicit_skip_rule_can_allow_a_skip (test_backend_shards.CoverageTests) ... ok
+test_partition_is_exact_and_same_name_is_never_repeated_across_shards (test_backend_shards.CoverageTests) ... ok
+test_skip_fail_missing_duplicate_and_nonzero_cannot_pass (test_backend_shards.CoverageTests) ... ok
+test_skipped_subtest_cannot_be_hidden_by_passing_parent (test_backend_shards.CoverageTests) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.044s
+
+OK

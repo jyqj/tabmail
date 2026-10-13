@@ -1,0 +1,20 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "scripts/run_r5_benchmark.py",
+    "--scale",
+    "M"
+  ],
+  "source_head": "f2d62c73a5d7b59a0ddda3f859a8cd392e1c0797",
+  "runner_sha256": "23da2d88b30feeb357391c9ac0b7a885a053de4e070756871d4ce235a0697dfe",
+  "exit_code": 1,
+  "stdout": "{\"status\": \"rejected\", \"task_complete\": false, \"product_green\": false, \"error\": \"insufficient disk safety margin\"}\n",
+  "stderr": "",
+  "observed_disk_free_bytes": 27146207232,
+  "original_disk_budget_bytes": 85899345920,
+  "required_safety_margin_bytes": 10737418240,
+  "actual_scale_run": false,
+  "task_complete": false,
+  "original_todos_closed": []
+}

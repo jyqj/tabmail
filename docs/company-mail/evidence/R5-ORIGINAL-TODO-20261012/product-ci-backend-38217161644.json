@@ -1,0 +1,242 @@
+{
+  "schema_version": 1,
+  "reviewed_at_utc": "2026-10-12T07:31:25.926799+00:00",
+  "reviewer": "todo_audit independent read-only round 5",
+  "repository": "jyqj/tabmail",
+  "pr": 260,
+  "pr_url": "https://github.com/jyqj/tabmail/pull/260",
+  "head_sha": "7524e650378487e8d32e70252cf1bd77010260b5",
+  "workflow": {
+    "id": 38217161644,
+    "name": "Company mail security and release checks",
+    "head_sha": "7524e650378487e8d32e70252cf1bd77010260b5",
+    "status": "completed",
+    "conclusion": "failure",
+    "run_attempt": 1,
+    "html_url": "https://github.com/jyqj/tabmail/actions/runs/38217161644",
+    "created_at": "2026-10-12T07:20:11Z",
+    "updated_at": "2026-10-12T07:27:25Z"
+  },
+  "actual_test_checkout": {
+    "source_sha": "edd2fba834f577c8fa050ae32573321a8937294d",
+    "tree": "4eb493c2b1a1b98353229500e2b840f61a297e81",
+    "matches_pr_head_tree": true,
+    "source_identity_evidence": "backend/go-test-source-sha.txt",
+    "merge_tree_evidence": "pr-merge-commit-api.json"
+  },
+  "downloaded_artifacts": [
+    {
+      "id": 11733765265,
+      "name": "company-template-grant-postgres-evidence",
+      "size_in_bytes": 7673,
+      "digest": "sha256:a5ec34ba0ae8bda1ff4e6e5452bdfffea068b48b7dc03b70d960f5e83235a156",
+      "created_at": "2026-10-12T07:27:21Z",
+      "workflow_run": {
+        "id": 38217161644,
+        "repository_id": 1188928152,
+        "head_repository_id": 1188928152,
+        "head_branch": "fix/r5-validation-fixtures-20261012",
+        "head_sha": "7524e650378487e8d32e70252cf1bd77010260b5"
+      }
+    },
+    {
+      "id": 11732900567,
+      "name": "company-p0-test-evidence",
+      "size_in_bytes": 744102,
+      "digest": "sha256:90a43f6488ca1e7e77d5fc557291a526389fc33c0f925142b82475766d842bf4",
+      "created_at": "2026-10-12T07:27:20Z",
+      "workflow_run": {
+        "id": 38217161644,
+        "repository_id": 1188928152,
+        "head_repository_id": 1188928152,
+        "head_branch": "fix/r5-validation-fixtures-20261012",
+        "head_sha": "7524e650378487e8d32e70252cf1bd77010260b5"
+      }
+    }
+  ],
+  "archive_digests_verified": true,
+  "backend_default_race": {
+    "command": "go test -json -race -count=1 -timeout=180s ./...",
+    "process_exit_code": 1,
+    "gate_status": "fail",
+    "go_test_terminal_event_counts": {
+      "skip_package": 7,
+      "pass_test": 11284,
+      "pass_package": 45,
+      "skip_test": 105,
+      "fail_test": 909,
+      "fail_package": 1
+    },
+    "count_boundary": "Raw terminal events include top-level tests and nested parents; 11284/909/105 are not independent leaf test counts.",
+    "mandatory_tests": 247,
+    "mandatory_missing_or_not_passed": 180,
+    "unexpected_skip_error_count": 99,
+    "failed_event_hierarchy": {
+      "failed_test_terminal_events": 909,
+      "failed_parent_events_with_failed_descendants": 130,
+      "failed_leaf_ids": 779,
+      "failed_leaf_ids_with_no_remaining_lifecycle_budget": 778
+    },
+    "first_failed_leaf": {
+      "Time": "2026-10-12T07:26:27.666195118Z",
+      "Action": "fail",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5CacheWriteVersusPhysicalDeleteLockOrder/purge",
+      "Elapsed": 0.49,
+      "output": "=== RUN   TestR5CacheWriteVersusPhysicalDeleteLockOrder/purge\n    r5_cache_parent_snapshot_test.go:194: postgres: apply migrations: partial migration error (type:sql,version:7): context deadline exceeded; sql: transaction has already been committed or rolled back; failed to execute pg_advisory_unlock: driver: bad connection; sql: connection is already closed\n--- FAIL: TestR5CacheWriteVersusPhysicalDeleteLockOrder/purge (0.49s)\n"
+    },
+    "other_failed_leaf_ids_excluding_no_budget": [
+      {
+        "Time": "2026-10-12T07:26:27.666195118Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5CacheWriteVersusPhysicalDeleteLockOrder/purge",
+        "Elapsed": 0.49
+      }
+    ],
+    "package_terminal_failures": [
+      {
+        "Time": "2026-10-12T07:26:29.101131358Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Elapsed": 171.597
+      }
+    ],
+    "targeted_original_grant_fixture_tests": [
+      {
+        "test": "TestR3CompanyHTTPJourney",
+        "events": [
+          {
+            "Time": "2026-10-12T07:23:58.755626901Z",
+            "Action": "run",
+            "Package": "tabmail/internal/store/postgres",
+            "Test": "TestR3CompanyHTTPJourney"
+          },
+          {
+            "Time": "2026-10-12T07:24:01.790165935Z",
+            "Action": "pass",
+            "Package": "tabmail/internal/store/postgres",
+            "Test": "TestR3CompanyHTTPJourney",
+            "Elapsed": 3.03
+          }
+        ],
+        "output": "=== RUN   TestR3CompanyHTTPJourney\n--- PASS: TestR3CompanyHTTPJourney (3.03s)\n"
+      },
+      {
+        "test": "TestMailboxAdministrationHTTPRequiresObservedVersion",
+        "events": [
+          {
+            "Time": "2026-10-12T07:24:13.310874408Z",
+            "Action": "run",
+            "Package": "tabmail/internal/store/postgres",
+            "Test": "TestMailboxAdministrationHTTPRequiresObservedVersion"
+          },
+          {
+            "Time": "2026-10-12T07:24:13.831380887Z",
+            "Action": "pass",
+            "Package": "tabmail/internal/store/postgres",
+            "Test": "TestMailboxAdministrationHTTPRequiresObservedVersion",
+            "Elapsed": 0.52
+          }
+        ],
+        "output": "=== RUN   TestMailboxAdministrationHTTPRequiresObservedVersion\n--- PASS: TestMailboxAdministrationHTTPRequiresObservedVersion (0.52s)\n"
+      }
+    ],
+    "observational_boundary": "The first failure occurred during migrations with context deadline exceeded, followed by no-budget fixture failures. This one full run does not establish that the new patch caused the package budget exhaustion. Original timeout and rejection criteria were not changed.",
+    "raw_log": "backend/go-test.jsonl",
+    "raw_log_sha256": "617c7a12ed2fda53c4d73402c0527a4de90fca61f9d9b7a466bc35976b0828fe",
+    "gate_json": "backend/go-test-evidence.json",
+    "gate_log_hash_matches_raw": true
+  },
+  "source_version_runner": {
+    "status": "failed",
+    "source_sha": "edd2fba834f577c8fa050ae32573321a8937294d",
+    "preparation_error": "unknown conditional build input: internal/testpg/r5_frontend_fixture_test.go",
+    "discovered_test_ids_count": 885,
+    "missing_test_ids_count": 885,
+    "all_discovered_ids_missing": true,
+    "groups": [],
+    "no_missing": false,
+    "no_overlap": true,
+    "executed_failure_ids": [],
+    "boundary": "Preparation failed before group dispatch. The empty executed failure ID list is not a test pass; all 885 exact missing IDs remain in the raw JSON.",
+    "raw_json": "backend/source-version-tests.json",
+    "raw_json_sha256": "6257efacba839c08d4cb37d2ce0b99d0fcb93d14811a1ce2fad4ea44f8263f42"
+  },
+  "shared_db_protocol": {
+    "workflow_step": "failure",
+    "protocol_source_manifest_upload": "skipped",
+    "protocol_baseline_evidence_present": false,
+    "protocol_source_manifest_artifact_present": false,
+    "retention_accepted": false,
+    "pe05_accepted": false,
+    "boundary": "No protocol baseline Go log or report was produced. There is no actual shared-db Retention or PE05 execution evidence on this head. Job-log retrieval returned Transport closed, so the exact protocol preparation stderr has not been retrieved."
+  },
+  "template_grant_independent_job_step": {
+    "command": "go test -mod=readonly -json -race -count=1 -timeout=120s -run '^TestR5TemplateGrantFrozenEmployeeRevocation$' ./internal/store/postgres",
+    "process_exit_code": 0,
+    "gate": {
+      "allowed_skips_observed": [],
+      "errors": [],
+      "events": 44,
+      "log_sha256": "d6497cc3a79d9bd109e9da155e635eec6b8b4bd11708ab19323695adba5ba75f",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 1,
+      "manifest_sha256": "145aee37b301d24c8f4ae6ba1ba6ac2175ef26a949905816b0a46cfefeaf864c",
+      "packages": 1,
+      "process_exit_code": 0,
+      "source_sha": "edd2fba834f577c8fa050ae32573321a8937294d",
+      "status": "pass",
+      "suite": "template-grant-revocation",
+      "tests_failed": 0,
+      "tests_passed": 10,
+      "tests_skipped": 0,
+      "tests_started": 10
+    },
+    "count_boundary": "10 passing test events include the top-level test and its 9 subtests. This is the independent narrow template-grant step, not the full backend suite.",
+    "raw_log": "template-grant/go-test.jsonl",
+    "raw_log_sha256": "d6497cc3a79d9bd109e9da155e635eec6b8b4bd11708ab19323695adba5ba75f"
+  },
+  "actual_http_contracts": {
+    "result": {
+      "status": "pass",
+      "source_sha": "edd2fba834f577c8fa050ae32573321a8937294d",
+      "errors": [],
+      "responses": 81,
+      "successful_operations": 66,
+      "required_success_variants": 67,
+      "excluded_operations": [
+        {
+          "method": "GET",
+          "path": "/api/v1/company/domains/{id}/verification",
+          "reason": "Live DNS status lookups are outside this loopback HTTP/PG fixture."
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/company/domains/{id}/verify",
+          "reason": "Live DNS verification is outside this loopback HTTP/PG fixture."
+        }
+      ],
+      "spec_sha256": "48020f150cb4947559f4e613d9b02ab99418de961fdb0e8a1dd04dc091470757",
+      "capture_sha256": "b62675eb5a0d09c9725dc11504ed86afa9a1c46168af382f59ebbbaa228d263a"
+    },
+    "raw_json": "backend/http-contract-evidence/result.json",
+    "raw_json_sha256": "83cfede6a2480c09861dea68a5da8f15d532e806fbb43d94cbd58dc99f3fdd3e",
+    "boundary": "The existing loopback HTTP/PG scope passed; the two original live-DNS exclusions remain."
+  },
+  "original_todo_progress": {
+    "newly_closed_ids": [],
+    "newly_completed": 0,
+    "cumulative_newly_completed_this_execution": 0,
+    "total": 171,
+    "accepted_baseline_and_current": 10,
+    "remaining": 161
+  },
+  "remaining_blockers": [
+    "Full backend mandatory gate remains failed and unexpected skips remain rejected.",
+    "Versioned source runner preparation rejects undeclared conditional build input.",
+    "Current original transaction/compatibility inventory steps remain failed pending reviewed source-bound catalog maintenance.",
+    "Full shared-db protocol, including Retention and PE05, has no execution receipt on this head.",
+    "Full Company workflow remains failed; no PR merge or parent acceptance is claimed."
+  ]
+}

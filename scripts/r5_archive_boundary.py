@@ -26,6 +26,13 @@ def identity(s):
     return stat.S_IFMT(s.st_mode), s.st_dev, s.st_ino, s.st_size, s.st_mtime_ns, s.st_ctime_ns
 
 
+def directory_identity(s):
+    # Directory size/timestamps track unrelated entry updates, not the opened
+    # object. Compare stable inode identity for path-to-descriptor binding;
+    # individual file reads continue to require the full identity() contract.
+    return stat.S_IFMT(s.st_mode), s.st_dev, s.st_ino
+
+
 def root_fd(root):
     root = Path(root).absolute()
     flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
@@ -36,7 +43,7 @@ def root_fd(root):
             if not stat.S_ISDIR(before.st_mode):
                 raise ValueError('symlink/non-directory boundary ancestor')
             child = os.open(component,flags,dir_fd=fd)
-            if identity(os.fstat(child)) != identity(before):
+            if directory_identity(os.fstat(child)) != directory_identity(before):
                 os.close(child)
                 raise ValueError('boundary root ancestor identity changed')
             os.close(fd);fd=child

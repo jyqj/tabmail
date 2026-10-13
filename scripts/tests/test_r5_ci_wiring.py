@@ -58,13 +58,21 @@ class R5CIWiringTests(unittest.TestCase):
 
     def test_existing_jobs_toolchain_and_timer_mode(self):
         jobs = load('company-p0.yml')['jobs']
-        self.assertEqual(set(jobs), {'backend', 'frontend', 'production-web', 'browser-journey'})
+        self.assertEqual(set(jobs), {'backend', 'backend-race', 'backend-race-coverage',
+                                     'frontend', 'frontend-build', 'production-web', 'browser-journey'})
+        self.assertEqual(jobs['backend-race']['strategy'],
+                         {'fail-fast': 'false', 'matrix': {'partition': ['0', '1', '2', '3']}})
+        self.assertEqual(jobs['backend-race-coverage']['needs'], 'backend-race')
+        self.assertEqual(jobs['backend-race-coverage']['if'], 'always()')
+        self.assertNotIn('needs', jobs['backend'])  # Independent source/protocol evidence still runs after a race failure.
+        coverage = next(s for s in jobs['backend-race-coverage']['steps'] if s.get('name') == 'Verify independent whole-suite matrix coverage')
+        self.assertIn('--verify-matrix matrix-artifacts', coverage['run'])
         for name, job in jobs.items():
-            self.assertEqual(job['timeout-minutes'], '15' if name == 'frontend' else '20')
+            self.assertEqual(job['timeout-minutes'], '15' if name in ('frontend', 'frontend-build') else '20')
             for step in job['steps']:
                 if step.get('uses') == 'actions/setup-go@v5':
                     self.assertEqual(step['with'], {'go-version-file': 'go.mod'})
-        for name in ['backend', 'browser-journey']:
+        for name in ['backend', 'backend-race', 'browser-journey']:
             self.assertEqual(jobs[name]['env']['GODEBUG'], 'asynctimerchan=0')
             self.assertEqual(jobs[name]['services']['postgres']['image'], 'postgres:16')
 
@@ -76,13 +84,27 @@ class R5CIWiringTests(unittest.TestCase):
         self.assertLess(guard,build)
         self.assertEqual(steps[build]['run'],'go build ./...')
         self.assertTrue(any(s.get('run')=='go vet ./...' for s in steps))
-        self.assertTrue(any('go test -json -race -count=1 -timeout=180s ./...' in s.get('run','') for s in steps))
+        race = next(s for s in jobs['backend-race']['steps'] if s.get('name') == 'Race tests with PostgreSQL')
+        self.assertIn('python3 -B tools/ci/backend_shards.py', race['run'])
+        shard_runner = (ROOT / 'tools/ci/backend_shards.py').read_text()
+        self.assertIn("'-race', '-count=1', '-timeout=180s'", shard_runner)
+        self.assertIn("'-run', expression", shard_runner)
+        self.assertIn("'go', 'list', './...'", shard_runner)
+        self.assertIn('set(seen) != planned', shard_runner)
         self.assertTrue(any('run_r5_source_version_tests.py' in s.get('run','') for s in steps))
         frontend = jobs['frontend']['steps']
         npm = next(i for i,s in enumerate(frontend) if s.get('run')=='npm ci')
         runner = next(i for i,s in enumerate(frontend) if 'run_r5_source_version_tests.py' in s.get('run',''))
         self.assertLess(npm,runner)
-        self.assertFalse(any('unittest discover' in s.get('run','') for steps in [steps,frontend] for s in steps))
+        # The full source suite must still use its isolated version dispatcher.
+        # Only the new, separate sharder control suite may use discovery here.
+        discoveries = [line.strip() for group in [steps, frontend] for step in group
+                       for line in step.get('run', '').splitlines() if 'unittest discover' in line]
+        self.assertEqual(discoveries, [])
+        for group in ('backend-race', 'backend-race-coverage'):
+            discoveries = [line.strip() for step in jobs[group]['steps']
+                           for line in step.get('run', '').splitlines() if 'unittest discover' in line]
+            self.assertEqual(discoveries, ["python3 -B -m unittest discover -s tools/ci -p 'test_*.py' -v"])
 
 
 if __name__ == '__main__':

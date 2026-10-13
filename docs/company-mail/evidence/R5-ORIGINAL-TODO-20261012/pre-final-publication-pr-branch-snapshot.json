@@ -1,0 +1,75 @@
+{
+  "source": "GitHub connector fresh full open-pull and branch pagination; observation before final catalog commit",
+  "open_pr_count": 6,
+  "branch_page_lengths": [
+    100,
+    19
+  ],
+  "branch_count": 119,
+  "prs": [
+    {
+      "number": 260,
+      "url": "https://github.com/jyqj/tabmail/pull/260",
+      "state": "open",
+      "draft": true,
+      "head": "311593e6a837287f58d8f10d559dc0b8991be55e",
+      "base": "af1444807e1018c95b963b8c5b74e2b2e5060b9a",
+      "branch": "fix/r5-validation-fixtures-20261012"
+    },
+    {
+      "number": 56,
+      "url": "https://github.com/jyqj/tabmail/pull/56",
+      "state": "open",
+      "draft": true,
+      "head": "af1444807e1018c95b963b8c5b74e2b2e5060b9a",
+      "base": "d6d512172fb6b874c3283d9df3f4d56758684a13",
+      "branch": "integration/company-mail-r5-pr-management-20261007"
+    },
+    {
+      "number": 40,
+      "url": "https://github.com/jyqj/tabmail/pull/40",
+      "state": "open",
+      "draft": true,
+      "head": "78f0643e504a9a4978c12e8c7106f8aeb4006fb2",
+      "base": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+      "branch": "verification/r5-slice5-closure-20261004"
+    },
+    {
+      "number": 24,
+      "url": "https://github.com/jyqj/tabmail/pull/24",
+      "state": "open",
+      "draft": true,
+      "head": "f4ed1f4257ff104a53ffdb49416e50fd5c6668b4",
+      "base": "e5e23e21abfe4c7e9f082405e56a95a7f346fa9a",
+      "branch": "experiment/goose-buffer-64k"
+    },
+    {
+      "number": 20,
+      "url": "https://github.com/jyqj/tabmail/pull/20",
+      "state": "open",
+      "draft": true,
+      "head": "722fcf2f5f9d28c8f6372494b49cccc7b8816467",
+      "base": "529f54782f0cfc90ed2501c253723a4fd88497e0",
+      "branch": "review/selected-attestation-v1-independent-20261003"
+    },
+    {
+      "number": 17,
+      "url": "https://github.com/jyqj/tabmail/pull/17",
+      "state": "open",
+      "draft": true,
+      "head": "5b7f8774643243711e8065f2403e419f5ba81065",
+      "base": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+      "branch": "fix/r5-benchmark-strict-evidence-20261001"
+    }
+  ],
+  "main_sha": "d6d512172fb6b874c3283d9df3f4d56758684a13",
+  "new_original_todo_ids": [],
+  "cumulative_new_original_completed": 0,
+  "original_total": 171,
+  "original_accepted": 10,
+  "original_remaining": 161,
+  "observation_window_utc": {
+    "not_before": "2026-10-12T07:48:32Z",
+    "completed_by": "2026-10-12T07:51:36Z"
+  }
+}

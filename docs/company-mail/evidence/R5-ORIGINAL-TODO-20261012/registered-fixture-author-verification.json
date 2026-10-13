@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "scope": "SOURCE_and_selection_only",
+  "author_tested_commit": "fec134b3422b1ab44a311dca10d802d4aeb6984c",
+  "author_tested_tree": "6ff0a4fca8116e1f4955e443f03007f7bf83c7bc",
+  "published_product_head": "311593e6a837287f58d8f10d559dc0b8991be55e",
+  "runtime_results_do_not_transfer_by_tree_identity": true,
+  "change": "Reuse existing r5fixtures opt-in fixture build context; keep the exact TestR5FrontendOwnedFixture selector and all existing source input rejection rules.",
+  "changed_source_sha256": {
+    "internal/testpg/r5_frontend_fixture_test.go": "16e51840e4deb646c08300f849e98a7c282ca8862146c316253945781c6b7c52",
+    "scripts/run_r5_frontend_fixture.py": "7d46fb656e66c7817ce84e660c55dc587fc037bb12ac61ebcce466859025aac7",
+    "scripts/tests/test_r5_frontend_fixture.py": "9124104e2228bf5b1748fb45c7d2341216e3df6c1924ba6047b7377c652232f0",
+    "scripts/tests/test_r5_frontend_fixture_source_inputs.py": "0a4c0b55707c5f371da907b70c488683f008455277eaa6e89992565b9bd0ed8a"
+  },
+  "guards_unchanged": {
+    "scripts/r5_source_inventory.py": true,
+    "scripts/required_go_tests.json": true,
+    "scripts/r5_selected_source_binding.py": true,
+    "scripts/r5_selected_source_binding_v2.py": true,
+    "scripts/r5_archive_boundary.py": true,
+    "scripts/run_r5_source_version_tests.py": true,
+    "scripts/r5_source_runner_prepare.py": true
+  },
+  "author_focused_controls": {
+    "total": 17,
+    "passed": 17,
+    "failed": 0,
+    "exit": 0,
+    "raw": "focused-checks.json"
+  },
+  "go_race_compile_and_list": {
+    "exit": 0,
+    "old_top_level_tests": 12,
+    "new_owner": 1,
+    "tests_executed": false,
+    "raw": "race-selection.json"
+  },
+  "protocol_source_preparation": {
+    "status": "source_prepared",
+    "source_policy": "r5_current_local_inputs_archive_boundary_v4",
+    "source_sha": "51a1d5709fc442db4a1f7dbc8f884e5f4d0d4410",
+    "source_manifest_sha256": "1051c0e93cd388065d8f8cf2adf1bdf53e470b98598b90f5a36706bef0c227b3",
+    "build_context": {
+      "goos": "linux",
+      "goarch": "amd64",
+      "cgo_enabled": 1,
+      "build_tag_sets": [
+        [
+          "r5protocol"
+        ]
+      ],
+      "race": true,
+      "go_work": "off",
+      "go_flags": "",
+      "selection": "all_local_variants_superset"
+    },
+    "task_complete": false,
+    "product_green": false
+  },
+  "source_version_preparation": {
+    "source_sha": "fec134b3422b1ab44a311dca10d802d4aeb6984c",
+    "run_id": "07ed41bd84ab4061aeeaadf848247db8",
+    "go_version": "go1.25.7",
+    "go_selection_unchanged": true,
+    "fixture_sha256": "9fdd0d734a549733a89fb9cb5f85035a137e9c5ff452276363579cf65b0950f3",
+    "actual_started_test_ids": [
+      "TestOrdinaryReceiptOpenAPIWireFixtures"
+    ],
+    "actual_passed_test_ids": [
+      "TestOrdinaryReceiptOpenAPIWireFixtures"
+    ],
+    "exit": 0,
+    "executed_binary_sha256": "ffa997bcc5940c7b7c6cfe37cae84c4692d7a1e4555e874d7f5fca3ef46b6b5b",
+    "execution_binding": "linux_parent_proc_fd_pinned_inode",
+    "preparation_receipt_sha256": "18ebee358dad10c0698c3d2ee18cfd9616e7f4567f749afaeb05c2595719b6c9",
+    "scope": "source-preparation-only; no frontend or PostgreSQL runtime qualification"
+  },
+  "source_version_preparation_exit": 0,
+  "evidence": {
+    "full_author_summary": "verification-summary.json",
+    "full_author_summary_sha256": "9154a254a5b88caea85b57ac0b6e7276cf4ef953faa71dd9901c39c18eed0de7",
+    "execution_records_sha256": {
+      "focused-checks.json": "65d72d6dadcf9fefc0e88970c88fcfa218678d80e89369f5a42120ef966415e8",
+      "race-selection.json": "fa1e98df492e02639de3a7b5849bb1a65f218542c39550940f311c75e124a084",
+      "protocol-preparation-execution.json": "008e63fd62b20d4e23de4da9e654cdcc58f240be9ba85ff0944c05d887403afb",
+      "source-version-preparation-summary.json": "dd6972059ad96ed71b272650ed59e825cdf7ab5099a5356b68fce77cf65e7acb",
+      "source-version-preparation.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    }
+  },
+  "independent_review_is_separate": {
+    "path": "/workspace/scratch/c5e5c3c93beb/frontend-input-review-evidence/frontend-input-independent-review.json",
+    "reported_controls_passed": 22,
+    "scope": "SOURCE_and_selection_only"
+  },
+  "postgresql_or_full_frontend_runtime_executed_locally": false,
+  "original_todo_newly_completed": 0,
+  "task_complete": false,
+  "product_green": false
+}

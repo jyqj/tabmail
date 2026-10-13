@@ -1,0 +1,616 @@
+{
+  "observed_at_utc": "2026-10-12T07:54:46Z",
+  "repository": "jyqj/tabmail",
+  "pr": 260,
+  "public_product_head": "311593e6a837287f58d8f10d559dc0b8991be55e",
+  "actual_pr_checkout": "55c12ad0c693d3379f1a55b9c442fa88aaa6f48a",
+  "same_product_and_checkout_tree": "6ff0a4fca8116e1f4955e443f03007f7bf83c7bc",
+  "company_run_id": 38219001084,
+  "source": "Root agent GitHub connector reads of all 13 workflow runs, Company jobs and artifact metadata",
+  "workflows": [
+    {
+      "id": 38219001082,
+      "name": "SMTPUTF8 fixed wire recovery",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38219001096,
+      "name": "Login issuance with PostgreSQL",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38219001121,
+      "name": "Mailbox provisioning with PostgreSQL",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38219001148,
+      "name": "Atomic settings seed with PostgreSQL",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38219001076,
+      "name": "EXEC08 mailbox route recovery qualification",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38219001195,
+      "name": "Pull request source evidence",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38219001134,
+      "name": "Webhook claim completion regression",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38219001093,
+      "name": "API key issuance with PostgreSQL",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38219001196,
+      "name": "R5 NEXT-1543 PostgreSQL regressions",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38219001085,
+      "name": "EXEC bounded regression checks",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38219001151,
+      "name": "R5 NEXT1010 PostgreSQL regressions",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38219001075,
+      "name": "Catalog reconciliation and complete source checks",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 38219001084,
+      "name": "Company mail security and release checks",
+      "status": "completed",
+      "conclusion": "failure"
+    }
+  ],
+  "jobs": [
+    {
+      "id": 114710434630,
+      "name": "backend",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Initialize containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Record the tested backend checkout",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "PostgreSQL client for coordinated restore rehearsal",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Exact immutable archive boundary",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Race tests with PostgreSQL",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 10
+        },
+        {
+          "name": "Template grant revocation with PostgreSQL",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Prove missing execution cannot pass",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Install pinned contract checker dependency",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Prepare the pinned TypeScript scanner dependency",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Validation tool regressions",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 15
+        },
+        {
+          "name": "DTO field contract",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Fresh route/client compatibility inventory and upgrade plan",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 17
+        },
+        {
+          "name": "Transaction syntax and review inventory drift",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 18
+        },
+        {
+          "name": "Real protocol baseline with explicit target failures",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19
+        },
+        {
+          "name": "Actual HTTP response contracts with PostgreSQL",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20
+        },
+        {
+          "name": "Vet",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21
+        },
+        {
+          "name": "Upload test evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22
+        },
+        {
+          "name": "Upload protocol source manifest",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23
+        },
+        {
+          "name": "Upload template grant PostgreSQL evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 45
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 46
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 47
+        },
+        {
+          "name": "Stop containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 48
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 49
+        }
+      ]
+    },
+    {
+      "id": 114710434823,
+      "name": "production-web",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Validate company Compose contract",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Build production standalone image and inspect baked API origin",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        }
+      ]
+    },
+    {
+      "id": 114710434830,
+      "name": "browser-journey",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Initialize containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Install pinned isolated browser driver",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Build the shipping standalone frontend",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Exercise the production UI against the real API and loopback SMTP",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17
+        },
+        {
+          "name": "Stop containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19
+        }
+      ]
+    },
+    {
+      "id": 114710434945,
+      "name": "frontend",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Initialize containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Record the tested frontend checkout",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Install pinned version-test checker dependency",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run npm ci",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Versioned source tests from independent clean Git checkouts",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 9
+        },
+        {
+          "name": "Catalog and TypeScript source validation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Record full dependency audit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Require a complete clean dependency audit",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 13
+        },
+        {
+          "name": "Run npx tsc --noEmit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Complete default frontend with an owned PostgreSQL fixture",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Run npm run lint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Run npm run build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17
+        },
+        {
+          "name": "Retain frontend evidence after validation failures",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 33
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 34
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 35
+        },
+        {
+          "name": "Stop containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 36
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 11734240315,
+      "name": "company-p0-protocol-source-manifest",
+      "digest": "sha256:1cf43fc2bbd850b13600fd64a97b001827eee939be786d23aab25993b42ceeef",
+      "size_in_bytes": 116528,
+      "expired": false,
+      "created_at": "2026-10-12T07:51:12Z",
+      "expires_at": "2026-10-26T07:51:11Z"
+    },
+    {
+      "id": 11734230391,
+      "name": "company-p0-test-evidence",
+      "digest": "sha256:6d66083894b5722ea35b7a6d8f659447501d8de4d2041f15a10901dbcd4b60fd",
+      "size_in_bytes": 1281634,
+      "expired": false,
+      "created_at": "2026-10-12T07:51:11Z",
+      "expires_at": "2026-10-26T07:51:10Z"
+    },
+    {
+      "id": 11733950869,
+      "name": "company-frontend-evidence",
+      "digest": "sha256:82cf8a1ceed19035b6299cdf79951aa7defbf576d829b5e86c372dea4644cc50",
+      "size_in_bytes": 564744,
+      "expired": false,
+      "created_at": "2026-10-12T07:53:28Z",
+      "expires_at": "2026-10-26T07:53:27Z"
+    },
+    {
+      "id": 11733865694,
+      "name": "company-template-grant-postgres-evidence",
+      "digest": "sha256:f6b65a441d627b01a34688cddb86a690bd3b17072c75bf326479021df320266c",
+      "size_in_bytes": 7676,
+      "expired": false,
+      "created_at": "2026-10-12T07:51:12Z",
+      "expires_at": "2026-10-26T07:51:12Z"
+    },
+    {
+      "id": 11733194835,
+      "name": "dependency-audit",
+      "digest": "sha256:75010d745447317e1885b102b1e6ed332105369dfa65bf154284be4fbd43b880",
+      "size_in_bytes": 1064,
+      "expired": false,
+      "created_at": "2026-10-12T07:47:56Z",
+      "expires_at": "2026-10-26T07:47:55Z"
+    },
+    {
+      "id": 11732748806,
+      "name": "company-browser-evidence",
+      "digest": "sha256:8e8c52038b6aa13eaae9fe3cf97ea5137228d1ce3ce25778da118f48faf91b35",
+      "size_in_bytes": 1607,
+      "expired": false,
+      "created_at": "2026-10-12T07:42:17Z",
+      "expires_at": "2026-10-26T07:42:16Z"
+    }
+  ],
+  "original_todo_newly_closed_ids": [],
+  "original_todo_cumulative_new_completed": 0,
+  "product_green": false,
+  "task_complete": false
+}

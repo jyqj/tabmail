@@ -1,0 +1,242 @@
+{
+  "schema_version": 1,
+  "reviewed_at_utc": "2026-10-12T07:51:02.805837+00:00",
+  "reviewer": "todo_audit independent catalog19 review",
+  "verdict": "pass_for_static_catalog_and_original_five_module_scope",
+  "candidate_head": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+  "candidate_tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+  "candidate_worktree_status": "",
+  "public_product_source": "311593e6a837287f58d8f10d559dc0b8991be55e",
+  "public_product_tree": "6ff0a4fca8116e1f4955e443f03007f7bf83c7bc",
+  "changed_file_count_from_product_source": 6,
+  "source_validation_inputs": 11,
+  "previous_review": "catalog-9bda7af-review.json",
+  "previous_failure_preserved": true,
+  "correction": "Only the new helper advances the preservation comparison to the exact five revision18-to19 pairs. The guard still requires each previous token once and exact resulting source equality. Fresh raw collection regenerated helper/self and observation pins.",
+  "changed_report_fields_since_previous_candidate": [
+    "baseline_validation",
+    "baseline_validation_sha256",
+    "protected_source_manifest",
+    "protected_source_manifest_sha256"
+  ],
+  "old_39_method_source_unchanged_from_previous_candidate": true,
+  "method_preservation_evidence": "method-preservation-af8ae6e.json",
+  "unchanged_semantic_catalogs_since_previous_candidate": {
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": true,
+    "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": true,
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": true,
+    "docs/company-mail/evidence/R5-CLIENT-CALLS.json": true
+  },
+  "historical_manifest_files": 160,
+  "protected_manifest_files": 199,
+  "manifest_identity_mismatches": [],
+  "initial_structure_evidence": "catalog-structure-checks-9bda7af.json",
+  "original_command_raw_evidence_directory": "/workspace/scratch/c5e5c3c93beb/pr-audit-evidence/catalog19-final-candidate-r2",
+  "original_command_receipts": [
+    {
+      "record": {
+        "label": "transactions",
+        "argv": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+          "-B",
+          "scripts/check_r5_transactions.py"
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 0.616513,
+        "before": {
+          "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+          "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+          "status": ""
+        },
+        "after": {
+          "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+          "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+          "status": ""
+        },
+        "stdout": {
+          "bytes": 309,
+          "sha256": "bedf85e440c68fde48f640a126ce1279a4ea4c4284aa979db46b404ad56577b9"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "raw_hash_checks": {
+        "stdout": {
+          "bytes_match": true,
+          "sha256_match": true
+        },
+        "stderr": {
+          "bytes_match": true,
+          "sha256_match": true
+        },
+        "exit_matches": true,
+        "exact_clean_candidate_before_and_after": true
+      }
+    },
+    {
+      "record": {
+        "label": "compatibility",
+        "argv": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+          "-B",
+          "scripts/check_r5_compatibility.py"
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 1.527634,
+        "before": {
+          "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+          "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+          "status": ""
+        },
+        "after": {
+          "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+          "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+          "status": ""
+        },
+        "stdout": {
+          "bytes": 1117,
+          "sha256": "d1fea8bd3377af11bc27f0d8d26954d0d55db9f5616a06cf72314dd46f6bfb91"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "raw_hash_checks": {
+        "stdout": {
+          "bytes_match": true,
+          "sha256_match": true
+        },
+        "stderr": {
+          "bytes_match": true,
+          "sha256_match": true
+        },
+        "exit_matches": true,
+        "exact_clean_candidate_before_and_after": true
+      }
+    },
+    {
+      "record": {
+        "label": "clients",
+        "argv": [
+          "node",
+          "scripts/collect_api_calls.cjs",
+          "--check"
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 0.755706,
+        "before": {
+          "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+          "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+          "status": ""
+        },
+        "after": {
+          "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+          "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+          "status": ""
+        },
+        "stdout": {
+          "bytes": 73,
+          "sha256": "1313f30b4f2dae10192bce7ccd33eba481bd203dc8046c713de911aeaaf469cf"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "raw_hash_checks": {
+        "stdout": {
+          "bytes_match": true,
+          "sha256_match": true
+        },
+        "stderr": {
+          "bytes_match": true,
+          "sha256_match": true
+        },
+        "exit_matches": true,
+        "exact_clean_candidate_before_and_after": true
+      }
+    },
+    {
+      "record": {
+        "label": "five-original-modules",
+        "argv": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+          "-B",
+          "-m",
+          "unittest",
+          "test_r5_transactions",
+          "test_r5_compatibility",
+          "test_r5_catalog_reconciliation",
+          "test_r5_current_source_inventory",
+          "test_r5_reviewed_web_locks",
+          "-v"
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 116.966989,
+        "before": {
+          "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+          "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+          "status": ""
+        },
+        "after": {
+          "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+          "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+          "status": ""
+        },
+        "stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "bytes": 20316,
+          "sha256": "bd23828e34d9371052eae2804acb5b2626ea83fd94313ec600e872f2b55695b9"
+        }
+      },
+      "raw_hash_checks": {
+        "stdout": {
+          "bytes_match": true,
+          "sha256_match": true
+        },
+        "stderr": {
+          "bytes_match": true,
+          "sha256_match": true
+        },
+        "exit_matches": true,
+        "exact_clean_candidate_before_and_after": true
+      }
+    }
+  ],
+  "five_module_observed_result_counts": {
+    "ok": 108
+  },
+  "five_module_run_total": 108,
+  "five_module_terminal_summary": "reviewed_web_locks.NextSecurityPatchLockTests.test_new_lock_mutations_reject_before_archive_or_filesystem_changes) ... ok\ntest_only_reviewed_direct_pair_and_matching_release_packages_change (test_r5_reviewed_web_locks.NextSecurityPatchLockTests.test_only_reviewed_direct_pair_and_matching_release_packages_change) ... ok\ntest_previous_and_updated_complete_locks_report_their_actual_hash (test_r5_reviewed_web_locks.ReviewedWebLockTests.test_previous_and_updated_complete_locks_report_their_actual_hash) ... ok\ntest_unreviewed_lock_bytes_reject_before_archive_or_filesystem_changes (test_r5_reviewed_web_locks.ReviewedWebLockTests.test_unreviewed_lock_bytes_reject_before_archive_or_filesystem_changes) ... ok\ntest_update_preserves_direct_requirements_and_typescript_identity (test_r5_reviewed_web_locks.ReviewedWebLockTests.test_update_preserves_direct_requirements_and_typescript_identity) ... ok\n\n----------------------------------------------------------------------\nRan 108 tests in 115.878s\n\nOK\n",
+  "author_summary": "/workspace/scratch/c5e5c3c93beb/pr-audit-evidence/catalog19-final-candidate-r2/summary.json",
+  "author_summary_sha256": "42e54809237d6391588765053be2773eff1b400090db83549eb6099c43c87d03",
+  "scope_boundaries": {
+    "three_original_clis_passed": true,
+    "five_original_modules_passed": true,
+    "original_five_unapproved_controls_preserved": true,
+    "benchmark_qualification_added": false,
+    "complete_source_version_runner_executed": false,
+    "postgres_runtime_executed": false,
+    "shared_db_pe05_executed": false,
+    "external_batch_qualified": false,
+    "runtime_verified": false,
+    "product_green": false,
+    "task_complete": false,
+    "repeated_full_original_suite_by_independent_reviewer": false,
+    "github_review_submitted": false
+  },
+  "original_todo_progress": {
+    "newly_closed_ids": [],
+    "newly_completed": 0,
+    "cumulative_newly_completed_this_execution": 0,
+    "total": 171,
+    "accepted": 10,
+    "remaining": 161
+  }
+}

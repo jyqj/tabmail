@@ -7,9 +7,9 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def frontend():
+def frontend(name='frontend'):
     workflow = yaml.load((ROOT / '.github/workflows/company-p0.yml').read_text(), Loader=yaml.BaseLoader)
-    return workflow['jobs']['frontend']
+    return workflow['jobs'][name]
 
 
 class FrontendEvidenceContinuationTests(unittest.TestCase):
@@ -23,7 +23,8 @@ class FrontendEvidenceContinuationTests(unittest.TestCase):
                     'npx tsc --noEmit', 'npm test', 'npm run lint', 'npm run build']
         for command in commands:
             with self.subTest(command=command):
-                matches = [step for step in steps if command in step.get('run', '')]
+                scope = frontend('frontend-build')['steps'] if command in ('npx tsc --noEmit', 'npm run lint', 'npm run build') else steps
+                matches = [step for step in scope if command in step.get('run', '')]
                 self.assertEqual(len(matches), 1)
                 condition = matches[0].get('if', '')
                 self.assertIn('!cancelled()', condition)
@@ -35,6 +36,14 @@ class FrontendEvidenceContinuationTests(unittest.TestCase):
 
     def test_failures_still_fail_the_existing_frontend_job(self):
         job = frontend()
+        build = frontend('frontend-build')
+        self.assertEqual(build['timeout-minutes'], '15')
+        self.assertNotIn('needs', build)
+        self.assertNotIn('continue-on-error', build)
+        for step in build['steps']:
+            self.assertNotIn('continue-on-error', step)
+        self.assertTrue(any(step.get('run') == 'npm ci' and step.get('id') == 'web_install'
+                            for step in build['steps']))
         self.assertNotIn('continue-on-error', job)
         for step in job['steps']:
             self.assertNotIn('continue-on-error', step)

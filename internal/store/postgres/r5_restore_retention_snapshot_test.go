@@ -19,6 +19,14 @@ func TestR5RestoreAndRetentionSnapshotEligibility(t *testing.T) {
 			id := r5MaintenanceFixture(t, f)
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
+			cutoff := time.Now()
+			if order == "restore-first" {
+				// Restore no longer revives an already elapsed purge deadline.
+				// Keep it eligible at the real clock, while the scanner's explicit
+				// future cutoff selects the old trash snapshot. This tests DELETE
+				// requalification after the row wait, not wall-clock expiry.
+				must(t, f.pool.QueryRow(ctx, `UPDATE messages SET purge_after=clock_timestamp()+interval '1 day' WHERE id=$1 RETURNING purge_after+interval '1 day'`, id).Scan(&cutoff))
+			}
 			access, err := f.st.GetWorkMailbox(ctx, f.u, f.personal.ID)
 			must(t, err)
 			if !access.CanRead || !access.CanOrganize {
@@ -26,7 +34,7 @@ func TestR5RestoreAndRetentionSnapshotEligibility(t *testing.T) {
 			}
 			before := r5MaintenanceState(t, f, id)
 			var restoredAssets, key string
-			must(t, f.pool.QueryRow(ctx, `SELECT jsonb_build_object('source',(SELECT to_jsonb(m)||jsonb_build_object('deleted_at',NULL,'purge_after',NULL,'expires_at',NULL) FROM messages m WHERE id=$1),'document',(SELECT to_jsonb(d) FROM mail_documents d WHERE message_id=$1),'index',(SELECT to_jsonb(j) FROM mail_index_jobs j WHERE message_id=$1))::text,(SELECT raw_object_key FROM messages WHERE id=$1)`, id).Scan(&restoredAssets, &key))
+			must(t, f.pool.QueryRow(ctx, `SELECT jsonb_build_object('source',(SELECT to_jsonb(m)||jsonb_build_object('deleted_at',NULL,'purge_after',NULL) FROM messages m WHERE id=$1),'document',(SELECT to_jsonb(d) FROM mail_documents d WHERE message_id=$1),'index',(SELECT to_jsonb(j) FROM mail_index_jobs j WHERE message_id=$1))::text,(SELECT raw_object_key FROM messages WHERE id=$1)`, id).Scan(&restoredAssets, &key))
 			hold, err := f.pool.Begin(ctx)
 			must(t, err)
 			defer hold.Rollback(context.Background())
@@ -39,7 +47,7 @@ func TestR5RestoreAndRetentionSnapshotEligibility(t *testing.T) {
 			deleted := make(chan receipt, 1)
 			restore := func() { restored <- f.st.MutateWorkMessage(ctx, f.u, f.personal.ID, id, "restore") }
 			retain := func() {
-				n, keys, e := f.st.DeleteExpiredMessagesReturningKeys(ctx, time.Now(), 100)
+				n, keys, e := f.st.DeleteExpiredMessagesReturningKeys(ctx, cutoff, 100)
 				deleted <- receipt{n, keys, e}
 			}
 			if order == "restore-first" {
@@ -79,10 +87,10 @@ func TestR5RestoreAndRetentionSnapshotEligibility(t *testing.T) {
 				r5RestoreReferences(t, f, ctx, key, 1-result.n)
 				if result.n == 0 {
 					if r5MaintenanceAssets(t, f, id) != restoredAssets {
-						t.Fatal("restore did not preserve source/document/index bytes and lease while clearing deadlines")
+						t.Fatal("restore did not preserve source/document/index bytes, lease and original expiry while clearing trash deadlines")
 					}
 				} else {
-					t.Errorf("retention deleted a source after successful restore cleared deleted_at/purge_after/expires_at; stale candidate became committed raw-key receipt")
+					t.Errorf("retention deleted a source after successful restore cleared deleted_at/purge_after; stale candidate became committed raw-key receipt")
 				}
 			} else {
 				if restoreErr == nil {

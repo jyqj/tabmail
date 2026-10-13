@@ -14,7 +14,9 @@ def backend():
 
 
 def by_name(name):
-    return next(step for step in backend()['steps'] if step.get('name') == name)
+    workflow = yaml.load((ROOT / '.github/workflows/company-p0.yml').read_text(), Loader=yaml.BaseLoader)
+    job = 'backend-race' if name in ('Race tests with PostgreSQL', 'Upload independent backend shard evidence') else 'backend'
+    return next(step for step in workflow['jobs'][job]['steps'] if step.get('name') == name)
 
 
 def prerequisites(step):
@@ -96,11 +98,22 @@ class BackendEvidenceContinuationTests(unittest.TestCase):
             self.assertNotIn('continue-on-error', step)
         race = by_name('Race tests with PostgreSQL')['run']
         self.assertIn('set -euo pipefail', race)
-        self.assertIn('set +e\n', race)
-        self.assertIn('go test -json -race -count=1 -timeout=180s ./... | tee go-test.jsonl\n'
-                      'test_exit=$?\nset -e\n', race)
-        self.assertIn('check_go_test_evidence.py --suite backend', race)
-        self.assertIn('--exit-code "$test_exit"', race)
+        self.assertIn("python3 -B -m unittest discover -s tools/ci -p 'test_*.py' -v", race)
+        self.assertIn('python3 -B tools/ci/backend_shards.py', race)
+        self.assertIn('--output-dir backend-shards', race)
+        self.assertEqual(by_name('Race tests with PostgreSQL')['timeout-minutes'], '12')
+        self.assertEqual(by_name('Race tests with PostgreSQL')['env'], {
+            'TABMAIL_PAIR_REVIEW': '1', 'TABMAIL_SUCCESSOR_AUTHZ_OWNED': '1', 'TABMAIL_LF01_OWNED_PROBE': '1'})
+        self.assertEqual(job['services']['postgres']['ports'], ['55447:5432'])
+        self.assertIn('@127.0.0.1:55447/', job['env']['TABMAIL_TEST_DB_DSN'])
+        # Original per-process event validation remains unchanged. Coverage of
+        # the discovered whole suite, duplicate selections, missing execution
+        # and skipped children is exercised by tools/ci/test_backend_shards.py.
+        runner = (ROOT / 'tools/ci/backend_shards.py').read_text()
+        self.assertIn('evaluate(lines, planned - set(allowed), allowed, exit_code)', runner)
+        self.assertIn("'-race', '-count=1', '-timeout=180s'", runner)
+        self.assertIn("load_suite(ROOT / 'scripts/required_go_tests.json', 'backend')", runner)
+        self.assertIn('set(seen) != planned', runner)
         for bypass in ['--exclude', '-run ', '-skip ', '|| true', '|| :']:
             self.assertNotIn(bypass, race)
         self.assertEqual(by_name('Build')['run'], 'go build ./...')
@@ -111,7 +124,8 @@ class BackendEvidenceContinuationTests(unittest.TestCase):
         source = by_name('Record the tested backend checkout')
         self.assertEqual(source['run'], 'git rev-parse HEAD > go-test-source-sha.txt')
         for name in CHECKS:
-            self.assertLess(steps.index(source), steps.index(by_name(name)))
+            if name != 'Race tests with PostgreSQL':
+                self.assertLess(steps.index(source), steps.index(by_name(name)))
         self.assertEqual(sum('> go-test-source-sha.txt' in step.get('run', '') for step in steps), 1)
         for name in ['Race tests with PostgreSQL', 'Prove missing execution cannot pass',
                      'Actual HTTP response contracts with PostgreSQL']:
@@ -126,6 +140,10 @@ class BackendEvidenceContinuationTests(unittest.TestCase):
             'go-test-evidence.json', 'go-test-negative-evidence', 'http-contract-evidence',
             '!http-contract-evidence/responses.json', 'protocol-baseline-evidence',
             'backend-typescript-preparation.json'})
+        shards = by_name('Upload independent backend shard evidence')
+        self.assertEqual(shards['if'], 'always()')
+        self.assertEqual(shards['with'], {'name': 'company-backend-shards-${{ matrix.partition }}', 'path': 'backend-shards',
+                                         'if-no-files-found': 'error', 'retention-days': '14'})
 
     def test_typescript_preparation_reuses_the_reviewed_installer_and_receipt(self):
         command = by_name('Prepare the pinned TypeScript scanner dependency')['run']

@@ -1,0 +1,26 @@
+{
+  "source_commit": "4e4a1a25fe410ce3bd8c9a163fedeb598dea4531",
+  "source_tree": "4eb493c2b1a1b98353229500e2b840f61a297e81",
+  "equivalent_public_commit": "7524e650378487e8d32e70252cf1bd77010260b5",
+  "command": [
+    "timeout",
+    "30s",
+    "python3",
+    "-B",
+    "-m",
+    "unittest",
+    "scripts.tests.test_r5_frontend_fixture",
+    "scripts.tests.test_r5_ci_wiring",
+    "scripts.tests.test_r5_frontend_evidence_continuation",
+    "-v"
+  ],
+  "exit_code": 0,
+  "tests_run": 18,
+  "tests_passed": 18,
+  "tests_failed": 0,
+  "tests_skipped": 0,
+  "observed_output": "test_altered_command_and_uncommitted_source_fail_before_dispatch (scripts.tests.test_r5_frontend_fixture.FrontendFixtureAdmissionTests.test_altered_command_and_uncommitted_source_fail_before_dispatch) ... ok\ntest_complete_results_are_required_even_when_probe_passes (scripts.tests.test_r5_frontend_fixture.FrontendFixtureAdmissionTests.test_complete_results_are_required_even_when_probe_passes) ... ok\ntest_deadline_crossed_during_final_join_rejects_successful_child (scripts.tests.test_r5_frontend_fixture.FrontendFixtureAdmissionTests.test_deadline_crossed_during_final_join_rejects_successful_child) ... ok\ntest_malformed_empty_or_inconsistent_results_are_rejected (scripts.tests.test_r5_frontend_fixture.FrontendFixtureAdmissionTests.test_malformed_empty_or_inconsistent_results_are_rejected) ... ok\ntest_missing_dsn_and_injected_fixture_fail_before_dispatch (scripts.tests.test_r5_frontend_fixture.FrontendFixtureAdmissionTests.test_missing_dsn_and_injected_fixture_fail_before_dispatch) ... ok\ntest_missing_duplicate_wrong_file_and_skipped_probe_are_rejected (scripts.tests.test_r5_frontend_fixture.FrontendFixtureAdmissionTests.test_missing_duplicate_wrong_file_and_skipped_probe_are_rejected) ... ok\ntest_original_go_checker_rejects_empty_skipped_and_nonzero_owner (scripts.tests.test_r5_frontend_fixture.FrontendFixtureAdmissionTests.test_original_go_checker_rejects_empty_skipped_and_nonzero_owner) ... ok\ntest_owned_process_preserves_real_failure_and_joins_timeout (scripts.tests.test_r5_frontend_fixture.FrontendFixtureAdmissionTests.test_owned_process_preserves_real_failure_and_joins_timeout) ... ok\ntest_signal_during_final_join_rejects_successful_child (scripts.tests.test_r5_frontend_fixture.FrontendFixtureAdmissionTests.test_signal_during_final_join_rejects_successful_child) ... ok\ntest_source_drift_invalidates_otherwise_passing_synthetic_results (scripts.tests.test_r5_frontend_fixture.FrontendFixtureAdmissionTests.test_source_drift_invalidates_otherwise_passing_synthetic_results) ... ok\ntest_archive_guard_order_and_version_dispatch (scripts.tests.test_r5_ci_wiring.R5CIWiringTests.test_archive_guard_order_and_version_dispatch) ... ok\ntest_existing_jobs_toolchain_and_timer_mode (scripts.tests.test_r5_ci_wiring.R5CIWiringTests.test_existing_jobs_toolchain_and_timer_mode) ... ok\ntest_pr_base_boundary_is_shared (scripts.tests.test_r5_ci_wiring.R5CIWiringTests.test_pr_base_boundary_is_shared) ... ok\ntest_push_remains_main_only_and_no_privileged_event (scripts.tests.test_r5_ci_wiring.R5CIWiringTests.test_push_remains_main_only_and_no_privileged_event) ... ok\ntest_read_only_checkout_and_exact_source_archive (scripts.tests.test_r5_ci_wiring.R5CIWiringTests.test_read_only_checkout_and_exact_source_archive) ... ok\ntest_each_validation_runs_after_an_unrelated_gate_failure (scripts.tests.test_r5_frontend_evidence_continuation.FrontendEvidenceContinuationTests.test_each_validation_runs_after_an_unrelated_gate_failure) ... ok\ntest_failures_still_fail_the_existing_frontend_job (scripts.tests.test_r5_frontend_evidence_continuation.FrontendEvidenceContinuationTests.test_failures_still_fail_the_existing_frontend_job) ... ok\ntest_test_report_and_actual_checkout_identity_are_retained_after_failure (scripts.tests.test_r5_frontend_evidence_continuation.FrontendEvidenceContinuationTests.test_test_report_and_actual_checkout_identity_are_retained_after_failure) ... ok\n\n----------------------------------------------------------------------\nRan 18 tests in 0.700s\n\nOK\n",
+  "runtime_postgresql": false,
+  "full_frontend": false,
+  "original_todos_closed": []
+}
