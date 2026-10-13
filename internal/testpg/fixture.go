@@ -43,22 +43,12 @@ func NewPostgres(t *testing.T) (*postgres.PgStore, *pgxpool.Pool, string) {
 	if ctx.Err() != nil {
 		t.Fatal("PostgreSQL fixture setup has no remaining lifecycle budget")
 	}
-	admin, err := pgxpool.New(ctx, dsn)
-	if err != nil {
-		t.Fatal(err)
-	}
-	owned := &postgresFixtureResources{closeAdmin: admin.Close}
-	t.Cleanup(func() {
-		if err := owned.close(); err != nil {
-			// Driver errors can include connection inputs. Report the failure,
-			// never the DSN or the error's potentially sensitive contents.
-			t.Errorf("owned PostgreSQL database cleanup failed: %T", err)
-		}
-	})
 	openStore := func(databaseDSN string) (*postgres.PgStore, error) {
-		return postgres.New(ctx, config.DB{DSN: databaseDSN, MaxOpenConns: 10, MaxIdleConns: 1, ConnMaxLifetime: time.Minute})
+		// Ping still establishes a real store connection. Do not also start a
+		// background minimum-idle connection for a short-lived test database.
+		return postgres.New(ctx, config.DB{DSN: databaseDSN, MaxOpenConns: 10, MaxIdleConns: 0, ConnMaxLifetime: time.Minute})
 	}
-	template, err := fixtureTemplate(ctx, dsn, func(templateDSN string) error {
+	owner, err := fixtureTemplate(ctx, dsn, func(templateDSN string) error {
 		st, err := openStore(templateDSN)
 		if err != nil {
 			return err
@@ -68,22 +58,53 @@ func NewPostgres(t *testing.T) (*postgres.PgStore, *pgxpool.Pool, string) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	owned := &postgresFixtureResources{}
+	var admin *pgxpool.Pool
+	if owner != nil {
+		// Only the suite's administration connection pool is reused. Stores,
+		// observer pools, transactions and databases remain fixture-private.
+		admin = owner.admin
+	} else {
+		admin, err = pgxpool.New(ctx, dsn)
+		if err != nil {
+			t.Fatal(err)
+		}
+		owned.closeAdmin = admin.Close
+	}
+	t.Cleanup(func() {
+		if err := owned.close(); err != nil {
+			t.Errorf("owned PostgreSQL database cleanup failed: %T", err)
+		}
+	})
 	name := "tm_test_" + strings.ReplaceAll(uuid.NewString(), "-", "")
 	create := "CREATE DATABASE " + pgx.Identifier{name}.Sanitize()
-	if template != "" {
-		create += " TEMPLATE " + pgx.Identifier{template}.Sanitize()
+	if owner != nil {
+		create += " TEMPLATE " + pgx.Identifier{owner.name}.Sanitize()
 	}
+	started := time.Now()
 	if _, err = admin.Exec(ctx, create); err != nil {
 		t.Fatal(err)
 	}
+	if owner != nil {
+		owner.clones.Add(1)
+		owner.createNanos.Add(int64(time.Since(started)))
+	}
 	// A failed CREATE never grants ownership of an existing database name.
 	owned.dropDatabase = func(cleanupCtx context.Context) error {
+		started := time.Now()
 		_, err := admin.Exec(cleanupCtx, "DROP DATABASE "+pgx.Identifier{name}.Sanitize()+" WITH (FORCE)")
+		if owner != nil {
+			owner.dropNanos.Add(int64(time.Since(started)))
+		}
 		return err
 	}
 	u.Path = "/" + name
 	testDSN := u.String()
+	started = time.Now()
 	st, err := openStore(testDSN)
+	if owner != nil {
+		owner.openNanos.Add(int64(time.Since(started)))
+	}
 	if err != nil {
 		t.Fatal(err)
 	}

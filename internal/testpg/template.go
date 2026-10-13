@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -21,14 +22,18 @@ var templateScope struct {
 }
 
 type databaseTemplate struct {
-	dsn      string
-	gate     chan struct{}
-	admin    *pgxpool.Pool
-	name     string
-	ready    bool
-	err      error
-	closed   bool
-	closeErr error
+	dsn         string
+	gate        chan struct{}
+	admin       *pgxpool.Pool
+	name        string
+	ready       bool
+	err         error
+	closed      bool
+	closeErr    error
+	clones      atomic.Int64
+	createNanos atomic.Int64
+	openNanos   atomic.Int64
+	dropNanos   atomic.Int64
 }
 
 func newDatabaseTemplate(dsn string) *databaseTemplate {
@@ -61,18 +66,24 @@ func RunWithDatabaseTemplate(run func() int) (code int) {
 			fmt.Fprintf(os.Stderr, "owned PostgreSQL template cleanup failed: %T\n", err)
 			code = 1
 		}
+		fmt.Fprintf(os.Stderr, "testpg_fixture_totals: clones=%d create_ms=%.3f open_ms=%.3f drop_ms=%.3f\n",
+			owner.clones.Load(), float64(owner.createNanos.Load())/1e6,
+			float64(owner.openNanos.Load())/1e6, float64(owner.dropNanos.Load())/1e6)
 	}()
 	return run()
 }
 
-func fixtureTemplate(ctx context.Context, dsn string, initialize func(string) error) (string, error) {
+func fixtureTemplate(ctx context.Context, dsn string, initialize func(string) error) (*databaseTemplate, error) {
 	templateScope.RLock()
 	owner := templateScope.owner
 	templateScope.RUnlock()
 	if owner == nil || owner.dsn != dsn {
-		return "", nil
+		return nil, nil
 	}
-	return owner.prepare(ctx, initialize)
+	if _, err := owner.prepare(ctx, initialize); err != nil {
+		return nil, err
+	}
+	return owner, nil
 }
 
 func (d *databaseTemplate) prepare(ctx context.Context, initialize func(string) error) (string, error) {
