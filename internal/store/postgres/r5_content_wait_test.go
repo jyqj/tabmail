@@ -66,8 +66,6 @@ func r5RequireSentConflict(t *testing.T, err error) {
 }
 
 func TestR5SentMutationRejectsExpiryAfterItemWait(t *testing.T) {
-	// This fixture owns its DB and clock/lock controllers within one test process.
-	t.Parallel()
 	r5ParallelFreshDB(t)
 	for _, kind := range []string{"expires", "purge"} {
 		t.Run(kind, func(t *testing.T) {
@@ -100,8 +98,6 @@ func TestR5SentMutationRejectsExpiryAfterItemWait(t *testing.T) {
 }
 
 func TestR5SentMutationRollsBackExpiryDuringAuditWait(t *testing.T) {
-	// This fixture owns its DB and clock/lock controllers within one test process.
-	t.Parallel()
 	r5ParallelFreshDB(t)
 	for _, kind := range []string{"expires", "purge", "mailbox"} {
 		t.Run(kind, func(t *testing.T) {
@@ -217,8 +213,6 @@ func TestR5SentMutationCancellationAndAuditFailureRollBack(t *testing.T) {
 }
 
 func TestR5SentReadUsesTimeAfterIdentityWait(t *testing.T) {
-	// This fixture owns its DB and clock/lock controllers within one test process.
-	t.Parallel()
 	r5ParallelFreshDB(t)
 	for _, endpoint := range []string{"content", "attachments", "list"} {
 		t.Run(endpoint, func(t *testing.T) {

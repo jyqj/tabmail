@@ -61,8 +61,7 @@ func r5RestoreConflict(t *testing.T, e error) {
 }
 
 func TestR5RestoreLifecyclePreservesRecordedDeadline(t *testing.T) {
-	// Each case owns its database; parallelism stays within this one test binary.
-	t.Parallel()
+	r5ParallelFreshDB(t)
 	r5RestoreRequirePG(t)
 	for _, axis := range []string{"active-finite", "archive-finite", "personal-legacy-past", "shared-zero-nil", "shared-null-nil", "shared-zero-unknown-future", "shared-null-unknown-future"} {
 		t.Run(axis, func(t *testing.T) {
@@ -132,8 +131,7 @@ func TestR5RestoreLifecyclePreservesRecordedDeadline(t *testing.T) {
 }
 
 func TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects(t *testing.T) {
-	// Each case owns its database; parallelism stays within this one test binary.
-	t.Parallel()
+	r5ParallelFreshDB(t)
 	r5RestoreRequirePG(t)
 	for _, axis := range []string{"hard-past", "hard-equal", "purge-past", "purge-equal", "archive-hard-past", "shared-zero-unknown-past", "shared-null-unknown-past", "personal-purge-past", "no-organize", "no-read", "missing", "not-trash"} {
 		t.Run(axis, func(t *testing.T) {
@@ -203,8 +201,7 @@ func TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects(t *testing.T) {
 // occur after UPDATE has cleared purge. The latter must retain the ORIGINAL
 // purge deadline in the operation guard, not infer permanence from new NULL.
 func TestR5RestoreLifecycleRechecksClockAfterWait(t *testing.T) {
-	// Each case owns its database; parallelism stays within this one test binary.
-	t.Parallel()
+	r5ParallelFreshDB(t)
 	r5RestoreRequirePG(t)
 	for _, axis := range []string{"identity-hard", "mailbox-hard", "audit-purge", "outbox-purge", "audit-hard", "outbox-hard"} {
 		t.Run(axis, func(t *testing.T) {
@@ -253,8 +250,7 @@ func TestR5RestoreLifecycleRechecksClockAfterWait(t *testing.T) {
 }
 
 func TestR5RestoreLifecycleSourceBusyAndDeleted(t *testing.T) {
-	// Each case owns its database; parallelism stays within this one test binary.
-	t.Parallel()
+	r5ParallelFreshDB(t)
 	r5RestoreRequirePG(t)
 	for _, axis := range []string{"source-nowait", "deleted-before-restore", "restored-before-old-purge"} {
 		t.Run(axis, func(t *testing.T) {
@@ -326,8 +322,7 @@ func TestR5RestoreLifecycleSourceBusyAndDeleted(t *testing.T) {
 }
 
 func TestR5RestoreLifecycleCurrentProofVersusGC(t *testing.T) {
-	// Each case owns its database; parallelism stays within this one test binary.
-	t.Parallel()
+	r5ParallelFreshDB(t)
 	r5RestoreRequirePG(t)
 	for _, axis := range []string{"restore-waits-past-purge", "gc-owns-source"} {
 		t.Run(axis, func(t *testing.T) {

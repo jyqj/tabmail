@@ -132,6 +132,7 @@ func TestR5AttachmentGCProgressBusyRowsAndBatchLimit(t *testing.T) {
 }
 
 func TestR5AttachmentGCProgressConcurrentDraftFence(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()

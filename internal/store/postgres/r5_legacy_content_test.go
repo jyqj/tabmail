@@ -430,6 +430,7 @@ func TestR5LegacyContentRejectsBusyKeyWithoutDeadlock(t *testing.T) {
 }
 
 func TestR5LegacyContentKeyExpiryAfterMailboxWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	j := r5LegacyJob(t, f)
 	k, a := r5LegacyKey(t, f)

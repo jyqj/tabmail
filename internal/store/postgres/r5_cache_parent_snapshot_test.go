@@ -189,6 +189,7 @@ func TestR5CacheConstraintFailureRollsBackDerivedWrite(t *testing.T) {
 // either production command or inventing a tenant FK. A detected victim must
 // roll back all source/derived/count state; SQLSTATE is retained as evidence.
 func TestR5CacheWriteVersusPhysicalDeleteLockOrder(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"single", "expired", "purge"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)

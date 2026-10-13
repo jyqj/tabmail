@@ -158,6 +158,7 @@ func TestR5AtomicRetryRechecksLockedJobAndRecipientState(t *testing.T) {
 }
 
 func TestR5AtomicRetryKeyExpiryDuringJobWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f, j, token := r5RetryFixture(t, true)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
@@ -181,6 +182,7 @@ func TestR5AtomicRetryKeyExpiryDuringJobWait(t *testing.T) {
 }
 
 func TestR5AtomicRetryAuditWaitExpiryAndCancellation(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"expiry", "cancel"} {
 		t.Run(mode, func(t *testing.T) {
 			f, j, token := r5RetryFixture(t, mode == "expiry")

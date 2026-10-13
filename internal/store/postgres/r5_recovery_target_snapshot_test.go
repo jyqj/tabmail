@@ -44,6 +44,7 @@ func r5RecoveryTargetConflict(t *testing.T, err error) {
 }
 
 func TestR5RecoveryRetryRejectsExpiryAfterAuditWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	c := r5RecoveryParentFixture(t, f, "retry")
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
@@ -142,6 +143,7 @@ func TestR5RecoveryRetryOrdersDestinationChanges(t *testing.T) {
 }
 
 func TestR5IngressDeliveryRejectsTargetExpiryAfterAuditWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	claim, message := r5ClaimIngress(t, f)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)

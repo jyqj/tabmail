@@ -102,6 +102,7 @@ func TestR5WebhookFanoutBatchFailureRollsBack(t *testing.T) {
 }
 
 func TestR5WebhookFanoutCompleteCommandsURLLockOrder(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, order := range []string{"ab-first", "ba-first"} {
 		t.Run(order, func(t *testing.T) {
 			f, e := r5FanoutFixture(t)
