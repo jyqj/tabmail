@@ -23,7 +23,7 @@ class FrontendEvidenceContinuationTests(unittest.TestCase):
                     'npx tsc --noEmit', 'npm test', 'npm run lint', 'npm run build']
         for command in commands:
             with self.subTest(command=command):
-                scope = frontend('frontend-build')['steps'] if command == 'npm run build' else steps
+                scope = frontend('frontend-build')['steps'] if command in ('npx tsc --noEmit', 'npm run lint', 'npm run build') else steps
                 matches = [step for step in scope if command in step.get('run', '')]
                 self.assertEqual(len(matches), 1)
                 condition = matches[0].get('if', '')

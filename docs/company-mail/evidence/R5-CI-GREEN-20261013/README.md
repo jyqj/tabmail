@@ -102,8 +102,8 @@ production-web和browser-journey全部成功。汇总job 115391882344 在实际m
 frontend的源码、完整默认测试、类型、lint、严格audit步骤成功，但最后npm build被原
 15分钟job时限取消；不能登记该workflow成功。
 
-当前把原npm build移入独立frontend-build job：同一checkout/lock、原npm ci和
-npm run build，仍15分钟，失败仍使完整workflow失败。原frontend保留全部验证与
-原证据上传；没有删构建、增大预算或用Docker构建结果顶替它。拓扑现为7个job定义，
+当前把原tsc、lint、npm build移入独立frontend-build job：同一checkout/lock、原npm ci和
+原三条命令，仍15分钟，失败仍使完整workflow失败。原frontend保留完整默认测试、
+源码/目录/严格审计检查与原证据上传；没有删构建、增大预算或用Docker构建结果顶替它。拓扑现为7个job定义，
 矩阵展开10个实际job。接线/前端独立失败/原制品/模板控制27项、当前目录两项通过；
 最终远端整轮尚待验收。

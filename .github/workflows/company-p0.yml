@@ -345,9 +345,6 @@ jobs:
         if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         run: |
           node -e 'const d=require("/tmp/tabmail-npm-audit.json"); if(!d.metadata?.vulnerabilities || d.error || d.metadata.vulnerabilities.total !== 0) throw new Error("dependency audit missing, failed or contains vulnerabilities");'
-      - run: npx tsc --noEmit
-        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
-        working-directory: web
       - name: Complete default frontend with an owned PostgreSQL fixture
         if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
@@ -359,9 +356,6 @@ jobs:
             --output-dir "$RUNNER_TEMP/tabmail-frontend-fixture" \
             --source-sha "$(cat ../frontend-source-sha.txt)" \
             -- npm test -- --reporter=default --reporter=json --outputFile=../frontend-vitest.json
-      - run: npm run lint
-        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
-        working-directory: web
       - name: Retain frontend evidence after validation failures
         if: always()
         uses: actions/upload-artifact@v4
@@ -392,6 +386,12 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci
         id: web_install
+        working-directory: web
+      - run: npx tsc --noEmit
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
+        working-directory: web
+      - run: npm run lint
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
       - run: npm run build
         if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}

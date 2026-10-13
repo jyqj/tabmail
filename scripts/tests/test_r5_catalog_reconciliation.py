@@ -20,8 +20,8 @@ ROOT = Path(__file__).resolve().parents[2]
 # Exact CI deltas reviewed on 2026-10-13. Historical revision19 manifests stay
 # immutable; these pins authorize no other byte changes or runtime acceptance.
 CI_REVIEWED_DELTAS = {'.github/workflows/company-p0.yml': {'before_commit': '0d58452206048a08c9d8d7137804762faf4d68ef',
-                                      'blob': 'ac1466c0a37a04dc127e2485db3ef437425f9c92',
-                                      'sha256': '2cb00c4aa0cf289f13589affeee8e7dc73773548034a81eaa5abd93f7782583b'},
+                                      'blob': '516a3f1c1ed96747a46f2450069e9f6391ee7644',
+                                      'sha256': '417a674b8262a0b97fd441b1cf5dfb2f21be0162471d237cade9c1277da6b102'},
  'scripts/r5_archive_boundary.py': {'before_commit': 'b50831c2de9c6ac6d825e0d64d8637aab3854487',
                                     'blob': '5d047afa2b307979e9a175ebfb5c8302545dcaba',
                                     'sha256': '6bc97ea325ff7086f43fc76f7b12a5b6c6790c594bad901172e808a5ee3b2191'},
@@ -38,8 +38,8 @@ CI_REVIEWED_DELTAS = {'.github/workflows/company-p0.yml': {'before_commit': '0d5
                                         'blob': '38091f4f82dbb583288c8edfc19399659553b9d5',
                                         'sha256': '547cb6e59a3e8140a270c66c3654fea3209c83005ad0c6293447a6c169e5f946'},
  'scripts/tests/test_r5_frontend_evidence_continuation.py': {'before_commit': '0d58452206048a08c9d8d7137804762faf4d68ef',
-                                                             'blob': '2195a8e1d01978ec92fb857450e14d887dd8ad5b',
-                                                             'sha256': '17707e13e4ad48ec3d62a33581c02e639feebdfadb4859080d7d78ea6a35c165'},
+                                                             'blob': '29ba394d5641bbd2023f10bb43f17ce5cd7df693',
+                                                             'sha256': 'ed8e9f294ad17e47e8ad9eaa9e2063065c43065809dea9318dab1da2fa10f2fe'},
  'scripts/tests/test_r5_reviewed_web_locks.py': {'before_commit': '0caf139ff8aaf4243cd12fdc9b1fc702f632e5c0',
                                                  'blob': '085ae957661b83df9ecc223e516058c7d924a8b3',
                                                  'sha256': '459b68bd0023dbfc57022a13b3b7893c5b9d90c683ef3340d8dc3c8b840ffbe2'},
