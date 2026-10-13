@@ -264,6 +264,7 @@ func TestR5PermissionStagePostgresTruthTable(t *testing.T) {
 // Administrative JWT management is intentionally distinct from an API key
 // owned by the same administrator. The latter always uses the owner's profile.
 func TestR5PermissionStagePostgresAdminOwnedKeyBoundary(t *testing.T) {
+	r5ParallelFreshDB(t)
 	r5StageRequirePG(t)
 	f, p := r5EditorSeed(t)
 	ctx := context.Background()
@@ -498,6 +499,7 @@ func TestR5PermissionStagePostgresWorkerRevocation(t *testing.T) {
 // Patch/assignment must use the existing companyAudit event protocol; no
 // private effective/raw permission data belongs in the public event metadata.
 func TestR5PermissionStagePostgresRequiredOutbox(t *testing.T) {
+	r5ParallelFreshDB(t)
 	r5StageRequirePG(t)
 	for _, command := range []string{"patch", "assign", "profile-update", "profile-delete"} {
 		for _, failure := range []string{"none", "audit", "outbox"} {

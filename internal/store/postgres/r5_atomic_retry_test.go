@@ -56,6 +56,7 @@ func r5RetryRequest(t *testing.T, f *companyFixture, j *models.OutboundJob, toke
 }
 
 func TestR5AtomicRetryOrdersAuthorizationChanges(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"user-freeze", "profile-revoke", "mailbox-disable", "zone-unverify", "key-delete", "key-scope", "requester-freeze", "original-sender-freeze", "grant-revoke", "tenant-policy"} {
 		t.Run(mode, func(t *testing.T) {
 			key := mode == "key-delete" || mode == "key-scope"
@@ -122,6 +123,7 @@ func TestR5AtomicRetryOrdersAuthorizationChanges(t *testing.T) {
 }
 
 func TestR5AtomicRetryRechecksLockedJobAndRecipientState(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"corrupt-content", "uncertain-recipient", "already-pending"} {
 		t.Run(mode, func(t *testing.T) {
 			f, j, token := r5RetryFixture(t, false)
@@ -237,6 +239,7 @@ func TestR5AtomicRetryAuditWaitExpiryAndCancellation(t *testing.T) {
 }
 
 func TestR5AtomicRetryTemplatesAndLegacyIdentity(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"template-live", "template-revoke", "legacy-exact", "legacy-busy-gap"} {
 		t.Run(mode, func(t *testing.T) {
 			f, j, token := r5RetryFixture(t, false)
@@ -323,6 +326,7 @@ func TestR5AtomicRetryTemplatesAndLegacyIdentity(t *testing.T) {
 }
 
 func TestR5AtomicRetryOutboxFailureAndAcceptedRecipients(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, failure := range []bool{false, true} {
 		t.Run(fmt.Sprint(failure), func(t *testing.T) {
 			f, j, token := r5RetryFixture(t, false)
@@ -360,6 +364,7 @@ func TestR5AtomicRetryOutboxFailureAndAcceptedRecipients(t *testing.T) {
 }
 
 func TestR5AtomicRetryConcurrentCommands(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, same := range []bool{false, true} {
 		t.Run(fmt.Sprint(same), func(t *testing.T) {
 			f, j, token := r5RetryFixture(t, false)
@@ -413,6 +418,7 @@ func TestR5AtomicRetryConcurrentCommands(t *testing.T) {
 }
 
 func TestR5AtomicRetryRequiredAuditRollsBack(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f, j, token := r5RetryFixture(t, false)
 	ctx := context.Background()
 	_, e := f.pool.Exec(ctx, `ALTER TABLE audit_log ADD CONSTRAINT reject_retry_audit CHECK(action<>'outbound.retry') NOT VALID`)
