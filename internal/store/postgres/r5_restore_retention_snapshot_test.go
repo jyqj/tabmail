@@ -13,6 +13,7 @@ import (
 // Retention must recheck the source that it actually deletes after a wait,
 // rather than treat an old trash candidate as an irrevocable delete receipt.
 func TestR5RestoreAndRetentionSnapshotEligibility(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, order := range []string{"restore-first", "retention-first"} {
 		t.Run(order, func(t *testing.T) {
 			f := seedCompany(t)
@@ -109,6 +110,7 @@ func TestR5RestoreAndRetentionSnapshotEligibility(t *testing.T) {
 }
 
 func TestR5RestoreRetentionExpiredSourceControl(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	id := r5MaintenanceFixture(t, f)
 	ctx := context.Background()
@@ -129,6 +131,7 @@ func TestR5RestoreRetentionExpiredSourceControl(t *testing.T) {
 // are seeded directly, as in the existing retention fixtures. Preserve both
 // active-expiry and trash-purge equality semantics (the predicate is <, not <=).
 func TestR5RestoreRetentionEligibilityControls(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, name := range []string{"legacy-active-expired", "owner-permanent", "shared-permanent", "legacy-active-deadline-equal", "trash-purge-deadline-equal"} {
 		t.Run(name, func(t *testing.T) {
 			f := seedCompany(t)

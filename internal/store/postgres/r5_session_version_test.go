@@ -37,6 +37,7 @@ func r5SessionDraftCounts(t *testing.T, f *companyFixture) [2]int {
 // waits on the transaction's user SHARE. Version changes commit before that
 // final authorization read resumes. No test middleware or time-based sleep.
 func TestR5SessionVersionInFlightRouterAuthorization(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, route := range []string{"receipt", "draft-save"} {
 		for _, transition := range []string{"password-change", "session-revoke", "freeze-reactivate", "unchanged"} {
 			t.Run(route+"/"+transition, func(t *testing.T) {

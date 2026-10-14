@@ -1,0 +1,7 @@
+test_revision20_only_updates_exact_fixture_caller_facts (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision20_only_updates_exact_fixture_caller_facts) ... ok
+test_revision20_preserves_history_oracles_and_reviewed_source (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision20_preserves_history_oracles_and_reviewed_source) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 5.682s
+
+OK

@@ -252,6 +252,7 @@ func r5MaintenanceSeenAssets(t *testing.T, f *companyFixture, id uuid.UUID) stri
 // the existing tombstone, document and index of an older trash item unchanged;
 // this is the real batch nil-ID port used by app/messages.PurgeMailbox.
 func TestR5MessageCompanyClearPreservesExistingTombstones(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	oldID := r5MaintenanceFixture(t, f)
 	oldAssets := r5MaintenanceAssets(t, f, oldID)

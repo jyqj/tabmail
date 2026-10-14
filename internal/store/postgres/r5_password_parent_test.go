@@ -11,6 +11,7 @@ import (
 // Password changes write no outbox, but their required audit references tenant.
 // Freeze is a complete tenant-first command, not synthetic SQL user locking.
 func TestR5PasswordChangeOrdersMemberFreeze(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -80,6 +81,7 @@ func TestR5PasswordChangeOrdersMemberFreeze(t *testing.T) {
 // Required audit-parent protection must precede even the initial user UPDATE;
 // taking tenant protection after changing the password preserves the lock ring.
 func TestR5PasswordAuditParentPrecedesUserUpdate(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
@@ -118,6 +120,7 @@ func r5PasswordState(t *testing.T, f *companyFixture) string {
 }
 
 func TestR5PasswordAuditFailureRollsBackSessionAndRefresh(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	must(t, f.st.CreateRefreshToken(ctx, rbNewRefresh(f.employee.ID)))

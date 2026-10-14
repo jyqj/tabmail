@@ -141,6 +141,7 @@ func TestR5IndexCompleteRechecksAfterDocumentWait(t *testing.T) {
 }
 
 func TestR5IndexSourceLockPrecedesJob(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	j, d := r5IndexFixture(t, f, false)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
@@ -167,6 +168,7 @@ func TestR5IndexSourceLockPrecedesJob(t *testing.T) {
 }
 
 func TestR5IndexDocumentFailureRollsBackCompletion(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	j, d := r5IndexFixture(t, f, true)
 	ctx := context.Background()
@@ -185,6 +187,7 @@ func TestR5IndexDocumentFailureRollsBackCompletion(t *testing.T) {
 	must(t, f.st.CompleteMailIndexJob(ctx, j, d))
 }
 func TestR5IndexCancelledCompletionReleasesLocks(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	j, d := r5IndexFixture(t, f, true)
 	observe, cancel := context.WithTimeout(context.Background(), 12*time.Second)
@@ -203,6 +206,7 @@ func TestR5IndexCancelledCompletionReleasesLocks(t *testing.T) {
 	must(t, f.st.CompleteMailIndexJob(observe, j, d))
 }
 func TestR5IndexRejectsChangedSourceAndStaleToken(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	j, d := r5IndexFixture(t, f, true)
 	ctx := context.Background()

@@ -13,6 +13,7 @@ import (
 // members read. Organizing (trash/archive/restore) remains a shared action
 // gated by CanOrganize.
 func TestSharedMailboxPersonalStateSeparation(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	readerActor := authz.Actor{Type: authz.PrincipalUser, ID: f.employee.ID, TenantID: f.tenant.ID, Role: models.RoleUser}
@@ -104,6 +105,7 @@ func TestSharedMailboxPersonalStateSeparation(t *testing.T) {
 // action still writes messages.seen (fast path), so both the workbench route
 // and the legacy mailbox route stay consistent, and starring is additive.
 func TestPersonalMailboxSeenBehaviorUnchanged(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	m := &models.Message{TenantID: f.tenant.ID, MailboxID: f.personal.ID, ZoneID: f.zone.ID, Sender: "sender@client.test", Recipients: []string{f.personal.FullAddress}, Subject: "private item", RawObjectKey: "private-item"}
@@ -138,6 +140,7 @@ func TestPersonalMailboxSeenBehaviorUnchanged(t *testing.T) {
 // the trigger does not fire (no messages row changed), so the store writes the
 // invalidation event itself.
 func TestPersonalStateWritesStillEmitMailboxEvents(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true}))

@@ -22,6 +22,7 @@ func ar09Revision(t *testing.T, f *companyFixture, id uuid.UUID) int64 {
 }
 
 func TestAR09HandoverAndConvertClaimRevisionThroughHelper(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 
@@ -70,6 +71,7 @@ func TestAR09HandoverAndConvertClaimRevisionThroughHelper(t *testing.T) {
 // id order and route each revision increment through the shared claim CAS; it
 // must not regress to one bulk UPDATE mixing owner and revision fields.
 func TestAR09OffboardingLocksOwnedMailboxesInIdOrder(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

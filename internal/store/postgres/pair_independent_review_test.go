@@ -141,6 +141,7 @@ func pairForeign(t *testing.T, f *companyFixture) *models.User {
 	return u
 }
 func TestPairIndependentOldPeerSelf(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"peer", "self"} {
 		t.Run(mode, func(t *testing.T) {
 			f := pairSeed(t)
@@ -168,6 +169,7 @@ func TestPairIndependentOldPeerSelf(t *testing.T) {
 	}
 }
 func TestPairIndependentPreviewPolicy(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"frozen", "peer-target", "super-target", "caller-target", "same-subject", "inactive-successor", "super-successor", "foreign-target", "foreign-successor", "ordinary-caller", "inactive-caller", "ordinary-selected-foreign", "super-selected-user", "super-selected-admin", "super-selected-super"} {
 		t.Run(mode, func(t *testing.T) {
 			f := pairSeed(t)
@@ -252,6 +254,7 @@ func TestPairIndependentPreviewPolicy(t *testing.T) {
 	}
 }
 func TestPairIndependentStaleExecute(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"successor-role", "successor-freeze", "target-role", "target-freeze", "caller-role", "caller-freeze", "caller-tenant", "successor-tenant-fk", "target-tenant-fk", "asset", "expiry", "plan-creator", "plan-target", "synthetic-old-self-plan", "super-successor-role", "super-target-role"} {
 		t.Run(mode, func(t *testing.T) {
 			f := pairSeed(t)
@@ -331,6 +334,7 @@ func TestPairIndependentStaleExecute(t *testing.T) {
 	}
 }
 func TestPairIndependentReplayCompletion(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"same", "successor-role", "successor-freeze", "target-role", "target-session", "successor-session", "unverified-receipt", "second-plan"} {
 		t.Run(mode, func(t *testing.T) {
 			f := pairSeed(t)
@@ -378,6 +382,7 @@ func TestPairIndependentReplayCompletion(t *testing.T) {
 	}
 }
 func TestPairIndependentCompatibility(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"peer", "self", "inactive", "foreign", "frozen-target"} {
 		t.Run(mode, func(t *testing.T) {
 			f := pairSeed(t)
@@ -424,6 +429,7 @@ func pairWaitBlocked(t *testing.T, f *companyFixture, pid int) {
 	t.Fatal("no real PostgreSQL wait edge")
 }
 func TestPairIndependentLockWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, stage := range []string{"preview", "execute", "replay"} {
 		for _, subject := range []string{"successor", "cross-tenant-super-caller"} {
 			t.Run(stage+"/"+subject, func(t *testing.T) {
@@ -479,6 +485,7 @@ func TestPairIndependentLockWait(t *testing.T) {
 	}
 }
 func TestPairIndependentConcurrentExecute(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := pairSeed(t)
 	s := pairServer(t, f)
 	token := r3Token(t, f.admin)
@@ -514,6 +521,7 @@ func TestPairIndependentConcurrentExecute(t *testing.T) {
 }
 
 func TestPairIndependentLocksHeldThroughCommit(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := pairSeed(t)
 	s := pairServer(t, f)
 	token := r3Token(t, f.admin)
@@ -553,6 +561,7 @@ func TestPairIndependentLocksHeldThroughCommit(t *testing.T) {
 	pairUnchanged(t, f, before)
 }
 func TestPairIndependentShippingUI(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"frozen", "successor-role", "target-freeze", "selected-super"} {
 		t.Run(mode, func(t *testing.T) {
 			f := pairSeed(t)

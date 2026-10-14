@@ -198,6 +198,7 @@ func TestR5SentRecipientSnapshotUsesExistingCurrentReadAndLifecycle(t *testing.T
 }
 
 func TestR5SentRecipientSnapshotRejectsDeadlineAfterMailboxWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := r5RecipientSnapshotFixture(t)
 	j := r5RecipientSnapshotJob(t, f, []string{"private@recipient.test"})
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)

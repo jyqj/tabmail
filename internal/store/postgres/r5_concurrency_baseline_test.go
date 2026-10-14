@@ -108,6 +108,7 @@ func r5VerifyTransferAtomicity(t *testing.T, f *companyFixture, a *company.Attac
 	t.Logf("atomicity: plan=%s old_active=%v job=%d archive=%d pin=%d; enqueue=%s offboard=%s", state, active, jobs, assets, pins, r5SQLState(enqueue), r5SQLState(offboard))
 }
 func TestR5ConcurrencyR01EnqueueOffboardNoAttachmentCycle(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	a, d, p, j := r5TransferFixture(t, f)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -134,6 +135,7 @@ func TestR5ConcurrencyR01EnqueueOffboardNoAttachmentCycle(t *testing.T) {
 	}
 }
 func TestR5ConcurrencyR03EnqueueOffboardNoTenantFKCycle(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	a, d, p, j := r5TransferFixture(t, f)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -164,6 +166,7 @@ func TestR5ConcurrencyR03EnqueueOffboardNoTenantFKCycle(t *testing.T) {
 	}
 }
 func TestR5ConcurrencyR02DraftCannotCommitAfterCompletedRevoke(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

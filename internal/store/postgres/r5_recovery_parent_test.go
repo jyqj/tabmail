@@ -75,6 +75,7 @@ func r5RecoveryParentSnapshot(t *testing.T, f *companyFixture) string {
 }
 
 func TestR5RecoveryAuditParentPrecedesActor(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range r5RecoveryParentKinds {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -103,6 +104,7 @@ func TestR5RecoveryAuditParentPrecedesActor(t *testing.T) {
 }
 
 func TestR5RecoveryAuditOrdersMemberFreeze(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range r5RecoveryParentKinds {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -144,6 +146,7 @@ func TestR5RecoveryAuditOrdersMemberFreeze(t *testing.T) {
 }
 
 func TestR5RecoveryAuditReloadsActorAfterParentWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range r5RecoveryParentKinds {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)

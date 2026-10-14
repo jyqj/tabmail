@@ -97,6 +97,7 @@ func r5OffboardingPermissionABA(t *testing.T, f *companyFixture, actor authz.Act
 }
 
 func TestR5OffboardingLifecycleFrozenTargetAndQualifiedReplay(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := r5OffboardingSeed(t)
 	a := r5OffboardingActor(t, f)
 	draft, err := f.st.SaveMailDraft(context.Background(), f.u, company.Draft{MailboxID: f.personal.ID, Payload: company.DraftPayload{Subject: "sealed private lifecycle draft"}})
@@ -142,6 +143,7 @@ func TestR5OffboardingLifecycleFrozenTargetAndQualifiedReplay(t *testing.T) {
 }
 
 func TestR5OffboardingLifecycleOldCompletionEpochDenied(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, change := range []string{"actor-demote", "actor-freeze", "actor-session", "target-reactivate", "target-session", "target-role", "target-permission-aba", "successor-freeze", "successor-session", "successor-permission-aba", "legacy-unverified", "foreign-target"} {
 		t.Run(change, func(t *testing.T) {
 			f := r5OffboardingSeed(t)
@@ -205,6 +207,7 @@ func TestR5OffboardingLifecycleOldCompletionEpochDenied(t *testing.T) {
 }
 
 func TestR5OffboardingLifecycleFreshReentryAndSuccessorEpoch(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := r5OffboardingSeed(t)
 	a := r5OffboardingActor(t, f)
 	old := r5OffboardingPreview(t, f, a)
@@ -264,6 +267,7 @@ func r5OffboardingProfile(t *testing.T, f *companyFixture) *models.PermissionPro
 }
 
 func TestR5OffboardingLifecycleAssignedProfileContentABA(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, phase := range []string{"preview", "replay"} {
 		for _, subject := range []string{"target", "successor"} {
 			t.Run(phase+"/"+subject, func(t *testing.T) {
@@ -306,6 +310,7 @@ func TestR5OffboardingLifecycleAssignedProfileContentABA(t *testing.T) {
 }
 
 func TestR5OffboardingLifecycleSharedAndNullableProfileReceipt(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range []string{"shared-unchanged-profile", "explicit-null-profile-pair"} {
 		t.Run(kind, func(t *testing.T) {
 			f := r5OffboardingSeed(t)
@@ -331,6 +336,7 @@ func TestR5OffboardingLifecycleSharedAndNullableProfileReceipt(t *testing.T) {
 }
 
 func TestR5OffboardingLifecycleProfileVersionFence(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, phase := range []string{"preview", "replay"} {
 		for _, change := range []string{"busy-profile", "target-recreated-profile", "successor-recreated-profile"} {
 			t.Run(phase+"/"+change, func(t *testing.T) {
@@ -412,6 +418,7 @@ func r5OffboardingWait(t *testing.T, pool *pgxpool.Pool, ctx context.Context, bl
 }
 
 func TestR5OffboardingLifecycleAuditWaitExpiryRollsBack(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := r5OffboardingSeed(t)
 	a := r5OffboardingActor(t, f)
 	_, err := f.st.SaveMailDraft(context.Background(), f.u, company.Draft{MailboxID: f.personal.ID, Payload: company.DraftPayload{Subject: "private rollback witness"}})
@@ -461,6 +468,7 @@ func TestR5OffboardingLifecycleAuditWaitExpiryRollsBack(t *testing.T) {
 }
 
 func TestR5OffboardingLifecyclePlanWaitUsesDatabaseDeadline(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := r5OffboardingSeed(t)
 	a := r5OffboardingActor(t, f)
 	p := r5OffboardingPreview(t, f, a)
@@ -496,6 +504,7 @@ func TestR5OffboardingLifecyclePlanWaitUsesDatabaseDeadline(t *testing.T) {
 }
 
 func TestR5OffboardingLifecyclePreviewExpiryBeforeReleaseRollsBack(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := r5OffboardingSeed(t)
 	a := r5OffboardingActor(t, f)
 	// A fixture-controlled deadline at the INSERT boundary tests equality
@@ -524,6 +533,7 @@ func r5OffboardingHTTPData(t *testing.T, raw []byte, want int, status int) compa
 }
 
 func TestR5OffboardingLifecycleShippingHTTP(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := testpg.NewR5HTTPFixture(t)
 	c := f.Companies[0]
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
@@ -555,6 +565,7 @@ func TestR5OffboardingLifecycleShippingHTTP(t *testing.T) {
 }
 
 func TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, phase := range []string{"preview", "execute", "replay"} {
 		for _, change := range []string{"demote", "freeze", "session", "successor-freeze"} {
 			t.Run(phase+"/"+change, func(t *testing.T) {

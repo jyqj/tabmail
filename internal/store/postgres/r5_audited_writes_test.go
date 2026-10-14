@@ -114,6 +114,7 @@ func r5AuditedForbidden(t *testing.T, e error) {
 // The old code holds user SHARE, then waits for the tenant FK at audit/INSERT;
 // freezing holds tenant UPDATE, then waits for that user. Do not swallow 40P01.
 func TestR5AuditedWritesOrderMemberFreeze(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range r5AuditedKinds {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -155,6 +156,7 @@ func TestR5AuditedWritesOrderMemberFreeze(t *testing.T) {
 }
 
 func TestR5AuditedWritesParentPrecedesActor(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range r5AuditedKinds {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -182,6 +184,7 @@ func TestR5AuditedWritesParentPrecedesActor(t *testing.T) {
 }
 
 func TestR5AuditedWritesReloadActorAfterParentWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range r5AuditedKinds {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -213,6 +216,7 @@ func TestR5AuditedWritesReloadActorAfterParentWait(t *testing.T) {
 }
 
 func TestR5AuditedIndependentWritesShareParent(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range r5AuditedKinds[:4] {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -240,6 +244,7 @@ func TestR5AuditedIndependentWritesShareParent(t *testing.T) {
 }
 
 func TestR5AuditedWritesAuditFailureRollsBack(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range r5AuditedKinds {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -263,6 +268,7 @@ func TestR5AuditedWritesAuditFailureRollsBack(t *testing.T) {
 }
 
 func TestR5MessageMutationReloadsGrantAfterMailboxWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, action := range []string{"archive", "starred"} {
 		t.Run(action, func(t *testing.T) {
 			f := seedCompany(t)

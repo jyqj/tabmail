@@ -32,6 +32,7 @@ func r5Reserve(ctx context.Context, f *companyFixture, actor authz.Actor, mailbo
 }
 
 func TestR5ReservationOrdersMailboxRevocation(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
@@ -97,6 +98,7 @@ observe:
 }
 
 func TestR5ReservationWaitsForMailboxBeforeBudget(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -122,6 +124,7 @@ func TestR5ReservationWaitsForMailboxBeforeBudget(t *testing.T) {
 }
 
 func TestR5ReservationConcurrentBudgetIsAtomic(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -172,6 +175,7 @@ func TestR5ReservationConcurrentBudgetIsAtomic(t *testing.T) {
 }
 
 func TestR5ReservationOtherUploaderRemainsIndependent(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -190,6 +194,7 @@ func TestR5ReservationOtherUploaderRemainsIndependent(t *testing.T) {
 }
 
 func TestR5ReservationCancellationReleasesLocksAndBudget(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

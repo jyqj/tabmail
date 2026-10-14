@@ -82,6 +82,7 @@ func TestR5AccessExplanationWaitsForTargetWrites(t *testing.T) {
 }
 
 func TestR5AccessExplanationRejectsBusyTargetProfile(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, global := range []bool{false, true} {
 		name := "tenant"
 		if global {
@@ -180,6 +181,7 @@ func TestR5AccessExplanationOrdersPermissionChanges(t *testing.T) {
 // with a permissive override. Neither committed state permits sending. The old
 // explanation can combine the first Active flag with the second permission.
 func TestR5AccessExplanationNeverCombinesTargetGenerations(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	r5SnapshotProfile(t, f, false, false)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
@@ -262,6 +264,7 @@ func TestR5AccessExplanationFailureReturnsNoProjection(t *testing.T) {
 }
 
 func TestR5AccessExplanationCancellationReleasesSnapshot(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	p := r5SnapshotProfile(t, f, true, false)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)

@@ -42,6 +42,7 @@ func r5CreateProfileCounts(t *testing.T, f *r5CreateProfileFixture) (int, int) {
 	return audit, event
 }
 func TestR5PermissionProfileCreateFreshScopeAndRevision(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"admin-stale-super-hint", "fresh-super-stale-admin-hint", "global-no-selected", "global-selected"} {
 		t.Run(mode, func(t *testing.T) {
 			f := r5CreateProfileSeed(t)
@@ -116,6 +117,7 @@ func TestR5PermissionProfileCreateFreshScopeAndRevision(t *testing.T) {
 	}
 }
 func TestR5PermissionProfileCreateAuthorityAndZoneFailures(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"employee", "owned-admin-key", "freeze", "session-version", "selected-foreign", "missing-selected-admin", "foreign-zone", "duplicate-zone", "global-zones", "system"} {
 		t.Run(mode, func(t *testing.T) {
 			f := r5CreateProfileSeed(t)
@@ -165,6 +167,7 @@ func TestR5PermissionProfileCreateAuthorityAndZoneFailures(t *testing.T) {
 	}
 }
 func TestR5PermissionProfileCreateRequiredAuditOutboxRollback(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, failure := range []string{"audit", "outbox"} {
 		t.Run(failure, func(t *testing.T) {
 			f := r5CreateProfileSeed(t)
@@ -185,6 +188,7 @@ func TestR5PermissionProfileCreateRequiredAuditOutboxRollback(t *testing.T) {
 	}
 }
 func TestR5PermissionProfileCreateLockWaitRechecksAuthority(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, gateKind := range []string{"tenant", "actor"} {
 		for _, change := range []string{"demote", "freeze", "session-version"} {
 			t.Run(gateKind+"/"+change, func(t *testing.T) {
@@ -245,6 +249,7 @@ func TestR5PermissionProfileCreateLockWaitRechecksAuthority(t *testing.T) {
 	}
 }
 func TestR5PermissionProfileCreateZoneBusyAndShippingService(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := r5CreateProfileSeed(t)
 	ctx := context.Background()
 	gate, err := f.pool.Begin(ctx)
@@ -269,6 +274,7 @@ func TestR5PermissionProfileCreateZoneBusyAndShippingService(t *testing.T) {
 }
 
 func TestR5PermissionProfileCreateGlobalAnchorIsPersistent(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := r5CreateProfileSeed(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
@@ -317,6 +323,7 @@ func TestR5PermissionProfileCreateGlobalAnchorIsPersistent(t *testing.T) {
 }
 
 func TestR5PermissionProfileCreateSuppressedInsertFailsClosed(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := r5CreateProfileSeed(t)
 	ctx := context.Background()
 	_, err := f.pool.Exec(ctx, `CREATE FUNCTION create_suppress_row() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NULL; END$$; CREATE TRIGGER create_suppress_row BEFORE INSERT ON permission_profiles FOR EACH ROW EXECUTE FUNCTION create_suppress_row()`)
@@ -329,6 +336,7 @@ func TestR5PermissionProfileCreateSuppressedInsertFailsClosed(t *testing.T) {
 	}
 }
 func TestR5PermissionProfileCreateInvalidValuesAndMissingHome(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"nil-request", "blank-name", "negative-send", "negative-receive", "negative-mailboxes", "negative-domains", "overflow-quota", "zero-target-super", "zero-zone", "zero-selected", "missing-home"} {
 		t.Run(mode, func(t *testing.T) {
 			f := r5CreateProfileSeed(t)

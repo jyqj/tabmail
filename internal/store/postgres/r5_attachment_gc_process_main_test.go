@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"tabmail/internal/testpg"
 	"testing"
 	"time"
 )
@@ -24,7 +25,7 @@ func TestMain(m *testing.M) {
 		}
 	}
 	if !privateArgument {
-		os.Exit(m.Run())
+		os.Exit(testpg.RunWithDatabaseTemplate(m.Run))
 	}
 	if len(os.Args) != 2 || os.Args[1] != r5GCScannerChildArgument {
 		fmt.Fprintln(os.Stderr, "invalid GC scanner child arguments")

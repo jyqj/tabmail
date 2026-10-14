@@ -10,6 +10,7 @@ import (
 // Parent KEY SHARE must not be replaced by a tenant-exclusive enqueue lock.
 // Both real commands reach a test-only late INSERT barrier concurrently.
 func TestR5ConcurrencyIndependentSubmissionsShareParentLock(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	_, _, _, first := r5TransferFixture(t, f)
 	second := *first

@@ -125,8 +125,8 @@ raise SystemExit(int(os.environ.get('CONTROL_GO_EXIT', '0')))
         self.assertNotIn('env', step)
         steps = backend()['steps']
         self.assertLess(steps.index(self.named('Build')), steps.index(step))
-        # Full race coverage runs independently on dedicated matrix runners;
-        # a failing shard must not suppress this original template-grant gate.
+        # The full race command runs independently on its dedicated runner;
+        # a failing race run must not suppress this original template-grant gate.
         workflow = yaml.load((ROOT / '.github/workflows/company-p0.yml').read_text(), Loader=yaml.BaseLoader)
         self.assertIn('backend-race', workflow['jobs'])
         self.assertNotIn('needs', workflow['jobs']['backend'])

@@ -1,0 +1,32 @@
+=== RUN   TestPostgresFixtureCleanupPartialInitialization
+=== RUN   TestPostgresFixtureCleanupPartialInitialization/nothing_acquired
+=== RUN   TestPostgresFixtureCleanupPartialInitialization/admin_only_create_failed
+=== RUN   TestPostgresFixtureCleanupPartialInitialization/owned_database_store_failed
+=== RUN   TestPostgresFixtureCleanupPartialInitialization/store_acquired_observer_failed
+=== RUN   TestPostgresFixtureCleanupPartialInitialization/fully_initialized
+--- PASS: TestPostgresFixtureCleanupPartialInitialization (0.00s)
+    --- PASS: TestPostgresFixtureCleanupPartialInitialization/nothing_acquired (0.00s)
+    --- PASS: TestPostgresFixtureCleanupPartialInitialization/admin_only_create_failed (0.00s)
+    --- PASS: TestPostgresFixtureCleanupPartialInitialization/owned_database_store_failed (0.00s)
+    --- PASS: TestPostgresFixtureCleanupPartialInitialization/store_acquired_observer_failed (0.00s)
+    --- PASS: TestPostgresFixtureCleanupPartialInitialization/fully_initialized (0.00s)
+=== RUN   TestPostgresFixtureCleanupDropFailureStillClosesAdmin
+--- PASS: TestPostgresFixtureCleanupDropFailureStillClosesAdmin (0.00s)
+=== RUN   TestPostgresFixtureSetupDeadlineAndCancellation
+=== RUN   TestPostgresFixtureSetupDeadlineAndCancellation/deadline
+=== RUN   TestPostgresFixtureSetupDeadlineAndCancellation/cancelled-parent
+--- PASS: TestPostgresFixtureSetupDeadlineAndCancellation (2.07s)
+    --- PASS: TestPostgresFixtureSetupDeadlineAndCancellation/deadline (2.04s)
+    --- PASS: TestPostgresFixtureSetupDeadlineAndCancellation/cancelled-parent (0.03s)
+=== RUN   TestDatabaseTemplateCancelledBeforeInitialization
+--- PASS: TestDatabaseTemplateCancelledBeforeInitialization (0.00s)
+=== RUN   TestDatabaseTemplateCopiesAreIsolatedAndOwned
+=== RUN   TestDatabaseTemplateCopiesAreIsolatedAndOwned/write-first-copy
+=== RUN   TestDatabaseTemplateCopiesAreIsolatedAndOwned/independent-second-copy
+--- PASS: TestDatabaseTemplateCopiesAreIsolatedAndOwned (0.42s)
+    --- PASS: TestDatabaseTemplateCopiesAreIsolatedAndOwned/write-first-copy (0.37s)
+    --- PASS: TestDatabaseTemplateCopiesAreIsolatedAndOwned/independent-second-copy (0.04s)
+=== RUN   TestDatabaseTemplateFailedMigrationNeverPublished
+--- PASS: TestDatabaseTemplateFailedMigrationNeverPublished (0.03s)
+PASS
+ok  	tabmail/internal/testpg	3.551s

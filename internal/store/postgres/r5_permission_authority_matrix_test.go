@@ -122,6 +122,7 @@ func r5PermissionAuthorityCommand(t *testing.T, f *companyFixture, actor authz.A
 }
 
 func TestR5PermissionAuthorityMatrixHierarchy(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, role := range []models.UserRole{models.RoleUser, models.RoleAdmin, models.RoleSuperAdmin} {
 		t.Run(string(role), func(t *testing.T) {
 			f := r5PermissionAuthoritySeed(t)
@@ -210,6 +211,7 @@ func TestR5PermissionAuthorityMatrixHierarchy(t *testing.T) {
 }
 
 func TestR5PermissionAuthorityMatrixNonInteractive(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := r5PermissionAuthoritySeed(t)
 	super := r5PermissionAuthorityActor(r5PermissionAuthorityUser(t, f, f.tenant.ID, models.RoleSuperAdmin), f.tenant.ID)
 	p := r5PermissionAuthorityProfile(t, f, super, f.employee.ID, f.tenant.ID)
@@ -239,6 +241,7 @@ func TestR5PermissionAuthorityMatrixNonInteractive(t *testing.T) {
 }
 
 func TestR5PermissionAuthorityMatrixEmptyCASAndNullableIntent(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := r5PermissionAuthoritySeed(t)
 	super := r5PermissionAuthorityActor(r5PermissionAuthorityUser(t, f, f.tenant.ID, models.RoleSuperAdmin), f.tenant.ID)
 	r5PermissionAuthorityProfile(t, f, super, f.employee.ID, f.tenant.ID)
@@ -289,6 +292,7 @@ func r5PermissionAuthorityWait(t *testing.T, f *companyFixture, ctx context.Cont
 }
 
 func TestR5PermissionAuthorityMatrixLockWaitRecheck(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, change := range []string{"demote", "freeze", "session-version"} {
 		for _, op := range []string{"patch", "assignment", "profile-cas", "delete"} {
 			t.Run(change+"/"+op, func(t *testing.T) {

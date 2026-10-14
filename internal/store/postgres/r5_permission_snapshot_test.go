@@ -74,6 +74,7 @@ func r5SnapshotDraftWait(t *testing.T, f *companyFixture, ctx context.Context, d
 }
 
 func TestR5PermissionSnapshotOrdersChanges(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range []string{"profile-local", "profile-global", "override-insert", "override-update", "override-clear"} {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -128,6 +129,7 @@ func TestR5PermissionSnapshotOrdersChanges(t *testing.T) {
 }
 
 func TestR5PermissionSnapshotWriterFirstReloads(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, clear := range []bool{false, true} {
 		t.Run(fmt.Sprintf("clear=%v", clear), func(t *testing.T) {
 			f := seedCompany(t)
@@ -174,6 +176,7 @@ func TestR5PermissionSnapshotWriterFirstReloads(t *testing.T) {
 }
 
 func TestR5PermissionSnapshotBusyProfileFailsClosed(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, change := range []string{"update", "delete"} {
 		t.Run(change, func(t *testing.T) {
 			f := seedCompany(t)
@@ -212,6 +215,7 @@ func TestR5PermissionSnapshotBusyProfileFailsClosed(t *testing.T) {
 }
 
 func TestR5PermissionSnapshotIndependentUsersShareProfile(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	p := r5SnapshotProfile(t, f, true, false)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
@@ -238,6 +242,7 @@ func TestR5PermissionSnapshotIndependentUsersShareProfile(t *testing.T) {
 }
 
 func TestR5PermissionSnapshotFailureReleasesLocks(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"cancel", "audit"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)
@@ -279,6 +284,7 @@ func TestR5PermissionSnapshotFailureReleasesLocks(t *testing.T) {
 }
 
 func TestR5PermissionSnapshotPreservesEffectiveSemantics(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"inherit", "empty-allowlist", "deny-zone", "override-false-zero", "clear", "no-profile"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)
@@ -330,6 +336,7 @@ func TestR5PermissionSnapshotPreservesEffectiveSemantics(t *testing.T) {
 }
 
 func TestR5PermissionSnapshotOrdersContentScope(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, source := range []string{"profile", "override"} {
 		t.Run(source, func(t *testing.T) {
 			f := seedCompany(t)
@@ -384,6 +391,7 @@ func TestR5PermissionSnapshotOrdersContentScope(t *testing.T) {
 }
 
 func TestR5PermissionSnapshotOverrideFailureAndMissingUser(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	r5SnapshotProfile(t, f, true, false)
 	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)

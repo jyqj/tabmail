@@ -20,6 +20,7 @@ import (
 // existence is not disclosed and content authority never derives from an
 // administrative role.
 func TestP4SubmissionContentAndAttachmentsScope(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	actor := func(u *models.User) authz.Actor {

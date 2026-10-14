@@ -60,6 +60,7 @@ func r5Draft(t *testing.T, f *companyFixture) *company.Draft {
 }
 
 func TestR5LockMapExistingDraftCASAvoidsTenantLock(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	d := r5Draft(t, f)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -79,6 +80,7 @@ func TestR5LockMapExistingDraftCASAvoidsTenantLock(t *testing.T) {
 }
 
 func TestR5LockMapDraftAuthorizationWaitsForMailboxFence(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
@@ -99,6 +101,7 @@ func TestR5LockMapDraftAuthorizationWaitsForMailboxFence(t *testing.T) {
 }
 
 func TestR5LockMapDraftUserFenceOrdersSuspension(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	d := r5Draft(t, f)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -135,6 +138,7 @@ func TestR5LockMapDraftUserFenceOrdersSuspension(t *testing.T) {
 }
 
 func TestR5LockMapRefreshFamilyThenUserThenToken(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
@@ -176,6 +180,7 @@ func TestR5LockMapRefreshFamilyThenUserThenToken(t *testing.T) {
 // Verify the repaired order without asserting unrelated paths are deadlock-free.
 // Parent KEY SHARE and sender SHARE must precede any attachment pinning.
 func TestR5LockMapEnqueueParentAndUserBeforeAttachments(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()

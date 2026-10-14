@@ -163,6 +163,7 @@ func r5StageLegacyMailbox(t *testing.T, f *companyFixture, local string) *models
 // worker validation entry and the Router/JWT retry command. Inherit resolves a
 // real profile, not a synthetic EffectivePermission mode named "inherit".
 func TestR5PermissionStagePostgresTruthTable(t *testing.T) {
+	r5ParallelFreshDB(t)
 	r5StageRequirePG(t)
 	f, p := r5EditorSeed(t)
 	ctx := context.Background()
@@ -263,6 +264,7 @@ func TestR5PermissionStagePostgresTruthTable(t *testing.T) {
 // Administrative JWT management is intentionally distinct from an API key
 // owned by the same administrator. The latter always uses the owner's profile.
 func TestR5PermissionStagePostgresAdminOwnedKeyBoundary(t *testing.T) {
+	r5ParallelFreshDB(t)
 	r5StageRequirePG(t)
 	f, p := r5EditorSeed(t)
 	ctx := context.Background()
@@ -497,6 +499,7 @@ func TestR5PermissionStagePostgresWorkerRevocation(t *testing.T) {
 // Patch/assignment must use the existing companyAudit event protocol; no
 // private effective/raw permission data belongs in the public event metadata.
 func TestR5PermissionStagePostgresRequiredOutbox(t *testing.T) {
+	r5ParallelFreshDB(t)
 	r5StageRequirePG(t)
 	for _, command := range []string{"patch", "assign", "profile-update", "profile-delete"} {
 		for _, failure := range []string{"none", "audit", "outbox"} {
@@ -796,6 +799,7 @@ func r5StageOwnerlessRetryState(t *testing.T, f *companyFixture, id uuid.UUID) s
 // All negative transports retain the actual non-nil sender mailbox ID. State
 // evidence includes the complete job, recipient ledger, attempts and audit/outbox.
 func TestR5PermissionStagePostgresOwnerlessRetryRejections(t *testing.T) {
+	r5ParallelFreshDB(t)
 	r5StageRequirePG(t)
 	for _, mutation := range []string{"different-key", "key-delete", "key-owner-added", "scope-shrink", "zone-shrink", "key-expire-at-db-now", "cross-tenant-key", "mailbox-owned", "mailbox-shared", "mailbox-address-reused", "mailbox-zone-change", "mailbox-expire-at-db-now", "zone-unverify", "zone-mx-unverify", "disabled-policy", "template-required-policy", "template-provenance", "in-flight-domain", "uncertain-recipient"} {
 		t.Run(mutation, func(t *testing.T) {

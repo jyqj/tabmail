@@ -79,6 +79,7 @@ func TestR5ActivationExpiryAfterRealWaitRollsBack(t *testing.T) {
 }
 
 func TestR5ActivationDuplicateTokenCommandsCommitOnce(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	inv, hash := r5ActivationInvite(t, f, nil)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
@@ -108,6 +109,7 @@ func TestR5ActivationDuplicateTokenCommandsCommitOnce(t *testing.T) {
 }
 
 func TestR5ActivationCurrentSponsorAndDomainBoundary(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, boundary := range []string{"sponsor-frozen", "domain-unverified", "domain-changed"} {
 		t.Run(boundary, func(t *testing.T) {
 			f := seedCompany(t)
@@ -147,6 +149,7 @@ func TestR5ActivationCurrentSponsorAndDomainBoundary(t *testing.T) {
 }
 
 func TestR5ActivationReadsCurrentProfileAfterTenantWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
@@ -185,6 +188,7 @@ func TestR5ActivationReadsCurrentProfileAfterTenantWait(t *testing.T) {
 // waits at the mandatory audit after validating the domain and inserting its
 // mailbox. Final eligibility must not use that stale domain authorization.
 func TestR5ActivationDomainWithdrawalDuringAuditWaitRollsBack(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, field := range []string{"verified", "mx"} {
 		t.Run(field, func(t *testing.T) {
 			f := seedCompany(t)
@@ -229,6 +233,7 @@ func TestR5ActivationDomainWithdrawalDuringAuditWaitRollsBack(t *testing.T) {
 // non-key lock is compatible with activation's mailbox FK KEY SHARE, but the
 // final domain SHARE must fail fast rather than creating a late wait edge.
 func TestR5ActivationBusyFinalDomainFenceRollsBackWithoutWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	inv, hash := r5ActivationInvite(t, f, nil)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)

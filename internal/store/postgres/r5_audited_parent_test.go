@@ -12,6 +12,7 @@ import (
 // The audit INSERT references tenants. Its parent protection must precede both
 // user and mailbox locks, not merely be moved before the final audit statement.
 func TestR5SentMutationParentLockPrecedesActor(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	job := archJob(t, f, models.OutboundSent)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
@@ -38,6 +39,7 @@ func TestR5SentMutationParentLockPrecedesActor(t *testing.T) {
 }
 
 func TestR5SentIndependentMutationsShareParent(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	first := archJob(t, f, models.OutboundSent)
 	second := archJob(t, f, models.OutboundSent)
@@ -71,6 +73,7 @@ func TestR5SentIndependentMutationsShareParent(t *testing.T) {
 }
 
 func TestR5SentMutationReloadsActorAfterParentWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	job := archJob(t, f, models.OutboundSent)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)

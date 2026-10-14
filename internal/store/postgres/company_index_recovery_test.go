@@ -9,6 +9,7 @@ import (
 )
 
 func TestArchitectureIndexCrashBudgetAndFailureFence(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	m := &models.Message{TenantID: f.tenant.ID, MailboxID: f.personal.ID, ZoneID: f.zone.ID, Sender: "sender@test", Recipients: []string{f.personal.FullAddress}, RawObjectKey: "index-crash-source"}
@@ -60,6 +61,7 @@ func TestArchitectureIndexCrashBudgetAndFailureFence(t *testing.T) {
 }
 
 func TestArchitectureIndexRecoveryIsBoundedTenantScopedAndAtomic(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	_, e := f.pool.Exec(ctx, `INSERT INTO messages(id,tenant_id,mailbox_id,zone_id,sender,recipients,raw_object_key)
@@ -105,6 +107,7 @@ func TestArchitectureIndexRecoveryIsBoundedTenantScopedAndAtomic(t *testing.T) {
 }
 
 func TestArchitectureIndexRecoveryHTTPRequiresAdministratorAndReason(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	h := companyRouter(t, f, testutil.NewMemoryObjectStore(), nil)
 	endpoint := "/api/v1/company/index/retry"

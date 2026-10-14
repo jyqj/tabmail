@@ -17,6 +17,7 @@ import (
 // Service.MarkSeen has no production caller in the current checkout (only
 // its definition and its PgStore call); no invented legacy dispatch is tested.
 func TestR5PersonalMessageStateAndRetentionCompleteCommands(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, action := range []string{"seen", "starred"} {
 		for _, order := range []string{"retention-first", "mutation-first"} {
 			t.Run(action+"/"+order, func(t *testing.T) {

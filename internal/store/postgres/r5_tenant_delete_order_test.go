@@ -21,6 +21,7 @@ func r5TenantDeleteService(f *companyFixture) *adminapp.Service {
 }
 
 func TestR5TenantDeleteNormalCatalogControls(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range []string{"empty", "message-document-index", "published-template"} {
 		t.Run(kind, func(t *testing.T) {
 			if kind == "empty" {

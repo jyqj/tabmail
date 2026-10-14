@@ -1,0 +1,7 @@
+=== RUN   TestFixtureCostMeasurement
+    fixture_cost_test.go:23: template initial migration 169.228417ms
+    fixture_cost_test.go:33: empty mean create=5.494796ms migrate/open=171.031575ms drop=2.499887ms total=179.026258ms
+    fixture_cost_test.go:33: template mean create=8.2721ms migrate/open=6.148066ms drop=1.916821ms total=16.336987ms
+--- PASS: TestFixtureCostMeasurement (2.14s)
+PASS
+ok  	tabmail/internal/testpg	3.174s

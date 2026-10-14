@@ -44,6 +44,7 @@ func r5RecoveryTargetConflict(t *testing.T, err error) {
 }
 
 func TestR5RecoveryRetryRejectsExpiryAfterAuditWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	c := r5RecoveryParentFixture(t, f, "retry")
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
@@ -67,6 +68,7 @@ func TestR5RecoveryRetryRejectsExpiryAfterAuditWait(t *testing.T) {
 // stale commit, not one particular SQL lock mechanism. NOWAIT is a probe only;
 // no test controller waits while it owns the audit blocker.
 func TestR5RecoveryRetryOrdersDestinationChanges(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range []string{"address", "recreated_mailbox", "zone", "tenant", "zone_unverified", "mx_unverified"} {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -142,6 +144,7 @@ func TestR5RecoveryRetryOrdersDestinationChanges(t *testing.T) {
 }
 
 func TestR5IngressDeliveryRejectsTargetExpiryAfterAuditWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	claim, message := r5ClaimIngress(t, f)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
@@ -177,6 +180,7 @@ func TestR5IngressDeliveryRejectsTargetExpiryAfterAuditWait(t *testing.T) {
 }
 
 func TestR5IngressDeliveryOrdersZoneRevocationAfterAuditWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, column := range []string{"is_verified", "mx_verified"} {
 		t.Run(column, func(t *testing.T) {
 			f := seedCompany(t)
@@ -237,6 +241,7 @@ func TestR5IngressDeliveryOrdersZoneRevocationAfterAuditWait(t *testing.T) {
 // Missing ordinary read/send rights and expired/deleted destinations must not
 // destroy accepted held bytes or block a CURRENT platform operator's inspect.
 func TestR5RecoveryInspectRetainsUnavailableDestinationOriginal(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range []string{"expired", "deleted"} {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -268,6 +273,7 @@ func TestR5RecoveryInspectRetainsUnavailableDestinationOriginal(t *testing.T) {
 }
 
 func TestR5RecoveryReconcileDoesNotRequireLiveSender(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	c := r5RecoveryParentFixture(t, f, "reconcile")
 	ctx := context.Background()
@@ -284,6 +290,7 @@ func TestR5RecoveryReconcileDoesNotRequireLiveSender(t *testing.T) {
 }
 
 func TestR5RecoveryRetryDoesNotRequireReadOrSendPolicy(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	c := r5RecoveryParentFixture(t, f, "retry")
 	ctx := context.Background()
@@ -306,6 +313,7 @@ func TestR5RecoveryRetryDoesNotRequireReadOrSendPolicy(t *testing.T) {
 // is collected directly. In either branch the controller releases its exact
 // blocker before waiting for request completion.
 func TestR5RecoveryRetryHTTPDestinationBusyConflict(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range []string{"target_row", "zone_row"} {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)

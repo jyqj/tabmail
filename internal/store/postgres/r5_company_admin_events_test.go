@@ -15,6 +15,7 @@ import (
 )
 
 func TestR5CompanyAdminEventsOriginalOutboxCurrentScope(t *testing.T) {
+	r5ParallelFreshDB(t)
 	if os.Getenv("TABMAIL_TEST_DB_DSN") == "" {
 		t.Fatal("company admin event runtime requires owned TABMAIL_TEST_DB_DSN; do not count a skip as evidence")
 	}
@@ -78,6 +79,7 @@ func TestR5CompanyAdminEventsOriginalOutboxCurrentScope(t *testing.T) {
 // callback, and that a committed role/session change rejects the next frame.
 // Callback errors and cancellation must release the same fence, too.
 func TestR5CompanyAdminEventsReleaseFence(t *testing.T) {
+	r5ParallelFreshDB(t)
 	if os.Getenv("TABMAIL_TEST_DB_DSN") == "" {
 		t.Fatal("company admin event fence requires owned TABMAIL_TEST_DB_DSN")
 	}

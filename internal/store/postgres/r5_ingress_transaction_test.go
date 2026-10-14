@@ -146,6 +146,7 @@ func TestR5IngressLeaseExpiryAfterTenantWaitRollsBack(t *testing.T) {
 }
 
 func TestR5IngressAuditFailureRollsBackCheckpointAndQuota(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	c, m := r5ClaimIngress(t, f)
 	ctx := context.Background()
@@ -168,6 +169,7 @@ func TestR5IngressAuditFailureRollsBackCheckpointAndQuota(t *testing.T) {
 }
 
 func TestR5IngressAcceptanceRollsBackEarlierTarget(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	j := r5IngressJob(f.personal.FullAddress, f.shared.FullAddress)
