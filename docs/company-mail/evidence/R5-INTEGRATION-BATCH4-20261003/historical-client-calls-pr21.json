@@ -1,0 +1,2020 @@
+[
+  {
+    "source": "web/app/(dashboard)/company/recovery/page.tsx",
+    "line": 22,
+    "branch": 0,
+    "callee": "request",
+    "owner": "receipts",
+    "expression": "\"/api/v1/company/recovery\"",
+    "path": "/api/v1/company/recovery",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/recovery"
+    ]
+  },
+  {
+    "source": "web/app/(dashboard)/company/recovery/page.tsx",
+    "line": 27,
+    "branch": 0,
+    "callee": "request",
+    "owner": "runtime",
+    "expression": "\"/api/v1/admin/runtime-config\"",
+    "path": "/api/v1/admin/runtime-config",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/runtime-config"
+    ]
+  },
+  {
+    "source": "web/app/(dashboard)/company/recovery/page.tsx",
+    "line": 96,
+    "branch": 0,
+    "callee": "company",
+    "owner": "next",
+    "expression": "`/recovery/${v.id}/inspect`",
+    "path": "/api/v1/company/recovery/{dynamic}/inspect",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/recovery/{id}/inspect"
+    ]
+  },
+  {
+    "source": "web/app/(dashboard)/company/recovery/page.tsx",
+    "line": 185,
+    "branch": 0,
+    "callee": "company",
+    "owner": "RecoveryPage",
+    "expression": "`/recovery/${inspection.receipt.id}/retry`",
+    "path": "/api/v1/company/recovery/{dynamic}/retry",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/recovery/{id}/retry"
+    ]
+  },
+  {
+    "source": "web/app/(dashboard)/company/recovery/page.tsx",
+    "line": 242,
+    "branch": 0,
+    "callee": "company",
+    "owner": "value",
+    "expression": "`/outbound/${encodeURIComponent(jobId)}/inspect`",
+    "path": "/api/v1/company/outbound/{id}/inspect",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/outbound/{id}/inspect"
+    ]
+  },
+  {
+    "source": "web/app/(dashboard)/company/recovery/page.tsx",
+    "line": 321,
+    "branch": 0,
+    "callee": "company",
+    "owner": "RecoveryPage",
+    "expression": "`/outbound/${jobInspection.job.id}/reconcile`",
+    "path": "/api/v1/company/outbound/{dynamic}/reconcile",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/outbound/{id}/reconcile"
+    ]
+  },
+  {
+    "source": "web/app/(dashboard)/company/templates/page.tsx",
+    "line": 36,
+    "branch": 0,
+    "callee": "company",
+    "owner": "templates",
+    "expression": "\"/templates\"",
+    "path": "/api/v1/company/templates",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/templates"
+    ]
+  },
+  {
+    "source": "web/app/(dashboard)/company/templates/page.tsx",
+    "line": 75,
+    "branch": 0,
+    "callee": "company",
+    "owner": "retireTemplate",
+    "expression": "`/templates/${template.id}/retire`",
+    "path": "/api/v1/company/templates/{dynamic}/retire",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/templates/{id}/retire"
+    ]
+  },
+  {
+    "source": "web/app/(dashboard)/company/templates/page.tsx",
+    "line": 97,
+    "branch": 0,
+    "callee": "company",
+    "owner": "onPublished",
+    "expression": "`/templates/${value.id}/publish`",
+    "path": "/api/v1/company/templates/{dynamic}/publish",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/templates/{id}/publish"
+    ]
+  },
+  {
+    "source": "web/app/auth/activate/page.tsx",
+    "line": 52,
+    "branch": 0,
+    "callee": "company",
+    "owner": "ActivatePage",
+    "expression": "\"/activate\"",
+    "path": "/api/v1/company/activate",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/activate"
+    ]
+  },
+  {
+    "source": "web/components/company/compose.tsx",
+    "line": 82,
+    "branch": 0,
+    "callee": "company",
+    "owner": "makeWriter",
+    "expression": "\"/drafts\"",
+    "path": "/api/v1/company/drafts",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/drafts"
+    ]
+  },
+  {
+    "source": "web/components/company/compose.tsx",
+    "line": 82,
+    "branch": 1,
+    "callee": "company",
+    "owner": "makeWriter",
+    "expression": "`/drafts/${d.id}`",
+    "path": "/api/v1/company/drafts/{dynamic}",
+    "methods": [
+      "PUT"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PUT /api/v1/company/drafts/{id}"
+    ]
+  },
+  {
+    "source": "web/components/company/compose.tsx",
+    "line": 85,
+    "branch": 0,
+    "callee": "company",
+    "owner": "makeWriter",
+    "expression": "`/drafts/${id}`",
+    "path": "/api/v1/company/drafts/{dynamic}",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/drafts/{id}"
+    ]
+  },
+  {
+    "source": "web/components/company/compose.tsx",
+    "line": 100,
+    "branch": 0,
+    "callee": "company",
+    "owner": "templates",
+    "expression": "`${workPath(mailboxId)}/templates`",
+    "path": "/api/v1/company/mailboxes/{id}/templates",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes/{id}/templates"
+    ]
+  },
+  {
+    "source": "web/components/company/compose.tsx",
+    "line": 473,
+    "branch": 0,
+    "callee": "company",
+    "owner": "Compose",
+    "expression": "\"/templates/preview\"",
+    "path": "/api/v1/company/templates/preview",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/templates/preview"
+    ]
+  },
+  {
+    "source": "web/components/company/compose.tsx",
+    "line": 551,
+    "branch": 0,
+    "callee": "company",
+    "owner": "a",
+    "expression": "`${workPath(mailboxId)}/attachments`",
+    "path": "/api/v1/company/mailboxes/{id}/attachments",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/mailboxes/{id}/attachments"
+    ]
+  },
+  {
+    "source": "web/components/company/compose.tsx",
+    "line": 574,
+    "branch": 0,
+    "callee": "downloadCompanyFile",
+    "owner": "Compose",
+    "expression": "`/attachments/${id}`",
+    "path": "/api/v1/company/attachments/{dynamic}",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/attachments/{id}"
+    ]
+  },
+  {
+    "source": "web/components/company/grants.tsx",
+    "line": 23,
+    "branch": 0,
+    "callee": "company",
+    "owner": "grants",
+    "expression": "`${workPath(mailbox.mailbox.id)}/grants`",
+    "path": "/api/v1/company/mailboxes/{id}/grants",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes/{id}/grants"
+    ]
+  },
+  {
+    "source": "web/components/company/grants.tsx",
+    "line": 104,
+    "branch": 0,
+    "callee": "company",
+    "owner": "GrantEditor",
+    "expression": "`${workPath(mailbox.mailbox.id)}/grants`",
+    "path": "/api/v1/company/mailboxes/{id}/grants",
+    "methods": [
+      "PUT"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PUT /api/v1/company/mailboxes/{id}/grants"
+    ]
+  },
+  {
+    "source": "web/components/company/grants.tsx",
+    "line": 168,
+    "branch": 0,
+    "callee": "company",
+    "owner": "GrantEditor",
+    "expression": "`${workPath(mailbox.mailbox.id)}/handover`",
+    "path": "/api/v1/company/mailboxes/{id}/handover",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/mailboxes/{id}/handover"
+    ]
+  },
+  {
+    "source": "web/components/company/grants.tsx",
+    "line": 177,
+    "branch": 0,
+    "callee": "company",
+    "owner": "GrantEditor",
+    "expression": "`${workPath(mailbox.mailbox.id)}/convert-shared`",
+    "path": "/api/v1/company/mailboxes/{id}/convert-shared",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/mailboxes/{id}/convert-shared"
+    ]
+  },
+  {
+    "source": "web/components/company/templates/editor.tsx",
+    "line": 60,
+    "branch": 0,
+    "callee": "company",
+    "owner": "res",
+    "expression": "`/templates/${edit.id}`",
+    "path": "/api/v1/company/templates/{dynamic}",
+    "methods": [
+      "PUT"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PUT /api/v1/company/templates/{id}"
+    ]
+  },
+  {
+    "source": "web/components/company/templates/editor.tsx",
+    "line": 60,
+    "branch": 1,
+    "callee": "company",
+    "owner": "res",
+    "expression": "\"/templates\"",
+    "path": "/api/v1/company/templates",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/templates"
+    ]
+  },
+  {
+    "source": "web/components/company/templates/editor.tsx",
+    "line": 308,
+    "branch": 0,
+    "callee": "company",
+    "owner": "TemplateEditorView",
+    "expression": "\"/templates/preview\"",
+    "path": "/api/v1/company/templates/preview",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/templates/preview"
+    ]
+  },
+  {
+    "source": "web/components/company/templates/grants.tsx",
+    "line": 42,
+    "branch": 0,
+    "callee": "company",
+    "owner": "grants",
+    "expression": "`/templates/${template!.id}/grants`",
+    "path": "/api/v1/company/templates/{dynamic}/grants",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/templates/{id}/grants"
+    ]
+  },
+  {
+    "source": "web/components/company/templates/grants.tsx",
+    "line": 90,
+    "branch": 0,
+    "callee": "company",
+    "owner": "TemplateGrantsView",
+    "expression": "`/templates/${template.id}/grants`",
+    "path": "/api/v1/company/templates/{dynamic}/grants",
+    "methods": [
+      "PUT"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PUT /api/v1/company/templates/{id}/grants"
+    ]
+  },
+  {
+    "source": "web/components/company/templates/grants.tsx",
+    "line": 133,
+    "branch": 0,
+    "callee": "company",
+    "owner": "TemplateGrantsView",
+    "expression": "`/templates/${template.id}/grants`",
+    "path": "/api/v1/company/templates/{dynamic}/grants",
+    "methods": [
+      "PUT"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PUT /api/v1/company/templates/{id}/grants"
+    ]
+  },
+  {
+    "source": "web/components/company/templates/versions.tsx",
+    "line": 37,
+    "branch": 0,
+    "callee": "company",
+    "owner": "versions",
+    "expression": "`/templates/${template!.id}/versions`",
+    "path": "/api/v1/company/templates/{dynamic}/versions",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/templates/{id}/versions"
+    ]
+  },
+  {
+    "source": "web/features/company/access-explanation.tsx",
+    "line": 15,
+    "branch": 0,
+    "callee": "company",
+    "owner": "access",
+    "expression": "`/mailboxes/${mailbox}/access/${user}`",
+    "path": "/api/v1/company/mailboxes/{dynamic}/access/{dynamic}",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes/{id}/access/{user}"
+    ]
+  },
+  {
+    "source": "web/features/company/api.ts",
+    "line": 56,
+    "branch": 0,
+    "callee": "company",
+    "owner": "previewOffboarding",
+    "expression": "`/employees/${encodeURIComponent(target)}/offboard/preview`",
+    "path": "/api/v1/company/employees/{id}/offboard/preview",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/employees/{id}/offboard/preview"
+    ]
+  },
+  {
+    "source": "web/features/company/api.ts",
+    "line": 57,
+    "branch": 0,
+    "callee": "company",
+    "owner": "executeOffboarding",
+    "expression": "`/employees/${encodeURIComponent(target)}/offboard`",
+    "path": "/api/v1/company/employees/{id}/offboard",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/employees/{id}/offboard"
+    ]
+  },
+  {
+    "source": "web/features/company/audit.tsx",
+    "line": 12,
+    "branch": 0,
+    "callee": "request",
+    "owner": "list",
+    "expression": "\"/api/v1/company/audit\"",
+    "path": "/api/v1/company/audit",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/audit"
+    ]
+  },
+  {
+    "source": "web/features/company/domain-settings.tsx",
+    "line": 12,
+    "branch": 0,
+    "callee": "company",
+    "owner": "settings",
+    "expression": "\"/settings\"",
+    "path": "/api/v1/company/settings",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/settings"
+    ]
+  },
+  {
+    "source": "web/features/company/domain-settings.tsx",
+    "line": 51,
+    "branch": 0,
+    "callee": "company",
+    "owner": "DomainSettings",
+    "expression": "\"/settings\"",
+    "path": "/api/v1/company/settings",
+    "methods": [
+      "PUT"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PUT /api/v1/company/settings"
+    ]
+  },
+  {
+    "source": "web/features/company/employees.tsx",
+    "line": 12,
+    "branch": 0,
+    "callee": "company",
+    "owner": "settings",
+    "expression": "\"/settings\"",
+    "path": "/api/v1/company/settings",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/settings"
+    ]
+  },
+  {
+    "source": "web/features/company/employees.tsx",
+    "line": 14,
+    "branch": 0,
+    "callee": "company",
+    "owner": "invitations",
+    "expression": "\"/invitations\"",
+    "path": "/api/v1/company/invitations",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/invitations"
+    ]
+  },
+  {
+    "source": "web/features/company/employees.tsx",
+    "line": 36,
+    "branch": 0,
+    "callee": "company",
+    "owner": "v",
+    "expression": "\"/invitations\"",
+    "path": "/api/v1/company/invitations",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/invitations"
+    ]
+  },
+  {
+    "source": "web/features/company/employees.tsx",
+    "line": 79,
+    "branch": 0,
+    "callee": "company",
+    "owner": "Employees",
+    "expression": "`/invitations/${v.id}`",
+    "path": "/api/v1/company/invitations/{dynamic}",
+    "methods": [
+      "DELETE"
+    ],
+    "forwarding": false,
+    "routes": [
+      "DELETE /api/v1/company/invitations/{id}"
+    ]
+  },
+  {
+    "source": "web/features/company/mailbox-admin.tsx",
+    "line": 48,
+    "branch": 0,
+    "callee": "company",
+    "owner": "MailboxAdmin",
+    "expression": "\"/mailboxes\"",
+    "path": "/api/v1/company/mailboxes",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/mailboxes"
+    ]
+  },
+  {
+    "source": "web/features/company/overview.tsx",
+    "line": 13,
+    "branch": 0,
+    "callee": "company",
+    "owner": "data",
+    "expression": "\"/overview\"",
+    "path": "/api/v1/company/overview",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/overview"
+    ]
+  },
+  {
+    "source": "web/features/company/overview.tsx",
+    "line": 21,
+    "branch": 0,
+    "callee": "company",
+    "owner": "result",
+    "expression": "\"/index/retry\"",
+    "path": "/api/v1/company/index/retry",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/index/retry"
+    ]
+  },
+  {
+    "source": "web/features/mail/api.ts",
+    "line": 20,
+    "branch": 0,
+    "callee": "request",
+    "owner": "draftPage",
+    "expression": "\"/api/v1/company/drafts\"",
+    "path": "/api/v1/company/drafts",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/drafts"
+    ]
+  },
+  {
+    "source": "web/features/mail/api.ts",
+    "line": 21,
+    "branch": 0,
+    "callee": "request",
+    "owner": "archivedPage",
+    "expression": "`/api/v1/company${workPath(mailbox)}/sent`",
+    "path": "/api/v1/company/mailboxes/{id}/sent",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes/{id}/sent"
+    ]
+  },
+  {
+    "source": "web/features/mail/api.ts",
+    "line": 22,
+    "branch": 0,
+    "callee": "company",
+    "owner": "indexStatus",
+    "expression": "`${workPath(mailbox)}/index-status`",
+    "path": "/api/v1/company/mailboxes/{id}/index-status",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes/{id}/index-status"
+    ]
+  },
+  {
+    "source": "web/features/mail/api.ts",
+    "line": 23,
+    "branch": 0,
+    "callee": "company",
+    "owner": "changeArchived",
+    "expression": "`${workPath(mailbox)}/sent/${encodeURIComponent(id)}/actions`",
+    "path": "/api/v1/company/mailboxes/{id}/sent/{id}/actions",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/mailboxes/{id}/sent/{message}/actions"
+    ]
+  },
+  {
+    "source": "web/features/mail/components/conversation-list.tsx",
+    "line": 13,
+    "branch": 0,
+    "callee": "request",
+    "owner": "list",
+    "expression": "`/api/v1/company/mailboxes/${encodeURIComponent(mailbox.mailbox.id)}/messages/${encodeURIComponent(message)}/conversation`",
+    "path": "/api/v1/company/mailboxes/{id}/messages/{id}/conversation",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes/{id}/messages/{message}/conversation"
+    ]
+  },
+  {
+    "source": "web/features/mail/components/draft-folder.tsx",
+    "line": 20,
+    "branch": 0,
+    "callee": "company",
+    "owner": "DraftFolder",
+    "expression": "`/drafts/${d.id}`",
+    "path": "/api/v1/company/drafts/{dynamic}",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/drafts/{id}"
+    ]
+  },
+  {
+    "source": "web/features/mail/components/draft-folder.tsx",
+    "line": 22,
+    "branch": 0,
+    "callee": "company",
+    "owner": "DraftFolder",
+    "expression": "`/drafts/${d.id}`",
+    "path": "/api/v1/company/drafts/{dynamic}",
+    "methods": [
+      "DELETE"
+    ],
+    "forwarding": false,
+    "routes": [
+      "DELETE /api/v1/company/drafts/{id}"
+    ]
+  },
+  {
+    "source": "web/features/mail/components/message-pane.tsx",
+    "line": 25,
+    "branch": 0,
+    "callee": "company",
+    "owner": "files",
+    "expression": "`${base}/attachments`",
+    "path": "/api/v1/company/mailboxes/{id}/messages/{dynamic}/attachments",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes/{id}/messages/{message}/attachments"
+    ]
+  },
+  {
+    "source": "web/features/mail/components/message-pane.tsx",
+    "line": 27,
+    "branch": 0,
+    "callee": "company",
+    "owner": "act",
+    "expression": "`${base}/actions`",
+    "path": "/api/v1/company/mailboxes/{id}/messages/{dynamic}/actions",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/mailboxes/{id}/messages/{message}/actions"
+    ]
+  },
+  {
+    "source": "web/features/mail/components/message-pane.tsx",
+    "line": 38,
+    "branch": 0,
+    "callee": "company",
+    "owner": "MessagePane",
+    "expression": "`${base}/compose`",
+    "path": "/api/v1/company/mailboxes/{id}/messages/{dynamic}/compose",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/mailboxes/{id}/messages/{message}/compose"
+    ]
+  },
+  {
+    "source": "web/features/mail/components/message-pane.tsx",
+    "line": 48,
+    "branch": 0,
+    "callee": "downloadCompanyFile",
+    "owner": "MessagePane",
+    "expression": "`${base}/source`",
+    "path": "/api/v1/company/mailboxes/{id}/messages/{dynamic}/source",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes/{id}/messages/{message}/source"
+    ]
+  },
+  {
+    "source": "web/features/mail/components/message-pane.tsx",
+    "line": 62,
+    "branch": 0,
+    "callee": "downloadCompanyFile",
+    "owner": "MessagePane",
+    "expression": "`${base}/parts/${encodeURIComponent(f.id)}`",
+    "path": "/api/v1/company/mailboxes/{id}/messages/{dynamic}/parts/{id}",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes/{id}/messages/{message}/parts/{attachment}"
+    ]
+  },
+  {
+    "source": "web/features/mail/components/message-pane.tsx",
+    "line": 62,
+    "branch": 1,
+    "callee": "downloadCompanyFile",
+    "owner": "MessagePane",
+    "expression": "`${base}/attachments/${f.index}`",
+    "path": "/api/v1/company/mailboxes/{id}/messages/{dynamic}/attachments/{dynamic}",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes/{id}/messages/{message}/attachments/{index}"
+    ]
+  },
+  {
+    "source": "web/features/mail/components/submission-content.tsx",
+    "line": 39,
+    "branch": 0,
+    "callee": "downloadCompanyFile",
+    "owner": "SubmissionContentView",
+    "expression": "`/submissions/${encodeURIComponent(id)}/attachments/${encodeURIComponent(f.id)}/download`",
+    "path": "/api/v1/company/submissions/{id}/attachments/{id}/download",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/submissions/{id}/attachments/{aid}/download"
+    ]
+  },
+  {
+    "source": "web/features/mail/components/submission-pane.tsx",
+    "line": 96,
+    "branch": 0,
+    "callee": "request",
+    "owner": "SubmissionPane",
+    "expression": "`/api/v1/outbound/${id}/retry`",
+    "path": "/api/v1/outbound/{dynamic}/retry",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/outbound/{id}/retry"
+    ]
+  },
+  {
+    "source": "web/features/mail/workspace.tsx",
+    "line": 48,
+    "branch": 0,
+    "callee": "streamEvents",
+    "owner": "MailWorkspace",
+    "expression": "`/api/v1/company/mailboxes/${encodeURIComponent(id)}/events`",
+    "path": "/api/v1/company/mailboxes/{id}/events",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes/{id}/events"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 25,
+    "branch": 0,
+    "callee": "streamEvents",
+    "owner": "streamAdminMonitorEvents",
+    "expression": "\"/api/v1/admin/monitor/events\"",
+    "path": "/api/v1/admin/monitor/events",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/monitor/events"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 35,
+    "branch": 0,
+    "callee": "request",
+    "owner": "listMonitorHistory",
+    "expression": "\"/api/v1/admin/monitor/history\"",
+    "path": "/api/v1/admin/monitor/history",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/monitor/history"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 43,
+    "branch": 0,
+    "callee": "request",
+    "owner": "listSettings",
+    "expression": "\"/api/v1/admin/settings\"",
+    "path": "/api/v1/admin/settings",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/settings"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 47,
+    "branch": 0,
+    "callee": "request",
+    "owner": "updateSettings",
+    "expression": "\"/api/v1/admin/settings\"",
+    "path": "/api/v1/admin/settings",
+    "methods": [
+      "PATCH"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PATCH /api/v1/admin/settings"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 56,
+    "branch": 0,
+    "callee": "request",
+    "owner": "getSMTPPolicy",
+    "expression": "\"/api/v1/admin/policy\"",
+    "path": "/api/v1/admin/policy",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/policy"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 60,
+    "branch": 0,
+    "callee": "request",
+    "owner": "updateSMTPPolicy",
+    "expression": "\"/api/v1/admin/policy\"",
+    "path": "/api/v1/admin/policy",
+    "methods": [
+      "PATCH"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PATCH /api/v1/admin/policy"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 67,
+    "branch": 0,
+    "callee": "request",
+    "owner": "listTenants",
+    "expression": "\"/api/v1/admin/tenants\"",
+    "path": "/api/v1/admin/tenants",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/tenants"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 71,
+    "branch": 0,
+    "callee": "request",
+    "owner": "createTenant",
+    "expression": "\"/api/v1/admin/tenants\"",
+    "path": "/api/v1/admin/tenants",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/admin/tenants"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 78,
+    "branch": 0,
+    "callee": "request",
+    "owner": "updateTenantOverrides",
+    "expression": "`/api/v1/admin/tenants/${id}`",
+    "path": "/api/v1/admin/tenants/{dynamic}",
+    "methods": [
+      "PATCH"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PATCH /api/v1/admin/tenants/{id}"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 85,
+    "branch": 0,
+    "callee": "request",
+    "owner": "deleteTenant",
+    "expression": "`/api/v1/admin/tenants/${id}`",
+    "path": "/api/v1/admin/tenants/{dynamic}",
+    "methods": [
+      "DELETE"
+    ],
+    "forwarding": false,
+    "routes": [
+      "DELETE /api/v1/admin/tenants/{id}"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 89,
+    "branch": 0,
+    "callee": "request",
+    "owner": "getTenantConfig",
+    "expression": "`/api/v1/admin/tenants/${id}/config`",
+    "path": "/api/v1/admin/tenants/{dynamic}/config",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/tenants/{id}/config"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 96,
+    "branch": 0,
+    "callee": "request",
+    "owner": "createAPIKey",
+    "expression": "`/api/v1/admin/tenants/${tenantId}/keys`",
+    "path": "/api/v1/admin/tenants/{dynamic}/keys",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/admin/tenants/{id}/keys"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 103,
+    "branch": 0,
+    "callee": "request",
+    "owner": "listAPIKeys",
+    "expression": "`/api/v1/admin/tenants/${tenantId}/keys`",
+    "path": "/api/v1/admin/tenants/{dynamic}/keys",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/tenants/{id}/keys"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 107,
+    "branch": 0,
+    "callee": "request",
+    "owner": "revokeAPIKey",
+    "expression": "`/api/v1/admin/tenants/${tenantId}/keys/${keyId}`",
+    "path": "/api/v1/admin/tenants/{dynamic}/keys/{dynamic}",
+    "methods": [
+      "DELETE"
+    ],
+    "forwarding": false,
+    "routes": [
+      "DELETE /api/v1/admin/tenants/{id}/keys/{keyId}"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 115,
+    "branch": 0,
+    "callee": "request",
+    "owner": "createUserAPIKey",
+    "expression": "\"/api/v1/keys\"",
+    "path": "/api/v1/keys",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/keys"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 122,
+    "branch": 0,
+    "callee": "request",
+    "owner": "listUserAPIKeys",
+    "expression": "\"/api/v1/keys\"",
+    "path": "/api/v1/keys",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/keys"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 126,
+    "branch": 0,
+    "callee": "request",
+    "owner": "revokeUserAPIKey",
+    "expression": "`/api/v1/keys/${keyId}`",
+    "path": "/api/v1/keys/{dynamic}",
+    "methods": [
+      "DELETE"
+    ],
+    "forwarding": false,
+    "routes": [
+      "DELETE /api/v1/keys/{keyId}"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 130,
+    "branch": 0,
+    "callee": "request",
+    "owner": "listPlans",
+    "expression": "\"/api/v1/admin/plans\"",
+    "path": "/api/v1/admin/plans",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/plans"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 134,
+    "branch": 0,
+    "callee": "request",
+    "owner": "createPlan",
+    "expression": "\"/api/v1/admin/plans\"",
+    "path": "/api/v1/admin/plans",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/admin/plans"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 141,
+    "branch": 0,
+    "callee": "request",
+    "owner": "updatePlan",
+    "expression": "`/api/v1/admin/plans/${id}`",
+    "path": "/api/v1/admin/plans/{dynamic}",
+    "methods": [
+      "PATCH"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PATCH /api/v1/admin/plans/{id}"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 148,
+    "branch": 0,
+    "callee": "request",
+    "owner": "deletePlan",
+    "expression": "`/api/v1/admin/plans/${id}`",
+    "path": "/api/v1/admin/plans/{dynamic}",
+    "methods": [
+      "DELETE"
+    ],
+    "forwarding": false,
+    "routes": [
+      "DELETE /api/v1/admin/plans/{id}"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 152,
+    "branch": 0,
+    "callee": "request",
+    "owner": "getStats",
+    "expression": "\"/api/v1/admin/stats\"",
+    "path": "/api/v1/admin/stats",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/stats"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 156,
+    "branch": 0,
+    "callee": "request",
+    "owner": "listAudit",
+    "expression": "\"/api/v1/admin/audit\"",
+    "path": "/api/v1/admin/audit",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/audit"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 168,
+    "branch": 0,
+    "callee": "request",
+    "owner": "listIngestJobs",
+    "expression": "\"/api/v1/admin/ingest/jobs\"",
+    "path": "/api/v1/admin/ingest/jobs",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/ingest/jobs"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 180,
+    "branch": 0,
+    "callee": "request",
+    "owner": "listWebhookDeliveries",
+    "expression": "\"/api/v1/admin/webhooks/deliveries\"",
+    "path": "/api/v1/admin/webhooks/deliveries",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/webhooks/deliveries"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 188,
+    "branch": 0,
+    "callee": "request",
+    "owner": "inviteAdmin",
+    "expression": "\"/api/v1/admin/invite\"",
+    "path": "/api/v1/admin/invite",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/admin/invite"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 195,
+    "branch": 0,
+    "callee": "request",
+    "owner": "listUsers",
+    "expression": "\"/api/v1/admin/users\"",
+    "path": "/api/v1/admin/users",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/users"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 204,
+    "branch": 0,
+    "callee": "request",
+    "owner": "updateUser",
+    "expression": "`/api/v1/admin/users/${id}`",
+    "path": "/api/v1/admin/users/{dynamic}",
+    "methods": [
+      "PATCH"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PATCH /api/v1/admin/users/{id}"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 211,
+    "branch": 0,
+    "callee": "request",
+    "owner": "deleteUser",
+    "expression": "`/api/v1/admin/users/${id}`",
+    "path": "/api/v1/admin/users/{dynamic}",
+    "methods": [
+      "DELETE"
+    ],
+    "forwarding": false,
+    "routes": [
+      "DELETE /api/v1/admin/users/{id}"
+    ]
+  },
+  {
+    "source": "web/lib/api/auth.ts",
+    "line": 5,
+    "branch": 0,
+    "callee": "request",
+    "owner": "changePassword",
+    "expression": "\"/api/v1/auth/change-password\"",
+    "path": "/api/v1/auth/change-password",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/auth/change-password"
+    ]
+  },
+  {
+    "source": "web/lib/api/auth.ts",
+    "line": 12,
+    "branch": 0,
+    "callee": "request",
+    "owner": "login",
+    "expression": "\"/api/v1/auth/login\"",
+    "path": "/api/v1/auth/login",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/auth/login"
+    ]
+  },
+  {
+    "source": "web/lib/api/auth.ts",
+    "line": 19,
+    "branch": 0,
+    "callee": "request",
+    "owner": "register",
+    "expression": "\"/api/v1/auth/register\"",
+    "path": "/api/v1/auth/register",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/auth/register"
+    ]
+  },
+  {
+    "source": "web/lib/api/auth.ts",
+    "line": 26,
+    "branch": 0,
+    "callee": "request",
+    "owner": "logoutSession",
+    "expression": "\"/api/v1/auth/logout\"",
+    "path": "/api/v1/auth/logout",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/auth/logout"
+    ]
+  },
+  {
+    "source": "web/lib/api/base.ts",
+    "line": 98,
+    "branch": 0,
+    "callee": "fetch",
+    "owner": "res",
+    "expression": "`${getBaseUrl()}${path}`",
+    "path": "{dynamic}",
+    "methods": [
+      "DYNAMIC"
+    ],
+    "forwarding": true,
+    "routes": []
+  },
+  {
+    "source": "web/lib/api/base.ts",
+    "line": 123,
+    "branch": 0,
+    "callee": "fetch",
+    "owner": "run",
+    "expression": "`${getBaseUrl()}${path}`",
+    "path": "{dynamic}",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": true,
+    "routes": []
+  },
+  {
+    "source": "web/lib/api/base.ts",
+    "line": 205,
+    "branch": 0,
+    "callee": "fetch",
+    "owner": "execute",
+    "expression": "url.toString()",
+    "path": "{dynamic}",
+    "methods": [
+      "DYNAMIC"
+    ],
+    "forwarding": true,
+    "routes": []
+  },
+  {
+    "source": "web/lib/api/base.ts",
+    "line": 290,
+    "branch": 0,
+    "callee": "fetch",
+    "owner": "res",
+    "expression": "`${getBaseUrl()}/api/v1/auth/refresh`",
+    "path": "/api/v1/auth/refresh",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/auth/refresh"
+    ]
+  },
+  {
+    "source": "web/lib/api/base.ts",
+    "line": 363,
+    "branch": 0,
+    "callee": "fetch",
+    "owner": "res",
+    "expression": "`${getBaseUrl()}${path}`",
+    "path": "{dynamic}",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": true,
+    "routes": []
+  },
+  {
+    "source": "web/lib/api/base.ts",
+    "line": 380,
+    "branch": 0,
+    "callee": "fetch",
+    "owner": "streamEvents",
+    "expression": "`${getBaseUrl()}${path}`",
+    "path": "{dynamic}",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": true,
+    "routes": []
+  },
+  {
+    "source": "web/lib/api/domains.ts",
+    "line": 5,
+    "branch": 0,
+    "callee": "request",
+    "owner": "listDomains",
+    "expression": "\"/api/v1/domains\"",
+    "path": "/api/v1/domains",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/domains"
+    ]
+  },
+  {
+    "source": "web/lib/api/domains.ts",
+    "line": 9,
+    "branch": 0,
+    "callee": "request",
+    "owner": "listAdminDomains",
+    "expression": "\"/api/v1/admin/domains\"",
+    "path": "/api/v1/admin/domains",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/domains"
+    ]
+  },
+  {
+    "source": "web/lib/api/permissions.ts",
+    "line": 12,
+    "branch": 0,
+    "callee": "request",
+    "owner": "listPermissionProfiles",
+    "expression": "\"/api/v1/admin/permissions\"",
+    "path": "/api/v1/admin/permissions",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/permissions"
+    ]
+  },
+  {
+    "source": "web/lib/api/permissions.ts",
+    "line": 16,
+    "branch": 0,
+    "callee": "request",
+    "owner": "createPermissionProfile",
+    "expression": "\"/api/v1/admin/permissions\"",
+    "path": "/api/v1/admin/permissions",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/admin/permissions"
+    ]
+  },
+  {
+    "source": "web/lib/api/permissions.ts",
+    "line": 23,
+    "branch": 0,
+    "callee": "request",
+    "owner": "updatePermissionProfile",
+    "expression": "`/api/v1/admin/permissions/${id}`",
+    "path": "/api/v1/admin/permissions/{dynamic}",
+    "methods": [
+      "PATCH"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PATCH /api/v1/admin/permissions/{id}"
+    ]
+  },
+  {
+    "source": "web/lib/api/permissions.ts",
+    "line": 30,
+    "branch": 0,
+    "callee": "request",
+    "owner": "deletePermissionProfile",
+    "expression": "`/api/v1/admin/permissions/${id}`",
+    "path": "/api/v1/admin/permissions/{dynamic}",
+    "methods": [
+      "DELETE"
+    ],
+    "forwarding": false,
+    "routes": [
+      "DELETE /api/v1/admin/permissions/{id}"
+    ]
+  },
+  {
+    "source": "web/lib/api/permissions.ts",
+    "line": 36,
+    "branch": 0,
+    "callee": "request",
+    "owner": "getUserPermission",
+    "expression": "`/api/v1/admin/users/${userId}/permissions`",
+    "path": "/api/v1/admin/users/{dynamic}/permissions",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/users/{id}/permissions"
+    ]
+  },
+  {
+    "source": "web/lib/api/permissions.ts",
+    "line": 40,
+    "branch": 0,
+    "callee": "request",
+    "owner": "setUserPermissionOverride",
+    "expression": "`/api/v1/admin/users/${userId}/permissions`",
+    "path": "/api/v1/admin/users/{dynamic}/permissions",
+    "methods": [
+      "PUT"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PUT /api/v1/admin/users/{id}/permissions"
+    ]
+  },
+  {
+    "source": "web/lib/api/permissions.ts",
+    "line": 47,
+    "branch": 0,
+    "callee": "request",
+    "owner": "deleteUserPermissionOverride",
+    "expression": "`/api/v1/admin/users/${userId}/permissions`",
+    "path": "/api/v1/admin/users/{dynamic}/permissions",
+    "methods": [
+      "DELETE"
+    ],
+    "forwarding": false,
+    "routes": [
+      "DELETE /api/v1/admin/users/{id}/permissions"
+    ]
+  },
+  {
+    "source": "web/lib/api/permissions.ts",
+    "line": 53,
+    "branch": 0,
+    "callee": "request",
+    "owner": "getMyPermissions",
+    "expression": "\"/api/v1/auth/me/permissions\"",
+    "path": "/api/v1/auth/me/permissions",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/auth/me/permissions"
+    ]
+  },
+  {
+    "source": "web/lib/api/system.ts",
+    "line": 4,
+    "branch": 0,
+    "callee": "fetch",
+    "owner": "res",
+    "expression": "`${getBaseUrl()}/health`",
+    "path": "/health",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /health"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 279,
+    "branch": 0,
+    "callee": "company",
+    "owner": "companyDomains",
+    "expression": "\"/domains\"",
+    "path": "/api/v1/company/domains",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/domains"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 281,
+    "branch": 0,
+    "callee": "company",
+    "owner": "addCompanyDomain",
+    "expression": "\"/domains\"",
+    "path": "/api/v1/company/domains",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/domains"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 287,
+    "branch": 0,
+    "callee": "company",
+    "owner": "verifyCompanyDomain",
+    "expression": "`/domains/${encodeURIComponent(id)}/verify`",
+    "path": "/api/v1/company/domains/{id}/verify",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/domains/{id}/verify"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 293,
+    "branch": 0,
+    "callee": "company",
+    "owner": "companyDomainVerification",
+    "expression": "`/domains/${encodeURIComponent(id)}/verification`",
+    "path": "/api/v1/company/domains/{id}/verification",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/domains/{id}/verification"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 298,
+    "branch": 0,
+    "callee": "company",
+    "owner": "deleteCompanyDomain",
+    "expression": "`/domains/${encodeURIComponent(id)}`",
+    "path": "/api/v1/company/domains/{id}",
+    "methods": [
+      "DELETE"
+    ],
+    "forwarding": false,
+    "routes": [
+      "DELETE /api/v1/company/domains/{id}"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 310,
+    "branch": 0,
+    "callee": "company",
+    "owner": "setMailboxSendPolicy",
+    "expression": "`/mailboxes/${encodeURIComponent(id)}/send-policy`",
+    "path": "/api/v1/company/mailboxes/{id}/send-policy",
+    "methods": [
+      "PUT"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PUT /api/v1/company/mailboxes/{id}/send-policy"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 323,
+    "branch": 0,
+    "callee": "company",
+    "owner": "revokeTemplateVersion",
+    "expression": "`/templates/${encodeURIComponent(templateId)}/versions/${version}/revoke`",
+    "path": "/api/v1/company/templates/{id}/versions/{dynamic}/revoke",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/templates/{id}/versions/{version}/revoke"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 333,
+    "branch": 0,
+    "callee": "company",
+    "owner": "submitDraft",
+    "expression": "`/drafts/${encodeURIComponent(id)}/submit`",
+    "path": "/api/v1/company/drafts/{id}/submit",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/drafts/{id}/submit"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 346,
+    "branch": 0,
+    "callee": "request",
+    "owner": "res",
+    "expression": "`/api/v1/company${path}`",
+    "path": "/api/v1/company{dynamic}",
+    "methods": [
+      "DYNAMIC"
+    ],
+    "forwarding": true,
+    "routes": []
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 350,
+    "branch": 0,
+    "callee": "company",
+    "owner": "workMailboxes",
+    "expression": "\"/mailboxes\"",
+    "path": "/api/v1/company/mailboxes",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 357,
+    "branch": 0,
+    "callee": "request",
+    "owner": "workMessages",
+    "expression": "`/api/v1/company${workPath(id)}/messages`",
+    "path": "/api/v1/company/mailboxes/{id}/messages",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes/{id}/messages"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 363,
+    "branch": 0,
+    "callee": "company",
+    "owner": "workMessage",
+    "expression": "`${workPath(id)}/messages/${encodeURIComponent(message)}`",
+    "path": "/api/v1/company/mailboxes/{id}/messages/{id}",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes/{id}/messages/{message}"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 368,
+    "branch": 0,
+    "callee": "request",
+    "owner": "submissions",
+    "expression": "\"/api/v1/company/submissions\"",
+    "path": "/api/v1/company/submissions",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/submissions"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 374,
+    "branch": 0,
+    "callee": "company",
+    "owner": "submission",
+    "expression": "`/submissions/${encodeURIComponent(id)}`",
+    "path": "/api/v1/company/submissions/{id}",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/submissions/{id}"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 377,
+    "branch": 0,
+    "callee": "company",
+    "owner": "submissionContent",
+    "expression": "`/submissions/${encodeURIComponent(id)}/content`",
+    "path": "/api/v1/company/submissions/{id}/content",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/submissions/{id}/content"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 382,
+    "branch": 0,
+    "callee": "company",
+    "owner": "submissionAttachments",
+    "expression": "`/submissions/${encodeURIComponent(id)}/attachments`",
+    "path": "/api/v1/company/submissions/{id}/attachments",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/submissions/{id}/attachments"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 389,
+    "branch": 0,
+    "callee": "request",
+    "owner": "res",
+    "expression": "\"/api/v1/admin/users\"",
+    "path": "/api/v1/admin/users",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/users"
+    ]
+  },
+  {
+    "source": "web/lib/company.ts",
+    "line": 408,
+    "branch": 0,
+    "callee": "request",
+    "owner": "blob",
+    "expression": "`/api/v1/company${path}`",
+    "path": "/api/v1/company{dynamic}",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": true,
+    "routes": []
+  },
+  {
+    "source": "web/lib/legacy-outbound.ts",
+    "line": 17,
+    "branch": 0,
+    "callee": "request",
+    "owner": "result",
+    "expression": "\"/api/v1/outbound\"",
+    "path": "/api/v1/outbound",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/outbound"
+    ]
+  },
+  {
+    "source": "web/lib/legacy-outbound.ts",
+    "line": 21,
+    "branch": 0,
+    "callee": "request",
+    "owner": "result",
+    "expression": "`/api/v1/outbound/${encodeURIComponent(id)}`",
+    "path": "/api/v1/outbound/{id}",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/outbound/{id}"
+    ]
+  }
+]

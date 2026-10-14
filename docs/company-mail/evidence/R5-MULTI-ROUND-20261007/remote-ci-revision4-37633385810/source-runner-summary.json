@@ -1,0 +1,37 @@
+{
+  "status": "pass",
+  "no_missing": true,
+  "no_overlap": true,
+  "dispatch_no_missing": true,
+  "dispatch_no_overlap": true,
+  "missing_test_ids": [],
+  "discovered": 717,
+  "groups": [
+    {
+      "group": "current",
+      "source_sha": "57ae4946ea60f0021c531aefc0c091dd984ca784",
+      "exit": 0,
+      "requested": 713,
+      "tests_run": 713,
+      "failures": [],
+      "errors": [],
+      "skips": [],
+      "expected_failures": [],
+      "unexpected_successes": [],
+      "actual": 713
+    },
+    {
+      "group": "frozen-v1",
+      "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+      "exit": 0,
+      "requested": 4,
+      "tests_run": 4,
+      "failures": [],
+      "errors": [],
+      "skips": [],
+      "expected_failures": [],
+      "unexpected_successes": [],
+      "actual": 4
+    }
+  ]
+}

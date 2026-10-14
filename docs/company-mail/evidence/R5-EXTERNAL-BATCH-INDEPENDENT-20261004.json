@@ -1,0 +1,232 @@
+{
+  "review": "independent external batch fixed-source review",
+  "tested_source": "f80b37fe14d856d2f2a048a06fe848fc4420448d",
+  "docs_evidence_head": "f5e54f101964822da6cea6f9e958fe89d1688a39",
+  "verdict": "REQUEST_CHANGES",
+  "findings": [
+    {
+      "id": "F1",
+      "priority": "high",
+      "finding": "detached descendants inheriting pipes defeat finish deadline",
+      "physical_reproduction": true
+    },
+    {
+      "id": "F2",
+      "priority": "medium",
+      "finding": "inventory walks and idle RPC joins lack remaining-deadline participation",
+      "idle_rpc_join_seconds": 79.988,
+      "physical_rpc_reproduction": true,
+      "slow_inventory_control": "injected"
+    },
+    {
+      "id": "F3",
+      "priority": "medium",
+      "finding": "accepted late per-case cancel before owner ack preserves synthetic qualification",
+      "actual_private_socket": true,
+      "real_full_validation": true,
+      "business_falsepass_reproduced": false
+    }
+  ],
+  "author_controls_rerun": {
+    "batch": 30,
+    "runtime_v2": 21,
+    "protocol_regressions": 70
+  },
+  "review_controls": {
+    "lifecycle": 6,
+    "real_contract_assertions": 22,
+    "status": "PASS means counterexamples reproduced, not product qualification"
+  },
+  "go_controls": {
+    "version": "go version go1.25.7 linux/amd64",
+    "archive_sha256": "12e6d6a191091ae27dc31f6efc630e3a3b8ba409baf3573d955b196fdf086005",
+    "race": true,
+    "count": 1,
+    "timeout_seconds": 120,
+    "top_level_tests": 5,
+    "real_loopback_fixtures": 2,
+    "status": "PASS"
+  },
+  "typescript": {
+    "command": "tsc --noEmit --incremental false",
+    "status": "PASS",
+    "skipped": false
+  },
+  "source_hashes": {
+    "scripts/preparation/r5_external_batch.py": "6e80b9ded4b01da727bd04f2a9be8e33c2dc4bf8b38e4c0e0ad1c4f556b341db",
+    "scripts/preparation/r5_external_runtime.py": "c793eab91eef55c5c48ebf0f37606402b7199700d346828180597a6ae70a0cf1",
+    "internal/api/handlers/r5_external_batch_test.go": "c590fc85d78095c9231c00e8671930dd06c226f89b959e885ac502533ca96e45",
+    "internal/api/handlers/r5_protocol_component_observations_test.go": "d0c4ce103fa231d43972af4a82b90fbdda99afb032c94b41b6c4951d95fbe9fe",
+    "internal/api/handlers/r5_protocol_grant_owner_test.go": "14691cd4d02d840d8f8a8a6abd2ad3b60ce6731450b3dd249a4001f6655eda1f",
+    "internal/api/handlers/r5_protocol_grant_owner_pg_test.go": "8c88adea9d54c4e26a8f04e03caef37af139b2c0323d214a06b2243b90ea50d7",
+    "internal/testpg/fixture.go": "cd58746b23e0c376a1c48c01ed2837091bbbfc85a7e5bdc49c8eefbbccd17153",
+    "scripts/contracts/r5-external-batch-v1.schema.json": "a49ba72a27c564e117da9bd78dc6f80f309767bfe3730c54efe9576748b5f89f",
+    "web/r5-external-batch-probe.test.tsx": "69283e7944d503b24aaf0f643b37dbd584d3a3454d80e09aa1c1fe933799c3e0",
+    "web/vitest.r5batch-probe.config.ts": "9b565f6436465eb26bf2da1dd54053e38a2ef0ec3f46f5368a7118b1c54b24a7",
+    "go.mod": "30eb5ba911706a9c88f5cfa77bea60eb61dbd1cb2570232d581847e12902e377",
+    "web/package-lock.json": "b839b59e9aa06133819adca60659e0f807ca1e321fbdc35fe55afe1c7b52eba3"
+  },
+  "review_hashes": {
+    "scripts/reviews/test_external_batch_independent_20261004.py": "46525e71b458350b4a4257785c6ad4696829aeb7fe36c864e1aa152e8d93b87b",
+    "scripts/reviews/check_external_batch_semantics_20261004.py": "2f5fb9ce398ceb433ede8761b20a1f630b4acd60a0aa95396ea92699ef50f6ef",
+    "docs/company-mail/R5-EXTERNAL-BATCH-INDEPENDENT-REVIEW-20261004.md": "181243d0371366e7fdbd7a50ba90a9f6a0808036ff467e7f5d547d0c50263e04"
+  },
+  "private_log_hashes": {
+    "batch-controls.log": "168fdf3d72314e0a57a6e2b9ac611b62143087f6225a917b239ba46244aaba0e",
+    "v2-controls.log": "708265def7115e8c78cfa9f90e5748e01655064f37de49da063c430e7c13ab19",
+    "protocol-controls.log": "e3bb4759daea3707ef47e438098287a70a66e4b34c6ff43336104f692ee471d5",
+    "go-controls.log": "025f033d96343213267890915810a816f0a059f05407a2186c7b903c92f0e74e",
+    "tsc.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "independent-controls.log": "f3d6c589a818a29f4015abfb42ed2acfdb89a91a8ec7e525158ddd75cd8039f6",
+    "outer-exception-control.log": "13f1eb8773c815d1df2a16365d6e6173a4cc6282cceb73096d183f7d4972e5ea",
+    "semantic-controls.json": "3e8f89c50409ab450c0e217b3aef3d39a5e346e194b420e73c761799f3d687a3",
+    "npm.log": "2cd136064cf7632c1ff55b582436748303a5469ee71adbe33cc20c31a9044ce9"
+  },
+  "probe": {
+    "status": "BATCH_QUALIFIED",
+    "receipt": {
+      "children": {
+        "probe/0": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "40b5c0b047d93c91bb67215049202d3063fcf519d8f59044f371873276186edb",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/1": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "320ee07e762e2a51008fa2a8636ca5b4b1b6b6cdc2ab6e2a2fb87792e9a55adf",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/2": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "40b06957a1f2f4c0ef4a8bef6994ea63586fc8d675b1206f151a52b0dc4a6c91",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/3": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "64839291edd9bbb8ff15eb4ca5a70344f9a541e5d11dae66f5ca842091c79127",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/4": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "29261085e13d992601bc136199db5c6668d4958a6fc21e183911349559f683ad",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/5": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "6036c0008fed54dd11827df235d8cb107db08c69047a7e461bb7994f81f7eba9",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/6": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "fef91a90625adb8c41d2ed8835a771fa692c1ffe1fb796b2749e7d944994c11a",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/7": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "c13fd0a7ca21e3f1facf9696409353c11be2d440b9d96d7110aa89e2d8d691e6",
+          "tail": false,
+          "timeout": false
+        }
+      },
+      "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+      "contract_sha256": "a2a78c384f209d8c783d797b8fbb2f7fccb91e58781930e32519eae5530bbae5",
+      "eligibility_scope": "infrastructure_probe_only",
+      "errors": [],
+      "max_live_children": 4,
+      "owners_joined": true,
+      "policy": "r5_external_batch_validation_v1",
+      "preflight": true,
+      "product_green": false,
+      "required_terminal_count": 10,
+      "schema_version": 1,
+      "status": "BATCH_QUALIFIED",
+      "task_complete": false,
+      "terminal_count": 10,
+      "terminal_postcheck": true
+    },
+    "receipt_sha256": "d963cac90882576b7cfa1b42ec60941a165b3fa4d337135536860aae6e4b6952",
+    "contract_independent_byte_pin": "3ef3ed9610e4ee313e0208e2e0df10d7c9a451ff517fa0b075c34188d6285339",
+    "contract_canonical_sha256": "a2a78c384f209d8c783d797b8fbb2f7fccb91e58781930e32519eae5530bbae5",
+    "runtime_manifest_independent_byte_pin": "94e9496057b5faa47c31d4642ae55b77def1565c7f2c1da9899753d993dbbb27",
+    "timing": {
+      "wall_seconds": 22.173414482,
+      "exit_code": 0
+    },
+    "raw_go_jsonl_sha256": "7fbea83b7b7c656c8cd1040825036f1205344060c1a8b484d156de5a5c6fca8e",
+    "go_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "python_report_sha256": "db32910582f655593a2bad6afd59d17533526b415084322e1c606b751978aeb9",
+    "infrastructure_only": true
+  },
+  "inventories": {
+    "source": {
+      "regular_files": 1924,
+      "regular_bytes": 59909388
+    },
+    "dependencies": {
+      "regular_files": 45584,
+      "regular_bytes": 775103182
+    }
+  },
+  "cleanup": {
+    "owned_fixture_databases_remaining": 0,
+    "owned_fixture_backend_connections_remaining": 0,
+    "physical_fixture_ack": true,
+    "exception_outer_barrier_reaps_direct_child": true,
+    "pgx_backend_cancellation_guarantee": "not newly qualified",
+    "owned_postgresql_shutdown": true
+  },
+  "preparation_rejections_retained": [
+    "selected receipt drift after cache hydration",
+    "inherited NPM_CONFIG_AUDIT rejected",
+    "user-supplied GOTOOLCHAIN rejected before output creation"
+  ],
+  "intermediate_probe": {
+    "status": "PASS infrastructure only",
+    "receipt_sha256": "b2fb40307f659d063716b9520fda18fa17f6f87106ec480d2b123181fe0fa617",
+    "timing": {
+      "wall_seconds": 23.630412414000034,
+      "exit_code": 0
+    },
+    "source_layout": "contained a harmless empty review directory; final capture removes it"
+  },
+  "scope": {
+    "catalog_ids": 46,
+    "handler_ids": 17,
+    "handler_variants": 26,
+    "required_go_paths": 40,
+    "required_python_assertions": 3,
+    "required_component_terminals": 43,
+    "probe_terminals": 10,
+    "formal_component_execution": "NOTRUN"
+  },
+  "original_budgets": {
+    "go": 120,
+    "batch": 180,
+    "case": 75,
+    "max_workers": 4
+  },
+  "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+  "legacy_failures": "retained; no receipt relabeled",
+  "central_progress": "10/171 unchanged",
+  "wholePG180": "NOTRUN",
+  "audit": "NOTRUN; audit8high remains open",
+  "implementation_changes": false,
+  "product_green": false,
+  "task_complete": false,
+  "delivery": "normal push and single draft attempt outcome reported separately"
+}

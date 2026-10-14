@@ -1,0 +1,566 @@
+{
+  "schema_version": 1,
+  "inventory_revision": 5,
+  "source_commit": "79738c17d185f1cd5cd1c8d550a9f15a5501f31c",
+  "source_tree": "1621d5fefb443d9d314abc2f9e0fab94914ce4c4",
+  "revision4_snapshots": {
+    "transaction": {
+      "commit": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe",
+      "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+      "blob": "bd50c385e9c6c385a650f68ce5c5857ee69986ea",
+      "sha256": "5fc5fb70255b5e6986b9aab38157fbb915b6012377d76d5b2a1956fc2907de2c"
+    },
+    "compatibility": {
+      "commit": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe",
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+      "blob": "23a227e3eae3aacc44d2c2be97c35bfa55bcc8a6",
+      "sha256": "56452854110d0c33b5d2ae9eaf1abe43a7f77681a59307fc2470796dbdc18f56"
+    },
+    "clients": {
+      "commit": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe",
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+      "blob": "9989cd7fe881f23eb2fe5b08e1a390e3128033e3",
+      "sha256": "83eeb4a43fa3a6c762353c1597c00e998ca64bf68138a7eb165984095b110e3d"
+    },
+    "client_routes": {
+      "commit": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe",
+      "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+      "blob": "6a9cac1e365ce2664c6cddb170009d52fec2184c",
+      "sha256": "0877601e0a825ba28f2e912bc057cf92e7d607ca568f5d1b29621e2798dc5139"
+    }
+  },
+  "boundary": "Static source inventory only; no new runtime, wire, dependency, product or parent-task acceptance.",
+  "transaction": {
+    "status": "PASS",
+    "postgres_files": 62,
+    "functions": 395,
+    "sql_execution_calls": 498,
+    "direct_write_functions": 134,
+    "write_closure_functions": 154,
+    "migration_files": 19,
+    "task_complete": false,
+    "runtime_verified": false,
+    "meaning": "syntax inventory current; no concurrency or behavior equivalence claim"
+  },
+  "compatibility": {
+    "wire_validation_scope": "not_checked_current_wire_required",
+    "historical_wire_reference": {
+      "artifact_ref": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json",
+      "sha256": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+      "qualification": "historical_metadata_only_not_current_wire"
+    },
+    "status": "source_inventory_and_upgrade_plan_checked",
+    "task_complete": false,
+    "product_green": false,
+    "routes": 132,
+    "client_branches": 134,
+    "source_files": 94,
+    "openapi_missing": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/suppression",
+      "GET /docs-assets/*"
+    ],
+    "no_shipped_client": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/admin/status",
+      "GET /api/v1/auth/me",
+      "GET /api/v1/company/outbound/{id}/recipients",
+      "GET /api/v1/suppression",
+      "GET /docs",
+      "GET /docs-assets/*",
+      "GET /metrics",
+      "GET /openapi.yaml",
+      "GET /ready",
+      "GET /redoc"
+    ],
+    "runtime_boundary": "No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required."
+  },
+  "client_changes": [
+    {
+      "before_index": 6,
+      "after_index": 6,
+      "path": "/api/v1/company/templates",
+      "methods": [
+        "GET"
+      ],
+      "changes": {
+        "line": {
+          "before": 37,
+          "after": 43
+        }
+      }
+    },
+    {
+      "before_index": 7,
+      "after_index": 7,
+      "path": "/api/v1/company/templates/{dynamic}/retire",
+      "methods": [
+        "POST"
+      ],
+      "changes": {
+        "line": {
+          "before": 76,
+          "after": 92
+        }
+      }
+    },
+    {
+      "before_index": 23,
+      "after_index": 20,
+      "path": "/api/v1/company/templates/preview",
+      "methods": [
+        "POST"
+      ],
+      "changes": {
+        "line": {
+          "before": 310,
+          "after": 111
+        },
+        "owner": {
+          "before": "TemplateEditorView",
+          "after": "value"
+        }
+      }
+    },
+    {
+      "before_index": 21,
+      "after_index": 21,
+      "path": "/api/v1/company/templates/{dynamic}",
+      "methods": [
+        "PUT"
+      ],
+      "changes": {
+        "line": {
+          "before": 61,
+          "after": 169
+        },
+        "expression": {
+          "before": "`/templates/${edit.id}`",
+          "after": "`/templates/${snapshot.id}`"
+        }
+      }
+    },
+    {
+      "before_index": 22,
+      "after_index": 22,
+      "path": "/api/v1/company/templates",
+      "methods": [
+        "POST"
+      ],
+      "changes": {
+        "line": {
+          "before": 61,
+          "after": 169
+        }
+      }
+    },
+    {
+      "before_index": 8,
+      "after_index": 23,
+      "path": "/api/v1/company/templates/{dynamic}/publish",
+      "methods": [
+        "POST"
+      ],
+      "changes": {
+        "source": {
+          "before": "web/app/(dashboard)/company/templates/page.tsx",
+          "after": "web/components/company/templates/editor.tsx"
+        },
+        "line": {
+          "before": 98,
+          "after": 199
+        },
+        "owner": {
+          "before": "onPublished",
+          "after": "save"
+        },
+        "expression": {
+          "before": "`/templates/${value.id}/publish`",
+          "after": "`/templates/${res.id}/publish`"
+        }
+      }
+    },
+    {
+      "before_index": 27,
+      "after_index": 27,
+      "path": "/api/v1/company/templates/{dynamic}/versions",
+      "methods": [
+        "GET"
+      ],
+      "changes": {
+        "line": {
+          "before": 37,
+          "after": 48
+        }
+      }
+    }
+  ],
+  "client_reorder": [
+    {
+      "before_index": 9,
+      "after_index": 8
+    },
+    {
+      "before_index": 10,
+      "after_index": 9
+    },
+    {
+      "before_index": 11,
+      "after_index": 10
+    },
+    {
+      "before_index": 12,
+      "after_index": 11
+    },
+    {
+      "before_index": 13,
+      "after_index": 12
+    },
+    {
+      "before_index": 14,
+      "after_index": 13
+    },
+    {
+      "before_index": 15,
+      "after_index": 14
+    },
+    {
+      "before_index": 16,
+      "after_index": 15
+    },
+    {
+      "before_index": 17,
+      "after_index": 16
+    },
+    {
+      "before_index": 18,
+      "after_index": 17
+    },
+    {
+      "before_index": 19,
+      "after_index": 18
+    },
+    {
+      "before_index": 20,
+      "after_index": 19
+    },
+    {
+      "before_index": 23,
+      "after_index": 20
+    },
+    {
+      "before_index": 8,
+      "after_index": 23
+    }
+  ],
+  "transaction_callers": [
+    {
+      "id": "internal/store/postgres/company_mail.go:*PgStore:OutboundAttachments",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "2ff0f7854bd8701e166ed3732df4bf60286e7f9c53a2e17049b6e6a90949839d",
+      "after_sha256": "5b001ba1975e9a3792092106939bd1caf801a614968d5200aacee6da976deeb2",
+      "locations": [
+        {
+          "caller_id": "internal/outbound/company.go:*Service:buildQueuedMIME",
+          "source": "internal/outbound/company.go",
+          "expression": "repo.OutboundAttachments",
+          "before_line": 70,
+          "after_line": 84
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/outbound.go:*PgStore:IsSuppressed",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "8bd1f0dcfb0c9ac7d9500247cc56b5825db17c6f4d770a9daba66b843caf5b62",
+      "after_sha256": "38a1865b54d345c47c69caf50a7aad3deda8942ce61ac7402e330864b3f49993",
+      "locations": [
+        {
+          "caller_id": "internal/app/submissions/service.go:*Service:SubmitAuthorized",
+          "source": "internal/app/submissions/service.go",
+          "expression": "s.store.IsSuppressed",
+          "before_line": 323,
+          "after_line": 325
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/outbound_content.go:*PgStore:CanReadOutboundContent",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "77d9b50b4fce9c94e268a540a5fc1b8daa925362fef8ef1a296d7b33055b97e7",
+      "after_sha256": "8602b03a8a116e7fbbe66dbaa92cff88553456fd86c767ee1c587e634d37ce37",
+      "locations": [
+        {
+          "caller_id": "internal/app/submissions/service.go:*Service:ContentAllowed",
+          "source": "internal/app/submissions/service.go",
+          "expression": "s.store.CanReadOutboundContent",
+          "before_line": 410,
+          "after_line": 413
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/outbound_retry.go:*PgStore:RequeueOutboundJobAuthorized",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "e207157ce1ea3823453cadfcdc0337637d4dc1852634cc76188136d1e7c4256c",
+      "after_sha256": "7e9e53e9c2fe0e9f6258e8bcabd682185256a14c42684fb68d264835f431e0d0",
+      "locations": [
+        {
+          "caller_id": "internal/app/submissions/service.go:*Service:RetryOutboundJob",
+          "source": "internal/app/submissions/service.go",
+          "expression": "s.store.RequeueOutboundJobAuthorized",
+          "before_line": 424,
+          "after_line": 427
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/postgres.go:*PgStore:Close",
+      "before_count": 152,
+      "after_count": 153,
+      "before_sha256": "4c799de9aaee7a5a34858a1f8116ccc068177728ee016caa04a4122bcb47466f",
+      "after_sha256": "b8649d4876c6e379c824a3ef9e2348ab2e7ae85ab8d8368b262782726ce1decf",
+      "locations": [
+        {
+          "caller_id": "internal/app/recovery/verify.go::Verify",
+          "source": "internal/app/recovery/verify.go",
+          "expression": "r.Close",
+          "before_line": 23,
+          "after_line": 35
+        },
+        {
+          "caller_id": "internal/outbound/company.go:*Service:buildQueuedMIME",
+          "source": "internal/outbound/company.go",
+          "expression": "r.Close",
+          "before_line": 91,
+          "after_line": 121
+        }
+      ],
+      "added": [
+        {
+          "caller_id": "internal/outbound/queued_attachment_read.go::readQueuedAttachment",
+          "file": "internal/outbound/queued_attachment_read.go",
+          "function": "readQueuedAttachment",
+          "line": 18,
+          "expression": "input.Close",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/postgres.go::New",
+      "before_count": 173,
+      "after_count": 175,
+      "before_sha256": "6ff253f321c0da014e2e3106b62724fdae06e65dbc392b0936f5f8d6441bf8a3",
+      "after_sha256": "97f145117876cd3085df1252ae355c71c3e26f1a5767107631e122c27857d379",
+      "locations": [
+        {
+          "caller_id": "internal/company/templates.go::renderValidated",
+          "source": "internal/company/templates.go",
+          "expression": "texttemplate.New",
+          "before_line": 149,
+          "after_line": 164
+        },
+        {
+          "caller_id": "internal/company/templates.go::renderValidated",
+          "source": "internal/company/templates.go",
+          "expression": "htmltemplate.New",
+          "before_line": 165,
+          "after_line": 180
+        }
+      ],
+      "added": [
+        {
+          "caller_id": "internal/app/recovery/verify.go::Verify",
+          "file": "internal/app/recovery/verify.go",
+          "function": "Verify",
+          "line": 43,
+          "expression": "sha256.New",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/outbound/queued_attachment_read.go::readQueuedAttachment",
+          "file": "internal/outbound/queued_attachment_read.go",
+          "function": "readQueuedAttachment",
+          "line": 14,
+          "expression": "errors.New",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ],
+      "removed": []
+    }
+  ],
+  "compatibility_routes": [
+    {
+      "route": "GET /api/v1/company/templates",
+      "changed_fields": [
+        "clients"
+      ]
+    },
+    {
+      "route": "GET /api/v1/company/templates/{id}/versions",
+      "changed_fields": [
+        "clients"
+      ]
+    },
+    {
+      "route": "POST /api/v1/company/templates",
+      "changed_fields": [
+        "clients"
+      ]
+    },
+    {
+      "route": "POST /api/v1/company/templates/preview",
+      "changed_fields": [
+        "clients"
+      ]
+    },
+    {
+      "route": "POST /api/v1/company/templates/{id}/publish",
+      "changed_fields": [
+        "clients"
+      ]
+    },
+    {
+      "route": "POST /api/v1/company/templates/{id}/retire",
+      "changed_fields": [
+        "clients"
+      ]
+    },
+    {
+      "route": "PUT /api/v1/company/templates/{id}",
+      "changed_fields": [
+        "clients"
+      ]
+    }
+  ],
+  "source_changes": [
+    {
+      "path": "internal/app/recovery/verify.go",
+      "before_blob": "d3e0ae1de29893480fbd02e83e8168456fbd2a07",
+      "before_sha256": "c3e19578482a1d69fe2dd661996513276bdf578fdea5b264bb9df13e4077667d",
+      "after_blob": "e750e62719a513f1406824fac3d3657674761cbc",
+      "after_sha256": "22217e2b7b033aed830f611c2735f4bbd55ae769a76a5bad7bc1e6700c75495a",
+      "effects": [
+        "transaction_callers"
+      ]
+    },
+    {
+      "path": "internal/app/submissions/service.go",
+      "before_blob": "c9f2d9a847faab65ec861b7ac7c86d17a8f7893a",
+      "before_sha256": "acbd2b2fbbf8b4346257853ccbb4f7ad3b79f7be07aace350b90e10c04150bda",
+      "after_blob": "dd00a6c5d4cfe2c7cda03d6a14bd53af6d25da3f",
+      "after_sha256": "4a232d787df416a8a351214bed75c29c6e752a16daf332ba71896d78b6131fae",
+      "effects": [
+        "transaction_callers"
+      ]
+    },
+    {
+      "path": "internal/company/templates.go",
+      "before_blob": "b5da320c448ba4ed70e23e5aa2a1045a6c71f62b",
+      "before_sha256": "e35aecef4feb2929c4140dd75c825570e8dfd25722513f0d785c6b3e50ee6010",
+      "after_blob": "cc31660d74a4ad558988e970cc5e621d5f2142b3",
+      "after_sha256": "425d56688eb808f89465e159f183443a5555cb46739aada2d391e955c86e75aa",
+      "effects": [
+        "compatibility_source_hash",
+        "transaction_callers"
+      ]
+    },
+    {
+      "path": "internal/outbound/company.go",
+      "before_blob": "28227e9d31e250e16c24ae9f5da99275fbca4635",
+      "before_sha256": "d1cf02344fbbb3cef6d4768e73cad8d206d80bd01f9535aa7e69fb92c3060e5b",
+      "after_blob": "647ceebe290418afd29b70c325b49fe0250070f2",
+      "after_sha256": "82e9ee1d1aeb7334fa6f70c70340c901414d021a518430860c4a0b9ed084dc03",
+      "effects": [
+        "transaction_callers"
+      ]
+    },
+    {
+      "path": "internal/outbound/queued_attachment_read.go",
+      "before_blob": null,
+      "before_sha256": null,
+      "after_blob": "11401340c3b9d24e7264687aad9fdd653f970fc4",
+      "after_sha256": "549d805c853792dc50c9e6fb3223c630329bc75013133c231d9d33bc7e494b27",
+      "effects": [
+        "transaction_callers"
+      ]
+    },
+    {
+      "path": "web/app/(dashboard)/company/templates/page.tsx",
+      "before_blob": "3d51e4f76376e3f4731fd049badda85c0c32eba7",
+      "before_sha256": "283afc6db4e6613add39ad07dca2a11024408182cadd525ce14aa4e0e8b1175f",
+      "after_blob": "f8c9ca406f4ab1f1bbe9605985ca324317945b60",
+      "after_sha256": "277cdac03c382617e1e09d81df8624e5df01b4ba11d17c98a3b1b0f961d048c9",
+      "effects": [
+        "client_source_facts",
+        "compatibility_source_hash"
+      ]
+    },
+    {
+      "path": "web/components/company/templates/editor.tsx",
+      "before_blob": "b9be4243792f862d47f814803ba9af0df097448e",
+      "before_sha256": "a8fe1fad206dd617f92f9a1430f1c28a992fb567aa33005d44d878481f941130",
+      "after_blob": "dfcd1aa175881c390677d23b4caae7470c00bbc7",
+      "after_sha256": "a88a764923cb19f187e22183cd46d879ab8200a037e0168c9581af0c2e185767",
+      "effects": [
+        "client_source_facts",
+        "compatibility_source_hash"
+      ]
+    },
+    {
+      "path": "web/components/company/templates/versions.tsx",
+      "before_blob": "dc82a0da90a7321ecae98298b751826e51f11bc2",
+      "before_sha256": "dcc1b34e7606df8afab6a1db8fb5ac82f3aeaa4e520a6ade966bb9cb964f77c7",
+      "after_blob": "1a12b55b341432a486e554f15fec53121552851b",
+      "after_sha256": "5824b4d9f1fd5c398523b2ca3f5680c788a63601d90a9821e5239efbfc186338",
+      "effects": [
+        "client_source_facts",
+        "compatibility_source_hash"
+      ]
+    }
+  ],
+  "generated_catalogs": {
+    "transaction": {
+      "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+      "sha256": "0ecb372399d4878fa46d454c88fc48e8cb1e40a06541beaef6309517c8cb6866"
+    },
+    "compatibility": {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+      "sha256": "73b30e5733dccba31b1330eec0c52b66a96fb9f3f2dfb19fd3069a2ba32ddf80"
+    },
+    "clients": {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+      "sha256": "76d03e2c33420a36cf49b0e740656ec83e672598028b9b0257a2de8d171acec7"
+    },
+    "client_routes": {
+      "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+      "sha256": "39e65cca57bcddfe9a8b67733cd240a2db0c86f372ec491161ee7ec94dd5b72d"
+    }
+  },
+  "unchanged_validators_and_collectors": {
+    "scripts/check_r5_transactions.py": "1f14b5b4e3ef11cd0642e9d7261cde285c17e47384c90e15b56adc68323b9355",
+    "scripts/check_r5_compatibility.py": "d3d0bd96c84a18c224160faaad96f3a928aab5224d93c31b6ec464489f740209",
+    "scripts/collect_api_calls.cjs": "06896de9f18dda8c7fd4f1ef2d520e4bd71fa831a99f0d63863a1fa6a06682e8",
+    "cmd/r5txinventory/main.go": "ad14b919505b23947de335dda6077d4f6745185329d911cc357e60b1001d2361",
+    "internal/architecture/route_inventory_test.go": "609ee5489c3e021f9b1a0238b47e4a01d09c5e5eef1144df780d6456e2ed4f05"
+  },
+  "local_source_collection": {
+    "node": "v24.19.0",
+    "typescript": "5.9.3",
+    "boundary": "Existing TypeScript bytes reused; local source collection is not Node 22 or GitHub CI execution."
+  }
+}

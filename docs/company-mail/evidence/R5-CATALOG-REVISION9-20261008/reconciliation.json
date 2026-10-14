@@ -1,0 +1,1323 @@
+{
+  "schema_version": 1,
+  "inventory_revision": 9,
+  "source_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+  "source_tree": "db7c422fcdd63405706a2f2cb7631a5380f87fd6",
+  "revision8_snapshot_commit": "1d856bd8a552c30dfb48b4902858edad7e53aaf5",
+  "revision8_source_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+  "revision8_snapshots": {
+    "transaction": {
+      "commit": "1d856bd8a552c30dfb48b4902858edad7e53aaf5",
+      "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+      "blob": "8ba42265c61b74a1e40bb29c3e302b811cfc2f97",
+      "sha256": "52477ba99dbec5eeb0d900d98be039cc383acb0c7284b269fcd0f71ea53cc404"
+    },
+    "compatibility": {
+      "commit": "1d856bd8a552c30dfb48b4902858edad7e53aaf5",
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+      "blob": "394dd577f1a08603b65546e904a637ad2eb80cf0",
+      "sha256": "46eca04fa364ff6bf575b5828e6219b9b6b6e217d6ac836a9c1e35fa450dcd2d"
+    },
+    "clients": {
+      "commit": "1d856bd8a552c30dfb48b4902858edad7e53aaf5",
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+      "blob": "40ecfe14652c5dda8fa4de077e316913f6505c9a",
+      "sha256": "7cc241cd0a0b83cab845bee62697a4301fa73a7de8115d3a56b09fbcbec64a60"
+    },
+    "client_routes": {
+      "commit": "1d856bd8a552c30dfb48b4902858edad7e53aaf5",
+      "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+      "blob": "d52027ee633aad43b38814ab6db7ef6429c35a2c",
+      "sha256": "1ad8439d35d67255c0bf9694c095ecbf8210506d26f6f15232d28276f8604c85"
+    }
+  },
+  "boundary": "Fresh static syntax and source-inventory reconciliation only; no runtime, wire, dependency, release, M/G0 or parent-task acceptance.",
+  "transaction": {
+    "status": "PASS",
+    "postgres_files": 62,
+    "functions": 395,
+    "sql_execution_calls": 499,
+    "direct_write_functions": 134,
+    "write_closure_functions": 154,
+    "migration_files": 19,
+    "task_complete": false,
+    "runtime_verified": false,
+    "meaning": "syntax inventory current; no concurrency or behavior equivalence claim"
+  },
+  "compatibility": {
+    "wire_validation_scope": "not_checked_current_wire_required",
+    "historical_wire_reference": {
+      "artifact_ref": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json",
+      "sha256": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+      "qualification": "historical_metadata_only_not_current_wire"
+    },
+    "status": "source_inventory_and_upgrade_plan_checked",
+    "task_complete": false,
+    "product_green": false,
+    "routes": 132,
+    "client_branches": 134,
+    "source_files": 94,
+    "openapi_missing": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/suppression",
+      "GET /docs-assets/*"
+    ],
+    "no_shipped_client": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/admin/status",
+      "GET /api/v1/auth/me",
+      "GET /api/v1/company/outbound/{id}/recipients",
+      "GET /api/v1/suppression",
+      "GET /docs",
+      "GET /docs-assets/*",
+      "GET /metrics",
+      "GET /openapi.yaml",
+      "GET /ready",
+      "GET /redoc"
+    ],
+    "runtime_boundary": "No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required."
+  },
+  "old_catalog_rejection": {
+    "transactions": {
+      "category": "caller drift",
+      "affected_functions": 35
+    },
+    "compatibility": {
+      "category": "client producer differs from reviewed current source inventory"
+    },
+    "clients": {
+      "category": "client source drift"
+    }
+  },
+  "compatibility_rejections": {
+    "revision1": "route/schema/client/test source drift: GET /api/v1/admin/runtime-config",
+    "revision2": "route/schema/client/test source drift: GET /api/v1/admin/runtime-config",
+    "revision3": "route/schema/client/test source drift: GET /api/v1/admin/runtime-config",
+    "revision4": "route/schema/client/test source drift: GET /api/v1/company/mailboxes/{id}/grants",
+    "revision5": "route/schema/client/test source drift: GET /api/v1/company/mailboxes/{id}/grants",
+    "revision6": "route/schema/client/test source drift: GET /api/v1/company/mailboxes/{id}/grants",
+    "revision7": "route/schema/client/test source drift: POST /api/v1/company/mailboxes",
+    "revision8": "route/schema/client/test source drift: POST /api/v1/company/mailboxes"
+  },
+  "transaction_revision8_rejection": "caller drift: internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey\ncaller drift: internal/store/postgres/apikeys.go:*PgStore:DeleteAPIKey\ncaller drift: internal/store/postgres/apikeys.go:*PgStore:ListAPIKeys\ncaller drift: internal/store/postgres/apikeys.go:*PgStore:ListAPIKeysByOwner\ncaller drift: internal/store/postgres/messages.go:*PgStore:CountTenantMessagesSince\ncaller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetUser\ncaller drift: internal/store/postgres/permission_assignment.go:*PgStore:AssignPermissionEditor\ncaller drift: internal/store/postgres/plans.go:*PgStore:CreatePlan\ncaller drift: internal/store/postgres/plans.go:*PgStore:DeletePlan\ncaller drift: internal/store/postgres/plans.go:*PgStore:ListPlans\ncaller drift: internal/store/postgres/plans.go:*PgStore:UpdatePlan\ncaller drift: internal/store/postgres/postgres.go:*PgStore:Close\ncaller drift: internal/store/postgres/postgres.go::New\ncaller drift: internal/store/postgres/queue.go:*PgStore:CountDeadWebhookDeliveries\ncaller drift: internal/store/postgres/queue.go:*PgStore:CreateOutboxEvent\ncaller drift: internal/store/postgres/queue.go:*PgStore:CreateWebhookDeliveries\ncaller drift: internal/store/postgres/queue.go:*PgStore:ListDeadWebhookDeliveries\ncaller drift: internal/store/postgres/queue.go:*PgStore:ListIngestJobs\ncaller drift: internal/store/postgres/queue.go:*PgStore:ListWebhookDeliveries\ncaller drift: internal/store/postgres/refresh_rotation.go:*PgStore:RevokeRefreshTokenByHash\ncaller drift: internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken\ncaller drift: internal/store/postgres/settings.go:*PgStore:ListSettings\ncaller drift: internal/store/postgres/smtp_policy.go:*PgStore:GetSMTPPolicy\ncaller drift: internal/store/postgres/tenants.go:*PgStore:CreateTenant\ncaller drift: internal/store/postgres/tenants.go:*PgStore:DeleteTenant\ncaller drift: internal/store/postgres/tenants.go:*PgStore:EffectiveConfig\ncaller drift: internal/store/postgres/users.go:*PgStore:ChangePasswordAtomic\ncaller drift: internal/store/postgres/users.go:*PgStore:CreateRefreshToken\ncaller drift: internal/store/postgres/users.go:*PgStore:CreateUser\ncaller drift: internal/store/postgres/users.go:*PgStore:GetUser\ncaller drift: internal/store/postgres/users.go:*PgStore:GetUserByEmail\ncaller drift: internal/store/postgres/users.go:*PgStore:RevokeUserRefreshTokens\ncaller drift: internal/store/postgres/users.go:*PgStore:TouchUserLogin\ncaller drift: internal/store/postgres/users.go:*PgStore:UpdateUserPassword\ncaller drift: internal/store/postgres/webhook_endpoints.go:*PgStore:ListWebhookEndpoints",
+  "transaction_callers": [
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey",
+      "before_count": 3,
+      "after_count": 3,
+      "before_sha256": "1924d43c9a4280f3339fc37ab97f0791c8327b51b306ddfc4004681e9a8b9964",
+      "after_sha256": "525cf40daed8ed3e0b0cec2b0ac4380214768696df9924ec3da13170eb44aac3",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:CreateAPIKey",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.CreateAPIKey",
+          "before_line": 197,
+          "after_line": 199
+        },
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:UserCreateAPIKey",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.CreateAPIKey",
+          "before_line": 361,
+          "after_line": 363
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:DeleteAPIKey",
+      "before_count": 3,
+      "after_count": 3,
+      "before_sha256": "bc467c8a659e31a8d9a05a368ba21ca2dfd8b23dacf0545cc11210358b89f621",
+      "after_sha256": "748091f934132042c3905215f4114648f0d9c64cb76d407e702f6a6595b0c9dd",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:DeleteAPIKey",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.DeleteAPIKey",
+          "before_line": 225,
+          "after_line": 227
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:ListAPIKeys",
+      "before_count": 3,
+      "after_count": 3,
+      "before_sha256": "0c81ff9bd4c801d72ccca1287345a99d87fc502c3ee00457090ee9993d7541ab",
+      "after_sha256": "2e9666913bc3a81cb88e56fcfdbcde8be262cd443521b69ba064c0e9ec3495cc",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:ListAPIKeys",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.ListAPIKeys",
+          "before_line": 211,
+          "after_line": 213
+        },
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:UserListAPIKeys",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.ListAPIKeys",
+          "before_line": 391,
+          "after_line": 393
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:ListAPIKeysByOwner",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "3f4bc04381ac57dfddcdd06511b8a172246eb109095cc2b8c3840886bea9a16d",
+      "after_sha256": "999c061146936ebf68e17ea60e66d0853b8190104d401ea2df945ee8456d0376",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:UserListAPIKeys",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.ListAPIKeysByOwner",
+          "before_line": 381,
+          "after_line": 383
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/messages.go:*PgStore:CountTenantMessagesSince",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "2a99c01fa0041c946c5c649372129739cd839bb57dfe7cf638459bcd074b2bcf",
+      "after_sha256": "1ca0a2c4936be836ed43a7c1c96ce92e692af9951ea465f895307c300008aa91",
+      "locations": [
+        {
+          "caller_id": "internal/ingest/service.go:*Service:reserveTenantDaily",
+          "source": "internal/ingest/service.go",
+          "expression": "s.store.CountTenantMessagesSince",
+          "before_line": 495,
+          "after_line": 498
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetUser",
+      "before_count": 19,
+      "after_count": 19,
+      "before_sha256": "3987780254bc1757e8f1787324c87b46309061269cca8165ef09b1a4dd96f24c",
+      "after_sha256": "39ec32e52185327f22c1d38c56e5c46f7fbb4707af7d9b51621f84da18f1edda",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.GetUser",
+          "before_line": 465,
+          "after_line": 471
+        },
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.GetUser",
+          "before_line": 352,
+          "after_line": 358
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/permission_assignment.go:*PgStore:AssignPermissionEditor",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "67e2f9c10b15b2567379ed071ac356b5004c242112ea852cd5cb223f3760fea8",
+      "after_sha256": "ebb3e4c5c00dbfd0df26a576b19fb73b76aff0731d6afcb938bd5e22c1bc3bb8",
+      "locations": [
+        {
+          "caller_id": "internal/app/permissions/editor.go:*Service:AssignEditor",
+          "source": "internal/app/permissions/editor.go",
+          "expression": "port.AssignPermissionEditor",
+          "before_line": 152,
+          "after_line": 155
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/plans.go:*PgStore:CreatePlan",
+      "before_count": 3,
+      "after_count": 3,
+      "before_sha256": "cf7bab7f006b20b99a2ff4a7804feeb784a2cad123875def37782f2c957fe955",
+      "after_sha256": "9628d4445b02fa4729f1d1985fd7339df5e4350cb34bdbc102f59cc7c9ec23c6",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:CreatePlan",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.CreatePlan",
+          "before_line": 140,
+          "after_line": 142
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/plans.go:*PgStore:DeletePlan",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "33d741a7fe9bfb29bfff292e2614abdd5b9f960c11fb6c4c9f0777f41ec97161",
+      "after_sha256": "6e55f1ace93934fe096550a7bd562aa36b5a7ee05604a9fb6229b09c4a1839c3",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:DeletePlan",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.DeletePlan",
+          "before_line": 174,
+          "after_line": 176
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/plans.go:*PgStore:ListPlans",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "a07d9bea808f583a71715db629404eb99a82a4df293b580db94f838a2cc38982",
+      "after_sha256": "2c316fe1a63218a00eec0f889c79b76157ee139821399122eb2142ceccf1fdc1",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:ListPlans",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.store.ListPlans",
+          "before_line": 126,
+          "after_line": 128
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/plans.go:*PgStore:UpdatePlan",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "c37ff519c71875286056e10ebf7a062d7777c2b9fb928c487d2cf52e989ccea1",
+      "after_sha256": "222962bfc500251e6f2bd94c02aa6acdbc1f02ffdf61b88a436216152346fffb",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:UpdatePlan",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.UpdatePlan",
+          "before_line": 160,
+          "after_line": 162
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/postgres.go:*PgStore:Close",
+      "before_count": 154,
+      "after_count": 154,
+      "before_sha256": "2d8e3a2e81e2f4b1d1b650f9a78d6e83a72a648b8a4012344deaea19e6cff09c",
+      "after_sha256": "76311435d94adc513e333e42eaa63690760a32eb2decbd5ea66bdd1fb73d27e3",
+      "locations": [
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:dispatch",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "resp.Body.Close",
+          "before_line": 435,
+          "after_line": 432
+        },
+        {
+          "caller_id": "internal/outbound/delivery.go::deliverDirectMXTLS",
+          "source": "internal/outbound/delivery.go",
+          "expression": "client.Close",
+          "before_line": 138,
+          "after_line": 177
+        },
+        {
+          "caller_id": "internal/outbound/delivery.go::deliverDirectMXTLS",
+          "source": "internal/outbound/delivery.go",
+          "expression": "client.Close",
+          "before_line": 149,
+          "after_line": 188
+        },
+        {
+          "caller_id": "internal/outbound/delivery.go::sendSMTP",
+          "source": "internal/outbound/delivery.go",
+          "expression": "w.Close",
+          "before_line": 191,
+          "after_line": 230
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/postgres.go::New",
+      "before_count": 177,
+      "after_count": 177,
+      "before_sha256": "0073032b29bc53553f7e81bb0ed0125e8649d4394a31d4dd1e6e5ae8030d0ba9",
+      "after_sha256": "b2808db94695a3a883ff7d8e2d4a002c1259dc39f221f7125b13c9729b63b468",
+      "locations": [
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "uuid.New",
+          "before_line": 174,
+          "after_line": 171
+        },
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "uuid.New",
+          "before_line": 192,
+          "after_line": 189
+        },
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:dispatch",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "errors.New",
+          "before_line": 441,
+          "after_line": 438
+        },
+        {
+          "caller_id": "internal/hooks/dispatcher.go::sign",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "hmac.New",
+          "before_line": 459,
+          "after_line": 456
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:CountDeadWebhookDeliveries",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "4873ebfd7c5ca795fb4784c120e8ecdc6435a3b071d3771e23a153516d0272af",
+      "after_sha256": "3133ac07153ea56a872ba3fc68d6e9eb7550ceea51628b8e367695ddc1ad783a",
+      "locations": [
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:DeadLetterSize",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "d.store.CountDeadWebhookDeliveries",
+          "before_line": 223,
+          "after_line": 220
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:CreateOutboxEvent",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "f6430c22cecf36bc06c59bdcda3eb09eeb02125a2b08f1ad657cef07b23be8cd",
+      "after_sha256": "73bcb3c3e48e4c59540da8bc4bcd0dc4baf7ff13df584e722b61d7a8de5092ba",
+      "locations": [
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "d.store.CreateOutboxEvent",
+          "before_line": 177,
+          "after_line": 174
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:CreateWebhookDeliveries",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "d0c56377f396532c07c2fadf637e8c26c536f2d0f060df18fd24eb0d4cab495b",
+      "after_sha256": "c146d57aa1f308fb54450eec93598fb061a9e29f9bacd36e3d6c00eea03a289b",
+      "locations": [
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:processOutbox",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "d.store.CreateWebhookDeliveries",
+          "before_line": 304,
+          "after_line": 301
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:ListDeadWebhookDeliveries",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "ba813a9f0f61f28600404ab4efd508c9a07af737bb552caecf1a68a9db2b2458",
+      "after_sha256": "39cdec6aa856bfcab1a64b01db1a89e7907c8e287dd0b45c4363280f2e29a418",
+      "locations": [
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:DeadLetters",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "d.store.ListDeadWebhookDeliveries",
+          "before_line": 204,
+          "after_line": 201
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:ListIngestJobs",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "850b62f605e763954cc6666a84c44b09440349d574f543dfaf0b07912f1709f0",
+      "after_sha256": "8b6516655e11d0f181e22420096d37dbd6dcbe529c7b6031ba30b3c486dc646c",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:ListIngestJobs",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.ListIngestJobs",
+          "before_line": 253,
+          "after_line": 255
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:ListWebhookDeliveries",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "a3c8925a84b13463665e00893c867fce00329a9b70dadda4e277953cd24e2cf5",
+      "after_sha256": "d77fdbd2eb640c22b191680740cf5e41f0e017c0d4e82f7192623c8f8a682d6a",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:ListWebhookDeliveries",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.ListWebhookDeliveries",
+          "before_line": 263,
+          "after_line": 265
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/refresh_rotation.go:*PgStore:RevokeRefreshTokenByHash",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "86cb543b9b7bb9a4ae13f80e51147e1bb57bc4626588b58c8543ef5b279b1afd",
+      "after_sha256": "f12ddcbc3e3d14fdb6f4131120cbe03573b373e1090942bd07af49a4a8fd2ef7",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Logout",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.RevokeRefreshTokenByHash",
+          "before_line": 386,
+          "after_line": 392
+        },
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.RevokeRefreshTokenByHash",
+          "before_line": 358,
+          "after_line": 364
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "acb02090a7d3d8d9c30d87dffc1a69fc9d6e78a5712c9ea881ab0d74c122d3d3",
+      "after_sha256": "47fcf064cfe27687abe680f0a81861377cfec2acb9d643b606071f373b182bbb",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.RotateRefreshToken",
+          "before_line": 332,
+          "after_line": 338
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/settings.go:*PgStore:ListSettings",
+      "before_count": 4,
+      "after_count": 4,
+      "before_sha256": "beed569b7c96724f3b6f5952f6410baa0d9907214e23bb5bb1b63e7ceff4aed6",
+      "after_sha256": "84fc237586c3822b2d753a6b9c30117f73ed08a5eeb6a6d4ebb29d31346cfc2b",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:ListSettings",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.ListSettings",
+          "before_line": 295,
+          "after_line": 297
+        },
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:UpdateSettings",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.ListSettings",
+          "before_line": 318,
+          "after_line": 320
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/smtp_policy.go:*PgStore:GetSMTPPolicy",
+      "before_count": 4,
+      "after_count": 4,
+      "before_sha256": "980d40ac9ba339ebe9190fc0b315e2f5cba5cb370241ab6dfc32eea232f8f53b",
+      "after_sha256": "2be28bf5a730b48b80c57728ea89d552c073f80ea6e8e2ce779683c3a83fb7d1",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:GetSMTPPolicy",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.GetSMTPPolicy",
+          "before_line": 272,
+          "after_line": 274
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/tenants.go:*PgStore:CreateTenant",
+      "before_count": 5,
+      "after_count": 5,
+      "before_sha256": "184ec1f253a5ab3693acb744c5e6184e409bca075e153f2dad7a676a769842de",
+      "after_sha256": "b234174d805b723c28b33c72be5810667ed9a2abe56268edc1e919a567986c24",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Register",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.CreateTenant",
+          "before_line": 264,
+          "after_line": 270
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/tenants.go:*PgStore:DeleteTenant",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "7e8a366009a3493bab6151b798ff081c785aa862141d2542e6690459f2e06178",
+      "after_sha256": "388d5b91a22d8a60fc7912f94e304a262033764fcd0f498dd54b0c36d0ead6cd",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:DeleteTenant",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.service.DeleteTenant",
+          "before_line": 104,
+          "after_line": 106
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/tenants.go:*PgStore:EffectiveConfig",
+      "before_count": 7,
+      "after_count": 7,
+      "before_sha256": "1cc0eac440e8755e102c827ad4ab450abed78a6a569be4bb94e93f5c610d9e49",
+      "after_sha256": "0f4235ef242b5ff514992e0cbe34d17dea290f5de95e39d1a2c0aee3732bcfd5",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/admin.go:*AdminHandler:GetEffectiveConfig",
+          "source": "internal/api/handlers/admin.go",
+          "expression": "h.store.EffectiveConfig",
+          "before_line": 117,
+          "after_line": 119
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/users.go:*PgStore:ChangePasswordAtomic",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "25d8e393fc1468d5affefd07f11b769c1f1d10843934657d3a5d785d93e1f1db",
+      "after_sha256": "acff06d0cac1698019abcb15dc54db41b1fcb575875d170efea5cc0c834ec697",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "atomic.ChangePasswordAtomic",
+          "before_line": 454,
+          "after_line": 460
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/users.go:*PgStore:CreateRefreshToken",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "5e35162bc1c4de9094cb6c643c839e688612524c6df9daba8fbd576148733656",
+      "after_sha256": "073a0a16b181fc31f561926e3e10c764fd395cf6c5e79ed35e17f47a5d0776db",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:issueTokenPair",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.CreateRefreshToken",
+          "before_line": 503,
+          "after_line": 509
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/users.go:*PgStore:CreateUser",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "cf97718d42d3288c71871c02bac827ec149079c84b5d965d8d39f840e679d44f",
+      "after_sha256": "a163cecc38adeafdd41204b6dd56d19dc1035c5a8303c687a1e5d409326f43a7",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Register",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.CreateUser",
+          "before_line": 283,
+          "after_line": 289
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/users.go:*PgStore:GetUser",
+      "before_count": 19,
+      "after_count": 19,
+      "before_sha256": "3987780254bc1757e8f1787324c87b46309061269cca8165ef09b1a4dd96f24c",
+      "after_sha256": "39ec32e52185327f22c1d38c56e5c46f7fbb4707af7d9b51621f84da18f1edda",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.GetUser",
+          "before_line": 465,
+          "after_line": 471
+        },
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.GetUser",
+          "before_line": 352,
+          "after_line": 358
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/users.go:*PgStore:GetUserByEmail",
+      "before_count": 4,
+      "after_count": 4,
+      "before_sha256": "796c0b42fffb40051becc9d1cd379e2dac8ddf0daa76cd196d9d8547bdf89a63",
+      "after_sha256": "300e7bafe01de42985a5aa670586414ea348a133ffdd13ee52e89d91dcdc93d2",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Login",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.GetUserByEmail",
+          "before_line": 159,
+          "after_line": 165
+        },
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Register",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.GetUserByEmail",
+          "before_line": 241,
+          "after_line": 247
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/users.go:*PgStore:RevokeUserRefreshTokens",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "c43743a588f761ea3a146008827193c21d1774e86ab52e52f3ed021b7358a725",
+      "after_sha256": "5c9cb87a32bcabce7f45be1afc620a6b5056945ddbd164a33f29855c1fdd09b2",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.RevokeUserRefreshTokens",
+          "before_line": 479,
+          "after_line": 485
+        },
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Logout",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.RevokeUserRefreshTokens",
+          "before_line": 388,
+          "after_line": 394
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/users.go:*PgStore:TouchUserLogin",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "d1189059b87fcc665431df79dc4db9edf882da46af740983e7fe30caf5cae0d7",
+      "after_sha256": "3f3791e0568dd2ec567e2ed1e6bcb568d8b6a5cc514359507826933f46b57f79",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Login",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.TouchUserLogin",
+          "before_line": 186,
+          "after_line": 192
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/users.go:*PgStore:UpdateUserPassword",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "c9a329ea877d669dcb5e57393382edb5f0b658ea9643217a55c3fcea393ca63f",
+      "after_sha256": "0e781b0dad6e5bedd4d65fd6ae73fd12f46ecd46766bf5823214efc8d73dcc3b",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/auth.go:*AuthHandler:updatePasswordHash",
+          "source": "internal/api/handlers/auth.go",
+          "expression": "h.store.UpdateUserPassword",
+          "before_line": 511,
+          "after_line": 517
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/webhook_endpoints.go:*PgStore:ListWebhookEndpoints",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "00974171c077b131d5e8cd740be84f71d672602e0165d84d8da42b35eb22a8da",
+      "after_sha256": "5c34938febd4700af07bfd2fe6fb98f356208df20c6584db253786c8d491a4f0",
+      "locations": [
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:processOutbox",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "d.store.ListWebhookEndpoints",
+          "before_line": 287,
+          "after_line": 284
+        }
+      ],
+      "removed": [],
+      "added": []
+    }
+  ],
+  "client_changes": [
+    {
+      "index": 39,
+      "source": "web/features/company/mailbox-admin.tsx",
+      "path": "/api/v1/company/mailboxes",
+      "methods": [
+        "POST"
+      ],
+      "before_line": 65,
+      "after_line": 81
+    }
+  ],
+  "compatibility_routes": [
+    {
+      "route": "POST /api/v1/company/mailboxes",
+      "changed_fields": [
+        "clients"
+      ]
+    }
+  ],
+  "closure_changes": [
+    {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+      "before_sha256": "7cc241cd0a0b83cab845bee62697a4301fa73a7de8115d3a56b09fbcbec64a60",
+      "after_sha256": "c62f46e2b95aeea514050a1f4a09308f7d9be5815a1640bded077605abae9057"
+    },
+    {
+      "path": "internal/api/handlers/admin.go",
+      "before_sha256": "7bdcc137f5355abb8b0df2f41f2f38a9926ac94a3de1488a7bacbb9ce72c3917",
+      "after_sha256": "efb4fd396514192f8857f6c884852a446d9c3ecb3768c135037f60b05c080bf7"
+    },
+    {
+      "path": "internal/api/handlers/auth.go",
+      "before_sha256": "204248871797cbca6638f2d9da4faa46d07505e0d65629ea8e20022e20c7d806",
+      "after_sha256": "d5e286534fa0d9967a30772ee3f3268e876c2770472916e31dfb8c50216e509e"
+    },
+    {
+      "path": "internal/company/permission_editor.go",
+      "before_sha256": "30755c1b11ddc4aa7af6f986e6f568d970a5138e9b4383e7afd7355d9e1d6a27",
+      "after_sha256": "a8d93f2a6d3e19ccdfe21809e00f0d3fd43eca63f1b078b1fe21239e64dfd343"
+    },
+    {
+      "path": "web/features/company/mailbox-admin.tsx",
+      "before_sha256": "70db99f72080531dc9c9c046c38b724cdb0cbb5c9f5b7d3e5e1218237055e4a6",
+      "after_sha256": "7b7076e0efc0baa919debe0f23851f9093f12f97664c2a92a1f5fe855c66eec9"
+    }
+  ],
+  "source_changes": [
+    {
+      "path": "internal/api/handlers/admin.go",
+      "before_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+      "after_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "before_blob": "cdeb5495bcdddad87da25024f780f301cf2b7eb0",
+      "after_blob": "e7c047a19848ab09f0daeda270d2998df915065f",
+      "before_sha256": "7bdcc137f5355abb8b0df2f41f2f38a9926ac94a3de1488a7bacbb9ce72c3917",
+      "after_sha256": "efb4fd396514192f8857f6c884852a446d9c3ecb3768c135037f60b05c080bf7"
+    },
+    {
+      "path": "internal/api/handlers/auth.go",
+      "before_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+      "after_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "before_blob": "4389cb41800bd45b1b441a3cdb1db14aab5f1568",
+      "after_blob": "2b541798062d50e51f9d71fa13c7d91b43a28942",
+      "before_sha256": "204248871797cbca6638f2d9da4faa46d07505e0d65629ea8e20022e20c7d806",
+      "after_sha256": "d5e286534fa0d9967a30772ee3f3268e876c2770472916e31dfb8c50216e509e"
+    },
+    {
+      "path": "internal/app/permissions/editor.go",
+      "before_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+      "after_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "before_blob": "0b4c7accc8f278fb1e3328104191b74af3f4ba42",
+      "after_blob": "c2bd5b1cc6826d93dc7dc9f997efbda78d149195",
+      "before_sha256": "669f88f765371be4da854581e290698a25a30d6db4267053a751a7788ce976ec",
+      "after_sha256": "5d933cc96c50299b72452e2acc6081746f151f755b081ef61402b680283df978"
+    },
+    {
+      "path": "internal/company/permission_editor.go",
+      "before_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+      "after_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "before_blob": "dd9d0597da05875d23f03a9b53b6518c6c3e006c",
+      "after_blob": "b37df35cc85a1d10513a069646f38a9e94972006",
+      "before_sha256": "30755c1b11ddc4aa7af6f986e6f568d970a5138e9b4383e7afd7355d9e1d6a27",
+      "after_sha256": "a8d93f2a6d3e19ccdfe21809e00f0d3fd43eca63f1b078b1fe21239e64dfd343"
+    },
+    {
+      "path": "internal/hooks/dispatcher.go",
+      "before_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+      "after_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "before_blob": "0fcd4a838c04ee4891e1a05e8b84fbe5f96b3527",
+      "after_blob": "1e6afa58d18e9e2062c1f3207979db170683b465",
+      "before_sha256": "568e8690da190a4dfebafc21df16982c18406a8482f8f35729ff15dc49678118",
+      "after_sha256": "6405f55e19591b0b48b1964ea4cf27d04ee637885519521517825f5904303ce2"
+    },
+    {
+      "path": "internal/ingest/service.go",
+      "before_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+      "after_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "before_blob": "d9455ead804d033419b10226b0c2cc6950eec804",
+      "after_blob": "509619ac8d95c5b9ccd6971f4116fb6a0b2ab8ae",
+      "before_sha256": "849adbb9ee7e02d17bd281cab1143156e1e27da39f7dee8cfab803476859978b",
+      "after_sha256": "82e30a8797768a5e0c59936ddb561646087fa59ec3658c1358f4a7c4f397b4bb"
+    },
+    {
+      "path": "internal/outbound/delivery.go",
+      "before_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+      "after_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "before_blob": "0dc4bc55b8709f5d1e38616444d6f6d18a958605",
+      "after_blob": "d4a3fc5cd7d732c3b0b7a8c2009c586e0981de8d",
+      "before_sha256": "5091a1f0089e5fbfadb8858f3a382923c9a2595c53173ffebc5214f7f62278b0",
+      "after_sha256": "47500f0183a07da37a10426e159e1fc51a19e8c44c2a6c847f7c4d53bd9577d7"
+    },
+    {
+      "path": "web/components/company/employee-field.tsx",
+      "before_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+      "after_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "before_blob": "03529cd526e35722e5413de4e5bf95f603e385fd",
+      "after_blob": "1e56f7faef2eb0bc9eeac2dae95f4e08679df9c1",
+      "before_sha256": "875be608ca84f5e540a6a3e4a187e11772ebb7243c8e646b1d43460677d05b7a",
+      "after_sha256": "c0319becbc7aebb10fab788c44712a1aa5db0d3781b58926a29cc29c88e4f13a"
+    },
+    {
+      "path": "web/features/company/mailbox-admin.tsx",
+      "before_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+      "after_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "before_blob": "db5e324fb1c5a1c51b3b346887fa0acff8509c39",
+      "after_blob": "052d94cbd82e2032791b9d40e04c9561c9403f07",
+      "before_sha256": "70db99f72080531dc9c9c046c38b724cdb0cbb5c9f5b7d3e5e1218237055e4a6",
+      "after_sha256": "7b7076e0efc0baa919debe0f23851f9093f12f97664c2a92a1f5fe855c66eec9"
+    },
+    {
+      "path": "web/features/company/profile-management.tsx",
+      "before_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+      "after_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "before_blob": "1439e880c98d4f2c0284ef3284c818f3711975d1",
+      "after_blob": "3055d7b080164eb58273f1a045a8cc2e98fcd3fb",
+      "before_sha256": "bf2431332c98ae3d478e6ae4ae1e2f7c23d3e28aeda5c1e6aa9fb3a218997857",
+      "after_sha256": "2dd7443d9db839a185f6de9fc612db5e53daa6aa7f3b10b4235ebb6f8ad9a9be"
+    },
+    {
+      "path": "web/features/company/user-management.tsx",
+      "before_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+      "after_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "before_blob": "388edde708889238bc1daa4cbe2867cbc2eedfb2",
+      "after_blob": "b1355c20fd874f8e1e15af383b7ae821b2a78dd7",
+      "before_sha256": "129b8adbde6e6c18a349d4b51a5797536d2bc48f3b8f39f1b18bcd7cf5cc27b6",
+      "after_sha256": "2c7e720ce693ed867d5b5143c82ea7415d9163fe1d078122d4414d5fd7b42295"
+    }
+  ],
+  "generated_catalogs": {
+    "transaction": {
+      "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+      "sha256": "32b35746b6b2ef170ae423fa0d460fb7375a229b0e402cb206f39bd1a63d8907",
+      "bytes": 2800835
+    },
+    "compatibility": {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+      "sha256": "1af19406cb5bad0df43b1b36fc95310dfa28566ceb5b4ce8cbb9e7577f1bb314",
+      "bytes": 406946
+    },
+    "clients": {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+      "sha256": "c62f46e2b95aeea514050a1f4a09308f7d9be5815a1640bded077605abae9057",
+      "bytes": 40832
+    },
+    "client_routes": {
+      "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+      "sha256": "11196f0fce4773d317d53b12ecf107ae21f5fbeb0fefe2c27c84e37571ca625d",
+      "bytes": 49631
+    }
+  },
+  "excluded_closure_product_paths": [
+    "internal/app/permissions/editor.go",
+    "internal/hooks/dispatcher.go",
+    "internal/ingest/service.go",
+    "internal/outbound/delivery.go",
+    "web/components/company/employee-field.tsx",
+    "web/features/company/profile-management.tsx",
+    "web/features/company/user-management.tsx"
+  ],
+  "transaction_syntax_changes": [],
+  "transaction_manual_review_changes": [],
+  "manual_review": {
+    "postgres": "Original collectors independently confirm identical PostgreSQL functions, file bytes, migrations and classifications. Every stored transaction field except caller candidates is preserved byte-for-value, including the earlier SetTemplateGrant SQL review and all unverified risks.",
+    "callers": "The refreshed rows remain source name-match candidates, not resolved dispatch or evidence that every caller is live. Exact location/addition/removal deltas and complete before/after hashes are bound in tests.",
+    "clients": "Only independently collected call-site line positions change; method, path, branch identity, forwarders, route bindings and external-client uncertainty remain unchanged.",
+    "routes_and_closure": "Route fact changes are limited to embedded current client locations. The complete 94-path closure is freshly hashed by the original producer; changed bytes do not establish HTTP or runtime acceptance."
+  },
+  "historical_files": 43,
+  "historical_manifest_sha256": "5d28b8c615ea00e3233e3135a22d024ae6297abbd7e9c65ba0bcf5ac60516a18",
+  "protected_sources": 164,
+  "protected_source_manifest_sha256": "346002800422bdf202a816d1f780467cad2761351d4cda5a387dc7f5572a4777",
+  "historical_test_migration": {
+    "revision8_methods": "Two revision-8 positive methods now read immutable four-catalog snapshots and the complete hash-bound published review at 1d856bd; e0cd175 Git bytes and the complete revision7-to-8 deltas remain checked.",
+    "validator_boundary": "The old current-source validator calls were removed from the historical methods. No catalog is converted into a synthetic AST to validate itself. Original collectors and validators execute on the current source in the current-revision tests, including actual rejection of revision-8 catalogs.",
+    "method_count_check": "The historical 19-method after_raw reads Git at REVISION8_COMMIT. The current check independently requires all 19 IDs plus two new methods (21 total).",
+    "mutation_methods": {
+      "test_unapproved_client_and_caller_locations_are_rejected": {
+        "source_sha256": "fe9a8bace1fbb19033747834275c0b26063a7bb455b42201e17c883af748d892",
+        "ast_sha256": "4d40e7297e2fc8a6aa3a9f8e10044ecd69c718f5b6a434318286625ad3c91fdb"
+      },
+      "test_unapproved_actual_source_and_ast_changes_rejected": {
+        "source_sha256": "73b550956287a1fc7ea30c4f3f5fc6c3d045e3b4454cae7589fdf84e7f95c5e5",
+        "ast_sha256": "11b567de8a18ac5c0274f994373fdef7c325dd21c24715f1f97fa61037c3ff3c"
+      },
+      "test_unapproved_actual_closure_bytes_rejected": {
+        "source_sha256": "b09fdeefe1c9f319999ee0de9ffafa2007b6d5a562f6ba0de38718ea964f1311",
+        "ast_sha256": "38ed0072e573290ea26a45a10de70e239da020803f8fc4b88406cbf08786b2a2"
+      },
+      "test_unapproved_route_and_ast_fact_changes_rejected": {
+        "source_sha256": "149c44f95fa4a98140715df389e38ac918e21c87858d872818eac85049d6b28d",
+        "ast_sha256": "8bff5925981614fbb104231891b3bbdae4e9a78bac499f4be670d238bf2ed82b"
+      },
+      "test_unapproved_actual_route_source_rejected_by_original_collector": {
+        "source_sha256": "2c2c906305f5acc849250147eb0f154d52a85a829a48b80ebad6c86b11f132df",
+        "ast_sha256": "b01f06f6d97650c466c23e7e1d572fdf8794e9f8ddb40a0aa513a1f6f9857c86"
+      }
+    }
+  },
+  "commands": [
+    {
+      "name": "old-transactions",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "source_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "seconds": 1.47,
+      "exit_code": 1,
+      "stdout_sha256": "8cc60cdfcc9e49867a4eba776047303caa380ad5afc50e52cd0af5a334e7fbc2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 2715,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "old-compatibility",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "source_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "seconds": 1.615,
+      "exit_code": 1,
+      "stdout_sha256": "a954d20d64d0e992b5e1fb6ce6fc0867a1871be7f54fd7426290df24c454da55",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 146,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "old-clients",
+      "argv": [
+        "node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "source_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "seconds": 1.143,
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "d95e39f6030cb93c20502adf6287a5084ac7d39f4b977f5bde5c917f30986e08",
+      "stdout_bytes": 0,
+      "stderr_bytes": 1203
+    },
+    {
+      "name": "current-transactions",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "source_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "seconds": 0.724,
+      "exit_code": 0,
+      "stdout_sha256": "34e6a8fa0313a2089edc5e453807a7f2fbbb3173031cea894e40d054daccc542",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 309,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "current-compatibility",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "source_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "seconds": 2.267,
+      "exit_code": 0,
+      "stdout_sha256": "677f536dea0eccc18aba48fb1134bf11abab8c980e362691fb8a01a9bd29d4db",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 1117,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "current-clients",
+      "argv": [
+        "node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "source_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "seconds": 1.276,
+      "exit_code": 0,
+      "stdout_sha256": "b5e92b0af9e25b23eb3f0ba9fd2ded8ff3a1fca31020a69cb91e0ab94000c5db",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 73,
+      "stderr_bytes": 0
+    }
+  ],
+  "validation": {
+    "status": "final_static_checks_passed_complete_source_preparation_failed",
+    "original_cli_passed": 3,
+    "python_tests": {
+      "total": 81,
+      "passed": 81,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "groups": {
+        "test_r5_transactions": 26,
+        "test_r5_compatibility": 19,
+        "test_r5_catalog_reconciliation": 21,
+        "test_r5_current_source_inventory": 15
+      }
+    },
+    "node_tests": {
+      "tests": 27,
+      "pass": 27,
+      "fail": 0,
+      "skipped": 0
+    },
+    "commands": [
+      {
+        "argv": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "test_r5_transactions",
+          "test_r5_compatibility",
+          "test_r5_catalog_reconciliation",
+          "test_r5_current_source_inventory",
+          "-v"
+        ],
+        "invocation_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+        "seconds": 57.685,
+        "exit_code": 0,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 0,
+        "stderr_sha256": "98ffc0cb6a5f5a4f2848f290c3d8f739d403ff1e5575b6dc8886801ec7e4ea9e",
+        "stderr_bytes": 14499,
+        "GOTOOLCHAIN_present": false
+      },
+      {
+        "argv": [
+          "node",
+          "--test",
+          "scripts/tests/api_calls.test.cjs"
+        ],
+        "invocation_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+        "seconds": 0.774,
+        "exit_code": 0,
+        "stdout_sha256": "3538db444e4b7147bd09a69c21b890195914bcd17d6b85a2884554ee4b6b233e",
+        "stdout_bytes": 2094,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_bytes": 0,
+        "GOTOOLCHAIN_present": false
+      }
+    ],
+    "tested_input_manifest": {
+      "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": {
+        "sha256": "32b35746b6b2ef170ae423fa0d460fb7375a229b0e402cb206f39bd1a63d8907",
+        "bytes": 2800835
+      },
+      "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": {
+        "sha256": "1af19406cb5bad0df43b1b36fc95310dfa28566ceb5b4ce8cbb9e7577f1bb314",
+        "bytes": 406946
+      },
+      "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": {
+        "sha256": "c62f46e2b95aeea514050a1f4a09308f7d9be5815a1640bded077605abae9057",
+        "bytes": 40832
+      },
+      "docs/company-mail/evidence/R5-CLIENT-CALLS.json": {
+        "sha256": "11196f0fce4773d317d53b12ecf107ae21f5fbeb0fefe2c27c84e37571ca625d",
+        "bytes": 49631
+      },
+      "scripts/tests/test_r5_catalog_reconciliation.py": {
+        "sha256": "9cc24aebbd20c874e92e40c0fbd63ddf9a7d2bf17de5dfdb14a3a9db48826455",
+        "bytes": 176233
+      },
+      "scripts/tests/test_r5_compatibility.py": {
+        "sha256": "2fa45da17bdb16c841e2eb63a103e658790c8bd401887be84330c471fab82fa2",
+        "bytes": 13605
+      }
+    },
+    "qualification": "Selected source/catalog and collector regressions only. No PostgreSQL runtime, full source-runner pass or global release acceptance follows."
+  },
+  "complete_source_runner": {
+    "executed_in_this_revision": true,
+    "status": "failed_during_original_preparation",
+    "command": {
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/run_r5_source_version_tests.py",
+        "--root",
+        ".",
+        "--output",
+        "/workspace/scratch/9e3fd1ca3a13/close-catalog9-private/source-version-tests.json"
+      ],
+      "invocation_commit": "9b0ce8dda39c1c5ccc2abb20a34c6f65a3bf0b0c",
+      "invocation_tree": "593e4e20ff20a72112f751fae34503308ae67b8b",
+      "seconds": 80.452,
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "GOTOOLCHAIN_present": false
+    },
+    "fixed_product_source_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+    "selected_binding_version": 2,
+    "preparation_error": "Linux pinned executable FD unavailable",
+    "preparation_completed": false,
+    "typed_wire_fixture_started": false,
+    "observed_stage": "Original TypeScript preparation and before/after default and race-r5protocol selections completed; the ordinary-receipt test binary compiled. The original parent-proc pinned-FD existence guard rejected before the first typed-wire execution.",
+    "discovered_tests": 772,
+    "dispatch_groups": [
+      {
+        "name": "current",
+        "assigned_tests": 768,
+        "executed_tests": 0,
+        "status": "not_dispatched_preparation_failed"
+      },
+      {
+        "name": "frozen-v1",
+        "assigned_tests": 4,
+        "executed_tests": 0,
+        "status": "not_dispatched_preparation_failed"
+      }
+    ],
+    "no_missing": false,
+    "no_overlap": true,
+    "missing_tests": 772,
+    "raw_report": {
+      "sha256": "ab51cbf59a1e869f65ba49b5a3cb29a7bc359961ace27e666d353f370319bcc7",
+      "bytes": 167430
+    },
+    "retained_preparation_files": [
+      {
+        "name": "current/after-default-selection.json",
+        "bytes": 1885570,
+        "sha256": "5d82eedb9dbb92cb855b3811b72d9b5021f2fbb3f602d1473d440fcc80c3f486"
+      },
+      {
+        "name": "current/after-race-r5protocol-selection.json",
+        "bytes": 1895523,
+        "sha256": "df9af6bcce1fa19a0f66d47aec5fe693e08f98fbabfbdfb81abc8bb18236f4db"
+      },
+      {
+        "name": "current/before-default-selection.json",
+        "bytes": 1885570,
+        "sha256": "5d82eedb9dbb92cb855b3811b72d9b5021f2fbb3f602d1473d440fcc80c3f486"
+      },
+      {
+        "name": "current/before-race-r5protocol-selection.json",
+        "bytes": 1895523,
+        "sha256": "df9af6bcce1fa19a0f66d47aec5fe693e08f98fbabfbdfb81abc8bb18236f4db"
+      },
+      {
+        "name": "current/ordinary-receipt.test",
+        "bytes": 30267923,
+        "sha256": "76df581c9b84e4000d50e69b5ae87467c39c19338380f7eb41f4f66e484d75f7"
+      }
+    ],
+    "runner_and_preparation_unmodified": true,
+    "six_catalog_test_inputs_unchanged_after_attempt": true,
+    "qualification": "One actual original-runner attempt on the committed catalog candidate, not a full gate pass. No source-version test group or typed-wire fixture executed. Original FD binding, loader, preparation and budget refusal policies remain intact; no workaround or retry was applied. Selected 81/27 results do not replace this failure. New raw diagnostics remain private."
+  },
+  "implementation_todos_completed": 0,
+  "runtime_verified": false,
+  "product_green": false,
+  "task_complete": false,
+  "parent_tasks": {
+    "accepted": 10,
+    "total": 171,
+    "remaining": 161
+  },
+  "finalization_boundary": "The four catalogs and both tested Python inputs retain their exact candidate and tested hashes after the complete runner attempt. Only this derived review and README record its actual failure; all source facts, tests, original guards and acceptance flags remain unchanged."
+}

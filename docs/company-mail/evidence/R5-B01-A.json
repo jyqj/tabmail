@@ -1,0 +1,112 @@
+{
+  "business_source_commit": "68641047a043e9a16bf34c24c81a76132da2a758",
+  "business_files_compared": 435,
+  "business_source_unchanged": true,
+  "script_sha256": {
+    "scripts/check_i18n_keys.py": "8ae2996e95996852021e526e00389b0075a578719baa677341f2a1fed1f59956",
+    "scripts/collect_i18n_keys.cjs": "3b9c749daae63d93b98b03e7682d4ba520780fe5c462c714dc363ab4a4ac1a1d",
+    "scripts/check_go_test_evidence.py": "35bee184598b21632ca6b8f95caf254f1442f66e4184cc1843c81431bc8be624",
+    "scripts/required_go_tests.json": "5823dd01007d9e33d55dce90e28fc0c9237dc990db7c750bccf549e223a81652",
+    "scripts/test_go_evidence_integration.py": "fbc2dca20520f591d004c64f159068a3cd914090fb08573cd15741577fff6ea2",
+    "scripts/tests/test_i18n_keys.py": "f0849aace8f1a0650df36efe0ad3de1d2e138d4ea0e188ec2cc4f2687d975945",
+    "scripts/tests/test_go_test_evidence.py": "fbbd63e1811bc6f2380894da4062805a52ca15d8e6b3eb60f2a26c884ca246fe",
+    "scripts/tests/i18n_sources.test.cjs": "fbf5f1fb06f007bd39513b3a47c9775761b5ac29ce6f35949c9041b77db77c4d",
+    "scripts/testenv/Dockerfile": "83b48271a6577c67af4eaefac80af9488d36a2513701e45d94bd2b59d58a3f74"
+  },
+  "migration_sha256": {
+    "internal/store/postgres/migrations/00001_baseline.sql": "233a6e0a5dea5e08de370aa3d8cd7e69a61f9cfaf2421846e23494de0e4e0549",
+    "internal/store/postgres/migrations/00002_mailbox_grants.sql": "51615b38624aaa3010c5b8e7ff84ddafbd22046fe5f8992bfc2c31b5592a6ba5",
+    "internal/store/postgres/migrations/00003_refresh_token_family.sql": "11a168f78cf5b3b11e369f3c089e6252258bfa0a5cdbfc192b1581284d3c541b",
+    "internal/store/postgres/migrations/00004_owned_mailbox_private.sql": "e8abcdd3026d6586afd20d0a7375c9b9a10bcfab94b9a5ddcace0efa3899add1",
+    "internal/store/postgres/migrations/00005_company_workflows.sql": "f6a66202fd0f2bdc9d3b6ceecb05cee5f6bd96f620d665e873222938b0e5ba50",
+    "internal/store/postgres/migrations/00006_draft_submission.sql": "8c02d23d9b06da8524e4ce67ade38cb72aa289f675b8856a831a62915907610a",
+    "internal/store/postgres/migrations/00007_message_user_state.sql": "8a0806eb2367d797a5af2f3f030d4767db9202b4cf7af472e360e8dcaa873caf",
+    "internal/store/postgres/migrations/00008_send_policy.sql": "f97a25c5fd3911bded2d1e63a094027780c34b58a503c27561c7423dc4cbc891",
+    "internal/store/postgres/migrations/00009_domain_asset_guard.sql": "54348b595d017a36edb77930f666aa6a26fadf7e848bf1cf5d1e4190c57fcc2a",
+    "internal/store/postgres/migrations/00010_sent_mail_archive.sql": "57156b73a3f5f4ba4aab55ce0a6e3a670a74b52544e7df13ea38e7dd61fb259f",
+    "internal/store/postgres/migrations/00011_mail_content_index.sql": "6232a3c74b75980d48bcc2f8e2e5f79854c366a89f09743deb5a8ebbfe747042",
+    "internal/store/postgres/migrations/00012_employee_disposition.sql": "2f7d448d04c185a1642399a0f6559d2df7ed9a1e59ac2523167e259e24e3d9b0",
+    "internal/store/postgres/migrations/00013_draft_creation_receipts.sql": "69c605b794be3b3884659c6315d518b94c69ffb8259d00199a45ee4d1e1160c3"
+  },
+  "backend": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 2440,
+    "log_sha256": "8deefc98e8492b6dcd148c5fdf90e91c19111a9f9da30d5cab8115a0a5213c71",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 11,
+    "manifest_sha256": "5823dd01007d9e33d55dce90e28fc0c9237dc990db7c750bccf549e223a81652",
+    "packages": 49,
+    "process_exit_code": 0,
+    "source_sha": "68641047a043e9a16bf34c24c81a76132da2a758",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 539,
+    "tests_skipped": 1,
+    "tests_started": 540
+  },
+  "negative_cases": {
+    "missing-dsn": {
+      "status": "fail",
+      "process_exit_code": 0,
+      "tests_started": 95,
+      "tests_passed": 9,
+      "tests_failed": 0,
+      "tests_skipped": 86,
+      "mandatory_missing_or_not_passed": 10,
+      "log_sha256": "d78784a36349e51afb52cce7b4a24f5c1475db52b413a448eafec3dcd7a669be"
+    },
+    "zero-tests": {
+      "status": "fail",
+      "process_exit_code": 0,
+      "tests_started": 0,
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "tests_skipped": 0,
+      "mandatory_missing_or_not_passed": 11,
+      "log_sha256": "5591035db88b1e2264b0e5cf7e8c7720e6eee5241d37ae49b8f9d51b029ceb3c"
+    },
+    "browser-disabled": {
+      "status": "fail",
+      "process_exit_code": 0,
+      "tests_started": 1,
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "tests_skipped": 1,
+      "mandatory_missing_or_not_passed": 1,
+      "log_sha256": "41cf00c1780586acd570df5b8821bbe5620c601c8a85451cda55456567f81cdd"
+    }
+  },
+  "python_tool_tests": {
+    "passed": 43,
+    "failed": 0,
+    "skipped": 0
+  },
+  "node_tool_tests": {
+    "passed": 13,
+    "failed": 0,
+    "skipped": 0
+  },
+  "frontend_tests": {
+    "passed": 108,
+    "failed": 0,
+    "pending": 0
+  },
+  "tool_image_id": "sha256:65934079f212a76983064db24e7a26066106a7e173cf2b05e4f1621aebfdb5c7",
+  "python_toolchain": "3.12.14",
+  "workflow_and_makefile_sha256": {
+    ".github/workflows/company-p0.yml": "3a3d7ed5156bc3d3a3d9c6d5dc96df92f7ec0aada58bf0e960324ced1d2aa818",
+    "Makefile": "e725cb930e66edec0ae5876224a74725bacd8371ffc5fa7f6c1efa5e726fa528"
+  },
+  "gates_log_sha256": "d2792c77fcea71998e3e6541191ce54b0179fd9ee50c7bf5fe2ec46aa6feee3b",
+  "boundary": "B01-A validation tooling; no A01-A07 fixes, shipping browser, hosted CI, performance or deployment certification",
+  "implementation_commit": "c4199e0b27a390ef352fd7b06555f7d33b6c72cb",
+  "implementation_tree": "34e988b76497a21c74d59243a314c2b07942f52f"
+}

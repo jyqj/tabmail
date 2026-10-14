@@ -1,0 +1,498 @@
+test_actual_cli_capture_validate_reject (__main__.IndependentExcludedOracle.test_actual_cli_capture_validate_reject) ... skipped 'old helper has no CLI; public capture/validate oracle still runs'
+test_actual_cli_regular_file_swap_must_reject (__main__.IndependentExcludedOracle.test_actual_cli_regular_file_swap_must_reject) ... skipped 'old helper has no CLI; public capture/validate oracle still runs'
+test_budget_exact_shared_roots_per_fork_and_overflow (__main__.IndependentExcludedOracle.test_budget_exact_shared_roots_per_fork_and_overflow) ... 
+  test_budget_exact_shared_roots_per_fork_and_overflow (__main__.IndependentExcludedOracle.test_budget_exact_shared_roots_per_fork_and_overflow) (entry='capture') ... FAIL
+  test_budget_exact_shared_roots_per_fork_and_overflow (__main__.IndependentExcludedOracle.test_budget_exact_shared_roots_per_fork_and_overflow) (entry='<lambda>') ... FAIL
+  test_budget_exact_shared_roots_per_fork_and_overflow (__main__.IndependentExcludedOracle.test_budget_exact_shared_roots_per_fork_and_overflow) (entry='capture') ... FAIL
+  test_budget_exact_shared_roots_per_fork_and_overflow (__main__.IndependentExcludedOracle.test_budget_exact_shared_roots_per_fork_and_overflow) (entry='<lambda>') ... FAIL
+test_depth_exact_and_overflow (__main__.IndependentExcludedOracle.test_depth_exact_and_overflow) ... 
+  test_depth_exact_and_overflow (__main__.IndependentExcludedOracle.test_depth_exact_and_overflow) (entry='capture') ... FAIL
+  test_depth_exact_and_overflow (__main__.IndependentExcludedOracle.test_depth_exact_and_overflow) (entry='<lambda>') ... FAIL
+  test_depth_exact_and_overflow (__main__.IndependentExcludedOracle.test_depth_exact_and_overflow) (entry='capture') ... FAIL
+  test_depth_exact_and_overflow (__main__.IndependentExcludedOracle.test_depth_exact_and_overflow) (entry='<lambda>') ... FAIL
+test_directory_swap_nofollow_public_entries (__main__.IndependentExcludedOracle.test_directory_swap_nofollow_public_entries) ... 
+  test_directory_swap_nofollow_public_entries (__main__.IndependentExcludedOracle.test_directory_swap_nofollow_public_entries) (fork='third_party/enmime-v2.3.0', entry='capture') ... FAIL
+  test_directory_swap_nofollow_public_entries (__main__.IndependentExcludedOracle.test_directory_swap_nofollow_public_entries) (fork='third_party/enmime-v2.3.0', entry='<lambda>') ... FAIL
+  test_directory_swap_nofollow_public_entries (__main__.IndependentExcludedOracle.test_directory_swap_nofollow_public_entries) (fork='third_party/go-smtp', entry='capture') ... FAIL
+  test_directory_swap_nofollow_public_entries (__main__.IndependentExcludedOracle.test_directory_swap_nofollow_public_entries) (fork='third_party/go-smtp', entry='<lambda>') ... FAIL
+test_legal_artifacts_no_reads_and_stable_original_inventory_and_closure (__main__.IndependentExcludedOracle.test_legal_artifacts_no_reads_and_stable_original_inventory_and_closure) ... ok
+test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) ... 
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='module') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='module') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='file_link') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='file_link') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='directory_link') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='directory_link') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='dangling_link') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='dangling_link') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='fifo') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='fifo') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='socket') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='socket') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/go-smtp', kind='module') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='module') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/go-smtp', kind='file_link') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='file_link') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/go-smtp', kind='directory_link') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='directory_link') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/go-smtp', kind='dangling_link') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='dangling_link') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/go-smtp', kind='fifo') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='fifo') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/go-smtp', kind='socket') ... FAIL
+  test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='socket') ... FAIL
+test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) ... 
+  test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/enmime-v2.3.0', entry='capture') ... FAIL
+RACE_OBSERVATION {"fork": "third_party/enmime-v2.3.0", "entry": "capture", "nofollow_stats": 0, "symlink_at_return": false}
+  test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/enmime-v2.3.0', entry='<lambda>') ... FAIL
+RACE_OBSERVATION {"fork": "third_party/enmime-v2.3.0", "entry": "<lambda>", "nofollow_stats": 0, "symlink_at_return": false}
+  test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/go-smtp', entry='capture') ... FAIL
+RACE_OBSERVATION {"fork": "third_party/go-smtp", "entry": "capture", "nofollow_stats": 0, "symlink_at_return": false}
+  test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/go-smtp', entry='<lambda>') ... FAIL
+RACE_OBSERVATION {"fork": "third_party/go-smtp", "entry": "<lambda>", "nofollow_stats": 0, "symlink_at_return": false}
+test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) ... 
+  test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='unknown') ... FAIL
+  test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='unknown') ... FAIL
+  test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='unavailable') ... FAIL
+  test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='unavailable') ... FAIL
+  test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='capture', fork='third_party/go-smtp', kind='unknown') ... FAIL
+  test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='unknown') ... FAIL
+  test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='capture', fork='third_party/go-smtp', kind='unavailable') ... FAIL
+  test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='unavailable') ... FAIL
+
+======================================================================
+FAIL: test_budget_exact_shared_roots_per_fork_and_overflow (__main__.IndependentExcludedOracle.test_budget_exact_shared_roots_per_fork_and_overflow) (entry='capture')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_budget_exact_shared_roots_per_fork_and_overflow (__main__.IndependentExcludedOracle.test_budget_exact_shared_roots_per_fork_and_overflow) (entry='<lambda>')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_budget_exact_shared_roots_per_fork_and_overflow (__main__.IndependentExcludedOracle.test_budget_exact_shared_roots_per_fork_and_overflow) (entry='capture')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_budget_exact_shared_roots_per_fork_and_overflow (__main__.IndependentExcludedOracle.test_budget_exact_shared_roots_per_fork_and_overflow) (entry='<lambda>')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_depth_exact_and_overflow (__main__.IndependentExcludedOracle.test_depth_exact_and_overflow) (entry='capture')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_depth_exact_and_overflow (__main__.IndependentExcludedOracle.test_depth_exact_and_overflow) (entry='<lambda>')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_depth_exact_and_overflow (__main__.IndependentExcludedOracle.test_depth_exact_and_overflow) (entry='capture')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_depth_exact_and_overflow (__main__.IndependentExcludedOracle.test_depth_exact_and_overflow) (entry='<lambda>')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_directory_swap_nofollow_public_entries (__main__.IndependentExcludedOracle.test_directory_swap_nofollow_public_entries) (fork='third_party/enmime-v2.3.0', entry='capture')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 208, in test_directory_swap_nofollow_public_entries
+    with self.assertRaises((ValueError, OSError)): action()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_directory_swap_nofollow_public_entries (__main__.IndependentExcludedOracle.test_directory_swap_nofollow_public_entries) (fork='third_party/enmime-v2.3.0', entry='<lambda>')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 208, in test_directory_swap_nofollow_public_entries
+    with self.assertRaises((ValueError, OSError)): action()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_directory_swap_nofollow_public_entries (__main__.IndependentExcludedOracle.test_directory_swap_nofollow_public_entries) (fork='third_party/go-smtp', entry='capture')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 208, in test_directory_swap_nofollow_public_entries
+    with self.assertRaises((ValueError, OSError)): action()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_directory_swap_nofollow_public_entries (__main__.IndependentExcludedOracle.test_directory_swap_nofollow_public_entries) (fork='third_party/go-smtp', entry='<lambda>')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 208, in test_directory_swap_nofollow_public_entries
+    with self.assertRaises((ValueError, OSError)): action()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='module')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='module')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='file_link')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='file_link')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='directory_link')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='directory_link')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='dangling_link')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='dangling_link')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='fifo')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='fifo')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='socket')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='socket')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/go-smtp', kind='module')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='module')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/go-smtp', kind='file_link')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='file_link')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/go-smtp', kind='directory_link')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='directory_link')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/go-smtp', kind='dangling_link')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='dangling_link')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/go-smtp', kind='fifo')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='fifo')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='capture', fork='third_party/go-smtp', kind='socket')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='socket')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/enmime-v2.3.0', entry='capture')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 233, in test_regular_file_becomes_symlink_on_final_stat_public_entries
+    with self.assertRaises((ValueError, OSError)): action()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/enmime-v2.3.0', entry='<lambda>')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 233, in test_regular_file_becomes_symlink_on_final_stat_public_entries
+    with self.assertRaises((ValueError, OSError)): action()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/go-smtp', entry='capture')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 233, in test_regular_file_becomes_symlink_on_final_stat_public_entries
+    with self.assertRaises((ValueError, OSError)): action()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) (fork='third_party/go-smtp', entry='<lambda>')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 233, in test_regular_file_becomes_symlink_on_final_stat_public_entries
+    with self.assertRaises((ValueError, OSError)): action()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='unknown')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='unknown')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='capture', fork='third_party/enmime-v2.3.0', kind='unavailable')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='<lambda>', fork='third_party/enmime-v2.3.0', kind='unavailable')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='capture', fork='third_party/go-smtp', kind='unknown')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='unknown')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='capture', fork='third_party/go-smtp', kind='unavailable')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) (entry='<lambda>', fork='third_party/go-smtp', kind='unavailable')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/source-review/scripts/tests/checkpoints/r5_excluded_independent_20261003/oracle.py", line 83, in both_reject
+    with self.assertRaises((ValueError, OSError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'ValueError'>, <class 'OSError'>) not raised
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.853s
+
+FAILED (failures=48, skipped=2)

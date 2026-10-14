@@ -1,0 +1,20 @@
+{
+  "integration_base": "eb366eecb6413f5aa025afb4ee63bd1eea7fdf7d",
+  "integration_tested_source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+  "independent_review": "08ea0791d3694fa0f85ae415c76eb7aa78170c99",
+  "branch": "fix/profile-refresh-three-way-20261003",
+  "sha256": {
+    "web/features/company/profile-management.tsx": "bf2431332c98ae3d478e6ae4ae1e2f7c23d3e28aeda5c1e6aa9fb3a218997857",
+    "web/features/company/profile-management.consumer.test.tsx": "bc58a54bda97289e7d74d41ee8e5eb2c71a30e26b9d28c60e4b90386472d0c1d",
+    "web/package-lock.json": "bd31660c52baa389e6d66a4ebf02a7ecd952bab72da6b16460f9d484b0be38c0",
+    "web/profile-refresh-browser/run.cjs": "9f2909eb778f1b8b0be427c98baa93f474c1cbdacfb6ba0d6fe1aaaa5596d1b2",
+    "web/profile-refresh-browser/entry.jsx": "1cb1a6dc93c91612cf608947cf813143b19ed07e40fbaf06e645cbb696b8f856"
+  },
+  "checks": {
+    "chromium": "28 passed / 0 failed; exit 0",
+    "consumer": "29 passed / 0 failed; exit 0",
+    "tsc": "tsc --noEmit; exit 0; empty output",
+    "eslint": "exit 0; 0 errors / 1 existing cleanup-ref warning",
+    "diff_check": "exit 0"
+  }
+}

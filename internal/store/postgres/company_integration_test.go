@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
 	"os"
+	"tabmail/internal/delivery"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 	"tabmail/internal/store/postgres"
@@ -92,22 +93,34 @@ func TestP0PostgresOutboundDomainFencingAndUncertainty(t *testing.T) {
 		t.Fatal("no claim")
 	}
 	first := jobs[0]
-	must(t, st.BeginOutboundDomain(ctx, job.ID, first.DeliveryToken, "a.test"))
-	must(t, st.CompleteOutboundDomain(ctx, job.ID, first.DeliveryToken, "a.test", true))
+	begun, err := st.BeginOutboundRecipient(ctx, job.ID, first.DeliveryToken, "one@a.test")
+	must(t, err)
+	if !begun {
+		t.Fatal("first recipient was not claimed")
+	}
+	must(t, st.CompleteOutboundRecipient(ctx, job.ID, first.DeliveryToken, "one@a.test", delivery.Accepted, 250, "Accepted"))
 	must(t, st.MarkOutboundJobRetry(ctx, job.ID, first.DeliveryToken, "b failed", time.Now().Add(-time.Second)))
 	jobs, err = st.ClaimOutboundJobs(ctx, time.Now(), 100)
 	must(t, err)
 	second := jobs[0]
-	if len(second.DeliveredDomains) != 1 || second.DeliveredDomains[0] != "a.test" {
-		t.Fatal("checkpoint missing after claim")
+	recipients, err := st.ListOutboundRecipients(ctx, tenant.ID, job.ID)
+	must(t, err)
+	if len(recipients) != 2 || recipients[0].Address != "one@a.test" || recipients[0].State != delivery.Accepted {
+		t.Fatalf("recipient checkpoint missing after claim: %+v", recipients)
 	}
-	if st.BeginOutboundDomain(ctx, job.ID, first.DeliveryToken, "b.test") == nil {
+	if begun, err = st.BeginOutboundRecipient(ctx, job.ID, first.DeliveryToken, "two@b.test"); err == nil || begun {
 		t.Fatal("stale token permitted send")
 	}
-	if st.BeginOutboundDomain(ctx, job.ID, second.DeliveryToken, "a.test") == nil {
-		t.Fatal("accepted domain resent")
+	begun, err = st.BeginOutboundRecipient(ctx, job.ID, second.DeliveryToken, "one@a.test")
+	must(t, err)
+	if begun {
+		t.Fatal("accepted recipient resent")
 	}
-	must(t, st.BeginOutboundDomain(ctx, job.ID, second.DeliveryToken, "b.test"))
+	begun, err = st.BeginOutboundRecipient(ctx, job.ID, second.DeliveryToken, "two@b.test")
+	must(t, err)
+	if !begun {
+		t.Fatal("second recipient was not claimed")
+	}
 	_, err = pool.Exec(ctx, `UPDATE outbound_jobs SET lease_until=now()-interval '1 second' WHERE id=$1`, job.ID)
 	must(t, err)
 	jobs, err = st.ClaimOutboundJobs(ctx, time.Now(), 100)
@@ -117,8 +130,10 @@ func TestP0PostgresOutboundDomainFencingAndUncertainty(t *testing.T) {
 	}
 	got, err := st.GetOutboundJob(ctx, job.ID)
 	must(t, err)
-	if got.State != models.OutboundFailed || got.InFlightDomain != "b.test" || len(got.DeliveredDomains) != 1 {
-		t.Fatalf("uncertainty or accepted progress lost: %+v", got)
+	recipients, err = st.ListOutboundRecipients(ctx, tenant.ID, job.ID)
+	must(t, err)
+	if got.State != models.OutboundFailed || got.InFlightDomain != "rcpt:two@b.test" || len(recipients) != 2 || recipients[0].State != delivery.Accepted || recipients[1].State != delivery.Uncertain {
+		t.Fatalf("uncertainty or accepted progress lost: job=%+v recipients=%+v", got, recipients)
 	}
 	if err = st.RequeueOutboundJob(ctx, job.ID); err != store.ErrOutboundNotRetryable {
 		t.Fatalf("uncertain retry: %v", err)
@@ -165,7 +180,22 @@ func TestP0GooseRestartAndHistoricalGrantSafety(t *testing.T) {
 				}
 			} else {
 				must(t, err)
+				var rows, initialRows int
+				must(t, pool.QueryRow(ctx, `SELECT count(*),count(*) FILTER (WHERE singleton AND last_tenant IS NULL) FROM company_attachment_gc_cursor`).Scan(&rows, &initialRows))
+				if rows != 1 || initialRows != 1 {
+					t.Fatal("schema18 did not initialize exactly one empty GC cursor")
+				}
+				// A boundary is deliberately not a live-tenant FK. Restart must
+				// preserve scheduler progress instead of reapplying initial state.
+				boundary := uuid.New()
+				_, err = pool.Exec(ctx, `UPDATE company_attachment_gc_cursor SET last_tenant=$1 WHERE singleton`, boundary)
+				must(t, err)
 				must(t, postgres.Migrate(ctx, cfg))
+				var persistedRows int
+				must(t, pool.QueryRow(ctx, `SELECT count(*),count(*) FILTER (WHERE singleton AND last_tenant=$1) FROM company_attachment_gc_cursor`, boundary).Scan(&rows, &persistedRows))
+				if rows != 1 || persistedRows != 1 {
+					t.Fatal("restart reset or duplicated committed schema18 GC cursor")
+				}
 			}
 			var n int
 			must(t, pool.QueryRow(ctx, `SELECT count(*) FROM send_as_grants WHERE id=7`).Scan(&n))
@@ -174,7 +204,7 @@ func TestP0GooseRestartAndHistoricalGrantSafety(t *testing.T) {
 			}
 			var version int
 			must(t, pool.QueryRow(ctx, `SELECT max(version_id) FROM goose_db_version WHERE is_applied`).Scan(&version))
-			want := 13 // 00013_draft_creation_receipts
+			want := 19 // 00019_api_key_usage; current startup applies the append-only chain
 			if conflict {
 				want = 1
 			}

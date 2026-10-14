@@ -1,0 +1,170 @@
+{
+  "Go_source_sha": "e08a1fc9d2e66625bc5b9067174b7c7408dfdd01",
+  "M_retry_validbaseline_or753k_depth_causeproof": false,
+  "Store_FS_SQL_span_metrics": null,
+  "actual_Go_source_closure_sha256": "86349afd7ee6780761802786d78c24e087d640bd6cbb939d8c04abbab5e6a59c",
+  "actual_diagnostic_test_run_count": 0,
+  "actual_diagnostic_test_terminal_count": 0,
+  "auto_retry": false,
+  "build_error": "internal/api/router.go:44:28: pattern docsassets/*.css: no matching files found",
+  "captured_source_files": 487,
+  "cause_Go_exit": 1,
+  "classification": "CAPTURE_BUILD_INFRA_ERROR_zero_diagnostic_tests_not_FS_SQL_performance_negative",
+  "cleanup": {
+    "all_phase_groups_observed_gone": true,
+    "base_schema16_and_stopped_ownedcluster_data_private_retained": true,
+    "diagnostic_objectroot_not_created_due_setupfailure": true,
+    "diagnostic_temporary_databases_remaining": [],
+    "launcher_group_gone": true,
+    "native_actual_ps_now_exit": 1,
+    "native_owned_PID": 29730,
+    "native_pidfile_socket_absent": {
+      "native_PID_absent": true,
+      "pidfile_absent": true,
+      "socket_absent": true
+    },
+    "native_stop_exit": 0
+  },
+  "complete_disk_samples": 48,
+  "complete_gap_max_seconds": 0.11780190467834473,
+  "controller_exit": 1,
+  "controller_sha256": "f5b3b8a18b624aa966b0324b42bfc0420a75e6edc6754ce37943baed9ebfc474",
+  "derived_review_UTC": "2026-10-02T16:46:30.763467+00:00",
+  "diagnostic_json_observed": false,
+  "diagnostic_test_fail_not_executed": true,
+  "disk_history_failures": [],
+  "disk_max_allocated_sample": 72056832,
+  "disk_samples": 48,
+  "disk_scope": "PGdata/WAL/log+ownedobjects/profiles+bootstrap/compiler; no atomic quota claim",
+  "elapsed_controller_completion_proof_before_guardjoin": 5.375604152679443,
+  "incomplete_disk_samples": 0,
+  "lookahead_generated_emitted_FIFO": null,
+  "missing_explicit_source_inputs": [
+    "internal/api/docsassets/swagger-ui.css",
+    "internal/api/docsassets/redoc.standalone.js",
+    "internal/api/docsassets/swagger-ui-bundle.js"
+  ],
+  "not_observed_metrics_not_fabricated_zero": true,
+  "official_bootstrap_actual_schema": 16,
+  "original_300_deadline_wall": 1790959426.4095218,
+  "original_300_origin_ns": 1790959126409522000,
+  "parent_observed_exit_since_original_native_origin_seconds": 5.463174343109131,
+  "parent_wall_execution_budget_timed_out": false,
+  "phase_results": {
+    "actual-bootstrap-schema": {
+      "elapsed_wall_seconds": 0.11178398132324219,
+      "exit": 0,
+      "final_owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "base-create": {
+      "elapsed_wall_seconds": 0.10202312469482422,
+      "exit": 0,
+      "final_owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "cause-Go": {
+      "elapsed_wall_seconds": 0.21336698532104492,
+      "exit": 1,
+      "final_owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "initdb": {
+      "elapsed_wall_seconds": 0.5487060546875,
+      "exit": 0,
+      "final_owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "native-config": {
+      "elapsed_wall_seconds": 0.1081838607788086,
+      "exit": 0,
+      "final_owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "native-stop": {
+      "elapsed_wall_seconds": 0.16234993934631348,
+      "exit": 0,
+      "final_owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "official-schema16-bootstrap": {
+      "elapsed_wall_seconds": 3.5685181617736816,
+      "exit": 0,
+      "final_owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "pg-start": {
+      "elapsed_wall_seconds": 0.1970820426940918,
+      "exit": 0,
+      "final_owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "preflight-lid": {
+      "elapsed_wall_seconds": 0.10086488723754883,
+      "exit": 0,
+      "final_owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "preflight-power": {
+      "elapsed_wall_seconds": 0.11469626426696777,
+      "exit": 0,
+      "final_owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "terminal-test-databases": {
+      "elapsed_wall_seconds": 0.10977888107299805,
+      "exit": 0,
+      "final_owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    }
+  },
+  "profiles_observed": false,
+  "raw_original_receipts_unchanged": true,
+  "source_bound_SQL_ready": null,
+  "source_certification_boundary": "487 equals declared old482+7observer manifest but excludes three actual go:embed compile inputs present in original M physical source; old manifest not expanded or relabelled",
+  "wall_reversal_observed": false
+}

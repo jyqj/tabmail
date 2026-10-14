@@ -11,11 +11,6 @@ const STATUS_LABELS: Record<Submission["status"], {
         en: "Submitted",
         className: "bg-muted text-foreground",
     },
-    waiting: {
-        zh: "等待中",
-        en: "Waiting",
-        className: "bg-muted text-foreground",
-    },
     sending: {
         zh: "发送中",
         en: "Sending",

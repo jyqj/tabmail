@@ -1,0 +1,46 @@
+{"Time":"2026-09-28T10:46:41.456777759Z","Action":"start","Package":"tabmail/internal/store/postgres"}
+{"Time":"2026-09-28T10:46:41.638523967Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal"}
+{"Time":"2026-09-28T10:46:41.640631675Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal","Output":"=== RUN   TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal\n"}
+{"Time":"2026-09-28T10:46:44.387734927Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal","Output":"--- PASS: TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal (2.75s)\n"}
+{"Time":"2026-09-28T10:46:44.391076218Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal","Elapsed":2.75}
+{"Time":"2026-09-28T10:46:44.392170135Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceGCRollsBackIfOrphanRegistrationFails"}
+{"Time":"2026-09-28T10:46:44.399060427Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceGCRollsBackIfOrphanRegistrationFails","Output":"=== RUN   TestR5ReferenceGCRollsBackIfOrphanRegistrationFails\n"}
+{"Time":"2026-09-28T10:46:46.690627261Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceGCRollsBackIfOrphanRegistrationFails","Output":"--- PASS: TestR5ReferenceGCRollsBackIfOrphanRegistrationFails (2.30s)\n"}
+{"Time":"2026-09-28T10:46:46.699270178Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceGCRollsBackIfOrphanRegistrationFails","Elapsed":2.3}
+{"Time":"2026-09-28T10:46:46.701353928Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceGCKeepsSentPinAfterQueueCleanup"}
+{"Time":"2026-09-28T10:46:46.703201636Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceGCKeepsSentPinAfterQueueCleanup","Output":"=== RUN   TestR5ReferenceGCKeepsSentPinAfterQueueCleanup\n"}
+{"Time":"2026-09-28T10:46:48.687815929Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceGCKeepsSentPinAfterQueueCleanup","Output":"--- PASS: TestR5ReferenceGCKeepsSentPinAfterQueueCleanup (1.99s)\n"}
+{"Time":"2026-09-28T10:46:48.692465012Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceGCKeepsSentPinAfterQueueCleanup","Elapsed":1.99}
+{"Time":"2026-09-28T10:46:48.69868422Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceObjectCallbackCancellationReleasesKey"}
+{"Time":"2026-09-28T10:46:48.702940845Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceObjectCallbackCancellationReleasesKey","Output":"=== RUN   TestR5ReferenceObjectCallbackCancellationReleasesKey\n"}
+{"Time":"2026-09-28T10:46:53.139596833Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceObjectCallbackCancellationReleasesKey","Output":"--- PASS: TestR5ReferenceObjectCallbackCancellationReleasesKey (4.47s)\n"}
+{"Time":"2026-09-28T10:46:53.141879125Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceObjectCallbackCancellationReleasesKey","Elapsed":4.47}
+{"Time":"2026-09-28T10:46:53.146781792Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceObjectGCWaitsForCommittedMessage"}
+{"Time":"2026-09-28T10:46:53.150161Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceObjectGCWaitsForCommittedMessage","Output":"=== RUN   TestR5ReferenceObjectGCWaitsForCommittedMessage\n"}
+{"Time":"2026-09-28T10:46:56.639569418Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceObjectGCWaitsForCommittedMessage","Output":"--- PASS: TestR5ReferenceObjectGCWaitsForCommittedMessage (3.50s)\n"}
+{"Time":"2026-09-28T10:46:56.642201293Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5ReferenceObjectGCWaitsForCommittedMessage","Elapsed":3.5}
+{"Time":"2026-09-28T10:46:56.656795043Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationOrdersMailboxRevocation"}
+{"Time":"2026-09-28T10:46:56.659380002Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationOrdersMailboxRevocation","Output":"=== RUN   TestR5ReservationOrdersMailboxRevocation\n"}
+{"Time":"2026-09-28T10:46:58.886160794Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationOrdersMailboxRevocation","Output":"    r5_reservation_boundary_test.go:78: R5_RESERVE_DEFECT_REVOKED: reservation committed after completed mailbox revoke using earlier authorization\n"}
+{"Time":"2026-09-28T10:46:59.055586169Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationOrdersMailboxRevocation","Output":"--- FAIL: TestR5ReservationOrdersMailboxRevocation (2.42s)\n"}
+{"Time":"2026-09-28T10:46:59.064226003Z","Action":"fail","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationOrdersMailboxRevocation","Elapsed":2.42}
+{"Time":"2026-09-28T10:46:59.066039086Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationWaitsForMailboxBeforeBudget"}
+{"Time":"2026-09-28T10:46:59.069841169Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationWaitsForMailboxBeforeBudget","Output":"=== RUN   TestR5ReservationWaitsForMailboxBeforeBudget\n"}
+{"Time":"2026-09-28T10:47:01.586396962Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationWaitsForMailboxBeforeBudget","Output":"    r5_reservation_boundary_test.go:120: R5_RESERVE_DEFECT_ORDER: waiting mailbox reservation held uploader budget before authorization fence\n"}
+{"Time":"2026-09-28T10:47:02.036054629Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationWaitsForMailboxBeforeBudget","Output":"--- FAIL: TestR5ReservationWaitsForMailboxBeforeBudget (2.98s)\n"}
+{"Time":"2026-09-28T10:47:02.041520962Z","Action":"fail","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationWaitsForMailboxBeforeBudget","Elapsed":2.98}
+{"Time":"2026-09-28T10:47:02.047202712Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationConcurrentBudgetIsAtomic"}
+{"Time":"2026-09-28T10:47:02.050240129Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationConcurrentBudgetIsAtomic","Output":"=== RUN   TestR5ReservationConcurrentBudgetIsAtomic\n"}
+{"Time":"2026-09-28T10:47:04.689094672Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationConcurrentBudgetIsAtomic","Output":"--- PASS: TestR5ReservationConcurrentBudgetIsAtomic (2.65s)\n"}
+{"Time":"2026-09-28T10:47:04.692051505Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationConcurrentBudgetIsAtomic","Elapsed":2.65}
+{"Time":"2026-09-28T10:47:04.695600839Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationOtherUploaderRemainsIndependent"}
+{"Time":"2026-09-28T10:47:04.698822505Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationOtherUploaderRemainsIndependent","Output":"=== RUN   TestR5ReservationOtherUploaderRemainsIndependent\n"}
+{"Time":"2026-09-28T10:47:08.175292715Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationOtherUploaderRemainsIndependent","Output":"--- PASS: TestR5ReservationOtherUploaderRemainsIndependent (3.49s)\n"}
+{"Time":"2026-09-28T10:47:08.177285382Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationOtherUploaderRemainsIndependent","Elapsed":3.49}
+{"Time":"2026-09-28T10:47:08.179795882Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationCancellationReleasesLocksAndBudget"}
+{"Time":"2026-09-28T10:47:08.182558924Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationCancellationReleasesLocksAndBudget","Output":"=== RUN   TestR5ReservationCancellationReleasesLocksAndBudget\n"}
+{"Time":"2026-09-28T10:47:17.652614387Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationCancellationReleasesLocksAndBudget","Output":"--- PASS: TestR5ReservationCancellationReleasesLocksAndBudget (9.48s)\n"}
+{"Time":"2026-09-28T10:47:17.66326397Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5ReservationCancellationReleasesLocksAndBudget","Elapsed":9.48}
+{"Time":"2026-09-28T10:47:17.668981262Z","Action":"output","Package":"tabmail/internal/store/postgres","Output":"FAIL\n"}
+{"Time":"2026-09-28T10:47:17.67651922Z","Action":"output","Package":"tabmail/internal/store/postgres","Output":"FAIL\ttabmail/internal/store/postgres\t36.217s\n"}
+{"Time":"2026-09-28T10:47:17.680783762Z","Action":"fail","Package":"tabmail/internal/store/postgres","Elapsed":36.236}

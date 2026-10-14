@@ -1,0 +1,237 @@
+{
+  "C0tests_not_wholewindow0": true,
+  "actual_controller_exit": 1,
+  "batch_results": {
+    "B": {
+      "FAILnodes": 0,
+      "Go_package_terminal": [
+        {
+          "Action": "pass",
+          "Elapsed": 3.82,
+          "Package": "tabmail/internal/store/postgres",
+          "Time": "2026-10-03T12:27:53.019978+08:00"
+        }
+      ],
+      "Goexit": 0,
+      "PASSnodes": 6,
+      "SKIPnodes": 0,
+      "cleanup": {
+        "DB_connection_query_known": true,
+        "all_non_base_owned_databases": [],
+        "all_non_system_databases": [
+          "tm_usage19_b"
+        ],
+        "all_owned_connections_zero": true,
+        "all_phase_groups_gone": true,
+        "excluded_current_observer_pid": 83514,
+        "native_PID_absent": true,
+        "native_stopped": true,
+        "observer_sampler_joined": true,
+        "other_client_connections_excluding_current_observer": 0,
+        "owned_native_PID": 82509,
+        "pidfile_absent": true,
+        "socket_absent": true,
+        "temporary_DBs_absent": true
+      },
+      "codeclosure": "e281399a4d32c013e9b485a088cf253670ee97559b338f1b9e79332a343bf9ac",
+      "elapsed_original300": 16.482342004776,
+      "joint_closure": "aca2dcc226494eab9ca6207e1e5416635bafceee20c90fddee4b646e2e4833fa",
+      "leaf": 5,
+      "observed_nonbase_DB_lowerbound": 5,
+      "official_SQL_base19": true,
+      "postchecks": {
+        "code_same": true,
+        "runtime_closure_sha256": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+        "runtime_same": true
+      },
+      "runtime_input_closure": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+      "samplecount": 190,
+      "source_sha": "f79eb4d71716da1357bac706427163ca41a35d79",
+      "status": "BOUNDED_COMPONENT_PASS",
+      "top": 4,
+      "unfinished": [],
+      "within300": true
+    },
+    "C": {
+      "FAILnodes": 0,
+      "Go_package_terminal": [],
+      "Goexit": -15,
+      "PASSnodes": 0,
+      "SKIPnodes": 0,
+      "actual_Go_stdout_bytes": 0,
+      "actual_SMTP_miniredis_workers_started": "NO_BODY_STARTED; 0Testevents and no ownedendpoint observed, not APIbehavior RED",
+      "actual_rejected_member_identity": "UNKNOWN_NOT_RECORDED; no later reconstruction or buildid guess accepted",
+      "classification": "PRE_TEST_CONTROLLER_OBSERVER_INFRA_UNKNOWN_0PRODUCTTESTS",
+      "cleanup": {
+        "DB_connection_query_known": true,
+        "all_non_base_owned_databases": [],
+        "all_non_system_databases": [
+          "tm_usage19_c"
+        ],
+        "all_owned_connections_zero": true,
+        "all_phase_groups_gone": true,
+        "excluded_current_observer_pid": 84848,
+        "native_PID_absent": true,
+        "native_stopped": true,
+        "observer_sampler_joined": true,
+        "other_client_connections_excluding_current_observer": 0,
+        "owned_native_PID": 84556,
+        "pidfile_absent": true,
+        "socket_absent": true,
+        "temporary_DBs_absent": true
+      },
+      "codeclosure": "e281399a4d32c013e9b485a088cf253670ee97559b338f1b9e79332a343bf9ac",
+      "elapsed_original300": 4.86016058921814,
+      "joint_closure": "aca2dcc226494eab9ca6207e1e5416635bafceee20c90fddee4b646e2e4833fa",
+      "leaf": 0,
+      "observed_nonbase_DB_lowerbound": 0,
+      "observer": {
+        "closed_observed": false,
+        "complete": false,
+        "failures": [
+          "Unknown:unknown_compile_group_member",
+          "receipt:sticky_observer_failure",
+          "child_end_not_observed"
+        ],
+        "groupgone": true,
+        "listener_failures": [],
+        "max_gap_seconds": 0.012570249993586913,
+        "observer_joined": true,
+        "owned_miniredis_sourceorder_added_address": null,
+        "samples": [],
+        "sampling_not_proof_of_no_short_external_connection": true,
+        "smtp_sourceorder_solo_address": null,
+        "source_environment_isolation_independent": true
+      },
+      "official_SQL_base19": true,
+      "postchecks": {
+        "code_same": true,
+        "runtime_closure_sha256": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+        "runtime_same": true
+      },
+      "process_signal_actions": [
+        "TERM"
+      ],
+      "runtime_input_closure": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+      "samplecount": 13,
+      "source_sha": "f79eb4d71716da1357bac706427163ca41a35d79",
+      "status": "FAILED_INFRA_OR_PRODUCT_UNKNOWN",
+      "top": 0,
+      "unfinished": [],
+      "within300": true
+    },
+    "D3": {
+      "FAILnodes": 0,
+      "Go_package_terminal": [
+        {
+          "Action": "pass",
+          "Elapsed": 2.025,
+          "Package": "tabmail/internal/store/postgres",
+          "Time": "2026-10-03T12:27:36.489203+08:00"
+        }
+      ],
+      "Goexit": 0,
+      "PASSnodes": 1,
+      "SKIPnodes": 0,
+      "cleanup": {
+        "DB_connection_query_known": true,
+        "all_non_base_owned_databases": [],
+        "all_non_system_databases": [
+          "tm_usage19_d3"
+        ],
+        "all_owned_connections_zero": true,
+        "all_phase_groups_gone": true,
+        "excluded_current_observer_pid": 82448,
+        "native_PID_absent": true,
+        "native_stopped": true,
+        "observer_sampler_joined": true,
+        "other_client_connections_excluding_current_observer": 0,
+        "owned_native_PID": 81540,
+        "pidfile_absent": true,
+        "socket_absent": true,
+        "temporary_DBs_absent": true
+      },
+      "codeclosure": "e281399a4d32c013e9b485a088cf253670ee97559b338f1b9e79332a343bf9ac",
+      "elapsed_original300": 15.229936838150024,
+      "joint_closure": "aca2dcc226494eab9ca6207e1e5416635bafceee20c90fddee4b646e2e4833fa",
+      "leaf": 1,
+      "observed_nonbase_DB_lowerbound": 1,
+      "official_SQL_base19": true,
+      "postchecks": {
+        "code_same": true,
+        "runtime_closure_sha256": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+        "runtime_same": true
+      },
+      "runtime_input_closure": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+      "samplecount": 163,
+      "source_sha": "f79eb4d71716da1357bac706427163ca41a35d79",
+      "status": "BOUNDED_COMPONENT_PASS",
+      "top": 1,
+      "unfinished": [],
+      "within300": true
+    },
+    "S": {
+      "FAILnodes": 0,
+      "Go_package_terminal": [
+        {
+          "Action": "pass",
+          "Elapsed": 2.303,
+          "Package": "tabmail/internal/store/postgres",
+          "Time": "2026-10-03T12:28:07.874986+08:00"
+        }
+      ],
+      "Goexit": 0,
+      "PASSnodes": 3,
+      "SKIPnodes": 0,
+      "cleanup": {
+        "DB_connection_query_known": true,
+        "all_non_base_owned_databases": [],
+        "all_non_system_databases": [
+          "tm_usage19_s"
+        ],
+        "all_owned_connections_zero": true,
+        "all_phase_groups_gone": true,
+        "excluded_current_observer_pid": 84496,
+        "native_PID_absent": true,
+        "native_stopped": true,
+        "observer_sampler_joined": true,
+        "other_client_connections_excluding_current_observer": 0,
+        "owned_native_PID": 83572,
+        "pidfile_absent": true,
+        "socket_absent": true,
+        "temporary_DBs_absent": true
+      },
+      "codeclosure": "e281399a4d32c013e9b485a088cf253670ee97559b338f1b9e79332a343bf9ac",
+      "elapsed_original300": 14.882872104644775,
+      "joint_closure": "aca2dcc226494eab9ca6207e1e5416635bafceee20c90fddee4b646e2e4833fa",
+      "leaf": 2,
+      "observed_nonbase_DB_lowerbound": 2,
+      "official_SQL_base19": true,
+      "postchecks": {
+        "code_same": true,
+        "runtime_closure_sha256": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+        "runtime_same": true
+      },
+      "runtime_input_closure": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+      "samplecount": 167,
+      "source_sha": "f79eb4d71716da1357bac706427163ca41a35d79",
+      "status": "BOUNDED_COMPONENT_PASS",
+      "top": 1,
+      "unfinished": [],
+      "within300": true
+    }
+  },
+  "executed_pass_totals": {
+    "leaf": 8,
+    "racePASSnodes": 10,
+    "tops": 6
+  },
+  "no_D1D2rerun_or_extra_mutation": true,
+  "no_autoRetry_or_controller_product_edit": true,
+  "notWholeGo_MethodCatalog_171_green": true,
+  "old_D1P_D2oldF_newP_originalAfailed_retained": true,
+  "protected_sourceinput_SIGCHLD_ownedanchor_cleanup_hardchecks_kept_no_relax": true,
+  "signedentry_sha256": "d4b137f4580eae54505cc975586833004cc27ae498ae3f71d12cad9966ecbe3d",
+  "source_and_runtime_new_directions_not_old18_manifest": true,
+  "status": "D3_B_S_BOUNDED_PASS_C_PRETEST_INFRA_UNKNOWN"
+}

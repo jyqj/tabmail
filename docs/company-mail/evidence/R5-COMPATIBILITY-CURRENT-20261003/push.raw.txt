@@ -1,0 +1,7 @@
+remote: 
+remote: Create a pull request for 'codex/r5-compatibility-source-boundary' on GitHub by visiting:        
+remote:      https://github.com/jyqj/tabmail/pull/new/codex/r5-compatibility-source-boundary        
+remote: 
+To https://github.com/jyqj/tabmail.git
+ * [new branch]      codex/r5-compatibility-source-boundary -> codex/r5-compatibility-source-boundary
+branch 'codex/r5-compatibility-source-boundary' set up to track 'origin/codex/r5-compatibility-source-boundary'.

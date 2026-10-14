@@ -1,0 +1,39 @@
+{
+  "task": "R2-07",
+  "baseline_commit": "594d4c39def14874f97c39392302fdf487494e88",
+  "candidate_commit": "db8cd9ab17bef8d6d8ac3b6280f39a0c99520961",
+  "candidate_tree": "6fdbbdc5f77d539981b6036f938b7d37995509f4",
+  "tests": {
+    "suppression-red.jsonl": {
+      "leaf": {
+        "pass": 13,
+        "fail": 9
+      },
+      "packages": {
+        "tabmail/internal/api/handlers": "fail"
+      },
+      "sha256": "1aa2fcbfb26aaaf5af9840ca4416b7e779ac091c5fa001f3ae3091e9091e4287"
+    },
+    "suppression-green.jsonl": {
+      "leaf": {
+        "pass": 22
+      },
+      "packages": {
+        "tabmail/internal/api/handlers": "pass"
+      },
+      "sha256": "267cc09e6abf1faa33bb7ad7fbf1f3bacee33cb70d115e00574f939ae4b6f538"
+    },
+    "suppression-related.jsonl": {
+      "leaf": {
+        "pass": 33
+      },
+      "packages": {
+        "tabmail/internal/api/handlers": "pass"
+      },
+      "sha256": "0b8000bdf17eee346aa9d47ff3741aacfb6a77d829a7c1515e183bc80cc814fa"
+    }
+  },
+  "frozen_test_sha256": "73bd7be6f936be69b438bae92827519add0c8db875c121d5d6531c8aa83a8972",
+  "initial_test_note": "An initial draft asserted handler-owned request Close, which was stricter than the existing HTTP contract. That assertion was removed and the employee pre-read check strengthened to count read calls. Initial source/logs are preserved separately; only the final same-byte red/green group is used for acceptance.",
+  "scope": "Actual authenticated handler, bounded standard JSON decoding, audit reason policy and existing FakeStore deletion/audit effects. These tests do not certify PostgreSQL transactions or complete CI."
+}

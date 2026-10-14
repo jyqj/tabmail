@@ -1,0 +1,93 @@
+{
+  "base": "f875672dea2b68fdec9e0b986f4863724da5d7ba",
+  "ui_evidence_commit": "648938a5baad2f35ba120da2cf5ae1001f8f3b4a",
+  "scope": "dedicated synthetic successor authorization regression; no formal qualification",
+  "source_sha256": {
+    "internal/store/postgres/employee_disposition.go": "ac722af5f6cc24b25662bdc9098d466417fb701ceddf29373ac26e1b17aca42e",
+    "internal/store/postgres/offboarding_successor_authz_test.go": "81b4e38669d98c6ae1732933f225f86f7231fb6cfcded6ff7fe6257fae068852"
+  },
+  "baseline_direct_http": {
+    "peer_admin_preview": 200,
+    "caller_self_preview": 200,
+    "persisted_preview_plans": true,
+    "denial_regression_failed_as_expected": true
+  },
+  "fixed_direct_http": {
+    "peer_admin_preview": 403,
+    "caller_self_preview": 400,
+    "denial_no_state_mutation": true
+  },
+  "validation": {
+    "command": "go test -race ./internal/store/postgres -run '^TestSuccessorAuthzOwned' -count=1 -timeout=120s -v",
+    "exit_code": 0,
+    "package_seconds": 20.249,
+    "top_level_tests": 8,
+    "leaf_cases": 44,
+    "go_version": "go1.25.7 linux/amd64",
+    "postgres_version": "17",
+    "vet": "go vet ./internal/store/postgres ./internal/authz: exit 0",
+    "existing_policy_test": "TestCanManageTenantMember: pass",
+    "cases": [
+      "TestSuccessorAuthzOwnedDirectHTTPPeerAndSelf/peer",
+      "TestSuccessorAuthzOwnedDirectHTTPPeerAndSelf/caller-self",
+      "TestSuccessorAuthzOwnedPreviewMatrix/user",
+      "TestSuccessorAuthzOwnedPreviewMatrix/frozen-target",
+      "TestSuccessorAuthzOwnedPreviewMatrix/admin",
+      "TestSuccessorAuthzOwnedPreviewMatrix/super-admin",
+      "TestSuccessorAuthzOwnedPreviewMatrix/inactive",
+      "TestSuccessorAuthzOwnedPreviewMatrix/foreign",
+      "TestSuccessorAuthzOwnedPreviewMatrix/target-self",
+      "TestSuccessorAuthzOwnedPreviewMatrix/nil",
+      "TestSuccessorAuthzOwnedPreviewMatrix/peer-target",
+      "TestSuccessorAuthzOwnedPreviewMatrix/foreign-target",
+      "TestSuccessorAuthzOwnedPreviewMatrix/ordinary-foreign-selection",
+      "TestSuccessorAuthzOwnedPreviewMatrix/super-selected-user",
+      "TestSuccessorAuthzOwnedPreviewMatrix/super-selected-admin",
+      "TestSuccessorAuthzOwnedPreviewMatrix/super-selected-super",
+      "TestSuccessorAuthzOwnedPreviewMatrix/super-selected-foreign",
+      "TestSuccessorAuthzOwnedPreviewMatrix/super-caller-self",
+      "TestSuccessorAuthzOwnedCurrentState/execute/role-admin",
+      "TestSuccessorAuthzOwnedCurrentState/execute/role-super",
+      "TestSuccessorAuthzOwnedCurrentState/execute/inactive",
+      "TestSuccessorAuthzOwnedCurrentState/execute/allowed-role-change",
+      "TestSuccessorAuthzOwnedCurrentState/execute/caller-demoted",
+      "TestSuccessorAuthzOwnedCurrentState/execute/caller-inactive",
+      "TestSuccessorAuthzOwnedCurrentState/execute/caller-tenant",
+      "TestSuccessorAuthzOwnedCurrentState/execute/target-frozen",
+      "TestSuccessorAuthzOwnedCurrentState/execute/assets-changed",
+      "TestSuccessorAuthzOwnedCurrentState/replay/role-admin",
+      "TestSuccessorAuthzOwnedCurrentState/replay/role-super",
+      "TestSuccessorAuthzOwnedCurrentState/replay/inactive",
+      "TestSuccessorAuthzOwnedCurrentState/replay/allowed-role-change",
+      "TestSuccessorAuthzOwnedCurrentState/replay/caller-demoted",
+      "TestSuccessorAuthzOwnedCurrentState/replay/caller-inactive",
+      "TestSuccessorAuthzOwnedCurrentState/replay/caller-tenant",
+      "TestSuccessorAuthzOwnedCurrentState/replay/target-frozen",
+      "TestSuccessorAuthzOwnedCurrentState/replay/assets-changed",
+      "TestSuccessorAuthzOwnedAfterTenantWait/preview",
+      "TestSuccessorAuthzOwnedAfterTenantWait/execute",
+      "TestSuccessorAuthzOwnedAfterTenantWait/replay",
+      "TestSuccessorAuthzOwnedTenantFence",
+      "TestSuccessorAuthzOwnedSuccessorFenceThroughCommit/preview",
+      "TestSuccessorAuthzOwnedSuccessorFenceThroughCommit/execute",
+      "TestSuccessorAuthzOwnedPersistedCallerSelfAndLegacy",
+      "TestSuccessorAuthzOwnedConcurrentExecute"
+    ]
+  },
+  "log_sha256": {
+    "/tmp/offboarding-authz-baseline.log": "c5eef0146c90cd4df95a8c48c79fe673bfedd7e6de04bf0306011d615786b8e2",
+    "/tmp/offboarding-authz-final.log": "6116dcdb0e0712362cedb7cd1a03024135087507325938550a138a09d404d49c",
+    "/tmp/offboarding-authz-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/offboarding-authz-cleanup.log": "cbb8bd5de29626c5161747698437d92bf20cb3429df159127327147a5c04b5e4"
+  },
+  "cleanup": {
+    "remaining_owned_databases": 0,
+    "remaining_owned_database_connections": 0,
+    "owned_cluster_stopped": true
+  },
+  "limitations": [
+    "mailbox-only synthetic accounts, default seal disposition",
+    "no broad catalog, queue uncertainty, private draft, profile ABA, audit rollback or expiry rerun",
+    "persisted plan and mailbox same-tenant FKs reject successor relocation; constraints preserved"
+  ]
+}

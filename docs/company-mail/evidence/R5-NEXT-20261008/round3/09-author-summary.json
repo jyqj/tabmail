@@ -1,0 +1,87 @@
+{
+  "task": "R5-NEXT-20261008-09",
+  "base": "8ddf1585d53f68d5fdb1add5a8abaa27b862ce65",
+  "candidate": "993a6bdd29f37a6cc7d6d5aa7e29f87a5dc83373",
+  "tree": "46076f2306b4ac67aaabcfc6349886759c323b1b",
+  "worktree": "/workspace/scratch/fabe500b93be/tabmail-ui",
+  "files_sha256": {
+    "web/components/company/domains.tsx": "b21092ffc2100b1824bea5b9492f86b274ad0a3101e9e2c8626584205a4386e1",
+    "web/components/company/domains-ownership.test.tsx": "f4a4ebc5865f7929054973eefd24dfaf94388c4300409715915ad1baee5782de"
+  },
+  "initial_25_frozen_sha256": "c6c3c0c11a5cb601bedcdff67c1df8ca0ede1245539432f87ece822a789fe8bd",
+  "initial_25_preserved_in_final": true,
+  "counterexample_source_sha256": "478f45c6c37f163113dc824d58d019ba3088d0b6b2a4205d5b3c57ddb514f781",
+  "runs": [
+    {
+      "name": "baseline",
+      "meaning": "Original 25 frozen cases against source base 8ddf158; 22 true behavior failures",
+      "total": 25,
+      "passed": 3,
+      "failed": 22,
+      "skipped": 0,
+      "test_files": [
+        "domains-ownership.test.tsx"
+      ],
+      "json": "/workspace/scratch/fabe500b93be/ui-evidence/round3/baseline.json",
+      "log": "/workspace/scratch/fabe500b93be/ui-evidence/round3/baseline.log"
+    },
+    {
+      "name": "candidate",
+      "meaning": "First product candidate: original 25 plus 9 existing regressions; all passed",
+      "total": 34,
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0,
+      "test_files": [
+        "domains-ownership.test.tsx",
+        "domains.test.tsx"
+      ],
+      "json": "/workspace/scratch/fabe500b93be/ui-evidence/round3/candidate.json",
+      "log": "/workspace/scratch/fabe500b93be/ui-evidence/round3/candidate.log"
+    },
+    {
+      "name": "read-error-counterexample",
+      "meaning": "One newly frozen error-after-list-replacement counterexample against the first candidate; exactly one selected case fails and the other 25 are intentionally filtered out",
+      "total": 26,
+      "passed": 0,
+      "failed": 1,
+      "skipped": 25,
+      "test_files": [
+        "domains-ownership.test.tsx"
+      ],
+      "json": "/workspace/scratch/fabe500b93be/ui-evidence/round3/read-error-counterexample.json",
+      "log": "/workspace/scratch/fabe500b93be/ui-evidence/round3/read-error-counterexample.log"
+    },
+    {
+      "name": "final",
+      "meaning": "Final unchanged 26 cases plus 9 existing regressions after tightening error ownership",
+      "total": 35,
+      "passed": 35,
+      "failed": 0,
+      "skipped": 0,
+      "test_files": [
+        "domains-ownership.test.tsx",
+        "domains.test.tsx"
+      ],
+      "json": "/workspace/scratch/fabe500b93be/ui-evidence/round3/final.json",
+      "log": "/workspace/scratch/fabe500b93be/ui-evidence/round3/final.log"
+    }
+  ],
+  "vitest": {
+    "maxWorkers": 1,
+    "timeout_ms": 5000,
+    "timeouts_changed": false
+  },
+  "eslint": {
+    "exit_code": 0,
+    "files": [
+      "web/components/company/domains.tsx",
+      "web/components/company/domains-ownership.test.tsx"
+    ],
+    "log": "/workspace/scratch/fabe500b93be/ui-evidence/round3/eslint.log"
+  },
+  "git_diff_check": 0,
+  "typecheck": "Deferred to root for once-per-round integration validation",
+  "round2_type_correction": "Root commit 1cc2d50 removes unsupported ByRole exact:true from the invitation test. Applied separately after task 09 as local commit 74afb469d70be8d82d362836e558b7640a6c1f02. It does not alter task 09 files or behavior.",
+  "workspace_head_after_type_correction": "74afb469d70be8d82d362836e558b7640a6c1f02"
+}

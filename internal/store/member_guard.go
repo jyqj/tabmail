@@ -11,9 +11,10 @@ import (
 )
 
 var (
-	ErrLastAdministrator = errors.New("cannot remove the last active company administrator")
-	ErrMemberNotFound    = errors.New("company member not found")
-	ErrMemberOwnsMailbox = errors.New("transfer owned mailboxes before deleting this member")
+	ErrLastAdministrator           = errors.New("cannot remove the last active company administrator")
+	ErrMemberNotFound              = errors.New("company member not found")
+	ErrMemberOwnsMailbox           = errors.New("transfer owned mailboxes before deleting this member")
+	ErrMemberHasHistoricalIdentity = errors.New("member identity is retained by historical records; deactivate instead of deleting")
 )
 
 type MemberGuardStore interface {
@@ -22,6 +23,8 @@ type MemberGuardStore interface {
 }
 
 type RefreshRotationStore interface {
+	// Successful rotation returns the current authentication snapshot in next.Issuance,
+	// captured while holding user ownership through the token commit.
 	RotateRefreshToken(context.Context, string, *models.RefreshToken) (rotated bool, familyRevoked bool, err error)
 	RevokeRefreshTokenByHash(context.Context, string) error
 }

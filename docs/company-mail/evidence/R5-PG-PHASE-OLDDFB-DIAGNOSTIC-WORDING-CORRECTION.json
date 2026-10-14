@@ -1,0 +1,42 @@
+{
+  "artifact_kind": "central_summary_of_delivered_independent_diagnostic_wording_review_not_raw_rewrite",
+  "reviewer": "/root/pg_phase_diagnostic_independent_review",
+  "parent_source": "dfb054d7988e42de93e0ee2e14638b3525c2443b",
+  "derived_file_closure_sha256": "6183c130818b10fa82ff758c08a7ba8ecffe0064fce5054badc22a9ca9ba5d83",
+  "raw_metrics": "R5-PG-PHASE-OLDDFB-DIAGNOSTIC-METRICS.json",
+  "actual_Go_exit": 1,
+  "actual_top_leaf_runs": [
+    8,
+    21,
+    27
+  ],
+  "actual_PASS_FAIL": [
+    24,
+    3
+  ],
+  "phase_events": 472,
+  "paired_spans": 221,
+  "observations": 30,
+  "fixtures": 15,
+  "duplicate_unknown_unpaired_or_unfinished": 0,
+  "precise_phase_median_ms": {
+    "create_database": 35.772625,
+    "migration_up": 172.930125,
+    "new_migrate_total": 175.162,
+    "store_new_total": 179.0985,
+    "drop_database": 47.964417,
+    "fixture_return_to_cleanup_including_seed_and_test_defers": 2023.042166
+  },
+  "179ms_is_store_new_total_not_new_migrate_total": true,
+  "fixture_return_to_cleanup_includes_seed_body_and_test_defers_not_pure_body": true,
+  "nested_spans_not_additive_wall": true,
+  "Suppression_raw_observation": "old expected migration16 assertion fails; no raw actual version18 query printed",
+  "actual18_status": "inference from reviewed source containing18 and successful Migrate; not labelled raw SQL observation",
+  "approved_packet_v2_serialization_boundary": "executor approved packet JSON reserialization differs bytes/hash from author packet; independent review accepted parsed JSON equality; neither hash substituted as proof of byte equality",
+  "old_fullPG180_timeout_cause_proven": false,
+  "206_unstarted_tail_completed": false,
+  "raw_archive_review_modified": false,
+  "tests_repeated": false,
+  "product_green": false,
+  "task_complete": false
+}

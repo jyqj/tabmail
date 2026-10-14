@@ -1,0 +1,159 @@
+{
+  "kind": "independent_existing_runtime_evidence_review_no_reexecution",
+  "verdict": "PASS_BOUNDED_PURE4_REALPG4TOP11CHILD_RACE_TWO_LANE_CLEANUP",
+  "blocking_findings": [],
+  "evidence_root": "/private/tmp/tm-r5pgparallel-run.4korz_mk",
+  "archive_sha256": "1f64d251d5eb737fa7fff458f91053d35378887e25b9015ce01a74e6a3852d1c",
+  "reviewer_reran_tests": false,
+  "reviewer_modified_source": false,
+  "results": {
+    "pure-admission-new2": {
+      "run": 2,
+      "pass": 2,
+      "top": 2,
+      "leaf": 2,
+      "run_pass_equal": true,
+      "skip_fail": 0,
+      "CLI_exit": 0,
+      "stderr_empty": true,
+      "timed_out": false,
+      "process_returncode": 0,
+      "live_process_group": []
+    },
+    "pure-fixture-lifecycle-new2": {
+      "run": 7,
+      "pass": 7,
+      "top": 2,
+      "leaf": 6,
+      "run_pass_equal": true,
+      "skip_fail": 0,
+      "CLI_exit": 0,
+      "stderr_empty": true,
+      "timed_out": false,
+      "process_returncode": 0,
+      "live_process_group": []
+    },
+    "realPG-four-truewaits-original11children": {
+      "run": 15,
+      "pass": 15,
+      "top": 4,
+      "leaf": 11,
+      "run_pass_equal": true,
+      "skip_fail": 0,
+      "CLI_exit": 0,
+      "stderr_empty": true,
+      "timed_out": false,
+      "process_returncode": 0,
+      "live_process_group": []
+    }
+  },
+  "admission": {
+    "raw_events": [
+      {
+        "time": "2026-10-02T21:03:48.282628+08:00",
+        "event": "acquire",
+        "active": [
+          "TestR5SentReadUsesTimeAfterIdentityWait"
+        ]
+      },
+      {
+        "time": "2026-10-02T21:03:48.282658+08:00",
+        "event": "acquire",
+        "active": [
+          "TestR5SentMutationRejectsExpiryAfterItemWait",
+          "TestR5SentReadUsesTimeAfterIdentityWait"
+        ]
+      },
+      {
+        "time": "2026-10-02T21:03:52.958754+08:00",
+        "event": "release",
+        "active": [
+          "TestR5SentReadUsesTimeAfterIdentityWait"
+        ]
+      },
+      {
+        "time": "2026-10-02T21:03:52.958841+08:00",
+        "event": "acquire",
+        "active": [
+          "TestR5SentMutationRollsBackExpiryDuringAuditWait",
+          "TestR5SentReadUsesTimeAfterIdentityWait"
+        ]
+      },
+      {
+        "time": "2026-10-02T21:03:55.287946+08:00",
+        "event": "release",
+        "active": [
+          "TestR5SentMutationRollsBackExpiryDuringAuditWait"
+        ]
+      },
+      {
+        "time": "2026-10-02T21:03:55.288038+08:00",
+        "event": "acquire",
+        "active": [
+          "TestR5ActivationExpiryAfterRealWaitRollsBack",
+          "TestR5SentMutationRollsBackExpiryDuringAuditWait"
+        ]
+      },
+      {
+        "time": "2026-10-02T21:03:59.844709+08:00",
+        "event": "release",
+        "active": [
+          "TestR5ActivationExpiryAfterRealWaitRollsBack"
+        ]
+      },
+      {
+        "time": "2026-10-02T21:04:02.116766+08:00",
+        "event": "release",
+        "active": []
+      }
+    ],
+    "peak": 2,
+    "terminal_active": [],
+    "qualification": "GOMAXPROCS=2; not independent stress of custom third acquire with test.parallel greater than 2"
+  },
+  "source_identity": {
+    "kind": "canonical_source_closure_sha1_NOT_Git_commit",
+    "sha1": "74f627f721decd575bf752846b839a23fc9f5a51",
+    "sha256": "0f92fbe64e997d667d3c0bcceabdfb047b2312390247765b6131aef104a5f894",
+    "whole_source_files_rehashed": false
+  },
+  "archive_all_members_match_raw": true,
+  "DB": {
+    "unique_fresh_identities": 11,
+    "all_schema18_users3_mailboxes_atleast2": true,
+    "catalog_max": 2,
+    "catalog_terminal": 0,
+    "sample_count": 111,
+    "fixture_peak_LOWER_BOUND": 8,
+    "all_clients_excluding_observer_peak_LOWER_BOUND": 10
+  },
+  "cleanup": {
+    "budget_seconds": 300,
+    "elapsed_total_capture_pure_init_real_observation_cleanup": 32.45901894569397,
+    "oldpartialstoppedroots_not_touched": true,
+    "original_deadline": 1790946510.896113,
+    "original_origin": 1790946210.896113,
+    "owned_pg_pid": 25043,
+    "owned_pid_observation": "absent",
+    "owned_root": "/private/tmp/tm-r5pgparallel-run.4korz_mk",
+    "pg_stop_exit": 0,
+    "pidfile_absent": true,
+    "query_exit": 0,
+    "socket_absent": true,
+    "temporaryDB_connections": [],
+    "within_original300": true
+  },
+  "resource_boundary": [
+    "D=16 runner record; pinned pgx5.10 source default max(4,NumCPU) confirmed",
+    "84=2*(16+10+16) only pgx pools; sql.DB migration and observer and other packages not included",
+    "sampling 8 fixture/10 total excluding observer are lower bounds, not hard caps"
+  ],
+  "nonblocking_metadata_corrections": [
+    "actual_parallel_overlap_parser_pending=true is stale; independent raw replay complete",
+    "schema18_and_seed_users3_mailboxes2_observed means at least2, not exactly2; mature raw fixtures show3 mailboxes"
+  ],
+  "not_proven": [
+    "real invalidDSN/CREATE failure/DROP failure/Fatal cleanup fault injection; pure closures only",
+    "whole backend 180s,206 completeness,production benchmark,cold build"
+  ]
+}

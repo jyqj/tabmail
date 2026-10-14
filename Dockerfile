@@ -2,6 +2,7 @@ FROM golang:1.25-alpine AS builder
 RUN apk add --no-cache git
 WORKDIR /src
 COPY go.mod go.sum ./
+COPY third_party/enmime-v2.3.0/go.mod ./third_party/enmime-v2.3.0/go.mod
 RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 go build -ldflags "-s -w" -o /tabmail ./cmd/tabmail

@@ -4,13 +4,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"net/http"
-	"strings"
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/app"
 	"tabmail/internal/app/recovery"
 	"tabmail/internal/app/submissions"
 	"tabmail/internal/company"
-	"tabmail/internal/models"
 	"time"
 )
 
@@ -19,15 +17,16 @@ type recoveryRepository interface {
 	company.DeliveryRecovery
 }
 type CompanyRecoveryHandler struct {
-	repo    recoveryRepository
-	store   app.AuditStore
-	objects recovery.Objects
-	subs    *submissions.Service
-	logger  zerolog.Logger
+	repo      recoveryRepository
+	store     app.AuditStore
+	objects   recovery.Objects
+	subs      *submissions.Service
+	logger    zerolog.Logger
+	inspector *recovery.Service
 }
 
 func NewCompanyRecoveryHandler(repo recoveryRepository, st app.AuditStore, obj recovery.Objects, subs *submissions.Service, l zerolog.Logger) *CompanyRecoveryHandler {
-	return &CompanyRecoveryHandler{repo, st, obj, subs, l}
+	return &CompanyRecoveryHandler{repo: repo, store: st, objects: obj, subs: subs, logger: l, inspector: recovery.New(repo)}
 }
 func (h *CompanyRecoveryHandler) result(w http.ResponseWriter, v any, e error) {
 	companyResponse(w, h.logger, v, e)
@@ -95,36 +94,14 @@ func (h *CompanyRecoveryHandler) Recipients(w http.ResponseWriter, r *http.Reque
 		errNotFound(w, "outbound disabled")
 		return
 	}
-	j, e := h.subs.AccessibleOutboundJob(r.Context(), middleware.TenantFromCtx(r.Context()), companyActor(r), id)
-	if e != nil {
-		writeOutboundJobAccessError(w, h.logger, e, "listing recipient outcomes")
-		return
-	}
-	view, e := h.subs.RedactOutboundJob(r.Context(), companyActor(r), j)
+	// A ledger outcome endpoint is still an ordinary operation receipt. Current
+	// content read does not grant addresses or diagnostics on this surface.
+	view, e := h.subs.OutboundReceiptView(r.Context(), middleware.TenantFromCtx(r.Context()), companyActor(r), id)
 	if e != nil {
 		h.result(w, nil, e)
 		return
 	}
-	rows, e := h.repo.ListOutboundRecipients(r.Context(), j.TenantID, id)
-	if e != nil {
-		h.result(w, nil, e)
-		return
-	}
-	if view.ContentRedacted {
-		visible := map[string]bool{}
-		for _, a := range view.RcptTo {
-			visible[a] = true
-		}
-		filtered := []company.Recipient{}
-		for _, row := range rows {
-			if visible[row.Address] {
-				row.Diagnostic = "Protocol details restricted"
-				filtered = append(filtered, row)
-			}
-		}
-		rows = filtered
-	}
-	h.result(w, rows, nil)
+	h.result(w, view, nil)
 }
 
 func (h *CompanyRecoveryHandler) Reconcile(w http.ResponseWriter, r *http.Request) {
@@ -154,28 +131,10 @@ func (h *CompanyRecoveryHandler) InspectOutbound(w http.ResponseWriter, r *http.
 	if !ok {
 		return
 	}
-	if len(strings.TrimSpace(v.Reason)) < 8 || len(v.Reason) > 1000 {
-		errBadRequest(w, "inspection reason must be 8-1000 bytes")
-		return
-	}
 	if h.subs == nil || !h.subs.OutboundEnabled() {
 		errNotFound(w, "outbound disabled")
 		return
 	}
-	j, e := h.subs.AccessibleOutboundJob(r.Context(), middleware.TenantFromCtx(r.Context()), companyActor(r), id)
-	if e != nil {
-		writeOutboundJobAccessError(w, h.logger, e, "inspecting outbound")
-		return
-	}
-	a := companyActor(r)
-	e = app.InsertAuditRequired(r.Context(), h.store, models.AuditEntry{TenantID: &a.TenantID, Actor: a.AuditLabel(), Action: "outbound.break_glass", ResourceType: "outbound_job", ResourceID: &id, Details: app.MustJSON(map[string]any{"reason": v.Reason})})
-	if e != nil {
-		errInternal(w)
-		return
-	}
-	cp := *j
-	cp.DeliveryToken = nil
-	cp.RawMIME = nil
-	rows, e := h.repo.ListOutboundRecipients(r.Context(), a.TenantID, id)
-	h.result(w, map[string]any{"job": cp, "recipients": rows}, e)
+	inspection, e := h.inspector.InspectOutboundRecovery(r.Context(), companyActor(r), id, v.Reason)
+	h.result(w, inspection, e)
 }

@@ -1,0 +1,111 @@
+{
+  "task": "R5-P0-100",
+  "batch": "B01-AJ",
+  "status": "failed",
+  "classification": "original_M2_incomplete_setup_and_runner_cleanup_error_with_missing_go_observations",
+  "base_commit": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+  "source_tree": "c9a8c29903c24bd82931c1b012f7df1da3ea48a2",
+  "source_sha_semantics": "git_write_tree_label_not_commit",
+  "scale": "M",
+  "population": [
+    1000,
+    5000,
+    1000000
+  ],
+  "budget_seconds": 10800,
+  "go_exit": null,
+  "go_exit_status": "missing_observation",
+  "runner_exit": 1,
+  "runner_error": "[Errno 1] Operation not permitted",
+  "missing_observations": [
+    "go.exit",
+    "execution-budget.json",
+    "timeout.json",
+    "result.json"
+  ],
+  "go_lifecycle": [
+    "run"
+  ],
+  "completed_workload_cache_pairs": 0,
+  "observed_after_terminal": {
+    "employees": 1000,
+    "mailboxes": 5000,
+    "messages": 1000000,
+    "indexed": 47420,
+    "pending": 952575,
+    "processing": 5,
+    "ready": 47420,
+    "outbound": 0
+  },
+  "observed_phase_timestamps": {
+    "seed_end": "2026-10-02T00:24:06.766713+08:00",
+    "index_first": "2026-10-02T00:24:07.203933+08:00",
+    "index_last": "2026-10-02T01:09:50.941328+08:00"
+  },
+  "setup_claim": {
+    "requested": 100,
+    "actual_clamped": 5,
+    "lease_seconds": 90,
+    "actual_plan": "Owned database EXPLAIN without ANALYZE of exact frozen production SQL/effective5, SeqScan+Sort; planner cost/row estimates are not runtime throughput",
+    "legal20_comparison": "Hypothetical read-only EXPLAIN only, not actual M2 configuration/execution or complete pipeline proof"
+  },
+  "power_scope": "owned -i -w assertion only, verified AC/open lid at start, not clamshell guarantee",
+  "process_absence_verified": [
+    95903,
+    95907,
+    95995,
+    96115
+  ],
+  "cleanup": "Actual named database and owned namespace count0/DROPexit0/queryexit0, 4PID absence, TMPDIR0; original Go exit remains unknown, PG3344 retained for authorized migration16 product validation",
+  "task100_complete": false,
+  "G0_accepted": false,
+  "M_baseline_complete": false,
+  "next": "Product16 PG integration window first; benchmark setup/cleanup repair only after real diagnostic and small equivalence proof, then original M, not a mechanical 3h rerun",
+  "archive": {
+    "path": "docs/company-mail/evidence/R5-B01-AJ-M2-FAILED-LOGS.tar.gz",
+    "sha256": "f03b0f0dbeb0014fbbc2c5b4b4166ea7ca55738208eaede98642abcc7f82ae5b",
+    "members": {
+      "M2/caffeinate-process.txt": "96b3f26427a02557c4f7535884aceb6510c9e1052b8a19f41f465b86ae00f3f5",
+      "M2/caffeinate.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "M2/caffeinate.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "M2/cleanup-database-counts.txt": "52f96c26a39ed25108a6db43d6e11c6051eba8a498a5baab1891adfa7ac7c262",
+      "M2/cleanup-db.log": "6e0504038d9284f24a4e629866b4a95050b3e6c28d03d72a3068b6023026ad30",
+      "M2/cleanup-drop.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "M2/cleanup-verify.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "M2/command.json": "62b283757c1cd43a1bd886ab90bc06ab9c1e75cf6fc3f5903ac30ddf0a185067",
+      "M2/go.jsonl": "a34194b2b26df05bf224288c2c0640e5c4774847546136c875edefe9341768b0",
+      "M2/go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "M2/lid-state-before.txt": "97affc952a261cb11296a9d36d48029ce4c3ce8c6744ed8093f51c8032d603bc",
+      "M2/owned-assertion.txt": "3d91d0049144ea801ee86c0dfccccfb656862b88f40933c49d916c1c062f34fc",
+      "M2/owned-database.txt": "32cec96055e0e9517856d7cc54a405850db10d024e495ffdc860dadcf5aee28c",
+      "M2/phase-timestamps.txt": "d105b062d459e1417a7ddc7c36fb9e52f32661310e9a31beb8eb7be2da9cf493",
+      "M2/post-terminal-dataset.txt": "3c57f074cbdfe877821b34d9642ffb0ba196546c5734b444d2c3e50232050b63",
+      "M2/power-assertion-scope.json": "8502dc305912b8287acde2e3ecf62ef6599bd9c1a42af95ef1dc9c5cf9937499",
+      "M2/preflight.json": "79ae7d993310fbb032ed1f1d719ab09183aaa1aefddf66f81aeb0ab98edbc1f9",
+      "M2/resource-watch.jsonl": "ef2a833d17efdf8205898ebe131a99a2d2dff93227dd463d82bd85f9a8777de0",
+      "M2/setup-diagnostic/active-query-classes.json": "b4002941c8f93933f7f7868c0efa69a5c65e843488bcc7a3f10ecf3d4289f509",
+      "M2/setup-diagnostic/claim-effective5-plan.json": "ee43ac2ad83bb5c22248068434a81e442ada38a64de360fdc2ffc79afa39b6ec",
+      "M2/setup-diagnostic/claim-hypothetical-legal20-plan.txt": "87f61ec0f85e96b28f88e92fbca29647e62c6eaa599aa7f2bc944da48f93caa1",
+      "M2/setup-diagnostic/claim-hypothetical-legal20.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "M2/setup-diagnostic/claim-hypothetical-legal20.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "M2/setup-diagnostic/legal20-comparison-provenance.json": "3f59ab670540ff77f78700fb01252a4bcbf1eafb513c26d3ecfa9f60e554a08a",
+      "M2/setup-diagnostic/plan-node-summary.json": "fc17619400c5aaff177ef6fa31763355b58eea6b4a79af4aa43e77a0b33c99a7",
+      "M2/setup-diagnostic/provenance.json": "1e6571ff456c5166101a1dc9b6112ba544c94f6266361334d62737121913b9c8",
+      "M2/setup-diagnostic/statistics-before-terminal.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "M2/setup-diagnostic/statistics-before-terminal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "M2/setup-diagnostic/statistics-before-terminal.txt": "2a8ff1b7293e7c4b4ba50b9ea56710fe3e684846d8984e7f3f204a9ae939fba6",
+      "M2/source-closure.json": "56a4ec7ab7067459fcdfe360a538b425701255a4136772434adc4a8d3da5cc76",
+      "runner/M2-runner.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "runner/M2-runner.json": "fe37e7b094e2e79139f3621ad53f4fb2ffaa1b9f7d64a0a859db863e30596841",
+      "runner/M2-runner.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "excluded": "global/unrelated assertion dump, DSN/JWT/raw HTTP response/DB/object/source tar",
+  "cleanup_receipt_archive": {
+    "path": "docs/company-mail/evidence/R5-B01-AJ-M2-CLEANUP-LOGS.tar.gz",
+    "sha256": "e287f43a802b24dbcd7ff90096dc17aa40759d1f5db9ccce276d35a953e602d8",
+    "members": {
+      "M2/cleanup-receipt.json": "38b6ede91bb8e5835d6ea3bfb37d3f45b779411286adc1b53d2ac6f3d98cc624"
+    }
+  }
+}

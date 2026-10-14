@@ -1,0 +1,229 @@
+{
+  "started_at_utc": "2026-10-07T12:41:38.282930+00:00",
+  "repository": "/workspace/scratch/458de7991ac3/tabmail-deps",
+  "web_directory": "/workspace/scratch/458de7991ac3/tabmail-deps/web",
+  "remote_integration_head": "97d6b71bb092c4a1fb7af9cc605f32559c4bec71",
+  "local_head": "e90c9ce0683dc9b9273962499cbed6713e60c5a2",
+  "source_tree": "53e28562bbbdc80dbba764e72555d783a0bf7f66",
+  "expected_source_tree": "53e28562bbbdc80dbba764e72555d783a0bf7f66",
+  "initial_git_status": "",
+  "node_version": "v24.19.0",
+  "npm_version": "11.9.0",
+  "go_version": "go version go1.25.7 linux/amd64",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "environment_overrides": {
+    "GOTOOLCHAIN": "local",
+    "GOCACHE": "/workspace/scratch/458de7991ac3/go-cache/build",
+    "GOMODCACHE": "/workspace/scratch/458de7991ac3/go-cache/mod"
+  },
+  "go_path_prefix": "/workspace/scratch/458de7991ac3/toolchains/go/bin",
+  "fixture_environment_present": {
+    "TABMAIL_R5_PROTOCOL_COMPONENT_FIXTURE": false,
+    "TABMAIL_R5_PROTOCOL_OBSERVATIONS": false
+  },
+  "lockfile_sha256": "b1c85223bc1171b16a5994c2f069ada51a5574719445142c31a213e9fda84e89",
+  "vitest_config_sha256": "3d754d8f3bd75d472d2025142426e1190fa8a417739e22411424308eceecffe4",
+  "initial_disk_free_bytes": 19063189504,
+  "checks": [
+    {
+      "name": "vitest",
+      "argv": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/458de7991ac3/validation/combined-web-vitest.results.json"
+      ],
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-deps/web",
+      "started_at_utc": "2026-10-07T12:41:38.524258+00:00",
+      "log": "/workspace/scratch/458de7991ac3/validation/combined-web-vitest.log",
+      "exit_code": 1,
+      "duration_seconds": 191.272,
+      "finished_at_utc": "2026-10-07T12:44:49.796879+00:00",
+      "log_sha256": "df02229aeca12ad938d5e9dc50c14944703ed1d817ffbe94e457b64e5c51a62d"
+    },
+    {
+      "name": "typecheck",
+      "argv": [
+        "npx",
+        "tsc",
+        "--noEmit",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-deps/web",
+      "started_at_utc": "2026-10-07T12:44:49.797633+00:00",
+      "log": "/workspace/scratch/458de7991ac3/validation/combined-web-typecheck.log",
+      "exit_code": 0,
+      "duration_seconds": 16.067,
+      "finished_at_utc": "2026-10-07T12:45:05.866086+00:00",
+      "log_sha256": "7125f194612fcff2f454c05d848e7cb71facc1967b4d5017e25b34fdee3ba74f"
+    },
+    {
+      "name": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-deps/web",
+      "started_at_utc": "2026-10-07T12:45:05.867801+00:00",
+      "log": "/workspace/scratch/458de7991ac3/validation/combined-web-build.log",
+      "exit_code": 0,
+      "duration_seconds": 16.65,
+      "finished_at_utc": "2026-10-07T12:45:22.522651+00:00",
+      "log_sha256": "9d2b9357d85f927384dddaa4c9ede2e8f91edc053fc6ab1d2e1e00eee08b5afe"
+    },
+    {
+      "name": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-deps/web",
+      "started_at_utc": "2026-10-07T12:45:22.523038+00:00",
+      "log": "/workspace/scratch/458de7991ac3/validation/combined-web-lint.log",
+      "exit_code": 0,
+      "duration_seconds": 24.224,
+      "finished_at_utc": "2026-10-07T12:45:46.747666+00:00",
+      "log_sha256": "5882257863d87bcf2ac8e36565be7d6afc7d396e705b735112c2bc0e36329a13"
+    }
+  ],
+  "finished_at_utc": "2026-10-07T12:45:46.748531+00:00",
+  "final_git_status": "",
+  "final_head": "e90c9ce0683dc9b9273962499cbed6713e60c5a2",
+  "final_tree": "53e28562bbbdc80dbba764e72555d783a0bf7f66",
+  "final_lockfile_sha256": "b1c85223bc1171b16a5994c2f069ada51a5574719445142c31a213e9fda84e89",
+  "final_vitest_config_sha256": "3d754d8f3bd75d472d2025142426e1190fa8a417739e22411424308eceecffe4",
+  "source_and_configuration_unchanged": true,
+  "vitest_results": {
+    "success": false,
+    "numTotalTestSuites": 142,
+    "numPassedTestSuites": 141,
+    "numFailedTestSuites": 1,
+    "numPendingTestSuites": 0,
+    "numTotalTests": 866,
+    "numPassedTests": 865,
+    "numFailedTests": 1,
+    "numPendingTests": 0,
+    "numTodoTests": 0
+  },
+  "vitest_failed_files": [
+    {
+      "name": "/workspace/scratch/458de7991ac3/tabmail-deps/web/r5-external-batch-probe.test.tsx",
+      "message": "",
+      "failed_assertions": [
+        {
+          "full_name": "R5 batch independent realm loopback PostgreSQL",
+          "failure_messages": [
+            "Error: explicit private fixture required\n    at /workspace/scratch/458de7991ac3/tabmail-deps/web/r5-external-batch-probe.test.tsx:9:20\n    at file:///workspace/scratch/458de7991ac3/tabmail-deps/web/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///workspace/scratch/458de7991ac3/tabmail-deps/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///workspace/scratch/458de7991ac3/tabmail-deps/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///workspace/scratch/458de7991ac3/tabmail-deps/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///workspace/scratch/458de7991ac3/tabmail-deps/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///workspace/scratch/458de7991ac3/tabmail-deps/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)\n    at file:///workspace/scratch/458de7991ac3/tabmail-deps/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64"
+          ]
+        }
+      ]
+    }
+  ],
+  "vitest_file_results": {
+    "total": 60,
+    "passed": 59,
+    "failed": 1,
+    "pending": 0
+  },
+  "vitest_fixture_scope": {
+    "config": "web/vitest.config.ts",
+    "existing_excluded_protocol_file": "components/company/r5-protocol-shared-components.test.tsx",
+    "added_exclusions": [],
+    "test_timeout_or_threshold_changes": false,
+    "full_default_suite_runs": 1,
+    "extra_postgresql_or_full_source_runner_executed": false
+  },
+  "failure_classification": {
+    "default_suite_green": false,
+    "test_file": "web/r5-external-batch-probe.test.tsx",
+    "test_name": "R5 batch independent realm loopback PostgreSQL",
+    "failure": "explicit private fixture required",
+    "required_environment": "TABMAIL_R5_PROTOCOL_COMPONENT_FIXTURE",
+    "required_environment_present": false,
+    "classification": "existing explicit private PostgreSQL fixture prerequisite is unavailable",
+    "basis": "The failure is thrown by the unchanged fixture-presence guard before any network or product behavior; no fallback fixture or skip was supplied.",
+    "unchanged_since_baseline": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+    "unchanged_paths": [
+      "web/vitest.config.ts",
+      "web/r5-external-batch-probe.test.tsx",
+      "web/components/company/r5-protocol.test.tsx"
+    ],
+    "git_diff_quiet_exit_code": 0
+  },
+  "feature_and_go_protocol_results": [
+    {
+      "name": "/workspace/scratch/458de7991ac3/tabmail-deps/web/components/company/compose-preview-response.test.tsx",
+      "status": "passed",
+      "total_tests": 19,
+      "passed": 19
+    },
+    {
+      "name": "/workspace/scratch/458de7991ac3/tabmail-deps/web/components/company/compose-sender-ownership.test.tsx",
+      "status": "passed",
+      "total_tests": 21,
+      "passed": 21
+    },
+    {
+      "name": "/workspace/scratch/458de7991ac3/tabmail-deps/web/components/company/r5-protocol.test.tsx",
+      "status": "passed",
+      "total_tests": 3,
+      "passed": 3
+    }
+  ],
+  "build_result": {
+    "exit_code": 0,
+    "next_version": "16.3.6",
+    "engine": "Turbopack",
+    "static_pages_generated": 29,
+    "default_page_workers": 8
+  },
+  "lint_result": {
+    "exit_code": 0,
+    "errors": 0,
+    "warnings": 4,
+    "warnings_in_unchanged_files": [
+      "web/features/company/profile-management.tsx",
+      "web/features/mail/components/submission-content.tsx",
+      "web/profile-refresh-browser/entry.jsx",
+      "web/review-independent/entry.jsx"
+    ]
+  },
+  "subsequent_rename_readonly_review": {
+    "commit": "221cdc9e70972bbc32a65d6ab46c1098dc34f1a3",
+    "tree": "c77ac064af69390ef493f6a7f1599b3ed7173738",
+    "comparison_base": "e90c9ce0683dc9b9273962499cbed6713e60c5a2",
+    "only_changed_path": "web/components/company/compose.tsx",
+    "change": "Rename local senderOperation callback parameter request to performRequest and its unique call site.",
+    "assessment": "Lexical alpha-renaming only; runtime control flow, state writes, error paths, and called callback are unchanged. This is read-only code review, not another full-suite/build run on the rename tree.",
+    "collector_before_count": 135,
+    "collector_after_count": 134,
+    "collector_removed": [
+      {
+        "branch": 0,
+        "callee": "request",
+        "expression": "",
+        "forwarding": false,
+        "line": 192,
+        "methods": [
+          "GET"
+        ],
+        "owner": "value",
+        "path": "",
+        "source": "web/components/company/compose.tsx"
+      }
+    ],
+    "collector_added": [],
+    "root_executed_targeted_test_log": "/workspace/scratch/458de7991ac3/validation/compose-collector-rename-tests.log",
+    "root_executed_targeted_test_result": {
+      "files_passed": 2,
+      "tests_passed": 40
+    }
+  },
+  "vitest_json_sha256": "7fbeed424ddee47b3c051a1ce7467969013ca51f5da31aca69cff70abbe65cdb"
+}

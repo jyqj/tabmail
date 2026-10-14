@@ -1,0 +1,53 @@
+{
+  "scope": "Live read-only PR metadata at finalization. Three implementation PRs merged into draft integration; duplicate recovery closed, not merged.",
+  "prs": [
+    {
+      "number": 79,
+      "url": "https://github.com/jyqj/tabmail/pull/79",
+      "title": "fix: complete four R5 reliability and administration tasks",
+      "state": "closed",
+      "merged": true,
+      "draft": false,
+      "head_sha": "50f6069c50ec396774bc3792109812479e48f470",
+      "base": "integration/company-mail-r5-pr-management-20261007",
+      "base_sha": "bcef70553ae0e2c541981e41edaa5e6993542d63",
+      "merge_commit_sha": "6172a69d9b24867369cdd891b5b00703143697ba"
+    },
+    {
+      "number": 80,
+      "url": "https://github.com/jyqj/tabmail/pull/80",
+      "title": "fix: complete three R5 protocol and administrator reliability tasks",
+      "state": "closed",
+      "merged": true,
+      "draft": false,
+      "head_sha": "7c5684917de133bc14d3e57c7ebfb864d07b649a",
+      "base": "integration/company-mail-r5-pr-management-20261007",
+      "base_sha": "6172a69d9b24867369cdd891b5b00703143697ba",
+      "merge_commit_sha": "b916bee08399eacd199d3bef8e5e5ebc2265a7d8"
+    },
+    {
+      "number": 82,
+      "url": "https://github.com/jyqj/tabmail/pull/82",
+      "title": "fix: finish R5 protocol evidence and domain lifecycle tasks",
+      "state": "closed",
+      "merged": true,
+      "draft": false,
+      "head_sha": "93278b0f6ad1297ce62cec8c69269461c1fbb6fa",
+      "base": "integration/company-mail-r5-pr-management-20261007",
+      "base_sha": "b916bee08399eacd199d3bef8e5e5ebc2265a7d8",
+      "merge_commit_sha": "b81233d71922840f90655bf2a3ebe6d4bef90525"
+    },
+    {
+      "number": 77,
+      "url": "https://github.com/jyqj/tabmail/pull/77",
+      "title": "fix: recover the completed R5 template follow-up and reviewed catalogs",
+      "state": "closed",
+      "merged": false,
+      "draft": false,
+      "head_sha": "fa6f559e12979fc76be8f876b135069358104d32",
+      "base": "integration/company-mail-r5-pr-management-20261007",
+      "base_sha": "bcef70553ae0e2c541981e41edaa5e6993542d63",
+      "merge_commit_sha": null
+    }
+  ]
+}

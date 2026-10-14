@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"tabmail/internal/delivery"
 	"time"
 
 	"tabmail/internal/app"
@@ -47,6 +48,25 @@ func (s *PgStore) CreateOutboundJobConsumeDraft(ctx context.Context, job *models
 }
 
 func (s *PgStore) enqueueOutboundJobTx(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption) (bool, error) {
+	return s.enqueueOutboundJobValidated(ctx, job, quota, draft, nil)
+}
+
+var _ store.AtomicOutboundEnqueue = (*PgStore)(nil)
+
+func (s *PgStore) CreateOutboundJobAuthorized(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption, validate store.OutboundEnqueueValidator) (replayed bool, err error) {
+	if job == nil || validate == nil {
+		return false, app.Forbidden("enqueue validation unavailable")
+	}
+	defer func() {
+		var pg *pgconn.PgError
+		if errors.As(err, &pg) && (pg.Code == "55P03" || pg.Code == "40001") {
+			err = app.Conflict("enqueue authority changed; reload before submitting")
+		}
+	}()
+	return s.enqueueOutboundJobValidated(ctx, job, quota, draft, validate)
+}
+
+func (s *PgStore) enqueueOutboundJobValidated(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption, validate store.OutboundEnqueueValidator) (bool, error) {
 	prepareOutboundJob(job)
 	if draft != nil {
 		// The store owns the provenance marker so any caller of the consume
@@ -60,6 +80,24 @@ func (s *PgStore) enqueueOutboundJobTx(ctx context.Context, job *models.Outbound
 		return false, err
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
+
+	// Acquire the parent key before sender/attachment/quota locks. The INSERT
+	// needs this same FK key protection eventually; taking it late creates a
+	// user -> tenant cycle against tenant-first offboarding. KEY SHARE allows
+	// concurrent submissions; it does not serialize them on tenant FOR UPDATE.
+	var tenantID uuid.UUID
+	parentLock := " FOR KEY SHARE"
+	if validate != nil {
+		// SHARE fences non-key tenant policy updates while independent
+		// submissions still share the parent instead of serializing globally.
+		parentLock = " FOR SHARE"
+	}
+	if err = tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1`+parentLock, job.TenantID).Scan(&tenantID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, app.NotFound("company not found")
+		}
+		return false, err
+	}
 
 	if job.IdempotencyKey != "" {
 		if len(job.IdempotencyKey) > 128 || job.SubmitActor == "" || job.RequestHash == "" {
@@ -80,6 +118,34 @@ func (s *PgStore) enqueueOutboundJobTx(ctx context.Context, job *models.Outbound
 			return true, tx.Commit(ctx)
 		}
 	}
+	var reader *outboundRetryReader
+	if validate != nil {
+		if job.SenderMailboxID == nil {
+			// A missing exact mailbox/identity cannot be row-locked. Match
+			// authorized retry's fail-fast protection of the absent-row gap.
+			if _, err = tx.Exec(ctx, `LOCK TABLE mailboxes,send_identities IN SHARE MODE NOWAIT`); err != nil {
+				return false, err
+			}
+		}
+		reader = &outboundRetryReader{store: s, tx: tx, tenant: job.TenantID}
+		if quota, err = validate(ctx, reader, job, quota); err != nil {
+			return false, err
+		}
+	}
+	// Match employee disposition's user-before-attachment order. Keep the
+	// database trigger as a final defense for direct INSERTs. A replay above
+	// performs no new submission and retains its established receipt semantics.
+	if job.SenderUserID != nil && job.SenderMailboxID != nil {
+		var active bool
+		err = tx.QueryRow(ctx, `SELECT is_active FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`, job.TenantID, *job.SenderUserID).Scan(&active)
+		if errors.Is(err, pgx.ErrNoRows) || err == nil && !active {
+			return false, app.Forbidden("employee sender is inactive")
+		}
+		if err != nil {
+			return false, err
+		}
+	}
+
 	if len(job.AttachmentIDs) > 0 {
 		if job.SenderUserID == nil || job.SenderMailboxID == nil {
 			return false, app.Forbidden("attachments require an employee mailbox")
@@ -87,6 +153,16 @@ func (s *PgStore) enqueueOutboundJobTx(ctx context.Context, job *models.Outbound
 		if err = validateAttachmentIDs(ctx, tx, job.TenantID, *job.SenderUserID, *job.SenderMailboxID, job.AttachmentIDs); err != nil {
 			return false, err
 		}
+	}
+	if quota.CurrentUserPolicy && quota.UserDaily != nil {
+		var now time.Time
+		if err = tx.QueryRow(ctx, `SELECT clock_timestamp()`).Scan(&now); err != nil {
+			return false, err
+		}
+		q := *quota.UserDaily
+		q.Since = now.UTC().Truncate(24 * time.Hour)
+		quota.UserDaily = &q
+		job.CreatedAt, job.UpdatedAt = now, now
 	}
 	if err := lockOutboundQuotaKeys(ctx, tx, job, quota); err != nil {
 		return false, err
@@ -141,10 +217,25 @@ func (s *PgStore) enqueueOutboundJobTx(ctx context.Context, job *models.Outbound
 			return false, store.ErrDraftAlreadyConsumed
 		}
 	}
+	if reader != nil {
+		var now time.Time
+		if err = tx.QueryRow(ctx, `SELECT clock_timestamp()`).Scan(&now); err != nil {
+			return false, err
+		}
+		if quota.CurrentUserPolicy && quota.UserDaily != nil && quota.UserDaily.Limit > 0 && !now.UTC().Truncate(24*time.Hour).Equal(quota.UserDaily.Since) {
+			return false, app.Conflict("submission crossed UTC quota day; retry the same command")
+		}
+		for _, deadline := range reader.deadlines {
+			if !deadline.After(now) {
+				return false, app.Forbidden("enqueue credential or mailbox expired")
+			}
+		}
+	}
 	return false, tx.Commit(ctx)
 }
 
 func prepareOutboundJob(job *models.OutboundJob) {
+	job.RecipientLedger = true
 	if job.ID == uuid.Nil {
 		job.ID = uuid.New()
 	}
@@ -265,38 +356,11 @@ func (s *PgStore) FindOutboundJobByDraft(ctx context.Context, tenantID, draftID 
 // exclusivity; this method asserts it defensively.
 func (s *PgStore) ListOutboundJobsScoped(ctx context.Context, scope authz.OwnerListFilter, pg models.Page) ([]*models.OutboundJob, int, error) {
 	pg = pg.Normalize()
-	args := []any{scope.TenantID}
-	where := []string{"tenant_id=$1"}
-	n := 1
-	switch {
-	case scope.AllInTenant:
-		// No owner filter — admins see the whole tenant.
-	case scope.UserID != nil:
-		n++
-		where = append(where, "user_id=$"+strconv.Itoa(n))
-		args = append(args, *scope.UserID)
-	case scope.APIKeyID != nil:
-		n++
-		where = append(where, "api_key_id=$"+strconv.Itoa(n))
-		args = append(args, *scope.APIKeyID)
-	default:
-		// Unknown principal: return empty rather than the whole tenant.
+	whereSQL, args, visible := outboundJobsScopeSQL(scope)
+	if !visible {
 		return []*models.OutboundJob{}, 0, nil
 	}
-
-	if scope.ReaderUserID != nil && !scope.AllInTenant {
-		n++
-		u := "$" + strconv.Itoa(n)
-		args = append(args, *scope.ReaderUserID)
-		shared := `sender_mailbox_id IN (SELECT m.id FROM mailboxes m WHERE m.tenant_id=$1 AND (m.expires_at IS NULL OR m.expires_at>clock_timestamp()) AND (m.owner_user_id=` + u + ` OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.tenant_id=m.tenant_id AND g.mailbox_id=m.id AND g.user_id=` + u + ` AND g.can_read)))`
-		where[len(where)-1] = "(" + where[len(where)-1] + " OR " + shared + ")"
-	}
-	if len(scope.AllowedZoneIDs) > 0 {
-		n++
-		where = append(where, "zone_id=ANY($"+strconv.Itoa(n)+")")
-		args = append(args, scope.AllowedZoneIDs)
-	}
-	whereSQL := strings.Join(where, " AND ")
+	n := len(args)
 	var total int
 	if err := s.pool.QueryRow(ctx,
 		"SELECT count(*) FROM outbound_jobs WHERE "+whereSQL, args...).Scan(&total); err != nil {
@@ -322,27 +386,65 @@ func (s *PgStore) ListOutboundJobsScoped(ctx context.Context, scope authz.OwnerL
 	return out, total, rows.Err()
 }
 
+// outboundJobsScopeSQL is the production listing predicate, kept pure so the
+// tagged empty-domain scope can be verified without querying a live database.
+func outboundJobsScopeSQL(scope authz.OwnerListFilter) (string, []any, bool) {
+	args := []any{scope.TenantID}
+	where := []string{"tenant_id=$1"}
+	n := 1
+	switch {
+	case scope.AllInTenant:
+		// No owner filter — admins see the whole tenant.
+	case scope.UserID != nil:
+		n++
+		where = append(where, "user_id=$"+strconv.Itoa(n))
+		args = append(args, *scope.UserID)
+	case scope.APIKeyID != nil:
+		n++
+		where = append(where, "api_key_id=$"+strconv.Itoa(n))
+		args = append(args, *scope.APIKeyID)
+	default:
+		// Unknown principal: return empty rather than the whole tenant.
+		return "", nil, false
+	}
+
+	if scope.ReaderUserID != nil && !scope.AllInTenant {
+		n++
+		args = append(args, *scope.ReaderUserID)
+		shared := `sender_mailbox_id IN (SELECT m.id FROM mailboxes m WHERE ` + readableMailboxPredicate(1, n) + `)`
+		where[len(where)-1] = "(" + where[len(where)-1] + " OR " + shared + ")"
+	}
+	if scope.RestrictZones || len(scope.AllowedZoneIDs) > 0 {
+		n++
+		where = append(where, "zone_id=ANY($"+strconv.Itoa(n)+")")
+		args = append(args, scope.AllowedZoneIDs)
+	}
+	return strings.Join(where, " AND "), args, true
+}
+
 // Claim one job using database time, holding ambiguous expired sends instead
 // of handing them to another sender. Network calls are bounded to one minute,
 // comfortably below this five-minute lease.
 func (s *PgStore) ClaimOutboundJobs(ctx context.Context, _ time.Time, _ int) ([]*models.OutboundJob, error) {
-	_, err := s.pool.Exec(ctx, `UPDATE outbound_jobs SET state='failed',last_error='Expired in-flight SMTP operation; acceptance uncertain, review required',
+	_, err := s.pool.Exec(ctx, `UPDATE outbound_jobs SET state=$1::outbound_state,last_error='Expired in-flight SMTP operation; acceptance uncertain, review required',
  claimed_at=NULL,lease_until=NULL,delivery_token=NULL,updated_at=clock_timestamp()
- WHERE state='processing' AND in_flight_domain<>'' AND (lease_until IS NULL OR lease_until<=clock_timestamp())`)
+ WHERE state=$2::outbound_state AND in_flight_domain<>'' AND (lease_until IS NULL OR lease_until<=clock_timestamp())`,
+		models.OutboundFailed, models.OutboundProcessing)
 	if err != nil {
 		return nil, err
 	}
 	rows, err := s.pool.Query(ctx, `WITH candidate AS (
  SELECT id FROM outbound_jobs WHERE in_flight_domain='' AND
- ((state IN ('pending','retry') AND next_attempt_at<=clock_timestamp()) OR
- (state='processing' AND (lease_until IS NULL OR lease_until<=clock_timestamp())))
+ ((state IN ($1::outbound_state,$2::outbound_state) AND next_attempt_at<=clock_timestamp()) OR
+ (state=$3::outbound_state AND (lease_until IS NULL OR lease_until<=clock_timestamp())))
  ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED)
- UPDATE outbound_jobs j SET state='processing',attempts=j.attempts+1,claimed_at=clock_timestamp(),
+ UPDATE outbound_jobs j SET state=$3::outbound_state,attempts=j.attempts+1,claimed_at=clock_timestamp(),
  lease_until=clock_timestamp()+interval '5 minutes',delivery_token=gen_random_uuid(),updated_at=clock_timestamp()
  FROM candidate WHERE j.id=candidate.id RETURNING j.id,j.tenant_id,j.user_id,j.api_key_id,j.mail_from,j.rcpt_to,j.subject,
  j.text_body,j.html_body,j.headers_json,j.raw_mime,j.zone_id,j.state,j.attempts,j.max_attempts,j.last_error,j.next_attempt_at,
  j.claimed_at,j.lease_until,j.smtp_code,j.smtp_response,j.message_id_header,j.delivery_token,j.created_at,j.updated_at,
- j.to_addrs,j.cc_addrs,j.bcc_addrs,j.delivered_domains,j.in_flight_domain,j.sender_user_id,j.sender_key_id,j.sender_mailbox_id,j.template_name,j.template_version_id,j.content_digest,j.submit_actor,j.idempotency_key,j.request_hash,j.recipient_ledger,j.attachment_ids,j.draft_id`)
+ j.to_addrs,j.cc_addrs,j.bcc_addrs,j.delivered_domains,j.in_flight_domain,j.sender_user_id,j.sender_key_id,j.sender_mailbox_id,j.template_name,j.template_version_id,j.content_digest,j.submit_actor,j.idempotency_key,j.request_hash,j.recipient_ledger,j.attachment_ids,j.draft_id`,
+		models.OutboundPending, models.OutboundRetry, models.OutboundProcessing)
 	if err != nil {
 		return nil, err
 	}
@@ -358,7 +460,8 @@ func (s *PgStore) ClaimOutboundJobs(ctx context.Context, _ time.Time, _ int) ([]
 	return out, rows.Err()
 }
 
-var ErrDeliveryTokenMismatch = errors.New("delivery token mismatch: job was re-claimed")
+// Compatibility alias: callers can use errors.Is against the store sentinel.
+var ErrDeliveryTokenMismatch = store.ErrDeliveryTokenMismatch
 
 func requireDeliveryUpdate(tag pgconn.CommandTag, err error) error {
 	if err != nil {
@@ -370,36 +473,18 @@ func requireDeliveryUpdate(tag pgconn.CommandTag, err error) error {
 	return nil
 }
 func (s *PgStore) MarkOutboundJobSent(ctx context.Context, id uuid.UUID, token *uuid.UUID, code int, response, messageID string) error {
-	if token == nil {
-		return ErrDeliveryTokenMismatch
-	}
-	tag, err := s.pool.Exec(ctx, `UPDATE outbound_jobs SET state='sent',smtp_code=$3,smtp_response=$4,message_id_header=$5,last_error='',
- claimed_at=NULL,lease_until=NULL,delivery_token=NULL,updated_at=clock_timestamp()
- WHERE id=$1 AND delivery_token=$2 AND state='processing' AND lease_until>clock_timestamp() AND in_flight_domain=''`, id, *token, code, response, messageID)
-	return requireDeliveryUpdate(tag, err)
+	return s.finalizeOutbound(ctx, id, token, delivery.FinishSent, "", nil, &code, &response, &messageID)
 }
 func (s *PgStore) MarkOutboundJobRetry(ctx context.Context, id uuid.UUID, token *uuid.UUID, reason string, next time.Time) error {
-	if token == nil {
-		return ErrDeliveryTokenMismatch
-	}
-	tag, err := s.pool.Exec(ctx, `UPDATE outbound_jobs SET state=(CASE WHEN in_flight_domain='' THEN 'retry' ELSE 'failed' END)::outbound_state,
- last_error=CASE WHEN in_flight_domain='' THEN $3 ELSE 'Acceptance uncertain; review required: '||$3 END,next_attempt_at=$4,
- claimed_at=NULL,lease_until=NULL,delivery_token=NULL,updated_at=clock_timestamp()
- WHERE id=$1 AND delivery_token=$2 AND state='processing' AND lease_until>clock_timestamp()`, id, *token, boundedIngressError(reason), next.UTC())
-	return requireDeliveryUpdate(tag, err)
+	next = next.UTC()
+	return s.finalizeOutbound(ctx, id, token, delivery.FinishRetry, reason, &next, nil, nil, nil)
 }
 func (s *PgStore) MarkOutboundJobFailed(ctx context.Context, id uuid.UUID, token *uuid.UUID, reason string, dead bool) error {
-	if token == nil {
-		return ErrDeliveryTokenMismatch
-	}
-	state := "failed"
+	event := delivery.FinishFailed
 	if dead {
-		state = "dead"
+		event = delivery.FinishDead
 	}
-	tag, err := s.pool.Exec(ctx, `UPDATE outbound_jobs SET state=$3,last_error=$4,
- claimed_at=NULL,lease_until=NULL,delivery_token=NULL,updated_at=clock_timestamp()
- WHERE id=$1 AND delivery_token=$2 AND state='processing' AND lease_until>clock_timestamp()`, id, *token, state, boundedIngressError(reason))
-	return requireDeliveryUpdate(tag, err)
+	return s.finalizeOutbound(ctx, id, token, event, reason, nil, nil, nil, nil)
 }
 
 func (s *PgStore) CountOutboundSince(ctx context.Context, tenantID uuid.UUID, userID *uuid.UUID, since time.Time) (int, error) {
@@ -455,9 +540,14 @@ func countOutboundByIdentitySinceQuery(ctx context.Context, querier outboundJobQ
 }
 
 func (s *PgStore) RequeueOutboundJob(ctx context.Context, id uuid.UUID) error {
-	tag, err := s.pool.Exec(ctx, `UPDATE outbound_jobs SET state='pending',last_error='',next_attempt_at=clock_timestamp(),
+	return requeueOutboundJob(ctx, s.pool, id)
+}
+
+func requeueOutboundJob(ctx context.Context, q outboundSQLExecutor, id uuid.UUID) error {
+	tag, err := q.Exec(ctx, `UPDATE outbound_jobs SET state=$2::outbound_state,last_error='',next_attempt_at=clock_timestamp(),
  claimed_at=NULL,lease_until=NULL,delivery_token=NULL,updated_at=clock_timestamp()
- WHERE id=$1 AND state IN ('dead','failed') AND in_flight_domain=''`, id)
+ WHERE id=$1 AND state IN ($3::outbound_state,$4::outbound_state) AND in_flight_domain=''`,
+		id, models.OutboundPending, models.OutboundDead, models.OutboundFailed)
 	if err != nil {
 		return err
 	}
@@ -567,6 +657,106 @@ func (s *PgStore) DeleteSuppressionAudited(ctx context.Context, tenantID uuid.UU
 		return err
 	}
 	defer tx.Rollback(ctx)
+	// The required audit takes the tenant FK key after deleting the child.
+	// Protect that same parent first, before acquiring the suppression lock,
+	// so tenant deletion cannot hold the parent while waiting on this child.
+	var parentID uuid.UUID
+	if err := tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, tenantID).Scan(&parentID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return app.NotFound("company not found")
+		}
+		return err
+	}
+	if err := deleteSuppressionAuditedTx(ctx, tx, tenantID, id, entry); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
+// DeleteSuppressionAuthorized keeps the current JWT or management-key admission
+// fenced in the same transaction as the suppression delete and required audit.
+// The older Audited port is trusted compatibility, not the HTTP admission port.
+func (s *PgStore) DeleteSuppressionAuthorized(ctx context.Context, actor authz.Actor, id uuid.UUID, entry models.AuditEntry) error {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	var tenantID uuid.UUID
+	if err = tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, actor.TenantID).Scan(&tenantID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return app.NotFound("company not found")
+		}
+		return err
+	}
+	var keyExpiry *time.Time
+	switch actor.Type {
+	case authz.PrincipalUser:
+		actor, err = currentMemberActor(ctx, tx, actor, tenantID)
+		if err != nil {
+			return app.FromAuthz(err)
+		}
+		if !actor.IsTenantAdmin() {
+			return app.Forbidden("tenant administrator required")
+		}
+	case authz.PrincipalAPIKey:
+		if actor.OwnerUserID != nil {
+			u, e := scanUser(tx.QueryRow(ctx, userSelect+` WHERE id=$1 AND tenant_id=$2 FOR SHARE`, *actor.OwnerUserID, tenantID))
+			if e != nil {
+				return e
+			}
+			if u == nil || !u.IsActive {
+				return app.Forbidden("key owner unavailable")
+			}
+		}
+		key := &models.TenantAPIKey{}
+		var scopes json.RawMessage
+		err = tx.QueryRow(ctx, `SELECT id,tenant_id,owner_user_id,scopes,expires_at FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 FOR SHARE NOWAIT`, actor.ID, tenantID).Scan(&key.ID, &key.TenantID, &key.OwnerUserID, &scopes, &key.ExpiresAt)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return app.Forbidden("key unavailable")
+		}
+		if err != nil {
+			var pg *pgconn.PgError
+			if errors.As(err, &pg) && pg.Code == "55P03" {
+				return app.Conflict("key is changing; reload before retrying")
+			}
+			return err
+		}
+		if err = json.Unmarshal(scopes, &key.Scopes); err != nil {
+			return err
+		}
+		manage := false
+		for _, scope := range key.Scopes {
+			if strings.ToLower(strings.TrimSpace(scope)) == "suppression:manage" {
+				manage = true
+			}
+		}
+		if !authz.OutboundKeyIdentityMatches(actor, key) || actor.TenantWide != (key.OwnerUserID == nil) || !manage {
+			return app.Forbidden("current key scope or identity unavailable")
+		}
+		keyExpiry = key.ExpiresAt
+	default:
+		return app.Forbidden("current suppression principal required")
+	}
+	// Audit labels are effects, never credentials or arbitrary parent references.
+	entry.TenantID, entry.Actor = &tenantID, actor.AuditLabel()
+	entry.Action, entry.ResourceType, entry.ResourceID = "suppression.delete", "suppression", &id
+	if err = deleteSuppressionAuditedTx(ctx, tx, tenantID, id, entry); err != nil {
+		return err
+	}
+	if keyExpiry != nil {
+		var now time.Time
+		if err = tx.QueryRow(ctx, `SELECT clock_timestamp()`).Scan(&now); err != nil {
+			return err
+		}
+		if !keyExpiry.After(now) {
+			return app.Forbidden("key expired")
+		}
+	}
+	return tx.Commit(ctx)
+}
+
+func deleteSuppressionAuditedTx(ctx context.Context, tx pgx.Tx, tenantID uuid.UUID, id uuid.UUID, entry models.AuditEntry) error {
 	var address string
 	if err := tx.QueryRow(ctx,
 		`SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE`,
@@ -593,7 +783,7 @@ func (s *PgStore) DeleteSuppressionAudited(ctx context.Context, tenantID uuid.UU
 		entry.ID, entry.TenantID, entry.Actor, entry.Action, entry.ResourceType, entry.ResourceID, entry.Details, entry.CreatedAt); err != nil {
 		return err
 	}
-	return tx.Commit(ctx)
+	return nil
 }
 
 // mergeAuditDetail decodes an audit entry's details JSON, sets one key, and
@@ -612,4 +802,3 @@ func mergeAuditDetail(details json.RawMessage, key string, value string) (json.R
 	}
 	return b, nil
 }
-

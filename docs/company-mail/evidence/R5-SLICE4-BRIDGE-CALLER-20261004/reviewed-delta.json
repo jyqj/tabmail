@@ -1,0 +1,104 @@
+{
+  "internal/api/handlers/r5_protocol_component_observations_test.go": {
+    "snapshot": "frozen-component.go.txt",
+    "sha256": "22c7eff281505fef03e4adfd8b6d7fe1724e157446153ede9640d3c0ff588dc7",
+    "changes": [
+      {
+        "start": 589,
+        "end": 590,
+        "old": "func r5UIExternalRuntime(t *testing.T, root string) (string, string, string) {\n",
+        "new": "func r5UIExternalRuntime(t *testing.T, root string) (string, string, string, int) {\n"
+      },
+      {
+        "start": 601,
+        "end": 601,
+        "old": "",
+        "new": "\tselectedVersion := 2\n\tif value, present := os.LookupEnv(\"TABMAIL_R5_SELECTED_BINDING_VERSION\"); present {\n\t\tswitch value {\n\t\tcase \"2\":\n\t\tcase \"3\":\n\t\t\tselectedVersion = 3\n\t\tdefault:\n\t\t\tt.Fatal(\"external runtime selector must be integer 2 or 3\")\n\t\t}\n\t}\n"
+      },
+      {
+        "start": 609,
+        "end": 610,
+        "old": "\t\tHelperSHA256      string `json:\"helper_sha256\"`\n",
+        "new": "\t\tHelperSHA256      string          `json:\"helper_sha256\"`\n\t\tSchemaVersion     json.RawMessage `json:\"schema_version\"`\n\t\tSelectedVersion   json.RawMessage `json:\"selected_binding_version\"`\n\t\tAdmittedSelection json.RawMessage `json:\"admitted_selection\"`\n"
+      },
+      {
+        "start": 612,
+        "end": 613,
+        "old": "\tif manifest.Policy != \"r5_external_dependency_runtime_v2\" || manifest.Status != \"UNADOPTED\" || manifest.Source.Path != root {\n",
+        "new": "\tif string(manifest.SchemaVersion) != fmt.Sprint(selectedVersion) || manifest.Policy != fmt.Sprintf(\"r5_external_dependency_runtime_v%d\", selectedVersion) || manifest.Status != \"UNADOPTED\" || manifest.Source.Path != root {\n"
+      },
+      {
+        "start": 614,
+        "end": 614,
+        "old": "",
+        "new": "\t}\n\tif selectedVersion == 2 && (len(manifest.SelectedVersion) != 0 || len(manifest.AdmittedSelection) != 0) || selectedVersion == 3 && string(manifest.SelectedVersion) != \"3\" {\n\t\tt.Fatal(\"external runtime selected version differs\")\n"
+      },
+      {
+        "start": 632,
+        "end": 633,
+        "old": "\tcmd := exec.Command(manifest.Python.Path, helper, \"validate\", \"--source\", root)\n",
+        "new": "\tcmd := exec.Command(manifest.Python.Path, helper, \"validate\", \"--source\", root, \"--selected-binding-version\", fmt.Sprint(selectedVersion))\n"
+      },
+      {
+        "start": 637,
+        "end": 642,
+        "old": "\treturn manifest.Python.Path, manifest.Node.Path, manifest.CLI.Path\n}\n\nfunc r5UIExternalVitestCommand(ctx context.Context, root, launcher, node, cli, config, report string) *exec.Cmd {\n\tcmd := exec.CommandContext(ctx, launcher, filepath.Join(root, \"scripts/preparation/r5_external_runtime.py\"), \"launch\", \"--source\", root, \"--\", node, cli, \"run\", \"--cache=false\", \"--experimental.fsModuleCache=false\", \"--config\", config, \"--reporter=json\", \"--outputFile\", report)\n",
+        "new": "\treturn manifest.Python.Path, manifest.Node.Path, manifest.CLI.Path, selectedVersion\n}\n\nfunc r5UIExternalVitestCommand(ctx context.Context, root, launcher, node, cli, config, report string, selectedVersion int) *exec.Cmd {\n\tcmd := exec.CommandContext(ctx, launcher, filepath.Join(root, \"scripts/preparation/r5_external_runtime.py\"), \"launch\", \"--source\", root, \"--selected-binding-version\", fmt.Sprint(selectedVersion), \"--\", node, cli, \"run\", \"--cache=false\", \"--experimental.fsModuleCache=false\", \"--config\", config, \"--reporter=json\", \"--outputFile\", report)\n"
+      },
+      {
+        "start": 652,
+        "end": 653,
+        "old": "\tlauncher, node, cli := r5UIExternalRuntime(t, root)\n",
+        "new": "\tlauncher, node, cli, selectedVersion := r5UIExternalRuntime(t, root)\n"
+      },
+      {
+        "start": 679,
+        "end": 680,
+        "old": "\t\t\t\t\tcmd := r5UIExternalVitestCommand(ctx, root, launcher, node, cli, \"vitest.r5protocol.config.ts\", report)\n",
+        "new": "\t\t\t\t\tcmd := r5UIExternalVitestCommand(ctx, root, launcher, node, cli, \"vitest.r5protocol.config.ts\", report, selectedVersion)\n"
+      }
+    ]
+  },
+  "internal/api/handlers/r5_external_runtime_probe_test.go": {
+    "snapshot": "frozen-probe.go.txt",
+    "sha256": "addb72c44b11167810bb888c74d20954086390fa2c9a5a44ccd9332c4988a4b7",
+    "changes": [
+      {
+        "start": 89,
+        "end": 90,
+        "old": "\tlauncher, node, cli := r5UIExternalRuntime(t, root)\n",
+        "new": "\tlauncher, node, cli, selectedVersion := r5UIExternalRuntime(t, root)\n"
+      },
+      {
+        "start": 92,
+        "end": 93,
+        "old": "\tcmd := r5UIExternalVitestCommand(ctx, root, launcher, node, cli, \"vitest.r5external-probe.config.ts\", report)\n",
+        "new": "\tcmd := r5UIExternalVitestCommand(ctx, root, launcher, node, cli, \"vitest.r5external-probe.config.ts\", report, selectedVersion)\n"
+      }
+    ]
+  },
+  "scripts/check_r5_protocol.py": {
+    "snapshot": "frozen-caller.py.txt",
+    "sha256": "4c2a066323b9e6871f99c98ef1ea62e770f03bdb4cfaea4911414e36dd1933e8",
+    "changes": [
+      {
+        "start": 552,
+        "end": 554,
+        "old": "        external_runtime = r5_external_runtime.from_environment(ROOT)\n        r5_external_runtime.validate(external_runtime)\n",
+        "new": "        selected_binding_version = r5_external_runtime.environment_version()\n        external_runtime = r5_external_runtime.from_environment(ROOT, selected_binding_version=selected_binding_version)\n        r5_external_runtime.validate(external_runtime, selected_binding_version=selected_binding_version)\n"
+      },
+      {
+        "start": 574,
+        "end": 575,
+        "old": "        result = r5_external_runtime.launch(external_runtime,cmd,env)\n",
+        "new": "        result = r5_external_runtime.launch(external_runtime,cmd,env,selected_binding_version=selected_binding_version)\n"
+      },
+      {
+        "start": 584,
+        "end": 585,
+        "old": "        r5_external_runtime.validate(external_runtime)\n",
+        "new": "        r5_external_runtime.validate(external_runtime, selected_binding_version=selected_binding_version)\n"
+      }
+    ]
+  }
+}

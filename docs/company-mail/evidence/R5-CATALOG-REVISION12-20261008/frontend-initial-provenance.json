@@ -1,0 +1,43 @@
+{
+  "head": "b87df7a77656457549d6f2d678c56d321ae0d869",
+  "tree": "312dbed6634b7b173e6ec9e180bbf5d0f1809d9d",
+  "status": "",
+  "9bcc542dcaa0bb7c280c380ea278c1a2a52717d3": {
+    "exit": 0,
+    "type": "commit"
+  },
+  "f2713367dd949487c632ebee51de3a0cc1d2c6f7": {
+    "exit": 0,
+    "type": "commit"
+  },
+  "58d0c9cf274569258319ff4b5dcab7912b0174f4": {
+    "exit": 0,
+    "type": "commit"
+  },
+  "f7ba05a": {
+    "exit": 128,
+    "type": ""
+  },
+  "d2a4f21d3cc6742bc2cb7e831eeedd771ddd1c71": {
+    "exit": 128,
+    "type": ""
+  },
+  "8e4fd58f63f4e111eca8e5482ae91abbec0484b2": {
+    "exit": 128,
+    "type": ""
+  },
+  "fd87031aa117dc48346bbdc22b663e0385704c20": {
+    "exit": 128,
+    "type": ""
+  },
+  "alternates_exists": false,
+  "shallow_exists": false,
+  "promisor_packs": [],
+  "object_env": {},
+  "pack_links": {
+    "pack-0b345513d9a8569cebc0163273f465a995fe8da2.rev": 1,
+    "pack-0b345513d9a8569cebc0163273f465a995fe8da2.pack": 1,
+    "pack-0b345513d9a8569cebc0163273f465a995fe8da2.idx": 1
+  },
+  "test_sha256": "c2b4799c7a602bff94591c7bdbf312ca97f27d4aeacad1d122ac035dd5e5f754"
+}

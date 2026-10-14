@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "actual_merge": {
+    "sha": "ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+    "node_id": "C_kwDORt2amNoAKGZmNDMzMjZlODFmMjYyZGFhYWM3YjNkZmQ4YjMwNDdhOGY1MTc0M2I",
+    "url": "https://api.github.com/repos/jyqj/tabmail/git/commits/ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+    "html_url": "https://github.com/jyqj/tabmail/commit/ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+    "author": {
+      "name": "金亦求金",
+      "email": "jyj20040616@gmail.com",
+      "date": "2026-10-09T03:27:43Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-10-09T03:27:43Z"
+    },
+    "tree": {
+      "sha": "a5d05c981558239810bb4dd1022fc52b32e16c90",
+      "url": "https://api.github.com/repos/jyqj/tabmail/git/trees/a5d05c981558239810bb4dd1022fc52b32e16c90"
+    },
+    "message": "Merge R5 EXEC round 2: complete names, rich drafts and DATA boundary tasks\n\nAccept fixed before/after regressions, independent review, 544 joint local Go and 157 UI passes, and exact public tree CI with 705 Go + 157 UI passes. Completes EXEC-04/05/06 in draft integration; parent TODO and release gates remain intact.",
+    "parents": [
+      {
+        "sha": "602b17544d0cd12c04f1b90c116814ae0522199a",
+        "url": "https://api.github.com/repos/jyqj/tabmail/git/commits/602b17544d0cd12c04f1b90c116814ae0522199a",
+        "html_url": "https://github.com/jyqj/tabmail/commit/602b17544d0cd12c04f1b90c116814ae0522199a"
+      },
+      {
+        "sha": "419848e51b2d5e509898c355ace1c0deffe47fd4",
+        "url": "https://api.github.com/repos/jyqj/tabmail/git/commits/419848e51b2d5e509898c355ace1c0deffe47fd4",
+        "html_url": "https://github.com/jyqj/tabmail/commit/419848e51b2d5e509898c355ace1c0deffe47fd4"
+      }
+    ],
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJqyF8vCRC1aQ7uu5UhlAAAJAoQAKliAJziQPcDkfzgpUEhpgTv\nWwge78xmrs8QR7Tk3KSNZr+XnzI49kRZ7k02UimQaWILSz3gBhRU3CGImOAOYS6E\nE8TmCSiHz/YRsU8OwI+biXoPRBBBDTuiZT0qmo7onxwkJKWRBv9h41QmkfW8MvcG\n7vJxM6jm+P/Jy02Im1U5/2CqJwZMVwmQ/+yOAbZDO7EigYaXPA0ZWMB5h9p67kMP\nOjYPp9d2T8f6X0URJVAXRNn+68yrVcEScVXzb4WfBs8z2bd8uGVLzNEJ893EcK2b\nvx3uqZHbyXQDuD1UUz9AOoxGKmX7Oxj8gvXlIa6fkDdMwVI56Dc4LO/vI7/koTKW\nZPL3gNKmuyx/aQ/nxJM9TmFmvmTzFVPQEmZ4hdI1ksHWZ2ZMoIonMbP+HkX4Qd29\n6nDabr9kRABKFokdoJGYVDtgD9Xe6uOtF37j6QDzH0+PaesrRGo1o5fADjl5weJj\nKCLkGLVY/bFAkhmFTOh37/umbkx492vWygIOUi3Z/rNCYhePjjJVOXYjihYbRay7\nt25bF6T/gwyXAw3oZn4JBAighZrzjoYER79mKhkZSCIrECrZsdPNUXsqDYYj3uU6\nPs0xmajPvvtt6PoLeTTYiMpZUlzhVCv9TKL0L5uGlwjCq7EJVUXIIWLKnkltfNXF\nv2QHSoVZAMwNOtwS8W7Y\n=E79A\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree a5d05c981558239810bb4dd1022fc52b32e16c90\nparent 602b17544d0cd12c04f1b90c116814ae0522199a\nparent 419848e51b2d5e509898c355ace1c0deffe47fd4\nauthor 金亦求金 <jyj20040616@gmail.com> 1791516463 +0800\ncommitter GitHub <noreply@github.com> 1791516463 +0800\n\nMerge R5 EXEC round 2: complete names, rich drafts and DATA boundary tasks\n\nAccept fixed before/after regressions, independent review, 544 joint local Go and 157 UI passes, and exact public tree CI with 705 Go + 157 UI passes. Completes EXEC-04/05/06 in draft integration; parent TODO and release gates remain intact.",
+      "verified_at": "2026-10-09T03:27:44Z"
+    }
+  },
+  "actual_ci_checkout": {
+    "sha": "872d7c4a885e0b3879f250f7e5d07455792a5a08",
+    "node_id": "C_kwDORt2amNoAKDg3MmQ3YzRhODg1ZTBiMzg3OWYyNTBmN2U1ZDA3NDU1NzkyYTVhMDg",
+    "url": "https://api.github.com/repos/jyqj/tabmail/git/commits/872d7c4a885e0b3879f250f7e5d07455792a5a08",
+    "html_url": "https://github.com/jyqj/tabmail/commit/872d7c4a885e0b3879f250f7e5d07455792a5a08",
+    "author": {
+      "name": "金亦求金",
+      "email": "jyj20040616@gmail.com",
+      "date": "2026-10-09T03:17:43Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-10-09T03:17:43Z"
+    },
+    "tree": {
+      "sha": "a5d05c981558239810bb4dd1022fc52b32e16c90",
+      "url": "https://api.github.com/repos/jyqj/tabmail/git/trees/a5d05c981558239810bb4dd1022fc52b32e16c90"
+    },
+    "message": "Merge 419848e51b2d5e509898c355ace1c0deffe47fd4 into 602b17544d0cd12c04f1b90c116814ae0522199a",
+    "parents": [
+      {
+        "sha": "602b17544d0cd12c04f1b90c116814ae0522199a",
+        "url": "https://api.github.com/repos/jyqj/tabmail/git/commits/602b17544d0cd12c04f1b90c116814ae0522199a",
+        "html_url": "https://github.com/jyqj/tabmail/commit/602b17544d0cd12c04f1b90c116814ae0522199a"
+      },
+      {
+        "sha": "419848e51b2d5e509898c355ace1c0deffe47fd4",
+        "url": "https://api.github.com/repos/jyqj/tabmail/git/commits/419848e51b2d5e509898c355ace1c0deffe47fd4",
+        "html_url": "https://github.com/jyqj/tabmail/commit/419848e51b2d5e509898c355ace1c0deffe47fd4"
+      }
+    ],
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJqyFzXCRC1aQ7uu5UhlAAATFoQAF1ajvrgGgvtt1rmZb8HYV6+\nXt7nys0mHzvmv3tD1xzkN0aAkqz/D8jDlpFPTD2duzA5J7N7pp2oFFlwnfY88MAt\nlMunkKuwrHghH0sa6mgYunRnAfubokH67uQuHPI0L7rn6Pw5XR7aTBhbpDDOST1G\n16ewfD23mXxbmuZSAI7aUX9Qgafar1kvY/68Xp0HlrPhcba3KPiWcgXQSVoL/5p/\nr9RwuIqDoC8oKmvttzFp3kObvQ/ON6eTxAVMTGC5Qt0HnZjn8OvMFg8e2wYP8l+S\nXwzKRzhCihhfL2My33Mkz3hatPBp5Za8E31ZHFwYPg3slIOdpGfztzNtGAathN7n\na9/bzWm0vssXpNLTmQ+1Gv1l2sEEL1d8ztmBqQKI4NU1FSDE73qBs+wFMaOJ+k5G\ncWJWhvCZ1nGsYPm5Vn+tJNdFegQkZqiVKm+N4FIafOp5FEZ3jqmnK+3NCGo52+dp\nXZ+kIaAfoHcXGFjBtrFKTbgjOiJmXz6B16mJ3T9i2hWAQBreiYEdou44S1HJ6ai2\nvlBF9YkXGCaSH3iKh69yYEEYilO2BU0WQ5zLcl4lGNcaV2cRzgMZZkJ8XgnSckxD\n9n7Pmr/qvtFAZnyyRMKS0v8bUnKOWsTBjnsm9TYjOj7lpSOvzReb8zpTylyvqe7U\nxk3FfmjtPM8HMpvhquX+\n=EiqJ\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree a5d05c981558239810bb4dd1022fc52b32e16c90\nparent 602b17544d0cd12c04f1b90c116814ae0522199a\nparent 419848e51b2d5e509898c355ace1c0deffe47fd4\nauthor 金亦求金 <jyj20040616@gmail.com> 1791515863 +0800\ncommitter GitHub <noreply@github.com> 1791515863 +0800\n\nMerge 419848e51b2d5e509898c355ace1c0deffe47fd4 into 602b17544d0cd12c04f1b90c116814ae0522199a\n",
+      "verified_at": "2026-10-09T03:17:43Z"
+    }
+  },
+  "results": {
+    "pr": 223,
+    "merge": "ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+    "public_head": "419848e51b2d5e509898c355ace1c0deffe47fd4",
+    "ci_checkout": "872d7c4a885e0b3879f250f7e5d07455792a5a08",
+    "tree": "a5d05c981558239810bb4dd1022fc52b32e16c90",
+    "workflow_run": 37878613080,
+    "go_leaf_counts": {
+      "tabmail/internal/company": {
+        "pass": 194,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/app/templates": {
+        "pass": 107,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/app/admin": {
+        "pass": 28,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/smtp": {
+        "pass": 172,
+        "fail": 0,
+        "skip": 0
+      },
+      "github.com/emersion/go-smtp": {
+        "pass": 103,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/api/handlers": {
+        "pass": 89,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/store/postgres": {
+        "pass": 12,
+        "fail": 0,
+        "skip": 0
+      }
+    },
+    "ui_actual_assertion_pass": 157,
+    "full_nonincremental_typescript": "success",
+    "raw_job_logs": [
+      {
+        "path": "docs/company-mail/evidence/R5-EXEC-20261009/round2-ci-go.log",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e900b928ace3c4092ca295c1150a0d915f5456c5",
+        "sha256": "183f8b6ea450229ec825ea0b7cb13e9972e8caf4a6ab6eb90473e545bbcac410",
+        "bytes": 811409,
+        "job_id": 113652841919
+      },
+      {
+        "path": "docs/company-mail/evidence/R5-EXEC-20261009/round2-ci-web.log",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "7198138e5ad26456a16ab33592f1368bc6ee8fc6",
+        "sha256": "2b1d1c3a5057f2e99836091a48ac3d8f1dc8dfb158632081885dfc38ee876cce",
+        "bytes": 76367,
+        "job_id": 113652841719
+      }
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "head": "504b59731adb219c41ed685cd2029759f3c116d1",
+  "read_results": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "workflow_runs": []
+        },
+        "isError": false
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "statuses": []
+        },
+        "isError": false
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "content": "{\"total_count\":0,\"check_runs\":[]}",
+          "title": "check-runs",
+          "modified_date": null,
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/504b59731adb219c41ed685cd2029759f3c116d1/check-runs",
+          "display_url": "https://api.github.com/repos/jyqj/tabmail/commits/504b59731adb219c41ed685cd2029759f3c116d1/check-runs",
+          "display_title": "check-runs",
+          "structuredContent": {
+            "title": "check-runs",
+            "content": "{\"total_count\":0,\"check_runs\":[]}",
+            "display_url": "https://api.github.com/repos/jyqj/tabmail/commits/504b59731adb219c41ed685cd2029759f3c116d1/check-runs"
+          }
+        },
+        "isError": false
+      }
+    }
+  ],
+  "conclusion": "Readable; no runs/statuses/check-runs observed. Existing main-only triggers do not cover stacked base. Not four-CI green."
+}

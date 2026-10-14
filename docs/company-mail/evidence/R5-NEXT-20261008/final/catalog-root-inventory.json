@@ -1,0 +1,65 @@
+{
+  "scope": "Every preserved root final-catalog execution and setup record; successful 17-method invocation is distinct from failed setup and import-loader attempts.",
+  "files": [
+    {
+      "path": "attempt-import/result-original.json",
+      "bytes": 1184,
+      "sha256": "25ce9a3c5772be735b9aec6bfad3d7cc5ef6ef158d223e3c206ee75d48a62bf1"
+    },
+    {
+      "path": "attempt-import/result.json",
+      "bytes": 1431,
+      "sha256": "17e5f25cf109c21b8a04683a2cd7c6303ae48b03f3c3726d96cc8c247e653c8d"
+    },
+    {
+      "path": "attempt-import/scope.json",
+      "bytes": 282,
+      "sha256": "cf12bc55f801915d51849ae3e1228f53bebb179c53cb508decd4166c2a44fe7a"
+    },
+    {
+      "path": "attempt-import/stderr.txt",
+      "bytes": 3017,
+      "sha256": "4ec9daeeeec13859524c3d3aae9e7e8a08a6ea6558619fe8932b98e3e138e4f7"
+    },
+    {
+      "path": "attempt-import/stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "initial-setup-failure.json",
+      "bytes": 693,
+      "sha256": "e7bf42ae3c22043b80e2a339397f1434f560a09c2614359cebfc2b6ee6caa877"
+    },
+    {
+      "path": "preparation.json",
+      "bytes": 2573,
+      "sha256": "a881c1fcecb273b0de585e159287a42c107eab392c4f50e0091c0ff1241fc687"
+    },
+    {
+      "path": "result.json",
+      "bytes": 1496,
+      "sha256": "aa1952f8af466cd1299a10225119a432deff587e713cce759e28265a058ec39a"
+    },
+    {
+      "path": "running.json",
+      "bytes": 1161,
+      "sha256": "5f832b4bbdfe38834bc54ba9f20ef30b9c1c9b9182786e6a4aca90022d5a5b9a"
+    },
+    {
+      "path": "stderr.txt",
+      "bytes": 3683,
+      "sha256": "d93cd2e6f2a629970d4d22c0a40a383ba0d521bef2afb2e3495b431ece1efb1b"
+    },
+    {
+      "path": "stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tested-review.json",
+      "bytes": 52898,
+      "sha256": "bfb4634f1483f6219a99c9c8e8f2b77be7ef2e280f3489b0255310b07f27e507"
+    }
+  ]
+}

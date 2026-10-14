@@ -1,0 +1,23 @@
+# Source catalog revision 10 — final ADVANCE source
+
+Public product source: `703a572864296120fff3efe0880c560ad9c74d57`. Product tree: `40e1d2d16258e0e2bc3afea29553dbb148920e4e`.
+
+This reconciliation completes **zero implementation TODOs**. It preserves `runtime_verified`, `product_green` and `task_complete` as false. Original parent acceptance remains **10 of 171**, with **161 unaccepted**. The separate ADVANCE implementation issues do not confer parent, M/G0, runtime, wire, dependency or release qualification.
+
+The four revision-9 catalogs are immutable snapshots from public `f2215611158d33ff9caed468bf6314e32dcf5046`. Their separately reviewed product source remains `25b0b294f4fa0bb93b0c82304a570eae43a0923a`. All 45 files in the revision-1 through revision-9 review directories retain their exact published bytes.
+
+The original collectors report **62 PostgreSQL files, 395 functions, 19 migrations, 134 direct-write functions, 154 write-closure functions and 499 SQL execution calls**. PostgreSQL syntax, files, migrations, classifications, manual reviews, evidence levels and unverified risks are unchanged. Current caller candidates change in 40 entries: 53 call-site positions and one added `deleteRawObjectIfOrphaned → EnqueueOrphanRetry` candidate, with no removals. Name matches remain an over-approximation rather than dispatch proof.
+
+The original client collector records 134 unchanged branches, 7 explicit transport forwarders and 132 unchanged route facts. Both client catalogs remain byte-identical. The compatibility producer freshly hashes its limited 94-path closure; exactly three files change: `company_stream.go`, `monitor.go` and `mailbox_grants.go`. This is not the complete runtime dependency closure. The derived review separately binds 16 changed runtime code and locale files to exact before/after Git identities, including 13 outside that limited closure. Both `web/locales/en.json` and `web/locales/zh.json` are explicitly listed; this expanded source listing adds no execution qualification.
+
+Revision 9's two positive tests now audit fixed historical Git bytes and complete manual deltas. Their previous current-source validator calls are not represented as a fresh historical execution. The historical 21-method check reads the revision-9 Git snapshot. Current tests independently execute the original collectors and validators, reject old catalogs against the new source, and check the freshly reconciled catalogs. All five `test_unapproved_*` methods retain their original source and AST. All 164 protected scripts, workflow, collector and route-inventory sources remain byte-identical.
+
+The original transaction and compatibility CLIs reject the old catalogs for actual caller drift and source hash drift. The original client CLI already passes as an unchanged positive control. After reconciliation all three original CLIs pass. These outcomes preserve the initial raw command evidence without inventing client drift.
+
+The four complete selected Python modules pass **83 tests**, including all **23** reconciliation methods and the unchanged five mutation guards. The original Node collector suite passes **27 tests**. Both have zero failures and skips; neither is the complete source-version runner. The original complete runner is a separate result below.
+
+The original complete source-version runner was attempted **once** against committed candidate `3d1f9b05d216a556cd93b2abb68373b3d5843483` (tree `73943abbb0c5d3cad39254aa2c7616d69c5378b3`). It exited 1 during preparation with **`Linux pinned executable FD unavailable`**. Original TypeScript preparation, four before/after Go selections and ordinary-receipt test-binary compilation completed. The unchanged parent-proc FD existence guard stopped execution before the typed-wire fixture. All **774 discovered source-version tests remained undispatched**; the report has zero groups and 774 missing IDs. This is neither a full-runner pass nor 774 executed failures. The loader, preparation, budgets and FD guard remain unchanged, with no workaround or retry.
+
+The four catalog inputs and two tested Python inputs retain the exact hashes checked by the passing selected suites and the committed runner candidate. Only this README and derived review record the final runner outcome; no product, catalog or test bytes changed afterward.
+
+Validation details and command-result hashes are in [reconciliation.json](reconciliation.json). New raw command output stays private; this directory contains only this README and derived review JSON. The complete source-version runner and its preparation/budget rejection gates are unchanged, and this packet claims no new full-runner pass.

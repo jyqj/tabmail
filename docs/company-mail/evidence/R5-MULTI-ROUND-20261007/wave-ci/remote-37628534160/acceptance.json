@@ -1,0 +1,151 @@
+{
+  "run_id": 37628534160,
+  "job_id": 112816479269,
+  "head_sha": "e4e0267248979faa974fab124d6cc2e271771876",
+  "tested_checkout_sha": "a8ae5ebff8fd63d6bafde2805ff1a9c49f91e191",
+  "artifact_id": 11485158317,
+  "zip_sha256": "9e2990de374011531c0b31d79712106a73524da49d9f41cfe1cb683ed88e38c5",
+  "vitest": {
+    "total": 866,
+    "passed": 865,
+    "failed": 1,
+    "pending": 0,
+    "success": false,
+    "failure": "r5-external-batch-probe.test.tsx: explicit private fixture required"
+  },
+  "source_tests": {
+    "current": 711,
+    "failures": 1,
+    "errors": 2,
+    "frozen": 4
+  },
+  "steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 1
+    },
+    {
+      "name": "Run actions/checkout@v4",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 2
+    },
+    {
+      "name": "Record the tested frontend checkout",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 3
+    },
+    {
+      "name": "Run actions/setup-node@v4",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 4
+    },
+    {
+      "name": "Run actions/setup-go@v5",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5
+    },
+    {
+      "name": "Install pinned version-test checker dependency",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6
+    },
+    {
+      "name": "Run npm ci",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 7
+    },
+    {
+      "name": "Versioned source tests from independent clean Git checkouts",
+      "status": "completed",
+      "conclusion": "failure",
+      "number": 8
+    },
+    {
+      "name": "Catalog and TypeScript source validation",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 9
+    },
+    {
+      "name": "Record full dependency audit",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 10
+    },
+    {
+      "name": "Run actions/upload-artifact@v4",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 11
+    },
+    {
+      "name": "Require a complete clean dependency audit",
+      "status": "completed",
+      "conclusion": "failure",
+      "number": 12
+    },
+    {
+      "name": "Run npx tsc --noEmit",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 13
+    },
+    {
+      "name": "Run npm test -- --reporter=default --reporter=json --outputFile=../frontend-vitest.json",
+      "status": "completed",
+      "conclusion": "failure",
+      "number": 14
+    },
+    {
+      "name": "Run npm run lint",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 15
+    },
+    {
+      "name": "Run npm run build",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 16
+    },
+    {
+      "name": "Retain frontend evidence after validation failures",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 17
+    },
+    {
+      "name": "Post Run actions/setup-go@v5",
+      "status": "completed",
+      "conclusion": "skipped",
+      "number": 32
+    },
+    {
+      "name": "Post Run actions/setup-node@v4",
+      "status": "completed",
+      "conclusion": "skipped",
+      "number": 33
+    },
+    {
+      "name": "Post Run actions/checkout@v4",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 34
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 35
+    }
+  ],
+  "independent_review": "pr_triage: unchanged strict failure semantics, original job/event/timeout/test selection; accepted only after actual continuation and evidence verification"
+}

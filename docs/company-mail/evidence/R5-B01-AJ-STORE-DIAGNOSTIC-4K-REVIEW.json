@@ -1,0 +1,417 @@
+{
+  "Go_owned_db_objects_observers_cleanup": {
+    "budget_seconds": 300,
+    "complete": true,
+    "elapsed_wall_seconds_including_init_execution_cleanup": 63.164988,
+    "owned_database_absent": true,
+    "owned_object_root_absent": true,
+    "profiles_stopped_and_closed": true,
+    "watcher_joined": true
+  },
+  "S_M_L_executed": false,
+  "actual_source_closure_sha256": "e2f7f44e26cb8f357cf34ac51c7a3727e76d7b08ed1bea8bb6c82cc10223c4e2",
+  "actual_sourcebound_ready": 4000,
+  "actual_span_classes": 17,
+  "call_spans": {
+    "blob_exists": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 10.545692999999993,
+      "errors": 0,
+      "max_call_ms": 269.679,
+      "max_wall_monotonic_gap_ms": 0.055916,
+      "min_call_ms": 0.034
+    },
+    "blob_put_including_original_durability": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 271.9209020000002,
+      "errors": 0,
+      "max_call_ms": 1134.702,
+      "max_wall_monotonic_gap_ms": 0.036042,
+      "min_call_ms": 8.825
+    },
+    "ensure": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 283.5642399999999,
+      "errors": 0,
+      "max_call_ms": 1134.919,
+      "max_wall_monotonic_gap_ms": 0.017709,
+      "min_call_ms": 8.961
+    },
+    "lifecycle/archived": {
+      "calls": 400,
+      "elapsed_call_seconds_sum": 1.3707270000000007,
+      "errors": 0,
+      "max_call_ms": 180.267,
+      "max_wall_monotonic_gap_ms": 0.00575,
+      "min_call_ms": 0.141
+    },
+    "lifecycle/hard_expired": {
+      "calls": 200,
+      "elapsed_call_seconds_sum": 1.2097870000000008,
+      "errors": 0,
+      "max_call_ms": 101.595,
+      "max_wall_monotonic_gap_ms": 0.001334,
+      "min_call_ms": 0.193
+    },
+    "lifecycle/trash_expired": {
+      "calls": 200,
+      "elapsed_call_seconds_sum": 0.9102560000000004,
+      "errors": 0,
+      "max_call_ms": 99.078,
+      "max_wall_monotonic_gap_ms": 0.001084,
+      "min_call_ms": 0.164
+    },
+    "pool_acquire": {
+      "calls": 4800,
+      "elapsed_call_seconds_sum": 0.1914240000000054,
+      "errors": 0,
+      "max_call_ms": 12.043,
+      "max_wall_monotonic_gap_ms": 0.036709,
+      "min_call_ms": 0
+    },
+    "reference_transaction_including_ensure": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 894.201710000002,
+      "errors": 0,
+      "max_call_ms": 1404.097,
+      "max_wall_monotonic_gap_ms": 0.200167,
+      "min_call_ms": 24.012
+    },
+    "sql/advisory_raw_key": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 253.84861599999923,
+      "errors": 0,
+      "max_call_ms": 691.115,
+      "max_wall_monotonic_gap_ms": 0.338792,
+      "min_call_ms": 0.016
+    },
+    "sql/begin": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 43.59900800000005,
+      "errors": 0,
+      "max_call_ms": 220,
+      "max_wall_monotonic_gap_ms": 0.002708,
+      "min_call_ms": 0.009
+    },
+    "sql/commit": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 21.95171900000005,
+      "errors": 0,
+      "max_call_ms": 422.056,
+      "max_wall_monotonic_gap_ms": 0.008416,
+      "min_call_ms": 0.053
+    },
+    "sql/insert_message_including_trigger": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 46.99482700000005,
+      "errors": 0,
+      "max_call_ms": 353.483,
+      "max_wall_monotonic_gap_ms": 0.034583,
+      "min_call_ms": 0.133
+    },
+    "sql/life_archived": {
+      "calls": 400,
+      "elapsed_call_seconds_sum": 1.3633849999999998,
+      "errors": 0,
+      "max_call_ms": 180.245,
+      "max_wall_monotonic_gap_ms": 0.001667,
+      "min_call_ms": 0.135
+    },
+    "sql/life_hard_expired": {
+      "calls": 200,
+      "elapsed_call_seconds_sum": 1.2050679999999998,
+      "errors": 0,
+      "max_call_ms": 101.58,
+      "max_wall_monotonic_gap_ms": 0.001209,
+      "min_call_ms": 0.186
+    },
+    "sql/life_trash_expired": {
+      "calls": 200,
+      "elapsed_call_seconds_sum": 0.9058960000000001,
+      "errors": 0,
+      "max_call_ms": 99.05,
+      "max_wall_monotonic_gap_ms": 0.001042,
+      "min_call_ms": 0.152
+    },
+    "sql/quota_mailbox_update": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 238.68955499999953,
+      "errors": 0,
+      "max_call_ms": 1007.75,
+      "max_wall_monotonic_gap_ms": 0.096417,
+      "min_call_ms": 0.127
+    },
+    "store": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 894.2059300000012,
+      "errors": 0,
+      "max_call_ms": 1404.098,
+      "max_wall_monotonic_gap_ms": 0.02125,
+      "min_call_ms": 24.013
+    }
+  },
+  "created_utc": "2026-10-01T22:01:07.079249+00:00",
+  "dataset_fingerprint": "3eada813e88bd2d926b291d22c9c3c7e9418390f9771c1695b98055d2b886222",
+  "disk_budget_bytes": 1073741824,
+  "disk_max_bytes": 97820075,
+  "executed_top_test": "TestR5StoreDiagnostic",
+  "execution_wall": {
+    "budget_seconds": 180,
+    "completed_unix_seconds": 1790891862.7802691,
+    "elapsed_wall_seconds": 55.760752,
+    "started_unix_seconds": 1790891807.019517
+  },
+  "go_exit": 0,
+  "interpretation": "Quota mailbox row lock waiting is directly observed and substantial at sampled resolution. File.Put including unchanged durability is also expensive in overlapping call elapsed sums, with actual File.Sync/Fsync stacks visible in scheduling and CPU profiles. These observations support a separately approved fixture-scheduling experiment, but do not prove a whole-run critical-path decomposition or lower-level fsync I/O latency.",
+  "limits": [
+    "overlapping/nested/concurrent elapsed call sums are not stage wall or server execution timings",
+    "100ms sampling is a target, actual gaps reached1.033992s; short waits may be missed, proportions are sampled rows not elapsed wall fractions",
+    "trace/CPU cover first seed window target20s with actual stop/flush20.208608s; syscall/sync/sched totals are aggregates across goroutines",
+    "trace sched File.Sync numbers are runnable delay, not fsync syscall duration or checkpoint/Commit latency",
+    "linear S-to-M budget risk remains planning only, not strict actual M failure or admission evidence"
+  ],
+  "lookahead100_executed": false,
+  "native_init_to_stop_outer_wall_seconds": 63.462329,
+  "native_owned_runtime_cleanup": {
+    "absolute_deadline_unix_nano": 1790892099861623000,
+    "cleanup_errors": [],
+    "completed_unix_nano": 1790891863323952000,
+    "disk_budget_bytes": 1073741824,
+    "execution_budget_seconds": 180,
+    "execution_start_outer_elapsed_seconds": 0.854855,
+    "execution_terminal_outer_elapsed_seconds": 63.29727,
+    "go_returncode": 0,
+    "listen_addresses": "",
+    "native_cleanup_complete": true,
+    "outer_budget_passed": true,
+    "owned_caffeinate_exit": -15,
+    "owned_caffeinate_pid": 79229,
+    "owned_pg_final_observation": "absent",
+    "owned_pg_non_zombie_absent": true,
+    "owned_pg_pid": 79266,
+    "owned_socket_absent": true,
+    "pg_owned_directory": "/tmp/tm-r5diag.lk4SrwEh/db",
+    "pg_started": true,
+    "pg_stop_exit": 0,
+    "port": 55457,
+    "postmaster_pid_file_absent": true,
+    "scope": "one original wall origin before native init/bootstrap through native stop and assertion cleanup",
+    "socket_permissions": "0700",
+    "source_sha": "b45b043d822ddabb536f0a2321a1ce0913ae7137",
+    "started_unix_nano": 1790891799861623000,
+    "status": "execution_and_native_cleanup_observed",
+    "total_budget_seconds": 300,
+    "total_elapsed_wall_seconds": 63.462329,
+    "uid": 501,
+    "watchdog_timeout_seconds": 180.0
+  },
+  "observed_profile_evidence": {
+    "FileSync_Fsync_runnable_scheduling_delay_cumulative_seconds": 35.65256005,
+    "FileSync_cpu_cumulative_seconds": 0.41,
+    "cpu_total_sample_seconds": 7.71,
+    "fileobj_putAtomic_syscall_cumulative_seconds": 3.22754,
+    "pg_network_read_cumulative_seconds": 42.66,
+    "sched_total_aggregate_seconds": 46.29037956,
+    "syscall_delay_aggregate_seconds": 48.97
+  },
+  "outer_budget_seconds": 300,
+  "outer_origin_unix_nano": 1790891799861623000,
+  "owned_process_group_observation": {
+    "members": [],
+    "non_zombie_live_pids": [],
+    "status": "observed"
+  },
+  "population": [
+    20,
+    100,
+    4000
+  ],
+  "preparation": {
+    "active_budget": 20,
+    "claim_calls": 201,
+    "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+    "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+    "claim_wall_seconds": 0.4812429999999998,
+    "company_wall_seconds": 0.162845,
+    "final_empty_claim": true,
+    "joined_completed_jobs": 4000,
+    "joined_inflight": 0,
+    "joined_ready_before_last_claim": 4000,
+    "joined_stored_messages": 4000,
+    "last_claim_batch": 0,
+    "last_claim_wall_seconds": 0.0011559999999999904,
+    "max_active": 20,
+    "max_claim_batch": 20,
+    "max_wall_monotonic_gap_ms": 0.015167,
+    "max_window_messages": 20,
+    "method": "bounded_store_claim_complete_window_v1",
+    "parse_complete_wall_seconds": 6.374577,
+    "parser_canceled_joined_calls": 0,
+    "parser_join_policy": "uncancelled_document_wait_with_31s_absolute_wall_admission_guard",
+    "parser_join_reserve_seconds": 31,
+    "parser_joined_call_wall_seconds_sum": 57.5816,
+    "parser_joined_calls": 4000,
+    "parser_joined_inflight": 0,
+    "parser_min_start_remaining_wall_seconds": 124.727558,
+    "parser_original_deadline_unix_seconds": 1790891987.019517,
+    "parser_quiescent": true,
+    "pending_upper_bound": 20,
+    "phase": "terminal",
+    "pipeline_wall_seconds": 54.95437,
+    "producer_done": true,
+    "sql_ready_count": 4000,
+    "store_wall_seconds": 47.978512999999985
+  },
+  "product_green": false,
+  "profile_parse_exits": {
+    "cpu-top.exit": 0,
+    "trace-sched-top.exit": 0,
+    "trace-sched.exit": 0,
+    "trace-sync-top.exit": 0,
+    "trace-sync.exit": 0,
+    "trace-syscall-all-top.exit": 0,
+    "trace-syscall-top.exit": 0,
+    "trace-syscall.exit": 0
+  },
+  "profile_wall": {
+    "closed_unix_seconds": 1790891827.416353,
+    "elapsed_wall_seconds": 20.208608,
+    "started_unix_seconds": 1790891807.207745,
+    "target_seconds": 20
+  },
+  "raw_sha256": "97af8cc30f1e00922c3758fce5ba045065f5325ba9ca39d8a2e3a280f6123cac",
+  "registry_written": false,
+  "rss_max_bytes": 238829568,
+  "sampled_lock_rows": 1760,
+  "sampled_quota_lock_percent": 21.843183921724183,
+  "sampled_quota_lock_rows": 1652,
+  "sampled_rows": 7563,
+  "sampled_rows_with_blocking_pids": 1731,
+  "sampler_actual_interval_max_seconds": 1.033992000000005,
+  "sampler_actual_interval_min_seconds": 0.00023700000000004273,
+  "sampler_queries": 512,
+  "schema_version": 16,
+  "six_actual_streams": [
+    {
+      "row_count": 2,
+      "sha256": "52bb8abf43f2b8d1c70a857875517f9d67f71d29c71df8fd8c4d422782214319",
+      "stream_id": 0
+    },
+    {
+      "row_count": 4000,
+      "sha256": "b6fb39cf2586dcae88613f160c8747b9a4d9e643206877ee5e6afcf0aa9a7372",
+      "stream_id": 1
+    },
+    {
+      "row_count": 4000,
+      "sha256": "ef13fef86244de129c145ee57e3b32a6c290740c4ba3792aff29fcc85866c78c",
+      "stream_id": 2
+    },
+    {
+      "row_count": 320,
+      "sha256": "3f59b298324672a168460e22a777e1bb964606a3ea3e9ca8c32168bca38fe861",
+      "stream_id": 3
+    },
+    {
+      "row_count": 22,
+      "sha256": "9fa139e0b52b205f3d99e02e97da8f14733c5dfe78b581d156a316b05b2eb3f5",
+      "stream_id": 4
+    },
+    {
+      "row_count": 100,
+      "sha256": "757606be6d6c53f76ce4c394b32d3b01eca9577ebf75c79867fb17e0e266d033",
+      "stream_id": 5
+    }
+  ],
+  "source_identity_kind": "canonical_source_closure_sha1",
+  "source_sha": "b45b043d822ddabb536f0a2321a1ce0913ae7137",
+  "status": "approved_4k_diagnostic_actual_passed_not_benchmark_admission",
+  "task_complete": false,
+  "tool_admission": false,
+  "top_sampled_states": [
+    {
+      "phase": "quota_mailbox_update",
+      "rows": 1969,
+      "state": "idle in transaction",
+      "wait_event": "ClientRead",
+      "wait_type": "Client"
+    },
+    {
+      "phase": "after/advisory_raw_key",
+      "rows": 1558,
+      "state": "idle in transaction",
+      "wait_event": "ClientRead",
+      "wait_type": "Client"
+    },
+    {
+      "phase": "quota_mailbox_update",
+      "rows": 985,
+      "state": "active",
+      "wait_event": "transactionid",
+      "wait_type": "Lock"
+    },
+    {
+      "phase": "advisory_raw_key",
+      "rows": 858,
+      "state": "idle in transaction",
+      "wait_event": "ClientRead",
+      "wait_type": "Client"
+    },
+    {
+      "phase": "quota_mailbox_update",
+      "rows": 667,
+      "state": "active",
+      "wait_event": "tuple",
+      "wait_type": "Lock"
+    },
+    {
+      "phase": "insert_message_including_trigger",
+      "rows": 548,
+      "state": "idle in transaction",
+      "wait_event": "ClientRead",
+      "wait_type": "Client"
+    },
+    {
+      "phase": "commit",
+      "rows": 336,
+      "state": "idle in transaction",
+      "wait_event": "ClientRead",
+      "wait_type": "Client"
+    },
+    {
+      "phase": "insert_message_including_trigger",
+      "rows": 99,
+      "state": "active",
+      "wait_event": "transactionid",
+      "wait_type": "Lock"
+    },
+    {
+      "phase": "begin",
+      "rows": 90,
+      "state": "idle in transaction",
+      "wait_event": "ClientRead",
+      "wait_type": "Client"
+    },
+    {
+      "phase": "quota_mailbox_update",
+      "rows": 79,
+      "state": "active",
+      "wait_event": "",
+      "wait_type": ""
+    },
+    {
+      "phase": "insert_message_including_trigger",
+      "rows": 61,
+      "state": "active",
+      "wait_event": "",
+      "wait_type": ""
+    },
+    {
+      "phase": "commit",
+      "rows": 54,
+      "state": "active",
+      "wait_event": "",
+      "wait_type": ""
+    }
+  ]
+}

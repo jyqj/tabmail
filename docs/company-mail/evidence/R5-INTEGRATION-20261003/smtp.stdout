@@ -1,0 +1,40 @@
+{"Time":"2026-10-03T17:11:30.157353934Z","Action":"start","Package":"tabmail/internal/smtp"}
+{"Time":"2026-10-03T17:11:30.188047805Z","Action":"run","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackSlowReadCancellation"}
+{"Time":"2026-10-03T17:11:30.188067757Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackSlowReadCancellation","Output":"=== RUN   TestR5CloudLoopbackSlowReadCancellation\n"}
+{"Time":"2026-10-03T17:11:30.18811887Z","Action":"run","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackSlowReadCancellation/DATA"}
+{"Time":"2026-10-03T17:11:30.188122422Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackSlowReadCancellation/DATA","Output":"=== RUN   TestR5CloudLoopbackSlowReadCancellation/DATA\n"}
+{"Time":"2026-10-03T17:11:30.220507023Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackSlowReadCancellation/DATA","Output":"--- PASS: TestR5CloudLoopbackSlowReadCancellation/DATA (0.03s)\n"}
+{"Time":"2026-10-03T17:11:30.220530504Z","Action":"pass","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackSlowReadCancellation/DATA","Elapsed":0.03}
+{"Time":"2026-10-03T17:11:30.220551654Z","Action":"run","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackSlowReadCancellation/BDAT"}
+{"Time":"2026-10-03T17:11:30.22055647Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackSlowReadCancellation/BDAT","Output":"=== RUN   TestR5CloudLoopbackSlowReadCancellation/BDAT\n"}
+{"Time":"2026-10-03T17:11:30.251924276Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackSlowReadCancellation/BDAT","Output":"--- PASS: TestR5CloudLoopbackSlowReadCancellation/BDAT (0.03s)\n"}
+{"Time":"2026-10-03T17:11:30.251945671Z","Action":"pass","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackSlowReadCancellation/BDAT","Elapsed":0.03}
+{"Time":"2026-10-03T17:11:30.252134199Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackSlowReadCancellation","Output":"--- PASS: TestR5CloudLoopbackSlowReadCancellation (0.06s)\n"}
+{"Time":"2026-10-03T17:11:30.252143541Z","Action":"pass","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackSlowReadCancellation","Elapsed":0.06}
+{"Time":"2026-10-03T17:11:30.252147993Z","Action":"run","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin"}
+{"Time":"2026-10-03T17:11:30.252151314Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin","Output":"=== RUN   TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin\n"}
+{"Time":"2026-10-03T17:11:30.25215785Z","Action":"run","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/DATA"}
+{"Time":"2026-10-03T17:11:30.252161152Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/DATA","Output":"=== RUN   TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/DATA\n"}
+{"Time":"2026-10-03T17:11:30.28348691Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/DATA","Output":"--- PASS: TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/DATA (0.03s)\n"}
+{"Time":"2026-10-03T17:11:30.2835085Z","Action":"pass","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/DATA","Elapsed":0.03}
+{"Time":"2026-10-03T17:11:30.283514539Z","Action":"run","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/BDAT"}
+{"Time":"2026-10-03T17:11:30.283518003Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/BDAT","Output":"=== RUN   TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/BDAT\n"}
+{"Time":"2026-10-03T17:11:30.314977309Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/BDAT","Output":"--- PASS: TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/BDAT (0.03s)\n"}
+{"Time":"2026-10-03T17:11:30.315014133Z","Action":"pass","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/BDAT","Elapsed":0.03}
+{"Time":"2026-10-03T17:11:30.3150251Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin","Output":"--- PASS: TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin (0.06s)\n"}
+{"Time":"2026-10-03T17:11:30.315029442Z","Action":"pass","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin","Elapsed":0.06}
+{"Time":"2026-10-03T17:11:30.315034135Z","Action":"run","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptedBeforeReplyDisconnect"}
+{"Time":"2026-10-03T17:11:30.315037222Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptedBeforeReplyDisconnect","Output":"=== RUN   TestR5CloudLoopbackAcceptedBeforeReplyDisconnect\n"}
+{"Time":"2026-10-03T17:11:30.315083249Z","Action":"run","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/DATA"}
+{"Time":"2026-10-03T17:11:30.315086665Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/DATA","Output":"=== RUN   TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/DATA\n"}
+{"Time":"2026-10-03T17:11:30.376785344Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/DATA","Output":"--- PASS: TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/DATA (0.06s)\n"}
+{"Time":"2026-10-03T17:11:30.376809174Z","Action":"pass","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/DATA","Elapsed":0.06}
+{"Time":"2026-10-03T17:11:30.376821653Z","Action":"run","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/BDAT"}
+{"Time":"2026-10-03T17:11:30.376825325Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/BDAT","Output":"=== RUN   TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/BDAT\n"}
+{"Time":"2026-10-03T17:11:30.438762969Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/BDAT","Output":"--- PASS: TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/BDAT (0.06s)\n"}
+{"Time":"2026-10-03T17:11:30.438787294Z","Action":"pass","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/BDAT","Elapsed":0.06}
+{"Time":"2026-10-03T17:11:30.43879772Z","Action":"output","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptedBeforeReplyDisconnect","Output":"--- PASS: TestR5CloudLoopbackAcceptedBeforeReplyDisconnect (0.12s)\n"}
+{"Time":"2026-10-03T17:11:30.43880232Z","Action":"pass","Package":"tabmail/internal/smtp","Test":"TestR5CloudLoopbackAcceptedBeforeReplyDisconnect","Elapsed":0.12}
+{"Time":"2026-10-03T17:11:30.438835306Z","Action":"output","Package":"tabmail/internal/smtp","Output":"PASS\n"}
+{"Time":"2026-10-03T17:11:31.441257212Z","Action":"output","Package":"tabmail/internal/smtp","Output":"ok  \ttabmail/internal/smtp\t1.283s\n"}
+{"Time":"2026-10-03T17:11:31.441353789Z","Action":"pass","Package":"tabmail/internal/smtp","Elapsed":1.284}

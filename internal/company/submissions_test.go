@@ -20,7 +20,8 @@ import (
 //	  nothing accepted, permanent failure or terminal
 //	  job state, or anomaly against job.state           -> needs_attention
 //	  nothing accepted, still retrying                  -> sending
-//	legacy jobs without a ledger fall back to job.state
+//	missing ledger evidence (including historical jobs) -> needs_attention
+//	required migration preserves proven legacy acceptance in actual rows
 func TestDeriveSubmissionStatus(t *testing.T) {
 	cases := []struct {
 		name     string
@@ -28,7 +29,7 @@ func TestDeriveSubmissionStatus(t *testing.T) {
 		ledger   []string
 		expected string
 	}{
-		{"queued without ledger", models.OutboundPending, nil, "submitted"},
+		{"queued without ledger needs review", models.OutboundPending, nil, "needs_attention"},
 		{"queued with untouched ledger", models.OutboundPending, []string{"pending", "pending"}, "submitted"},
 		{"sending", models.OutboundProcessing, []string{"pending"}, "sending"},
 		{"sending mid-retry", models.OutboundRetry, []string{"temporary"}, "sending"},
@@ -43,8 +44,8 @@ func TestDeriveSubmissionStatus(t *testing.T) {
 		{"dead job", models.OutboundDead, []string{"pending"}, "needs_attention"},
 		{"uncertain recipient wins", models.OutboundSent, []string{"accepted", "uncertain"}, "needs_attention"},
 		{"uncertain beats processing", models.OutboundProcessing, []string{"uncertain"}, "needs_attention"},
-		{"legacy sent", models.OutboundSent, nil, "accepted"},
-		{"legacy retry", models.OutboundRetry, nil, "sending"},
+		{"sent without ledger is unproven", models.OutboundSent, nil, "needs_attention"},
+		{"retry without ledger is unproven", models.OutboundRetry, nil, "needs_attention"},
 		{"legacy failed", models.OutboundFailed, nil, "needs_attention"},
 		{"legacy dead", models.OutboundDead, nil, "needs_attention"},
 	}

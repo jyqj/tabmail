@@ -1,0 +1,78 @@
+{
+  "status": "structure_checked_only",
+  "task_complete": false,
+  "cases": 46,
+  "cases_with_reference_adapters": 19,
+  "shared_input_verified_cases": 0,
+  "cases_with_shared_input_adapters": 46,
+  "missing_shared_input_adapters": [],
+  "unresolved_codes": [],
+  "declared_applicability": {
+    "RT04": {
+      "organize_only_runtime_state": "unrepresentable_by_current_api_and_database_CHECK",
+      "runtime_operation_variant": "read_only_no_organize",
+      "original_input_evidence": [
+        "actual_PgStore_grant_BAD_REQUEST",
+        "shipping_PUT_grants_400"
+      ],
+      "not_claimed": "Runtime operation with organize-only persisted state; constraints are never bypassed."
+    },
+    "RT07": {
+      "http": "not_applicable: this case tests metadata sweep/raw reaper; content HTTP expiry is CT08/09",
+      "normal_content": "normal personal message is in trash past purge_after cutoff, not assigned an anomalous hard expiry; GetWorkMessage denies it. This avoids reinterpreting permanent personal/shared-unlimited expiry before P3-020 conservative migration.",
+      "reference_isolation": "sent_asset removes job; queue removes archive; no candidate is protected merely by the expired logical message",
+      "read_boundary_gap": "Current company_message_read.go GetWorkMessage SQL filters only tenant/mailbox/id, not deleted_at/purge_after; companymail.message repeats identity only. Test first confirms deleted_at and expired purge_after with actual SQL, then accepts target red only if actual returned exact content provenance. Every GC/reference assertion still executes after this marker."
+    },
+    "BC02": {
+      "observed": "actual current PostgreSQL asset/job provenance and shipping sent-content product outputs; no formal R5 BCC backfill command exists yet",
+      "BC02_boundary": "repeat checks current immutable values unchanged under real reads; this is not execution or certification of a nonexistent idempotent backfill command. Exact source has BCC but actual durable asset lacks it => specific capability target red",
+      "BC03_boundary": "source absent or same-ID foreign tenant job cannot be trusted; actual response must not imply completeness or copy foreign BCC. Missing legacy_unknown is an exact current product target red",
+      "followup": "R5-P2-080 must add real versioned migration/backfill and replace capability-observation red with actual idempotent write tests"
+    },
+    "BC03": {
+      "observed": "actual current PostgreSQL asset/job provenance and shipping sent-content product outputs; no formal R5 BCC backfill command exists yet",
+      "BC02_boundary": "repeat checks current immutable values unchanged under real reads; this is not execution or certification of a nonexistent idempotent backfill command. Exact source has BCC but actual durable asset lacks it => specific capability target red",
+      "BC03_boundary": "source absent or same-ID foreign tenant job cannot be trusted; actual response must not imply completeness or copy foreign BCC. Missing legacy_unknown is an exact current product target red",
+      "followup": "R5-P2-080 must add real versioned migration/backfill and replace capability-observation red with actual idempotent write tests"
+    },
+    "BC05": {
+      "list_receipt_sse": "shipping authenticated routes; SSE replays stored actual sent.created then cancels after ready without arbitrary sleep",
+      "webhook": "actual current message.trash outbox producer and real dispatcher POST to loopback; this is not certification of a nonexistent outbound submission webhook event type",
+      "metrics": "actual PostgreSQL operational counts plus production Snapshot/RenderPrometheus; not live shipping /metrics HTTP scrape",
+      "wire_mime": "actual production outbound.Build; no external SMTP leaves fixture"
+    },
+    "GC01": {
+      "http": "not_applicable: background sweep has no HTTP endpoint; no fabricated status adapter",
+      "db": "actual PostgreSQL SweepCompanyMetadata with protected_prefix_count and expired_orphan_index"
+    },
+    "GC02": {
+      "http": "not_applicable: metadata sweep and atomic raw-object reaper are background/internal ports with no HTTP endpoint",
+      "sealed_draft": "actual offboarding seal and draft creation receipt retained before SweepCompanyMetadata",
+      "held_raw": "actual ingress hold/finalize, mailbox removal leaves fixed destination tombstone; authoritative reaper must not call object deletion"
+    },
+    "LF05": {
+      "higher_role": "target role equal/higher than administrator; successor role itself does not confer management authority",
+      "foreign_or_self": "preview rejects, so no executable invalid plan is fabricated",
+      "frozen": "actual valid plan then successor freezes before actual execution"
+    },
+    "PE03": {
+      "baseline_wire": "Current profile PATCH lacks revision field; stale profile uses the actual old security form snapshot. Current override accepts id/updated_at but does not perform CAS. Only actual200 plus observed revoked-security restoration is admitted target red. Newly proposed revision fields are not sent as malformed requests."
+    },
+    "PE04": {
+      "baseline_wire": "Current profile PATCH lacks revision field; stale profile uses the actual old security form snapshot. Current override accepts id/updated_at but does not perform CAS. Only actual200 plus observed revoked-security restoration is admitted target red. Newly proposed revision fields are not sent as malformed requests."
+    },
+    "PE05": {
+      "db_http": "both concurrent commands use shipping authenticated HTTP routes; PostgreSQL row lock and pg_blocking_pids establish order, not sleeps; verify actual SQL payload/revision and exact post-revocation403",
+      "not_claimed": "browser multiwindow interaction; components remain separate evidence"
+    }
+  },
+  "remaining_semantic_or_layer_gaps": {
+    "BC02": [
+      "Formal versioned R5 BCC backfill/unknown migration command does not exist; current capability observation is not execution of future idempotent writes."
+    ],
+    "BC03": [
+      "Formal versioned R5 BCC backfill/unknown migration command does not exist; current capability observation is not execution of future idempotent writes."
+    ]
+  },
+  "boundary": "Structure checks are not execution evidence. Declared shared consumers require fresh scoped unit/DB/HTTP/component execution and explicit target-red classification."
+}

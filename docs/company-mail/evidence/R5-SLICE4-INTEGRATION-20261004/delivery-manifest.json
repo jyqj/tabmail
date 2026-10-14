@@ -1,0 +1,162 @@
+{
+  "F52": "historical failures unchanged",
+  "all_frozen_source_files_preserved": "full-source-manifest.json and verify_combined.py authenticate every frozen source path; no historical path edited",
+  "central": "10/171 unchanged",
+  "delivery": "subsequent docs-only commit; exact commit supplied in parent handoff, never conflated with tested source",
+  "draft_PR_owner": "parent",
+  "new_delivery_files": {
+    "docs/company-mail/R5-SLICE4-INTEGRATION-20261004.md": {
+      "bytes": 13418,
+      "mode": "100644",
+      "sha256": "54ec719bcba1d71390ee82a7fdf4cf3b10cadbfa886fc7f86259a93b6367621d"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/batch-author.stderr": {
+      "bytes": 1849,
+      "mode": "100644",
+      "sha256": "52a1275903d4123c21d9a4fe8d8253ec11639dd693314f72cfd611605d3b47df"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/batch-author.stdout": {
+      "bytes": 67,
+      "mode": "100644",
+      "sha256": "ef8dca9c70c879258c771b13293a1b16b034556480eddb3e3064aed29a76b613"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/batch-independent.stderr": {
+      "bytes": 1515,
+      "mode": "100644",
+      "sha256": "1c3eddc1677da18301b721ec60f44e73527d372114cfda0019877a41359e0d12"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/batch-independent.stdout": {
+      "bytes": 110,
+      "mode": "100644",
+      "sha256": "ea4d1f25a9983304d9a975f798206aca19a7e5961512d04fd15f2e350204f750"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/bridge-author.stderr": {
+      "bytes": 0,
+      "mode": "100644",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/bridge-author.stdout": {
+      "bytes": 1347,
+      "mode": "100644",
+      "sha256": "775377bb94c4f0331625a9b2614ec41b80cd73e2ef2208605e98d0f7380b923d"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/bridge-independent.stderr": {
+      "bytes": 0,
+      "mode": "100644",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/bridge-independent.stdout": {
+      "bytes": 4005,
+      "mode": "100644",
+      "sha256": "a970fbdb6144cf00afb80bfcdf348930ffcde7e666bcef9a60f575d889637d54"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/bridge-static-results.json": {
+      "bytes": 175971,
+      "mode": "100644",
+      "sha256": "8c35d8685e906fe478f31f814153edc133d66797116468f9885104b7cfcc51c4"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/bridge-static.stderr": {
+      "bytes": 0,
+      "mode": "100644",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/bridge-static.stdout": {
+      "bytes": 175971,
+      "mode": "100644",
+      "sha256": "cd9e5a6de6d4b63a2fd73e936ba7690dbfa7a053370c29e048dac9458898bf9a"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/draft-pr-body.md": {
+      "bytes": 2194,
+      "mode": "100644",
+      "sha256": "d4842164dd8f8526b53ea783d91dfec1453e294478f50e2520925fdc1356b426"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/fresh-results.json": {
+      "bytes": 32878,
+      "mode": "100644",
+      "sha256": "b631d4cc9d77ba703a01a3c0436df2c132b10d0996782bc0d36727770bac933c"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/full-source-manifest.json": {
+      "bytes": 559245,
+      "mode": "100644",
+      "sha256": "9f848de7b56907d8175e998f147f969ae112fca69b83b28efc0bed0ae2bd9079"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/inventory_slice5.py": {
+      "bytes": 7986,
+      "mode": "100644",
+      "sha256": "3e920492cd651d6c9c7e3963a0dfe34ffb167b70df5c1c12a0ad3e4e1f88c344"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/preparation-author.stderr": {
+      "bytes": 0,
+      "mode": "100644",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/preparation-author.stdout": {
+      "bytes": 6038,
+      "mode": "100644",
+      "sha256": "747c95cec09aa58a8b4b285a57b0764197b5938e0031e44fc091474c2ad8601c"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/preparation-independent.stderr": {
+      "bytes": 0,
+      "mode": "100644",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/preparation-independent.stdout": {
+      "bytes": 8543,
+      "mode": "100644",
+      "sha256": "bf83d51dd008fe1b703f4de2dcb2bbb4240c640cee42b5f732f8ba195094ac75"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/preparation-preserved.stderr": {
+      "bytes": 1403,
+      "mode": "100644",
+      "sha256": "c82665c959d63d713d409a007e655e651350ed0ec6cb56d43b2f7205329a6bbe"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/preparation-preserved.stdout": {
+      "bytes": 1905,
+      "mode": "100644",
+      "sha256": "5442098dd9652cc8a894c04c6caf2a8b15eb9fa9293873c779682733aa1d1460"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/preserved-tree.json": {
+      "bytes": 358427,
+      "mode": "100644",
+      "sha256": "224af99a1c2703740b1b0b2a511fe86f037088b7bcabd9f4769d262bcdfcf512"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/runtime-author.stderr": {
+      "bytes": 3895,
+      "mode": "100644",
+      "sha256": "bb5660eb88e92a0aee6a763220970e1fadc7dd45dfddf0cfaaeeff713dc4707b"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/runtime-author.stdout": {
+      "bytes": 91,
+      "mode": "100644",
+      "sha256": "dd4c6bf0ba128d290dbac417ebb0f3504e5321846a5dcb66e775bd573b371c03"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/runtime-independent.stderr": {
+      "bytes": 1989,
+      "mode": "100644",
+      "sha256": "302885f31e59d458356a1f8a19d2a285e41b9c055541e252e6c61dd5f4af5dc9"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/runtime-independent.stdout": {
+      "bytes": 91,
+      "mode": "100644",
+      "sha256": "ae27c2617776432ae96856213aed9533edf256a76f4b818605cfd9a24f84dc99"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/slice5-authority-inventory.json": {
+      "bytes": 18619,
+      "mode": "100644",
+      "sha256": "8f9aa3e4edf9ab6bb96992d8017942894348e971e1a882501c7a2c9948837448"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/static-review.json": {
+      "bytes": 17934,
+      "mode": "100644",
+      "sha256": "0b6aca8e96577c9a4b2136aa0a89c2fbf91c1e46bb2fce5d6e46949af12d1727"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-INTEGRATION-20261004/verify_combined.py": {
+      "bytes": 10255,
+      "mode": "100644",
+      "sha256": "24a614978de294922f8b50161aec9e03c8f942fe9f38a20dd7ca2acc0a2c7af2"
+    }
+  },
+  "self_exclusion": "This manifest cannot include its own hash; its exact blob/mode is authenticated by the final delivery Git tree.",
+  "tested_combined_source_commit": "73777de3f51ff185d02ab2e1193421fa91cde9d4",
+  "tested_combined_source_tree": "f27e02ce4987488d783a22f7cc1620dfe3795cd4"
+}

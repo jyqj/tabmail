@@ -1,0 +1,45 @@
+{"Time":"2026-10-03T19:08:46.162726519Z","Action":"start","Package":"tabmail/internal/store/postgres"}
+{"Time":"2026-10-03T19:08:46.168358344Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney"}
+{"Time":"2026-10-03T19:08:46.168371934Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"=== RUN   TestR3BrowserJourney\n"}
+{"Time":"2026-10-03T19:08:57.013272596Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"    company_browser_test.go:92: Je [Error]: expect(locator).toBeVisible() failed\n"}
+{"Time":"2026-10-03T19:08:57.013333788Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"        \n"}
+{"Time":"2026-10-03T19:08:57.013338485Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"        Locator: getByRole('button', { name: /Re: Browser welcome/ })\n"}
+{"Time":"2026-10-03T19:08:57.01334219Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"        Expected: visible\n"}
+{"Time":"2026-10-03T19:08:57.013345185Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"        Timeout: 5000ms\n"}
+{"Time":"2026-10-03T19:08:57.013347949Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"        Error: element(s) not found\n"}
+{"Time":"2026-10-03T19:08:57.013350723Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"        \n"}
+{"Time":"2026-10-03T19:08:57.013353287Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"        Call log:\n"}
+{"Time":"2026-10-03T19:08:57.013355881Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"          - Expect \"to.be.visible\" with timeout 5000ms\n"}
+{"Time":"2026-10-03T19:08:57.013359416Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"          - waiting for getByRole('button', { name: /Re: Browser welcome/ })\n"}
+{"Time":"2026-10-03T19:08:57.013362Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"        \n"}
+{"Time":"2026-10-03T19:08:57.013364513Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"            at Proxy.\u003canonymous\u003e (/workspace/browser-reply-tools/node_modules/playwright/lib/matchers/expect.js:221:24)\n"}
+{"Time":"2026-10-03T19:08:57.013367808Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"            at /workspace/tabmail/scripts/browser_company.cjs:98:27 {\n"}
+{"Time":"2026-10-03T19:08:57.013370753Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"          matcherResult: {\n"}
+{"Time":"2026-10-03T19:08:57.013373767Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"            message: 'expect(locator).toBeVisible() failed\\n' +\n"}
+{"Time":"2026-10-03T19:08:57.013376311Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"              '\\n' +\n"}
+{"Time":"2026-10-03T19:08:57.013378234Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"              \"Locator: getByRole('button', { name: /Re: Browser welcome/ })\\n\" +\n"}
+{"Time":"2026-10-03T19:08:57.013381759Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"              'Expected: visible\\n' +\n"}
+{"Time":"2026-10-03T19:08:57.013384553Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"              'Timeout: 5000ms\\n' +\n"}
+{"Time":"2026-10-03T19:08:57.013390022Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"              'Error: element(s) not found\\n' +\n"}
+{"Time":"2026-10-03T19:08:57.013403201Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"              '\\n' +\n"}
+{"Time":"2026-10-03T19:08:57.013407668Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"              'Call log:\\n' +\n"}
+{"Time":"2026-10-03T19:08:57.013410973Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"              '  - Expect \"to.be.visible\" with timeout 5000ms\\n' +\n"}
+{"Time":"2026-10-03T19:08:57.013414879Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"              \"  - waiting for getByRole('button', { name: /Re: Browser welcome/ })\\n\",\n"}
+{"Time":"2026-10-03T19:08:57.013419265Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"            pass: false,\n"}
+{"Time":"2026-10-03T19:08:57.013422199Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"            actual: undefined,\n"}
+{"Time":"2026-10-03T19:08:57.013425695Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"            name: 'toBeVisible',\n"}
+{"Time":"2026-10-03T19:08:57.01342944Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"            expected: 'visible',\n"}
+{"Time":"2026-10-03T19:08:57.013432395Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"            log: [\n"}
+{"Time":"2026-10-03T19:08:57.013437462Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"              '  - Expect \"to.be.visible\" with timeout 5000ms',\n"}
+{"Time":"2026-10-03T19:08:57.013440757Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"              \"  - waiting for getByRole('button', { name: /Re: Browser welcome/ })\"\n"}
+{"Time":"2026-10-03T19:08:57.013443962Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"            ],\n"}
+{"Time":"2026-10-03T19:08:57.013446986Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"            timeout: 5000\n"}
+{"Time":"2026-10-03T19:08:57.01344954Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"          }\n"}
+{"Time":"2026-10-03T19:08:57.013451964Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"        }\n"}
+{"Time":"2026-10-03T19:08:57.013454508Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"        \n"}
+{"Time":"2026-10-03T19:08:57.013456951Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"    company_browser_test.go:93: exit status 1\n"}
+{"Time":"2026-10-03T19:08:57.125204429Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"--- FAIL: TestR3BrowserJourney (10.96s)\n"}
+{"Time":"2026-10-03T19:08:57.12523871Z","Action":"fail","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Elapsed":10.96}
+{"Time":"2026-10-03T19:08:57.125295545Z","Action":"output","Package":"tabmail/internal/store/postgres","Output":"FAIL\n"}
+{"Time":"2026-10-03T19:08:57.128663526Z","Action":"output","Package":"tabmail/internal/store/postgres","Output":"FAIL\ttabmail/internal/store/postgres\t10.966s\n"}
+{"Time":"2026-10-03T19:08:57.128677386Z","Action":"fail","Package":"tabmail/internal/store/postgres","Elapsed":10.966}

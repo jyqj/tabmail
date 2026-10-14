@@ -1,0 +1,352 @@
+name: Catalog reconciliation and complete source checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches:
+      - main
+      - work/company-mail-r5-goal-20260930
+      - integration/company-mail-r5-*
+permissions:
+  contents: read
+concurrency:
+  group: catalog-reconciliation-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Record exact source before validation
+        id: source
+        run: |
+          mkdir -p "$RUNNER_TEMP/tabmail-catalog16-inventory"
+          python3 -B - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          def git(*args):
+              return subprocess.check_output(['git', *args]).decode()
+          source = dict(commit=git('rev-parse','HEAD').strip(),
+                        tree=git('rev-parse','HEAD^{tree}').strip(),
+                        status=git('status','--porcelain','--untracked-files=all'))
+          output = Path(os.environ['RUNNER_TEMP']) / 'tabmail-catalog16-inventory'
+          (output / 'source-before.json').write_text(json.dumps(source, indent=2) + '\n')
+          print(json.dumps(source, indent=2))
+          if source['status']:
+              raise SystemExit('exact clean source checkout required')
+          PY
+      - uses: actions/setup-go@v5
+        id: go
+        if: ${{ !cancelled() && steps.source.outcome == 'success' }}
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        id: node
+        if: ${{ !cancelled() && steps.source.outcome == 'success' }}
+        with:
+          node-version: '22'
+      - name: Install the original pinned contract dependencies
+        id: python
+        if: ${{ !cancelled() && steps.source.outcome == 'success' }}
+        run: python3 -m pip install --disable-pip-version-check -r scripts/requirements-contract.txt
+      - name: Download the existing Go module graph
+        id: modules
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.go.outcome == 'success' }}
+        run: go mod download
+      - name: Prepare the original locked TypeScript compiler
+        id: typescript
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.python.outcome == 'success' }}
+        run: |
+          python3 -B - <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          sys.path.insert(0, 'scripts')
+          from r5_source_runner_prepare import prepare_typescript
+          receipt = prepare_typescript(Path.cwd())
+          path = Path(os.environ['RUNNER_TEMP']) / 'tabmail-catalog16-inventory' / 'typescript-preparation.json'
+          path.write_text(json.dumps(receipt, indent=2) + '\n')
+          print(json.dumps(receipt, indent=2))
+          PY
+      - name: Original transaction inventory CLI
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.go.outcome == 'success' && steps.node.outcome == 'success' && steps.python.outcome == 'success' && steps.modules.outcome == 'success' && steps.typescript.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          set +e
+          python3 -B scripts/check_r5_transactions.py > "$RUNNER_TEMP/tabmail-catalog16-inventory/transactions.stdout" 2> "$RUNNER_TEMP/tabmail-catalog16-inventory/transactions.stderr"
+          catalog_command_exit=$?
+          set -e
+          printf '%s\n' "$catalog_command_exit" > "$RUNNER_TEMP/tabmail-catalog16-inventory/transactions.exit"
+          cat "$RUNNER_TEMP/tabmail-catalog16-inventory/transactions.stdout"
+          cat "$RUNNER_TEMP/tabmail-catalog16-inventory/transactions.stderr"
+          exit "$catalog_command_exit"
+      - name: Original compatibility inventory CLI
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.go.outcome == 'success' && steps.node.outcome == 'success' && steps.python.outcome == 'success' && steps.modules.outcome == 'success' && steps.typescript.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          set +e
+          python3 -B scripts/check_r5_compatibility.py > "$RUNNER_TEMP/tabmail-catalog16-inventory/compatibility.stdout" 2> "$RUNNER_TEMP/tabmail-catalog16-inventory/compatibility.stderr"
+          catalog_command_exit=$?
+          set -e
+          printf '%s\n' "$catalog_command_exit" > "$RUNNER_TEMP/tabmail-catalog16-inventory/compatibility.exit"
+          cat "$RUNNER_TEMP/tabmail-catalog16-inventory/compatibility.stdout"
+          cat "$RUNNER_TEMP/tabmail-catalog16-inventory/compatibility.stderr"
+          exit "$catalog_command_exit"
+      - name: Original client inventory CLI
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.go.outcome == 'success' && steps.node.outcome == 'success' && steps.python.outcome == 'success' && steps.modules.outcome == 'success' && steps.typescript.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          set +e
+          node scripts/collect_api_calls.cjs --check > "$RUNNER_TEMP/tabmail-catalog16-inventory/clients.stdout" 2> "$RUNNER_TEMP/tabmail-catalog16-inventory/clients.stderr"
+          catalog_command_exit=$?
+          set -e
+          printf '%s\n' "$catalog_command_exit" > "$RUNNER_TEMP/tabmail-catalog16-inventory/clients.exit"
+          cat "$RUNNER_TEMP/tabmail-catalog16-inventory/clients.stdout"
+          cat "$RUNNER_TEMP/tabmail-catalog16-inventory/clients.stderr"
+          exit "$catalog_command_exit"
+      - name: All five original modules with current and historical guards
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.go.outcome == 'success' && steps.node.outcome == 'success' && steps.python.outcome == 'success' && steps.modules.outcome == 'success' && steps.typescript.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          set +e
+          PYTHONPATH=scripts:scripts/tests python3 -B -m unittest test_r5_transactions test_r5_compatibility test_r5_catalog_reconciliation test_r5_current_source_inventory test_r5_reviewed_web_locks -v > "$RUNNER_TEMP/tabmail-catalog16-inventory/five-modules.stdout" 2> "$RUNNER_TEMP/tabmail-catalog16-inventory/five-modules.stderr"
+          catalog_command_exit=$?
+          set -e
+          printf '%s\n' "$catalog_command_exit" > "$RUNNER_TEMP/tabmail-catalog16-inventory/five-modules.exit"
+          cat "$RUNNER_TEMP/tabmail-catalog16-inventory/five-modules.stdout"
+          cat "$RUNNER_TEMP/tabmail-catalog16-inventory/five-modules.stderr"
+          exit "$catalog_command_exit"
+      - name: Record exact source after validation
+        if: ${{ always() && steps.source.outcome == 'success' }}
+        run: |
+          python3 -B - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          def git(*args):
+              return subprocess.check_output(['git', *args]).decode()
+          source = dict(commit=git('rev-parse','HEAD').strip(),
+                        tree=git('rev-parse','HEAD^{tree}').strip(),
+                        status=git('status','--porcelain','--untracked-files=all'))
+          output = Path(os.environ['RUNNER_TEMP']) / 'tabmail-catalog16-inventory'
+          (output / 'source-after.json').write_text(json.dumps(source, indent=2) + '\n')
+          print(json.dumps(source, indent=2))
+          if source != json.loads((output / 'source-before.json').read_text()):
+              raise SystemExit('source changed during validation')
+          PY
+      - name: Preserve all original outputs and source identities
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog16-inventory-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/tabmail-catalog16-inventory
+          if-no-files-found: error
+          retention-days: 14
+  source-version:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Record exact source before validation
+        id: source
+        run: |
+          mkdir -p "$RUNNER_TEMP/tabmail-catalog16-source-version"
+          python3 -B - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          def git(*args):
+              return subprocess.check_output(['git', *args]).decode()
+          source = dict(commit=git('rev-parse','HEAD').strip(),
+                        tree=git('rev-parse','HEAD^{tree}').strip(),
+                        status=git('status','--porcelain','--untracked-files=all'))
+          output = Path(os.environ['RUNNER_TEMP']) / 'tabmail-catalog16-source-version'
+          (output / 'source-before.json').write_text(json.dumps(source, indent=2) + '\n')
+          print(json.dumps(source, indent=2))
+          if source['status']:
+              raise SystemExit('exact clean source checkout required')
+          PY
+      - uses: actions/setup-go@v5
+        id: go
+        if: ${{ !cancelled() && steps.source.outcome == 'success' }}
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        id: node
+        if: ${{ !cancelled() && steps.source.outcome == 'success' }}
+        with:
+          node-version: '22'
+      - name: Install the original pinned contract dependencies
+        id: python
+        if: ${{ !cancelled() && steps.source.outcome == 'success' }}
+        run: python3 -m pip install --disable-pip-version-check -r scripts/requirements-contract.txt
+      - name: Download the existing Go module graph
+        id: modules
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.go.outcome == 'success' }}
+        run: go mod download
+      - name: Prepare the original locked TypeScript compiler
+        id: typescript
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.python.outcome == 'success' }}
+        run: |
+          python3 -B - <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          sys.path.insert(0, 'scripts')
+          from r5_source_runner_prepare import prepare_typescript
+          receipt = prepare_typescript(Path.cwd())
+          path = Path(os.environ['RUNNER_TEMP']) / 'tabmail-catalog16-source-version' / 'typescript-preparation.json'
+          path.write_text(json.dumps(receipt, indent=2) + '\n')
+          print(json.dumps(receipt, indent=2))
+          PY
+      - name: Complete original source-version runner
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.go.outcome == 'success' && steps.node.outcome == 'success' && steps.python.outcome == 'success' && steps.modules.outcome == 'success' && steps.typescript.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          set +e
+          python3 -B scripts/run_r5_source_version_tests.py --root . --output "$RUNNER_TEMP/tabmail-catalog16-source-version/source-version.json" > "$RUNNER_TEMP/tabmail-catalog16-source-version/source-version.stdout" 2> "$RUNNER_TEMP/tabmail-catalog16-source-version/source-version.stderr"
+          catalog_command_exit=$?
+          set -e
+          printf '%s\n' "$catalog_command_exit" > "$RUNNER_TEMP/tabmail-catalog16-source-version/source-version.exit"
+          cat "$RUNNER_TEMP/tabmail-catalog16-source-version/source-version.stdout"
+          cat "$RUNNER_TEMP/tabmail-catalog16-source-version/source-version.stderr"
+          exit "$catalog_command_exit"
+      - name: Print the original source-version report
+        if: ${{ always() && steps.source.outcome == 'success' }}
+        run: |
+          if test -f "$RUNNER_TEMP/tabmail-catalog16-source-version/source-version.json"; then
+            cat "$RUNNER_TEMP/tabmail-catalog16-source-version/source-version.json"
+          fi
+      - name: Record exact source after validation
+        if: ${{ always() && steps.source.outcome == 'success' }}
+        run: |
+          python3 -B - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          def git(*args):
+              return subprocess.check_output(['git', *args]).decode()
+          source = dict(commit=git('rev-parse','HEAD').strip(),
+                        tree=git('rev-parse','HEAD^{tree}').strip(),
+                        status=git('status','--porcelain','--untracked-files=all'))
+          output = Path(os.environ['RUNNER_TEMP']) / 'tabmail-catalog16-source-version'
+          (output / 'source-after.json').write_text(json.dumps(source, indent=2) + '\n')
+          print(json.dumps(source, indent=2))
+          if source != json.loads((output / 'source-before.json').read_text()):
+              raise SystemExit('source changed during validation')
+          PY
+      - name: Preserve all original outputs and source identities
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog16-source-version-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/tabmail-catalog16-source-version
+          if-no-files-found: error
+          retention-days: 14
+  proposal:
+    # A proposal is an author artifact; the two qualification jobs above always
+    # retain the original checks and their failures on the published checkout.
+    if: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'catalog16') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Record exact source before validation
+        id: source
+        run: |
+          mkdir -p "$RUNNER_TEMP/tabmail-catalog16-proposal"
+          python3 -B - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          def git(*args):
+              return subprocess.check_output(['git', *args]).decode()
+          source = dict(commit=git('rev-parse','HEAD').strip(),
+                        tree=git('rev-parse','HEAD^{tree}').strip(),
+                        status=git('status','--porcelain','--untracked-files=all'))
+          output = Path(os.environ['RUNNER_TEMP']) / 'tabmail-catalog16-proposal'
+          (output / 'source-before.json').write_text(json.dumps(source, indent=2) + '\n')
+          print(json.dumps(source, indent=2))
+          if source['status']:
+              raise SystemExit('exact clean source checkout required')
+          PY
+      - uses: actions/setup-go@v5
+        id: go
+        if: ${{ !cancelled() && steps.source.outcome == 'success' }}
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        id: node
+        if: ${{ !cancelled() && steps.source.outcome == 'success' }}
+        with:
+          node-version: '22'
+      - name: Install the original pinned contract dependencies
+        id: python
+        if: ${{ !cancelled() && steps.source.outcome == 'success' }}
+        run: python3 -m pip install --disable-pip-version-check -r scripts/requirements-contract.txt
+      - name: Download the existing Go module graph
+        id: modules
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.go.outcome == 'success' }}
+        run: go mod download
+      - name: Generate proposals from the actual final product merge
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && steps.go.outcome == 'success' && steps.node.outcome == 'success' && steps.python.outcome == 'success' && steps.modules.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          # The author pins b6516f9ac873f4464894933b5c3a0e046bc9a4a5 /
+          # 4034b36faa89a421f2a21b525cf35e93da4a1670 and performs original
+          # prepare_typescript in its own ordinary, clean product clone.
+          set +e
+          python3 -B scripts/prepare_r5_catalog_revision16.py --root . \
+            --output "$RUNNER_TEMP/tabmail-catalog16-proposal/author" \
+            > "$RUNNER_TEMP/tabmail-catalog16-proposal/author.stdout" \
+            2> "$RUNNER_TEMP/tabmail-catalog16-proposal/author.stderr"
+          catalog_author_exit=$?
+          set -e
+          printf '%s\n' "$catalog_author_exit" > "$RUNNER_TEMP/tabmail-catalog16-proposal/author.exit"
+          cat "$RUNNER_TEMP/tabmail-catalog16-proposal/author.stdout"
+          cat "$RUNNER_TEMP/tabmail-catalog16-proposal/author.stderr"
+          python3 -B - <<'PY'
+          import os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP']) / 'tabmail-catalog16-proposal/author'
+          for phase in ('baseline', 'generated'):
+              for command in ('transactions', 'compatibility', 'clients'):
+                  for suffix in ('stdout', 'stderr', 'exit', 'receipt.json'):
+                      path = root / phase / (command + '.' + suffix)
+                      if path.is_file():
+                          print('ORIGINAL_COMMAND_OUTPUT ' + phase + '/' + path.name, flush=True)
+                          print(path.read_text(), end='', flush=True)
+          PY
+          exit "$catalog_author_exit"
+      - name: Record exact source after validation
+        if: ${{ always() && steps.source.outcome == 'success' }}
+        run: |
+          python3 -B - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          def git(*args):
+              return subprocess.check_output(['git', *args]).decode()
+          source = dict(commit=git('rev-parse','HEAD').strip(),
+                        tree=git('rev-parse','HEAD^{tree}').strip(),
+                        status=git('status','--porcelain','--untracked-files=all'))
+          output = Path(os.environ['RUNNER_TEMP']) / 'tabmail-catalog16-proposal'
+          (output / 'source-after.json').write_text(json.dumps(source, indent=2) + '\n')
+          print(json.dumps(source, indent=2))
+          if source != json.loads((output / 'source-before.json').read_text()):
+              raise SystemExit('source changed during validation')
+          PY
+      - name: Preserve all original outputs and source identities
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog16-proposal-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/tabmail-catalog16-proposal
+          if-no-files-found: error
+          retention-days: 14

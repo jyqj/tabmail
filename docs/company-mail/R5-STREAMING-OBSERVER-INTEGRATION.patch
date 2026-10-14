@@ -1,0 +1,62 @@
+--- a/web/components/company/r5-protocol-shared-components.test.tsx
++++ b/web/components/company/r5-protocol-shared-components.test.tsx
+@@ -1,4 +1,5 @@
+ import React from "react";
++import { createR5FetchObserver, type R5ObservedCall } from "./r5-streaming-fetch-observer";
+ import { createHash } from "node:crypto";
+ import { readFileSync } from "node:fs";
+ import { resolve } from "node:path";
+@@ -46,7 +47,8 @@
+ if (fixture.schema_version !== 1 || !shared || fixture.case_sha256 !== createHash("sha256").update(raw).digest("hex") || JSON.stringify(shared.input) !== JSON.stringify(fixture.input) || origin.protocol !== "http:" || origin.hostname !== "127.0.0.1") {
+   throw new Error("Invalid source hash, shared input, or non-loopback Go-owned fixture");
+ }
+-const calls: { method: string; path: string; body?: Record<string, unknown>; status: number; data?: unknown }[] = [];
++const calls: R5ObservedCall[] = [];
++let fetchObserver: ReturnType<typeof createR5FetchObserver>;
+ beforeEach(() => {
+   process.env.NEXT_PUBLIC_API_URL = origin.origin;
+   host.user = fixture.auth.user; installSession(fixture.auth.token, fixture.auth.user);
+@@ -54,16 +56,10 @@
+   Object.defineProperty(window, "matchMedia", { configurable: true, value: (query: string) => ({ matches: false, media: query, onchange: null, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {}, dispatchEvent() { return false; } }) });
+   vi.spyOn(window, "confirm").mockReturnValue(true);
+   const fetchReal = globalThis.fetch.bind(globalThis);
+-  vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
+-    const target = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
+-    if (target.origin !== origin.origin) throw new Error("Component attempted non-fixture network I/O");
+-    const response = await fetchReal(input, init);
+-    let data: unknown; try { data = await response.clone().json(); } catch { /* real 204/non-JSON */ }
+-    calls.push({ method: init?.method ?? "GET", path: target.pathname, body: typeof init?.body === "string" ? JSON.parse(init.body) : undefined, status: response.status, data });
+-    return response;
+-  });
++  fetchObserver = createR5FetchObserver(fetchReal, origin.origin, calls);
++  vi.stubGlobal("fetch", fetchObserver.fetch);
+ });
+-afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); delete process.env.NEXT_PUBLIC_API_URL; });
++afterEach(async () => { cleanup(); try { await fetchObserver.close(); } finally { vi.unstubAllGlobals(); vi.restoreAllMocks(); delete process.env.NEXT_PUBLIC_API_URL; } });
+ function target(marker: string, detail: string): never { throw new Error(`${marker}: ${detail}`); }
+ // Inspect the captured REAL response, including fields the UI parser could reject.
+ // Boolean assertions avoid publishing response bodies or private canaries on failure.
+@@ -253,15 +249,23 @@
+   if (id === "PE03") {
+     if (!fixture.profile_id || !fixture.profile_name) throw new Error("Actual profile fixture missing");
+     render(<SidebarProvider><PermissionsPage /></SidebarProvider>);
++    await waitFor(() => expect(fetchObserver.streams.some(stream => stream.frames.some(frame =>
++      frame.event === "ready" && frame.tenant_id === fixture.auth.user.tenant_id))).toBe(true));
+     const dialog = await rowDialog(fixture.profile_name, "Edit");
+     // Observe the current persistent version through the real authorized GET;
+     // the shipping editor retains the older snapshot opened above.
+     const observed = (await listPermissionProfiles()).data.find(p => p.id === fixture.profile_id);
+     if (!observed) throw new Error("Actual profile GET omitted the fixture profile");
+     validateObservedPermissionProfile(observed);
++    const streamFrameCounts = fetchObserver.streams.map(stream => stream.frames.length);
+     const revoked = (await updatePermissionProfile(fixture.profile_id, { expected_revision: observed.revision, fields: { can_send: false } })).data;
+     expect(revoked.can_send).toBe(false);
+     expect(revoked.revision).not.toBe(observed.revision);
++    await waitFor(() => expect(fetchObserver.streams.some((stream, index) =>
++      stream.frames.slice(streamFrameCounts[index] ?? 0).some(frame =>
++        frame.event === "company.admin.changed" && frame.tenant_id === fixture.auth.user.tenant_id &&
++        frame.action === "permission.profile.update" && frame.resource_id === fixture.profile_id))).toBe(true), { timeout: 5000 });
++    expect(fetchObserver.streams.every(stream => !stream.error)).toBe(true);
+     const input = within(dialog).getByPlaceholderText("Profile description (optional)");
+     await userEvent.clear(input); await userEvent.type(input, "Shared stale description");
+     await userEvent.click(within(dialog).getByRole("button", { name: /^Save$/ }));

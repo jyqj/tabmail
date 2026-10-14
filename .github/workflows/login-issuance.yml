@@ -1,0 +1,64 @@
+name: Login issuance with PostgreSQL
+on:
+  pull_request:
+    branches:
+      - main
+      - integration/company-mail-r5-*
+permissions:
+  contents: read
+concurrency:
+  group: login-issuance-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  login-issuance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tabmail_test
+          POSTGRES_PASSWORD: disposable-test-password
+          POSTGRES_DB: tabmail_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      GOSUMDB: sum.golang.org
+      GODEBUG: asynctimerchan=0
+      TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Real login, account mutation and refresh races
+        run: |
+          set -euo pipefail
+          mkdir login-issuance-evidence
+          git rev-parse HEAD > login-issuance-evidence/source-sha.txt
+          git rev-parse 'HEAD^{tree}' > login-issuance-evidence/source-tree.txt
+          sha256sum internal/api/handlers/r5_login_issuance_pg_test.go > login-issuance-evidence/test-source.sha256
+          set +e
+          go test -mod=readonly -p 2 -json -race -count=1 -timeout=120s \
+            -run '^TestR5LoginIssuancePostgres' ./internal/api/handlers \
+            > login-issuance-evidence/go-test.jsonl 2> login-issuance-evidence/go-test.stderr
+          test_exit=$?
+          set -e
+          printf '%s\n' "$test_exit" > login-issuance-evidence/go-test.exit
+          python3 -B scripts/check_go_test_evidence.py --suite login-issuance \
+            --manifest scripts/required_login_issuance_tests.json \
+            --log login-issuance-evidence/go-test.jsonl --exit-code "$test_exit" \
+            --source-sha "$(cat login-issuance-evidence/source-sha.txt)" \
+            | tee login-issuance-evidence/verification.json
+      - name: Retain exact source and actual execution
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: login-issuance-evidence
+          path: login-issuance-evidence
+          if-no-files-found: error
+          retention-days: 14

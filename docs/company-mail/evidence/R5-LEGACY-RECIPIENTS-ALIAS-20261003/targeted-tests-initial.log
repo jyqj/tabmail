@@ -1,0 +1,21 @@
+
+> web@0.1.0 test
+> vitest run lib/legacy-outbound.test.ts lib/receipt-types.test.ts features/mail/components/receipt-consumer.test.tsx
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 /workspace/tabmail/web
+
+
+ Test Files  3 passed (3)
+      Tests  78 passed (78)
+   Start at  19:18:17
+   Duration  3.30s (transform 1.05s, setup 1.10s, import 985ms, tests 766ms, environment 4.24s)
+
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

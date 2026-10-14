@@ -1,0 +1,1825 @@
+{
+  "OSchildren_runtime_inside_parent_raw_only": true,
+  "SuppressionScopes_rawonly_not_phase_missing_bug": true,
+  "actual_Go_exit": 1,
+  "actual_PASS": 24,
+  "actual_failed_names": [
+    "TestR5SuppressionScopesMigrationFreshUpgradeRepeat/fresh",
+    "TestR5SuppressionScopesMigrationFreshUpgradeRepeat/actual-14-upgrade",
+    "TestR5SuppressionScopesMigrationFreshUpgradeRepeat"
+  ],
+  "actual_leaf_run": 21,
+  "actual_package_terminal": [
+    {
+      "action": "fail",
+      "elapsed": 30.556
+    }
+  ],
+  "actual_runs": 27,
+  "actual_skipped_names": [],
+  "actual_top_run": 8,
+  "diagnostic_complete_metrics_only": true,
+  "fixture_count": 15,
+  "fixture_return_to_cleanup_NOT_pure_body": true,
+  "must_not_sum_nested_phase_spans_as_wall": true,
+  "observed_error_drop_flags": [],
+  "perfixture_metrics": {
+    "70989-1": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 2352791,
+            "elapsed_ms": 0.382125,
+            "span_id": 1
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 318338208,
+            "elapsed_ms": 0.06525,
+            "span_id": 15
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 256725125,
+            "elapsed_ms": 0.01075,
+            "span_id": 12
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 256956458,
+            "elapsed_ms": 0.206667,
+            "span_id": 13
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 45257500,
+            "elapsed_ms": 42.854209,
+            "span_id": 2
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 318205833,
+            "elapsed_ms": 61.221209,
+            "span_id": 14
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 256663125,
+            "elapsed_ms": 20.1505,
+            "span_id": 10
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 52045166,
+            "elapsed_ms": 0.17175,
+            "span_id": 7
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 236254041,
+            "elapsed_ms": 184.17,
+            "span_id": 8
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 51830958,
+            "elapsed_ms": 2.253416,
+            "span_id": 6
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 236338000,
+            "elapsed_ms": 186.789583,
+            "span_id": 5
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 49501291,
+            "elapsed_ms": 4.177708,
+            "span_id": 4
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 236484541,
+            "elapsed_ms": 0.104625,
+            "span_id": 9
+          }
+        ],
+        "seed_excluding_fresh_database": [
+          {
+            "at_ns": 249556750,
+            "elapsed_ms": 13.007333,
+            "span_id": 11
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 236353666,
+            "elapsed_ms": 191.04525,
+            "span_id": 3
+          }
+        ]
+      },
+      "test_name": "TestR3EmployeeActivationSingleUseAndPrivateProvisioning"
+    },
+    "70989-10": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 23056228291,
+            "elapsed_ms": 0.119292,
+            "span_id": 132
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 25349757416,
+            "elapsed_ms": 0.063875,
+            "span_id": 146
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 25301156875,
+            "elapsed_ms": 0.224542,
+            "span_id": 143
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 25301575666,
+            "elapsed_ms": 0.321125,
+            "span_id": 144
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 23099816833,
+            "elapsed_ms": 43.559709,
+            "span_id": 133
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 25349632583,
+            "elapsed_ms": 47.955917,
+            "span_id": 145
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 25300810666,
+            "elapsed_ms": 2026.821,
+            "span_id": 141
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 23105261583,
+            "elapsed_ms": 0.093042,
+            "span_id": 138
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 23273733666,
+            "elapsed_ms": 168.438959,
+            "span_id": 139
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 23105126708,
+            "elapsed_ms": 1.676,
+            "span_id": 137
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 23273812125,
+            "elapsed_ms": 170.379166,
+            "span_id": 136
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 23103397750,
+            "elapsed_ms": 3.508375,
+            "span_id": 135
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 23273959375,
+            "elapsed_ms": 0.104209,
+            "span_id": 140
+          }
+        ],
+        "seed_excluding_fresh_database": [
+          {
+            "at_ns": 23285812875,
+            "elapsed_ms": 11.78625,
+            "span_id": 142
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 23273827958,
+            "elapsed_ms": 173.951375,
+            "span_id": 134
+          }
+        ]
+      },
+      "test_name": "TestR5SentMutationRollsBackExpiryDuringAuditWait/purge"
+    },
+    "70989-11": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 25350012583,
+            "elapsed_ms": 0.095083,
+            "span_id": 147
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 27655803500,
+            "elapsed_ms": 0.08,
+            "span_id": 161
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 27603163583,
+            "elapsed_ms": 0.163125,
+            "span_id": 158
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 27603311791,
+            "elapsed_ms": 0.099833,
+            "span_id": 159
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 25386426916,
+            "elapsed_ms": 36.383375,
+            "span_id": 148
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 27655642500,
+            "elapsed_ms": 52.286125,
+            "span_id": 160
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 27602918833,
+            "elapsed_ms": 2027.801875,
+            "span_id": 156
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 25392927166,
+            "elapsed_ms": 0.129458,
+            "span_id": 153
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 25574871791,
+            "elapsed_ms": 181.915666,
+            "span_id": 154
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 25392754416,
+            "elapsed_ms": 2.19675,
+            "span_id": 152
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 25574941083,
+            "elapsed_ms": 184.404875,
+            "span_id": 151
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 25390490916,
+            "elapsed_ms": 3.984083,
+            "span_id": 150
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 25575085583,
+            "elapsed_ms": 0.100084,
+            "span_id": 155
+          }
+        ],
+        "seed_excluding_fresh_database": [
+          {
+            "at_ns": 25587242333,
+            "elapsed_ms": 12.088834,
+            "span_id": 157
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 25574957958,
+            "elapsed_ms": 188.470542,
+            "span_id": 149
+          }
+        ]
+      },
+      "test_name": "TestR5SentMutationRollsBackExpiryDuringAuditWait/mailbox"
+    },
+    "70989-12": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 27656508666,
+            "elapsed_ms": 0.109209,
+            "span_id": 162
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 28227094541,
+            "elapsed_ms": 0.045334,
+            "span_id": 191
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 28201421833,
+            "elapsed_ms": 0.03525,
+            "span_id": 188
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 28201506958,
+            "elapsed_ms": 0.055584,
+            "span_id": 189
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 27695214291,
+            "elapsed_ms": 38.667542,
+            "span_id": 163
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 28226991833,
+            "elapsed_ms": 25.459667,
+            "span_id": 190
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 28201353625,
+            "elapsed_ms": 326.828334,
+            "span_id": 171
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 27701326291,
+            "elapsed_ms": 0.107625,
+            "span_id": 168
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 27874286291,
+            "elapsed_ms": 172.930125,
+            "span_id": 169
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 27701135916,
+            "elapsed_ms": 1.922416,
+            "span_id": 167
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 27874358708,
+            "elapsed_ms": 175.162,
+            "span_id": 166
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 27699154666,
+            "elapsed_ms": 3.8625,
+            "span_id": 165
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 27874495041,
+            "elapsed_ms": 0.095541,
+            "span_id": 170
+          }
+        ],
+        "seed_excluding_fresh_database": [
+          {
+            "at_ns": 27886558250,
+            "elapsed_ms": 11.997,
+            "span_id": 172
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 27874375041,
+            "elapsed_ms": 179.0985,
+            "span_id": 164
+          }
+        ]
+      },
+      "test_name": "TestR5InvitationProfileCompleteCommandsLockOrder/invite-first"
+    },
+    "70989-13": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 27892265958,
+            "elapsed_ms": 0.092791,
+            "span_id": 173
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 28201330583,
+            "elapsed_ms": 0.059666,
+            "span_id": 187
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 28131224375,
+            "elapsed_ms": 0.071792,
+            "span_id": 184
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 28131298416,
+            "elapsed_ms": 0.045,
+            "span_id": 185
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 27922018541,
+            "elapsed_ms": 29.721125,
+            "span_id": 174
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 28201201666,
+            "elapsed_ms": 69.877625,
+            "span_id": 186
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 28131118458,
+            "elapsed_ms": 35.306208,
+            "span_id": 182
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 27927065791,
+            "elapsed_ms": 0.094167,
+            "span_id": 179
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 28095562458,
+            "elapsed_ms": 168.464083,
+            "span_id": 180
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 27926941416,
+            "elapsed_ms": 1.55675,
+            "span_id": 178
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 28095643750,
+            "elapsed_ms": 170.276792,
+            "span_id": 177
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 27925335291,
+            "elapsed_ms": 3.249417,
+            "span_id": 176
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 28095784083,
+            "elapsed_ms": 0.0975,
+            "span_id": 181
+          }
+        ],
+        "seed_excluding_fresh_database": [
+          {
+            "at_ns": 28106939041,
+            "elapsed_ms": 11.088834,
+            "span_id": 183
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 28095660416,
+            "elapsed_ms": 173.588084,
+            "span_id": 175
+          }
+        ]
+      },
+      "test_name": "TestR5InvitationProfileCompleteCommandsLockOrder/invite-first"
+    },
+    "70989-14": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 28227393416,
+            "elapsed_ms": 0.099167,
+            "span_id": 192
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 28783901583,
+            "elapsed_ms": 0.075,
+            "span_id": 221
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 28757551625,
+            "elapsed_ms": 0.051042,
+            "span_id": 218
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 28757640208,
+            "elapsed_ms": 0.060333,
+            "span_id": 219
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 28261901750,
+            "elapsed_ms": 34.476792,
+            "span_id": 193
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 28783740833,
+            "elapsed_ms": 26.072708,
+            "span_id": 220
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 28757453750,
+            "elapsed_ms": 324.262125,
+            "span_id": 201
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 28267624833,
+            "elapsed_ms": 0.091833,
+            "span_id": 198
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 28432921166,
+            "elapsed_ms": 165.269,
+            "span_id": 199
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 28267496166,
+            "elapsed_ms": 2.142541,
+            "span_id": 197
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 28432993458,
+            "elapsed_ms": 167.657,
+            "span_id": 196
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 28265290291,
+            "elapsed_ms": 3.278625,
+            "span_id": 195
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 28433160625,
+            "elapsed_ms": 0.102417,
+            "span_id": 200
+          }
+        ],
+        "seed_excluding_fresh_database": [
+          {
+            "at_ns": 28444893791,
+            "elapsed_ms": 11.669,
+            "span_id": 202
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 28433009750,
+            "elapsed_ms": 171.012292,
+            "span_id": 194
+          }
+        ]
+      },
+      "test_name": "TestR5InvitationProfileCompleteCommandsLockOrder/profile-delete-first"
+    },
+    "70989-15": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 28450822875,
+            "elapsed_ms": 0.111541,
+            "span_id": 203
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 28757401541,
+            "elapsed_ms": 0.067333,
+            "span_id": 217
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 28695750500,
+            "elapsed_ms": 0.093875,
+            "span_id": 214
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 28695847750,
+            "elapsed_ms": 0.065792,
+            "span_id": 215
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 28482603500,
+            "elapsed_ms": 31.745916,
+            "span_id": 204
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 28757259083,
+            "elapsed_ms": 61.383167,
+            "span_id": 216
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 28695615541,
+            "elapsed_ms": 33.544666,
+            "span_id": 212
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 28488113166,
+            "elapsed_ms": 0.128666,
+            "span_id": 209
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 28661833041,
+            "elapsed_ms": 173.686,
+            "span_id": 210
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 28487953541,
+            "elapsed_ms": 2.023834,
+            "span_id": 208
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 28661902041,
+            "elapsed_ms": 175.98675,
+            "span_id": 207
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 28485880458,
+            "elapsed_ms": 3.210542,
+            "span_id": 206
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 28662042583,
+            "elapsed_ms": 0.097458,
+            "span_id": 211
+          }
+        ],
+        "seed_excluding_fresh_database": [
+          {
+            "at_ns": 28673703708,
+            "elapsed_ms": 11.589833,
+            "span_id": 213
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 28661919125,
+            "elapsed_ms": 179.262208,
+            "span_id": 205
+          }
+        ]
+      },
+      "test_name": "TestR5InvitationProfileCompleteCommandsLockOrder/profile-delete-first"
+    },
+    "70989-2": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 318814250,
+            "elapsed_ms": 0.149083,
+            "span_id": 16
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 2617724625,
+            "elapsed_ms": 0.076042,
+            "span_id": 30
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 2566216500,
+            "elapsed_ms": 1.129458,
+            "span_id": 27
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 2566443333,
+            "elapsed_ms": 0.154,
+            "span_id": 28
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 354616333,
+            "elapsed_ms": 35.772625,
+            "span_id": 17
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 2617555291,
+            "elapsed_ms": 51.065708,
+            "span_id": 29
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 2564902625,
+            "elapsed_ms": 2024.952208,
+            "span_id": 25
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 360609708,
+            "elapsed_ms": 0.098458,
+            "span_id": 22
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 539701875,
+            "elapsed_ms": 179.060792,
+            "span_id": 23
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 360473041,
+            "elapsed_ms": 1.886125,
+            "span_id": 21
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 539777875,
+            "elapsed_ms": 181.204083,
+            "span_id": 20
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 358527291,
+            "elapsed_ms": 3.841333,
+            "span_id": 19
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 539922333,
+            "elapsed_ms": 0.101,
+            "span_id": 24
+          }
+        ],
+        "seed_excluding_fresh_database": [
+          {
+            "at_ns": 552553708,
+            "elapsed_ms": 12.563708,
+            "span_id": 26
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 539795458,
+            "elapsed_ms": 185.1225,
+            "span_id": 18
+          }
+        ]
+      },
+      "test_name": "TestR5ActivationExpiryAfterRealWaitRollsBack/tenant"
+    },
+    "70989-3": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 2618072583,
+            "elapsed_ms": 0.138958,
+            "span_id": 31
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 4909979500,
+            "elapsed_ms": 0.088375,
+            "span_id": 45
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 4859028625,
+            "elapsed_ms": 0.207458,
+            "span_id": 42
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 4859362875,
+            "elapsed_ms": 0.25425,
+            "span_id": 43
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 2658666750,
+            "elapsed_ms": 40.547791,
+            "span_id": 32
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 4909815083,
+            "elapsed_ms": 50.333834,
+            "span_id": 44
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 4858724083,
+            "elapsed_ms": 2023.042166,
+            "span_id": 40
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 2664680750,
+            "elapsed_ms": 0.093875,
+            "span_id": 37
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 2835435333,
+            "elapsed_ms": 170.724166,
+            "span_id": 38
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 2664546666,
+            "elapsed_ms": 1.847709,
+            "span_id": 36
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 2835509125,
+            "elapsed_ms": 172.824125,
+            "span_id": 35
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 2662637708,
+            "elapsed_ms": 3.892166,
+            "span_id": 34
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 2835653708,
+            "elapsed_ms": 0.103,
+            "span_id": 39
+          }
+        ],
+        "seed_excluding_fresh_database": [
+          {
+            "at_ns": 2847189541,
+            "elapsed_ms": 11.468666,
+            "span_id": 41
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 2835526125,
+            "elapsed_ms": 176.795083,
+            "span_id": 33
+          }
+        ]
+      },
+      "test_name": "TestR5ActivationExpiryAfterRealWaitRollsBack/invitation"
+    },
+    "70989-4": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 4910339791,
+            "elapsed_ms": 0.132083,
+            "span_id": 46
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 7212503916,
+            "elapsed_ms": 0.143375,
+            "span_id": 60
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 7164124583,
+            "elapsed_ms": 0.206167,
+            "span_id": 57
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 7164281625,
+            "elapsed_ms": 0.108417,
+            "span_id": 58
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 4956030166,
+            "elapsed_ms": 45.643167,
+            "span_id": 47
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 7212289125,
+            "elapsed_ms": 47.964417,
+            "span_id": 59
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 7163759708,
+            "elapsed_ms": 2024.686709,
+            "span_id": 55
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 4962304500,
+            "elapsed_ms": 0.09475,
+            "span_id": 52
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 5138821833,
+            "elapsed_ms": 176.485917,
+            "span_id": 53
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 4962171541,
+            "elapsed_ms": 2.081417,
+            "span_id": 51
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 5138911916,
+            "elapsed_ms": 178.837583,
+            "span_id": 50
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 4960030375,
+            "elapsed_ms": 3.9275,
+            "span_id": 49
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 5139044583,
+            "elapsed_ms": 0.091708,
+            "span_id": 54
+          }
+        ],
+        "seed_excluding_fresh_database": [
+          {
+            "at_ns": 5151716083,
+            "elapsed_ms": 12.605042,
+            "span_id": 56
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 5138928208,
+            "elapsed_ms": 182.8385,
+            "span_id": 48
+          }
+        ]
+      },
+      "test_name": "TestR5ActivationExpiryAfterRealWaitRollsBack/audit"
+    },
+    "70989-5": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 9428576500,
+            "elapsed_ms": 0.164375,
+            "span_id": 61
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 14727397041,
+            "elapsed_ms": 0.082125,
+            "span_id": 74
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 14677414375,
+            "elapsed_ms": 0.317875,
+            "span_id": 71
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 14677829166,
+            "elapsed_ms": 0.144334,
+            "span_id": 72
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 9462561958,
+            "elapsed_ms": 33.9495,
+            "span_id": 62
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 14727225791,
+            "elapsed_ms": 49.343125,
+            "span_id": 73
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 14676924916,
+            "elapsed_ms": 5036.166833,
+            "span_id": 70
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 9467924666,
+            "elapsed_ms": 0.145708,
+            "span_id": 67
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 9640499166,
+            "elapsed_ms": 172.5445,
+            "span_id": 68
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 9467741000,
+            "elapsed_ms": 1.583125,
+            "span_id": 66
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 9640573750,
+            "elapsed_ms": 174.428,
+            "span_id": 65
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 9466111208,
+            "elapsed_ms": 3.473,
+            "span_id": 64
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 9640730750,
+            "elapsed_ms": 0.113625,
+            "span_id": 69
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 9640593125,
+            "elapsed_ms": 177.971208,
+            "span_id": 63
+          }
+        ]
+      },
+      "test_name": "TestR5AttachmentGCTenantLockTimeoutContinuesRound"
+    },
+    "70989-6": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 14727857500,
+            "elapsed_ms": 0.143,
+            "span_id": 75
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 15045112250,
+            "elapsed_ms": 0.051625,
+            "span_id": 88
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 15020325875,
+            "elapsed_ms": 0.063,
+            "span_id": 85
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 15020409875,
+            "elapsed_ms": 0.050375,
+            "span_id": 86
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 14764058666,
+            "elapsed_ms": 36.159042,
+            "span_id": 76
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 15045000083,
+            "elapsed_ms": 24.561417,
+            "span_id": 87
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 15020216625,
+            "elapsed_ms": 82.833583,
+            "span_id": 84
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 14770134875,
+            "elapsed_ms": 0.11575,
+            "span_id": 81
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 14937150500,
+            "elapsed_ms": 166.988291,
+            "span_id": 82
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 14769983291,
+            "elapsed_ms": 2.1215,
+            "span_id": 80
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 14937217875,
+            "elapsed_ms": 169.369125,
+            "span_id": 79
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 14767798750,
+            "elapsed_ms": 3.665083,
+            "span_id": 78
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 14937352333,
+            "elapsed_ms": 0.094292,
+            "span_id": 83
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 14937233875,
+            "elapsed_ms": 173.11275,
+            "span_id": 77
+          }
+        ]
+      },
+      "test_name": "TestR5AttachmentGCTenantInterruptedSessionResumes/backend_terminated"
+    },
+    "70989-7": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 15045352125,
+            "elapsed_ms": 0.087542,
+            "span_id": 89
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 15381032250,
+            "elapsed_ms": 0.0535,
+            "span_id": 102
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 15357390541,
+            "elapsed_ms": 0.0695,
+            "span_id": 99
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 15357474083,
+            "elapsed_ms": 0.052959,
+            "span_id": 100
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 15079086250,
+            "elapsed_ms": 33.699791,
+            "span_id": 90
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 15380910416,
+            "elapsed_ms": 23.407042,
+            "span_id": 101
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 15357275083,
+            "elapsed_ms": 95.86675,
+            "span_id": 98
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 15084656125,
+            "elapsed_ms": 0.100833,
+            "span_id": 95
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 15261160375,
+            "elapsed_ms": 176.478708,
+            "span_id": 96
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 15084522541,
+            "elapsed_ms": 1.721917,
+            "span_id": 94
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 15261236000,
+            "elapsed_ms": 178.451917,
+            "span_id": 93
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 15082739416,
+            "elapsed_ms": 3.561459,
+            "span_id": 92
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 15261379916,
+            "elapsed_ms": 0.101167,
+            "span_id": 97
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 15261253791,
+            "elapsed_ms": 182.092833,
+            "span_id": 91
+          }
+        ]
+      },
+      "test_name": "TestR5AttachmentGCTenantInterruptedSessionResumes/context_cancelled"
+    },
+    "70989-8": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 15381291333,
+            "elapsed_ms": 0.10825,
+            "span_id": 103
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 20762681333,
+            "elapsed_ms": 0.07025,
+            "span_id": 116
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 20736141458,
+            "elapsed_ms": 0.112375,
+            "span_id": 113
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 20736259916,
+            "elapsed_ms": 0.076583,
+            "span_id": 114
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 15414697125,
+            "elapsed_ms": 33.377125,
+            "span_id": 104
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 20762543500,
+            "elapsed_ms": 26.249625,
+            "span_id": 115
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 20735950166,
+            "elapsed_ms": 5143.08375,
+            "span_id": 112
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 15420098500,
+            "elapsed_ms": 0.09775,
+            "span_id": 109
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 15592616833,
+            "elapsed_ms": 172.490583,
+            "span_id": 110
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 15419969250,
+            "elapsed_ms": 1.666708,
+            "span_id": 108
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 15592698083,
+            "elapsed_ms": 174.412,
+            "span_id": 107
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 15418244041,
+            "elapsed_ms": 3.477041,
+            "span_id": 106
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 15592833208,
+            "elapsed_ms": 0.093125,
+            "span_id": 111
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 15592714583,
+            "elapsed_ms": 177.960291,
+            "span_id": 105
+          }
+        ]
+      },
+      "test_name": "TestR5AttachmentGCTenantInterruptedSessionResumes/process_killed"
+    },
+    "70989-9": {
+      "observations": {
+        "cleanup_registered": false,
+        "drop_result": false
+      },
+      "phases": {
+        "admin_pool_new": [
+          {
+            "at_ns": 20763283875,
+            "elapsed_ms": 0.119167,
+            "span_id": 117
+          }
+        ],
+        "close_admin_pool": [
+          {
+            "at_ns": 23055889458,
+            "elapsed_ms": 0.056458,
+            "span_id": 131
+          }
+        ],
+        "close_observer_pool": [
+          {
+            "at_ns": 23013966250,
+            "elapsed_ms": 0.306708,
+            "span_id": 128
+          }
+        ],
+        "close_store_pool": [
+          {
+            "at_ns": 23014303666,
+            "elapsed_ms": 0.262583,
+            "span_id": 129
+          }
+        ],
+        "create_database": [
+          {
+            "at_ns": 20796377666,
+            "elapsed_ms": 33.064083,
+            "span_id": 118
+          }
+        ],
+        "drop_database": [
+          {
+            "at_ns": 23055761333,
+            "elapsed_ms": 41.265083,
+            "span_id": 130
+          }
+        ],
+        "fixture_return_to_cleanup_including_seed_and_test_defers": [
+          {
+            "at_ns": 23013518833,
+            "elapsed_ms": 2028.440042,
+            "span_id": 126
+          }
+        ],
+        "migration_provider_build": [
+          {
+            "at_ns": 20802191291,
+            "elapsed_ms": 0.113792,
+            "span_id": 123
+          }
+        ],
+        "migration_up": [
+          {
+            "at_ns": 20984809666,
+            "elapsed_ms": 182.591833,
+            "span_id": 124
+          }
+        ],
+        "migration_version_check": [
+          {
+            "at_ns": 20802045875,
+            "elapsed_ms": 1.948666,
+            "span_id": 122
+          }
+        ],
+        "new_migrate_total": [
+          {
+            "at_ns": 20984886666,
+            "elapsed_ms": 184.8145,
+            "span_id": 121
+          }
+        ],
+        "new_pool_ping": [
+          {
+            "at_ns": 20800030791,
+            "elapsed_ms": 3.587,
+            "span_id": 120
+          }
+        ],
+        "observer_pool_new": [
+          {
+            "at_ns": 20985045791,
+            "elapsed_ms": 0.116166,
+            "span_id": 125
+          }
+        ],
+        "seed_excluding_fresh_database": [
+          {
+            "at_ns": 20996429416,
+            "elapsed_ms": 11.317917,
+            "span_id": 127
+          }
+        ],
+        "store_new_total": [
+          {
+            "at_ns": 20984903958,
+            "elapsed_ms": 188.472875,
+            "span_id": 119
+          }
+        ]
+      },
+      "test_name": "TestR5SentMutationRollsBackExpiryDuringAuditWait/expires"
+    }
+  },
+  "phase_JSON_event_count": 472,
+  "phase_span_aggregate": {
+    "admin_pool_new": {
+      "actual_span_count": 15,
+      "max_ms": 0.382125,
+      "median_ms": 0.119167,
+      "min_ms": 0.087542,
+      "sum_ms_NOT_additive_wall": 2.051666
+    },
+    "close_admin_pool": {
+      "actual_span_count": 15,
+      "max_ms": 0.143375,
+      "median_ms": 0.067333,
+      "min_ms": 0.045334,
+      "sum_ms_NOT_additive_wall": 1.078208
+    },
+    "close_observer_pool": {
+      "actual_span_count": 15,
+      "max_ms": 1.129458,
+      "median_ms": 0.112375,
+      "min_ms": 0.01075,
+      "sum_ms_NOT_additive_wall": 3.062917
+    },
+    "close_store_pool": {
+      "actual_span_count": 15,
+      "max_ms": 0.321125,
+      "median_ms": 0.099833,
+      "min_ms": 0.045,
+      "sum_ms_NOT_additive_wall": 1.957835
+    },
+    "create_database": {
+      "actual_span_count": 15,
+      "max_ms": 45.643167,
+      "median_ms": 35.772625,
+      "min_ms": 29.721125,
+      "sum_ms_NOT_additive_wall": 549.621792
+    },
+    "drop_database": {
+      "actual_span_count": 15,
+      "max_ms": 69.877625,
+      "median_ms": 47.964417,
+      "min_ms": 23.407042,
+      "sum_ms_NOT_additive_wall": 658.446669
+    },
+    "fixture_return_to_cleanup_including_seed_and_test_defers": {
+      "actual_span_count": 15,
+      "max_ms": 5143.08375,
+      "median_ms": 2023.042166,
+      "min_ms": 20.1505,
+      "sum_ms_NOT_additive_wall": 23253.786749
+    },
+    "migration_provider_build": {
+      "actual_span_count": 15,
+      "max_ms": 0.17175,
+      "median_ms": 0.100833,
+      "min_ms": 0.091833,
+      "sum_ms_NOT_additive_wall": 1.677457
+    },
+    "migration_up": {
+      "actual_span_count": 15,
+      "max_ms": 184.17,
+      "median_ms": 172.930125,
+      "min_ms": 165.269,
+      "sum_ms_NOT_additive_wall": 2612.238623
+    },
+    "migration_version_check": {
+      "actual_span_count": 15,
+      "max_ms": 2.253416,
+      "median_ms": 1.922416,
+      "min_ms": 1.55675,
+      "sum_ms_NOT_additive_wall": 28.628874
+    },
+    "new_migrate_total": {
+      "actual_span_count": 15,
+      "max_ms": 186.789583,
+      "median_ms": 175.162,
+      "min_ms": 167.657,
+      "sum_ms_NOT_additive_wall": 2644.997499
+    },
+    "new_pool_ping": {
+      "actual_span_count": 15,
+      "max_ms": 4.177708,
+      "median_ms": 3.587,
+      "min_ms": 3.210542,
+      "sum_ms_NOT_additive_wall": 54.695832
+    },
+    "observer_pool_new": {
+      "actual_span_count": 15,
+      "max_ms": 0.116166,
+      "median_ms": 0.101,
+      "min_ms": 0.091708,
+      "sum_ms_NOT_additive_wall": 1.515917
+    },
+    "seed_excluding_fresh_database": {
+      "actual_span_count": 11,
+      "max_ms": 13.007333,
+      "median_ms": 11.78625,
+      "min_ms": 11.088834,
+      "sum_ms_NOT_additive_wall": 131.182417
+    },
+    "store_new_total": {
+      "actual_span_count": 15,
+      "max_ms": 191.04525,
+      "median_ms": 179.0985,
+      "min_ms": 171.012292,
+      "sum_ms_NOT_additive_wall": 2700.794291
+    }
+  },
+  "product_or_fullGo_PASS": false,
+  "sample_unknown_count": 0,
+  "sampled_connection_peak_lower_bound": 7,
+  "source_instrument_overhead_not_uninstrumented_causeproof": true,
+  "source_kind": "diagnostic_derived_olddfb",
+  "unfinished_spans": [],
+  "v2_duplicate_unknown_or_mismatched_issues": []
+}

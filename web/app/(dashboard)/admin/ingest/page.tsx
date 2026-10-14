@@ -1,12 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useReducer, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Boxes, RefreshCw, Search } from "lucide-react";
 
 import { listIngestJobs } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
+import { useSessionScope } from "@/lib/session";
 import { useCRUDPage } from "@/hooks/use-crud-page";
+import { useText } from "@/components/company/common";
+import { ListReadFeedback, listPending, listReady, refreshList } from "@/components/crud/list-read-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,14 +43,25 @@ const stateStyles: Record<string, string> = {
 };
 
 export default function AdminIngestPage() {
+  const scope = useSessionScope();
+  return <AdminIngestSession key={scope} />;
+}
+
+function AdminIngestSession() {
   const { t } = useI18n();
+  const text = useText();
+  const reader = useId();
   const [page, setPage] = useState(1);
   const [state, setState] = useState("all");
   const [source, setSource] = useState("all");
   const [recipient, setRecipient] = useState("");
+  // Revisiting a query must obtain a new observation, including before SWR's
+  // deferred cache revalidation starts. Explicit retries keep this generation.
+  const [readGeneration, advanceRead] = useReducer((generation: number) => generation + 1, 0);
+  const changePage = (nextPage: number) => { setPage(nextPage); advanceRead(); };
 
-  const { data: response, isLoading: loading, mutate } = useCRUDPage(
-    ["ingest", page, state, source, recipient],
+  const list = useCRUDPage(
+    ["ingest", reader, page, state, source, recipient, readGeneration],
     () => listIngestJobs({
       page,
       per_page: PAGE_SIZE,
@@ -57,6 +71,9 @@ export default function AdminIngestPage() {
     }),
     "ingest.loadFailed",
   );
+  const loading = listPending(list);
+  const ready = listReady(list);
+  const response = ready ? list.data : undefined;
   const jobs = useMemo(() => response?.data ?? [], [response]);
   const total = response?.meta?.total ?? 0;
 
@@ -75,7 +92,7 @@ export default function AdminIngestPage() {
         title={t("ingest.title")}
         description={t("ingest.desc")}
         actions={
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => mutate()}>
+          <Button variant="outline" size="sm" className="gap-1.5" disabled={!ready} onClick={() => refreshList(list)}>
             <RefreshCw className="h-3.5 w-3.5" />
             {t("ingest.refresh")}
           </Button>
@@ -84,10 +101,10 @@ export default function AdminIngestPage() {
 
       <div className="space-y-4 p-4">
         <div className="grid gap-4 md:grid-cols-4">
-          <StatCard title={t("ingest.currentPage")} value={jobs.length} />
-          <StatCard title={t("ingest.total")} value={total} />
-          <StatCard title={t("ingest.processing")} value={totals.processing || 0} />
-          <StatCard title={t("ingest.retryDead")} value={(totals.retry || 0) + (totals.dead || 0)} />
+          <StatCard title={t("ingest.currentPage")} value={ready ? jobs.length : undefined} />
+          <StatCard title={t("ingest.total")} value={ready ? total : undefined} />
+          <StatCard title={t("ingest.processing")} value={ready ? totals.processing || 0 : undefined} />
+          <StatCard title={t("ingest.retryDead")} value={ready ? (totals.retry || 0) + (totals.dead || 0) : undefined} />
         </div>
 
         <Card>
@@ -99,7 +116,7 @@ export default function AdminIngestPage() {
             <CardDescription>{t("ingest.filterDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-3">
-            <Select value={state} onValueChange={(value) => { setPage(1); setState(value || "all"); }}>
+            <Select value={state} onValueChange={(value) => { setPage(1); setState(value || "all"); advanceRead(); }}>
               <SelectTrigger>
                 <SelectValue placeholder={t("ingest.statePlaceholder")} />
               </SelectTrigger>
@@ -112,7 +129,7 @@ export default function AdminIngestPage() {
                 <SelectItem value="dead">dead</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={source} onValueChange={(value) => { setPage(1); setSource(value || "all"); }}>
+            <Select value={source} onValueChange={(value) => { setPage(1); setSource(value || "all"); advanceRead(); }}>
               <SelectTrigger>
                 <SelectValue placeholder={t("ingest.sourcePlaceholder")} />
               </SelectTrigger>
@@ -127,6 +144,7 @@ export default function AdminIngestPage() {
               onChange={(e) => {
                 setPage(1);
                 setRecipient(e.target.value);
+                advanceRead();
               }}
             />
           </CardContent>
@@ -141,13 +159,14 @@ export default function AdminIngestPage() {
             <CardDescription>{t("ingest.queueDetailDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
+            <ListReadFeedback list={list} />
             {loading ? (
               <div className="space-y-3">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <Skeleton key={i} className="h-10 w-full" />
                 ))}
               </div>
-            ) : jobs.length === 0 ? (
+            ) : !ready ? null : jobs.length === 0 ? (
               <div className="py-12 text-center text-sm text-muted-foreground">{t("ingest.noJobs")}</div>
             ) : (
               <>
@@ -197,21 +216,21 @@ export default function AdminIngestPage() {
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="text-xs text-muted-foreground">
-                    {t("ingest.pageOf", { page, total: totalPages })}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-                      {t("ingest.previous")}
-                    </Button>
-                    <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
-                      {t("ingest.next")}
-                    </Button>
-                  </div>
-                </div>
               </>
             )}
+            {ready && <nav aria-label={text("分页", "Pagination")} className="mt-4 flex items-center justify-between">
+              <div className="text-xs text-muted-foreground">
+                {t("ingest.pageOf", { page, total: totalPages })}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => changePage(page - 1)}>
+                  {t("ingest.previous")}
+                </Button>
+                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => changePage(page + 1)}>
+                  {t("ingest.next")}
+                </Button>
+              </div>
+            </nav>}
           </CardContent>
         </Card>
       </div>
@@ -219,14 +238,14 @@ export default function AdminIngestPage() {
   );
 }
 
-function StatCard({ title, value }: { title: string; value: number }) {
+function StatCard({ title, value }: { title: string; value?: number }) {
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold tracking-tight">{value.toLocaleString()}</div>
+        <div className="text-3xl font-bold tracking-tight">{value?.toLocaleString() ?? "—"}</div>
       </CardContent>
     </Card>
   );

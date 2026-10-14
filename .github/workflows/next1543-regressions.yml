@@ -1,0 +1,54 @@
+name: R5 NEXT-1543 PostgreSQL regressions
+on:
+  pull_request:
+    branches:
+      - main
+      - integration/company-mail-r5-*
+permissions:
+  contents: read
+concurrency:
+  group: next1543-pg-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  postgres-regressions:
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [mailbox-grants, derived-text, reconcile-ledger]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tabmail_test
+          POSTGRES_PASSWORD: disposable-test-password
+          POSTGRES_DB: tabmail_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      GOSUMDB: sum.golang.org
+      GODEBUG: asynctimerchan=0
+      TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify identical frozen baseline and candidate tests
+        run: |
+          python3 -B scripts/run_r5_next1543_pg.py --candidate . \
+            --case "${{ matrix.case }}" --output "$RUNNER_TEMP/next1543-${{ matrix.case }}"
+      - name: Preserve actual execution evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: next1543-${{ matrix.case }}
+          path: ${{ runner.temp }}/next1543-${{ matrix.case }}
+          if-no-files-found: error
+          retention-days: 14

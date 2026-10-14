@@ -1,0 +1,17 @@
+{
+  "archive": "R5-REGISTRY25-INPUT-INCOMPLETE-LOGS.tar.gz",
+  "original_archive": "/private/tmp/tm-r5registry25.yfe_9fyz/REGISTRY25-REALCLI-evidence.tar.gz",
+  "archive_sha256_from_executor": "e648710788b56ee4748c2e210f832663b6187226686dde78b4472dfb767a93de",
+  "archive_hash_recomputed": false,
+  "payload_files": 17,
+  "payload_bytes_modified": false,
+  "actual_executed": 4,
+  "actual_passed": 2,
+  "actual_errors": 2,
+  "Registry21_setup_error_not_executed": true,
+  "actual_CLI_exit": 1,
+  "classification": "inputincomplete_capture_omitted_real_declared_corrections_dependency_not_product_RED",
+  "next_scope_only_23_affected_and_CLI": "typed_M_positive1 + Contract1 + Registry21, do not rerun two PASS",
+  "tests_repeated_by_docs": false,
+  "task_complete": false
+}

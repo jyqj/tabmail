@@ -1,0 +1,123 @@
+....................................................................................................................................................................................................................................s....................................................................................................................................................................................{"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-kmajxpwp/atomic-baseexception-0"}
+{"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-kmajxpwp/atomic-baseexception-1"}
+{"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-kmajxpwp/atomic-baseexception-2"}
+.{"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-4etgwiqv/atomic-revoke"}
+........{"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-2eu85566/match"}
+...usage: python3 -m unittest [-h] [--repo REPO] --output-dir OUTPUT_DIR
+                           [--dirty-file DIRTY_FILE] [--execute]
+                           [--runtime-window RUNTIME_WINDOW]
+                           [--node-bin NODE_BIN]
+                           [--expected-source-identity EXPECTED_SOURCE_IDENTITY]
+                           [--timeout-seconds TIMEOUT_SECONDS]
+                           [--total-timeout-seconds TOTAL_TIMEOUT_SECONDS]
+python3 -m unittest: error: --execute requires runtime-owner window, trusted --node-bin and --expected-source-identity
+.........E.{"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-s0lx5iuv/prepared"}
+...................................................................{"fork": "third_party/enmime-v2.3.0", "action": "capture", "cli_exit": 1, "same_receipt": false, "observation": "CLI_RACE_OBSERVATION 2 True"}
+{"fork": "third_party/enmime-v2.3.0", "action": "validate", "cli_exit": 1, "same_receipt": false, "observation": "CLI_RACE_OBSERVATION 2 True"}
+{"fork": "third_party/go-smtp", "action": "capture", "cli_exit": 1, "same_receipt": false, "observation": "CLI_RACE_OBSERVATION 2 True"}
+{"fork": "third_party/go-smtp", "action": "validate", "cli_exit": 1, "same_receipt": false, "observation": "CLI_RACE_OBSERVATION 2 True"}
+.DESCRIPTOR_REPLACEMENT {"fork": "third_party/enmime-v2.3.0", "action": "capture", "entry": "cli", "rejected": true, "old": [33, 10206], "new": [33, 10207], "phase": 1, "anchor_matches_old": true}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/enmime-v2.3.0", "action": "capture", "entry": "api", "rejected": true, "old": [33, 10208], "new": [33, 10209], "phase": 1, "anchor_matches_old": true}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/enmime-v2.3.0", "action": "validate", "entry": "cli", "rejected": true, "old": [33, 10211], "new": [33, 10212], "phase": 1, "anchor_matches_old": true}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/enmime-v2.3.0", "action": "validate", "entry": "api", "rejected": true, "old": [33, 10213], "new": [33, 10214], "phase": 1, "anchor_matches_old": true}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/go-smtp", "action": "capture", "entry": "cli", "rejected": true, "old": [33, 10311], "new": [33, 10312], "phase": 1, "anchor_matches_old": true}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/go-smtp", "action": "capture", "entry": "api", "rejected": true, "old": [33, 10313], "new": [33, 10314], "phase": 1, "anchor_matches_old": true}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/go-smtp", "action": "validate", "entry": "cli", "rejected": true, "old": [33, 10316], "new": [33, 10317], "phase": 1, "anchor_matches_old": true}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/go-smtp", "action": "validate", "entry": "api", "rejected": true, "old": [33, 10318], "new": [33, 10319], "phase": 1, "anchor_matches_old": true}
+........RACE_OBSERVATION {"fork": "third_party/enmime-v2.3.0", "entry": "capture", "nofollow_stats": 2, "symlink_at_return": true}
+RACE_OBSERVATION {"fork": "third_party/enmime-v2.3.0", "entry": "<lambda>", "nofollow_stats": 2, "symlink_at_return": true}
+RACE_OBSERVATION {"fork": "third_party/go-smtp", "entry": "capture", "nofollow_stats": 2, "symlink_at_return": true}
+RACE_OBSERVATION {"fork": "third_party/go-smtp", "entry": "<lambda>", "nofollow_stats": 2, "symlink_at_return": true}
+........................................................................E........E.................................test_fail (test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Bad.test_fail) ... FAIL
+
+======================================================================
+FAIL: test_fail (test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Bad.test_fail)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_source_version_runner.py", line 27, in test_fail
+    def test_fail(self):self.fail('intentional runner negative')
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: intentional runner negative
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (failures=1)
+test_skip (test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Skip.test_skip) ... skipped 'intentional runner negative'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK (skipped=1)
+test_expected (test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Expected.test_expected) ... expected failure
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK (expected failures=1)
+..............................
+======================================================================
+ERROR: test_output_refuses_existing_checkout_and_non_temporary_path (test_r5_cold_web.ColdWebTests.test_output_refuses_existing_checkout_and_non_temporary_path)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_cold_web.py", line 181, in test_output_refuses_existing_checkout_and_non_temporary_path
+    gate.private_output(Path('/Users/new-cold-evidence'), self.repo)
+  File "/workspace/tabmail/scripts/run_r5_cold_web.py", line 237, in private_output
+    parent = output.parent.resolve(strict=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1240, in resolve
+    s = self._flavour.realpath(self, strict=strict)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen posixpath>", line 424, in realpath
+  File "<frozen posixpath>", line 468, in _joinrealpath
+FileNotFoundError: [Errno 2] No such file or directory: '/Users'
+
+======================================================================
+ERROR: setUpClass (test_r5_selected_source_binding.ActualRootBindingTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_selected_source_binding.py", line 86, in setUpClass
+    cls.receipt=binding.capture(ROOT,GO,cache=CACHE,modulecache=MODULECACHE)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_selected_source_binding.py", line 193, in capture
+    before_go = topology(root)
+                ^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_selected_source_binding.py", line 96, in topology
+    raise ValueError('unknown nested module')
+ValueError: unknown nested module
+
+======================================================================
+ERROR: setUpClass (test_r5_selected_source_binding_v2.ActualRootBindingV2Tests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_selected_source_binding_v2.py", line 53, in setUpClass
+    cls.receipts={name:binding.capture(ROOT,GO,cache=CACHE,modulecache=MODULECACHE,context=context) for name,context in [('default',binding.DEFAULT_CONTEXT),('race-r5protocol',binding.CONTEXT)]}
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_selected_source_binding_v2.py", line 268, in capture
+    base = inventory.capture_current_source(root,purpose='selected',policy=inventory.ARCHIVE_POLICY,build_context=context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_source_inventory.py", line 602, in capture_current_source
+    return _capture_archive_v4(root, purpose=purpose, policy=policy, build_context=build_context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_source_inventory.py", line 572, in _capture_archive_v4
+    before = boundary.check(root)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_archive_boundary.py", line 163, in check
+    files, dirs = topology(root)
+                  ^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_archive_boundary.py", line 140, in topology
+    visit(fd, '', 0)
+  File "/workspace/tabmail/scripts/r5_archive_boundary.py", line 123, in visit
+    visit(child, rel + '/', depth + 1)
+  File "/workspace/tabmail/scripts/r5_archive_boundary.py", line 123, in visit
+    visit(child, rel + '/', depth + 1)
+  File "/workspace/tabmail/scripts/r5_archive_boundary.py", line 123, in visit
+    visit(child, rel + '/', depth + 1)
+  File "/workspace/tabmail/scripts/r5_archive_boundary.py", line 112, in visit
+    raise ValueError('symlink/special boundary entry: ' + rel)
+ValueError: symlink/special boundary entry: web/node_modules/.bin/acorn
+
+----------------------------------------------------------------------
+Ran 651 tests in 91.250s
+
+FAILED (errors=3, skipped=1)

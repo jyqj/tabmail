@@ -1,0 +1,54 @@
+{
+  "source_commit": "b87df7a77656457549d6f2d678c56d321ae0d869",
+  "source_tree": "312dbed6634b7b173e6ec9e180bbf5d0f1809d9d",
+  "source_parent": "ed81ee2fcadc9e8cfcd165947561f8b4b65589e6",
+  "static_review": "PASS",
+  "history_files": 65,
+  "old_methods": 25,
+  "new_methods": 27,
+  "frozen_methods": [
+    "test_revision11_reconciles_actual_functions_clients_routes_and_source",
+    "test_revision11_preserves_history_and_all_unapproved_rejection_guards"
+  ],
+  "negative_methods_unchanged": [
+    "test_unapproved_actual_closure_bytes_rejected",
+    "test_unapproved_actual_route_source_rejected_by_original_collector",
+    "test_unapproved_actual_source_and_ast_changes_rejected",
+    "test_unapproved_client_and_caller_locations_are_rejected",
+    "test_unapproved_route_and_ast_fact_changes_rejected"
+  ],
+  "clients_before": 135,
+  "clients_after": 136,
+  "normalized_removed": [],
+  "normalized_added": [
+    [
+      [
+        "web/features/company/domain-settings.tsx",
+        "company",
+        [
+          "GET"
+        ],
+        "/api/v1/company/settings",
+        0,
+        false
+      ],
+      1
+    ]
+  ],
+  "postgres_functions_unchanged_except_callers": 401,
+  "routes_with_unchanged_manual_fields": 133,
+  "routes_changed_only_in_clients": [
+    "DELETE /api/v1/company/invitations/{id}",
+    "GET /api/v1/company/audit",
+    "GET /api/v1/company/invitations",
+    "GET /api/v1/company/settings",
+    "POST /api/v1/company/invitations",
+    "POST /api/v1/company/mailboxes",
+    "PUT /api/v1/company/settings"
+  ],
+  "implementation_todos_completed": 0,
+  "runtime_verified": false,
+  "product_green": false,
+  "task_complete": false,
+  "reconciliation_sha256": "29e0d04269114057031ba4490b1c2b70082883ef4b3565bb824aeb71fed9fbe2"
+}

@@ -45,6 +45,7 @@ func seedDraftSubmit(t *testing.T, f *companyFixture) http.Handler {
 }
 
 func TestDraftSubmitConsumesDraftAtomically(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	h := seedDraftSubmit(t, f)
@@ -114,6 +115,7 @@ func TestDraftSubmitConsumesDraftAtomically(t *testing.T) {
 }
 
 func TestDraftSubmitConcurrentWindowsProduceOneJob(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	h := seedDraftSubmit(t, f)
@@ -172,6 +174,7 @@ func TestDraftSubmitConcurrentWindowsProduceOneJob(t *testing.T) {
 }
 
 func TestDraftSubmitRevisionMismatchKeepsDraft(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	h := seedDraftSubmit(t, f)
 	token := r3Token(t, f.employee)
@@ -207,6 +210,7 @@ func TestDraftSubmitRevisionMismatchKeepsDraft(t *testing.T) {
 }
 
 func TestDraftSubmitRevokedSendRightKeepsDraft(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	h := seedDraftSubmit(t, f)
 	token := r3Token(t, f.employee)
@@ -236,6 +240,7 @@ func TestDraftSubmitRevokedSendRightKeepsDraft(t *testing.T) {
 }
 
 func TestCreateOutboundJobConsumeDraftSingleConsumption(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	mb, e := f.st.GetMailboxByAddress(ctx, "employee@company.test")

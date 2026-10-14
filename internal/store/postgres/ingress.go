@@ -147,6 +147,13 @@ func (s *PgStore) DeliverIngress(ctx context.Context, c *store.IngressClaim, m *
 	if err = tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR UPDATE`, tenant).Scan(&id); err != nil {
 		return false, err
 	}
+	deadline, eligible, err := fenceIngressDestination(ctx, tx, tenant, zone, m.MailboxID, address)
+	if err != nil {
+		return false, err
+	}
+	if !eligible {
+		return false, store.ErrIngressQuota
+	}
 	_, err = tx.Exec(ctx, `INSERT INTO ingress_daily_usage(tenant_id,day,used)
  SELECT $1,(clock_timestamp() AT TIME ZONE 'UTC')::date,count(*) FROM messages
  WHERE tenant_id=$1 AND received_at >= date_trunc('day',clock_timestamp() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC'
@@ -199,12 +206,19 @@ func (s *PgStore) DeliverIngress(ctx context.Context, c *store.IngressClaim, m *
 		return false, err
 	}
 	// Recheck elapsed time after any blocked transaction before committing effects.
-	var valid bool
-	if err = tx.QueryRow(ctx, `SELECT lease_until>clock_timestamp() FROM ingest_jobs WHERE id=$1 AND claim_token=$2`, c.Job.ID, c.Token).Scan(&valid); err != nil {
+	var valid, alive bool
+	// One materialized DB clock decides both deadlines: adding a destination
+	// check must not move the claim's final fence before another SQL wait.
+	if err = tx.QueryRow(ctx, `WITH current_clock AS MATERIALIZED (SELECT clock_timestamp() AS now)
+ SELECT j.lease_until>c.now,($3::timestamptz IS NULL OR $3>c.now)
+ FROM ingest_jobs j CROSS JOIN current_clock c WHERE j.id=$1 AND j.claim_token=$2`, c.Job.ID, c.Token, deadline).Scan(&valid, &alive); err != nil {
 		return false, err
 	}
 	if !valid {
 		return false, store.ErrIngressClaim
+	}
+	if !alive {
+		return false, store.ErrIngressQuota
 	}
 	return true, tx.Commit(ctx)
 }

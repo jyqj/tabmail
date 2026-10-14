@@ -1,0 +1,51 @@
+{
+  "task": "R5-NEXT-20261008-10",
+  "baseline_source": "bfad3e4",
+  "candidate": "00a7e3ed64cdd5c8008e73d49784df4123377e0b",
+  "tree": "ea147d8766244808978e4d5bd4860e1268f6dedd",
+  "frozen_test_sha256": "e00a75a0220f6c32c1cf69fb30a32eed6068ea6edfd93e9daea4c4137b7694e8",
+  "runs": {
+    "dns-red.jsonl": {
+      "leaves": {
+        "fail": 12,
+        "pass": 1
+      },
+      "frozen_DNS_leaves": {
+        "fail": 12,
+        "pass": 1
+      },
+      "packages": {
+        "tabmail/internal/app/domains": "fail"
+      },
+      "sha256": "17791b8697e4fa7934b2f7d7cbb02afd6ca7d43c93f69f0ea29e321a399eaa0f"
+    },
+    "dns-context-only.jsonl": {
+      "leaves": {
+        "pass": 27,
+        "fail": 2
+      },
+      "frozen_DNS_leaves": {
+        "pass": 11,
+        "fail": 2
+      },
+      "packages": {
+        "tabmail/internal/app/domains": "fail"
+      },
+      "sha256": "09a68a345fe440c4d34413350bc6135befc15df2e0711fbe48c870bf86169116"
+    },
+    "dns-green.jsonl": {
+      "leaves": {
+        "pass": 29
+      },
+      "frozen_DNS_leaves": {
+        "pass": 13
+      },
+      "packages": {
+        "tabmail/internal/app/domains": "pass"
+      },
+      "sha256": "732ceae4363dcb6a2ad7c80e4d03a8aec0f6b0981d695b78a5dff95c3dcec230"
+    }
+  },
+  "review": "/root/pr_audit ACCEPT, scoped to cancellation during DNS lookups before persistence",
+  "boundary": "Production lookups receive the request context and original 3-second child deadline. A buffered bounded worker makes service return promptly even when the Go resolver socket waits until its deadline. Cancellation stops later queries and zone/identity/audit/cache effects; no rollback of already-committed DB writes, forced interruption of legacy non-context callbacks, or whole PostgreSQL qualification is claimed."
+}

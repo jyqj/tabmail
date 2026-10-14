@@ -1,0 +1,271 @@
+{
+  "batch": "B01-G",
+  "observed_at": "2026-09-28T11:29:54.680009+00:00",
+  "inherited_implementation": "6ef485951f464d0e2c92413a5ec43feb0b14aa1e",
+  "inherited_docs_commit": "30e10f85bf2e5fa361c4915d8c533297a038d167",
+  "implementation_commit": "8ed18662dc7c1ea08525a42175fcd077717a09f0",
+  "implementation_tree": "05d3550aa9fb68cca8933bae8811f6e3f20a847a",
+  "source_file_count": 539,
+  "new_runtime_hashes": {
+    "internal/store/postgres/r5_ingress_transaction_test.go": "cf977df4b10c1c0a773110bed2ff794b1ca76eae4742f1356f50ee611b0c676a",
+    "scripts/required_go_tests.json": "3266f5d355a7de251a71726035fc96ab1800e27c4d1a4d8dce921f88a74a91c7"
+  },
+  "production_changes_this_round": [],
+  "prior_cleanup": {
+    "test": {
+      "id": "3e3b9a8ab0ce101dced88087671856ddeaf5d0b23445910f7b9d0429b1fb54cf",
+      "exit_code": 137,
+      "oom_killed": false,
+      "removed": true
+    },
+    "network": {
+      "id": "4ceca98d70297ddbab16e6e27b533355f23688af5790aa15a92a2b8f927b3ee0",
+      "removed": true
+    },
+    "all_prior_resources_absent": true
+  },
+  "inherited_recovery": {
+    "backend": {
+      "allowed_skips_observed": [
+        {
+          "package": "tabmail/internal/store/postgres",
+          "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+          "test": "TestR3BrowserJourney"
+        }
+      ],
+      "errors": [],
+      "events": 2600,
+      "log_sha256": "3d006680e41dcb4115c1e356d61f5859e9260d3cbaa0824b1f0db05e60eb17d3",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 41,
+      "manifest_sha256": "5c468e38bc781314d74b18f4ab7904aeb89701d88c23679be61160012203f2ea",
+      "packages": 48,
+      "process_exit_code": 0,
+      "source_sha": "30e10f85bf2e5fa361c4915d8c533297a038d167",
+      "status": "pass",
+      "suite": "backend",
+      "tests_failed": 0,
+      "tests_passed": 576,
+      "tests_skipped": 1,
+      "tests_started": 577
+    },
+    "focused": {
+      "unique_tests": 27,
+      "passes": 81,
+      "counts": {
+        "TestR5AttachmentFinishRejectsConcurrentRemoval": 3,
+        "TestR5AttachmentFinishRejectsExpiryAfterWait": 3,
+        "TestR5AttachmentFinishUsesTimeAfterLockWait": 3,
+        "TestR5AttachmentFinishOnlyOneChecksumWins": 3,
+        "TestR5AttachmentFinishOrdersMailboxRevocation": 3,
+        "TestR5AttachmentFinishCanonicalChecksumAndReplay": 3,
+        "TestR5AttachmentFinishCancellationRollsBack": 3,
+        "TestR5AttachmentFinishRejectsNonHexChecksum": 3,
+        "TestR5ConcurrencyR01EnqueueOffboardNoAttachmentCycle": 3,
+        "TestR5ConcurrencyR03EnqueueOffboardNoTenantFKCycle": 3,
+        "TestR5ConcurrencyR02DraftCannotCommitAfterCompletedRevoke": 3,
+        "TestR5ConcurrencyIndependentSubmissionsShareParentLock": 3,
+        "TestR5LockMapExistingDraftCASAvoidsTenantLock": 3,
+        "TestR5LockMapDraftAuthorizationWaitsForMailboxFence": 3,
+        "TestR5LockMapDraftUserFenceOrdersSuspension": 3,
+        "TestR5LockMapRefreshFamilyThenUserThenToken": 3,
+        "TestR5LockMapEnqueueParentAndUserBeforeAttachments": 3,
+        "TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal": 3,
+        "TestR5ReferenceGCRollsBackIfOrphanRegistrationFails": 3,
+        "TestR5ReferenceGCKeepsSentPinAfterQueueCleanup": 3,
+        "TestR5ReferenceObjectCallbackCancellationReleasesKey": 3,
+        "TestR5ReferenceObjectGCWaitsForCommittedMessage": 3,
+        "TestR5ReservationOrdersMailboxRevocation": 3,
+        "TestR5ReservationWaitsForMailboxBeforeBudget": 3,
+        "TestR5ReservationConcurrentBudgetIsAtomic": 3,
+        "TestR5ReservationOtherUploaderRemainsIndependent": 3,
+        "TestR5ReservationCancellationReleasesLocksAndBudget": 3
+      },
+      "failures_or_skips": 0
+    },
+    "reservation_reference_tests": 10
+  },
+  "backend": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 2615,
+    "log_sha256": "7463f6f897997448bc57b69e8cdd3437f1dcae99ac718420eba23c91b928a728",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 44,
+    "manifest_sha256": "3266f5d355a7de251a71726035fc96ab1800e27c4d1a4d8dce921f88a74a91c7",
+    "packages": 48,
+    "process_exit_code": 0,
+    "source_sha": "8ed18662dc7c1ea08525a42175fcd077717a09f0",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 579,
+    "tests_skipped": 1,
+    "tests_started": 580
+  },
+  "focused": {
+    "unique_tests": 30,
+    "passes": 90,
+    "counts": {
+      "TestR5AttachmentFinishRejectsConcurrentRemoval": 3,
+      "TestR5AttachmentFinishRejectsExpiryAfterWait": 3,
+      "TestR5AttachmentFinishUsesTimeAfterLockWait": 3,
+      "TestR5AttachmentFinishOnlyOneChecksumWins": 3,
+      "TestR5AttachmentFinishOrdersMailboxRevocation": 3,
+      "TestR5AttachmentFinishCanonicalChecksumAndReplay": 3,
+      "TestR5AttachmentFinishCancellationRollsBack": 3,
+      "TestR5AttachmentFinishRejectsNonHexChecksum": 3,
+      "TestR5ConcurrencyR01EnqueueOffboardNoAttachmentCycle": 3,
+      "TestR5ConcurrencyR03EnqueueOffboardNoTenantFKCycle": 3,
+      "TestR5ConcurrencyR02DraftCannotCommitAfterCompletedRevoke": 3,
+      "TestR5ConcurrencyIndependentSubmissionsShareParentLock": 3,
+      "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack": 3,
+      "TestR5IngressAuditFailureRollsBackCheckpointAndQuota": 3,
+      "TestR5IngressAcceptanceRollsBackEarlierTarget": 3,
+      "TestR5LockMapExistingDraftCASAvoidsTenantLock": 3,
+      "TestR5LockMapDraftAuthorizationWaitsForMailboxFence": 3,
+      "TestR5LockMapDraftUserFenceOrdersSuspension": 3,
+      "TestR5LockMapRefreshFamilyThenUserThenToken": 3,
+      "TestR5LockMapEnqueueParentAndUserBeforeAttachments": 3,
+      "TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal": 3,
+      "TestR5ReferenceGCRollsBackIfOrphanRegistrationFails": 3,
+      "TestR5ReferenceGCKeepsSentPinAfterQueueCleanup": 3,
+      "TestR5ReferenceObjectCallbackCancellationReleasesKey": 3,
+      "TestR5ReferenceObjectGCWaitsForCommittedMessage": 3,
+      "TestR5ReservationOrdersMailboxRevocation": 3,
+      "TestR5ReservationWaitsForMailboxBeforeBudget": 3,
+      "TestR5ReservationConcurrentBudgetIsAtomic": 3,
+      "TestR5ReservationOtherUploaderRemainsIndependent": 3,
+      "TestR5ReservationCancellationReleasesLocksAndBudget": 3
+    },
+    "failures_or_skips": 0
+  },
+  "original_audit": {
+    "status": "baseline_reproduced",
+    "product_fixed": false,
+    "reproduced": [
+      "A01",
+      "A02",
+      "A03",
+      "A04",
+      "A05",
+      "A06",
+      "A07"
+    ],
+    "errors": [],
+    "process_exit_code": 1,
+    "log_sha256": "8bf975182c0416d10bc3fa1ac094bbe09d02652f8085bc34ab8e2d830869ce36",
+    "tests_expected": 7,
+    "layer": "db",
+    "source_sha": "8ed18662dc7c1ea08525a42175fcd077717a09f0",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-timeout=180s",
+      "-tags=r5audit",
+      "-run",
+      "^TestR5AuditA0[1-7]",
+      "./internal/store/postgres"
+    ],
+    "test_source_sha256": "d935efbf1e9007928fc50e92fb152f2c1de161359c9fedffd97883a257add099",
+    "evidence_boundary": "Real PostgreSQL and loopback HTTP; no rendered components in this layer."
+  },
+  "tools": {
+    "python_pass": 57,
+    "dto_shared_models": 16,
+    "dto_company_types": 32,
+    "go_build": "pass",
+    "go_vet": "pass"
+  },
+  "evidence_files": {
+    "R5-B01-G-BACKEND.jsonl.gz": {
+      "bytes": 42895,
+      "sha256": "8884084a1eb78b6f8b82260c3abc792efb4e39972870a655138601c76780e03d",
+      "raw_sha256": "7463f6f897997448bc57b69e8cdd3437f1dcae99ac718420eba23c91b928a728",
+      "complete": true
+    },
+    "R5-B01-G-FOCUSED.jsonl.gz": {
+      "bytes": 6631,
+      "sha256": "87a404fcf38236cc2f55576075b2afaad2fd0b52dc87fc59ab82cba325503acf",
+      "raw_sha256": "893c7bbb1bbbb98038db6005d985501dd76413233c4489cc1dc788d57a455c47",
+      "complete": true
+    },
+    "R5-B01-G-AUDIT.jsonl": {
+      "bytes": 8033,
+      "sha256": "8bf975182c0416d10bc3fa1ac094bbe09d02652f8085bc34ab8e2d830869ce36",
+      "raw_sha256": "8bf975182c0416d10bc3fa1ac094bbe09d02652f8085bc34ab8e2d830869ce36",
+      "complete": true
+    }
+  },
+  "environment": {
+    "tool_image": "sha256:65934079f212a76983064db24e7a26066106a7e173cf2b05e4f1621aebfdb5c7",
+    "postgres_image": "sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94",
+    "source": "git archive copied into container-local /src",
+    "go_build_cache": "container-local /var/cache/tabmail-go",
+    "go_module_cache": "existing read-only cache; GOPROXY=off; no dependency refresh",
+    "network": "session-owned internal; no host-published ports",
+    "go": "1.25.7 linux/arm64",
+    "python": "3.12.14",
+    "max_cpus": 4,
+    "runner_memory": "6GiB",
+    "host_docker_timeout_root_cause": "not established"
+  },
+  "commands": {
+    "backend": "go test -mod=readonly -p 4 -json -race -count=1 -timeout=180s ./...",
+    "focused": "go test -mod=readonly -p 4 -json -race -count=3 -timeout=180s -run '^TestR5(Reservation|Reference|AttachmentFinish|LockMap|Concurrency|Ingress)' ./internal/store/postgres"
+  },
+  "local_evidence": "/var/folders/g6/80ckk0w918xcr2c7j17wc0jc0000gn/T/tabmail-r5-b01g-ax2fb2u4/evidence/final",
+  "not_run": [
+    "shipping-image browser",
+    "frontend Vitest/TS/lint/build",
+    "GitHub Actions",
+    "current dependency audit",
+    "S/M benchmark",
+    "A01/A02 original-editor integration"
+  ],
+  "progress": {
+    "completed": 6,
+    "total": 171,
+    "P0_completed": 6,
+    "P0_total": 12,
+    "closed_this_round": []
+  },
+  "cleanup": {
+    "runner": {
+      "id": "7424e9005ee540950f80b461d2352f3afd644503b33335d25a5ce76b661f2c60",
+      "name": "tabmail-r5-b01g-b5e571fe-runner",
+      "ownership_verified": true,
+      "removed": true
+    },
+    "pg": {
+      "id": "c20132dffc537c2005579e123141f279f73a8f64154ce3dc8502b3f6085f8d3a",
+      "name": "tabmail-r5-b01g-b5e571fe-pg",
+      "ownership_verified": true,
+      "removed": true
+    },
+    "network": {
+      "id": "5a5efa3bdf9bd482c6b95bc88768e606e719626a19d77c142a92a6cfd9082fd9",
+      "name": "tabmail-r5-b01g-b5e571fe",
+      "removed": true
+    },
+    "disposable_postgres_anonymous_volumes_removed": [
+      "7336a50a7f32d27e4ab62490f2751f20b7b6b85bb74349a4b36748d89292bf55"
+    ],
+    "other_projects_untouched": true
+  },
+  "limitations": [
+    "P0-070 still has ordinary read/time, index and remaining implicit-FK cross-path cases",
+    "P0-080 remains an unvalidated target protocol draft; blocked checker untouched",
+    "new ingress tests use real PostgreSQL methods, not SMTP/object-store durability or a process-crash test",
+    "A01-A07 remain unrepaired"
+  ]
+}

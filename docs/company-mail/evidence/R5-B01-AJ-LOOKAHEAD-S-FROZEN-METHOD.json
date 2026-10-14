@@ -1,0 +1,73 @@
+{
+  "authorized_original_scales": [
+    "S"
+  ],
+  "cli_binding": {
+    "contract_option": "--method-contract",
+    "contract_sha256_environment": "TABMAIL_R5_BENCHMARK_METHOD_CONTRACT_SHA256",
+    "default": "bounded_store_claim_complete_window_v1",
+    "environment": "TABMAIL_R5_BENCHMARK_PREPARATION_METHOD",
+    "option": "--preparation-method",
+    "value": "lookahead100_unpersisted_inputs_distinct_mailbox_windows20_ordinal_fifo_v1"
+  },
+  "clock_contract": {
+    "latency_clock": "wall_elapsed_cross_checked_monotonic_gap_le_100ms",
+    "max_wall_monotonic_gap_ms": 100,
+    "resume_policy": "reject_observed_deadline_overrun_cleanup_after_resume_no_sleep_time_kill_claim",
+    "run_deadline": "absolute_wall_time_includes_host_suspend"
+  },
+  "dataset_contract": "docs/company-mail/evidence/R5-BENCHMARK-DATASETS.json",
+  "dataset_contract_sha256": "9e81020680dbd6e990cbb35ab1aac16413885e65306d949a5889c4bafda00b36",
+  "input_scheduler_contract": {
+    "buffer_scope": "unpersisted_inputs_only_no_database_job_backlog",
+    "failure_policy": "predecessor_error_stops_dependents_cancel_and_join_all_workers",
+    "fairness": "earliest_ordinal_head_selected_no_overtaking_within_mailbox",
+    "lookahead_limit": 100,
+    "mailbox_order": "generator_ordinal_fifo_predecessor_success_before_store_and_lifecycle",
+    "method": "lookahead100_unpersisted_inputs_distinct_mailbox_windows20_ordinal_fifo_v1",
+    "observer_dependency": "none_scheduler_explicit_opt_in_independent_of_diagnostic_observer",
+    "selection": "earliest_ordinal_mailbox_heads_distinct_first_then_earliest_remaining_sorted_ordinal",
+    "window_messages": 20
+  },
+  "persistent_observation_policy": "actual_postgresql_uid_catalog_and_per_mailbox_received_at_ordinal_projection_not_scheduler_metadata",
+  "persistent_query_sha256": {
+    "received_at_projection_query_sha256": "d56b9930a294ee2b4a00ce7ffd95e0871fc2049f474bc08900d78071943a0a9d",
+    "uid_catalog_query_sha256": "2de36ca227e3140de0f200ef3e10f207d9f917061469b8b7047d2c520de14ba8"
+  },
+  "preparation_contract": {
+    "active_budget": 20,
+    "checkpoint_policy": "before_claim_ready20_1000_10000_100000_each250000_Nminus20_then_terminalN",
+    "claim_requested_limit": 20,
+    "fingerprint_method": "six_actual_canonical_sql_streams_v1",
+    "maintenance": "no_explicit_analyze_or_planner_override",
+    "method": "lookahead100_unpersisted_inputs_distinct_mailbox_windows20_ordinal_fifo_v1",
+    "parser_concurrency": 4,
+    "parser_join_policy": "uncancelled_document_wait_with_31s_absolute_wall_admission_guard",
+    "parser_join_reserve_seconds": 31,
+    "parser_timeout_seconds": 30,
+    "schema_version": 16,
+    "window_messages": 20
+  },
+  "preparation_identity_boundary": {
+    "A_random_commit_order_not_preserved_or_claimed": true,
+    "all_persistent_equivalent": false,
+    "all_physical_uuid_time_protocol_uid_fields_not_covered_by_six_streams": true,
+    "canonical_streams_unchanged_no_added_normalization": true,
+    "generator_ordinal_mailbox_fifo_preserved": true,
+    "protocol_UID_certified": false,
+    "received_at_and_received_order_may_change_with_B_scheduling": true,
+    "uncovered_fields": "received_at/received-order, lifecycle clock timestamps, indexed_at, next_attempt_at, lease tokens, random actor/mailbox row UUIDs; protocol UID not certified"
+  },
+  "preparation_method": "lookahead100_unpersisted_inputs_distinct_mailbox_windows20_ordinal_fifo_v1",
+  "product_green": false,
+  "schema_version": 1,
+  "six_stream_boundary": "only_original_six_defined_canonical_streams_no_normalized_digest_or_all_persistent_uid_timestamp_equivalence",
+  "source_binding": "selected_method_file_in_canonical_source_closure_sha1_not_git_tree_or_commit",
+  "task": "R5-P0-100",
+  "task_complete": false,
+  "tool_only_population": [
+    20,
+    100,
+    1000
+  ]
+}

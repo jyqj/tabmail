@@ -1,0 +1,48 @@
+{
+  "source_sha": "de1b7d37edbb83004592e7a8f2d78c8434278457",
+  "comparisons": {
+    "default": {
+      "selected_local": true,
+      "selected_local_packages": true,
+      "root_mvs": true,
+      "production_coverage": true,
+      "base_source": true,
+      "environment": true,
+      "go_env": true,
+      "generated_testmain": true,
+      "external_modulecache_inputs": true,
+      "native_inputs": true,
+      "toolchain_source_inputs": true,
+      "package_records": true,
+      "archive_static": true
+    },
+    "race-r5protocol": {
+      "selected_local": true,
+      "selected_local_packages": true,
+      "root_mvs": true,
+      "production_coverage": true,
+      "base_source": true,
+      "environment": true,
+      "go_env": true,
+      "generated_testmain": true,
+      "external_modulecache_inputs": true,
+      "native_inputs": true,
+      "toolchain_source_inputs": true,
+      "package_records": true,
+      "archive_static": true
+    }
+  },
+  "capture_payload_sha256": "ff10f9fa0ed200859a7b993cacacbb953ef916bb800772cf78a06f5825584dfc",
+  "selection": {
+    "default": {
+      "package_records": 602,
+      "selected_local": 589,
+      "attestation_sha256": "73c1c50035abe5190fb0a139444ae17e4abea2faf0fc62fc27c42d69f367ecdd"
+    },
+    "race-r5protocol": {
+      "package_records": 604,
+      "selected_local": 592,
+      "attestation_sha256": "19cb70cb5670751fad01fb16f9c512d1e3acd9c2c66316d3b93e0176f37d500c"
+    }
+  }
+}

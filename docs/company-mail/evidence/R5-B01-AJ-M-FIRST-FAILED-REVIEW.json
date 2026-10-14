@@ -1,0 +1,91 @@
+{
+  "task": "R5-P0-100",
+  "batch": "B01-AJ",
+  "status": "original_M_first_attempt_failed_host_wall_budget",
+  "base_commit": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+  "source_tree": "68cafcc03672edff848b9fd07abd95c34944a35c",
+  "source_sha_semantics": "git_write_tree_label_not_commit",
+  "scale": "M",
+  "requested_population": [
+    1000,
+    5000,
+    1000000
+  ],
+  "budget_seconds": 10800,
+  "absolute_deadline_utc": "2026-10-01T12:40:12.176028Z",
+  "guard_resumed_and_observed_utc": "2026-10-01T12:52:07.560490Z",
+  "guard_observed_elapsed_wall_seconds": 11515.358124017715,
+  "go_exit": -15,
+  "runner_exit": 1,
+  "result_present": false,
+  "actual_go_lifecycle": [
+    "run"
+  ],
+  "observed_before_cleanup": {
+    "employees": 1000,
+    "mailboxes": 5000,
+    "messages": 484744,
+    "indexed": 0,
+    "outbound": 0
+  },
+  "completed_workload_cache_pairs": 0,
+  "budget_classification": "external absolute wall-budget termination after host suspension, not performance candidate red or complete baseline",
+  "host_observation": {
+    "selected_actual_sleep_darkwake_wake_events": 18,
+    "selected_related_raw_lines": 56,
+    "event_scope": "snapshot during run, not all later transitions or exclusive M suspension duration",
+    "first_clamshell_sleep": "2026-10-01T18:21:29+08:00",
+    "selected_lid_activity_wake": "2026-10-01T20:09:16+08:00",
+    "darwin_monotonic": "mach_absolute_time excludes host suspension",
+    "boot_difference": "cumulative host lifetime, not M exclusive",
+    "timely_termination_claimed": false,
+    "termination": "TERM_then_KILL on first guard resume; wall cutoff could not execute while host suspended"
+  },
+  "cleanup": "Actual named owned database and owned namespace count0, DROPexit0/queryexit0, 3PIDs absent, group terminal, TMPDIR0; owned watches terminal, PG3344 retained for next authorized serial fixture run.",
+  "original_M_baseline_complete": false,
+  "S2_baseline_complete": true,
+  "task100_complete": false,
+  "G0_accepted": false,
+  "next": "user allowed plugged-in open-lid fresh window; repair strict wall/time/registry tools, new source and tool reviews then original M2 same 1000/5000/1M,10800s/80GiB; no budget extension or downscale",
+  "archive": {
+    "path": "docs/company-mail/evidence/R5-B01-AJ-M-FIRST-FAILED-LOGS.tar.gz",
+    "sha256": "d36a0d36220c1f5551a4c9dc774fd1660ad70510d1023f38be3dc807c6c2b1ad",
+    "members": {
+      "M/cleanup-database-counts.txt": "52f96c26a39ed25108a6db43d6e11c6051eba8a498a5baab1891adfa7ac7c262",
+      "M/cleanup-db.log": "6e0504038d9284f24a4e629866b4a95050b3e6c28d03d72a3068b6023026ad30",
+      "M/cleanup-drop.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "M/cleanup-receipt.json": "69d234aaedddcb69a8da0e1a1c134b063f7767b7636958e57c3bba327e9105df",
+      "M/cleanup-verify.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "M/command.json": "62b283757c1cd43a1bd886ab90bc06ab9c1e75cf6fc3f5903ac30ddf0a185067",
+      "M/go.exit": "0e55cbbc9d11449b186092d82905aa6974858df7a0b7d706ae51c4716c9461ef",
+      "M/go.jsonl": "b4f316f62a87a63169692976bcec28eacecc165a72769445a06f53e8c47fce25",
+      "M/go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "M/host-clock-diagnosis.json": "f21a33a0292efed733841b6a970e51894c4cd11647a17b787ea81f3c7d4aaf96",
+      "M/host-sleep-events.txt": "d04092bdd357b9ffcf71aa35920f4bb9ebb3cf416ebe5668a0706d599c34df53",
+      "M/owned-database.txt": "42131ffc5b45e7047df6aff1dd69fc5e9106038a04ba3588acd9c0bcc28082f8",
+      "M/post-timeout-dataset.txt": "5edf4c73969ec4645c6363308d48c9ddab03901b2ef56c635b72737bec5fbb84",
+      "M/preflight.json": "7f0f2e0e87fc45b379c720c51a62f71898227a60ebc72e6b3c14e7f4e1595d83",
+      "M/resource-watch.jsonl": "78e3dbe4bd942e52597ee7a529d986e78f21a07460901eea94b42a31cd4d01a4",
+      "M/source-closure.json": "6f39dd6dded9f98257a549883dd6534044572398c807637e66d3b36fd4bb55e7",
+      "M/wall-budget-timeout.json": "6c9f62b59f5c15c367043c2800214968e97e12527fbce9f69b6832d8ccb71a97",
+      "M/wall-budget-watch.jsonl": "5ff100af5ce36f44b81811cb43bdf3ea7616f351467dc09e0be3fd3725ff3930",
+      "runner/M-runner.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "runner/M-runner.json": "f6b40c229cf3c2a4f81797d40baf3092f17b2398d929b24905aa4c4b8c433a71",
+      "runner/M-runner.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "excluded": "private DSN/JWT/raw HTTP responses/DB/raw objects/source tar/56 unfiltered host-related lines (18 selected safe events retained)",
+  "cleanup_receipt_archive": {
+    "path": "docs/company-mail/evidence/R5-B01-AJ-M-CLEANUP-LOGS.tar.gz",
+    "sha256": "924dc841475c494dbbc35e8f752cd05e586a3f46eef6d208bcf582cc48d4f16b",
+    "members": {
+      "M/cleanup-receipt.json": "69d234aaedddcb69a8da0e1a1c134b063f7767b7636958e57c3bba327e9105df"
+    }
+  },
+  "population": [
+    1000,
+    5000,
+    1000000
+  ],
+  "population_semantics": "Original requested contract scale; actual incomplete observed rows are in observed_before_cleanup, not certified complete population"
+}

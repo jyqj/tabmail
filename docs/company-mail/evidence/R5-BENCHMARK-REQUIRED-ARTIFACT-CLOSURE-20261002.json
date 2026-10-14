@@ -1,0 +1,56 @@
+{
+  "rows": [
+    {
+      "run_index": 0,
+      "source": "68cafcc03672edff848b9fd07abd95c34944a35c",
+      "identity_kind": "git_write_tree",
+      "exact_safe_artifacts": {
+        "archive": "R5-B01-AJ-S2-LOGS.tar.gz",
+        "evidence": "R5-B01-AJ-S2-REVIEW.json",
+        "dataset_contract": "R5-B01-AJ-S2-FROZEN-CONTRACT.json"
+      }
+    },
+    {
+      "run_index": 1,
+      "source": "3d07b72b3732cf289410aefaaba49f8d8423f746",
+      "identity_kind": "canonical_source_closure_sha1",
+      "exact_safe_artifacts": {
+        "archive": "R5-B01-AJ-S-PIPELINE-LOGS.tar.gz",
+        "evidence": "R5-B01-AJ-S-PIPELINE-REVIEW.json",
+        "dataset_contract": "R5-B01-AJ-S-PIPELINE-FROZEN-CONTRACT.json",
+        "delivery_receipt": "R5-BOUNDED-DELIVERY-20261002.json"
+      }
+    },
+    {
+      "run_index": 2,
+      "source": "4074282496c0c60e3b6e0c6f6c1407858939c95c",
+      "identity_kind": "canonical_source_closure_sha1",
+      "exact_safe_artifacts": {
+        "archive": "R5-B01-AJ-LOOKAHEAD-S-LOGS.tar.gz",
+        "evidence": "R5-B01-AJ-LOOKAHEAD-S-REVIEW.json",
+        "dataset_contract": "R5-B01-AJ-S-PIPELINE-FROZEN-CONTRACT.json",
+        "method_contract": "R5-BENCHMARK-LOOKAHEAD100-METHOD.json",
+        "frozen_method_contract": "R5-B01-AJ-LOOKAHEAD-S-FROZEN-METHOD.json",
+        "result_binding_receipt": "R5-B01-AJ-LOOKAHEAD-S-RESULT-BINDING.json",
+        "delivery_receipt": "R5-OPTIN-S-COLD-DELIVERY-20261002.json",
+        "tool_gate_evidence": "R5-B01-AJ-LOOKAHEAD-TOOL-REVIEW.json"
+      }
+    }
+  ],
+  "required_artifact_paths": [
+    "docs/company-mail/evidence/R5-B01-AJ-LOOKAHEAD-S-FROZEN-METHOD.json",
+    "docs/company-mail/evidence/R5-B01-AJ-LOOKAHEAD-S-LOGS.tar.gz",
+    "docs/company-mail/evidence/R5-B01-AJ-LOOKAHEAD-S-RESULT-BINDING.json",
+    "docs/company-mail/evidence/R5-B01-AJ-LOOKAHEAD-S-REVIEW.json",
+    "docs/company-mail/evidence/R5-B01-AJ-LOOKAHEAD-TOOL-REVIEW.json",
+    "docs/company-mail/evidence/R5-B01-AJ-S-PIPELINE-FROZEN-CONTRACT.json",
+    "docs/company-mail/evidence/R5-B01-AJ-S-PIPELINE-LOGS.tar.gz",
+    "docs/company-mail/evidence/R5-B01-AJ-S-PIPELINE-REVIEW.json",
+    "docs/company-mail/evidence/R5-B01-AJ-S2-FROZEN-CONTRACT.json",
+    "docs/company-mail/evidence/R5-B01-AJ-S2-LOGS.tar.gz",
+    "docs/company-mail/evidence/R5-B01-AJ-S2-REVIEW.json",
+    "docs/company-mail/evidence/R5-BENCHMARK-LOOKAHEAD100-METHOD.json",
+    "docs/company-mail/evidence/R5-BOUNDED-DELIVERY-20261002.json",
+    "docs/company-mail/evidence/R5-OPTIN-S-COLD-DELIVERY-20261002.json"
+  ]
+}

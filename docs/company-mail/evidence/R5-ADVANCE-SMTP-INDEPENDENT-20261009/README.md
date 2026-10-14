@@ -1,0 +1,11 @@
+# Independent frontend-agent review of ADVANCE-04
+
+Decision: ACCEPT. Reviewed product commit `fcad85135e86f59d5ad59391a6a6f7991310faf8` from an independent detached worktree. Only delivery_context.go changes production behavior.
+
+The reader retains the actual terminal transport error. Classification uses the last *consumed* plaintext byte, calculated from the circular tail and the outer buffer unread count, rather than the final received byte. Consequently an unterminated response cannot acquire an authoritative textproto.Error, while a full LF response retains its valid accept/reject outcome even if a read-ahead error was received alongside it. Existing wrapped DATA uncertainty behavior then prevents a second MX or recipient retry. The MAIL, RCPT and DATA pre-body call sites continue to stop immediately on a classified error; they do not send further commands. The existing setup and TLS reader-installation positions are unchanged.
+
+Independent tests cover two successive responses in one data+error read, EOF/unexpected EOF/no-progress causes, final CR without LF, accepted LF compatibility, negative LF replies, and wraparound at 4095/4096/4097/8193-byte boundaries. The exact same 35 independent leaves produce **13 PASS / 22 FAIL / 0 SKIP** at original `fdea217` and **35 PASS / 0 FAIL / 0 SKIP** at the reviewed product. Combined with the author's 41 frozen EOF/timeout/read-ahead/TCP and recipient-state leaves, the review run produced **76 PASS / 0 FAIL / 0 SKIP** under `-race -p 1`. Counts overlap and are not additive beyond those 76 leaves.
+
+The initial independent test draft had a missing closing brace and produced a compile failure before any case executed. The raw setup failure is retained separately; it is not a product baseline or a case result. The corrected test was frozen before its original-product execution and no production source was changed in either review worktree.
+
+Command: `GOTOOLCHAIN=local GOPROXY=off GOMAXPROCS=2 go test -mod=readonly -race -p 1 ./internal/outbound -run '^(TestR5AdvanceSMTP|TestAdvanceSMTPIndependent)' -count=1 -json`; the baseline run selected only `^TestAdvanceSMTPIndependent`. Toolchain and cache paths were the parent's pre-existing Go 1.25.7 runtime. No full outbound suite or real PG qualification was claimed.

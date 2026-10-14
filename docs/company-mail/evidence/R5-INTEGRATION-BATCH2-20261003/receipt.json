@@ -1,0 +1,177 @@
+{
+  "base_integration": "eb366eecb6413f5aa025afb4ee63bd1eea7fdf7d",
+  "base_tested_source": "4016720586be817e5f1edcf0e45ef7d0cccc605a",
+  "preserved_handoff": "29a388a3c7d6da03641abe79bb5c728b90b75273",
+  "original_fixes": [
+    "7bb7658d363856e8f4a8cefc7630a6ec77e86f04",
+    "b940c6e2a4aa050c657e065ff68c97de7f249b28"
+  ],
+  "cherry_picks": [
+    "4e6f860",
+    "d3337d1"
+  ],
+  "conflicts": 0,
+  "branch": "integration/company-mail-r5-batch2-20261003",
+  "contract_consumer_tested_source": "81ee07262942ee824ee8a9226bfb8aef1a53db51",
+  "contract_consumer_tested_tree": "0811a12473ac320400ddef714bb91055e272f4ec",
+  "browser_tested_source": "41fc0f3c24568fa1a8a8b23550859060f0b2d255",
+  "browser_tested_tree": "1fac6bd076d87cec6fd9def9684904eccd949c5a",
+  "source_difference_between_runs": "browser runner report candidate/baseline metadata only; assertions/product/contract source unchanged",
+  "toolchain": {
+    "go": "go version go1.25.7 linux/amd64",
+    "GODEBUG": "asynctimerchan=0",
+    "GOMAXPROCS": "2",
+    "GOFLAGS": "-mod=readonly",
+    "go_mod_sum_npm_lock_requirements": "unchanged and checked against first-batch source pins",
+    "python": "temporary venv /tmp/r5-batch2-venv; existing scripts/requirements-contract.txt installed verbatim",
+    "playwright": "1.58.2 in isolated /tmp/r5-batch2-tools; repository deps unchanged",
+    "chromium": "151.0.7922.173"
+  },
+  "contract_runs": [
+    {
+      "name": "typed-go",
+      "argv": [
+        "/workspace/tabmail-cloud/tools/go/bin/go",
+        "test",
+        "-p",
+        "1",
+        "-count=1",
+        "-timeout=90s",
+        "-v",
+        "./internal/api/handlers",
+        "-run",
+        "^TestOrdinaryReceiptOpenAPIWireFixtures$"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 27.537931755000017
+    },
+    {
+      "name": "contracts",
+      "argv": [
+        "/tmp/r5-batch2-venv/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "scripts.tests.test_permission_editor_contract",
+        "scripts.tests.test_company_admin_events_contract",
+        "scripts.tests.test_ordinary_receipt_contract",
+        "scripts.tests.test_outbound_inspection_contract",
+        "scripts.tests.test_openapi_contract",
+        "scripts.tests.test_contract_drift",
+        "scripts.tests.test_contract_source_aliases",
+        "scripts.tests.test_http_contract",
+        "scripts.tests.test_i18n_keys",
+        "scripts.tests.test_r5_smtp_owner_source_inventory"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 10.928531948
+    }
+  ],
+  "contract_counts": {
+    "tests": 227,
+    "pass": 227,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "fresh_synthetic_typed_fixtures": 21,
+    "go_exporter_tests": 1
+  },
+  "browser": {
+    "command": "PROFILE_CANDIDATE=41fc0f3c24568fa1a8a8b23550859060f0b2d255 NODE_PATH=/tmp/r5-batch2-tools/node_modules node web/review-independent/run.cjs",
+    "pass": 26,
+    "fail": 0,
+    "original_oracle": 25,
+    "independent_new_case": 1,
+    "exit": 0,
+    "scope": "real Chromium, candidate component on Vite; synthetic API and auth; real locale, Base UI, SWR, API/session/event transport. NOT shipping Next runtime, PG authz or durable acceptance."
+  },
+  "consumer": {
+    "tests": 29,
+    "pass": 29,
+    "fail": 0,
+    "skip": 0,
+    "command": "npm test -- --reporter=json --outputFile=../docs/company-mail/evidence/R5-INTEGRATION-BATCH2-20261003/consumer-results.json features/company/profile-management.consumer.test.tsx"
+  },
+  "frontend_checks": [
+    {
+      "name": "type",
+      "argv": [
+        "./node_modules/.bin/tsc",
+        "--noEmit",
+        "--incremental",
+        "false"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 7.02860297999996
+    },
+    {
+      "name": "lint",
+      "argv": [
+        "./node_modules/.bin/eslint",
+        "features/company/profile-management.tsx",
+        "features/company/profile-management.consumer.test.tsx"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 1.9542403429999808
+    }
+  ],
+  "inherited_api_smtp_caller": "first-batch race evidence inherited only; all first-batch backend production/test inputs and deps hash-identical; no fresh race run claimed",
+  "history": "original 217 partial-error run and 227/226pass/1skip then ordinary8 run preserved; this 227/0skip is one newly executed complete ten-suite run after new typed fixture generation; first browser invocation MODULE_NOT_FOUND=0 cases NOT_RUN; first successful 26 run inherited old candidate literals, raw preserved, second 26 run correct source binding",
+  "not_run": [
+    "whole backend/wholePG",
+    "four CI jobs",
+    "shipping Next/PG/browser journey",
+    "real PG/Redis/mailbox/external SMTP",
+    "watchdog/runtime",
+    "current19 Method/Catalog/SML",
+    "million M",
+    "private original proofs unavailable"
+  ],
+  "progress": "10/171 unchanged; no parent/leaf checkbox closed",
+  "remote": {
+    "push": "SUCCESS",
+    "pushed_head": "cb2d32ef73b2dff6e7fe00c0ad30db4fe38affa6",
+    "confirmed_remote_ref": "refs/heads/integration/company-mail-r5-batch2-20261003",
+    "url": "https://github.com/jyqj/tabmail/tree/integration/company-mail-r5-batch2-20261003",
+    "draft_pr": "NOT_CREATED: GitHub GraphQL Forbidden; exit1; stopped, no alternate route/identity or old rejected branch retry",
+    "pr_base": "integration/company-mail-r5-20261003",
+    "pr_body": "draft-pr-body.md",
+    "followup": "documentation-only delivery-status commit/push follows; final head reported separately"
+  },
+  "ci": {
+    "head_sha": "81ee07262942ee824ee8a9226bfb8aef1a53db51",
+    "status": "UNAVAILABLE",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "four_job_state": "UNAVAILABLE / not verified; no successful run claimed. Existing company-p0 workflow triggers only push/main or PR/main; this stacked branch/base is outside those configured triggers; workflow unchanged."
+  },
+  "evidence_hashes": {
+    "browser-terminal.txt": "1df3bf691c14897217166b67016d4f2e164e63de9c3cd57f4d330e48721d0ee9",
+    "ordinary-wire.json": "9fdd0d734a549733a89fb9cb5f85035a137e9c5ff452276363579cf65b0950f3",
+    "contract-runs.json": "d99d73c6163bc06978295f3ab447e8bcf48b42c798a2db6753a226aebad21014",
+    "lint-terminal.txt": "8c978b9b104dfa8c93099dd0a179659fd608ae8c33131f333ed37fbe81dc7c45",
+    "inherited-pin-check.json": "6bf2cf31e902673f99b884e46e331363b5f4a78d894b7288b84cf1ace47418f1",
+    "ci-prepush.json": "745ae42270327a35217fd9551486d0ed57d757d30d130d8cbc3a77f96e6cf066",
+    "consumer-terminal.txt": "fefb3e9d38d924e9f8bac3302884641f311161de31393708872ade638392d9fe",
+    "contracts.stderr": "34c83b667c7d7b5301ea450b3a3889c60201f82a465138c9c31881a1dfbac68c",
+    "source-pins.json": "cfb6f948023aa89e804362bac70c6dc3064844a8fc72d21e564ee940a440fa9d",
+    "browser-infra-notrun.txt": "17e1d607e4f6ddd7e6503c94f4e63636ed5ed2ef41819ff02a68085e8a091fc6",
+    "lint-exit-verified.txt": "8c978b9b104dfa8c93099dd0a179659fd608ae8c33131f333ed37fbe81dc7c45",
+    "browser-first-terminal.txt": "1df3bf691c14897217166b67016d4f2e164e63de9c3cd57f4d330e48721d0ee9",
+    "contracts.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "frontend-checks.json": "9cb987dd2cf467bf259dcf6fe53fc8b3a8c22fc8647dda8cf1c5d2a290efdd33",
+    "oracle-check.json": "f9d9a2f8b8f0e0a1d79d4aabdc4a525a0ca1647e5065b84a65de42ca1ab2c435",
+    "latestrefs.txt": "04a4dd2d4f7f60ac7f5ce610f92702b5be6222a5715dc79c26ec9629a81c3536",
+    "consumer-results.json": "24d4bd65afc9f9d758b28fbe8549134065b022898a2eacd95e76a850181937b4",
+    "type-terminal.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "typed-go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "oracle-original.cjs": "d6c4492d0c38c9c98f9b1426a7a77f1ce24178627cc2d512982c4e4980a1cafc",
+    "typed-go.stdout": "36b690e5c501ca892f0a117087fb1cc3a69ea93086fefdcce66aa4a332bfa777",
+    "type-exit-verified.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "browser-first-inherited-labels/browser-results.json": "3db540af2199c9a6182847b1d74ef21008641e5d5dd2ea7c6a3da7475a770be5",
+    "browser/browser-results.json": "71c7cf97f7e10088a4c9e0934362310e661a07cdbfb5b3db32e0233ebb9bcfcd",
+    "push-terminal.txt": "c5563ea7f4a525564000249a1e058b942cb242667e7ac1513d25f0882d75a063",
+    "pr-terminal.txt": "682deed6ccd21e66582c7f0e0efdffb3363feeac4c8b58f35a46d43dc240c725",
+    "draft-pr-body.md": "c8802f74142af8c59443b127c0e46ae7ce1e049dc6396dbd1b7895be6603c15b"
+  }
+}

@@ -1,0 +1,257 @@
+{
+  "batch": "r5-multi-round-20261007",
+  "source_base": "4065c4909c8f21a401a9a1af6370fa3f72670b99",
+  "integration_product_source": "e32564304c0c84aa80b1184e72129fb0316d989d",
+  "implementation_items": {
+    "total": 10,
+    "completed": 10,
+    "remaining": 0
+  },
+  "parent_tasks": {
+    "total": 171,
+    "completed": 10,
+    "remaining": 161
+  },
+  "items": [
+    {
+      "id": "R5-P6-090-20261007-01",
+      "title": "SMTP IPv6 relay",
+      "status": "completed",
+      "pr": 61,
+      "url": "https://github.com/jyqj/tabmail/pull/61",
+      "local_commit": "7a4629c793105cde4038ec05b8ba51e084d0806e",
+      "remote_commit": "54dd44534e8f49155c2682827b87da6f376bdca9",
+      "tested_tree": "7fb60d6e7003020f146752e30ed064025f4ddd95",
+      "merge_commit": "0c402faa74fff0690e49f7594dae38dea104fc69",
+      "baseline": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "skipped": 0
+      },
+      "candidate_new_cases": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "kind": "behavioral_regression"
+    },
+    {
+      "id": "R5-P6-040-20261007-01",
+      "title": "SMTP greeting causes",
+      "status": "completed",
+      "pr": 63,
+      "url": "https://github.com/jyqj/tabmail/pull/63",
+      "local_commit": "1386b38c9e156dab4d9c57b4c58c8c9e77c10882",
+      "remote_commit": "43e48bdd7bf2b8fad408b89a696634b4832ee2ad",
+      "tested_tree": "0c85568330258ec62cc4bd9e4a2c8816f2d73135",
+      "merge_commit": "a306da76360e191133cda964591e9507f4230b3d",
+      "baseline": {
+        "total": 12,
+        "passed": 6,
+        "failed": 6,
+        "skipped": 0
+      },
+      "candidate_new_cases": {
+        "total": 12,
+        "passed": 12,
+        "failed": 0,
+        "skipped": 0
+      },
+      "kind": "behavioral_regression"
+    },
+    {
+      "id": "R5-P6-050-20261007-01",
+      "title": "Recipient failure causes",
+      "status": "completed",
+      "pr": 67,
+      "url": "https://github.com/jyqj/tabmail/pull/67",
+      "local_commit": "013bd96e93518dd453df7202bacf54f02a0609f1",
+      "remote_commit": "ae35c883f235060508ef25f54cf34554a90356de",
+      "tested_tree": "90b0f2847173a69bbec015fb2560ed45b60d36c0",
+      "merge_commit": "58da53ea1c912f8d36fc1ae83a5eeebe3301658b",
+      "baseline": {
+        "total": 8,
+        "passed": 1,
+        "failed": 7,
+        "skipped": 0
+      },
+      "candidate_new_cases": {
+        "total": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0
+      },
+      "kind": "behavioral_regression"
+    },
+    {
+      "id": "R5-P9-080-20261007-01",
+      "title": "Recovery conflict reinspection",
+      "status": "completed",
+      "pr": 65,
+      "url": "https://github.com/jyqj/tabmail/pull/65",
+      "local_commit": "8e976b634f36fdd09a8332b01cfe6cd800f15b75",
+      "remote_commit": "8181f13905cc8edd9d7478a62173422368b25fe2",
+      "tested_tree": "6b77326331231d2381abf5b3a97716fe224ab507",
+      "merge_commit": "7ea617f86bdca328144c65a30a52b00d72bce77e",
+      "baseline": {
+        "total": 7,
+        "passed": 3,
+        "failed": 4,
+        "skipped": 0
+      },
+      "candidate_new_cases": {
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0
+      },
+      "kind": "behavioral_regression"
+    },
+    {
+      "id": "R5-P9-090-20261007-01",
+      "title": "Session-scoped refresh",
+      "status": "completed",
+      "pr": 69,
+      "url": "https://github.com/jyqj/tabmail/pull/69",
+      "local_commit": "d170ef9a37f5d102674b4172018e5dc1f3e05c3d",
+      "remote_commit": "cd39089e983c7da10a9f4a90c1a4cc91e163cbb8",
+      "tested_tree": "eeec7fbd9e052cc5d032e1d8de2a84b1cead2408",
+      "merge_commit": "278ebc1aaa50a5d0dd98944ee67c6825d077a1d0",
+      "baseline": {
+        "total": 6,
+        "passed": 0,
+        "failed": 6,
+        "skipped": 0
+      },
+      "candidate_new_cases": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0
+      },
+      "kind": "behavioral_regression"
+    },
+    {
+      "id": "R5-P9-100-20261007-01",
+      "title": "Recovery queue load states",
+      "status": "completed",
+      "pr": 71,
+      "url": "https://github.com/jyqj/tabmail/pull/71",
+      "local_commit": "6c73230d7f3c00ab640e2a8b7ce10b20bb88a2f4",
+      "remote_commit": "63931188530214708e05e74497f59ddb28285e14",
+      "tested_tree": "d637625d3de97c3dcd8db8e57130dd09dbf743d1",
+      "merge_commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+      "baseline": {
+        "total": 8,
+        "passed": 2,
+        "failed": 6,
+        "skipped": 0
+      },
+      "candidate_new_cases": {
+        "total": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0
+      },
+      "kind": "behavioral_regression"
+    },
+    {
+      "id": "R5-P8-110-20261007-01",
+      "title": "SMTP and retention configuration bounds",
+      "status": "completed",
+      "pr": 64,
+      "url": "https://github.com/jyqj/tabmail/pull/64",
+      "local_commit": "042ad48357671f6181a1ef0ecc0d968988756e37",
+      "remote_commit": "478eec7047d5d74db14ce2c32ba1b8d1a1b90169",
+      "tested_tree": "d83e60be3c98a1467e5a3cb8f8a77bb0787bda8d",
+      "merge_commit": "8d5fa6f5af728688082ff3445570e2ba837f654b",
+      "baseline": {
+        "total": 18,
+        "passed": 1,
+        "failed": 17,
+        "skipped": 0
+      },
+      "candidate_new_cases": {
+        "total": 18,
+        "passed": 18,
+        "failed": 0,
+        "skipped": 0
+      },
+      "kind": "behavioral_regression"
+    },
+    {
+      "id": "R5-P8-060-20261007-01",
+      "title": "Attachment source error classification",
+      "status": "completed",
+      "pr": 68,
+      "url": "https://github.com/jyqj/tabmail/pull/68",
+      "local_commit": "b504ba8e2f529b6e52ff332d667bd21390b37d37",
+      "remote_commit": "49facad80dabf5ef4754d37e964bdfbb3876e0a5",
+      "tested_tree": "5639046e226ea20a8a784d0c42cd487376370e3b",
+      "merge_commit": "1c160d445d9ab7f30c5d80e1ca23daa2ccb7d456",
+      "baseline": {
+        "total": 10,
+        "passed": 2,
+        "failed": 8,
+        "skipped": 0
+      },
+      "candidate_new_cases": {
+        "total": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped": 0
+      },
+      "kind": "behavioral_regression"
+    },
+    {
+      "id": "R5-P5-060-20261007-01",
+      "title": "Attachment progress and cancellation",
+      "status": "completed",
+      "pr": 70,
+      "url": "https://github.com/jyqj/tabmail/pull/70",
+      "local_commit": "14697c87d543ddcd215cf14f7a9685d3a07ddee8",
+      "remote_commit": "ec1e2b5c5536f0513a6d7a757012c9befb05f75c",
+      "tested_tree": "a272540a178cd801d8d9c5145b5d9c951402e03d",
+      "merge_commit": "ac1afc64e738695b2f7c38c27fbd9b22ccb5c420",
+      "baseline": {
+        "total": 7,
+        "passed": 1,
+        "failed": 6,
+        "skipped": 0
+      },
+      "candidate_new_cases": {
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0
+      },
+      "kind": "behavioral_regression"
+    },
+    {
+      "id": "R5-P11-080-20261007-01",
+      "title": "Frontend evidence continuation",
+      "status": "completed",
+      "pr": 62,
+      "url": "https://github.com/jyqj/tabmail/pull/62",
+      "local_commit": "36f5c1f6e430a9d1de8e63f64b6c40321fe4f706",
+      "remote_commit": "e4e0267248979faa974fab124d6cc2e271771876",
+      "tested_tree": "4951a6ead6fe179c869b763e38e18ae532aae943",
+      "merge_commit": "c4b7e1c2c4420e6eb1da6d8d7196ec5a1225e168",
+      "baseline": {
+        "total": 3,
+        "passed": 1,
+        "failed": 2,
+        "skipped": 0
+      },
+      "candidate_new_cases": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0
+      },
+      "kind": "workflow_contract_with_actual_github_execution"
+    }
+  ]
+}

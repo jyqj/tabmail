@@ -1,0 +1,18 @@
+{
+  "allowed_skips_observed": [],
+  "errors": [],
+  "events": 13,
+  "log_sha256": "5357456dd9aef158f28b1be6a2de25c2cd6197bfdc73693cbc20ed85f78dd7e9",
+  "mandatory_missing_or_not_passed": 0,
+  "mandatory_tests": 1,
+  "manifest_sha256": "6b5e7fc0fc37b7098d5aa8aeace43f25f0f98f5c1f2e1f73ce4495a14e692682",
+  "packages": 1,
+  "process_exit_code": 0,
+  "source_sha": "57ae4946ea60f0021c531aefc0c091dd984ca784",
+  "status": "pass",
+  "suite": "browser",
+  "tests_failed": 0,
+  "tests_passed": 1,
+  "tests_skipped": 0,
+  "tests_started": 1
+}

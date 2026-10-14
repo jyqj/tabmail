@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 )
 
 func (s *FakeStore) CreateOutboxEvent(_ context.Context, e *models.OutboxEvent) error {
@@ -93,6 +94,42 @@ func (s *FakeStore) MarkOutboxEventRetry(_ context.Context, id uuid.UUID, lastEr
 		e.LeaseUntil = nil
 		e.UpdatedAt = time.Now().UTC()
 	}
+	return nil
+}
+
+func (s *FakeStore) MarkOutboxEventDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	e := s.outbox[id]
+	if e == nil || !currentFakeQueueClaim(e.State, e.Attempts, attempt, e.LeaseUntil) {
+		return store.ErrClaimLeaseLost
+	}
+	e.State = "done"
+	e.ClaimedAt = nil
+	e.LeaseUntil = nil
+	e.UpdatedAt = time.Now().UTC()
+	return nil
+}
+
+func (s *FakeStore) MarkOutboxEventRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	e := s.outbox[id]
+	if e == nil || !currentFakeQueueClaim(e.State, e.Attempts, attempt, e.LeaseUntil) {
+		return store.ErrClaimLeaseLost
+	}
+	e.State = "retry"
+	e.LastError = lastError
+	e.NextAttemptAt = nextAttemptAt.UTC()
+	e.ClaimedAt = nil
+	e.LeaseUntil = nil
+	e.UpdatedAt = time.Now().UTC()
 	return nil
 }
 
@@ -195,6 +232,51 @@ func (s *FakeStore) MarkWebhookDeliveryRetry(_ context.Context, id uuid.UUID, la
 		d.UpdatedAt = time.Now().UTC()
 	}
 	return nil
+}
+
+func (s *FakeStore) MarkWebhookDeliveryDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	d := s.deliveries[id]
+	if d == nil || !currentFakeQueueClaim(d.State, d.Attempts, attempt, d.LeaseUntil) {
+		return store.ErrClaimLeaseLost
+	}
+	now := time.Now().UTC()
+	d.State = "delivered"
+	d.ClaimedAt = nil
+	d.LeaseUntil = nil
+	d.DeliveredAt = &now
+	d.UpdatedAt = now
+	return nil
+}
+
+func (s *FakeStore) MarkWebhookDeliveryRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time, dead bool) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	d := s.deliveries[id]
+	if d == nil || !currentFakeQueueClaim(d.State, d.Attempts, attempt, d.LeaseUntil) {
+		return store.ErrClaimLeaseLost
+	}
+	d.State = "retry"
+	if dead {
+		d.State = "dead"
+	}
+	d.LastError = lastError
+	d.NextAttemptAt = nextAttemptAt.UTC()
+	d.ClaimedAt = nil
+	d.LeaseUntil = nil
+	d.UpdatedAt = time.Now().UTC()
+	return nil
+}
+
+func currentFakeQueueClaim(state string, current, observed int, lease *time.Time) bool {
+	return observed > 0 && state == "processing" && current == observed && lease != nil && lease.After(time.Now())
 }
 
 func (s *FakeStore) ListDeadWebhookDeliveries(_ context.Context, limit int) ([]models.DeadLetter, error) {

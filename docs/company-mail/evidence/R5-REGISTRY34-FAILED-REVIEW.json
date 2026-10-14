@@ -1,0 +1,31 @@
+{
+  "actual_source_closure_sha256": "cfa267b27fb07ac795a50b5db52aca06d32d6077ffbbb174b9283f31d3e3c30c",
+  "new_M_typed_failure_admission_missing_may_reject": "record actual stderr; no schema waiver or review fabrication",
+  "product_green": false,
+  "requested_unittest_count": 34,
+  "results": {
+    "real-registry-CLI": {
+      "CLI_exit": 1,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false,
+      "wall_seconds": 0.1050407886505127
+    },
+    "registry34": {
+      "CLI_exit": 1,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false,
+      "wall_seconds": 0.20991301536560059
+    }
+  },
+  "source_sha": "5339a73527e1d0235bafea90dfff82a257eb34c4",
+  "task_complete": false,
+  "test_pass_not_claimed_from_static_SOURCE": true
+}

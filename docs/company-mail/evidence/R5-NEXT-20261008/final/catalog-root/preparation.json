@@ -1,0 +1,46 @@
+{
+  "status": "candidate_staged_for_independent_review",
+  "source_commit": "f413a9138d305cf154ed2cecaddcf9b9a2397666",
+  "source_tree": "37adfe5efb4ae49274a6d52a5d769bcb5b116cf0",
+  "checkout": "/workspace/scratch/fabe500b93be/catalog-revision6-f413-final/checkout",
+  "generated_files": [
+    "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+    "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+    "scripts/tests/test_r5_catalog_reconciliation.py",
+    "docs/company-mail/evidence/R5-CATALOG-REVISION6-20261008/README.md",
+    "docs/company-mail/evidence/R5-CATALOG-REVISION6-20261008/reconciliation.json",
+    "scripts/tests/test_r5_compatibility.py"
+  ],
+  "generated_sha256": {
+    "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": "e820435ec2357f2fa0d0509e4e0759124a85054c0f4fc35df887f683a3c4e715",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": "457fcd6c63ce7f0b80a3d38aa2d7153e243eaa06569898ff47932bc02ca0983c",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "c673d9b6d049283bcba582a5465448c94234d1388a4a55b43035fc8fcdebb679",
+    "docs/company-mail/evidence/R5-CLIENT-CALLS.json": "56bbc1329b0433e215413542409c6486d08af406d45d0a1fc6a6dc73dc6c6d21",
+    "scripts/tests/test_r5_catalog_reconciliation.py": "4944f44dbf2fbdf822396a07420211acea85bd97cac23abef18209e89e7e2b38",
+    "docs/company-mail/evidence/R5-CATALOG-REVISION6-20261008/README.md": "e9e6566ed2fcdc00d09a14ec9e4a49988f449f7d0588ee81c13e4112cfaffb7c",
+    "docs/company-mail/evidence/R5-CATALOG-REVISION6-20261008/reconciliation.json": "bfb4634f1483f6219a99c9c8e8f2b77be7ef2e280f3489b0255310b07f27e507",
+    "scripts/tests/test_r5_compatibility.py": "15ccbc1dc24470053e0c1a28aa2a24a163588534d94f15092f3f1d37e33de1bc"
+  },
+  "caller_entries": 41,
+  "caller_locations": 63,
+  "callers_added": 3,
+  "callers_removed": 2,
+  "client_changes": 2,
+  "client_reorder": 107,
+  "closure_changes": [
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+    "internal/api/handlers/outbound.go",
+    "internal/api/handlers/respond.go",
+    "internal/models/models.go",
+    "web/app/(dashboard)/company/templates/page.tsx",
+    "web/components/company/templates/grants.tsx"
+  ],
+  "source_changes": 11,
+  "historical_files": 33,
+  "reconciliation_methods": 15,
+  "mutation_methods_unchanged": true,
+  "runtime_tests_executed": false,
+  "implementation_todos_completed": 0
+}

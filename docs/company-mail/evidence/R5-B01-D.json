@@ -1,0 +1,142 @@
+{
+  "batch": "B01-D",
+  "status": "implementation_committed_partial_validation",
+  "base_sha": "46711be9d8421db35a687e28e181a67a2e720b2f",
+  "implementation_commit": "0f9c3ce58518e93be4fec555a2adb9af46700f19",
+  "implementation_tree": "9ac85d2b1d1daec06bb358fa67dd267f00ea8842",
+  "tasks_closed": [],
+  "tasks_in_progress": [
+    "R5-P0-070",
+    "R5-P0-080"
+  ],
+  "completed_total": 6,
+  "task_total": 171,
+  "original_A01_A07_product_fixes_closed": false,
+  "production_changed": [
+    "internal/store/postgres/company_mail.go",
+    "internal/store/postgres/outbound.go"
+  ],
+  "runtime_sha256": {
+    "internal/store/postgres/outbound.go": "4f5ddbd472c2a2a31435e85998b6c1d6194ec89c255df5348593278fd1b277bd",
+    "internal/store/postgres/company_mail.go": "cd2aa270b422b52addd1a116d0cb6e723c39a9efbff6d017e89f7126b78e11c9",
+    "internal/store/postgres/r5_lock_order_test.go": "2f670eb5cb41bbc61b529d6101408aedb2873311aa55aa755d904756e9b80f6e",
+    "internal/store/postgres/r5_concurrency_baseline_test.go": "a193e4234d0c4d8efa7924f9bff90d486c8ed14f0e07c956fc0192397bfe6c4d",
+    "internal/store/postgres/r5_enqueue_parallel_test.go": "33ccf9aa181198cb31c21428a1452e1817f179bc41e1de66fa3adfce577e3230",
+    "scripts/required_go_tests.json": "8b76ccf58d07cfddb998adc4bc67edcf976227afbceea18f4b5f2fbd8e400053"
+  },
+  "historical_migrations_unchanged": true,
+  "baseline": {
+    "exit_code": 1,
+    "failed": [
+      "TestR5ConcurrencyR01EnqueueOffboardNoAttachmentCycle",
+      "TestR5ConcurrencyR03EnqueueOffboardNoTenantFKCycle",
+      "TestR5ConcurrencyR02DraftCannotCommitAfterCompletedRevoke"
+    ],
+    "markers": [
+      "r5_concurrency_baseline_test.go:124: R5_CONCURRENCY_R01: real enqueue and transfer-owned disposition formed an attachment/user deadlock",
+      "r5_concurrency_baseline_test.go:152: R5_CONCURRENCY_R03: sender-share enqueue and tenant-first offboarding deadlocked through implicit tenant FK",
+      "r5_concurrency_baseline_test.go:226: R5_CONCURRENCY_R02: draft write committed after completed grant revocation while using the earlier authorization read"
+    ],
+    "test_sha256": "6f60af45207ccfb906de7824d8c8a6ca1f73296da4109e0cae849458f40aec6b",
+    "source_base": "46711be9d8421db35a687e28e181a67a2e720b2f"
+  },
+  "intermediate_focused": {
+    "tests_run": 8,
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "production_sources_unchanged_after_run": true,
+    "not_final_test_source": true,
+    "subsequent_test_only_changes": "typed Forbidden/Conflict assertions strengthened; independent parallel enqueue case added"
+  },
+  "final_validation": {
+    "full_backend": "outer_330_second_timeout; no complete Go evidence",
+    "backend_jsonl_bytes": 0,
+    "final_focused_repeat": "not_started; disposable PostgreSQL creation timed out",
+    "nine_cases_times_three_passed": false,
+    "required_manifest_count": 23,
+    "all_23_required_executed": false,
+    "build_vet_separate_certification": false,
+    "frontend_browser_performance_dependency_audit": "not_run"
+  },
+  "host_checks": [
+    {
+      "name": "python-tests",
+      "exit": 0
+    },
+    {
+      "name": "dto",
+      "exit": 0
+    },
+    {
+      "name": "diff",
+      "exit": 0
+    }
+  ],
+  "python_tests_passed": 57,
+  "dto": {
+    "shared_models": 16,
+    "company_dtos": 32
+  },
+  "protocol": {
+    "document": "R5-PROTOCOL.md",
+    "status": "non_executable_draft",
+    "validator_write": "blocked by tool safety check; not retried through another route",
+    "validator_exists": false
+  },
+  "runtime": {
+    "source_snapshot": "/tmp/tabmail-r5-b01d-fop50z37",
+    "tool_image_id": "sha256:65934079f212a76983064db24e7a26066106a7e173cf2b05e4f1621aebfdb5c7",
+    "network_policy": "session-owned internal networks; no published host ports; no SMTP workers or production data"
+  },
+  "cleanup": {
+    "original_session_resources": {
+      "exit": 0,
+      "remaining": "",
+      "stderr": ""
+    },
+    "verification_attempt": [
+      {
+        "kind": "container",
+        "name": "tabmail-r5-b01d-verify-pg-xzjp",
+        "session_label": "wc_sess_xzJphvjbLPkVLBhu",
+        "state": "created",
+        "id": "bdc4deec2142ac978fce632c93de9824bb6e018bd10a0adeed7fec9aea0b1505",
+        "cleanup_exit": 0,
+        "cleanup_stdout": "tabmail-r5-b01d-verify-pg-xzjp",
+        "cleanup_stderr": ""
+      },
+      {
+        "kind": "container",
+        "name": "tabmail-r5-b01d-verify-test-xzjp",
+        "inspect_exit": 1,
+        "stderr": "Error response from daemon: No such container: tabmail-r5-b01d-verify-test-xzjp"
+      },
+      {
+        "kind": "network",
+        "name": "tabmail-r5-b01d-verify-xzjp",
+        "session_label": "wc_sess_xzJphvjbLPkVLBhu",
+        "state": null,
+        "id": "c17c6e1acdecc3b60b4aa7a2c6aa6f753ce32ad2976d1bdd244f944d5b1e7281",
+        "cleanup_exit": 0,
+        "cleanup_stdout": "tabmail-r5-b01d-verify-xzjp",
+        "cleanup_stderr": ""
+      }
+    ],
+    "global_docker_restart": false
+  },
+  "artifacts": {
+    "R5-B01-D-BEFORE.jsonl": {
+      "bytes": 5560,
+      "sha256": "d072dfa0793a51582606950a1150b84b14cb2aa7647cc23522f2f8c708788ef1"
+    },
+    "R5-B01-D-BEFORE-SOURCE.go.txt": {
+      "bytes": 11102,
+      "sha256": "6f60af45207ccfb906de7824d8c8a6ca1f73296da4109e0cae849458f40aec6b"
+    },
+    "R5-B01-D-FOCUSED.jsonl": {
+      "bytes": 10215,
+      "sha256": "4adfcd41e26b011f3538d68b18194d0fb48fab153c1c56d63991db8989d3fd63"
+    }
+  }
+}

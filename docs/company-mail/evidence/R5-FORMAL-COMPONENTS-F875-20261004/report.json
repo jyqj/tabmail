@@ -1,0 +1,1836 @@
+{
+  "schema_version": 1,
+  "status": "BATCH_REJECTED",
+  "tested_source": "f875672dea2b68fdec9e0b986f4863724da5d7ba",
+  "formal_batches_started": 1,
+  "prestart_cli_rejections": 1,
+  "reruns": 0,
+  "mode": "components",
+  "budgets": {
+    "case": 75,
+    "go": 120,
+    "process": 180
+  },
+  "workers": 4,
+  "catalog_ids": 46,
+  "handler_ids": 17,
+  "handler_variants": 26,
+  "required_terminals": 43,
+  "counts": {
+    "pass": 17,
+    "fail": 9,
+    "skip": 0,
+    "missing": 17
+  },
+  "qualified_terminals": 0,
+  "missing_required_layer_count": 106,
+  "errors": [
+    "Go required terminal/assertion failure",
+    "execution rejected: ValueError",
+    "owner acknowledgement/queue incomplete or invalid",
+    "staged child assertion/lifecycle failure",
+    "missing/duplicate/nonpassing required terminal",
+    "terminal inventory rejected: ValueError"
+  ],
+  "preflight": true,
+  "in_batch_terminal_postcheck": false,
+  "independent_postrun_validation": {
+    "status": "passed",
+    "seconds": 6.145730617999959,
+    "scope": "independent post-run diagnostic; cannot replace missing in-batch postcheck or owner ack"
+  },
+  "owners_joined": false,
+  "resources_joined": true,
+  "max_live_children": 4,
+  "staged_children": 19,
+  "child_timeouts": 0,
+  "child_tails": 0,
+  "cleanup": {
+    "state": "JOINED",
+    "channel_joined": true,
+    "resources_joined": true,
+    "registered_roots": 21,
+    "all_roots_directly_reaped": true,
+    "all_groups_joined": true,
+    "all_pipes_closed": true,
+    "pending_roots": 0,
+    "cleanup_errors": 0,
+    "lease_held": false,
+    "lease_token_present": false,
+    "owned_fixture_databases_remaining": 0,
+    "owned_fixture_backend_connections_remaining": 0,
+    "owned_pg_stopped": true
+  },
+  "elapsed": {
+    "preparation": 49.306123528,
+    "compile_warmup": 47.639253545,
+    "formal": 53.780887459999974,
+    "launch_to_first_go_event": 8.574706315994263,
+    "handler_go_event_window": 44.96959686279297,
+    "handler_go_parent": 44.93,
+    "other_go_groups": "not_run",
+    "direct_python": "not_run",
+    "in_batch_postcheck": "withheld: missing owner ack",
+    "independent_postrun_validation": 6.145730617999959,
+    "phase_boundary": "first-event/file-observation timings include launch overhead; exact compiler/preflight split unknown"
+  },
+  "diagnosis": [
+    {
+      "cases": [
+        "PE01",
+        "PE02",
+        "PE04"
+      ],
+      "variants": 7,
+      "layer": "Go HTTP fixture setup",
+      "source": "internal/api/handlers/r5_protocol_component_observations_test.go:594",
+      "cause": "r5UISetup legacy permission PUT expected 200; handler unconditionally returns 409",
+      "handler": "internal/api/handlers/permissions.go:135",
+      "target_assertion_reached": false
+    },
+    {
+      "cases": [
+        "PE03"
+      ],
+      "variants": 1,
+      "layer": "component assertion",
+      "source": "web/components/company/r5-protocol-shared-components.test.tsx:268",
+      "cause": "expected two profile PATCH requests, observed one; trace has only explicit revocation PATCH 200; second editor write absent",
+      "classification": "unexpected failure; not admitted target red",
+      "deeper_ui_cause": "unknown from this evidence"
+    },
+    {
+      "cases": [
+        "LF01"
+      ],
+      "variants": 1,
+      "layer": "component target assertion",
+      "source": "web/components/company/r5-protocol-shared-components.test.tsx:210",
+      "marker": "R5_PROTOCOL_UI_TARGET_LF01_FROZEN",
+      "cause": "frozen employee excluded from shipping handover selector",
+      "classification": "declared target red; still invalidates formal batch"
+    },
+    {
+      "cases": [],
+      "layer": "batch acknowledgement",
+      "source": "internal/api/handlers/r5_external_batch_test.go:205",
+      "cause": "Go completion ack rejected because seven fixture setup failures never submitted required child keys; exact fixture ack remains false"
+    }
+  ],
+  "terminal_matrix": [
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/eight",
+      "runner": "go",
+      "case_id": "OP03",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/empty",
+      "runner": "go",
+      "case_id": "OP03",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/maximum",
+      "runner": "go",
+      "case_id": "OP03",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/over_maximum",
+      "runner": "go",
+      "case_id": "OP03",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/seven",
+      "runner": "go",
+      "case_id": "OP03",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/trim_maximum",
+      "runner": "go",
+      "case_id": "OP03",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/trim_seven",
+      "runner": "go",
+      "case_id": "OP03",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_nine",
+      "runner": "go",
+      "case_id": "OP03",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_six",
+      "runner": "go",
+      "case_id": "OP03",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_twelve",
+      "runner": "go",
+      "case_id": "OP03",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/whitespace",
+      "runner": "go",
+      "case_id": "OP03",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF01/default",
+      "runner": "go",
+      "case_id": "LF01",
+      "status": "fail",
+      "lifecycle": [
+        "run",
+        "fail"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF02/default",
+      "runner": "go",
+      "case_id": "LF02",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF03/default",
+      "runner": "go",
+      "case_id": "LF03",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF04/default",
+      "runner": "go",
+      "case_id": "LF04",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF05/foreign_tenant",
+      "runner": "go",
+      "case_id": "LF05",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF05/frozen",
+      "runner": "go",
+      "case_id": "LF05",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF05/higher_role",
+      "runner": "go",
+      "case_id": "LF05",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF05/self",
+      "runner": "go",
+      "case_id": "LF05",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF06/default",
+      "runner": "go",
+      "case_id": "LF06",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF07/default",
+      "runner": "go",
+      "case_id": "LF07",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE01/default",
+      "runner": "go",
+      "case_id": "PE01",
+      "status": "fail",
+      "lifecycle": [
+        "run",
+        "fail"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE02/0",
+      "runner": "go",
+      "case_id": "PE02",
+      "status": "fail",
+      "lifecycle": [
+        "run",
+        "fail"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE02/[]",
+      "runner": "go",
+      "case_id": "PE02",
+      "status": "fail",
+      "lifecycle": [
+        "run",
+        "fail"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE02/false",
+      "runner": "go",
+      "case_id": "PE02",
+      "status": "fail",
+      "lifecycle": [
+        "run",
+        "fail"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE02/null",
+      "runner": "go",
+      "case_id": "PE02",
+      "status": "fail",
+      "lifecycle": [
+        "run",
+        "fail"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE02/omitted",
+      "runner": "go",
+      "case_id": "PE02",
+      "status": "fail",
+      "lifecycle": [
+        "run",
+        "fail"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE03/default",
+      "runner": "go",
+      "case_id": "PE03",
+      "status": "fail",
+      "lifecycle": [
+        "run",
+        "fail"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE04/default",
+      "runner": "go",
+      "case_id": "PE04",
+      "status": "fail",
+      "lifecycle": [
+        "run",
+        "fail"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE05/default",
+      "runner": "go",
+      "case_id": "PE05",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/RC01/default",
+      "runner": "go",
+      "case_id": "RC01",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/RC02/legacy_outbound_detail",
+      "runner": "go",
+      "case_id": "RC02",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/RC02/legacy_outbound_list",
+      "runner": "go",
+      "case_id": "RC02",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/RC02/submit_replay",
+      "runner": "go",
+      "case_id": "RC02",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/RC03/default",
+      "runner": "go",
+      "case_id": "RC03",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/RC04/default",
+      "runner": "go",
+      "case_id": "RC04",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/RC05/default",
+      "runner": "go",
+      "case_id": "RC05",
+      "status": "pass",
+      "lifecycle": [
+        "run",
+        "pass"
+      ],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolDeliverySharedCases/RC03",
+      "runner": "go",
+      "case_id": "RC03",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolDeliverySharedCases/RC04",
+      "runner": "go",
+      "case_id": "RC04",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "TestR5ProtocolDeliverySharedCases/RC05",
+      "runner": "go",
+      "case_id": "RC05",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "R5 shared receipt RC03",
+      "runner": "python",
+      "case_id": "RC03",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "R5 shared receipt RC04",
+      "runner": "python",
+      "case_id": "RC04",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    },
+    {
+      "name": "R5 shared receipt RC05",
+      "runner": "python",
+      "case_id": "RC05",
+      "status": "missing",
+      "lifecycle": [],
+      "qualified": false
+    }
+  ],
+  "case_layer_matrix": [
+    {
+      "case_id": "CT01",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT02",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT03",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT04",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT05",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT06",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT07",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT08",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT09",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT10",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RC01",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components"
+      ],
+      "observed_terminals": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "RC02",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components"
+      ],
+      "observed_terminals": {
+        "pass": 3,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "RC03",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components",
+        "unit"
+      ],
+      "observed_terminals": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 2
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run",
+        "unit": "unqualified_observation"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "RC04",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components",
+        "unit"
+      ],
+      "observed_terminals": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 2
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run",
+        "unit": "unqualified_observation"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "RC05",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components",
+        "unit"
+      ],
+      "observed_terminals": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 2
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run",
+        "unit": "unqualified_observation"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "OP01",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "OP02",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "OP03",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [
+        "unit"
+      ],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 11
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run",
+        "unit": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "OP04",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RT01",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RT02",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RT03",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RT04",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RT05",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RT06",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RT07",
+      "required_layers": [
+        "db"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db"
+      ]
+    },
+    {
+      "case_id": "BC01",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "BC02",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "BC03",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "BC04",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "BC05",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "BC06",
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "GC01",
+      "required_layers": [
+        "db"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db"
+      ]
+    },
+    {
+      "case_id": "GC02",
+      "required_layers": [
+        "db"
+      ],
+      "scope_layers": [],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "db": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db"
+      ]
+    },
+    {
+      "case_id": "LF01",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components"
+      ],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 1,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "LF02",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components"
+      ],
+      "observed_terminals": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "LF03",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components"
+      ],
+      "observed_terminals": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "LF04",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components"
+      ],
+      "observed_terminals": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "LF05",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components"
+      ],
+      "observed_terminals": {
+        "pass": 4,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "LF06",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components"
+      ],
+      "observed_terminals": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "LF07",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components"
+      ],
+      "observed_terminals": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "PE01",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components"
+      ],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 1,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "PE02",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components"
+      ],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 5,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "PE03",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components"
+      ],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 1,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "PE04",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components"
+      ],
+      "observed_terminals": {
+        "pass": 0,
+        "fail": 1,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    },
+    {
+      "case_id": "PE05",
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "scope_layers": [
+        "components"
+      ],
+      "observed_terminals": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "layer_outcomes": {
+        "components": "unqualified_observation",
+        "db": "not_run",
+        "http": "not_run"
+      },
+      "qualified_layers": [],
+      "missing_required_layers": [
+        "db",
+        "http",
+        "components"
+      ]
+    }
+  ],
+  "pins": {
+    "batch.json": "17a3d0bedf8b1f0e897a740f1956d1ab26d876919e0540432f88df03c9be1d29",
+    "runtime.json": "e9f89657a43162d12426be4df46dfc916ffc30f0eaa1e008c01f70fc11174ec3",
+    "archive.json": "5f991a76d63f923abd4fadf572d0a7189804ce6ba1b60185e0920a039fef90bc",
+    "default.json": "63e9226df587d76b4fe15fc993b37b63e0f2ff2af086291839c5f1fe80df01c0",
+    "race.json": "37173740ca81e3156aec00ffae5b032b1dab4e526f92ce93439a0a08e4a53baf"
+  },
+  "raw_evidence_hashes": {
+    "formal-end.json": "05e971ac589fc053f28e0f475f03b7e1355b04de4cf2192c81d0232b4e49c330",
+    "formal-output/cleanup.json": "374be1e5a65f1487ebd97f0868576168f8cbde609489da5047912b25ee4119e6",
+    "formal-output/go-0.jsonl": "21d4ecb0b1a4379f0c487110c389366bd3b399970882bc4dc7e9035fb2a5f029",
+    "formal-output/go-0.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "formal-output/http-pg-components/LF01/default/observations.json": "187809c3b097e38e97ca2379a2bc8b332513aa1b0b70a18faf81c6efe88ac6dd",
+    "formal-output/http-pg-components/LF01/default/vitest.json": "92d4f23d19798805a06fffa1388b89ddec951221e6aabbbc609c7238785fcec1",
+    "formal-output/http-pg-components/LF01/default/vitest.log": "43038732a40656b709fda9ea1b644649091c3c5542c6fa65b306d9cf430a1563",
+    "formal-output/http-pg-components/LF02/default/observations.json": "725f6c994b6a0dfd22815c7c1a8d133267a169add6239b33dd3d731f64fe1e77",
+    "formal-output/http-pg-components/LF02/default/vitest.json": "4c2f841ef91a9187723999b6cd9b440a82efa18d345680369f0ca29b77182ce1",
+    "formal-output/http-pg-components/LF02/default/vitest.log": "5726e4bfd799d21aa813ad2bf01dc971e27fb669b88255860c928e93b97be368",
+    "formal-output/http-pg-components/LF03/default/observations.json": "45b493f1b87df8dd5212704958cbb7d5a6d6566af71a7f2b0597ef7647929ffe",
+    "formal-output/http-pg-components/LF03/default/vitest.json": "ba62aeaf65cecdc1dd89665618fb5948f9f5783aad2999cdf68d89465b0cc428",
+    "formal-output/http-pg-components/LF03/default/vitest.log": "0042c82d34a982b4dfbcffb08387ef6f4ffd5a582e4e4809852c5ea6e5f3d476",
+    "formal-output/http-pg-components/LF04/default/observations.json": "e9607057285e894c30111cdd03d79426022b5e99977841806108199632d1fc4e",
+    "formal-output/http-pg-components/LF04/default/vitest.json": "1ed3d8e7cb423c4809968f0e69cb6548d4e47e9e728fa88cbdd6e8e375392e3d",
+    "formal-output/http-pg-components/LF04/default/vitest.log": "afe81d9f252364152af6a149e436d5aab7231f6143e5b9829e5c1b42bb1f4543",
+    "formal-output/http-pg-components/LF05/foreign_tenant/observations.json": "679e1296f3597f1e29f728e103c8a8d4738f9f2269dae84f58819723a9cee217",
+    "formal-output/http-pg-components/LF05/foreign_tenant/vitest.json": "0eec2892dde08df4b7500e4d230bb5c384241634e2de4b42076e00b14374df05",
+    "formal-output/http-pg-components/LF05/foreign_tenant/vitest.log": "e6e0dd02a47ab1cfde401fbed8e20723c711305dfb6e93478279b414b1f4b22b",
+    "formal-output/http-pg-components/LF05/frozen/observations.json": "cf65802d15148796d8b5a15bdf08656ea9124903fe64c7836f4491a80e87f00d",
+    "formal-output/http-pg-components/LF05/frozen/vitest.json": "50fb384d1678d854add19cd1f73bc81c103e2fd873af07baa440174048189dae",
+    "formal-output/http-pg-components/LF05/frozen/vitest.log": "793ff2f546c8c7e028594ae58a3b604bc275604bf902292c7c18ada2190d5d63",
+    "formal-output/http-pg-components/LF05/higher_role/observations.json": "c7d121b3b835aea25eec3bc490ba27cab223d0d517f7f17d2c57a0086bbcd012",
+    "formal-output/http-pg-components/LF05/higher_role/vitest.json": "0025bde9f4e2c99e7b21f27c92e6b0a60883cfbd1b94524c7b1f0f8057c5f457",
+    "formal-output/http-pg-components/LF05/higher_role/vitest.log": "020c3eaf9af6325797b05e3757b7c98c7507e46df4b6c2574c619500b57b7798",
+    "formal-output/http-pg-components/LF05/self/observations.json": "b1b521d50769183c8dfca9ea787bdcc88d5de3e2c8e29ca7b4a2939b4c6cc1e0",
+    "formal-output/http-pg-components/LF05/self/vitest.json": "7d8e782efacfec101e113d4e4c2c1b8125a6e5514930f0fd4c1d9426f36815d9",
+    "formal-output/http-pg-components/LF05/self/vitest.log": "71ec4e2ccafdb1df2003d3f0c6423c49dd9582ea433376278c96cd225215a95c",
+    "formal-output/http-pg-components/LF06/default/observations.json": "3513a53399a1c27d255f146bafac306e5d1e7f18f51b700fdaaed46c595bd359",
+    "formal-output/http-pg-components/LF06/default/vitest.json": "4320b1b873143696cd95c8c06f655a48957c0f8afde35f63567cea8e8baf2f85",
+    "formal-output/http-pg-components/LF06/default/vitest.log": "da88c198880a6d881426f82c536fe86b8cca4666e0c45e8cde3cb0055caa7be4",
+    "formal-output/http-pg-components/LF07/default/observations.json": "f2fea0d9cbc77355e2c25979e5f5ce0a1a2ad2cdb6102f9620f2c27b7be9fc83",
+    "formal-output/http-pg-components/LF07/default/vitest.json": "4ec12abd9e912576435e9df83bd955742c758cb41f4025846968b5acb71f3f47",
+    "formal-output/http-pg-components/LF07/default/vitest.log": "c7a981d8744eda854325e810b50ccbafb917958cf625de897773fc87a3a8f013",
+    "formal-output/http-pg-components/PE03/default/observations.json": "41de10cbcc5724081d15f62f64d2f9868c39510db11d584c3250afac6fad3e1d",
+    "formal-output/http-pg-components/PE03/default/vitest.json": "8b8b14ecf54c580cc9c73e9e754c94b95e91065c60a8dfaa47856d97bf9c7e48",
+    "formal-output/http-pg-components/PE03/default/vitest.log": "d24ad929bb9139be871c01159eba97d96352834a1f7ed6c2189d8b4c75162dda",
+    "formal-output/http-pg-components/PE05/default/observations.json": "b0ab2f473222e78e6f1f07b1aa4f397fe5353e8130e0d29e7f2585cf9187042c",
+    "formal-output/http-pg-components/PE05/default/vitest.json": "ace5de0dee62d01115bbbc4f12c43c6f5da18cb24a9e9d67c4171d1ae326c670",
+    "formal-output/http-pg-components/PE05/default/vitest.log": "e8d6c689551360f97e4a6403945129300faa74188d5e1df2dda27496d33d3c43",
+    "formal-output/http-pg-components/RC01/default/observations.json": "b4b37714df9ff6c4d60535d18c07bf2cb97473a0b493e6649ba35bd2d1e12571",
+    "formal-output/http-pg-components/RC01/default/vitest.json": "267848779ae6bd9ee7cd57bb671c78d83d8ffb9cae0d5f445d955a306cb4eb8c",
+    "formal-output/http-pg-components/RC01/default/vitest.log": "5fe89415add01ae291af0603bab75b9c5345b15d18d8390c61ad74f88b8b46b3",
+    "formal-output/http-pg-components/RC02/legacy_outbound_detail/observations.json": "6ab5b353474ca23dd83a9dd2f06e0106aae21da09c5e65bca5b4090408e69e4a",
+    "formal-output/http-pg-components/RC02/legacy_outbound_detail/vitest.json": "839e3623a821eb16553fffa7a03cf54c03aef11f5ebb46b43207296dbe03f454",
+    "formal-output/http-pg-components/RC02/legacy_outbound_detail/vitest.log": "3d261f55676cff51ed0f7af0e6fe0d2a3a52a584f3c966d2ca9e2fc79b860928",
+    "formal-output/http-pg-components/RC02/legacy_outbound_list/observations.json": "498e06c02a355d3413b25242a480292cea6eb48d8d419ade489880e584c057f4",
+    "formal-output/http-pg-components/RC02/legacy_outbound_list/vitest.json": "a2ea3c258805d910430db1ee2567c8332c9ae80023cddef27ada0eac6ca42bc4",
+    "formal-output/http-pg-components/RC02/legacy_outbound_list/vitest.log": "c30badba0d49113904fbe4e8843697a27c685b03940073a86328cbdf672cf171",
+    "formal-output/http-pg-components/RC02/submit_replay/observations.json": "a5c4a6094f86ef971611afd26f55f946216d82770b35e6a0b4e72d26196ff53a",
+    "formal-output/http-pg-components/RC02/submit_replay/vitest.json": "21fb58fc06c08769e4a2c27304ae43441107bd5101c285eb16959837f3cbce84",
+    "formal-output/http-pg-components/RC02/submit_replay/vitest.log": "cd98f7064ee341f29703d4c4480bf9ff7c97856d9afc5ad5fa0cd8318a20ef02",
+    "formal-output/http-pg-components/RC03/default/observations.json": "9fb6abc7d977a5eebb7c4b0249eaa3509744442e49b2c300be2b5020dbb27ecb",
+    "formal-output/http-pg-components/RC03/default/vitest.json": "3e2d158d220dfd80daa55950135a0b8b1ba4a9f0ee0c192a69e58d63f2605b26",
+    "formal-output/http-pg-components/RC03/default/vitest.log": "6280f891de269aebe586533b7787c97b99094a9440b38d4896f01b2f48f1539c",
+    "formal-output/http-pg-components/RC04/default/observations.json": "027d0bc2d551da0bc1570663c63e2a5f645ab3ade3db483a1dcd04fe534f0bef",
+    "formal-output/http-pg-components/RC04/default/vitest.json": "e98d7625c4dc5a812884ddc0bef26b2aefc747246350bfeaa416ce71a02d36c2",
+    "formal-output/http-pg-components/RC04/default/vitest.log": "3538bde2da2f73fccc3324accb90adb269e630b711a12b470b04b75f6d1cac0e",
+    "formal-output/http-pg-components/RC05/default/observations.json": "9b666a1c8a79fbca7405a513da655d6983defcc0ee96da2b0d406b564a74aa38",
+    "formal-output/http-pg-components/RC05/default/vitest.json": "87468bac9235e9ec14ef15ae819971c553e780f90246c093417ddec04d204cbe",
+    "formal-output/http-pg-components/RC05/default/vitest.log": "bf645e6bc40ae1f8837ed2fcfd1cd424ccc8c3590178e4e6ad760e94d664742e",
+    "formal-output/receipt.json": "319887e80ce634244b9bc03884e29a21aae8ceaef28960ca046ecb4c17f37e6d",
+    "formal-output/staged/LF01/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF01/default/stdout": "c07efcd62d7ce2497c44b7bc29ef123e9201348eb4c2dfb6a2cf15ffca3ffd2c",
+    "formal-output/staged/LF01/default/vitest.json": "92d4f23d19798805a06fffa1388b89ddec951221e6aabbbc609c7238785fcec1",
+    "formal-output/staged/LF02/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF02/default/stdout": "f9258bf6e90e9f3cb3cf36ab137a0c08931fd5d0680660b0578588a89fbb01c1",
+    "formal-output/staged/LF02/default/vitest.json": "4c2f841ef91a9187723999b6cd9b440a82efa18d345680369f0ca29b77182ce1",
+    "formal-output/staged/LF03/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF03/default/stdout": "ef97532a698848c7a9c5afbf370db964d130e8827f881a27350c59ee4dd4a86b",
+    "formal-output/staged/LF03/default/vitest.json": "ba62aeaf65cecdc1dd89665618fb5948f9f5783aad2999cdf68d89465b0cc428",
+    "formal-output/staged/LF04/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF04/default/stdout": "8ce208baf3c634bd8451ffe6ccf9fc58704c91507c79cba719dfce089a20b928",
+    "formal-output/staged/LF04/default/vitest.json": "1ed3d8e7cb423c4809968f0e69cb6548d4e47e9e728fa88cbdd6e8e375392e3d",
+    "formal-output/staged/LF05/foreign_tenant/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF05/foreign_tenant/stdout": "9438214513b349a9631875edd85ec662f0c8a38e22c2c6b0c6151520cfd387c9",
+    "formal-output/staged/LF05/foreign_tenant/vitest.json": "0eec2892dde08df4b7500e4d230bb5c384241634e2de4b42076e00b14374df05",
+    "formal-output/staged/LF05/frozen/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF05/frozen/stdout": "1ede6c92c6be82ad31f8f145ac40c70fe2bfa7051a5ae787729f517531e76a35",
+    "formal-output/staged/LF05/frozen/vitest.json": "50fb384d1678d854add19cd1f73bc81c103e2fd873af07baa440174048189dae",
+    "formal-output/staged/LF05/higher_role/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF05/higher_role/stdout": "0fc07fb0cf5115ec78f6cdc7d339e1668d7ebe2c2f72cd8bdcbcfca0d89fb9e2",
+    "formal-output/staged/LF05/higher_role/vitest.json": "0025bde9f4e2c99e7b21f27c92e6b0a60883cfbd1b94524c7b1f0f8057c5f457",
+    "formal-output/staged/LF05/self/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF05/self/stdout": "8581e8b7495e07d492a370835edb8317a21f699efd092748fa2799af4c956b38",
+    "formal-output/staged/LF05/self/vitest.json": "7d8e782efacfec101e113d4e4c2c1b8125a6e5514930f0fd4c1d9426f36815d9",
+    "formal-output/staged/LF06/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF06/default/stdout": "1398df445d87713efcb54cc3b6db5f1ae29ee779c11c3647c5329b5da2a79b09",
+    "formal-output/staged/LF06/default/vitest.json": "4320b1b873143696cd95c8c06f655a48957c0f8afde35f63567cea8e8baf2f85",
+    "formal-output/staged/LF07/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF07/default/stdout": "6e3106be37c9be1fb1a68f9ffd22a5fc90df3837584bcfa0e9e9cabbc3089a47",
+    "formal-output/staged/LF07/default/vitest.json": "4ec12abd9e912576435e9df83bd955742c758cb41f4025846968b5acb71f3f47",
+    "formal-output/staged/PE03/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/PE03/default/stdout": "3872e756a2b6096a25550fa5b9e297ab5557cf70546ecaea61a11a77365a442e",
+    "formal-output/staged/PE03/default/vitest.json": "8b8b14ecf54c580cc9c73e9e754c94b95e91065c60a8dfaa47856d97bf9c7e48",
+    "formal-output/staged/PE05/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/PE05/default/stdout": "50cd444c162b7407a3cff1ef0df6c9ae824d672a1081ec41cd03cc9937ba5306",
+    "formal-output/staged/PE05/default/vitest.json": "ace5de0dee62d01115bbbc4f12c43c6f5da18cb24a9e9d67c4171d1ae326c670",
+    "formal-output/staged/RC01/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/RC01/default/stdout": "d765882bc30844d86450040d6adf662df4b5434b06db59752c376e9d59d43e0f",
+    "formal-output/staged/RC01/default/vitest.json": "267848779ae6bd9ee7cd57bb671c78d83d8ffb9cae0d5f445d955a306cb4eb8c",
+    "formal-output/staged/RC02/legacy_outbound_detail/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/RC02/legacy_outbound_detail/stdout": "4de0f1e970b8c0c53ec36cd0495a0377a5a9e984bf81469667607735c0015c33",
+    "formal-output/staged/RC02/legacy_outbound_detail/vitest.json": "839e3623a821eb16553fffa7a03cf54c03aef11f5ebb46b43207296dbe03f454",
+    "formal-output/staged/RC02/legacy_outbound_list/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/RC02/legacy_outbound_list/stdout": "c675ab32b130565149bff4ec8614c8bea6842074d77351f7e2fe5e4f74934b5b",
+    "formal-output/staged/RC02/legacy_outbound_list/vitest.json": "a2ea3c258805d910430db1ee2567c8332c9ae80023cddef27ada0eac6ca42bc4",
+    "formal-output/staged/RC02/submit_replay/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/RC02/submit_replay/stdout": "99d0cda4faf8528ef22f4132fe202fba7af7d7751bb9914349e5e50fbdb4efb9",
+    "formal-output/staged/RC02/submit_replay/vitest.json": "21fb58fc06c08769e4a2c27304ae43441107bd5101c285eb16959837f3cbce84",
+    "formal-output/staged/RC03/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/RC03/default/stdout": "a9b1f8fa8dcdb5d6f235b5a392688a9ec1184255a57e480a233018c5653cc66c",
+    "formal-output/staged/RC03/default/vitest.json": "3e2d158d220dfd80daa55950135a0b8b1ba4a9f0ee0c192a69e58d63f2605b26",
+    "formal-output/staged/RC04/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/RC04/default/stdout": "d65ac38528a183a87283c67d7a02c2876254fbd587aef758d3b59d19b24c04b4",
+    "formal-output/staged/RC04/default/vitest.json": "e98d7625c4dc5a812884ddc0bef26b2aefc747246350bfeaa416ce71a02d36c2",
+    "formal-output/staged/RC05/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/RC05/default/stdout": "de11f35eb658d37d7a756000ae6c2bc975cf9e4bb0964f4d0e0ec3d596cb07c2",
+    "formal-output/staged/RC05/default/vitest.json": "87468bac9235e9ec14ef15ae819971c553e780f90246c093417ddec04d204cbe",
+    "formal-output/validation-contract.json": "17a3d0bedf8b1f0e897a740f1956d1ab26d876919e0540432f88df03c9be1d29",
+    "formal-start.json": "b5f06ac52fb7d82f8b0a9df02a64eec60f44abd32d52691ad4f65d4af9830acb",
+    "formal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "formal.stdout": "726eea8fa40dadace52e616c8bc66582139f873b64bf07b7cbe06e7903b4f8cc",
+    "pg-cleanup-counts.txt": "52f96c26a39ed25108a6db43d6e11c6051eba8a498a5baab1891adfa7ac7c262",
+    "pg-stop.log": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "postrun-env-rejected.log": "9808f8c3d3a88a005e5330e7d97f6555bac54d8f5658004cb671e8f7daf78e02",
+    "prestart-formal-end.json": "4551fcfafdcb52893ac466f7ec9f1ded149501aba288df70156c926a2b442b31",
+    "prestart-formal.stderr": "6585a45113d7cf401114415072e488a8aa3681eb3074aa43e137ea035cca72ad"
+  },
+  "product_green": false,
+  "task_complete": false,
+  "remaining_blockers": [
+    "formal batch failed and every staged pass is unqualified",
+    "missing exact fixture owner acknowledgement and in-batch postcheck",
+    "17 required terminals not run",
+    "catalog46 remaining layers unknown; this scope does not cover all catalog cases",
+    "central10/171, wholePG180 and audit remain open"
+  ],
+  "boundary": "not_qualified_for_hostile_concurrent_mutation"
+}

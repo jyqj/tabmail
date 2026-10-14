@@ -1,7 +1,10 @@
 name: Pull request source evidence
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - work/company-mail-r5-goal-20260930
+      - integration/company-mail-r5-*
 permissions:
   contents: read
 concurrency:

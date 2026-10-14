@@ -1,0 +1,1764 @@
+{
+  "schema_version": 1,
+  "inventory_revision": 6,
+  "source_commit": "f413a9138d305cf154ed2cecaddcf9b9a2397666",
+  "source_tree": "37adfe5efb4ae49274a6d52a5d769bcb5b116cf0",
+  "revision5_snapshots": {
+    "transaction": {
+      "commit": "697b12d70b84658f5429e9a88ad2efde94e2e443",
+      "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+      "blob": "f34b037f26dc23464fe595a85b310bbed2f4a409",
+      "sha256": "0ecb372399d4878fa46d454c88fc48e8cb1e40a06541beaef6309517c8cb6866"
+    },
+    "compatibility": {
+      "commit": "697b12d70b84658f5429e9a88ad2efde94e2e443",
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+      "blob": "46175d14abb95668baaed6143d6e038c88e62ba1",
+      "sha256": "73b30e5733dccba31b1330eec0c52b66a96fb9f3f2dfb19fd3069a2ba32ddf80"
+    },
+    "clients": {
+      "commit": "697b12d70b84658f5429e9a88ad2efde94e2e443",
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+      "blob": "c1dc0d0acc96e9f6375bf9a82c9a3a6d3a1d8ae1",
+      "sha256": "76d03e2c33420a36cf49b0e740656ec83e672598028b9b0257a2de8d171acec7"
+    },
+    "client_routes": {
+      "commit": "697b12d70b84658f5429e9a88ad2efde94e2e443",
+      "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+      "blob": "63a497f7cdcdb4002d0139c8f68681c0dfb32781",
+      "sha256": "39e65cca57bcddfe9a8b67733cd240a2db0c86f372ec491161ee7ec94dd5b72d"
+    }
+  },
+  "boundary": "Static source inventory only; no new runtime, wire, dependency, product or parent-task acceptance.",
+  "transaction": {
+    "status": "PASS",
+    "postgres_files": 62,
+    "functions": 395,
+    "sql_execution_calls": 498,
+    "direct_write_functions": 134,
+    "write_closure_functions": 154,
+    "migration_files": 19,
+    "task_complete": false,
+    "runtime_verified": false,
+    "meaning": "syntax inventory current; no concurrency or behavior equivalence claim"
+  },
+  "compatibility": {
+    "wire_validation_scope": "not_checked_current_wire_required",
+    "historical_wire_reference": {
+      "artifact_ref": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json",
+      "sha256": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+      "qualification": "historical_metadata_only_not_current_wire"
+    },
+    "status": "source_inventory_and_upgrade_plan_checked",
+    "task_complete": false,
+    "product_green": false,
+    "routes": 132,
+    "client_branches": 133,
+    "source_files": 94,
+    "openapi_missing": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/suppression",
+      "GET /docs-assets/*"
+    ],
+    "no_shipped_client": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/admin/status",
+      "GET /api/v1/auth/me",
+      "GET /api/v1/company/outbound/{id}/recipients",
+      "GET /api/v1/suppression",
+      "GET /docs",
+      "GET /docs-assets/*",
+      "GET /metrics",
+      "GET /openapi.yaml",
+      "GET /ready",
+      "GET /redoc"
+    ],
+    "runtime_boundary": "No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required."
+  },
+  "client_changes": [
+    {
+      "before_index": 24,
+      "after_index": 24,
+      "path": "/api/v1/company/templates/{dynamic}/grants",
+      "methods": [
+        "GET"
+      ],
+      "changes": {
+        "line": {
+          "before": 42,
+          "after": 57
+        }
+      }
+    },
+    {
+      "before_index": 25,
+      "after_index": 25,
+      "path": "/api/v1/company/templates/{dynamic}/grants",
+      "methods": [
+        "PUT"
+      ],
+      "changes": {
+        "line": {
+          "before": 90,
+          "after": 81
+        },
+        "owner": {
+          "before": "TemplateGrantsView",
+          "after": "changeGrant"
+        }
+      }
+    }
+  ],
+  "client_reorder": [
+    {
+      "before_index": 27,
+      "after_index": 26
+    },
+    {
+      "before_index": 28,
+      "after_index": 27
+    },
+    {
+      "before_index": 29,
+      "after_index": 28
+    },
+    {
+      "before_index": 30,
+      "after_index": 29
+    },
+    {
+      "before_index": 31,
+      "after_index": 30
+    },
+    {
+      "before_index": 32,
+      "after_index": 31
+    },
+    {
+      "before_index": 33,
+      "after_index": 32
+    },
+    {
+      "before_index": 34,
+      "after_index": 33
+    },
+    {
+      "before_index": 35,
+      "after_index": 34
+    },
+    {
+      "before_index": 36,
+      "after_index": 35
+    },
+    {
+      "before_index": 37,
+      "after_index": 36
+    },
+    {
+      "before_index": 38,
+      "after_index": 37
+    },
+    {
+      "before_index": 39,
+      "after_index": 38
+    },
+    {
+      "before_index": 40,
+      "after_index": 39
+    },
+    {
+      "before_index": 41,
+      "after_index": 40
+    },
+    {
+      "before_index": 42,
+      "after_index": 41
+    },
+    {
+      "before_index": 43,
+      "after_index": 42
+    },
+    {
+      "before_index": 44,
+      "after_index": 43
+    },
+    {
+      "before_index": 45,
+      "after_index": 44
+    },
+    {
+      "before_index": 46,
+      "after_index": 45
+    },
+    {
+      "before_index": 47,
+      "after_index": 46
+    },
+    {
+      "before_index": 48,
+      "after_index": 47
+    },
+    {
+      "before_index": 49,
+      "after_index": 48
+    },
+    {
+      "before_index": 50,
+      "after_index": 49
+    },
+    {
+      "before_index": 51,
+      "after_index": 50
+    },
+    {
+      "before_index": 52,
+      "after_index": 51
+    },
+    {
+      "before_index": 53,
+      "after_index": 52
+    },
+    {
+      "before_index": 54,
+      "after_index": 53
+    },
+    {
+      "before_index": 55,
+      "after_index": 54
+    },
+    {
+      "before_index": 56,
+      "after_index": 55
+    },
+    {
+      "before_index": 57,
+      "after_index": 56
+    },
+    {
+      "before_index": 58,
+      "after_index": 57
+    },
+    {
+      "before_index": 59,
+      "after_index": 58
+    },
+    {
+      "before_index": 60,
+      "after_index": 59
+    },
+    {
+      "before_index": 61,
+      "after_index": 60
+    },
+    {
+      "before_index": 62,
+      "after_index": 61
+    },
+    {
+      "before_index": 63,
+      "after_index": 62
+    },
+    {
+      "before_index": 64,
+      "after_index": 63
+    },
+    {
+      "before_index": 65,
+      "after_index": 64
+    },
+    {
+      "before_index": 66,
+      "after_index": 65
+    },
+    {
+      "before_index": 67,
+      "after_index": 66
+    },
+    {
+      "before_index": 68,
+      "after_index": 67
+    },
+    {
+      "before_index": 69,
+      "after_index": 68
+    },
+    {
+      "before_index": 70,
+      "after_index": 69
+    },
+    {
+      "before_index": 71,
+      "after_index": 70
+    },
+    {
+      "before_index": 72,
+      "after_index": 71
+    },
+    {
+      "before_index": 73,
+      "after_index": 72
+    },
+    {
+      "before_index": 74,
+      "after_index": 73
+    },
+    {
+      "before_index": 75,
+      "after_index": 74
+    },
+    {
+      "before_index": 76,
+      "after_index": 75
+    },
+    {
+      "before_index": 77,
+      "after_index": 76
+    },
+    {
+      "before_index": 78,
+      "after_index": 77
+    },
+    {
+      "before_index": 79,
+      "after_index": 78
+    },
+    {
+      "before_index": 80,
+      "after_index": 79
+    },
+    {
+      "before_index": 81,
+      "after_index": 80
+    },
+    {
+      "before_index": 82,
+      "after_index": 81
+    },
+    {
+      "before_index": 83,
+      "after_index": 82
+    },
+    {
+      "before_index": 84,
+      "after_index": 83
+    },
+    {
+      "before_index": 85,
+      "after_index": 84
+    },
+    {
+      "before_index": 86,
+      "after_index": 85
+    },
+    {
+      "before_index": 87,
+      "after_index": 86
+    },
+    {
+      "before_index": 88,
+      "after_index": 87
+    },
+    {
+      "before_index": 89,
+      "after_index": 88
+    },
+    {
+      "before_index": 90,
+      "after_index": 89
+    },
+    {
+      "before_index": 91,
+      "after_index": 90
+    },
+    {
+      "before_index": 92,
+      "after_index": 91
+    },
+    {
+      "before_index": 93,
+      "after_index": 92
+    },
+    {
+      "before_index": 94,
+      "after_index": 93
+    },
+    {
+      "before_index": 95,
+      "after_index": 94
+    },
+    {
+      "before_index": 96,
+      "after_index": 95
+    },
+    {
+      "before_index": 97,
+      "after_index": 96
+    },
+    {
+      "before_index": 98,
+      "after_index": 97
+    },
+    {
+      "before_index": 99,
+      "after_index": 98
+    },
+    {
+      "before_index": 100,
+      "after_index": 99
+    },
+    {
+      "before_index": 101,
+      "after_index": 100
+    },
+    {
+      "before_index": 102,
+      "after_index": 101
+    },
+    {
+      "before_index": 103,
+      "after_index": 102
+    },
+    {
+      "before_index": 104,
+      "after_index": 103
+    },
+    {
+      "before_index": 105,
+      "after_index": 104
+    },
+    {
+      "before_index": 106,
+      "after_index": 105
+    },
+    {
+      "before_index": 107,
+      "after_index": 106
+    },
+    {
+      "before_index": 108,
+      "after_index": 107
+    },
+    {
+      "before_index": 109,
+      "after_index": 108
+    },
+    {
+      "before_index": 110,
+      "after_index": 109
+    },
+    {
+      "before_index": 111,
+      "after_index": 110
+    },
+    {
+      "before_index": 112,
+      "after_index": 111
+    },
+    {
+      "before_index": 113,
+      "after_index": 112
+    },
+    {
+      "before_index": 114,
+      "after_index": 113
+    },
+    {
+      "before_index": 115,
+      "after_index": 114
+    },
+    {
+      "before_index": 116,
+      "after_index": 115
+    },
+    {
+      "before_index": 117,
+      "after_index": 116
+    },
+    {
+      "before_index": 118,
+      "after_index": 117
+    },
+    {
+      "before_index": 119,
+      "after_index": 118
+    },
+    {
+      "before_index": 120,
+      "after_index": 119
+    },
+    {
+      "before_index": 121,
+      "after_index": 120
+    },
+    {
+      "before_index": 122,
+      "after_index": 121
+    },
+    {
+      "before_index": 123,
+      "after_index": 122
+    },
+    {
+      "before_index": 124,
+      "after_index": 123
+    },
+    {
+      "before_index": 125,
+      "after_index": 124
+    },
+    {
+      "before_index": 126,
+      "after_index": 125
+    },
+    {
+      "before_index": 127,
+      "after_index": 126
+    },
+    {
+      "before_index": 128,
+      "after_index": 127
+    },
+    {
+      "before_index": 129,
+      "after_index": 128
+    },
+    {
+      "before_index": 130,
+      "after_index": 129
+    },
+    {
+      "before_index": 131,
+      "after_index": 130
+    },
+    {
+      "before_index": 132,
+      "after_index": 131
+    },
+    {
+      "before_index": 133,
+      "after_index": 132
+    }
+  ],
+  "client_previous_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130,
+    131,
+    132,
+    133
+  ],
+  "client_merges": [
+    {
+      "before_indices": [
+        25,
+        26
+      ],
+      "after_index": 25
+    }
+  ],
+  "client_branch_count": 133,
+  "transaction_callers": [
+    {
+      "id": "internal/store/postgres/audit.go:*PgStore:InsertAudit",
+      "before_count": 21,
+      "after_count": 21,
+      "before_sha256": "8a2eb4581c0cff23b4998a2a7395a907087e1f3ca858b64d16a2fe354d213e3d",
+      "after_sha256": "7d8423722ab8553b4b77a47b66a2a9d40c20486db26b8d5a0b553855f91a1af0",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:CreateZone",
+          "source": "internal/app/domains/service.go",
+          "expression": "app.InsertAudit",
+          "before_line": 273,
+          "after_line": 312
+        },
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:TriggerVerify",
+          "source": "internal/app/domains/service.go",
+          "expression": "app.InsertAudit",
+          "before_line": 345,
+          "after_line": 390
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/company_mail.go:*PgStore:FinishMailAttachment",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "3a8dca6599bdca7a285a9c6700002d43c917cd1d55124181e6bf2fe30fc355ca",
+      "after_sha256": "ba37201a11a726253a4d365918972de155d4fac8f2a42b822b3679a46015207c",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.FinishMailAttachment",
+          "before_line": 287,
+          "after_line": 289
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/company_mail.go:*PgStore:GetMailDraft",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "14bae361a37a6371d0f2a021e32e3d278d5bdbed156da4d6cb9c9d81be960987",
+      "after_sha256": "10c78b30e96a7b23f679ee4d86e1857248d2033bfcfb7f3aca937ef6fb26068a",
+      "locations": [
+        {
+          "caller_id": "internal/app/submissions/service.go:*Service:SubmitDraft",
+          "source": "internal/app/submissions/service.go",
+          "expression": "s.repo.GetMailDraft",
+          "before_line": 151,
+          "after_line": 152
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/company_mail.go:*PgStore:GetWorkAttachment",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "2c4488fd20bf06a14ae7547934d5b9abcf7117dd49e3e62859301cabbd4a7523",
+      "after_sha256": "92f739876f5a69bc35b5dd57198cdf99eb7b11786b1ee14735d72b993ec8108f",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:Attachment",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.GetWorkAttachment",
+          "before_line": 317,
+          "after_line": 319
+        },
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:Attachment",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.GetWorkAttachment",
+          "before_line": 332,
+          "after_line": 334
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/company_mail.go:*PgStore:ReserveMailAttachment",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "87e8520b67b5a478029f41781b433c2f4a37cdcdeb92ec5a7a5e52869150f612",
+      "after_sha256": "a7d5be0ae6ce2f9cccb5a1b44352d0bb5286229070fe716b4e8179dd23d050c1",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.ReserveMailAttachment",
+          "before_line": 280,
+          "after_line": 282
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/company_mail.go:*capturedRestoreDeadline:check",
+      "before_count": 7,
+      "after_count": 7,
+      "before_sha256": "95f1edd21c074b9f639a81093be232442fbd707281c3e92384ac063b60c70df3",
+      "after_sha256": "9036d39343686dff5ac16edfa755bfc476de40721afe265af11a9ca424ebe6ac",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/read_boundary.go:*authorizedSource:Read",
+          "source": "internal/app/companymail/read_boundary.go",
+          "expression": "r.check",
+          "before_line": 51,
+          "after_line": 75
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/company_members.go:*PgStore:GetWorkMailbox",
+      "before_count": 5,
+      "after_count": 5,
+      "before_sha256": "7d935aa2c677bd78c75e21373fee7be2db1447d887519925a363a376427b3a51",
+      "after_sha256": "e7a1c2021c3b3d9fd0bbe544c8476239ac46b5fee617cc1feddb58e8d6aa92a9",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:sender",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.GetWorkMailbox",
+          "before_line": 240,
+          "after_line": 242
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/domain_delete.go:*PgStore:DeleteZone",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "a5e44759829c8d2031a1fe7e855843d8415874cfb9360c6f13a7bdae484c4b55",
+      "after_sha256": "6baf6e7b2c6e78acd9c6269f8092bd4290305ee7de4efd698d24a9a936dc55c9",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:DeleteZone",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.DeleteZone",
+          "before_line": 295,
+          "after_line": 334
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/mail_content.go:*PgStore:GetParsedMessage",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "92db1a6b501c3268b3ea52336a08c332bebe66886c5c6d656ca994cb2a6fddc6",
+      "after_sha256": "153f87722be5b6517525183a5026c49ebd51706bbe501863b37e3b0387aca716",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:document",
+          "source": "internal/app/companymail/service.go",
+          "expression": "cache.GetParsedMessage",
+          "before_line": 136,
+          "after_line": 138
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/mail_content.go:*PgStore:SaveParsedMessage",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "9a56e582d63aef44f94239948515d86c576915bf530cfc96b64ca6ddb285abb0",
+      "after_sha256": "bcb88b1a28562668bd8d9298c123fe6b447471d8b5d5889dbf8672392bf0886c",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:document",
+          "source": "internal/app/companymail/service.go",
+          "expression": "cache.SaveParsedMessage",
+          "before_line": 157,
+          "after_line": 159
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/mailboxes.go:*PgStore:GetMailbox",
+      "before_count": 6,
+      "after_count": 6,
+      "before_sha256": "008c6077a4af1b4d4e4ac0a3cc961d10f0d733677aba0b8c47aaf68b7216b91e",
+      "after_sha256": "d5762bde8bf7b5b530c7a521428cabc967074e6d9b6fe43d37d3a8d0b3c7f44c",
+      "locations": [
+        {
+          "caller_id": "internal/app/submissions/service.go:*Service:SubmitDraft",
+          "source": "internal/app/submissions/service.go",
+          "expression": "s.store.GetMailbox",
+          "before_line": 178,
+          "after_line": 179
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/mailboxes.go:*pgTenantView:GetMailbox",
+      "before_count": 6,
+      "after_count": 6,
+      "before_sha256": "008c6077a4af1b4d4e4ac0a3cc961d10f0d733677aba0b8c47aaf68b7216b91e",
+      "after_sha256": "d5762bde8bf7b5b530c7a521428cabc967074e6d9b6fe43d37d3a8d0b3c7f44c",
+      "locations": [
+        {
+          "caller_id": "internal/app/submissions/service.go:*Service:SubmitDraft",
+          "source": "internal/app/submissions/service.go",
+          "expression": "s.store.GetMailbox",
+          "before_line": 178,
+          "after_line": 179
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "42b146da00cee5fe02864144ce2bbb7060d794b8411d3dbcfdd980d7b2e08aa3",
+      "after_sha256": "16439cda6a56c2e57c7bb6b77783cd2afb1430141e9ed2f5c86df2cdae7fa00c",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/outbound.go:*OutboundHandler:DeleteSuppression",
+          "source": "internal/api/handlers/outbound.go",
+          "expression": "h.store.DeleteSuppressionAuthorized",
+          "before_line": 247,
+          "after_line": 249
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/outbound.go:*PgStore:IsSuppressed",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "38a1865b54d345c47c69caf50a7aad3deda8942ce61ac7402e330864b3f49993",
+      "after_sha256": "733d47a436e969e0bfb744e67ec9750fe8b47bdb0e7094b6b3e0f46ca998cfe3",
+      "locations": [
+        {
+          "caller_id": "internal/app/submissions/service.go:*Service:SubmitAuthorized",
+          "source": "internal/app/submissions/service.go",
+          "expression": "s.store.IsSuppressed",
+          "before_line": 325,
+          "after_line": 338
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/outbound.go:*PgStore:ListSuppressions",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "a854c93fbd5db1968162c1726890438f63db648988e663687b36d3f250abce28",
+      "after_sha256": "cdb1a102f28d77093630da9bb7f405e21dc3d4f4d7932717cd1fd6c1574b5df2",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/outbound.go:*OutboundHandler:ListSuppressions",
+          "source": "internal/api/handlers/outbound.go",
+          "expression": "h.store.ListSuppressions",
+          "before_line": 195,
+          "after_line": 194
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/outbound_content.go:*PgStore:CanReadOutboundContent",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "8602b03a8a116e7fbbe66dbaa92cff88553456fd86c767ee1c587e634d37ce37",
+      "after_sha256": "9a2474fdc25ec42ddf41f4f4845f56cfd9f33571624ad254eac8caebeefaec40",
+      "locations": [
+        {
+          "caller_id": "internal/app/submissions/service.go:*Service:ContentAllowed",
+          "source": "internal/app/submissions/service.go",
+          "expression": "s.store.CanReadOutboundContent",
+          "before_line": 413,
+          "after_line": 425
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/outbound_retry.go:*PgStore:RequeueOutboundJobAuthorized",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "7e9e53e9c2fe0e9f6258e8bcabd682185256a14c42684fb68d264835f431e0d0",
+      "after_sha256": "d9ced64ee63856f16776f806b9f09ad546fbd79ba73ce3551fc5969717f3d858",
+      "locations": [
+        {
+          "caller_id": "internal/app/submissions/service.go:*Service:RetryOutboundJob",
+          "source": "internal/app/submissions/service.go",
+          "expression": "s.store.RequeueOutboundJobAuthorized",
+          "before_line": 427,
+          "after_line": 439
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetZone",
+      "before_count": 9,
+      "after_count": 9,
+      "before_sha256": "26d637900f978a5bdef93fdd5bab5f84169652f36a3f85c0afa5c99070086d6b",
+      "after_sha256": "7d9d1bfc4770566d626ed59b04a667eaac3130661afb8b0e18eb0b01bbeb391a",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:ownedZone",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.GetZone",
+          "before_line": 392,
+          "after_line": 443
+        },
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:validateZoneAncestry",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.GetZone",
+          "before_line": 505,
+          "after_line": 566
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/outbound_retry_reader.go:retryTenantView:GetMailbox",
+      "before_count": 6,
+      "after_count": 6,
+      "before_sha256": "008c6077a4af1b4d4e4ac0a3cc961d10f0d733677aba0b8c47aaf68b7216b91e",
+      "after_sha256": "d5762bde8bf7b5b530c7a521428cabc967074e6d9b6fe43d37d3a8d0b3c7f44c",
+      "locations": [
+        {
+          "caller_id": "internal/app/submissions/service.go:*Service:SubmitDraft",
+          "source": "internal/app/submissions/service.go",
+          "expression": "s.store.GetMailbox",
+          "before_line": 178,
+          "after_line": 179
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/postgres.go:*PgStore:Close",
+      "before_count": 153,
+      "after_count": 154,
+      "before_sha256": "b8649d4876c6e379c824a3ef9e2348ab2e7ae85ab8d8368b262782726ce1decf",
+      "after_sha256": "62866d93eaf2613ec696f70af97e255b7e15f4fcae97c85ba9566bede15724e9",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/respond.go::decodeBody",
+          "source": "internal/api/handlers/respond.go",
+          "expression": "r.Body.Close",
+          "before_line": 100,
+          "after_line": 106
+        },
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:dispatch",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "resp.Body.Close",
+          "before_line": 423,
+          "after_line": 435
+        },
+        {
+          "caller_id": "internal/testpg/fixture.go::NewPostgres",
+          "source": "internal/testpg/fixture.go",
+          "expression": "st.Close",
+          "before_line": 59,
+          "after_line": 73
+        }
+      ],
+      "removed": [
+        {
+          "caller_id": "internal/app/companymail/read_boundary.go:*authorizedSource:Close",
+          "file": "internal/app/companymail/read_boundary.go",
+          "function": "Close",
+          "line": 65,
+          "expression": "r.ReadCloser.Close",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/app/companymail/read_boundary.go:*authorizedSource:Read",
+          "file": "internal/app/companymail/read_boundary.go",
+          "function": "Read",
+          "line": 56,
+          "expression": "r.Close",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ],
+      "added": [
+        {
+          "caller_id": "internal/app/companymail/read_boundary.go:*authorizedSource:closeUnderlying",
+          "file": "internal/app/companymail/read_boundary.go",
+          "function": "closeUnderlying",
+          "line": 105,
+          "expression": "r.ReadCloser.Close",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/app/companymail/read_boundary.go:*authorizedSource:finish",
+          "file": "internal/app/companymail/read_boundary.go",
+          "function": "finish",
+          "line": 97,
+          "expression": "r.Close",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:open",
+          "file": "internal/app/companymail/service.go",
+          "function": "open",
+          "line": 128,
+          "expression": "r.Close",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ]
+    },
+    {
+      "id": "internal/store/postgres/postgres.go::New",
+      "before_count": 175,
+      "after_count": 175,
+      "before_sha256": "97f145117876cd3085df1252ae355c71c3e26f1a5767107631e122c27857d379",
+      "after_sha256": "96ff927fb234c87f5bca17bb61a7a471632e60d8857f95d7826bd64afeae12dc",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
+          "source": "internal/app/companymail/service.go",
+          "expression": "errors.New",
+          "before_line": 268,
+          "after_line": 270
+        },
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:open",
+          "source": "internal/app/companymail/service.go",
+          "expression": "errors.New",
+          "before_line": 119,
+          "after_line": 121
+        },
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:open",
+          "source": "internal/app/companymail/service.go",
+          "expression": "errors.New",
+          "before_line": 126,
+          "after_line": 125
+        },
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:verifiedFile",
+          "source": "internal/app/companymail/service.go",
+          "expression": "errors.New",
+          "before_line": 300,
+          "after_line": 302
+        },
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:verifiedFile",
+          "source": "internal/app/companymail/service.go",
+          "expression": "errors.New",
+          "before_line": 311,
+          "after_line": 313
+        },
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:CreateZone",
+          "source": "internal/app/domains/service.go",
+          "expression": "uuid.New",
+          "before_line": 242,
+          "after_line": 281
+        },
+        {
+          "caller_id": "internal/app/domains/service.go::NewService",
+          "source": "internal/app/domains/service.go",
+          "expression": "authz.New",
+          "before_line": 104,
+          "after_line": 130
+        },
+        {
+          "caller_id": "internal/app/submissions/service.go::NewService",
+          "source": "internal/app/submissions/service.go",
+          "expression": "authz.New",
+          "before_line": 124,
+          "after_line": 125
+        },
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "uuid.New",
+          "before_line": 175,
+          "after_line": 174
+        },
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "uuid.New",
+          "before_line": 189,
+          "after_line": 192
+        },
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:dispatch",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "errors.New",
+          "before_line": 429,
+          "after_line": 441
+        },
+        {
+          "caller_id": "internal/hooks/dispatcher.go::sign",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "hmac.New",
+          "before_line": 447,
+          "after_line": 459
+        },
+        {
+          "caller_id": "internal/testpg/fixture.go::NewPostgres",
+          "source": "internal/testpg/fixture.go",
+          "expression": "pgxpool.New",
+          "before_line": 32,
+          "after_line": 46
+        },
+        {
+          "caller_id": "internal/testpg/fixture.go::NewPostgres",
+          "source": "internal/testpg/fixture.go",
+          "expression": "postgres.New",
+          "before_line": 55,
+          "after_line": 69
+        },
+        {
+          "caller_id": "internal/testpg/fixture.go::NewPostgres",
+          "source": "internal/testpg/fixture.go",
+          "expression": "pgxpool.New",
+          "before_line": 60,
+          "after_line": 74
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:CountDeadWebhookDeliveries",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "e2f676f447fb3145deba1dee3512ba068a87538eb569e2a27c181d0c0d2ad15e",
+      "after_sha256": "4873ebfd7c5ca795fb4784c120e8ecdc6435a3b071d3771e23a153516d0272af",
+      "locations": [
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:DeadLetterSize",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "d.store.CountDeadWebhookDeliveries",
+          "before_line": 219,
+          "after_line": 223
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:CreateOutboxEvent",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "73bcb3c3e48e4c59540da8bc4bcd0dc4baf7ff13df584e722b61d7a8de5092ba",
+      "after_sha256": "f6430c22cecf36bc06c59bdcda3eb09eeb02125a2b08f1ad657cef07b23be8cd",
+      "locations": [
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "d.store.CreateOutboxEvent",
+          "before_line": 174,
+          "after_line": 177
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:CreateWebhookDeliveries",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "2d0c953231dc8a21fca853ecd259e0de861c4b6bb7c6bca981c159cc0dd77a64",
+      "after_sha256": "d0c56377f396532c07c2fadf637e8c26c536f2d0f060df18fd24eb0d4cab495b",
+      "locations": [
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:processOutbox",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "d.store.CreateWebhookDeliveries",
+          "before_line": 300,
+          "after_line": 304
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:ListDeadWebhookDeliveries",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "6fc2a5bc52b48a2cb13e505eb070b683432e96737fc6c1bc40a561182dfe0bb9",
+      "after_sha256": "ba813a9f0f61f28600404ab4efd508c9a07af737bb552caecf1a68a9db2b2458",
+      "locations": [
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:DeadLetters",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "d.store.ListDeadWebhookDeliveries",
+          "before_line": 200,
+          "after_line": 204
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/send_identities.go:*PgStore:CreateSendIdentity",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "258b4fc5a361e17114c07cb9946157ffe896fdcd04a29dbfff256d59c1a67c16",
+      "after_sha256": "081ab548cfa5beaa6e785c548c3a7db1ff3918f750b0ca916e788d5edd3c799b",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:CreateZone",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.CreateSendIdentity",
+          "before_line": 270,
+          "after_line": 309
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/send_identities.go:*PgStore:UpdateSendIdentitiesVerifiedByZone",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "ad7c0177cc5d2a8b91e10477e4625ea23985a85172d43804e69e352725459e9f",
+      "after_sha256": "4a744954a2f0d26d2ad954059b423b75547eeb599bb67efc600fb8d42208e986",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:TriggerVerify",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.UpdateSendIdentitiesVerifiedByZone",
+          "before_line": 342,
+          "after_line": 387
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/submissions.go:*PgStore:GetSubmissionAttachment",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "6e1a6fd5d65d85013462095eb3e99ea04b6f833f82d5543ea8a50949f6bbcee7",
+      "after_sha256": "dd208982ad7fa716fc1d7d28a6281fc210cab9590ede6e087d53c92c4532a60f",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachment",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.GetSubmissionAttachment",
+          "before_line": 351,
+          "after_line": 353
+        },
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachment",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.GetSubmissionAttachment",
+          "before_line": 367,
+          "after_line": 369
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/submissions.go:*PgStore:GetSubmissionContent",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "821d3fa371354fe8dbe6ae402bc74615d5303b10db2a35997b974df97b275164",
+      "after_sha256": "c602dde94467b310c869bb924bc5433e4cc12651ba5d2b768d65dd5e21406f5b",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:SubmissionContent",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.GetSubmissionContent",
+          "before_line": 343,
+          "after_line": 345
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/submissions.go:*PgStore:ListSubmissionAttachments",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "6d79ebfc32a55a7607680e74e26e7fad37a04987e7bb2e4a3adab721d3d51413",
+      "after_sha256": "d63dde751ff1e988c654c5b15e67006e536ad2fc80fd8fdc77e47adb310d9e8c",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachments",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.ListSubmissionAttachments",
+          "before_line": 347,
+          "after_line": 349
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/tenants.go:*PgStore:EffectiveConfig",
+      "before_count": 7,
+      "after_count": 7,
+      "before_sha256": "a176d46a3b20f09fb4d17a7bf927511186c07281bad734e1f9cc0294881b6b47",
+      "after_sha256": "adc497547a95ed6b1b8bc353cee2d1a3ab7957e78618014a1b2580e71f72ec0e",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:CreateZone",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.EffectiveConfig",
+          "before_line": 226,
+          "after_line": 265
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/webhook_endpoints.go:*PgStore:ListWebhookEndpoints",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "d433e08dff5f763e47982361f5880b8108f01acc5bb772fbb25da60fa3334380",
+      "after_sha256": "00974171c077b131d5e8cd740be84f71d672602e0165d84d8da42b35eb22a8da",
+      "locations": [
+        {
+          "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:processOutbox",
+          "source": "internal/hooks/dispatcher.go",
+          "expression": "d.store.ListWebhookEndpoints",
+          "before_line": 283,
+          "after_line": 287
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/zones.go:*PgStore:CountZones",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "fca688513206be48e4b04c7986d7012ece278ef0c7a6800bf6c54370381d2037",
+      "after_sha256": "5f58855b3bc2af8c0f74857807750a5157466d2945e2c163243e633a536f83fb",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:CreateZone",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.CountZones",
+          "before_line": 230,
+          "after_line": 269
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/zones.go:*PgStore:CreateZone",
+      "before_count": 4,
+      "after_count": 4,
+      "before_sha256": "0bd62d1cf9417177bbbf714621b65b8e2af3f437a51849cd36c0bfbad659c158",
+      "after_sha256": "76abc4fec9ef9bbdb9609f3eb27d83d664fba90cf4a6a76b80d4b1e1efb3e785",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:CreateZone",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.CreateZone",
+          "before_line": 254,
+          "after_line": 293
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/zones.go:*PgStore:GetZone",
+      "before_count": 9,
+      "after_count": 9,
+      "before_sha256": "26d637900f978a5bdef93fdd5bab5f84169652f36a3f85c0afa5c99070086d6b",
+      "after_sha256": "7d9d1bfc4770566d626ed59b04a667eaac3130661afb8b0e18eb0b01bbeb391a",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:ownedZone",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.GetZone",
+          "before_line": 392,
+          "after_line": 443
+        },
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:validateZoneAncestry",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.GetZone",
+          "before_line": 505,
+          "after_line": 566
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/zones.go:*PgStore:GetZoneByDomain",
+      "before_count": 5,
+      "after_count": 5,
+      "before_sha256": "b6bc2a7056fe8af1070ec68f060e156644ab1be55d5c1e55008fd7abda893a69",
+      "after_sha256": "266775591f2d49e11a8edf4611c92b2df9b83e9483d40c1b839de00f95f00e94",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:findParentZone",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.GetZoneByDomain",
+          "before_line": 478,
+          "after_line": 539
+        },
+        {
+          "caller_id": "internal/app/submissions/service.go:*Service:SubmitAuthorized",
+          "source": "internal/app/submissions/service.go",
+          "expression": "s.store.GetZoneByDomain",
+          "before_line": 240,
+          "after_line": 241
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/zones.go:*PgStore:ListAllZones",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "3933c38ce97fc3cbbabba46c3f610f11f358bc011dc208e34717d759037c6a93",
+      "after_sha256": "fbf35aaf257a731896ceed2feb5889b2cc98f25f42149a5edf4e875120b13b2a",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:ListAllZones",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.ListAllZones",
+          "before_line": 157,
+          "after_line": 193
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/zones.go:*PgStore:ListZones",
+      "before_count": 4,
+      "after_count": 4,
+      "before_sha256": "ede9d1c4c049588c8b093ddb57941d7b308bd33e6d1763e235b998aa31b96d91",
+      "after_sha256": "4b94c2a43aade99e8676512a0801b5ea21da4e011ad84a4eb22557b37d5cc92a",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go::countOwnedZones",
+          "source": "internal/app/domains/service.go",
+          "expression": "st.ListZones",
+          "before_line": 570,
+          "after_line": 631
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/zones.go:*PgStore:ListZonesByVisibilities",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "98f5e78fca970e8ca145228b5a4642707f4fd39891acbfedd92a59797a1159df",
+      "after_sha256": "6b3869fb5c0017082051ae02811ae7279d8b48f376872aa6124731f047071cd1",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:ListOpenZones",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.ListZonesByVisibilities",
+          "before_line": 169,
+          "after_line": 205
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/zones.go:*PgStore:ListZonesScoped",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "f306e51106cbb25997dd1af027f9cd36ac945fad1fff7d9c3f9786a445f8d817",
+      "after_sha256": "58bd0aaf2e1ce9616007d0d423d6a64a82101b1f1e812432fae374d2b6078599",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:ListZones",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.ListZonesScoped",
+          "before_line": 146,
+          "after_line": 182
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/zones.go:*PgStore:UpdateZone",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "8de4be3399772f8649908ab7a54006638a87b82fabe45f4255543f0ba9c96c0d",
+      "after_sha256": "073563c0eb5909b09a5984231dae366672299f3922bcf0203beae80dd9ba50fe",
+      "locations": [
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:TriggerVerify",
+          "source": "internal/app/domains/service.go",
+          "expression": "s.store.UpdateZone",
+          "before_line": 336,
+          "after_line": 381
+        }
+      ],
+      "removed": [],
+      "added": []
+    }
+  ],
+  "compatibility_routes": [
+    {
+      "route": "GET /api/v1/company/templates/{id}/grants",
+      "changed_fields": [
+        "clients"
+      ]
+    },
+    {
+      "route": "PUT /api/v1/company/templates/{id}/grants",
+      "changed_fields": [
+        "clients"
+      ]
+    }
+  ],
+  "closure_changes": [
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+    "internal/api/handlers/outbound.go",
+    "internal/api/handlers/respond.go",
+    "internal/models/models.go",
+    "web/app/(dashboard)/company/templates/page.tsx",
+    "web/components/company/templates/grants.tsx"
+  ],
+  "source_changes": [
+    {
+      "path": "internal/api/handlers/outbound.go",
+      "before_blob": "67c10914e3af9327d371dbf494cd036e3feea5dd",
+      "before_sha256": "535a602f0d2b0566c09a8131040ee25471f0266b5c15395ee9b312ffe83fa5a8",
+      "after_blob": "03508c096110addf15ec39e735722782eb1ec74a",
+      "after_sha256": "739b7deac109b763d6134e6630fe891ee7ffbe65f7057bd8016d37ca51f7a24b"
+    },
+    {
+      "path": "internal/api/handlers/respond.go",
+      "before_blob": "b25b4153a97146b0cb935f2b799aac984b8fd194",
+      "before_sha256": "cad0a2150d3bfa2f30e5cd8b75fb6d2bca4b5437ef586bbf3a93c2a514265bf9",
+      "after_blob": "eac4d5d0fad29f16a8353cbcce651a6a0a4ba911",
+      "after_sha256": "1ee1d18afbac384f36c254a74be3e8dbc11768e796501ccd9815a68a194e2a84"
+    },
+    {
+      "path": "internal/app/companymail/read_boundary.go",
+      "before_blob": "6d843bba27e42044712b4eaa6a3126d4b3f47f9d",
+      "before_sha256": "e3f10be045678b51d4a81d004b588b7beee1d5c7f361d1037b4b5f1fa5ecdaa3",
+      "after_blob": "b3b504661bb8996852afd9e6615432938a2892b8",
+      "after_sha256": "a79430f33458c1f2c609c05d881933e51d18806d45ec0d321486ea61f45ff5e0"
+    },
+    {
+      "path": "internal/app/companymail/service.go",
+      "before_blob": "db5aaab16892369f15f46f1df10db33673cc6340",
+      "before_sha256": "08568fba5ea6ac448eda6b166c2bd05b445e3ab723bc965a48d976a71524e5b6",
+      "after_blob": "23b6e3a9f17a4c3e525616b25e2c5e853784f8bc",
+      "after_sha256": "ab47e67614278a58aa87f5513cce9558e1c3a7e795d51825ab4150506fbc14ee"
+    },
+    {
+      "path": "internal/app/domains/service.go",
+      "before_blob": "ed5a59d16abe4914a52316177c8a61d5e3ad156f",
+      "before_sha256": "2c9b4d65e9d97a42c2e28399601c0172589aa2aa23b22732f7f4037a7a2e6000",
+      "after_blob": "b92b0b54f1743b1fd8eca06860bb586ecb7c7f6e",
+      "after_sha256": "381987ef9b8aa0ce4882e61e875cb511e39291aeffa755cfe645bf8790c98518"
+    },
+    {
+      "path": "internal/app/submissions/service.go",
+      "before_blob": "dd00a6c5d4cfe2c7cda03d6a14bd53af6d25da3f",
+      "before_sha256": "4a232d787df416a8a351214bed75c29c6e752a16daf332ba71896d78b6131fae",
+      "after_blob": "fe2191731a56f19ce1d219f523259dbe4684f27a",
+      "after_sha256": "03c027833cfeb36a18193d229e047b9af42c706f5f0ae2147f45722f19aa3e20"
+    },
+    {
+      "path": "internal/hooks/dispatcher.go",
+      "before_blob": "7ec006e52f4e43d56523fb303a17baebe0cc275d",
+      "before_sha256": "0fad53e15be35fa5fab9b3590142082f4ed6feddadd340b06e81b764b4ba520d",
+      "after_blob": "0fcd4a838c04ee4891e1a05e8b84fbe5f96b3527",
+      "after_sha256": "568e8690da190a4dfebafc21df16982c18406a8482f8f35729ff15dc49678118"
+    },
+    {
+      "path": "internal/models/models.go",
+      "before_blob": "7fe8e6f2c99a24256a8781fda8239df9f130cc7a",
+      "before_sha256": "497558bbcdb3579034db3744e544c5f09ae5f28d101ea966a6d9e9e6e7ab002d",
+      "after_blob": "dc2bd5f7ba7f7a746b5410b607ed1a197b0f5676",
+      "after_sha256": "0e3ad3d5c5da7291854e3ce6e71662e5316c151e3084e8a4fac7164727fccc0f"
+    },
+    {
+      "path": "internal/testpg/fixture.go",
+      "before_blob": "ae78273fec019e140a1a57abecf9411ae2c0e46e",
+      "before_sha256": "cd58746b23e0c376a1c48c01ed2837091bbbfc85a7e5bdc49c8eefbbccd17153",
+      "after_blob": "18b2676aae3fa03fd7a509254772e19097d192ca",
+      "after_sha256": "4bb44b90de399c53b702327a561848791e49e785842ab3c039c640621228960c"
+    },
+    {
+      "path": "web/app/(dashboard)/company/templates/page.tsx",
+      "before_blob": "f8c9ca406f4ab1f1bbe9605985ca324317945b60",
+      "before_sha256": "277cdac03c382617e1e09d81df8624e5df01b4ba11d17c98a3b1b0f961d048c9",
+      "after_blob": "2bd61790351471be00d445c13893658b1316591e",
+      "after_sha256": "51f5da1f71dda1a47a937a92c868783a99d41fbfdfda0255bfa4af09cc2df71f"
+    },
+    {
+      "path": "web/components/company/templates/grants.tsx",
+      "before_blob": "16c37507405e110a91099f4661bc9f4859fcde96",
+      "before_sha256": "6f7f4eb1a3713e0429586d805af9400ccad2dc18d53411c6abfddd9220cfa1bd",
+      "after_blob": "f8c39ab80982680627f9f05f1446f7e6da1c871b",
+      "after_sha256": "2ff8802065a4b39567f1cea70ce727d4aecd5745158930ca3cad0e43ec01e85c"
+    }
+  ],
+  "generated_catalogs": {
+    "transaction": {
+      "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+      "sha256": "e820435ec2357f2fa0d0509e4e0759124a85054c0f4fc35df887f683a3c4e715"
+    },
+    "compatibility": {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+      "sha256": "457fcd6c63ce7f0b80a3d38aa2d7153e243eaa06569898ff47932bc02ca0983c"
+    },
+    "clients": {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+      "sha256": "c673d9b6d049283bcba582a5465448c94234d1388a4a55b43035fc8fcdebb679"
+    },
+    "client_routes": {
+      "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+      "sha256": "56bbc1329b0433e215413542409c6486d08af406d45d0a1fc6a6dc73dc6c6d21"
+    }
+  },
+  "unchanged_validators_and_collectors": {
+    "scripts/check_r5_transactions.py": "1f14b5b4e3ef11cd0642e9d7261cde285c17e47384c90e15b56adc68323b9355",
+    "scripts/check_r5_compatibility.py": "d3d0bd96c84a18c224160faaad96f3a928aab5224d93c31b6ec464489f740209",
+    "scripts/collect_api_calls.cjs": "06896de9f18dda8c7fd4f1ef2d520e4bd71fa831a99f0d63863a1fa6a06682e8",
+    "cmd/r5txinventory/main.go": "ad14b919505b23947de335dda6077d4f6745185329d911cc357e60b1001d2361",
+    "internal/architecture/route_inventory_test.go": "609ee5489c3e021f9b1a0238b47e4a01d09c5e5eef1144df780d6456e2ed4f05"
+  },
+  "local_source_collection": {
+    "node": "v24.19.0",
+    "typescript": "5.9.3",
+    "boundary": "Existing TypeScript bytes reused; local source collection is not Node 22 or GitHub CI execution."
+  },
+  "current_assertion_changes": [
+    {
+      "path": "scripts/tests/test_r5_compatibility.py",
+      "assertion": "test_current_source_map_is_not_product_or_dependency_completion/client_branches",
+      "before": 134,
+      "after": 133,
+      "before_sha256": "2fa45da17bdb16c841e2eb63a103e658790c8bd401887be84330c471fab82fa2",
+      "after_sha256": "15ccbc1dc24470053e0c1a28aa2a24a163588534d94f15092f3f1d37e33de1bc"
+    }
+  ]
+}

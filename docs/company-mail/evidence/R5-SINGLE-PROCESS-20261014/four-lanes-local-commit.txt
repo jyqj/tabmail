@@ -1,0 +1,6 @@
+tree 256027278290213b1822831adca6bed420cd1617
+parent 534438a92ad4ead6e20238cc455aabf0ff5137ac
+author 金亦求金 <jyj20040616@gmail.com> 1791919401 +0800
+committer 金亦求金 <jyj20040616@gmail.com> 1791919401 +0800
+
+perf(test): bound independent fixture waits to four in-process lanes

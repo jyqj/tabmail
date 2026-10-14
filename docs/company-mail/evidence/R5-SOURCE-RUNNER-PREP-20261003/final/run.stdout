@@ -1,0 +1,8 @@
+{"Time":"2026-10-03T21:48:43.333064747Z","Action":"start","Package":"tabmail/internal/api/handlers"}
+{"Time":"2026-10-03T21:48:43.344064255Z","Action":"run","Package":"tabmail/internal/api/handlers","Test":"TestOrdinaryReceiptOpenAPIWireFixtures"}
+{"Time":"2026-10-03T21:48:43.344134093Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestOrdinaryReceiptOpenAPIWireFixtures","Output":"=== RUN   TestOrdinaryReceiptOpenAPIWireFixtures\n"}
+{"Time":"2026-10-03T21:48:43.344883264Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestOrdinaryReceiptOpenAPIWireFixtures","Output":"    ordinary_receipt_contract_fixture_test.go:110: typed wire fixtures: 21; output=/workspace/r5-source-runner/evidence/r5-source-preparation-fvizh0dt/current/ordinary-receipt-wire.json\n"}
+{"Time":"2026-10-03T21:48:43.344918959Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestOrdinaryReceiptOpenAPIWireFixtures","Output":"--- PASS: TestOrdinaryReceiptOpenAPIWireFixtures (0.00s)\n"}
+{"Time":"2026-10-03T21:48:43.344924345Z","Action":"pass","Package":"tabmail/internal/api/handlers","Test":"TestOrdinaryReceiptOpenAPIWireFixtures","Elapsed":0}
+{"Time":"2026-10-03T21:48:43.344929564Z","Action":"output","Package":"tabmail/internal/api/handlers","Output":"PASS\n"}
+{"Time":"2026-10-03T21:48:43.345099633Z","Action":"pass","Package":"tabmail/internal/api/handlers","Elapsed":0.012}

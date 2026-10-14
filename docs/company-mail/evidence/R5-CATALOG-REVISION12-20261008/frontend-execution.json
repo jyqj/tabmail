@@ -1,0 +1,139 @@
+{
+  "checked_at": "2026-10-08T09:51:55.518660+00:00",
+  "worktree": "/workspace/scratch/4f09dfb9aa92/tabmail-frontend-review-catalog12-public",
+  "source": "b87df7a77656457549d6f2d678c56d321ae0d869",
+  "tree": "312dbed6634b7b173e6ec9e180bbf5d0f1809d9d",
+  "initial_status": "",
+  "python_executable": "/workspace/scratch/4f09dfb9aa92/backend-catalog-python/bin/python",
+  "python_version": "3.12.14",
+  "node_version": "v24.19.0",
+  "go_version": "go version go1.25.7 linux/amd64",
+  "environment": {
+    "R5_TEST_GO": "/workspace/scratch/9e3fd1ca3a13/toolchains/go/bin/go",
+    "R5_TEST_CACHE": "/workspace/scratch/4f09dfb9aa92/go-build",
+    "R5_TEST_MODULECACHE": "/workspace/scratch/9e3fd1ca3a13/go-cache/mod",
+    "GOPROXY": "off",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONPATH": "scripts:scripts/tests",
+    "GOTOOLCHAIN": "local",
+    "GOMODCACHE": "/workspace/scratch/9e3fd1ca3a13/go-cache/mod",
+    "GOCACHE": "/workspace/scratch/4f09dfb9aa92/go-build",
+    "GOMAXPROCS": "4",
+    "GODEBUG": "asynctimerchan=0",
+    "GOFLAGS": "-mod=readonly"
+  },
+  "typescript": {
+    "version": "5.9.3",
+    "symlink": "/workspace/scratch/4f09dfb9aa92/dependencies/node_modules/typescript"
+  },
+  "installed_python_distributions": [
+    {
+      "name": "attrs",
+      "version": "26.1.0"
+    },
+    {
+      "name": "jsonschema",
+      "version": "4.26.0"
+    },
+    {
+      "name": "jsonschema-specifications",
+      "version": "2025.9.1"
+    },
+    {
+      "name": "pip",
+      "version": "25.0.1"
+    },
+    {
+      "name": "PyYAML",
+      "version": "6.0.3"
+    },
+    {
+      "name": "referencing",
+      "version": "0.37.0"
+    },
+    {
+      "name": "rfc3339-validator",
+      "version": "0.1.4"
+    },
+    {
+      "name": "rpds-py",
+      "version": "2026.6.3"
+    },
+    {
+      "name": "six",
+      "version": "1.17.0"
+    },
+    {
+      "name": "typing_extensions",
+      "version": "4.16.0"
+    }
+  ],
+  "commands": [
+    {
+      "name": "transactions",
+      "argv": [
+        "/workspace/scratch/4f09dfb9aa92/backend-catalog-python/bin/python",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "cwd": "/workspace/scratch/4f09dfb9aa92/tabmail-frontend-review-catalog12-public",
+      "started_at": "2026-10-08T09:51:55.572900+00:00",
+      "log": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/transactions.log",
+      "exit_code": 0,
+      "elapsed_seconds": 0.812,
+      "log_sha256": "75ae46d78f95d41f145e505836e8a8e30503140c248f2c561e4730322c409dfd",
+      "log_bytes": 309
+    },
+    {
+      "name": "compatibility",
+      "argv": [
+        "/workspace/scratch/4f09dfb9aa92/backend-catalog-python/bin/python",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "cwd": "/workspace/scratch/4f09dfb9aa92/tabmail-frontend-review-catalog12-public",
+      "started_at": "2026-10-08T09:51:56.385870+00:00",
+      "log": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/compatibility.log",
+      "exit_code": 0,
+      "elapsed_seconds": 2.165,
+      "log_sha256": "d0954efef62572f718c0d4a4dc38485d1e60599ce81088ee6a4efb731707ed71",
+      "log_bytes": 1117
+    },
+    {
+      "name": "clients",
+      "argv": [
+        "node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "cwd": "/workspace/scratch/4f09dfb9aa92/tabmail-frontend-review-catalog12-public",
+      "started_at": "2026-10-08T09:51:58.551580+00:00",
+      "log": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/clients.log",
+      "exit_code": 0,
+      "elapsed_seconds": 1.182,
+      "log_sha256": "47b96ae470deec0228831298df2ab391d0e25b90aec7aaabbaa7c78ebc5536eb",
+      "log_bytes": 73
+    },
+    {
+      "name": "catalog27",
+      "argv": [
+        "/workspace/scratch/4f09dfb9aa92/backend-catalog-python/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "test_r5_catalog_reconciliation",
+        "-v"
+      ],
+      "cwd": "/workspace/scratch/4f09dfb9aa92/tabmail-frontend-review-catalog12-public",
+      "started_at": "2026-10-08T09:51:59.734603+00:00",
+      "log": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/catalog27.log",
+      "exit_code": 0,
+      "elapsed_seconds": 41.428,
+      "log_sha256": "6161d9fae0ebb973002f6269fd26eb52e80f17eeba9bd2a6eb06d52d3e2ff605",
+      "log_bytes": 5743
+    }
+  ],
+  "final_status": "",
+  "finished_at": "2026-10-08T09:52:41.178115+00:00",
+  "all_commands_pass": true
+}

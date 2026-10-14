@@ -20,12 +20,27 @@ func New(repo company.ContentIndexer, objects mailcontent.ObjectReader, l zerolo
 	return &Service{repo: repo, parser: mailcontent.New(objects), logger: l.With().Str("component", "mail_index").Logger()}
 }
 func (s *Service) Batch(ctx context.Context) (int, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
 	jobs, e := s.repo.ClaimMailIndexJobs(ctx, 1)
 	if e != nil {
 		return 0, e
 	}
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
 	for _, j := range jobs {
+		if err := ctx.Err(); err != nil {
+			return 0, err
+		}
 		d, e := s.parser.Document(ctx, j.MessageID, j.SourceKey)
+		// A cancelled waiter is not evidence of an invalid raw source. Once
+		// cancellation is observed, leave the claim for existing lease recovery.
+		// This does not undo any repository outcome already acknowledged.
+		if err := ctx.Err(); err != nil {
+			return 0, err
+		}
 		if e != nil {
 			if e = s.repo.FailMailIndexJob(ctx, j, "parse_failed"); e != nil {
 				return 0, e

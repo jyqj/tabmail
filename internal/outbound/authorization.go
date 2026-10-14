@@ -2,8 +2,8 @@ package outbound
 
 import (
 	"context"
-	"strings"
 	"github.com/google/uuid"
+	"strings"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
 	"tabmail/internal/models"
@@ -64,6 +64,18 @@ func ResolveSendAuthorization(ctx context.Context, st SendAddressStore, actor au
 		if err := authz.CheckMailboxSender(ctx, st, actor, mb, hasPublishedTemplate); err != nil {
 			res.MailboxSenderErr = err
 		}
+	} else {
+		// Integration scope is not a company/mailbox send-policy exemption.
+		// A published-version claim only passes this policy gate; the worker
+		// still resolves its current immutable template grant through governance.
+		switch authz.MailboxSendPolicy(mb) {
+		case authz.SendPolicyDisabled:
+			res.MailboxSenderErr = authz.ErrForbidden("mailbox sending disabled by company policy")
+		case authz.SendPolicyTemplateRequired:
+			if !hasPublishedTemplate {
+				res.MailboxSenderErr = authz.ErrForbidden("a granted published template version is required")
+			}
+		}
 	}
 	if mb == nil {
 		identity, err := st.FindSendIdentityForAddress(ctx, tenantID, address)
@@ -93,11 +105,30 @@ func (r *SendAuthorization) WorkerFailure() error {
 	return nil
 }
 
+// JobAuthorizationReader is shared by the worker's repository and the retry
+// transaction reader. It deliberately excludes queue mutation and network I/O.
+type JobAuthorizationReader interface {
+	SendAddressStore
+	GetUser(context.Context, uuid.UUID) (*models.User, error)
+	GetAPIKey(context.Context, uuid.UUID) (*models.TenantAPIKey, error)
+	GetZone(context.Context, uuid.UUID) (*models.DomainZone, error)
+	EffectivePermission(context.Context, uuid.UUID) (*models.EffectivePermission, error)
+}
+
 // ValidateJobAuthorization re-reads current identities and exact mailbox
 // permissions at submit, manual retry and every delivery attempt. Immutable
 // sender IDs prevent deletion of an owned key/user from widening old jobs.
 func (s *Service) ValidateJobAuthorization(ctx context.Context, j *models.OutboundJob) error {
-	if s == nil || s.store == nil || j == nil {
+	if s == nil {
+		return authz.ErrForbidden("sender validation unavailable")
+	}
+	return ValidateJobAuthorization(ctx, s.store, s.governance, j)
+}
+
+// ValidateJobAuthorization keeps worker/retry provenance and content validation
+// single-sourced; retry supplies a transaction-bound reader and governance.
+func ValidateJobAuthorization(ctx context.Context, st JobAuthorizationReader, governance TemplateGovernance, j *models.OutboundJob) error {
+	if st == nil || j == nil {
 		return authz.ErrForbidden("sender validation unavailable")
 	}
 	if j.InFlightDomain != "" {
@@ -105,7 +136,7 @@ func (s *Service) ValidateJobAuthorization(ctx context.Context, j *models.Outbou
 	}
 	a := authz.Actor{TenantID: j.TenantID}
 	if j.SenderKeyID != nil {
-		key, err := s.store.GetAPIKey(ctx, *j.SenderKeyID)
+		key, err := st.GetAPIKey(ctx, *j.SenderKeyID)
 		if err != nil {
 			return err
 		}
@@ -135,7 +166,7 @@ func (s *Service) ValidateJobAuthorization(ctx context.Context, j *models.Outbou
 		return authz.ErrForbidden("submission has no durable sender identity")
 	}
 	if j.SenderUserID != nil {
-		u, err := s.store.GetUser(ctx, *j.SenderUserID)
+		u, err := st.GetUser(ctx, *j.SenderUserID)
 		if err != nil {
 			return err
 		}
@@ -147,7 +178,7 @@ func (s *Service) ValidateJobAuthorization(ctx context.Context, j *models.Outbou
 			return authz.ErrForbidden("sender company changed")
 		}
 		if !a.IsSuperAdmin && (u.Role != models.RoleAdmin || a.Type == authz.PrincipalAPIKey) {
-			perm, err := s.store.EffectivePermission(ctx, u.ID)
+			perm, err := st.EffectivePermission(ctx, u.ID)
 			if err != nil {
 				return err
 			}
@@ -157,7 +188,7 @@ func (s *Service) ValidateJobAuthorization(ctx context.Context, j *models.Outbou
 			a.Permission = perm
 		}
 	}
-	zone, err := s.store.GetZone(ctx, j.ZoneID)
+	zone, err := st.GetZone(ctx, j.ZoneID)
 	if err != nil {
 		return err
 	}
@@ -168,7 +199,7 @@ func (s *Service) ValidateJobAuthorization(ctx context.Context, j *models.Outbou
 	if err != nil || address != j.MailFrom || extractDomain(address) != zone.Domain {
 		return authz.ErrForbidden("sender address changed or invalid")
 	}
-	res, err := ResolveSendAuthorization(ctx, s.store, a, j.TenantID, address, j.TemplateVersionID != nil)
+	res, err := ResolveSendAuthorization(ctx, st, a, j.TenantID, address, j.TemplateVersionID != nil)
 	if err != nil {
 		return err
 	}
@@ -182,10 +213,10 @@ func (s *Service) ValidateJobAuthorization(ctx context.Context, j *models.Outbou
 		if j.SenderMailboxID == nil {
 			return authz.ErrForbidden("template sender mailbox missing")
 		}
-		if s.governance == nil {
+		if governance == nil {
 			return authz.ErrForbidden("published template governance unavailable")
 		}
-		if _, _, _, err := s.governance.TemplateForSend(ctx, j.TenantID, j.SenderUserID, j.SenderKeyID, *j.SenderMailboxID, *j.TemplateVersionID); err != nil {
+		if _, _, _, err := governance.TemplateForSend(ctx, j.TenantID, j.SenderUserID, j.SenderKeyID, *j.SenderMailboxID, *j.TemplateVersionID); err != nil {
 			return err
 		}
 	}

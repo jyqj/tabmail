@@ -1,0 +1,3333 @@
+{
+  "repository": "jyqj/tabmail",
+  "observed_on": "2026-10-07",
+  "source": "GitHub plugin metadata and review reads, with local Git ancestry and mode/type/blob identity validation",
+  "candidate_source_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+  "prs": [
+    {
+      "number": 17,
+      "title": "fix: enforce R5 benchmark evidence types and current index identity",
+      "url": "https://github.com/jyqj/tabmail/pull/17",
+      "state": "open",
+      "draft": true,
+      "mergeable": false,
+      "merged": false,
+      "base_ref": "work/company-mail-r5-goal-20260930",
+      "base_sha": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+      "head_ref": "fix/r5-benchmark-strict-evidence-20261001",
+      "head_sha": "5b7f8774643243711e8065f2403e419f5ba81065",
+      "merge_commit_sha": null,
+      "commits": 3,
+      "changed_files": 16,
+      "additions": 1074,
+      "deletions": 13,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+        "candidate_ahead": 205,
+        "candidate_behind": 3,
+        "head_is_ancestor": false,
+        "unique_commits": [
+          {
+            "sha": "5b7f8774643243711e8065f2403e419f5ba81065",
+            "subject": "fix(benchmark): observe current index identity and persisted parse fingerprints"
+          },
+          {
+            "sha": "b647ec8b34fb72c86885aa622d9dc088831edeca",
+            "subject": "test: record full Python and Go checks after isolated toolchain setup"
+          },
+          {
+            "sha": "d896b8efda3b262ef09779702a0d3cdd6d2c444e",
+            "subject": "fix(benchmark): reject coerced evidence types and require calibration resources"
+          }
+        ],
+        "branch_delta_paths": 16,
+        "identical_delta_paths": [],
+        "different_delta_paths": [
+          {
+            "path": "docs/company-mail/R5-TODO.md",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "a67416ee070c983866d19e3c7227fc4143933651"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "34eefaf44adbe2c33190f59224aa576d0c001426"
+            }
+          },
+          {
+            "path": "internal/store/postgres/r5_benchmark_test.go",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e47da2ee2cd6e5c74333955a03a06606fcb9ed26"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "0a58c20131712e6751f2871166792e92f97f399c"
+            }
+          },
+          {
+            "path": "scripts/run_r5_benchmark.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "a6c66c80d236f329c4eb23151d3e56e858cb87a4"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "a582e0719ffa22a2bcb8fdfecad24cabd5798e03"
+            }
+          },
+          {
+            "path": "scripts/tests/test_r5_benchmark.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "fd6c93bfd21fa2e8da58f41a30b03824a1e8ad4a"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "30da3f43ccb5eaa7aa2fba5fb8d0bd3c2f8f0a96"
+            }
+          }
+        ],
+        "missing_delta_paths": [
+          {
+            "path": "docs/company-mail/evidence/r5-p0-100-observer/baseline-failure.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "894f1e50bfd16e3a17b274d55374d56105b2edbd"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/r5-p0-100-observer/cli-validation.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "90c8a519801eb04576263da53e5003a9fb316b1a"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/r5-p0-100-observer/exit-code.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "573541ac9702dd3969c9bc859d2b91ec1f7e6e56"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/r5-p0-100-observer/result.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "4556cf4ae63b76d6198aa36f83ef9ff5f1bb0f62"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/r5-p0-100-observer/stdout.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "f5ed572fe292d01dc1cd5be056d241f15e08c1e5"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/r5-p0-100-observer/validation.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "f538394bdb711c3f891ec0bbf6006837a5d37a5d"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/r5-p0-100-strict-types/after.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "a4491bf3f3297bbddd16d0618f84c66c0eb63a13"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/r5-p0-100-strict-types/before.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "f8f3a8de439637a3bd6fac37c12e9b971daf7275"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/r5-p0-100-strict-types/suite-configured-environment.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "46a0c529cec63965b9e3d8211dbb26292f106ae9"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/r5-p0-100-strict-types/suite-current-environment.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "231322aa7ce353c0b2ee08b2b3830defefb78f56"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/r5-p0-100-strict-types/suite-final-environment.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "8d16f112748ac87bd978f14424d7a5308a4253b1"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/r5-p0-100-strict-types/validation.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "f65abb5242ba962b2178bc3c6b4b80d347a08680"
+            },
+            "candidate_entry": null
+          }
+        ],
+        "unique_delta_fully_present": false
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 1,
+        "states": [
+          "COMMENTED"
+        ],
+        "inline_threads": 0,
+        "approvals": 0,
+        "comment_url": "https://github.com/jyqj/tabmail/pull/17#pullrequestreview-5376595349"
+      },
+      "local_base_ref_sha": "29a388a3c7d6da03641abe79bb5c728b90b75273",
+      "base_ref_matches_plugin_base_sha": false,
+      "recommendation": {
+        "action": "keep_draft",
+        "reason": "Keep draft: 12 unique historical evidence files absent from candidate; 3 code/test files and TODO have evolved. No complete content equivalence established; mechanical merge conflicts. Port only audited remaining deltas and preserve evidence."
+      }
+    },
+    {
+      "number": 18,
+      "title": "test: 修复 R5 普通回执 alias / inspection 边界门禁",
+      "url": "https://github.com/jyqj/tabmail/pull/18",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "integration/company-mail-r5-20261003",
+      "base_sha": "eb366eecb6413f5aa025afb4ee63bd1eea7fdf7d",
+      "head_ref": "fix/r5-receipt-inspection-test-gate",
+      "head_sha": "b940c6e2a4aa050c657e065ff68c97de7f249b28",
+      "merge_commit_sha": "308d38fa3f294f98c327e2f35f85e8879f67b20c",
+      "commits": 1,
+      "changed_files": 13,
+      "additions": 1223,
+      "deletions": 8,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "eb366eecb6413f5aa025afb4ee63bd1eea7fdf7d",
+        "candidate_ahead": 197,
+        "candidate_behind": 1,
+        "head_is_ancestor": false,
+        "unique_commits": [
+          {
+            "sha": "b940c6e2a4aa050c657e065ff68c97de7f249b28",
+            "subject": "test: enforce R5 ordinary receipt boundary through local aliases"
+          }
+        ],
+        "branch_delta_paths": 13,
+        "identical_delta_paths": [
+          {
+            "path": "docs/company-mail/R5-OUTBOUND-INSPECTION-GATE-CHECKPOINT-20261003.md",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "9666d85aee804bd0628d621739007600522f83ac"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "9666d85aee804bd0628d621739007600522f83ac"
+            }
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-OUTBOUND-INSPECTION-GATE-20261003/before.stderr",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "0b2c0c16b827d930613313391a5bd2a60cd6d4bb"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "0b2c0c16b827d930613313391a5bd2a60cd6d4bb"
+            }
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-OUTBOUND-INSPECTION-GATE-20261003/contracts-run.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "68380252f3c7a46a4bab345b22420c0cd0163c3c"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "68380252f3c7a46a4bab345b22420c0cd0163c3c"
+            }
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-OUTBOUND-INSPECTION-GATE-20261003/contracts.stderr",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "875bcbefc8198b8a54c5a2a14e6bebb64ccc681a"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "875bcbefc8198b8a54c5a2a14e6bebb64ccc681a"
+            }
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-OUTBOUND-INSPECTION-GATE-20261003/contracts.stdout",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            }
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-OUTBOUND-INSPECTION-GATE-20261003/deps-freeze.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "7f62691d66175e76adef7b0acc20b76875afde85"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "7f62691d66175e76adef7b0acc20b76875afde85"
+            }
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-OUTBOUND-INSPECTION-GATE-20261003/ordinary-wire.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "facaa1045ef030d03207a6120cb0fddcc00a733b"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "facaa1045ef030d03207a6120cb0fddcc00a733b"
+            }
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-OUTBOUND-INSPECTION-GATE-20261003/receipt.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "0caa56054cd8e1962557785eb67b49ae1f931332"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "0caa56054cd8e1962557785eb67b49ae1f931332"
+            }
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-OUTBOUND-INSPECTION-GATE-20261003/typed-go.stderr",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            }
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-OUTBOUND-INSPECTION-GATE-20261003/typed-go.stdout",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "7778ffd7088cfd17cc8e7c5d3ad774f4401c613b"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "7778ffd7088cfd17cc8e7c5d3ad774f4401c613b"
+            }
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-OUTBOUND-INSPECTION-GATE-20261003/typed-python.stderr",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "4019f36ae9ed535b5930c14b604138f2881998be"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "4019f36ae9ed535b5930c14b604138f2881998be"
+            }
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-OUTBOUND-INSPECTION-GATE-20261003/typed-python.stdout",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            }
+          },
+          {
+            "path": "scripts/tests/test_outbound_inspection_contract.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "c2339fdffb94da9cafa3b03d17b16dbe80518cf5"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "c2339fdffb94da9cafa3b03d17b16dbe80518cf5"
+            }
+          }
+        ],
+        "different_delta_paths": [],
+        "missing_delta_paths": [],
+        "unique_delta_fully_present": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "eb366eecb6413f5aa025afb4ee63bd1eea7fdf7d",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "All 13 changed paths since merge-base have identical mode/type/blob entries in candidate; branch-only commits add no missing payload."
+      }
+    },
+    {
+      "number": 19,
+      "title": "R5 batch 3: combine selected source attestation and descriptor race fix",
+      "url": "https://github.com/jyqj/tabmail/pull/19",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "integration/company-mail-r5-batch2-20261003",
+      "base_sha": "b4803fe6722ba05b83799459e88d4a014f546da2",
+      "head_ref": "integration/company-mail-r5-batch3-20261003",
+      "head_sha": "5ae68c2d037603cd0151e1b9188f2df4db1e45a1",
+      "merge_commit_sha": "d16337e7859bb9c71262253db65fb99faac1971c",
+      "commits": 12,
+      "changed_files": 64,
+      "additions": 10014,
+      "deletions": 0,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "5ae68c2d037603cd0151e1b9188f2df4db1e45a1",
+        "candidate_ahead": 179,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "b4803fe6722ba05b83799459e88d4a014f546da2",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 20,
+      "title": "test(r5): independent selected-attestation v1 review rejects first-capture drift",
+      "url": "https://github.com/jyqj/tabmail/pull/20",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/r5-selected-source-binding-20261003",
+      "base_sha": "529f54782f0cfc90ed2501c253723a4fd88497e0",
+      "head_ref": "review/selected-attestation-v1-independent-20261003",
+      "head_sha": "722fcf2f5f9d28c8f6372494b49cccc7b8816467",
+      "merge_commit_sha": "b1051d661ed421a081c6ebe2305efe77c2e414af",
+      "commits": 1,
+      "changed_files": 12,
+      "additions": 2606,
+      "deletions": 0,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "29a388a3c7d6da03641abe79bb5c728b90b75273",
+        "candidate_ahead": 203,
+        "candidate_behind": 8,
+        "head_is_ancestor": false,
+        "unique_commits": [
+          {
+            "sha": "722fcf2f5f9d28c8f6372494b49cccc7b8816467",
+            "subject": "test(r5): reject selected attestation first-capture cache hydration drift"
+          },
+          {
+            "sha": "529f54782f0cfc90ed2501c253723a4fd88497e0",
+            "subject": "test(r5): pin final code freeze pure60 and capture validation"
+          },
+          {
+            "sha": "ddc80bea1826e76a19f9792ca3a2df1954d067e5",
+            "subject": "test(r5): retain fresh selected binding receipt and bounded pure evidence"
+          },
+          {
+            "sha": "9d53d54035d62d31d122419a5d4f0a8770835476",
+            "subject": "fix(r5): separate selected input provenance and retain metadata blockers"
+          },
+          {
+            "sha": "0b537ff38218e28cade8233dc641d17931aadba8",
+            "subject": "feat(r5): add incompatible root-selected local source attestation"
+          },
+          {
+            "sha": "64cd11816cfd94c9dc80e65578edb06b92725e84",
+            "subject": "fix(r5): bound excluded fork metadata checks without collecting artifacts"
+          },
+          {
+            "sha": "8de4809516a39ad43b0e17afa288bcedab8b40a7",
+            "subject": "test(r5): retain actual pure logs for blocked checkpoint"
+          },
+          {
+            "sha": "9735e02192434985e305abdf84c6b0064f875e81",
+            "subject": "test(r5): checkpoint source v3 boundary failures and root metadata"
+          }
+        ],
+        "branch_delta_paths": 44,
+        "identical_delta_paths": [
+          {
+            "path": "scripts/r5_selected_source_binding.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "f5c67257615a7c41543ad0e1447983e994bed45a"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "f5c67257615a7c41543ad0e1447983e994bed45a"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_binding_20261003/README.md",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "d5308e8c53811752d19f0c2a98708a7255ae030b"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "d5308e8c53811752d19f0c2a98708a7255ae030b"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_binding_20261003/attestation.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "28de676bed87477eba21eacf7299febab006d0de"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "28de676bed87477eba21eacf7299febab006d0de"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_binding_20261003/delivery.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "ddf658114994f7ab18d7139c5b89cbb34bb82bd7"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "ddf658114994f7ab18d7139c5b89cbb34bb82bd7"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_binding_20261003/selected-pure12.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "437f72d9c9601195cdfcab311b60ae9c0668b0f6"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "437f72d9c9601195cdfcab311b60ae9c0668b0f6"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_binding_20261003/source-pure60.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "18fd228e190d540d372762f3231d51133b79614d"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "18fd228e190d540d372762f3231d51133b79614d"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_binding_20261003/unclassified-node-input.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "1942c2420d2d053ad39869618e83387a124bb273"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "1942c2420d2d053ad39869618e83387a124bb273"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_binding_20261003/worktree-vcs-failure.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "117dfc22b7777d220037ebccc3bf6ed3206fd14d"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "117dfc22b7777d220037ebccc3bf6ed3206fd14d"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_excluded_metadata_20261003/README.md",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "f8e28c6e86a1ab67a0c48d5f355376a97c9ded2b"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "f8e28c6e86a1ab67a0c48d5f355376a97c9ded2b"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_excluded_metadata_20261003/before-pure5.raw.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "88495852cfa82b69638920c6dfd47317cdbf5e25"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "88495852cfa82b69638920c6dfd47317cdbf5e25"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_excluded_metadata_20261003/cli-capture.raw.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "5a8a908e10579a67ebd51fba8a8fe7cf68f794f2"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "5a8a908e10579a67ebd51fba8a8fe7cf68f794f2"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_excluded_metadata_20261003/cli-summary.raw.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "b03ffad2256f1e637a39058d9bfa0cd333ce0041"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "b03ffad2256f1e637a39058d9bfa0cd333ce0041"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_excluded_metadata_20261003/test_r5_current_source_inventory.raw.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "0498ab2d74ae058d749ec52cef0c0435ae5111bf"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "0498ab2d74ae058d749ec52cef0c0435ae5111bf"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_excluded_metadata_20261003/test_r5_protocol_source_inventory.raw.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "09b30de924ee3807b46c52786dbb687081903d5e"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "09b30de924ee3807b46c52786dbb687081903d5e"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_excluded_metadata_20261003/test_r5_smtp_owner_source_inventory.raw.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "cf6d4db72d67f6d3ea39fd579b48e9ae732fe73f"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "cf6d4db72d67f6d3ea39fd579b48e9ae732fe73f"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_excluded_metadata_20261003/test_r5_source_excluded_metadata.raw.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "8692e362e9538bb355e424f2029491301747af57"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "8692e362e9538bb355e424f2029491301747af57"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_excluded_metadata_20261003/test_r5_source_v3_boundary_negatives.raw.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "9a3c22d783359f6a5031efb2b4d540d5600b4660"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "9a3c22d783359f6a5031efb2b4d540d5600b4660"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_v3_20261003/README.md",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "7d54c8f570f0fa472e17002042b8014555636c9f"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "7d54c8f570f0fa472e17002042b8014555636c9f"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_v3_20261003/baseline-source.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "1de04c5be9836e4e5a52b8427687e3a545cff46e"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "1de04c5be9836e4e5a52b8427687e3a545cff46e"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_v3_20261003/go-selected-diagnostic.json.gz",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "4df192c2da525ea2a203204de38b6a93694cf96e"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "4df192c2da525ea2a203204de38b6a93694cf96e"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_v3_20261003/go-selected-diagnostic.stderr",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_v3_20261003/go-selected.stderr",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "de84e0d517b764daef07afd36e9ff41dbfaa0f96"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "de84e0d517b764daef07afd36e9ff41dbfaa0f96"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_v3_20261003/legacy-current.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "b325cc778b0f0671f6450e0e2762ce85aad0296e"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "b325cc778b0f0671f6450e0e2762ce85aad0296e"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_v3_20261003/legacy-protocol.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "4da7d3810ee89f3df614e584e6b7e9e07909c5c1"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "4da7d3810ee89f3df614e584e6b7e9e07909c5c1"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_v3_20261003/new-negatives.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "6b8a7c7d4b926e641826577aeb8dfa0f98fbe685"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "6b8a7c7d4b926e641826577aeb8dfa0f98fbe685"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_v3_20261003/pure16.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "780c923220d42710b0621aae46270876ebee871b"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "780c923220d42710b0621aae46270876ebee871b"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_v3_20261003/review.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "bcdedc674ecf5abe56e1ade7a1339381222258f4"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "bcdedc674ecf5abe56e1ade7a1339381222258f4"
+            }
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_source_v3_20261003/root-mvs.json.gz",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "1453ed186a914e2d7885b1a4dab25c8daa7c8719"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "1453ed186a914e2d7885b1a4dab25c8daa7c8719"
+            }
+          },
+          {
+            "path": "scripts/tests/test_r5_selected_source_binding.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "b5b6617181ced748e996bc18048c7f532d1c0caf"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "b5b6617181ced748e996bc18048c7f532d1c0caf"
+            }
+          },
+          {
+            "path": "scripts/tests/test_r5_source_v3_boundary_negatives.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "ef4da4e51f3264692632074a5c4834e9ec210073"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "ef4da4e51f3264692632074a5c4834e9ec210073"
+            }
+          }
+        ],
+        "different_delta_paths": [
+          {
+            "path": "scripts/r5_source_inventory.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e2b26afd07e969823eb3a9c8aa7744eb4a328b91"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "4215c11019249e9647cd3c4188d7854d450fccf9"
+            }
+          },
+          {
+            "path": "scripts/tests/test_r5_source_excluded_metadata.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "7d57f9930389bdadc89259e02a703865712a33e0"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "5a035d4bfc02daae7e5fbbe1bf37330a60f753a0"
+            }
+          }
+        ],
+        "missing_delta_paths": [
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_independent_20261003/README.md",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e227454dcd0d447cb087b1703ee4d6d7bc501228"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_independent_20261003/cache-hydration-repro.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "a37de5ecfb9be4ef10e8c8545cfe488c4180edb3"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_independent_20261003/first-capture-regression.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "96075cf4755522d2e2b3490c23ef19258ecc95b6"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_independent_20261003/independent-attestation.log.gz",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "6d1551fd95409d637565ee74f1a2200310181c91"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_independent_20261003/independent-tests.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "b9cc4791fa847bacc630fde7649634c82b134d58"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_independent_20261003/recapture-diagnostic.log.gz",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "9b331fd1bd4e07076044937749673dac7a000501"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_independent_20261003/repro-first-attestation.log.gz",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "974ac90baf74d34357b8c12b8d4e79b6ceca0960"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_independent_20261003/repro-mvs-0.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "94dd00b1fc0f91d1bec091ed29551a72425483cf"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_independent_20261003/repro-mvs-1.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "06da0b9bf027088dd504987c40cd6c1ad8d0b42c"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_independent_20261003/repro-warm-attestation.log.gz",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "72028b813993982d89dd16dc295a83c3db9f5611"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/tests/checkpoints/r5_selected_independent_20261003/review-summary.log",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "777a61d97fe3bd5da0a8355ac3158661da22d7f7"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/tests/test_r5_selected_independent_review.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "64464a0c5e8f9cebaf130177a1e9c758402ed890"
+            },
+            "candidate_entry": null
+          }
+        ],
+        "unique_delta_fully_present": false
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "529f54782f0cfc90ed2501c253723a4fd88497e0",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "keep_draft",
+        "reason": "Keep draft: 12 independent first-capture regression/evidence files absent from candidate. Historical selected-attestation-v1 REJECT remains an independent record; do not reintroduce obsolete source implementation."
+      }
+    },
+    {
+      "number": 21,
+      "title": "ci: connect existing checks to R5 integration PRs",
+      "url": "https://github.com/jyqj/tabmail/pull/21",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "integration/company-mail-r5-batch2-20261003",
+      "base_sha": "b4803fe6722ba05b83799459e88d4a014f546da2",
+      "head_ref": "ci/company-mail-r5-wiring-20261003",
+      "head_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+      "merge_commit_sha": "f833acb680935718fc3b855a86e9c5b94f3a05a4",
+      "commits": 13,
+      "changed_files": 68,
+      "additions": 10108,
+      "deletions": 2,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+        "candidate_ahead": 178,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [
+          {
+            "id": 37145582718,
+            "name": "Pull request source evidence",
+            "conclusion": "success"
+          },
+          {
+            "id": 37145582728,
+            "name": "Company mail security and release checks",
+            "conclusion": "failure",
+            "jobs": {
+              "production-web": "success",
+              "browser-journey": "failure",
+              "backend": "failure at Build",
+              "frontend": "failure at Catalog and TypeScript source validation"
+            }
+          }
+        ],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "b4803fe6722ba05b83799459e88d4a014f546da2",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 22,
+      "title": "fix: alias legacy recipients to authorized outbound detail",
+      "url": "https://github.com/jyqj/tabmail/pull/22",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "ci/company-mail-r5-wiring-20261003",
+      "base_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+      "head_ref": "fix/r5-legacy-recipients-alias-20261003",
+      "head_sha": "139b701a6d278f07bdd770fa1f4fc2c3c30f3d63",
+      "merge_commit_sha": "dce3b937fd6b30fef07cc80797d13dfab0962dbf",
+      "commits": 2,
+      "changed_files": 15,
+      "additions": 1255,
+      "deletions": 2,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "139b701a6d278f07bdd770fa1f4fc2c3c30f3d63",
+        "candidate_ahead": 176,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 23,
+      "title": "R5 batch 4: fixed archive/client/alias/browser/dependency/lint combination",
+      "url": "https://github.com/jyqj/tabmail/pull/23",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "integration/company-mail-r5-batch3-20261003",
+      "base_sha": "5ae68c2d037603cd0151e1b9188f2df4db1e45a1",
+      "head_ref": "integration/company-mail-r5-batch4-20261003",
+      "head_sha": "e5e23e21abfe4c7e9f082405e56a95a7f346fa9a",
+      "merge_commit_sha": "0aded4b24816acb99479199b97cd83af2ed0415e",
+      "commits": 37,
+      "changed_files": 126,
+      "additions": 44535,
+      "deletions": 580,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "e5e23e21abfe4c7e9f082405e56a95a7f346fa9a",
+        "candidate_ahead": 142,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [
+          {
+            "id": 37152887934,
+            "name": "Pull request source evidence",
+            "conclusion": "success"
+          },
+          {
+            "id": 37152887928,
+            "name": "Company mail security and release checks",
+            "conclusion": "failure",
+            "jobs": {
+              "production-web": "success",
+              "browser-journey": "success",
+              "backend": "failure at Race tests with PostgreSQL",
+              "frontend": "failure at Versioned source tests from independent clean Git checkouts"
+            }
+          }
+        ],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "5ae68c2d037603cd0151e1b9188f2df4db1e45a1",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 24,
+      "title": "Experiment: Goose 64 KiB parser equivalence; wholePG still times out",
+      "url": "https://github.com/jyqj/tabmail/pull/24",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "integration/company-mail-r5-batch4-20261003",
+      "base_sha": "e5e23e21abfe4c7e9f082405e56a95a7f346fa9a",
+      "head_ref": "experiment/goose-buffer-64k",
+      "head_sha": "f4ed1f4257ff104a53ffdb49416e50fd5c6668b4",
+      "merge_commit_sha": "f6e41ed02e862d4bd62e9c868a742812a748a510",
+      "commits": 3,
+      "changed_files": 51,
+      "additions": 64538,
+      "deletions": 0,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "aeed47f0e1998d9925acb680992b051463821d69",
+        "candidate_ahead": 143,
+        "candidate_behind": 3,
+        "head_is_ancestor": false,
+        "unique_commits": [
+          {
+            "sha": "f4ed1f4257ff104a53ffdb49416e50fd5c6668b4",
+            "subject": "experiment: analyze existing Goose allocation profiles with owned caches"
+          },
+          {
+            "sha": "d18e21f3aaac2096958eb888e1dbb0e6d1888302",
+            "subject": "docs: record isolated Goose experiment draft PR24 delivery"
+          },
+          {
+            "sha": "c33eb17294b449ae587e8334d3acb8a4511821f9",
+            "subject": "experiment: record isolated Goose 64KiB parser and failed wholePG runs"
+          }
+        ],
+        "branch_delta_paths": 51,
+        "identical_delta_paths": [],
+        "different_delta_paths": [],
+        "missing_delta_paths": [
+          {
+            "path": "docs/company-mail/GOOSE-BUFFER-64K-TODO-APPENDIX-20261003.md",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "8ebd0a2eaa3542b3e32d7ea7bbfa1ce350a72988"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/allocation-analysis-blocker.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "dae49790fd6584635dd0178e82d10160dd51c7ba"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/allocation-analysis-followup.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "044174d671a0f048ab82076e5e716c213a297c95"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-alloc-objects.stderr",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-alloc-objects.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "26533e486b165ee733dcd49758e3b821296e2d04"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-alloc-space.stderr",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-alloc-space.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "bb3292482f92581f5b862668964d1d665c79d350"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-databases-after.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "0883d533e7247d5d1535ed60cf14e739733a06d5"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-log-redaction.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "1ef80a98556e8e30efae54f23c7c1530f80a544c"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-modfile.patch",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "fd1d39ee656a55db43121be079a3619ac7409862"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-official-file-hashes.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "bc923a784df0bf3c63226b3892245ff7a0818b0f"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-profile-raw.stderr",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-profile-raw.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "88279c44064c7b3a648387bd8601eccfd4d62a6b"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-result.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "10aa4b0d6b25ca16d16ff8455de09bf1a6f03b28"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-settings.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "2b3c9dea4f020b7d50f5bfce2ee49b16a44dd588"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-source-binding.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "7cec908c805b941d79c7bedc5fb19220a6838be4"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-wholepg.jsonl",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "a908aae7d3d9f939db568117c4e4e59a9fce861d"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/baseline-wholepg.stderr",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-alloc-objects.stderr",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-alloc-objects.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "fdd54a7fa452e84662ec00b7011ed15dd1514745"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-alloc-space.stderr",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-alloc-space.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "96cdee210b2a3968d1cfb2a6ab0c685e80f07d19"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-databases-after.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e850a0565b2a4f8be559f3ab185fee22c1fe4e2f"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-log-redaction.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "ecd9b30668426cc0fd4cc0517dbfe5cef82c80f0"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-modfile.patch",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "2f542103e1bb655f0540d5901636d5fc205e40be"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-official-file-hashes.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "c8034bfa8e640aaa67dbf586826a4058a8dc22a5"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-profile-raw.stderr",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-profile-raw.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e7fac18253553f928fd29ad597814856bdd86e34"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-result.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "0d0301c5b34290bd6bea018bbc486ac1e79d3269"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-settings.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "2b3c9dea4f020b7d50f5bfce2ee49b16a44dd588"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-source-binding.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "463ba97217bc2514c9c8bdf08d28c8a67afaa69a"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-wholepg.jsonl",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "473e9b229d6501a07f5f765e0f595b533cdd8e42"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/candidate-wholepg.stderr",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/delivery.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e21c03e86f694c5f7a9ae2f5177039698e26a468"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/experiment-receipt.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "0709cb235ed9c47d69dd096417324374b3a6b206"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/goose-buffer.patch",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "4534c893f325eee7daa754005ab428daa6c7ed07"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/inventory.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "5f7015d149ffcba9a4ddf81ce2a825f43ba66587"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/parser-cases.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "ff32c97f5e5a6ebbcf8ee8dbf98f5f6ba53530d4"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/parser-summary.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "418a863137af7ed264fec953c2020fda8b41337f"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/payload-sha256.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e05aab8734c782a89a8981792bf9cdd9c6d099d7"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/protected-product-pins.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "52259a7141965ccc80c2b863e3872d5de83c7a93"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/registry-proof.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "081392fb7ae9088e73a2d30d3eba9998e73e2555"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/GOOSE-BUFFER-64K-EXPERIMENT-20261003/runner-cwd-correction.patch",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "2462abe49142cb4f10202ee8af5b53f9883c9bca"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/experiments/goose-buffer-64k/README.md",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "9475bc25c01e725b74fa683a66f17365f41026d9"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/experiments/goose-buffer-64k/analyze_profiles.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "15074c9a733a372e7429d4cdc5958214dfb1b8ec"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/experiments/goose-buffer-64k/diag.go.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "5f1e56473af49d9d740eeb559a60a585fbb15419"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/experiments/goose-buffer-64k/prepare.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "f5485e3533f7a86a668442a6621fa4347aeb34e3"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/experiments/goose-buffer-64k/run_wholepg.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "f1df0ce70bb274ced7b686ed507029d72a77330c"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/experiments/goose-buffer-64k/source_binding.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "bcbd6175a4cefd020d7d9eea8e8f270ff0bfb5b8"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/experiments/goose-buffer-64k/summarize.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "e6610495e580aa3a015a3c6c3ada41d627d59e38"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "scripts/experiments/goose-buffer-64k/wrapper.go.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "c7b8b6293031c6a56fd7ef361672b51a0d537879"
+            },
+            "candidate_entry": null
+          }
+        ],
+        "unique_delta_fully_present": false
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [
+          {
+            "id": 37155076529,
+            "name": "Pull request source evidence",
+            "conclusion": "success"
+          },
+          {
+            "id": 37155076525,
+            "name": "Company mail security and release checks",
+            "conclusion": "failure",
+            "jobs": {
+              "production-web": "success",
+              "browser-journey": "success",
+              "backend": "failure at Race tests with PostgreSQL",
+              "frontend": "failure at Versioned source tests from independent clean Git checkouts"
+            }
+          }
+        ],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "e5e23e21abfe4c7e9f082405e56a95a7f346fa9a",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "keep_draft",
+        "reason": "Keep draft as separate experiment: all 51 changed files absent from candidate. It does not change the formal Go dependency graph; whole-PG comparison was invalid because baseline/candidate cwd differed and both timed out."
+      }
+    },
+    {
+      "number": 25,
+      "title": "fix: execute pinned source runner fixtures and retain review evidence",
+      "url": "https://github.com/jyqj/tabmail/pull/25",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "integration/company-mail-r5-batch5-20261003",
+      "base_sha": "4aec142bcffd53c6ab91f2263436aaf980833fab",
+      "head_ref": "fix/r5-source-runner-preparation",
+      "head_sha": "92c040492d5a7ac94d5b72e63ca1be92c2fe5418",
+      "merge_commit_sha": "1ab53a913ec32701c3524693622f4ce6b11b755c",
+      "commits": 3,
+      "changed_files": 53,
+      "additions": 212100,
+      "deletions": 15,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "92c040492d5a7ac94d5b72e63ca1be92c2fe5418",
+        "candidate_ahead": 129,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "4aec142bcffd53c6ab91f2263436aaf980833fab",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 26,
+      "title": "Fix R5 batch supervisor detached-tail, deadline and late-cancel lifecycle",
+      "url": "https://github.com/jyqj/tabmail/pull/26",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "review/external-batch-independent-20261004",
+      "base_sha": "0a2baf4a6ccd11dca7b9aa3c188e6ae2aab2a338",
+      "head_ref": "fix/batch-supervisor-lifecycle-20261004",
+      "head_sha": "68ae9c566af48c378c9f1958ae3f2caeeb66936e",
+      "merge_commit_sha": "f17b62b39586c0eac2c9cc63e32a9475c5f19802",
+      "commits": 5,
+      "changed_files": 12,
+      "additions": 1471,
+      "deletions": 28,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "f875672dea2b68fdec9e0b986f4863724da5d7ba",
+        "candidate_ahead": 100,
+        "candidate_behind": 1,
+        "head_is_ancestor": false,
+        "unique_commits": [
+          {
+            "sha": "68ae9c566af48c378c9f1958ae3f2caeeb66936e",
+            "subject": "docs(r5): record G1 fixed-source lease-held cleanup validation"
+          }
+        ],
+        "branch_delta_paths": 2,
+        "identical_delta_paths": [
+          {
+            "path": "docs/company-mail/R5-EXTERNAL-BATCH-G1-CLEANUP-FIX-20261004.md",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "a8004125a126d395f52207675128c9d827205b51"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "a8004125a126d395f52207675128c9d827205b51"
+            }
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-EXTERNAL-BATCH-G1-CLEANUP-FIX-20261004.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "cdda910ad787c54756a81992ee8a819317372724"
+            },
+            "candidate_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "cdda910ad787c54756a81992ee8a819317372724"
+            }
+          }
+        ],
+        "different_delta_paths": [],
+        "missing_delta_paths": [],
+        "unique_delta_fully_present": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "89a8cfb670d974b8ab1694d2175fa0cc279d16fb",
+      "base_ref_matches_plugin_base_sha": false,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "All 2 changed paths since merge-base have identical mode/type/blob entries in candidate; branch-only commits add no missing payload."
+      }
+    },
+    {
+      "number": 27,
+      "title": "Integrate reviewed default runner and shared DB fixes; freeze unqualified union",
+      "url": "https://github.com/jyqj/tabmail/pull/27",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "integration/pe-lf-components-20261004",
+      "base_sha": "5d3a8cfc81a77581919ea0b2a93f9c352fae5208",
+      "head_ref": "cloud/r5-source-integration-20261004",
+      "head_sha": "f52f8cbbf31dcbfb72ba062af6623248334a2e99",
+      "merge_commit_sha": "9a63f3dbaffe7dac48a69be38bbf00f24378469c",
+      "commits": 15,
+      "changed_files": 167,
+      "additions": 222961,
+      "deletions": 35,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "f52f8cbbf31dcbfb72ba062af6623248334a2e99",
+        "candidate_ahead": 70,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "5d3a8cfc81a77581919ea0b2a93f9c352fae5208",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 28,
+      "title": "Reconcile reviewed R5 source catalogs with preserved prior pins",
+      "url": "https://github.com/jyqj/tabmail/pull/28",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "codex/r5-env-evidence-20261004",
+      "base_sha": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+      "head_ref": "codex/r5-approved-catalog-reconciliation-20261004",
+      "head_sha": "4540fb91ba742443dcf0a872b80261e58af7b3ab",
+      "merge_commit_sha": "1533d10f0556d042a6185782ffd2bfbfec7e0b21",
+      "commits": 1,
+      "changed_files": 10,
+      "additions": 78438,
+      "deletions": 325,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "4540fb91ba742443dcf0a872b80261e58af7b3ab",
+        "candidate_ahead": 64,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 29,
+      "title": "feat(r5): add selected-binding v3 with externally pinned observations",
+      "url": "https://github.com/jyqj/tabmail/pull/29",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "codex/r5-env-evidence-20261004",
+      "base_sha": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+      "head_ref": "tooling/selected-binding-v3-20261004",
+      "head_sha": "c31076ab0c445f0fdb02da08f0fb3bbf79520271",
+      "merge_commit_sha": "9ca6f43c3c0c506b1724d4ee9b6106ce006e21bb",
+      "commits": 6,
+      "changed_files": 16,
+      "additions": 3656,
+      "deletions": 0,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "c31076ab0c445f0fdb02da08f0fb3bbf79520271",
+        "candidate_ahead": 59,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 30,
+      "title": "fix(r5): preserve v3 rejection when diagnostic retention fails",
+      "url": "https://github.com/jyqj/tabmail/pull/30",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "tooling/selected-binding-v3-20261004",
+      "base_sha": "c31076ab0c445f0fdb02da08f0fb3bbf79520271",
+      "head_ref": "fix/r5-v3-rejection-evidence-20261004",
+      "head_sha": "52c2d4a996ff6e6bc7f7f8f36a3e161c5f6f3e73",
+      "merge_commit_sha": "6ef861034a839a9e68dfc8f482be41e6d512d06a",
+      "commits": 1,
+      "changed_files": 5,
+      "additions": 476,
+      "deletions": 3,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "52c2d4a996ff6e6bc7f7f8f36a3e161c5f6f3e73",
+        "candidate_ahead": 58,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "c31076ab0c445f0fdb02da08f0fb3bbf79520271",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 31,
+      "title": "fix(r5): require absolute v3 metadata producer paths",
+      "url": "https://github.com/jyqj/tabmail/pull/31",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/r5-v3-rejection-evidence-20261004",
+      "base_sha": "52c2d4a996ff6e6bc7f7f8f36a3e161c5f6f3e73",
+      "head_ref": "fix/r5-v3-producer-path-20261004",
+      "head_sha": "edd8e720c0b11c1bbacaaeffa7f8492129a2c098",
+      "merge_commit_sha": "ed05b0ed4b99fc2e226422b4e591bf0322b43b6f",
+      "commits": 1,
+      "changed_files": 9,
+      "additions": 899,
+      "deletions": 3,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "edd8e720c0b11c1bbacaaeffa7f8492129a2c098",
+        "candidate_ahead": 57,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "52c2d4a996ff6e6bc7f7f8f36a3e161c5f6f3e73",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 32,
+      "title": "Freeze reviewed R5 catalog and additive v3 integration",
+      "url": "https://github.com/jyqj/tabmail/pull/32",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "codex/r5-env-evidence-20261004",
+      "base_sha": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+      "head_ref": "integration/catalog-v3-frozen-20261004",
+      "head_sha": "412f875985854527f5e7d74040f18954c3a352bf",
+      "merge_commit_sha": "bd0a3f50b441638cc210c0e82e049c74812d597d",
+      "commits": 13,
+      "changed_files": 48,
+      "additions": 108267,
+      "deletions": 325,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "412f875985854527f5e7d74040f18954c3a352bf",
+        "candidate_ahead": 52,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 33,
+      "title": "Add independently verified selected-binding adapter",
+      "url": "https://github.com/jyqj/tabmail/pull/33",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "integration/catalog-v3-frozen-20261004",
+      "base_sha": "412f875985854527f5e7d74040f18954c3a352bf",
+      "head_ref": "candidate/r5-consumer-generated-provenance-20261004",
+      "head_sha": "632d55de566254c618bca9a54c5dbae7b355fcf9",
+      "merge_commit_sha": "531f451753bc85a0dafd01e9d6d7dbe80aedede9",
+      "commits": 9,
+      "changed_files": 6,
+      "additions": 2803,
+      "deletions": 0,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "632d55de566254c618bca9a54c5dbae7b355fcf9",
+        "candidate_ahead": 43,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "412f875985854527f5e7d74040f18954c3a352bf",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 34,
+      "title": "Add explicit v3 preparation opt-in",
+      "url": "https://github.com/jyqj/tabmail/pull/34",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "candidate/r5-consumer-generated-provenance-20261004",
+      "base_sha": "632d55de566254c618bca9a54c5dbae7b355fcf9",
+      "head_ref": "codex/r5-v3-preparation-slice2",
+      "head_sha": "7262e78e0120c5a203bb588807ca876b82c4d5bc",
+      "merge_commit_sha": "3b2f2fd9ebb8387665713c0ab8a44e1bebc539be",
+      "commits": 3,
+      "changed_files": 4,
+      "additions": 753,
+      "deletions": 17,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "7262e78e0120c5a203bb588807ca876b82c4d5bc",
+        "candidate_ahead": 40,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "632d55de566254c618bca9a54c5dbae7b355fcf9",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 35,
+      "title": "Add explicit v3 external runtime admission",
+      "url": "https://github.com/jyqj/tabmail/pull/35",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "candidate/r5-consumer-generated-provenance-20261004",
+      "base_sha": "632d55de566254c618bca9a54c5dbae7b355fcf9",
+      "head_ref": "candidate/r5-runtime-v3-20261004",
+      "head_sha": "97c54dc8dad6ab2da6d4dd29e43c20b7091db73f",
+      "merge_commit_sha": "52e71b5ad00250201fecade423210ca87e9d83dc",
+      "commits": 4,
+      "changed_files": 16,
+      "additions": 2976,
+      "deletions": 29,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "97c54dc8dad6ab2da6d4dd29e43c20b7091db73f",
+        "candidate_ahead": 39,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "632d55de566254c618bca9a54c5dbae7b355fcf9",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 36,
+      "title": "Integrate reviewed v3 preparation and runtime",
+      "url": "https://github.com/jyqj/tabmail/pull/36",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "candidate/r5-consumer-generated-provenance-20261004",
+      "base_sha": "632d55de566254c618bca9a54c5dbae7b355fcf9",
+      "head_ref": "integration/r5-consumer-slices23-20261004",
+      "head_sha": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+      "merge_commit_sha": "74568adb044ad63734ab6cc35ff746a752f0d9b0",
+      "commits": 13,
+      "changed_files": 51,
+      "additions": 29685,
+      "deletions": 46,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+        "candidate_ahead": 30,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "632d55de566254c618bca9a54c5dbae7b355fcf9",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 37,
+      "title": "Add explicit v2 external batch contracts",
+      "url": "https://github.com/jyqj/tabmail/pull/37",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "integration/r5-consumer-slices23-20261004",
+      "base_sha": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+      "head_ref": "candidate/r5-slice4-batch-20261004",
+      "head_sha": "5ebf159302520507829b93c5502b94b0f768f94e",
+      "merge_commit_sha": "700f584cf349cfd5816d2fed37fbc961aaf87b0e",
+      "commits": 2,
+      "changed_files": 10,
+      "additions": 11964,
+      "deletions": 20,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "5ebf159302520507829b93c5502b94b0f768f94e",
+        "candidate_ahead": 28,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 38,
+      "title": "Propagate explicit runtime bridge versions",
+      "url": "https://github.com/jyqj/tabmail/pull/38",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "integration/r5-consumer-slices23-20261004",
+      "base_sha": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+      "head_ref": "candidate/slice4-bridge-caller-20261004",
+      "head_sha": "4643de904ff171b9b14189f63ff5e28470a73c72",
+      "merge_commit_sha": "7daa8e60a335a2c4586c8ddf6ec8f54853dd4d85",
+      "commits": 2,
+      "changed_files": 14,
+      "additions": 20177,
+      "deletions": 15,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "4643de904ff171b9b14189f63ff5e28470a73c72",
+        "candidate_ahead": 28,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 39,
+      "title": "Integrate reviewed batch and bridge versioning",
+      "url": "https://github.com/jyqj/tabmail/pull/39",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "integration/r5-consumer-slices23-20261004",
+      "base_sha": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+      "head_ref": "integration/r5-slice4-combined-20261004",
+      "head_sha": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+      "merge_commit_sha": "42fe5a36a947aa9c83bdf2652e16394b4f12c4fb",
+      "commits": 9,
+      "changed_files": 75,
+      "additions": 79518,
+      "deletions": 35,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+        "candidate_ahead": 21,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 40,
+      "title": "Verify existing closure covers v3 consumers",
+      "url": "https://github.com/jyqj/tabmail/pull/40",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "integration/r5-slice4-combined-20261004",
+      "base_sha": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+      "head_ref": "verification/r5-slice5-closure-20261004",
+      "head_sha": "78f0643e504a9a4978c12e8c7106f8aeb4006fb2",
+      "merge_commit_sha": "69c4dcc486e50e23702a0dc960224ba73be0dad9",
+      "commits": 2,
+      "changed_files": 9,
+      "additions": 15018,
+      "deletions": 0,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+        "candidate_ahead": 21,
+        "candidate_behind": 2,
+        "head_is_ancestor": false,
+        "unique_commits": [
+          {
+            "sha": "78f0643e504a9a4978c12e8c7106f8aeb4006fb2",
+            "subject": "Retain bounded checker transcripts as tracked text evidence"
+          },
+          {
+            "sha": "68a16cd139486c7cbf1e86024c2eb0d7b2c36e11",
+            "subject": "Document guarded slice5 closure coverage on frozen slice4 source"
+          }
+        ],
+        "branch_delta_paths": 9,
+        "identical_delta_paths": [],
+        "different_delta_paths": [],
+        "missing_delta_paths": [
+          {
+            "path": "docs/company-mail/R5-SLICE5-CLOSURE-20261004.md",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "2db5200aa00f1946639f8e7c2a0a66a9c6b06889"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/checks.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "60b58d579998223f8301427d566365701a34fe6c"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/final-preservation.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "4502ddea32ac9100ebad101cc2da8e2e284c39db"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/predicate-checks.txt",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "f1db0704a32376e8135d094d4dfed6a029c345c2"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/predicate-results.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "3499227f43d802b619198ce8b12297b9a7b51fa5"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/proposed_physical_controller.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "992dcab036a7c362bfbf3c525902f24dc1cbd23c"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/results.json",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "38162b72c26877964fb15a580b33e33477f9f0a6"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/verify_closure.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "9b7468515c05dee24d9600132dd7cdc7cc7d1e84"
+            },
+            "candidate_entry": null
+          },
+          {
+            "path": "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/verify_predicates.py",
+            "branch_entry": {
+              "mode": "100644",
+              "kind": "blob",
+              "blob": "d23b6f9dfea6e4b47e20e53cc1fbb301aeee437e"
+            },
+            "candidate_entry": null
+          }
+        ],
+        "unique_delta_fully_present": false
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "keep_draft",
+        "reason": "Keep draft: all 9 closure/checker/controller evidence files absent from candidate. Closure coverage acceptance was bounded to 593bbc6; controller plan explicitly needs correction for its PostgreSQL fixture/DSN prerequisites before any execution claim."
+      }
+    },
+    {
+      "number": 41,
+      "title": "Fix client SSE framing across network chunks",
+      "url": "https://github.com/jyqj/tabmail/pull/41",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "integration/r5-slice4-combined-20261004",
+      "base_sha": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+      "head_ref": "fix/sse-framing-20261004",
+      "head_sha": "650d4807359fae0b625d2a16a5b43466a2466ce0",
+      "merge_commit_sha": "aa5d0b0757033769bd4fb26bc8fc52f0467d175a",
+      "commits": 2,
+      "changed_files": 6,
+      "additions": 308,
+      "deletions": 32,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "650d4807359fae0b625d2a16a5b43466a2466ce0",
+        "candidate_ahead": 19,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 42,
+      "title": "Fix stale open mail readers after refresh and reconnect",
+      "url": "https://github.com/jyqj/tabmail/pull/42",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/sse-framing-20261004",
+      "base_sha": "650d4807359fae0b625d2a16a5b43466a2466ce0",
+      "head_ref": "fix/mail-reader-invalidation-20261004",
+      "head_sha": "b90b91176ed0a85b14d1de63e869120fee89ee16",
+      "merge_commit_sha": "0070d471d1e863bda200d2308bc082d92829755c",
+      "commits": 2,
+      "changed_files": 4,
+      "additions": 217,
+      "deletions": 1,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "b90b91176ed0a85b14d1de63e869120fee89ee16",
+        "candidate_ahead": 17,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "650d4807359fae0b625d2a16a5b43466a2466ce0",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 43,
+      "title": "Fix stale message actions after confirmed updates",
+      "url": "https://github.com/jyqj/tabmail/pull/43",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/mail-reader-invalidation-20261004",
+      "base_sha": "b90b91176ed0a85b14d1de63e869120fee89ee16",
+      "head_ref": "fix/message-action-reconciliation-20261005",
+      "head_sha": "e80a057adefb1dfe7ec0389a6b03430c01222b2d",
+      "merge_commit_sha": "98f79e52bd1ce00690b21274bc43cd8ecf7a5980",
+      "commits": 2,
+      "changed_files": 4,
+      "additions": 226,
+      "deletions": 0,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "e80a057adefb1dfe7ec0389a6b03430c01222b2d",
+        "candidate_ahead": 15,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "b90b91176ed0a85b14d1de63e869120fee89ee16",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 44,
+      "title": "Serialize draft reloads with queued saves",
+      "url": "https://github.com/jyqj/tabmail/pull/44",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/message-action-reconciliation-20261005",
+      "base_sha": "e80a057adefb1dfe7ec0389a6b03430c01222b2d",
+      "head_ref": "fix/draft-reload-serialization-20261005",
+      "head_sha": "1b85ff3e8a700fc179b64fdb93f951dbfb67b30f",
+      "merge_commit_sha": "d20589b12e989187119790cb9e70f97c97ff83ae",
+      "commits": 2,
+      "changed_files": 4,
+      "additions": 311,
+      "deletions": 13,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "1b85ff3e8a700fc179b64fdb93f951dbfb67b30f",
+        "candidate_ahead": 13,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "e80a057adefb1dfe7ec0389a6b03430c01222b2d",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 45,
+      "title": "Sync recipient display after explicit draft reload",
+      "url": "https://github.com/jyqj/tabmail/pull/45",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/draft-reload-serialization-20261005",
+      "base_sha": "1b85ff3e8a700fc179b64fdb93f951dbfb67b30f",
+      "head_ref": "fix/recipient-reload-display-20261005",
+      "head_sha": "e290412a0fb0cb1e303557edeff0d313427d2db3",
+      "merge_commit_sha": "4d41466ff4cc9ae6f53b9879e25ca00c77f486e6",
+      "commits": 2,
+      "changed_files": 4,
+      "additions": 327,
+      "deletions": 1,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "e290412a0fb0cb1e303557edeff0d313427d2db3",
+        "candidate_ahead": 11,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "1b85ff3e8a700fc179b64fdb93f951dbfb67b30f",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 46,
+      "title": "Preserve newer navigation after sent-folder actions",
+      "url": "https://github.com/jyqj/tabmail/pull/46",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/recipient-reload-display-20261005",
+      "base_sha": "e290412a0fb0cb1e303557edeff0d313427d2db3",
+      "head_ref": "fix/sent-action-lifecycle-20261005",
+      "head_sha": "00461ab2f5b8343b844c0cea1d014b20fe7c2ffb",
+      "merge_commit_sha": "93e5f89c7de88f00c7729b542a90618059596e62",
+      "commits": 2,
+      "changed_files": 4,
+      "additions": 307,
+      "deletions": 2,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "00461ab2f5b8343b844c0cea1d014b20fe7c2ffb",
+        "candidate_ahead": 9,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "e290412a0fb0cb1e303557edeff0d313427d2db3",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 47,
+      "title": "Fence compose sends by committed editor ownership",
+      "url": "https://github.com/jyqj/tabmail/pull/47",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/sent-action-lifecycle-20261005",
+      "base_sha": "00461ab2f5b8343b844c0cea1d014b20fe7c2ffb",
+      "head_ref": "fix/compose-send-lifecycle-20261005",
+      "head_sha": "4c8c6880e4936acfc933fde2102b88db21e8c754",
+      "merge_commit_sha": "f69410575577c7a33e0e2f54fd4dcc4040d51928",
+      "commits": 1,
+      "changed_files": 4,
+      "additions": 396,
+      "deletions": 3,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "4c8c6880e4936acfc933fde2102b88db21e8c754",
+        "candidate_ahead": 8,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "00461ab2f5b8343b844c0cea1d014b20fe7c2ffb",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 48,
+      "title": "Preserve newer navigation after compose completion",
+      "url": "https://github.com/jyqj/tabmail/pull/48",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/compose-send-lifecycle-20261005",
+      "base_sha": "4c8c6880e4936acfc933fde2102b88db21e8c754",
+      "head_ref": "fix/compose-query-completion-20261005",
+      "head_sha": "d1c7102507fe1cf050298b108096b3508662cd8f",
+      "merge_commit_sha": "03de612db3a1913f21d8ac8acc085b25de59865a",
+      "commits": 1,
+      "changed_files": 4,
+      "additions": 309,
+      "deletions": 2,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "d1c7102507fe1cf050298b108096b3508662cd8f",
+        "candidate_ahead": 7,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "4c8c6880e4936acfc933fde2102b88db21e8c754",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 49,
+      "title": "Preserve newer editors during asynchronous opening",
+      "url": "https://github.com/jyqj/tabmail/pull/49",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/compose-query-completion-20261005",
+      "base_sha": "d1c7102507fe1cf050298b108096b3508662cd8f",
+      "head_ref": "fix/editor-opening-ownership-20261005",
+      "head_sha": "24f5bd4edcd50dbb4702b5fa109672697a8f0342",
+      "merge_commit_sha": "3198fb2a7a8d70ca860622fc41bf83f4263b7c34",
+      "commits": 1,
+      "changed_files": 7,
+      "additions": 244,
+      "deletions": 8,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "24f5bd4edcd50dbb4702b5fa109672697a8f0342",
+        "candidate_ahead": 6,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "d1c7102507fe1cf050298b108096b3508662cd8f",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 50,
+      "title": "Refresh company and compatibility receipt aggregates",
+      "url": "https://github.com/jyqj/tabmail/pull/50",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/editor-opening-ownership-20261005",
+      "base_sha": "24f5bd4edcd50dbb4702b5fa109672697a8f0342",
+      "head_ref": "fix/receipt-aggregate-refresh-20261005",
+      "head_sha": "7a61bedef174ed82714323c743f33f6438ca3479",
+      "merge_commit_sha": "4e3f851e29d48ae6e6fb451ac68f9908be57ed09",
+      "commits": 1,
+      "changed_files": 4,
+      "additions": 240,
+      "deletions": 3,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "7a61bedef174ed82714323c743f33f6438ca3479",
+        "candidate_ahead": 5,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "24f5bd4edcd50dbb4702b5fa109672697a8f0342",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 51,
+      "title": "Refresh opened submission content with the mail workspace",
+      "url": "https://github.com/jyqj/tabmail/pull/51",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/receipt-aggregate-refresh-20261005",
+      "base_sha": "7a61bedef174ed82714323c743f33f6438ca3479",
+      "head_ref": "fix/live-content-refresh-20261005",
+      "head_sha": "71b99514f4aa4457462387abe2f68ca351185bff",
+      "merge_commit_sha": "986f36b626aa872db7951277802d13992c9b05ed",
+      "commits": 1,
+      "changed_files": 6,
+      "additions": 332,
+      "deletions": 7,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "71b99514f4aa4457462387abe2f68ca351185bff",
+        "candidate_ahead": 4,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "7a61bedef174ed82714323c743f33f6438ca3479",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 52,
+      "title": "Bound authentication JSON request bodies before credential work",
+      "url": "https://github.com/jyqj/tabmail/pull/52",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/live-content-refresh-20261005",
+      "base_sha": "71b99514f4aa4457462387abe2f68ca351185bff",
+      "head_ref": "fix/auth-body-limit-20261005",
+      "head_sha": "0e0288fed6da7c8fdfae80c6b4bd4a9958e6b14b",
+      "merge_commit_sha": "e0315aeb50a86eef5b2e418bbc01b2f613659ef2",
+      "commits": 1,
+      "changed_files": 5,
+      "additions": 457,
+      "deletions": 8,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "0e0288fed6da7c8fdfae80c6b4bd4a9958e6b14b",
+        "candidate_ahead": 3,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "71b99514f4aa4457462387abe2f68ca351185bff",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 53,
+      "title": "Encode and fold outbound Subject headers safely",
+      "url": "https://github.com/jyqj/tabmail/pull/53",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/auth-body-limit-20261005",
+      "base_sha": "0e0288fed6da7c8fdfae80c6b4bd4a9958e6b14b",
+      "head_ref": "fix/subject-wire-encoding-20261006",
+      "head_sha": "9f2982d8366fabded56945991218a69cd715e1b8",
+      "merge_commit_sha": "2d0926966d4dfbf154abc60a9ac95682aac55397",
+      "commits": 1,
+      "changed_files": 4,
+      "additions": 242,
+      "deletions": 1,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "9f2982d8366fabded56945991218a69cd715e1b8",
+        "candidate_ahead": 2,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "0e0288fed6da7c8fdfae80c6b4bd4a9958e6b14b",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 54,
+      "title": "Reject valid null MX before SMTP delivery",
+      "url": "https://github.com/jyqj/tabmail/pull/54",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/subject-wire-encoding-20261006",
+      "base_sha": "9f2982d8366fabded56945991218a69cd715e1b8",
+      "head_ref": "fix/direct-null-mx-20261006",
+      "head_sha": "2987f509131b0a569094959a2b35a5b8883e9c68",
+      "merge_commit_sha": "5512179496924185f3cca46e5fd6933a69cf2f98",
+      "commits": 1,
+      "changed_files": 4,
+      "additions": 410,
+      "deletions": 5,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "2987f509131b0a569094959a2b35a5b8883e9c68",
+        "candidate_ahead": 1,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "9f2982d8366fabded56945991218a69cd715e1b8",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    },
+    {
+      "number": 55,
+      "title": "Preserve DATA-final SMTP transport error causes",
+      "url": "https://github.com/jyqj/tabmail/pull/55",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "merged": false,
+      "base_ref": "fix/direct-null-mx-20261006",
+      "base_sha": "2987f509131b0a569094959a2b35a5b8883e9c68",
+      "head_ref": "fix/smtp-data-cause-20261006",
+      "head_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+      "merge_commit_sha": "88c5603de749cddc210a9843efb92f44ffd581ce",
+      "commits": 1,
+      "changed_files": 4,
+      "additions": 297,
+      "deletions": 1,
+      "containment": {
+        "candidate_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "merge_base": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+        "candidate_ahead": 0,
+        "candidate_behind": 0,
+        "head_is_ancestor": true
+      },
+      "ci": {
+        "pr_triggered_current_head_runs": [],
+        "combined_status_contexts": [],
+        "current_head_full_ci_green": false
+      },
+      "reviews": {
+        "submitted": 0,
+        "states": [],
+        "inline_threads": 0,
+        "approvals": 0
+      },
+      "local_base_ref_sha": "2987f509131b0a569094959a2b35a5b8883e9c68",
+      "base_ref_matches_plugin_base_sha": true,
+      "recommendation": {
+        "action": "close_as_superseded_after_replacement_pr_exists",
+        "reason": "Pinned head is an ancestor of the replacement source; preserve source branches and discussion history. This closure is PR consolidation, not main merge or qualification."
+      }
+    }
+  ],
+  "main_sha": "d6d512172fb6b874c3283d9df3f4d56758684a13",
+  "main_relation": {
+    "candidate_ahead": 252,
+    "candidate_behind": 0
+  },
+  "sources": [
+    "GitHub plugin get_pr_info on all 39 PRs",
+    "GitHub compare_commits on each head versus candidate",
+    "GitHub workflow runs and combined statuses on all 39 PR heads",
+    "GitHub reviews, review threads and comments on all 39 PRs",
+    "Local git object ancestry and mode/type/blob identity checks"
+  ],
+  "summary": {
+    "open_prs": 39,
+    "draft_prs": 39,
+    "merge_conflict_prs": [
+      17
+    ],
+    "close_as_superseded_after_replacement_pr_exists": [
+      18,
+      19,
+      21,
+      22,
+      23,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55
+    ],
+    "keep_draft": [
+      17,
+      20,
+      24,
+      40
+    ],
+    "content_equivalent_nonancestor_prs": [
+      18,
+      26
+    ],
+    "current_head_runs_present": [
+      21,
+      23,
+      24
+    ],
+    "current_head_runs_absent_count": 36
+  },
+  "integration_admission": {
+    "recommended_base": "main",
+    "recommended_head": "integration/company-mail-r5-pr-management-20261007",
+    "existing_branch_filters_match_new_pr": true,
+    "workflow_change_needed": false,
+    "eligible_for_main_merge_now": false,
+    "required_before_main_merge": [
+      "Fresh current-combination backend race tests with disposable PostgreSQL and required-test execution gate, preserving original budgets and selection",
+      "Fresh source-version runner plus DTO/route-client/transaction/protocol/HTTP contracts without converting missing execution to success",
+      "Fresh full frontend source/catalog/typecheck/tests/lint/build and complete zero-vulnerability dependency audit",
+      "Fresh production-web and real browser-journey jobs",
+      "Triage actual failures at the current combination; historical partial passes do not qualify it"
+    ],
+    "qualification_limits": [
+      "Source-evidence success only verifies archive creation",
+      "Current workflow source-evidence checks the PR head; the four release jobs use the default pull-request merge ref",
+      "P0-100 original S/M and P0-120/G0 remain open at historical 10/171; PR consolidation does not alter task acceptance"
+    ]
+  }
+}

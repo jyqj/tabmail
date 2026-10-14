@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "status": "released_doc_freeze_not_runtime_target_result",
+  "files": [
+    {
+      "path": "docs/company-mail/R5-API-MATRIX.md",
+      "sha256": "26864f2f67a0ad158e202ebaadb5c0836324c9f3bb8aa1d803b6ecd97ffba6c3"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-API-MATRIX.json",
+      "sha256": "b78d0d6d89beeed88052c4648e5d4013ec043ccd56cf44f75604c17ee2e3d090"
+    }
+  ],
+  "route_count": 132,
+  "exact_registered_set_matches_author_AST": true,
+  "new_route_count": 5,
+  "old_registration_tuple_change_count": 0,
+  "checker_source_modified": false,
+  "Go_PG_or_test_reexecuted_by_doc_owner": false,
+  "affected_selector": "^TestR5RouteInventory$",
+  "package": "./internal/architecture",
+  "boundary": "Two owned document files hashed once for sole executor freeze; not per-tree hash sweep. Source semantics only; fullGo2aa9 FAIL remains."
+}

@@ -61,3 +61,8 @@ require (
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.40.0 // indirect
 )
+
+// Fixed upstream v2.3.0 plus tabmail actual-allocation budget guards.
+replace github.com/jhillyerd/enmime/v2 v2.3.0 => ./third_party/enmime-v2.3.0
+
+replace github.com/emersion/go-smtp v0.24.0 => ./third_party/go-smtp

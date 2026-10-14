@@ -1,0 +1,693 @@
+{
+  "implementation_base": "e5e6a2b4a429dbaf07f34a4f37a6d489d7e0422c",
+  "cache_source": "7beb93faf99fd50323edb4ddd00ed19a3e6ab405",
+  "rc_source": "49776be96f0dfa860d2377447b407e037dcf4a90",
+  "combined_source": "20b51d48c4a849615817ee461699d31fe3e0cb4c",
+  "candidate_adopted": false,
+  "prepared": {
+    "policy": "r5_external_dependency_runtime_v2",
+    "schema_version": 2,
+    "status": "ready_for_scoped_run",
+    "source_freeze": "20b51d48c4a849615817ee461699d31fe3e0cb4c",
+    "rc_source": "49776be96f0dfa860d2377447b407e037dcf4a90",
+    "excluded_integrations": [
+      "default675",
+      "89e7af sharedDB"
+    ],
+    "manifest_sha256": "a046f894ebba359649de25d73356727e62a36ed27a4496bfd1c6097ed69a8273",
+    "receipt_hashes": {
+      "archive": "97e53828dbc73ed2eabcd31c8b6338f6bd99fb47d3ce683eecd37e564d7f0953",
+      "default": "9f026fcbe3058f79b8d95553cdf45c219658284cf4748cb91fc0f78359c9ef6c",
+      "race": "e9656f5672c136645a0b72ba3e566e385077f179859b1243a5362cc0461c42b7"
+    },
+    "cli_path": "/workspace/r5-runtime-v2/toolroot/node_modules/vitest/vitest.mjs",
+    "cli_sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6",
+    "node_sha256": "bc17c508ffeed0ec622934f9b7fa72f8e78da65350e63c3eceb56fa688aa5e12",
+    "configs": {
+      "vitest.config.ts": "3d754d8f3bd75d472d2025142426e1190fa8a417739e22411424308eceecffe4",
+      "vitest.r5external-probe.config.ts": "bc54a8bf9e14cb4d72f6eece29b4c6926eb2a20b064b38bd54798548b0e6d176",
+      "vitest.r5protocol.config.ts": "0b2aa438a94a3c61e561a91abffed63f1a49e757768ff854943aa59cdbeb1e91",
+      "vitest.setup.ts": "29ceea9d963e80fb0eabb31985b05a8c93b54e5ab1fd03bd7d5fa377b11ff7b8"
+    },
+    "cache_policy": {
+      "cli_options": [
+        "--cache=false",
+        "--experimental.fsModuleCache=false"
+      ],
+      "config_loader": "bundle",
+      "fs_module_cache": false,
+      "on_disk_runtime_cache_root": null,
+      "optimizer_default_enabled": false,
+      "results": false
+    },
+    "dependency_content_root": "615fe56e088f38d7e5aafe316be5af2dde7f7c4632e8546290403e38f4aa112a",
+    "selected_qualification": "blocked: unchanged unknown external/generated/native/Method19/SML/wholeCI",
+    "controls": [
+      {
+        "control": "cache_policy_promotion",
+        "result": "rejected"
+      },
+      {
+        "control": "cli_drift_rehash",
+        "result": "rejected"
+      },
+      {
+        "control": "dependency_root_rehash",
+        "result": "rejected"
+      }
+    ],
+    "probe_same_cli_and_cache_policy": true,
+    "task_complete": false,
+    "product_green": false,
+    "hostile_concurrency": "not_qualified_for_hostile_concurrent_mutation"
+  },
+  "cache_probe": {
+    "policy": "r5_external_dependency_runtime_v2",
+    "source_freeze": "7beb93faf99fd50323edb4ddd00ed19a3e6ab405",
+    "manifest_sha256": "4c6ed988a08e5de9612507fa62f19893a14c8118a188dd41ea1b38aea05b5d35",
+    "node_sha256": "bc17c508ffeed0ec622934f9b7fa72f8e78da65350e63c3eceb56fa688aa5e12",
+    "cli_path": "/workspace/r5-runtime-v2/toolroot/node_modules/vitest/vitest.mjs",
+    "cli_sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6",
+    "cache_policy": {
+      "cli_options": [
+        "--cache=false",
+        "--experimental.fsModuleCache=false"
+      ],
+      "config_loader": "bundle",
+      "fs_module_cache": false,
+      "on_disk_runtime_cache_root": null,
+      "optimizer_default_enabled": false,
+      "results": false
+    },
+    "source_and_dependency_full_no_follow_validation": "equal after both consumers",
+    "source_shadow_node_modules": false,
+    "external_dependency_mutation": false,
+    "complete_dynamic_loader_coverage": "unknown",
+    "entries": [
+      {
+        "entry": "python",
+        "success": true,
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pending": 0,
+        "report_sha256": "acb5fe786afc161a5db25fd197b0015ac2dd034ecb77ad008b9a19bd21d40f72",
+        "assertions": [
+          "R5 external runtime real TSX CJS ESM worker jsdom"
+        ]
+      },
+      {
+        "entry": "go",
+        "success": true,
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pending": 0,
+        "report_sha256": "dcfa65e930ba6b1b7afd432844a78fed1a765a1bc04163d5a0fb44f1069b0da4",
+        "assertions": [
+          "R5 external runtime real TSX CJS ESM worker jsdom"
+        ]
+      }
+    ],
+    "go_terminal": [
+      {
+        "test": "TestR5ExternalRuntimeProbe",
+        "action": "pass",
+        "elapsed": 22.73
+      },
+      {
+        "test": null,
+        "action": "pass",
+        "elapsed": 23.785
+      }
+    ],
+    "go_log_sha256": "4f24216b35676652a3a2f391db69c23e6b8154e1cca60ddf3fb4d77d8c15e8d3"
+  },
+  "formal_state": {
+    "policy": "r5_external_dependency_runtime_v2",
+    "status": "run_failed",
+    "task_complete": false,
+    "product_green": false,
+    "manifest_sha256": "a046f894ebba359649de25d73356727e62a36ed27a4496bfd1c6097ed69a8273",
+    "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+    "dynamic_loader_coverage": "unknown",
+    "final_missing_layers": {
+      "CT01": [
+        "db",
+        "http"
+      ],
+      "CT02": [
+        "db",
+        "http"
+      ],
+      "CT03": [
+        "db",
+        "http"
+      ],
+      "CT04": [
+        "db",
+        "http"
+      ],
+      "CT05": [
+        "db",
+        "http"
+      ],
+      "CT06": [
+        "db",
+        "http"
+      ],
+      "CT07": [
+        "db",
+        "http"
+      ],
+      "CT08": [
+        "db",
+        "http"
+      ],
+      "CT09": [
+        "db",
+        "http"
+      ],
+      "CT10": [
+        "db",
+        "http"
+      ],
+      "RC01": [
+        "components",
+        "db",
+        "http"
+      ],
+      "RC02": [
+        "components",
+        "db",
+        "http"
+      ],
+      "RC03": [
+        "components",
+        "db",
+        "http"
+      ],
+      "RC04": [
+        "components",
+        "db",
+        "http"
+      ],
+      "RC05": [
+        "components",
+        "db",
+        "http"
+      ],
+      "OP01": [
+        "db",
+        "http"
+      ],
+      "OP02": [
+        "db",
+        "http"
+      ],
+      "OP03": [
+        "db",
+        "http"
+      ],
+      "OP04": [
+        "db",
+        "http"
+      ],
+      "RT01": [
+        "db",
+        "http"
+      ],
+      "RT02": [
+        "db",
+        "http"
+      ],
+      "RT03": [
+        "db",
+        "http"
+      ],
+      "RT04": [
+        "db",
+        "http"
+      ],
+      "RT05": [
+        "db",
+        "http"
+      ],
+      "RT06": [
+        "db",
+        "http"
+      ],
+      "RT07": [
+        "db"
+      ],
+      "BC01": [
+        "db",
+        "http"
+      ],
+      "BC02": [
+        "db",
+        "http"
+      ],
+      "BC03": [
+        "db",
+        "http"
+      ],
+      "BC04": [
+        "db",
+        "http"
+      ],
+      "BC05": [
+        "db",
+        "http"
+      ],
+      "BC06": [
+        "db",
+        "http"
+      ],
+      "GC01": [
+        "db"
+      ],
+      "GC02": [
+        "db"
+      ],
+      "LF01": [
+        "components",
+        "db",
+        "http"
+      ],
+      "LF02": [
+        "components",
+        "db",
+        "http"
+      ],
+      "LF03": [
+        "components",
+        "db",
+        "http"
+      ],
+      "LF04": [
+        "components",
+        "db",
+        "http"
+      ],
+      "LF05": [
+        "components",
+        "db",
+        "http"
+      ],
+      "LF06": [
+        "components",
+        "db",
+        "http"
+      ],
+      "LF07": [
+        "components",
+        "db",
+        "http"
+      ],
+      "PE01": [
+        "components",
+        "db",
+        "http"
+      ],
+      "PE02": [
+        "components",
+        "db",
+        "http"
+      ],
+      "PE03": [
+        "components",
+        "db",
+        "http"
+      ],
+      "PE04": [
+        "components",
+        "db",
+        "http"
+      ],
+      "PE05": [
+        "components",
+        "db",
+        "http"
+      ]
+    },
+    "process_exit_code": 1,
+    "stdout_sha256": "9fce5fbc07309b6cf7369a48bb346816cc62edacaac215c017d94a1cc8ce0986",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "protocol_status": "shared_scoped_evidence_failed",
+    "report_sha256": "9fce5fbc07309b6cf7369a48bb346816cc62edacaac215c017d94a1cc8ce0986"
+  },
+  "source_and_dependencies_terminal": "full_no_follow_equal_to_prepared",
+  "source_node_modules": false,
+  "dependency_mutation": false,
+  "owner_token_released": true,
+  "formal_launches": 1,
+  "go_producers": [
+    {
+      "file": "go-0.jsonl",
+      "sha256": "20390db25587c665922434b6a3f50a81fff2746b885da19d32fb71cf1b875d53",
+      "package": "tabmail/internal/api/handlers",
+      "terminal": [
+        "fail"
+      ],
+      "timeout120": true,
+      "runs": [
+        "TestR5ProtocolComponentObservations",
+        "TestR5ProtocolComponentObservations/RC01/default",
+        "TestR5ProtocolComponentObservations/RC02/legacy_outbound_list",
+        "TestR5ProtocolComponentObservations/RC02/legacy_outbound_detail",
+        "TestR5ProtocolComponentObservations/RC02/submit_replay",
+        "TestR5ProtocolComponentObservations/RC03/default",
+        "TestR5ProtocolComponentObservations/RC04/default"
+      ],
+      "passes": [
+        "TestR5ProtocolComponentObservations/RC01/default",
+        "TestR5ProtocolComponentObservations/RC03/default"
+      ],
+      "failures": [
+        "TestR5ProtocolComponentObservations/RC02/legacy_outbound_list",
+        "TestR5ProtocolComponentObservations/RC02/legacy_outbound_detail",
+        "TestR5ProtocolComponentObservations/RC02/submit_replay"
+      ],
+      "skips": []
+    },
+    {
+      "file": "go-1.jsonl",
+      "sha256": "5552c1bf81b234a7983996c42385056450759bdf333604af0a1ed2389bcd6f41",
+      "package": "tabmail/internal/app/credentials",
+      "terminal": [
+        "pass"
+      ],
+      "timeout120": false,
+      "runs": [
+        "TestR5ProtocolAuditReasonSharedCases",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/empty",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/whitespace",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/seven",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/trim_seven",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/eight",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_six",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_nine",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_twelve",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/maximum",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/trim_maximum",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/over_maximum"
+      ],
+      "passes": [
+        "TestR5ProtocolAuditReasonSharedCases/OP03/empty",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/whitespace",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/seven",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/trim_seven",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/eight",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_six",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_nine",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_twelve",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/maximum",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/trim_maximum",
+        "TestR5ProtocolAuditReasonSharedCases/OP03/over_maximum",
+        "TestR5ProtocolAuditReasonSharedCases"
+      ],
+      "failures": [],
+      "skips": []
+    },
+    {
+      "file": "go-2.jsonl",
+      "sha256": "9f6c1dd24245dd3c62ad05ee90d8c67f1d1653a26a8d024dde6bc142ba20f866",
+      "package": "tabmail/internal/delivery",
+      "terminal": [
+        "pass"
+      ],
+      "timeout120": false,
+      "runs": [
+        "TestR5ProtocolDeliverySharedCases",
+        "TestR5ProtocolDeliverySharedCases/RC03",
+        "TestR5ProtocolDeliverySharedCases/RC04",
+        "TestR5ProtocolDeliverySharedCases/RC05"
+      ],
+      "passes": [
+        "TestR5ProtocolDeliverySharedCases/RC03",
+        "TestR5ProtocolDeliverySharedCases/RC04",
+        "TestR5ProtocolDeliverySharedCases/RC05",
+        "TestR5ProtocolDeliverySharedCases"
+      ],
+      "failures": [],
+      "skips": []
+    }
+  ],
+  "component_packets": [
+    {
+      "case_variant": "RC01/default",
+      "vitest_sha256": "b61d229ab7813743c2dc00b2049b449e83d2f503da1782900e4acf2d0652a58b",
+      "vitest_success": true,
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "pending": 0,
+      "go_terminal": [
+        "pass"
+      ],
+      "assertions": [
+        {
+          "name": "R5 protocol component RC01 default secure behavior",
+          "status": "passed",
+          "failure_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "source_frames": [],
+          "markers": []
+        }
+      ],
+      "observations_sha256": "1cce4fa9ce87f1d272b5250485cc23d750bd89edb24146c1ab4ce183dc8cd64c",
+      "http_metadata": [
+        {
+          "method": "GET",
+          "path": "/api/v1/company/submissions/<fixture-id>",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "case_variant": "RC02/legacy_outbound_detail",
+      "vitest_sha256": "e1ddb3ba0612bea1ee6c8cc38fbada28d352a083dd2a79d1bfcd82be1828f78b",
+      "vitest_success": false,
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "pending": 0,
+      "go_terminal": [
+        "fail"
+      ],
+      "assertions": [
+        {
+          "name": "R5 protocol component RC02 legacy_outbound_detail secure behavior",
+          "status": "failed",
+          "failure_sha256": "d503532674bf65925c76b2e8b37d2ad4439136d6db588bf845fa53f6945c4be1",
+          "source_frames": [
+            "components/company/r5-protocol-shared-components.test.tsx:107:139",
+            "components/company/r5-protocol-shared-components.test.tsx:177:5"
+          ],
+          "markers": []
+        }
+      ],
+      "observations_sha256": "3bbfaed131dc98195f6e7d387518209fb5a5c40b8cfc381085c05441fdf1ed5e",
+      "http_metadata": [
+        {
+          "method": "GET",
+          "path": "/api/v1/company/submissions",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/outbound",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "case_variant": "RC02/legacy_outbound_list",
+      "vitest_sha256": "9025c4d91ffe04eac86e051a1903d0da37f343bc546749e1b556e9ba61e65c33",
+      "vitest_success": false,
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "pending": 0,
+      "go_terminal": [
+        "fail"
+      ],
+      "assertions": [
+        {
+          "name": "R5 protocol component RC02 legacy_outbound_list secure behavior",
+          "status": "failed",
+          "failure_sha256": "d503532674bf65925c76b2e8b37d2ad4439136d6db588bf845fa53f6945c4be1",
+          "source_frames": [
+            "components/company/r5-protocol-shared-components.test.tsx:107:139",
+            "components/company/r5-protocol-shared-components.test.tsx:177:5"
+          ],
+          "markers": []
+        }
+      ],
+      "observations_sha256": "cbf2b207fbbcfcfe6dff6c4ed992ec76721c37eddf92b57e856fbdfe060aa901",
+      "http_metadata": [
+        {
+          "method": "GET",
+          "path": "/api/v1/outbound",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/company/submissions",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "case_variant": "RC02/submit_replay",
+      "vitest_sha256": "3b18945132fce5f3a3651d9d1da0a2108945510e0d6a56d4e10eb124f231cad6",
+      "vitest_success": false,
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "pending": 0,
+      "go_terminal": [
+        "fail"
+      ],
+      "assertions": [
+        {
+          "name": "R5 protocol component RC02 submit_replay secure behavior",
+          "status": "failed",
+          "failure_sha256": "d503532674bf65925c76b2e8b37d2ad4439136d6db588bf845fa53f6945c4be1",
+          "source_frames": [
+            "components/company/r5-protocol-shared-components.test.tsx:107:139",
+            "components/company/r5-protocol-shared-components.test.tsx:177:5"
+          ],
+          "markers": []
+        }
+      ],
+      "observations_sha256": "85d009faa914155a96de24d9dd63d6d1d02fed2959a479cd88dc70e1aa2b667f",
+      "http_metadata": [
+        {
+          "method": "GET",
+          "path": "/api/v1/company/mailboxes/<fixture-id>/templates",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/company/drafts/<fixture-id>/submit",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/company/drafts/<fixture-id>/submit",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/outbound",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "case_variant": "RC03/default",
+      "vitest_sha256": "bc324932cdbf021def01fe11ed1a2fd41e67eb4a6f6dec1ae9d0750fe14d9597",
+      "vitest_success": true,
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "pending": 0,
+      "go_terminal": [
+        "pass"
+      ],
+      "assertions": [
+        {
+          "name": "R5 protocol component RC03 default secure behavior",
+          "status": "passed",
+          "failure_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "source_frames": [],
+          "markers": []
+        }
+      ],
+      "observations_sha256": "1a6268bded359e78b14028b35cbb296ddefb18bc73d6582492933b416e1aa417",
+      "http_metadata": [
+        {
+          "method": "GET",
+          "path": "/api/v1/company/submissions/<fixture-id>",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "case_variant": "RC04/default",
+      "vitest_sha256": "a6ad393a8bc121c87cc61636466dda9a9f3069a3a8c5a71bd74d8bc26d54a906",
+      "vitest_success": true,
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "pending": 0,
+      "go_terminal": [],
+      "assertions": [
+        {
+          "name": "R5 protocol component RC04 default secure behavior",
+          "status": "passed",
+          "failure_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "source_frames": [],
+          "markers": []
+        }
+      ]
+    }
+  ],
+  "uncredited_late_or_incomplete_packets": [
+    "RC04/default"
+  ],
+  "scope_exclusions": [
+    "default675",
+    "89e7af sharedDB"
+  ],
+  "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+  "dynamic_loader_completeness": "unknown",
+  "central_10_171": "unchanged",
+  "historical_vcs_128_cause": "unproven",
+  "tests": {
+    "runtime_controls": 33,
+    "protocol_regressions": 70,
+    "approved_RC_unit_evidence": "63/63 from RC owner; formal is independent"
+  },
+  "direct_python_formal_vitest": "notrun: Go component producer failed/timed out; independent Python probe passed",
+  "selected_identities": {
+    "default": {
+      "source_sha": "66db457ec56a9f1edc9631ed1849336ec6dc7aa7",
+      "attestation_sha256": "39a01ea2b501ea106b44843d766f3ef710e72a9518dc3a855b9f482f7c66527b",
+      "qualification": {
+        "Method19": "unknown",
+        "SML": "unknown",
+        "compiler_native": "unknown",
+        "excluded_metadata_boundary": "descriptor_checked",
+        "external_modulecache": "unknown",
+        "generated": "unknown",
+        "local_static_binding": "captured",
+        "overall": "blocked",
+        "wholeCI": "unknown"
+      }
+    },
+    "race": {
+      "source_sha": "92da460d89eaec377b6b8893202f880d6238c2b7",
+      "attestation_sha256": "580f9794f5c540362462a0c9f2e4e35d598cca66a51e5b37dc10a5653b146bfa",
+      "qualification": {
+        "Method19": "unknown",
+        "SML": "unknown",
+        "compiler_native": "unknown",
+        "excluded_metadata_boundary": "descriptor_checked",
+        "external_modulecache": "unknown",
+        "generated": "unknown",
+        "local_static_binding": "captured",
+        "overall": "blocked",
+        "wholeCI": "unknown"
+      }
+    }
+  },
+  "archive_source_sha": "50e7551883f00763f6733c98d40cfa1b1859389d",
+  "fixed_implementation_hashes": {
+    "vitest/dist/chunks/cac.uFydS1Z4.js": "27cc9365d180bee3da005fe6c4d485868caf9d8f54280759eea28842836af549",
+    "vitest/dist/chunks/cli-api.CnMVyzaz.js": "a236001d048380e2c67d05423fc9ea3f26b07ee019ba8d6e622082f29d49102e",
+    "vite/dist/node/chunks/node.js": "f64038f08022030b77efee87b6baa81933a7b77d820aaa64bc3262fda44d80b0"
+  },
+  "old_v1_failure": "unchanged: 9c04fed freeze, source-shadow cache plus original RC01 assertion, prior checkpoint retained"
+}

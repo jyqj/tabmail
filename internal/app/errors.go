@@ -14,12 +14,19 @@ const (
 	KindNotFound   ErrorKind = "not_found"
 	KindConflict   ErrorKind = "conflict"
 	KindInternal   ErrorKind = "internal"
+	// KindQuotaExceeded marks a rate/quota limitation. It has no HTTP number
+	// baked in; the transport layer decides how to render it.
+	KindQuotaExceeded ErrorKind = "quota_exceeded"
 )
 
 type Error struct {
 	Kind    ErrorKind
 	Message string
 	Err     error
+	// Data optionally carries machine-readable payload alongside the error
+	// (e.g. the current revision on a draft conflict). The transport layer
+	// decides whether and how to surface it; domain code only fills it in.
+	Data map[string]any
 }
 
 func (e *Error) Error() string {
@@ -41,6 +48,16 @@ func BadRequest(msg string) error { return &Error{Kind: KindBadRequest, Message:
 func Forbidden(msg string) error  { return &Error{Kind: KindForbidden, Message: msg} }
 func NotFound(msg string) error   { return &Error{Kind: KindNotFound, Message: msg} }
 func Conflict(msg string) error   { return &Error{Kind: KindConflict, Message: msg} }
+
+// ConflictWithData builds a conflict that additionally reports the current
+// domain state (e.g. the live revision) so clients can resynchronize.
+func ConflictWithData(msg string, data map[string]any) error {
+	return &Error{Kind: KindConflict, Message: msg, Data: data}
+}
+
+// QuotaExceeded reports that a usage limit has been reached.
+func QuotaExceeded(msg string) error { return &Error{Kind: KindQuotaExceeded, Message: msg} }
+
 func Internal(err error) error {
 	if err == nil {
 		return nil

@@ -2,12 +2,16 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"sort"
 	"time"
 
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 // ================================================================
@@ -57,7 +61,7 @@ func (s *PgStore) ClaimOutboxEvents(ctx context.Context, now time.Time, limit in
 		SET state='processing', attempts=o.attempts + 1, claimed_at=$1, lease_until=$3, updated_at=$1
 		FROM cte
 		WHERE o.id = cte.id
-		RETURNING o.id,o.event_type,o.payload,o.occurred_at,o.state,o.attempts,o.last_error,o.next_attempt_at,o.claimed_at,o.lease_until,o.created_at,o.updated_at`,
+		RETURNING o.id,o.event_type,o.payload,o.occurred_at,o.state,o.attempts,COALESCE(o.last_error,'') AS last_error,o.next_attempt_at,o.claimed_at,o.lease_until,o.created_at,o.updated_at`,
 		now, limit, leaseUntil)
 	if err != nil {
 		return nil, err
@@ -90,10 +94,31 @@ func (s *PgStore) MarkOutboxEventRetry(ctx context.Context, id uuid.UUID, lastEr
 	return err
 }
 
+func (s *PgStore) MarkOutboxEventDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error {
+	return s.markQueueClaim(ctx, id, attempt,
+		`SELECT id FROM outbox_events WHERE id=$1 FOR UPDATE`,
+		`UPDATE outbox_events
+		 SET state='done', claimed_at=NULL, lease_until=NULL, updated_at=clock_timestamp()
+		 WHERE id=$1 AND state='processing' AND attempts=$2 AND lease_until>clock_timestamp()`)
+}
+
+func (s *PgStore) MarkOutboxEventRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time) error {
+	return s.markQueueClaim(ctx, id, attempt,
+		`SELECT id FROM outbox_events WHERE id=$1 FOR UPDATE`,
+		`UPDATE outbox_events
+		 SET state='retry', last_error=$3, next_attempt_at=$4, claimed_at=NULL, lease_until=NULL, updated_at=clock_timestamp()
+		 WHERE id=$1 AND state='processing' AND attempts=$2 AND lease_until>clock_timestamp()`,
+		lastError, nextAttemptAt.UTC())
+}
+
 func (s *PgStore) CreateWebhookDeliveries(ctx context.Context, event *models.OutboxEvent, urls []string) error {
 	if event == nil || len(urls) == 0 {
 		return nil
 	}
+	// Reclaimed handlers may fan out the same event concurrently. Acquire
+	// unique (event_id,url) keys in one order without mutating caller config.
+	orderedURLs := append([]string(nil), urls...)
+	sort.Strings(orderedURLs)
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -101,7 +126,7 @@ func (s *PgStore) CreateWebhookDeliveries(ctx context.Context, event *models.Out
 	defer tx.Rollback(ctx)
 
 	now := time.Now().UTC()
-	for _, url := range urls {
+	for _, url := range orderedURLs {
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO webhook_deliveries (id,event_id,url,event_type,payload,state,attempts,next_attempt_at,created_at,updated_at)
 			VALUES ($1,$2,$3,$4,$5,'pending',0,$6,$6,$6)
@@ -133,7 +158,7 @@ func (s *PgStore) ClaimWebhookDeliveries(ctx context.Context, now time.Time, lim
 		SET state='processing', attempts=d.attempts + 1, claimed_at=$1, lease_until=$3, last_tried_at=$1, updated_at=$1
 		FROM cte
 		WHERE d.id = cte.id
-		RETURNING d.id,d.event_id,d.url,d.event_type,d.payload,d.state,d.attempts,d.last_error,d.next_attempt_at,d.claimed_at,d.lease_until,d.last_tried_at,d.delivered_at,d.created_at,d.updated_at`,
+		RETURNING d.id,d.event_id,d.url,d.event_type,d.payload,d.state,d.attempts,COALESCE(d.last_error,'') AS last_error,d.next_attempt_at,d.claimed_at,d.lease_until,d.last_tried_at,d.delivered_at,d.created_at,d.updated_at`,
 		now, limit, leaseUntil)
 	if err != nil {
 		return nil, err
@@ -171,12 +196,67 @@ func (s *PgStore) MarkWebhookDeliveryRetry(ctx context.Context, id uuid.UUID, la
 	return err
 }
 
+func (s *PgStore) MarkWebhookDeliveryDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error {
+	return s.markQueueClaim(ctx, id, attempt,
+		`SELECT id FROM webhook_deliveries WHERE id=$1 FOR UPDATE`,
+		`UPDATE webhook_deliveries
+		 SET state='delivered', delivered_at=clock_timestamp(), claimed_at=NULL, lease_until=NULL, updated_at=clock_timestamp()
+		 WHERE id=$1 AND state='processing' AND attempts=$2 AND lease_until>clock_timestamp()`)
+}
+
+func (s *PgStore) MarkWebhookDeliveryRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time, dead bool) error {
+	state := "retry"
+	if dead {
+		state = "dead"
+	}
+	return s.markQueueClaim(ctx, id, attempt,
+		`SELECT id FROM webhook_deliveries WHERE id=$1 FOR UPDATE`,
+		`UPDATE webhook_deliveries
+		 SET state=$3, last_error=$4, next_attempt_at=$5, claimed_at=NULL, lease_until=NULL, updated_at=clock_timestamp()
+		 WHERE id=$1 AND state='processing' AND attempts=$2 AND lease_until>clock_timestamp()`,
+		state, lastError, nextAttemptAt.UTC())
+}
+
+// The attempt counter is advanced by each successful claim and is never reset
+// on these queues. Lock first, then evaluate the current database lease in a
+// separate statement: an UPDATE alone may wait after evaluating its predicate.
+// A stale observation never changes state or clears a successor's lease.
+func (s *PgStore) markQueueClaim(ctx context.Context, id uuid.UUID, attempt int, lockSQL, updateSQL string, values ...any) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if id == uuid.Nil || attempt <= 0 {
+		return store.ErrClaimLeaseLost
+	}
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	var lockedID uuid.UUID
+	if err = tx.QueryRow(ctx, lockSQL, id).Scan(&lockedID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return store.ErrClaimLeaseLost
+		}
+		return err
+	}
+	args := append([]any{id, attempt}, values...)
+	result, err := tx.Exec(ctx, updateSQL, args...)
+	if err != nil {
+		return err
+	}
+	if result.RowsAffected() != 1 {
+		return store.ErrClaimLeaseLost
+	}
+	return tx.Commit(ctx)
+}
+
 func (s *PgStore) ListDeadWebhookDeliveries(ctx context.Context, limit int) ([]models.DeadLetter, error) {
 	if limit <= 0 {
 		limit = 20
 	}
 	rows, err := s.pool.Query(ctx, `
-		SELECT id,url,event_type,payload,attempts,last_error,created_at,last_tried_at
+		SELECT id,url,event_type,payload,attempts,COALESCE(last_error,'') AS last_error,created_at,last_tried_at
 		FROM webhook_deliveries
 		WHERE state='dead'
 		ORDER BY updated_at DESC
@@ -232,7 +312,7 @@ func (s *PgStore) ListWebhookDeliveries(ctx context.Context, pg models.Page, sta
 	}
 	args := append(filters, pg.PerPage, pg.Offset())
 	rows, err := s.pool.Query(ctx, `
-		SELECT id,event_id,url,event_type,payload,state,attempts,last_error,next_attempt_at,claimed_at,lease_until,last_tried_at,delivered_at,created_at,updated_at
+		SELECT id,event_id,url,event_type,payload,state,attempts,COALESCE(last_error,'') AS last_error,next_attempt_at,claimed_at,lease_until,last_tried_at,delivered_at,created_at,updated_at
 		FROM webhook_deliveries`+where+fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", len(filters)+1, len(filters)+2), args...)
 	if err != nil {
 		return nil, 0, err
@@ -322,7 +402,7 @@ func (s *PgStore) ClaimIngestJobs(ctx context.Context, now time.Time, limit int)
 		SET state='processing', attempts=j.attempts + 1, claimed_at=$1, lease_until=$3, updated_at=$1
 		FROM cte
 		WHERE j.id = cte.id
-		RETURNING j.id,j.source,j.remote_ip,j.mail_from,j.recipients,j.raw_object_key,j.metadata,j.state,j.attempts,j.last_error,j.next_attempt_at,j.claimed_at,j.lease_until,j.created_at,j.updated_at`,
+		RETURNING j.id,j.source,j.remote_ip,j.mail_from,j.recipients,j.raw_object_key,j.metadata,j.state,j.attempts,COALESCE(j.last_error,'') AS last_error,j.next_attempt_at,j.claimed_at,j.lease_until,j.created_at,j.updated_at`,
 		now, limit, leaseUntil)
 	if err != nil {
 		return nil, err
@@ -384,7 +464,7 @@ func (s *PgStore) ListIngestJobs(ctx context.Context, pg models.Page, state, sou
 	}
 	args := append(filters, pg.PerPage, pg.Offset())
 	rows, err := s.pool.Query(ctx, `
-		SELECT id,source,remote_ip,mail_from,recipients,raw_object_key,metadata,state,attempts,last_error,next_attempt_at,claimed_at,lease_until,created_at,updated_at
+		SELECT id,source,remote_ip,mail_from,recipients,raw_object_key,metadata,state,attempts,COALESCE(last_error,'') AS last_error,next_attempt_at,claimed_at,lease_until,created_at,updated_at
 		FROM ingest_jobs`+where+fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", len(filters)+1, len(filters)+2), args...)
 	if err != nil {
 		return nil, 0, err

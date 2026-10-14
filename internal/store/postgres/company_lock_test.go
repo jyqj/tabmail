@@ -14,6 +14,7 @@ import (
 // company traffic never queues behind a management mutation (or behind the
 // ingress quota lock). Administration itself keeps the company lock.
 func TestCompanyReadPathDoesNotSerializeOnTenantLock(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 

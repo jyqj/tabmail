@@ -1,0 +1,16 @@
+{
+  "scope": "registry_clock_and_typed_M_proof_minimal_repair",
+  "files": {
+    "scripts/run_r5_benchmark.py": "cf156af977167d9b4ece53b61e48c7e941e6ccbeff5c0279e247d7f0844e1d02",
+    "scripts/tests/test_r5_benchmark.py": "79b3d443a04198b27a44dde978bbd4742c3c8145745d05ef40d6a93c7f04d482"
+  },
+  "base_packet": "/tmp/tabmail-registry-clock-Mtyped-prepared-20261002-e9sjl53o/sole-execution-packet.json",
+  "syntax_ast_parse": "PASS_ONLY",
+  "runtime_tests_executed": false,
+  "registry_CLI_executed": false,
+  "new_mutation_groups": 3,
+  "target_methods_preserved": true,
+  "historical_rows_reviews_raw_methods_modified": false,
+  "typed_M_summary_bound_field_count": 13,
+  "independent_review_followup_fix": "observed exit / absent Go terminal / strict rejection machine summaries bound to authenticated original failed evidence"
+}

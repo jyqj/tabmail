@@ -1,0 +1,182 @@
+{
+  "verdict": "ACCEPT",
+  "scope": "catalog revision15 static inventory and preserved historical tests; no implementation TODO or product-runtime acceptance",
+  "final_reviewed_source": {
+    "commit": "0e329e872685209486e966fe7d5cf031e3020034",
+    "tree": "0135d90c89bedef6bf9a44c4738944a485feea3f",
+    "status": ""
+  },
+  "data_candidate_source": {
+    "commit": "53d0d925601620f7062792d13d55b9a73837c5e5",
+    "tree": "f4030eeb47dc59c8c4e03180a7349b677e0bfa54",
+    "status": ""
+  },
+  "product_input_source": {
+    "commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
+    "tree": "437de0716fc9247e188f0409654f4f178905dc33",
+    "status": ""
+  },
+  "stages": [
+    {
+      "label": "Original CLI baseline",
+      "source": {
+        "commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
+        "tree": "437de0716fc9247e188f0409654f4f178905dc33",
+        "status": ""
+      },
+      "exits": [
+        1,
+        1,
+        1
+      ],
+      "receipt": "baseline-receipt.json"
+    },
+    {
+      "label": "Original CLI reconciled data candidate",
+      "source": {
+        "commit": "53d0d925601620f7062792d13d55b9a73837c5e5",
+        "tree": "f4030eeb47dc59c8c4e03180a7349b677e0bfa54",
+        "status": ""
+      },
+      "exits": [
+        0,
+        0,
+        0
+      ],
+      "receipt": "candidate-data-cli-receipt.json"
+    },
+    {
+      "label": "First independent full five modules; original failure retained",
+      "source": {
+        "commit": "d79c5ba04ce43f420ea95d28f2367a6aa27228c2",
+        "tree": "01bd88c23bb18a494e6727a5418b140e44037ad7",
+        "status": ""
+      },
+      "tests": 100,
+      "pass": 99,
+      "fail": 1,
+      "error": 0,
+      "skip": 0,
+      "receipt": "candidate-final-modules-receipt.json"
+    },
+    {
+      "label": "Corrected source first targeted run; ENOSPC retained",
+      "source": {
+        "commit": "0e329e872685209486e966fe7d5cf031e3020034",
+        "tree": "0135d90c89bedef6bf9a44c4738944a485feea3f",
+        "status": ""
+      },
+      "tests": 30,
+      "pass": 28,
+      "fail": 0,
+      "error": 2,
+      "skip": 0,
+      "receipt": "candidate-pr23-followup-receipt.json"
+    },
+    {
+      "label": "Corrected source independent serial targeted run",
+      "source": {
+        "commit": "0e329e872685209486e966fe7d5cf031e3020034",
+        "tree": "0135d90c89bedef6bf9a44c4738944a485feea3f",
+        "status": ""
+      },
+      "tests": 30,
+      "pass": 30,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "receipt": "candidate-pr23-serial-receipt.json"
+    },
+    {
+      "label": "Author full five modules; independently read and byte-verified, not a frontend full rerun",
+      "source": {
+        "commit": "0e329e872685209486e966fe7d5cf031e3020034",
+        "tree": "0135d90c89bedef6bf9a44c4738944a485feea3f",
+        "status": ""
+      },
+      "tests": 100,
+      "pass": 100,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "receipt": "author-final-full-suite-verified.json"
+    }
+  ],
+  "preservation": {
+    "historical_files_same_bytes": 120,
+    "protected_source_files_same_bytes": 174,
+    "original_revision_constants_same_source": 72,
+    "original_catalog_negative_controls_same_source": 5,
+    "original_catalog_methods_retained": 31,
+    "current_catalog_methods": 33,
+    "original_transaction_methods_retained": 26,
+    "unchanged_existing_function_manual_reviews": 401,
+    "existing_file_reviews_preserved": 64,
+    "changed_function_review_archived": "CreateAPIKey four original manual fields and complete original source_review",
+    "new_functions": 2,
+    "changed_existing_function_bodies": 1,
+    "pr23_original_body_sha256": "645376ce0d324122b53a9426a6caea4ed18ee2738d25ed983a74f0264c3e756c",
+    "pr23_original_method_ast_sha256": "5b82e67898cecb5946b58450a5bc72b62ce8c227bac4b058d3aa267b89432b0e"
+  },
+  "current_static_facts": {
+    "postgres_files": 64,
+    "functions": 404,
+    "sql_execution_calls": 505,
+    "migrations": 19,
+    "routes": 133,
+    "client_branches": 136,
+    "source_closure_files": 95
+  },
+  "closed_findings": [
+    {
+      "kind": "Historical positive required old CreateAPIKey state",
+      "resolution": "Preserved full PR23 original body in exact clean ordinary fdea clone; current revision15 source/manual guards remain active."
+    },
+    {
+      "kind": "ENOSPC during complete historical clone checkout",
+      "resolution": "Reclaimed fully committed inactive worktrees. During the author's final 100-test run, root also removed 65 large, rebuildable compiler .a files from the established GOCACHE after verifying their Tabmail ownership, totaling 1,172,124,994 bytes. Source files, go-mod module packages, compiler, standard-library and AST-tool caches, and original evidence were preserved. The independent retry used the same exact source and command in serial execution; fixtures, collectors, assertions, and identity requirements were unchanged."
+    }
+  ],
+  "independent_final_method_ids": [
+    "test_r5_transactions.TransactionInventoryTests.test_cache_has_specific_message_fence_not_ancestor_lock",
+    "test_r5_transactions.TransactionInventoryTests.test_callback_signature_drift_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_constant_backed_observation_is_write_despite_ast_heuristic",
+    "test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence",
+    "test_r5_transactions.TransactionInventoryTests.test_current_trigger_and_package_constant_changes_remain_fenced",
+    "test_r5_transactions.TransactionInventoryTests.test_duplicate_entry_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_external_caller_change_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_fk_or_trigger_drift_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_gc_round_and_receipt_projection_are_not_transaction_acceptance",
+    "test_r5_transactions.TransactionInventoryTests.test_literal_and_concatenated_dynamic_sql_distinguished",
+    "test_r5_transactions.TransactionInventoryTests.test_missing_callback_effect_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_missing_file_type_review_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_missing_function_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_missing_specific_assertion_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_missing_specific_sql_effect_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_new_file_without_functions_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_new_migration_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_new_pure_function_is_also_rejected_and_no_inventory_allowlist",
+    "test_r5_transactions.TransactionInventoryTests.test_new_write_function_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_new_write_in_old_function_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_obsolete_function_and_wrong_receiver_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_package_sql_constant_drift_rejected",
+    "test_r5_transactions.TransactionInventoryTests.test_pr23_each_added_and_changed_body_has_independent_source_review",
+    "test_r5_transactions.TransactionInventoryTests.test_read_preview_and_sse_have_real_lock_and_callback_boundaries",
+    "test_r5_transactions.TransactionInventoryTests.test_structure_cannot_claim_runtime_or_parent_acceptance",
+    "test_r5_transactions.TransactionInventoryTests.test_update_detected_but_row_lock_not_mutation",
+    "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision14_binds_actual_source_facts_and_preserves_manual_reviews",
+    "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision14_preserves_public_history_collectors_and_original_rejections",
+    "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision15_binds_actual_source_facts_and_preserves_manual_reviews",
+    "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision15_preserves_public_history_collectors_and_original_rejections"
+  ],
+  "runtime_verified": false,
+  "product_green": false,
+  "task_complete": false,
+  "implementation_todos_completed": 0,
+  "parent_tasks": {
+    "accepted": 10,
+    "total": 171,
+    "remaining": 161
+  },
+  "no_remaining_blocking_findings": true
+}

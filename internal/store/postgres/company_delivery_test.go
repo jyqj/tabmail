@@ -186,6 +186,7 @@ func TestR3RealSMTPRecipientIsolationAndUncertainRecovery(t *testing.T) {
 }
 
 func TestR3BootstrapIsAtomicAcrossRoles(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	start := make(chan struct{})
 	results := make(chan bool, 8)

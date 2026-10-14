@@ -1,0 +1,1 @@
+{"status": "rejected", "product_green": false, "task_complete": false, "error": "Command '['go', 'test', '-mod=readonly', '-count=1', './internal/architecture', '-run', '^TestR5RouteInventory$']' returned non-zero exit status 1."}

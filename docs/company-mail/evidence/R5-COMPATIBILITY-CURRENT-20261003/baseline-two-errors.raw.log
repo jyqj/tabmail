@@ -1,0 +1,33 @@
+test_current_source_map_is_not_product_or_dependency_completion (__main__.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion) ... ERROR
+test_exact_safe_join_remains_metadata_not_product_approval (__main__.SafeWireJoinTests.test_exact_safe_join_remains_metadata_not_product_approval) ... ERROR
+
+======================================================================
+ERROR: test_current_source_map_is_not_product_or_dependency_completion (__main__.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/r5-compatibility/baseline-tests.py", line 21, in test_current_source_map_is_not_product_or_dependency_completion
+    result=gate.validate(self.data,self.routes,self.clients)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/r5-compatibility/baseline-gate.py", line 213, in validate
+    if len(stored)!=len(actual) or len({x.get('route') for x in stored})!=len(stored):raise ValueError('missing/duplicate routes')
+                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: missing/duplicate routes
+
+======================================================================
+ERROR: test_exact_safe_join_remains_metadata_not_product_approval (__main__.SafeWireJoinTests.test_exact_safe_join_remains_metadata_not_product_approval)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/r5-compatibility/baseline-tests.py", line 109, in test_exact_safe_join_remains_metadata_not_product_approval
+    result=self.validate(self.data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/r5-compatibility/baseline-tests.py", line 102, in validate
+    def validate(self,data):return gate.validate_wire(data,self.facts)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/r5-compatibility/baseline-gate.py", line 140, in validate_wire
+    raise ValueError('wire spec/case differs from current source')
+ValueError: wire spec/case differs from current source
+
+----------------------------------------------------------------------
+Ran 2 tests in 1.583s
+
+FAILED (errors=2)

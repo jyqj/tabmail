@@ -34,6 +34,22 @@ func (s *FakeStore) UpsertSetting(_ context.Context, key, value, description str
 	return nil
 }
 
+func (s *FakeStore) SeedSetting(ctx context.Context, key, value, description string) (bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return false, err
+	}
+	if _, exists := s.settings[key]; exists {
+		return false, nil
+	}
+	if s.settings == nil {
+		s.settings = map[string]*models.SystemSetting{}
+	}
+	s.settings[key] = &models.SystemSetting{Key: key, Value: value, Description: description, UpdatedAt: time.Now().UTC()}
+	return true, nil
+}
+
 func (s *FakeStore) ListSettings(_ context.Context) ([]*models.SystemSetting, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useI18n } from "@/lib/i18n";
 import { login, register } from "@/lib/api";
+import { sessionScope } from "@/lib/session";
 import {
   Dialog,
   DialogContent,
@@ -33,9 +34,10 @@ import { cn } from "@/lib/utils";
 import { TabMailLogo } from "@/components/tabmail-logo";
 
 type AuthMode = "login" | "register";
+type AuthAttempt = { owner: object; before: string; remountScope?: string };
 
 export function AuthDialog() {
-  const { level, user, loginWithTokens, logout } = useAuth();
+  const { level, user, logout } = useAuth();
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -50,53 +52,103 @@ export function AuthDialog() {
   const [regPassword, setRegPassword] = useState("");
   const [regName, setRegName] = useState("");
   const [regLoading, setRegLoading] = useState(false);
-
-  const handleLogin = async () => {
-    if (!loginEmail.trim() || !loginPassword.trim()) return;
-    setLoginLoading(true);
-    try {
-      const res = await login(loginEmail.trim(), loginPassword);
-      loginWithTokens(res.data.access_token, res.data.user);
-      setLoginEmail("");
-      setLoginPassword("");
-      setOpen(false);
-      toast.success(
-        `Welcome, ${res.data.user.display_name || res.data.user.email}`,
-      );
-    } catch (e: unknown) {
-      const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || "Login failed");
-    } finally {
-      setLoginLoading(false);
+  const registrationHint = useId();
+  // Match the server's bcrypt input policy, preserving every password byte.
+  const registrationBytes = new TextEncoder().encode(regPassword).length;
+  const validRegistrationPassword = registrationBytes >= 12 && registrationBytes <= 72;
+  const submitting = loginLoading || regLoading;
+  const pending = useRef<AuthAttempt | null>(null);
+  const view = useRef<object | null>(null);
+  useLayoutEffect(() => {
+    view.current = {};
+    return () => {
+      const operation = pending.current;
+      if (operation && view.current === operation.owner) {
+        const after = sessionScope();
+        // AuthProvider remounts its cache subtree when the request installs
+        // identity. Preserve only this still-owned attempt's exact new scope;
+        // ordinary departures and previously retired forms get no receipt.
+        if (after !== operation.before) operation.remountScope = after;
+      }
+      view.current = null;
+    };
+  }, []);
+  const retireView = () => { if (view.current) view.current = {}; };
+  const changeOpen = (nextOpen: boolean) => {
+    retireView();
+    setOpen(nextOpen);
+    if (nextOpen) {
+      setShowPwd(false);
+      setMode("login");
     }
   };
+  const changeMode = (nextMode: AuthMode) => {
+    retireView();
+    setMode(nextMode);
+    setShowPwd(false);
+  };
+  const handleEnter = (event: KeyboardEvent<HTMLInputElement>, submit: () => Promise<void>) => {
+    if (event.key !== "Enter" || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
+    event.preventDefault();
+    void submit();
+  };
 
-  const handleRegister = async () => {
-    if (!regEmail.trim() || !regPassword.trim()) return;
-    if (regPassword.length < 8) {
+  const submitAuth = async (kind: AuthMode) => {
+    // State only disables the rendered button. A ref also excludes same-turn
+    // clicks, Enter events and a different form while the cookie write settles.
+    if (pending.current || !view.current) return;
+    const email = kind === "login" ? loginEmail.trim() : regEmail.trim();
+    const password = kind === "login" ? loginPassword : regPassword;
+    if (!email || !password) return;
+    if (kind === "register" && !validRegistrationPassword) {
       toast.error(t("auth.passwordMinLength"));
       return;
     }
-    setRegLoading(true);
+    const owner = view.current, before = sessionScope();
+    const operation: AuthAttempt = { owner, before };
+    pending.current = operation;
+    setLoginLoading(kind === "login");
+    setRegLoading(kind === "register");
     try {
-      const res = await register(
-        regEmail.trim(),
-        regPassword,
-        regName.trim() || undefined,
-      );
-      loginWithTokens(res.data.access_token, res.data.user);
-      setRegEmail("");
-      setRegPassword("");
-      setRegName("");
-      setOpen(false);
-      toast.success(`Account created! Welcome, ${res.data.user.display_name}`);
+      const res = kind === "login"
+        ? await login(email, password)
+        : await register(email, password, regName.trim() || undefined);
+      // The request layer installs the identity while holding the shared cookie
+      // lock. Never reinstall it from a component continuation after release.
+      const ownsView = view.current === owner;
+      const ownsRemount = operation.remountScope !== undefined && operation.remountScope === sessionScope();
+      if ((!ownsView && !ownsRemount) ||
+          localStorage.getItem("tabmail_access_token") !== res.data.access_token ||
+          localStorage.getItem("tabmail_user") !== JSON.stringify(res.data.user) ||
+          localStorage.getItem("tabmail_tenant_id") !== res.data.user.tenant_id) return;
+      if (ownsView) {
+        if (kind === "login") {
+          setLoginEmail("");
+          setLoginPassword("");
+        } else {
+          setRegEmail("");
+          setRegPassword("");
+          setRegName("");
+        }
+        changeOpen(false);
+      }
+      toast.success(kind === "login"
+        ? `Welcome, ${res.data.user.display_name || res.data.user.email}`
+        : `Account created! Welcome, ${res.data.user.display_name}`);
     } catch (e: unknown) {
+      if (view.current !== owner || before !== sessionScope()) return;
       const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || "Registration failed");
+      toast.error(err?.error?.message || (kind === "login" ? "Login failed" : "Registration failed"));
     } finally {
-      setRegLoading(false);
+      if (pending.current === operation) pending.current = null;
+      if (view.current) {
+        setLoginLoading(false);
+        setRegLoading(false);
+      }
     }
   };
+  const handleLogin = () => submitAuth("login");
+  const handleRegister = () => submitAuth("register");
 
   const handleLogout = () => logout();
 
@@ -164,13 +216,7 @@ export function AuthDialog() {
   return (
     <Dialog
       open={open}
-      onOpenChange={(o) => {
-        setOpen(o);
-        if (o) {
-          setShowPwd(false);
-          setMode("login");
-        }
-      }}
+      onOpenChange={changeOpen}
     >
       <DialogTrigger
         render={<Button variant="outline" size="sm" className="gap-1.5" />}
@@ -240,7 +286,8 @@ export function AuthDialog() {
           {/* ── Right: Form panel ── */}
           <div className="flex flex-col p-6 sm:p-8 relative bg-gradient-to-b from-muted/30 to-transparent">
             <button
-              onClick={() => setOpen(false)}
+              onClick={() => changeOpen(false)}
+              aria-label={t("auth.close")}
               className="absolute top-4 right-4 flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-muted/80 transition-colors"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -288,8 +335,8 @@ export function AuthDialog() {
                         type="email"
                         placeholder="you@example.com"
                         value={loginEmail}
-                        onChange={(e) => setLoginEmail(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                        onChange={(e) => { retireView(); setLoginEmail(e.target.value); }}
+                        onKeyDown={(e) => handleEnter(e, handleLogin)}
                         autoFocus
                       />
                     </div>
@@ -309,8 +356,8 @@ export function AuthDialog() {
                         type={showPwd ? "text" : "password"}
                         placeholder="••••••••"
                         value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                        onChange={(e) => { retireView(); setLoginPassword(e.target.value); }}
+                        onKeyDown={(e) => handleEnter(e, handleLogin)}
                       />
                       <button
                         type="button"
@@ -330,9 +377,9 @@ export function AuthDialog() {
                     className="w-full h-11 mt-2 gap-2 text-[13px] font-semibold shadow-sm"
                     onClick={handleLogin}
                     disabled={
-                      loginLoading ||
+                      submitting ||
                       !loginEmail.trim() ||
-                      !loginPassword.trim()
+                      !loginPassword
                     }
                   >
                     {loginLoading ? t("auth.loggingIn") : t("auth.loginBtn")}
@@ -343,10 +390,7 @@ export function AuthDialog() {
                   <p className="text-[13px] text-muted-foreground">
                     {t("auth.noAccount")}{" "}
                     <button
-                      onClick={() => {
-                        setMode("register");
-                        setShowPwd(false);
-                      }}
+                      onClick={() => changeMode("register")}
                       className="text-primary hover:text-primary/80 font-medium transition-colors cursor-pointer"
                     >
                       {t("auth.registerLink")}
@@ -375,7 +419,8 @@ export function AuthDialog() {
                         type="email"
                         placeholder="you@example.com"
                         value={regEmail}
-                        onChange={(e) => setRegEmail(e.target.value)}
+                        onChange={(e) => { retireView(); setRegEmail(e.target.value); }}
+                        onKeyDown={(e) => handleEnter(e, handleRegister)}
                         autoFocus
                       />
                     </div>
@@ -399,7 +444,8 @@ export function AuthDialog() {
                         className={inputBase}
                         placeholder={t("auth.displayNamePlaceholder")}
                         value={regName}
-                        onChange={(e) => setRegName(e.target.value)}
+                        onChange={(e) => { retireView(); setRegName(e.target.value); }}
+                        onKeyDown={(e) => handleEnter(e, handleRegister)}
                       />
                     </div>
                   </div>
@@ -423,8 +469,11 @@ export function AuthDialog() {
                         type={showPwd ? "text" : "password"}
                         placeholder="••••••••"
                         value={regPassword}
-                        onChange={(e) => setRegPassword(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleRegister()}
+                        autoComplete="new-password"
+                        aria-describedby={registrationHint}
+                        aria-invalid={regPassword.length > 0 && !validRegistrationPassword ? true : undefined}
+                        onChange={(e) => { retireView(); setRegPassword(e.target.value); }}
+                        onKeyDown={(e) => handleEnter(e, handleRegister)}
                       />
                       <button
                         type="button"
@@ -439,12 +488,15 @@ export function AuthDialog() {
                         )}
                       </button>
                     </div>
+                    <p id={registrationHint} className="text-xs text-muted-foreground" aria-live="polite">
+                      {t("auth.passwordBytes", { bytes: registrationBytes })}
+                    </p>
                   </div>
                   <Button
                     className="w-full h-11 mt-2 gap-2 text-[13px] font-semibold shadow-sm"
                     onClick={handleRegister}
                     disabled={
-                      regLoading || !regEmail.trim() || regPassword.length < 8
+                      submitting || !regEmail.trim() || !validRegistrationPassword
                     }
                   >
                     {regLoading ? t("auth.registering") : t("auth.registerBtn")}
@@ -455,10 +507,7 @@ export function AuthDialog() {
                   <p className="text-[13px] text-muted-foreground">
                     {t("auth.hasAccount")}{" "}
                     <button
-                      onClick={() => {
-                        setMode("login");
-                        setShowPwd(false);
-                      }}
+                      onClick={() => changeMode("login")}
                       className="text-primary hover:text-primary/80 font-medium transition-colors cursor-pointer"
                     >
                       {t("auth.loginLink")}

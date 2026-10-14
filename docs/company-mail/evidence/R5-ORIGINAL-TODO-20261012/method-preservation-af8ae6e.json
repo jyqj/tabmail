@@ -1,0 +1,55 @@
+{
+  "base_sha256": "0686f1c5b5bd3764f8d04a4549aff27c173d2770de3b33bc5bfd1e0fc52b6ebc",
+  "candidate_sha256": "4a2b466720b7e8d5e0f3389da62c6c73d11b87cc86eff9031c0e2a62ca74f930",
+  "old_test_method_count": 39,
+  "new_test_method_count": 41,
+  "duplicate_test_names": [],
+  "unchanged_old_test_methods": 36,
+  "changed_old_test_methods": [
+    "test_old_pins_reject_and_current_revision_passes_same_actual_facts",
+    "test_revision18_binds_actual_source_facts_and_preserves_manual_reviews",
+    "test_revision18_preserves_public_history_collectors_and_original_rejections"
+  ],
+  "missing_old_test_methods": [],
+  "added_test_methods": [
+    "test_revision19_binds_actual_source_facts_and_preserves_manual_reviews",
+    "test_revision19_preserves_public_history_collectors_and_original_rejections"
+  ],
+  "frozen_revision18_wrappers": {
+    "test_revision18_binds_actual_source_facts_and_preserves_manual_reviews": {
+      "one_with_statement": true,
+      "body_ast_unchanged": true,
+      "with_expression": "self.revision18_context()"
+    },
+    "test_revision18_preserves_public_history_collectors_and_original_rejections": {
+      "one_with_statement": true,
+      "body_ast_unchanged": true,
+      "with_expression": "self.revision18_context()"
+    }
+  },
+  "changed_existing_non_test_functions": [
+    "ReviewedCatalogReconciliationTests.setUpClass"
+  ],
+  "old_top_level_assignment_count": 102,
+  "old_assignment_names_changed": [
+    "CURRENT_EVIDENCE",
+    "SOURCE_COMMIT",
+    "SOURCE_TREE"
+  ],
+  "old_assignment_names_missing": [],
+  "old_unapproved_negative_count": 5,
+  "old_unapproved_negatives_unchanged": true,
+  "non_test_comparison_scope": "Fully qualified function names; source normalized only for wrapping indentation, plus exact AST comparison.",
+  "imports_unchanged": true,
+  "current_positive_exact_five_replacements": true,
+  "current_positive_replacement_occurrences": [
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "candidate_head": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+  "old_39_methods_unchanged_from_previous_review": true,
+  "old_39_methods_changed_since_previous_review": []
+}

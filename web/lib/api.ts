@@ -10,6 +10,7 @@ export {
   getSMTPPolicy,
   getStats,
   getTenantConfig,
+  getTenantOverrides,
   inviteAdmin,
   listIngestJobs,
   listAPIKeys,

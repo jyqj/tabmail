@@ -1,0 +1,2512 @@
+{
+  "batch": "ADVANCE-20261009",
+  "original_parent_tasks": {
+    "total": 171,
+    "accepted": 10,
+    "remaining": 161
+  },
+  "baseline": "fdea2178759ce9842844926374ea98517bc4188b",
+  "final_focused_execution_source": "d9e64dd08295f35f9fdb43d56129c4ed902b839a",
+  "final_focused_execution_tree": "be506138d15b4749c45a8ad83b5d8a950914a59c",
+  "registration_baseline": {
+    "log_sha256": "0b90bd5f43676cb48ef5c2b20fe3bada900e3b0b351879d34eb78e21d427c733",
+    "leaf_count": 31,
+    "pass": 12,
+    "fail": 19,
+    "skip": 0,
+    "cases": [
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailKeepsLegacyLoginLookup",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/address-literal",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/escaped-quote",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/normalized",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/ordinary",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/plus-tag",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/quoted-at",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/quoted-comma",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/quoted-space",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/redundant-quotes",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/unicode",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/address-group",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/angle-address",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/crlf-quoted-local",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/display-name",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/domain-double-dot",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/leading-comment",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/local-double-dot",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/local-leading-dot",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/local-trailing-dot",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/missing-at",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/missing-domain",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/missing-local",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/multiple-at",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/newline",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/nul",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/quoted-display-name",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/semicolon-list",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/trailing-comment",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/two-addresses",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/unclosed-quote",
+        "result": "fail"
+      }
+    ]
+  },
+  "registration_first_candidate_related": {
+    "log_sha256": "ce00323d284231bfa270dd9dd243fdbb369e678cdc5d5a6cab7605f7cdd30d29",
+    "leaf_count": 110,
+    "pass": 109,
+    "fail": 1,
+    "skip": 0,
+    "cases": [
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailKeepsLegacyLoginLookup",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/address-literal",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/escaped-quote",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/normalized",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/ordinary",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/plus-tag",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/quoted-at",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/quoted-comma",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/quoted-space",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/redundant-quotes",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/unicode",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/address-group",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/angle-address",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/crlf-quoted-local",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/display-name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/domain-double-dot",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/leading-comment",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/local-double-dot",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/local-leading-dot",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/local-trailing-dot",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/missing-at",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/missing-domain",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/missing-local",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/multiple-at",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/newline",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/nul",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/quoted-display-name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/semicolon-list",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/trailing-comment",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/two-addresses",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/unclosed-quote",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/exact_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/exact_limit_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/invalid_json",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/leading_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/limit_plus_one",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/second_document",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/trailing_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/unknown_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/exact_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/exact_limit_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/invalid_json",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/leading_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/limit_plus_one",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/second_document",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/trailing_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/unknown_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/exact_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/exact_limit_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/invalid_json",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/leading_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/limit_plus_one",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/second_document",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/trailing_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/unknown_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/exact_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/exact_limit_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/invalid_json",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/leading_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/limit_plus_one",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/second_document",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/trailing_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/unknown_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/exact_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/exact_limit_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/invalid_json",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/leading_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/limit_plus_one",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/second_document",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/trailing_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/unknown_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitBodyTokenFallback",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitEmptyAuthenticatedLogout",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitEscapedFieldHeadroom",
+        "result": "fail"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitMultibyteAndDeclaredLength/exact_byte_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitMultibyteAndDeclaredLength/one_byte_over",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitValidLogin",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthLoginBodyLimit/known_length",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthLoginBodyLimit/unknown_length",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextKeepsFailureBoundaries/duplicate",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextKeepsFailureBoundaries/lookup",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextKeepsFailureBoundaries/tenant",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextKeepsFailureBoundaries/token",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextKeepsFailureBoundaries/user",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/default-display",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/default-display-long-local",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/display-ascii-255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/display-combining-255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/display-emoji-255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/display-unicode-255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/email-ascii-255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/email-emoji-255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/normalized",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/ordinary",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/trim-before-length",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-ascii-256",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-combining-256",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-emoji-256",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-normalized-still-over",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-nul-middle",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-nul-prefix",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-nul-suffix",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-unicode-256",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/email-ascii-256",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/email-emoji-256",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/email-normalized-still-over",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/email-nul-middle",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/email-nul-prefix",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/email-nul-suffix",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/email-unicode-256",
+        "result": "pass"
+      }
+    ]
+  },
+  "round1_initial_combination": {
+    "log_sha256": "f2e8d95b0a72eb41653602861fb685316541c9841c6a887a68662e6944b4db83",
+    "leaf_count": 195,
+    "pass": 195,
+    "fail": 0,
+    "skip": 0,
+    "cases": [
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/\"ops@team\"@_example.test",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/\"ops@team\"@example.test",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/\"ops\\\"_team\"@example.test",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/\"ops_team\"@_example.test",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/\"ops_team\"@example.test",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/person@__example.test",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/person@_example.test",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/person@_example.test#01",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailKeepsLegacyLoginLookup",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/address-literal",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/escaped-quote",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/normalized",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/ordinary",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/plus-tag",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/quoted-at",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/quoted-comma",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/quoted-space",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/redundant-quotes",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/unicode",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/address-group",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/angle-address",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/crlf-quoted-local",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/display-name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/domain-double-dot",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/leading-comment",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/local-double-dot",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/local-leading-dot",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/local-trailing-dot",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/missing-at",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/missing-domain",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/missing-local",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/multiple-at",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/newline",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/nul",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/quoted-display-name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/semicolon-list",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/trailing-comment",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/two-addresses",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/unclosed-quote",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/exact_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/exact_limit_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/invalid_json",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/leading_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/limit_plus_one",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/second_document",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/trailing_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/change-password/unknown_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/exact_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/exact_limit_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/invalid_json",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/leading_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/limit_plus_one",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/second_document",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/trailing_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/login/unknown_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/exact_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/exact_limit_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/invalid_json",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/leading_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/limit_plus_one",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/second_document",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/trailing_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/logout/unknown_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/exact_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/exact_limit_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/invalid_json",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/leading_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/limit_plus_one",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/second_document",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/trailing_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/refresh/unknown_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/exact_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/exact_limit_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/invalid_json",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/leading_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/limit_plus_one",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/second_document",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/trailing_whitespace_unknown",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitAllRoutes/register/unknown_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitBodyTokenFallback",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitEmptyAuthenticatedLogout",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitEscapedFieldHeadroom",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitMultibyteAndDeclaredLength/exact_byte_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitMultibyteAndDeclaredLength/one_byte_over",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthBodyLimitValidLogin",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthLoginBodyLimit/known_length",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAuthLoginBodyLimit/unknown_length",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextKeepsFailureBoundaries/duplicate",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextKeepsFailureBoundaries/lookup",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextKeepsFailureBoundaries/tenant",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextKeepsFailureBoundaries/token",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextKeepsFailureBoundaries/user",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/default-display",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/default-display-long-local",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/display-ascii-255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/display-combining-255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/display-emoji-255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/display-unicode-255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/email-ascii-255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/email-emoji-255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/normalized",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/ordinary",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextPreservesValidIdentity/trim-before-length",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-ascii-256",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-combining-256",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-emoji-256",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-normalized-still-over",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-nul-middle",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-nul-prefix",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-nul-suffix",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/display-unicode-256",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/email-ascii-256",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/email-emoji-256",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/email-normalized-still-over",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/email-nul-middle",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/email-nul-prefix",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/email-nul-suffix",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestContinueRegistrationPersistentTextRejectsBeforeStorage/email-unicode-256",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/at_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/large_whitespace",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/malformed",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/null_object",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/one_over",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/oversized_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/trailing_document",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/unknown_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/at_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/large_whitespace",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/malformed",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/null_object",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/one_over",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/oversized_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/trailing_document",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/unknown_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputKeepsExistingDenials/foreign_target",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputKeepsExistingDenials/invalid_role",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputKeepsExistingDenials/legacy_profile_null",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputKeepsExistingDenials/legacy_profile_uuid",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputKeepsExistingDenials/store_failure",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputKeepsExistingDenials/super_admin_promotion",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/ascii_255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/emoji_255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/empty",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/explicit_false_and_role",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/unicode_255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/whitespace_unchanged",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/{\"display_name\":null,\"role\":null,\"is_active\":null}",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/{}",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputRejectsInvalidTextBeforeCommand/ascii_256/combined_lifecycle_update",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputRejectsInvalidTextBeforeCommand/ascii_256/name_only",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputRejectsInvalidTextBeforeCommand/nul/combined_lifecycle_update",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputRejectsInvalidTextBeforeCommand/nul/name_only",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputRejectsInvalidTextBeforeCommand/unicode_256/combined_lifecycle_update",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputRejectsInvalidTextBeforeCommand/unicode_256/name_only",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/250/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/250/\"\\r\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/250/\"\\r\\n450_next_fragment\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/451/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/451/\"\\r\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/451/\"\\r\\n450_next_fragment\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/550/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/550/\"\\r\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/550/\"\\r\\n450_next_fragment\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/250/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/250/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/251/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/251/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/451/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/451/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/550/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/550/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/complete/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/complete/451",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/complete/550",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReplyStopsRedelivery/mx/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReplyStopsRedelivery/mx/451",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReplyStopsRedelivery/mx/550",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReplyStopsRedelivery/recipient/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReplyStopsRedelivery/recipient/451",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReplyStopsRedelivery/recipient/550",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalTimeout/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalTimeout/451",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalTimeout/550",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/direct/data/354",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/direct/final/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/direct/final/451",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/direct/final/550",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/direct/mail/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/direct/rcpt/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/relay/data/354",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/relay/final/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/relay/final/451",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/relay/final/550",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/relay/mail/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/relay/rcpt/250",
+        "result": "pass"
+      }
+    ]
+  },
+  "final_focused": {
+    "log_sha256": "24d454834dc6487f682ffd7d8a63f148767bafd42766ef0747053e73fc59fa71",
+    "leaf_count": 116,
+    "pass": 116,
+    "fail": 0,
+    "skip": 0,
+    "cases": [
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/\"ops@team\"@_example.test",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/\"ops@team\"@example.test",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/\"ops\\\"_team\"@example.test",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/\"ops_team\"@_example.test",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/\"ops_team\"@example.test",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/person@__example.test",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/person@_example.test",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailIndependentAddrSpecWhitespace/person@_example.test#01",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailKeepsLegacyLoginLookup",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/address-literal",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/escaped-quote",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/normalized",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/ordinary",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/plus-tag",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/quoted-at",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/quoted-comma",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/quoted-space",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/redundant-quotes",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailPreservesSingleMailbox/unicode",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/address-group",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/angle-address",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/crlf-quoted-local",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/display-name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/domain-double-dot",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/leading-comment",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/local-double-dot",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/local-leading-dot",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/local-trailing-dot",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/missing-at",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/missing-domain",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/missing-local",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/multiple-at",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/newline",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/nul",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/quoted-display-name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/semicolon-list",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/trailing-comment",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/two-addresses",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestAdvanceRegistrationEmailRejectsBeforeAccountEffects/unclosed-quote",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/at_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/large_whitespace",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/malformed",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/null_object",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/one_over",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/oversized_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/trailing_document",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/known_length/unknown_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/at_limit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/large_whitespace",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/malformed",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/null_object",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/one_over",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/oversized_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/trailing_document",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputBoundsCompleteBody/streamed/unknown_field",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputKeepsExistingDenials/foreign_target",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputKeepsExistingDenials/invalid_role",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputKeepsExistingDenials/legacy_profile_null",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputKeepsExistingDenials/legacy_profile_uuid",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputKeepsExistingDenials/store_failure",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputKeepsExistingDenials/super_admin_promotion",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/ascii_255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/emoji_255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/empty",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/explicit_false_and_role",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/unicode_255",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/whitespace_unchanged",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/{\"display_name\":null,\"role\":null,\"is_active\":null}",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputPreservesExplicitAndOmittedFields/{}",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputRejectsInvalidTextBeforeCommand/ascii_256/combined_lifecycle_update",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputRejectsInvalidTextBeforeCommand/ascii_256/name_only",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputRejectsInvalidTextBeforeCommand/nul/combined_lifecycle_update",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputRejectsInvalidTextBeforeCommand/nul/name_only",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputRejectsInvalidTextBeforeCommand/unicode_256/combined_lifecycle_update",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "test": "TestR5MemberProfileInputRejectsInvalidTextBeforeCommand/unicode_256/name_only",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/250/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/250/\"\\r\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/250/\"\\r\\n450_next_fragment\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/451/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/451/\"\\r\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/451/\"\\r\\n450_next_fragment\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/550/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/550/\"\\r\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPReplyReadAhead/550/\"\\r\\n450_next_fragment\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/250/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/250/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/251/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/251/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/451/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/451/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/550/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/550/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/complete/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/complete/451",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReply/complete/550",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReplyStopsRedelivery/mx/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReplyStopsRedelivery/mx/451",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReplyStopsRedelivery/mx/550",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReplyStopsRedelivery/recipient/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReplyStopsRedelivery/recipient/451",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalReplyStopsRedelivery/recipient/550",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalTimeout/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalTimeout/451",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortFinalTimeout/550",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/direct/data/354",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/direct/final/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/direct/final/451",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/direct/final/550",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/direct/mail/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/direct/rcpt/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/relay/data/354",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/relay/final/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/relay/final/451",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/relay/final/550",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/relay/mail/250",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceSMTPShortReplyTCP/relay/rcpt/250",
+        "result": "pass"
+      }
+    ]
+  },
+  "final_independent_smtp": {
+    "log_sha256": "f9c3b1f124daa486b15ec2bd109ffaaec6bd14158cd8cd0e3b0379b7ab305290",
+    "leaf_count": 35,
+    "pass": 35,
+    "fail": 0,
+    "skip": 0,
+    "cases": [
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/250/EOF/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/250/EOF/\"\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/250/EOF/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/250/multiple_Read_calls_return_no_data_or_error/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/250/multiple_Read_calls_return_no_data_or_error/\"\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/250/multiple_Read_calls_return_no_data_or_error/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/250/unexpected_EOF/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/250/unexpected_EOF/\"\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/250/unexpected_EOF/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/451/EOF/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/451/EOF/\"\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/451/EOF/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/451/multiple_Read_calls_return_no_data_or_error/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/451/multiple_Read_calls_return_no_data_or_error/\"\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/451/multiple_Read_calls_return_no_data_or_error/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/451/unexpected_EOF/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/451/unexpected_EOF/\"\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/451/unexpected_EOF/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/550/EOF/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/550/EOF/\"\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/550/EOF/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/550/multiple_Read_calls_return_no_data_or_error/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/550/multiple_Read_calls_return_no_data_or_error/\"\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/550/multiple_Read_calls_return_no_data_or_error/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/550/unexpected_EOF/\"\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/550/unexpected_EOF/\"\\n\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentConsumedBoundary/550/unexpected_EOF/\"\\r\"",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentRingBoundary/4095/false",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentRingBoundary/4095/true",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentRingBoundary/4096/false",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentRingBoundary/4096/true",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentRingBoundary/4097/false",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentRingBoundary/4097/true",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentRingBoundary/8193/false",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceSMTPIndependentRingBoundary/8193/true",
+        "result": "pass"
+      }
+    ]
+  },
+  "source_identity_note": "The initial 195-case combined run overlapped an independent SMTP test/evidence addition. Production bytes did not change, but that run is not attributed to a single complete Git tree. The final two disjoint focused invocations were executed with unchanged d9e64dd HEAD/tree; their 116 and 35 leaves form 151 distinct passing cases.",
+  "retained_initial_failure": "The first related registration run had 109 PASS/1 FAIL: the old escaped-field test used 255 emoji without @. Its email fixture now remains 255 characters with valid mailbox syntax, preserving the body budget and lookup assertion. This result is retained, not relabeled.",
+  "root_ui": {
+    "numTotalTests": 15,
+    "numPassedTests": 15,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "execution_source": "426ca1a69dc93274b58f6b831f3d29675c301d19",
+    "note": "The entire web subtree is unchanged between this execution source and d9e64dd."
+  },
+  "fixed_sources": {
+    "internal/api/handlers/auth.go": "7a5806ef691478bbd0648945c1f74fb1a850a7e35f6219154da45cd944e1dca2",
+    "internal/api/handlers/r5_registration_email_test.go": "20e4573080c00e1aa8b369c09902cbc8abb7c4c2c47a8a16e431c84ad760fe8b",
+    "internal/api/handlers/advance_registration_fws_independent_test.go": "dee9ab59d956520e5588015a5f7c90cb4e6ef5baab7e8ac905adc0e5013e9a82",
+    "internal/api/handlers/users_admin.go": "e1760358edf9ee3ffad5d7e833c2d3528693135e28202cc6bb7995b624ad2d16",
+    "internal/api/handlers/r5_member_profile_input_test.go": "db9aab664a1b948d3880cd0ee4725d81f0cc687081cb23139cb67e862eddb4f1",
+    "internal/outbound/delivery_context.go": "73561d6c26e4effcfe573035edfd261d67419d1bd743a00002e92ed1f6b6b03a",
+    "web/features/company/employees.tsx": "01ac9442f13ce0707c7e03bad1f614d352985a85f30d9c7eb040bc89598a1d17",
+    "web/features/company/offboarding-panel.tsx": "31c2e8a2b46069513b2e83b535604305aa7d3f122bd66a1b8daf6f887ff1a6ce"
+  },
+  "log_projection_note": "This derived event summary intentionally excludes Output fields, including synthetic credential responses in the failed registration fixture. Raw log hashes and exact case outcomes are retained; this file is not an original unmodified log."
+}

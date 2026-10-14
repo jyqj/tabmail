@@ -1,0 +1,12 @@
+test_revision11_reconciles_actual_functions_clients_routes_and_source (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision11_reconciles_actual_functions_clients_routes_and_source) ... ok
+test_revision11_preserves_history_and_all_unapproved_rejection_guards (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision11_preserves_history_and_all_unapproved_rejection_guards) ... ok
+test_unapproved_actual_closure_bytes_rejected (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_closure_bytes_rejected) ... ok
+test_unapproved_actual_route_source_rejected_by_original_collector (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_route_source_rejected_by_original_collector) ... ok
+test_unapproved_actual_source_and_ast_changes_rejected (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_source_and_ast_changes_rejected) ... ok
+test_unapproved_client_and_caller_locations_are_rejected (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_client_and_caller_locations_are_rejected) ... ok
+test_unapproved_route_and_ast_fact_changes_rejected (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_route_and_ast_fact_changes_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 13.836s
+
+OK

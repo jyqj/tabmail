@@ -1,0 +1,22 @@
+test_archive_guard_order_and_version_dispatch (test_r5_ci_wiring.R5CIWiringTests) ... ok
+test_existing_jobs_toolchain_and_timer_mode (test_r5_ci_wiring.R5CIWiringTests) ... ok
+test_pr_base_boundary_is_shared (test_r5_ci_wiring.R5CIWiringTests) ... ok
+test_push_remains_main_only_and_no_privileged_event (test_r5_ci_wiring.R5CIWiringTests) ... ok
+test_read_only_checkout_and_exact_source_archive (test_r5_ci_wiring.R5CIWiringTests) ... ok
+test_checkout_identity_and_all_existing_evidence_survive_failure (test_r5_backend_evidence_continuation.BackendEvidenceContinuationTests) ... ok
+test_failed_jobs_and_original_race_selection_remain_failed (test_r5_backend_evidence_continuation.BackendEvidenceContinuationTests) ... ok
+test_failed_or_skipped_prerequisite_blocks_only_its_dependents (test_r5_backend_evidence_continuation.BackendEvidenceContinuationTests) ... ok
+test_setups_do_not_inherit_an_unrelated_gate_failure (test_r5_backend_evidence_continuation.BackendEvidenceContinuationTests) ... ok
+test_typescript_preparation_reuses_the_reviewed_installer_and_receipt (test_r5_backend_evidence_continuation.BackendEvidenceContinuationTests) ... ok
+test_validation_failure_cannot_suppress_ready_independent_checks (test_r5_backend_evidence_continuation.BackendEvidenceContinuationTests) ... ok
+test_failed_preparation_does_not_admit_partial_source_or_launch_protocol (test_r5_protocol_artifact_layout.ProtocolArtifactLayoutTests) ... ok
+test_original_artifact_common_ancestor_stays_at_the_checkout (test_r5_protocol_artifact_layout.ProtocolArtifactLayoutTests) ... ok
+test_original_artifact_name_paths_exclusion_and_failure_upload_are_unchanged (test_r5_protocol_artifact_layout.ProtocolArtifactLayoutTests) ... ok
+test_protocol_failure_stays_failed_and_retains_successfully_prepared_source (test_r5_protocol_artifact_layout.ProtocolArtifactLayoutTests) ... ok
+test_source_has_one_separate_guarded_artifact_without_changing_legacy_root (test_r5_protocol_artifact_layout.ProtocolArtifactLayoutTests) ... ok
+test_success_retains_all_three_prepared_files_outside_runtime_and_checkout (test_r5_protocol_artifact_layout.ProtocolArtifactLayoutTests) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 3.067s
+
+OK

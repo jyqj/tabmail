@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "branch": "prep/source-policy-20261003",
+  "preparation_commit": "2e5dd8d9d8f92cf12981e512a091fe303e8a72ff",
+  "ordinary_origin_push": "SUCCESS",
+  "draft_creation_attempts": 1,
+  "draft_creation_exit": 1,
+  "draft_creation_status": "DENIED",
+  "draft_creation_safe_error": "Post https://api.github.com/graphql: Forbidden",
+  "draft_pr_url": null,
+  "alternate_api_or_retry": false,
+  "raw_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "raw_stderr_sha256": "682deed6ccd21e66582c7f0e0efdffb3363feeac4c8b58f35a46d43dc240c725",
+  "body_sha256": "4a96b0989c8c53aadb34361a1889f47828d5ef05308fa490599bd6cecfd9cd80",
+  "shared_components_actual_started": false,
+  "product_green": false,
+  "task_complete": false
+}

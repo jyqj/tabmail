@@ -1,0 +1,16 @@
+test_authenticated_incompatible_admission (__main__.Independent.test_authenticated_incompatible_admission) ... ok
+test_cli_default_explicit_and_environment_cannot_upgrade (__main__.Independent.test_cli_default_explicit_and_environment_cannot_upgrade) ... ok
+test_contract_runtime_policy_schema_cross_product (__main__.Independent.test_contract_runtime_policy_schema_cross_product) ... ok
+test_env_worker_deadline_and_gate_order (__main__.Independent.test_env_worker_deadline_and_gate_order) ... ok
+test_finalization_barrier_only_with_mocked_execution (__main__.Independent.test_finalization_barrier_only_with_mocked_execution) ... ok
+test_fixed_budgets_closed_fields_and_worker_rejection (__main__.Independent.test_fixed_budgets_closed_fields_and_worker_rejection) ... ok
+test_omission_and_both_valid_routes (__main__.Independent.test_omission_and_both_valid_routes) ... ok
+test_outer_manifest_pins_and_recaptured_hash (__main__.Independent.test_outer_manifest_pins_and_recaptured_hash) ... ok
+test_publication_fragment_failures_and_result_selector (__main__.Independent.test_publication_fragment_failures_and_result_selector) ... ok
+test_resealed_receipts_and_replaced_bundle_original_manifest_pin (__main__.Independent.test_resealed_receipts_and_replaced_bundle_original_manifest_pin) ... ok
+test_strict_selector_at_all_public_boundaries (__main__.Independent.test_strict_selector_at_all_public_boundaries) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.791s
+
+OK

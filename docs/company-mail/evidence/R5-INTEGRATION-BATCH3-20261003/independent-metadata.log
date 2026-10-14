@@ -1,0 +1,22 @@
+test_actual_cli_capture_validate_reject (__main__.IndependentExcludedOracle.test_actual_cli_capture_validate_reject) ... ok
+test_actual_cli_regular_file_swap_must_reject (__main__.IndependentExcludedOracle.test_actual_cli_regular_file_swap_must_reject) ... {"fork": "third_party/enmime-v2.3.0", "action": "capture", "cli_exit": 1, "same_receipt": false, "observation": "CLI_RACE_OBSERVATION 2 True"}
+{"fork": "third_party/enmime-v2.3.0", "action": "validate", "cli_exit": 1, "same_receipt": false, "observation": "CLI_RACE_OBSERVATION 2 True"}
+{"fork": "third_party/go-smtp", "action": "capture", "cli_exit": 1, "same_receipt": false, "observation": "CLI_RACE_OBSERVATION 2 True"}
+{"fork": "third_party/go-smtp", "action": "validate", "cli_exit": 1, "same_receipt": false, "observation": "CLI_RACE_OBSERVATION 2 True"}
+ok
+test_budget_exact_shared_roots_per_fork_and_overflow (__main__.IndependentExcludedOracle.test_budget_exact_shared_roots_per_fork_and_overflow) ... ok
+test_depth_exact_and_overflow (__main__.IndependentExcludedOracle.test_depth_exact_and_overflow) ... ok
+test_directory_swap_nofollow_public_entries (__main__.IndependentExcludedOracle.test_directory_swap_nofollow_public_entries) ... ok
+test_legal_artifacts_no_reads_and_stable_original_inventory_and_closure (__main__.IndependentExcludedOracle.test_legal_artifacts_no_reads_and_stable_original_inventory_and_closure) ... ok
+test_nested_module_links_fifo_socket_public_entries (__main__.IndependentExcludedOracle.test_nested_module_links_fifo_socket_public_entries) ... ok
+test_regular_file_becomes_symlink_on_final_stat_public_entries (__main__.IndependentExcludedOracle.test_regular_file_becomes_symlink_on_final_stat_public_entries) ... RACE_OBSERVATION {"fork": "third_party/enmime-v2.3.0", "entry": "capture", "nofollow_stats": 2, "symlink_at_return": true}
+RACE_OBSERVATION {"fork": "third_party/enmime-v2.3.0", "entry": "<lambda>", "nofollow_stats": 2, "symlink_at_return": true}
+RACE_OBSERVATION {"fork": "third_party/go-smtp", "entry": "capture", "nofollow_stats": 2, "symlink_at_return": true}
+RACE_OBSERVATION {"fork": "third_party/go-smtp", "entry": "<lambda>", "nofollow_stats": 2, "symlink_at_return": true}
+ok
+test_unknown_and_unavailable_metadata_public_entries (__main__.IndependentExcludedOracle.test_unknown_and_unavailable_metadata_public_entries) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 1.483s
+
+OK

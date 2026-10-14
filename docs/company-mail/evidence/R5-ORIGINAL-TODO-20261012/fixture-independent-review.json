@@ -1,0 +1,71 @@
+{
+  "reviewer": "/root/todo_audit",
+  "repository": "jyqj/tabmail",
+  "review_kind": "independent source review and admission controls; not runtime qualification",
+  "base_sha": "af1444807e1018c95b963b8c5b74e2b2e5060b9a",
+  "reviewed_commits": [
+    "5c852218d168ab9e0681041df9eec190ae0ab2c1",
+    "e9917f4664c2c43ea6ec8e93f19be1b0806e0e4f"
+  ],
+  "reviewed_head": "e9917f4664c2c43ea6ec8e93f19be1b0806e0e4f",
+  "reviewed_tree": "3461f1bd3e22fafecf73f9c3b494b1f082ccdb94",
+  "disposition": "ACCEPT_SOURCE_REVIEW_ONLY",
+  "original_todos_closed": [],
+  "findings": [
+    {
+      "id": "fixture-review-terminal-cancel-deadline",
+      "initial_sha": "5c852218d168ab9e0681041df9eec190ae0ab2c1",
+      "path": "scripts/run_r5_frontend_fixture.py",
+      "issue": "run_owned did not reject cancellation or deadline crossing after finish returned and during final physical cleanup",
+      "observed_control": "A real clean Python child was joined, then a real SIGTERM was injected at the terminal boundary. Cancellation was observed but the old wrapper returned exit_code=0, timeout=false, tail=false.",
+      "deadline_control": "An independently controlled terminal clock crossed deadline and the old wrapper still returned timeout=false.",
+      "fixed_by": "e9917f4664c2c43ea6ec8e93f19be1b0806e0e4f",
+      "resolution": "One absolute deadline is frozen before Popen. Physical cleanup remains mandatory and signal handlers restore even if cleanup raises. Cancellation/deadline are checked after cleanup and restoration. Both new terminal controls pass without relaxing clean-process assertions.",
+      "status": "resolved"
+    }
+  ],
+  "preserved_invariants": [
+    "Original loopback probe helper still uses an isolated migrated PostgreSQL database, a fresh random token, a real HTTP listener, a 401 foreign-token control and a SQL identity read.",
+    "Original eight-owner external batch, four workers, and case75/go120/process180 budgets are unchanged.",
+    "Company workflow keeps four jobs, frontend timeout-minutes=15, strict zero-vulnerability audit and full original npm test command/report path.",
+    "Go manifest requires successful owner and package terminals and permits no skips.",
+    "Frontend report must have positive complete passing assertions, zero failures/pending/todo/runtime errors and exactly one original fixture probe.",
+    "Synchronous t.Run observes HTTP, PostgreSQL and temporary fixture cleanup before successful owner completion.",
+    "Evidence records external_batch_qualified=false and task_complete=false."
+  ],
+  "verification": {
+    "command": [
+      "timeout",
+      "30s",
+      "python3",
+      "-B",
+      "-m",
+      "unittest",
+      "scripts.tests.test_r5_frontend_fixture",
+      "scripts.tests.test_r5_ci_wiring",
+      "scripts.tests.test_r5_frontend_evidence_continuation",
+      "-v"
+    ],
+    "cwd": "/workspace/scratch/c5e5c3c93beb/tabmail-fixture",
+    "exit_code": 0,
+    "tests_run": 18,
+    "tests_passed": 18,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "suite_breakdown": {
+      "frontend_admission_controls": 10,
+      "original_ci_wiring": 5,
+      "original_frontend_evidence_continuation": 3
+    },
+    "result_source": "Observed tool execution output, not a fresh saved raw test log.",
+    "diff_check": "pass",
+    "working_tree": "clean"
+  },
+  "still_required": [
+    "Real PostgreSQL and complete default frontend execution on the final integration source",
+    "Original eight-owner external batch qualification when claimed",
+    "Complete Company workflow including strict audit",
+    "Original TODO acceptance and approval constraints"
+  ],
+  "runtime_execution_performed_by_this_review": false
+}

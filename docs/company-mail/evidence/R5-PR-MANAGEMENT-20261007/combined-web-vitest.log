@@ -1,0 +1,253 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> web@0.1.0 test
+> vitest run --maxWorkers=2 --reporter=default --reporter=json --outputFile=/workspace/scratch/458de7991ac3/validation/combined-web-vitest.results.json
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 /workspace/scratch/458de7991ac3/tabmail-deps/web
+
+ ✓ features/company/profile-management.consumer.test.tsx (29 tests) 28414ms
+     ✓ sends observed decimal revision, explicit false and zero in fields  4148ms
+     ✓ rebases quota intent so choosing original 10 after reviewing remote 20 is transmitted  2730ms
+     ✓ keeps draft on conflict, blocks blind retry and requires manual revision refresh  2690ms
+     ✓ opening and saving without field changes preserves raw NULL and sends no command  965ms
+     ✓ preserves NULL zone storage when changing only description  843ms
+     ✓ an incomplete observed profile cannot enable a write using default UI values  626ms
+     ✓ does not restore untouched revoked fields after conflict refresh  1266ms
+     ✓ blocks saves after a failed revision refresh even with a formerly valid revision  564ms
+     ✓ reports 401 denial and blocks later submissions in this session  562ms
+     ✓ reports 403 denial and blocks later submissions in this session  760ms
+     ✓ does not manufacture a missing legacy revision or permit unsafe quotas  743ms
+     ✓ shows effective before/after and requires explicit revision-bound deletion confirmation  410ms
+     ✓ invalidates stale deletion preview and never automatically replays DELETE  760ms
+     ✓ ignores old-session edit resolve without clearing a new write lock  1275ms
+     ✓ ignores old-session edit reject without clearing a new write lock  1215ms
+     ✓ ignores old-session DELETE resolve without clearing new preview/confirmation  1215ms
+     ✓ ignores old-session DELETE reject without clearing new preview/confirmation  918ms
+     ✓ ignores old-session create resolve without clearing new draft/busy state  751ms
+     ✓ ignores old-session create reject without clearing new draft/busy state  634ms
+     ✓ ignores an old-session revision refresh rejection without unlocking a newer refresh  1600ms
+     ✓ platform admin edits a global profile using its observed revision without changing scope  579ms
+     ✓ rejects malformed or non-string observed profile revision "0"  472ms
+     ✓ rejects malformed or non-string observed profile revision "01"  486ms
+     ✓ rejects malformed or non-string observed profile revision "9223372036854775808"  912ms
+     ✓ rejects malformed or non-string observed profile revision 9  427ms
+     ✓ tenant admin cannot mutate protected scope {"tenant_id":"10000000-0000-4000-8000-000000000002"}  390ms
+ ✓ features/company/permission-editor.consumer.test.tsx (22 tests) 30494ms
+     ✓ formal assignment capability enables a versioned profile selector without immediately mutating permissions  4702ms
+     ✓ assignment submits the observed target profile revision and dirty overrides in one atomic POST  3393ms
+     ✓ unassignment sends an explicit NULL profile identity/version pair with an empty override patch  2629ms
+     ✓ assignment conflict preserves the staged profile and dirty quota but prohibits automatic replays  2303ms
+     ✓ an old assignment response cannot overwrite a newly opened user's profile or overrides  2172ms
+     ✓ loads the real Go inherited raw NULL slice instead of staying disabled behind a validation error  723ms
+     ✓ accepts a clear/reset response containing Go inherited zone_ids NULL and can continue editing  763ms
+     ✓ incomplete effective {} never enables a consumer write  520ms
+     ✓ incomplete effective {"can_send":false} never enables a consumer write  510ms
+     ✓ loads raw false/zero/null separately from effective and patches only the dirty quota  784ms
+     ✓ clearing an existing numeric override sends explicit null rather than omission  918ms
+     ✓ setting an inherited quota to zero sends explicit zero, even when unlimited is the effective value  896ms
+     ✓ preserves dirty edits on conflict and never automatically replays or falls back to PUT  762ms
+     ✓ reload after conflict explicitly discards draft and uses the fresh observed revision  1029ms
+     ✓ domain All preserves empty-zone mode instead of treating all empty arrays alike  791ms
+     ✓ domain No domains allowed preserves empty-zone mode instead of treating all empty arrays alike  706ms
+     ✓ domain Inherit preserves empty-zone mode instead of treating all empty arrays alike  1571ms
+     ✓ unchecking the last allowed zone sends none, never the legacy empty-array allow-all  879ms
+     ✓ disables mutations for capability false without pretending the edit succeeded  963ms
+     ✓ reset is one revision-bound explicit inherit patch, not legacy DELETE  650ms
+     ✓ a failed snapshot never uses effective-only legacy data to enable an unsafe save  875ms
+     ✓ discards an older target snapshot that resolves after switching users  1952ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx (36 tests) 5809ms
+     ✓ renders the safe recipient class/code and next-hop acceptance, not a raw diagnostic  485ms
+     ✓ rejects header raw/private extensions without rendering body, BCC or secret canary  301ms
+     ✓ rejects top-level raw/private extensions without rendering body, BCC or secret canary  423ms
+     ✓ reinspection clears a previous safe result before rejecting malformed replacement data  558ms
+ ✓ features/company/company-event-consumer.test.tsx (14 tests) 9772ms
+     ✓ mounted EOF reconnect re-reads overview then authoritative resource without rebasing draft  2112ms
+     ✓ refresh endpoint final failure stops the original scope and clears its private draft  535ms
+     ✓ refresh endpoint success preserves stable identity and dirty draft through actual stream retry  893ms
+     ✓ re-reads authoritative profiles on duplicate events without rebasing a dirty CAS form  1011ms
+     ✓ strictly ignores wrong-tenant, unknown and permission-bearing payloads  1378ms
+     ✓ periodic tenant-bound resync invalidates deletion confirmation without automatic DELETE  565ms
+     ✓ same-principal token rotation keeps the stream and dirty draft  454ms
+     ✓ a late same-scope preview GET cannot restore confirmation after resync  417ms
+     ✓ a current role downgrade aborts the prior stream and clears the old private draft  712ms
+     ✓ authoritative read revocation aborts the live stream and closes private draft UI  454ms
+     ✓ old-session late 403 cannot evict a new tenant or its draft  436ms
+     ✓ real permission editor preserves dirty intent but requires explicit reload after an event  759ms
+ ✓ lib/api/permission-editor.serializer.test.ts (69 tests) 103ms
+ ✓ features/mail/workspace-live-content-refresh.test.tsx (42 tests) 9066ms
+     ✓ manual refresh reauthorizes body and then attachments without remount or cache retention  573ms
+     ✓ manual refresh reauthorizes body and then attachments without remount or cache retention  434ms
+     ✓ SSE invalidation reauthorizes body and then attachments without remount or cache retention  832ms
+     ✓ an observed denied receipt removes pending private content; regrant never opens it  313ms
+     ✓ an observed purged receipt removes pending private content; regrant never opens it  653ms
+   ✓ a repeated refresh aborts a pending body and rejects its late completion  342ms
+ ✓ components/company/compose-send-lifecycle.test.tsx (24 tests) 4845ms
+     ✓ does not submit a saved draft when navigation unmounts it during save  430ms
+     ✓ cannot revive the old send after a new editor mounts for draft-one  303ms
+     ✓ cannot revive the old send after a new editor mounts for draft-two  348ms
+     ✓ does not close a replacement editor when an already-dispatched submit succeeds  372ms
+     ✓ does not submit after can_send eligibility changes while saving  393ms
+     ✓ does not submit under a changed session after save  670ms
+ ✓ features/mail/draft-writer-snapshot.test.ts (41 tests) 73ms
+ ✓ features/mail/components/receipt-consumer.test.tsx (19 tests) 914ms
+ ✓ components/company/compose-sender-ownership.test.tsx (21 tests) 3951ms
+     ✓ does not display another From identity after Revoke sender and preserves edits through an explicit switch  1137ms
+     ✓ does not display another From identity after Remove sender and preserves edits through an explicit switch  313ms
+     ✓ does not report a stale denied upload failure after sender revocation  421ms
+ ✓ components/company/compose-recipient-reload.test.tsx (17 tests) 6204ms
+     ✓ replaces visible to and submits exactly the displayed server revision  853ms
+     ✓ replaces visible cc and submits exactly the displayed server revision  333ms
+     ✓ replaces visible bcc and submits exactly the displayed server revision  753ms
+     ✓ clears discarded Cc/Bcc when the server fields are omitted  732ms
+     ✓ clears discarded Cc/Bcc when the server fields are empty  600ms
+     ✓ a wrong identity during reload preserves local raw input and the conflict  475ms
+ ✓ app/(dashboard)/mail/page.test.tsx (11 tests) 1867ms
+     ✓ reveals the sent body and attachment download on demand  1009ms
+ ✓ features/mail/components/sent-folder-actions.test.tsx (20 tests) 6401ms
+     ✓ sent / Archive clears its current selection and reloads the original list  1245ms
+     ✓ sent / Move to trash clears its current selection and reloads the original list  629ms
+     ✓ archive / Move to sent clears its current selection and reloads the original list  658ms
+     ✓ archive / Move to trash clears its current selection and reloads the original list  412ms
+     ✓ trash / Restore clears its current selection and reloads the original list  371ms
+ ✓ features/mail/draft-writer-reload.test.ts (15 tests) 69ms
+ ✓ features/mail/workspace-receipt-refresh.test.tsx (20 tests) 7441ms
+     ✓ manual refresh updates the visible aggregate and list without opening content  988ms
+     ✓ manual refresh retries an errored selected aggregate without waiting for polling  319ms
+     ✓ refresh applies capability revocation and re-grant does not open content  487ms
+     ✓ an old in-flight aggregate cannot overwrite the new account  1051ms
+     ✓ manual refresh updates the visible aggregate and list without opening content  301ms
+     ✓ SSE invalidation updates the visible aggregate and list without opening content  375ms
+     ✓ EOF reconnect updates the visible aggregate and list without opening content  318ms
+     ✓ manual refresh retries an errored selected aggregate without waiting for polling  1194ms
+     ✓ refresh applies capability revocation and re-grant does not open content  541ms
+ ✓ features/mail/workspace-compose-navigation.test.tsx (15 tests) 5099ms
+     ✓ retains the same editor and unsaved input across query navigation without sending  683ms
+     ✓ ordinary dispatched success closes the consumed editor and navigates to receipts  884ms
+     ✓ successful completion preserves unrelated query data added while the same view remains  497ms
+     ✓ a committed mailbox change retires redirect ownership but reconciles the consumed editor  388ms
+     ✓ a committed page change retires redirect ownership but reconciles the consumed editor  336ms
+     ✓ query navigation during save preserves the explicit send and only retires its redirect  439ms
+ ✓ features/company/permission-editor-session.consumer.test.tsx (17 tests) 45954ms
+     ✓ tenant change clears loaded ownership without a manual dialog close and cannot rebase old intent  4432ms
+     ✓ tenant change clears get ownership without a manual dialog close and cannot rebase old intent  3466ms
+     ✓ tenant change clears patch ownership without a manual dialog close and cannot rebase old intent  3380ms
+     ✓ tenant change clears assignment ownership without a manual dialog close and cannot rebase old intent  3438ms
+     ✓ session change clears loaded ownership without a manual dialog close and cannot rebase old intent  1959ms
+     ✓ session change clears get ownership without a manual dialog close and cannot rebase old intent  2007ms
+     ✓ session change clears patch ownership without a manual dialog close and cannot rebase old intent  2387ms
+     ✓ session change clears assignment ownership without a manual dialog close and cannot rebase old intent  3834ms
+     ✓ logout change clears loaded ownership without a manual dialog close and cannot rebase old intent  4170ms
+     ✓ logout change clears get ownership without a manual dialog close and cannot rebase old intent  2613ms
+     ✓ logout change clears patch ownership without a manual dialog close and cannot rebase old intent  2357ms
+     ✓ logout change clears assignment ownership without a manual dialog close and cannot rebase old intent  3260ms
+     ✓ rejects a self-consistent old-tenant user row and snapshot delivered under a new tenant transport  2142ms
+     ✓ rejects a same-target wrong-tenant PATCH response rather than importing its capabilities or version  930ms
+     ✓ rejects a same-target wrong-tenant POST response rather than importing its capabilities or version  1923ms
+     ✓ new-session read does not reuse the old session's write capabilities  2909ms
+     ✓ a new-tenant read rejects another target's self-consistent snapshot  739ms
+ ✓ app/(dashboard)/admin/tenants/page.test.tsx (3 tests) 3167ms
+     ✓ 加载列表并支持创建 tenant  2282ms
+     ✓ 支持生成 API key  489ms
+     ✓ 支持保存 tenant overrides  394ms
+ ✓ features/mail/components/message-pane-actions.test.tsx (14 tests) 3044ms
+     ✓ 'seen' re-reads authoritative detail before enabling the next action  390ms
+     ✓ 'restore' re-reads authoritative detail before enabling the next action  604ms
+     ✓ keeps actions disabled until the authoritative read settles and then sends the opposite action  615ms
+ ✓ features/mail/workspace-editor-opening.test.tsx (28 tests) 9350ms
+     ✓ Continue editing ordinarily opens its prepared editor  1961ms
+     ✓ Reply ordinarily opens its prepared editor  400ms
+     ✓ Reply all ordinarily opens its prepared editor  408ms
+     ✓ late Reply cannot replace a newer dirty Compose  530ms
+     ✓ late Reply all cannot replace a newer dirty Compose  1285ms
+     ✓ late Forward cannot replace a newer dirty Compose  405ms
+     ✓ unrelated query fields and refresh preserve ordinary Reply  670ms
+ ✓ features/mail/workspace-events.test.tsx (7 tests) 3896ms
+     ✓ manual refresh revalidates the open message, attachments and conversation  1507ms
+     ✓ SSE invalidation revalidates the open message, attachments and conversation  414ms
+     ✓ EOF reconnect revalidates the open message, attachments and conversation  412ms
+     ✓ a late detail read from the old account cannot replace the current message  342ms
+     ✓ token-only rotation preserves the open conversation and uses the replacement credential  679ms
+ ✓ features/mail/draft-writer.test.ts (10 tests) 20ms
+ ✓ components/company/pe-independent-review.test.ts (18 tests) 2470ms
+   ✓ fragmented UTF8/CRLF metadata, EOF, reconnect, untouched JSON and closed observer  2364ms
+ ✓ lib/receipt-types.test.ts (38 tests) 26ms
+ ✓ lib/outbound-inspection-types.test.ts (85 tests) 55ms
+ ✓ lib/legacy-outbound.test.ts (22 tests) 123ms
+ ✓ lib/api/company-events.test.ts (15 tests) 42ms
+ ✓ components/company/compose-preview-response.test.tsx (19 tests) 5032ms
+     ✓ rejects HTTP 200 with object subject without crashing or discarding edits  1755ms
+     ✓ rejects HTTP 200 with object html_body without crashing or discarding edits  611ms
+     ✓ retains a valid preview after malformed refresh and permits a valid retry  385ms
+     ✓ accepts all-string previews, including empty fields  340ms
+ ✓ components/company/compose.test.tsx (3 tests) 1027ms
+     ✓ shows the revoked notice, blocks sending, and can unpin the template  400ms
+     ✓ edits, previews and submits authorized v1 when the picker only contains v2  547ms
+ ✓ app/(dashboard)/admin/plans/page.test.tsx (2 tests) 639ms
+     ✓ 加载列表并支持创建 plan  520ms
+ ✓ lib/session-safety.test.ts (10 tests) 154ms
+ ✓ app/(dashboard)/admin/monitor/page.test.tsx (2 tests) 970ms
+     ✓ 加载历史并接收实时事件  442ms
+     ✓ 支持筛选历史并重新连接  525ms
+ ✓ components/company/r5-protocol.test.tsx (3 tests) 4374ms
+     ✓ RC03  612ms
+ ✓ components/company/domains.test.tsx (5 tests) 773ms
+     ✓ runs verification, shows all five checks and refreshes  322ms
+ ✓ app/(dashboard)/admin/page.test.tsx (1 test) 233ms
+ ✓ app/(dashboard)/admin/policy/page.test.tsx (2 tests) 1187ms
+     ✓ 支持编辑并保存 SMTP policy  1083ms
+ ✓ components/company/send-policy.test.tsx (6 tests) 1071ms
+     ✓ stores the chosen override, refreshes and toasts  579ms
+     ✓ clears the override (inherit company default) by sending an empty policy  345ms
+ ✓ lib/wire-response-input.test.ts (2 tests) 14ms
+ ✓ lib/api/base-stream.test.ts (14 tests) 94ms
+ ✓ components/auth-dialog.test.tsx (1 test) 341ms
+     ✓ 支持账号登录并写入 JWT  339ms
+ ✓ app/docs/page.test.tsx (2 tests) 547ms
+     ✓ 支持切换 quickstart 并复制 curl 示例  408ms
+ ✓ components/company/r5-receipt-surface-oracle.test.ts (19 tests) 13ms
+ ✓ features/company/offboarding-panel.test.tsx (4 tests) 258ms
+ ✓ components/company/r5-permission-contract-oracle.test.ts (8 tests) 15ms
+ ✓ components/company/templates/versions.test.tsx (3 tests) 147ms
+ ✓ components/company/grants.test.tsx (2 tests) 438ms
+ ✓ lib/permissions.test.ts (27 tests) 11ms
+ ✓ lib/api/event-stream.test.ts (10 tests) 66ms
+ ✓ lib/settings.test.tsx (2 tests) 235ms
+ ✓ lib/error-code.test.ts (7 tests) 9ms
+ ✓ app/page.test.tsx (3 tests) 315ms
+ ✓ contexts/auth-context.test.tsx (2 tests) 270ms
+ ✓ components/company/r5-receipt-contract-oracle.test.ts (22 tests) 9ms
+ ✓ components/company/domain-onboarding.test.tsx (1 test) 426ms
+     ✓ updates the actual primary-domain selector after verification without reloading the page  424ms
+ ✓ lib/api/base.test.ts (3 tests) 13ms
+ ✓ features/mail/components/rich-message.test.tsx (2 tests) 300ms
+ ❯ r5-external-batch-probe.test.tsx (1 test | 1 failed) 7ms
+   × R5 batch independent realm loopback PostgreSQL 6ms
+ ✓ lib/compose-identity.test.ts (4 tests) 7ms
+ ✓ features/company/overview.test.tsx (1 test) 287ms
+ ✓ r5-external-runtime-probe.test.tsx (1 test) 85ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  r5-external-batch-probe.test.tsx > R5 batch independent realm loopback PostgreSQL
+Error: explicit private fixture required
+ ❯ r5-external-batch-probe.test.tsx:9:20
+      7| test("R5 batch independent realm loopback PostgreSQL", async () => {
+      8|   const path = process.env.TABMAIL_R5_PROTOCOL_COMPONENT_FIXTURE;
+      9|   if (!path) throw new Error("explicit private fixture required");
+       |                    ^
+     10|   const fixture: { case_id: string; api_url: string; token: string } =…
+     11|   expect(process.env.VITEST_WORKER_ID).toMatch(/^\d+$/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 59 passed (60)
+      Tests  1 failed | 865 passed (866)
+   Start at  19:41:39
+   Duration  189.95s (transform 8.49s, setup 11.69s, import 45.81s, tests 208.04s, environment 90.00s)
+
+JSON report written to /workspace/scratch/458de7991ac3/validation/combined-web-vitest.results.json

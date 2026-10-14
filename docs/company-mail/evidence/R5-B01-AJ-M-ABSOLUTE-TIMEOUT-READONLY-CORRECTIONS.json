@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "source_sha": "8529007132f1d61a2571e43aaabfe15b8452baa1",
+  "original_review": "R5-B01-AJ-M-ABSOLUTE-TIMEOUT-REVIEW.json",
+  "original_review_bytes_unchanged": true,
+  "raw_source": "R5-B01-AJ-M-ABSOLUTE-TIMEOUT-LOGS.tar.gz:M/go.jsonl",
+  "method": "Join originalGoJSON Output in originalrow order, parse complete markerJSON, pair adjacent same-parameter checkpoint+actual joined; no test rerun or sourcehash sweep",
+  "independent_readonly_review": "m_admission_independent_review delivered ACCEPTED_AS_ACTUAL_FAILED_ATTEMPT_ONLY, strictfailedvariantadmission_pending",
+  "actual_checkpoint_claims": [
+    {
+      "ready": 20,
+      "actual_claim_joined_seconds": 0.0006000000000000001,
+      "actual_claim_batch": 20,
+      "actual_claim_requested_limit": 20,
+      "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+      "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+      "checkpoint_origin": "captured_preparation_claim_same_parameters_observed_heap",
+      "phase": "batch_joined",
+      "joined_inflight": 0,
+      "source": "original GoOutput PREPARATION_ACTUAL_CLAIM_JOINED immediately paired with CHECKPOINT sameparameters",
+      "joined_ready_before_last_claim": 20
+    },
+    {
+      "ready": 1000,
+      "actual_claim_joined_seconds": 0.0005440000000000028,
+      "actual_claim_batch": 20,
+      "actual_claim_requested_limit": 20,
+      "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+      "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+      "checkpoint_origin": "captured_preparation_claim_same_parameters_observed_heap",
+      "phase": "batch_joined",
+      "joined_inflight": 0,
+      "source": "original GoOutput PREPARATION_ACTUAL_CLAIM_JOINED immediately paired with CHECKPOINT sameparameters",
+      "joined_ready_before_last_claim": 1000
+    },
+    {
+      "ready": 10000,
+      "actual_claim_joined_seconds": 0.0008299999999999974,
+      "actual_claim_batch": 20,
+      "actual_claim_requested_limit": 20,
+      "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+      "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+      "checkpoint_origin": "captured_preparation_claim_same_parameters_observed_heap",
+      "phase": "batch_joined",
+      "joined_inflight": 0,
+      "source": "original GoOutput PREPARATION_ACTUAL_CLAIM_JOINED immediately paired with CHECKPOINT sameparameters",
+      "joined_ready_before_last_claim": 10000
+    },
+    {
+      "ready": 100000,
+      "actual_claim_joined_seconds": 0.0006250000000003197,
+      "actual_claim_batch": 20,
+      "actual_claim_requested_limit": 20,
+      "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+      "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+      "checkpoint_origin": "captured_preparation_claim_same_parameters_observed_heap",
+      "phase": "batch_joined",
+      "joined_inflight": 0,
+      "source": "original GoOutput PREPARATION_ACTUAL_CLAIM_JOINED immediately paired with CHECKPOINT sameparameters",
+      "joined_ready_before_last_claim": 100000
+    },
+    {
+      "ready": 250000,
+      "actual_claim_joined_seconds": 0.003775000000000972,
+      "actual_claim_batch": 20,
+      "actual_claim_requested_limit": 20,
+      "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+      "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+      "checkpoint_origin": "captured_preparation_claim_same_parameters_observed_heap",
+      "phase": "batch_joined",
+      "joined_inflight": 0,
+      "source": "original GoOutput PREPARATION_ACTUAL_CLAIM_JOINED immediately paired with CHECKPOINT sameparameters",
+      "joined_ready_before_last_claim": 250000
+    },
+    {
+      "ready": 500000,
+      "actual_claim_joined_seconds": 0.008556999999996151,
+      "actual_claim_batch": 20,
+      "actual_claim_requested_limit": 20,
+      "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+      "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+      "checkpoint_origin": "captured_preparation_claim_same_parameters_observed_heap",
+      "phase": "batch_joined",
+      "joined_inflight": 0,
+      "source": "original GoOutput PREPARATION_ACTUAL_CLAIM_JOINED immediately paired with CHECKPOINT sameparameters",
+      "joined_ready_before_last_claim": 500000
+    },
+    {
+      "ready": 750000,
+      "actual_claim_joined_seconds": 0.009925000000009732,
+      "actual_claim_batch": 20,
+      "actual_claim_requested_limit": 20,
+      "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+      "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+      "checkpoint_origin": "captured_preparation_claim_same_parameters_observed_heap",
+      "phase": "batch_joined",
+      "joined_inflight": 0,
+      "source": "original GoOutput PREPARATION_ACTUAL_CLAIM_JOINED immediately paired with CHECKPOINT sameparameters",
+      "joined_ready_before_last_claim": 750000
+    }
+  ],
+  "original_summary_missing_actual_claim_joined_values": "Seven null summary values are incomplete reporting, not absence of original actualclaim evidence; EXPLAIN fields remainplanonly, precedingclaim not replacement",
+  "pre_deadline_guard_failure": [
+    {
+      "time": "2026-10-02T14:47:28.938305+08:00",
+      "output": "    r5_benchmark_test.go:1266: fixture parser admission requires original absolute wall remaining>31s: context deadline exceeded\n"
+    },
+    {
+      "time": "2026-10-02T14:47:28.938352+08:00",
+      "output": "        fixture parser admission requires original absolute wall remaining>31s: context deadline exceeded\n"
+    }
+  ],
+  "outer_process_exit": -15,
+  "Go_test_terminal": "not_observed",
+  "raw_actual_attempt_classification": "failure_only_nonbaseline_noinfra_orp95_causal_failure_proven",
+  "task_complete": false,
+  "product_green": false
+}

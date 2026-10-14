@@ -1,0 +1,28 @@
+setUpClass (__main__.ActualRootBindingTests) ... ERROR
+test_duplicate_metadata_and_unknown_compiled (__main__.SelectedNegativeTests.test_duplicate_metadata_and_unknown_compiled) ... ok
+test_forged_metadata_does_not_authorize_secret_or_evidence (__main__.SelectedNegativeTests.test_forged_metadata_does_not_authorize_secret_or_evidence) ... ok
+test_generated_and_external_are_not_local_read_capabilities (__main__.SelectedNegativeTests.test_generated_and_external_are_not_local_read_capabilities) ... ok
+test_missing_and_symlink_static_source (__main__.SelectedNegativeTests.test_missing_and_symlink_static_source) ... ok
+test_nested_module_in_excluded_static_output_is_rejected (__main__.SelectedNegativeTests.test_nested_module_in_excluded_static_output_is_rejected) ... ok
+test_source_hash_drift_detected (__main__.SelectedNegativeTests.test_source_hash_drift_detected) ... ok
+test_unknown_nested_module_and_extra_go (__main__.SelectedNegativeTests.test_unknown_nested_module_and_extra_go) ... ok
+test_wrongfork_and_third_replace (__main__.SelectedNegativeTests.test_wrongfork_and_third_replace) ... ok
+
+======================================================================
+ERROR: setUpClass (__main__.ActualRootBindingTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_selected_source_binding.py", line 86, in setUpClass
+    cls.receipt=binding.capture(ROOT,GO,cache=CACHE,modulecache=MODULECACHE)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_selected_source_binding.py", line 222, in capture
+    local, generated, external, native, toolchain = classify(rows,root,authorized,envinfo,mvs)
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_selected_source_binding.py", line 159, in classify
+    raise ValueError('unclassified local Go input: '+rel)
+ValueError: unclassified local Go input: web/node_modules/flatted/golang/pkg/flatted/flatted.go
+
+----------------------------------------------------------------------
+Ran 8 tests in 5.569s
+
+FAILED (errors=1)

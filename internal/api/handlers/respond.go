@@ -31,6 +31,16 @@ type meta struct {
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
+	// API responses can contain mail content, receipts or session credentials.
+	// Keep an explicit endpoint policy, but never leave their storage policy
+	// to a browser or intermediary's default caching behavior.
+	if w.Header().Get("Cache-Control") == "" {
+		w.Header().Set("Cache-Control", "no-store")
+	}
+	if result, isEnvelope := v.(envelope); isEnvelope {
+		result.Data = companyWireValue(result.Data)
+		v = result
+	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(v)

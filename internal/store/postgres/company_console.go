@@ -26,7 +26,10 @@ func (s *PgStore) ListCompanyAudit(ctx context.Context, a authz.Actor, p models.
 	out := []company.AdminAudit{}
 	total := 0
 	e := s.companyReadTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
-		const filter = `tenant_id=$1 AND (action LIKE 'company.%' OR action LIKE 'employee.%' OR action LIKE 'mailbox.%' OR action LIKE 'template.%' OR action LIKE 'domain.%')`
+		// Permission management writes use their own action namespace. Include
+		// its shipped commands explicitly; an arbitrary future permission.*
+		// action does not automatically become company-console-visible.
+		const filter = `tenant_id=$1 AND (action LIKE 'company.%' OR action LIKE 'employee.%' OR action LIKE 'mailbox.%' OR action LIKE 'template.%' OR action LIKE 'domain.%' OR action IN ('permission.profile.create','permission.profile.update','permission.profile.delete','permission.profile.assign','permission.override.patch'))`
 		if e := tx.QueryRow(ctx, `SELECT count(*) FROM audit_log WHERE `+filter, a.TenantID).Scan(&total); e != nil {
 			return e
 		}

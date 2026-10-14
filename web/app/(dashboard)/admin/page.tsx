@@ -156,12 +156,14 @@ export default function AdminPage() {
           <DeliveryTable
             title={t("admin.topTenantDelivery")}
             description={t("admin.topTenantDeliveryDesc")}
+            aggregateLabel={t("admin.otherTenantDelivery")}
             rows={stats?.tenant_delivery ?? []}
             loading={loading}
           />
           <DeliveryTable
             title={t("admin.topMailboxDelivery")}
             description={t("admin.topMailboxDeliveryDesc")}
+            aggregateLabel={t("admin.otherMailboxDelivery")}
             rows={stats?.mailbox_delivery ?? []}
             loading={loading}
           />
@@ -312,11 +314,13 @@ function MetricsCard({
 function DeliveryTable({
   title,
   description,
+  aggregateLabel,
   rows,
   loading,
 }: {
   title: string;
   description: string;
+  aggregateLabel: string;
   rows: SystemStats["tenant_delivery"];
   loading: boolean;
 }) {
@@ -349,8 +353,8 @@ function DeliveryTable({
             </TableHeader>
             <TableBody>
               {rows.map((row) => (
-                <TableRow key={row.key}>
-                  <TableCell className="max-w-[280px] truncate font-mono text-xs">{row.key}</TableCell>
+                <TableRow key={row.aggregate ? "aggregate" : `key:${row.key}`}>
+                  <TableCell className="max-w-[280px] truncate font-mono text-xs">{row.aggregate ? aggregateLabel : row.key}</TableCell>
                   <TableCell className="text-right tabular-nums">{row.accepted}</TableCell>
                   <TableCell className="text-right tabular-nums">{row.rejected}</TableCell>
                   <TableCell className="text-right tabular-nums">{row.deliveries_ok}</TableCell>

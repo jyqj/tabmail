@@ -86,6 +86,12 @@ const origin = process.env.TABMAIL_E2E_ORIGIN || "http://localhost:3000";
         /^\/api\/v1\/company\/drafts\/[0-9a-f-]{36}\/submit$/.test(new URL(r.url()).pathname) &&
         r.request().method() === "POST",
     );
+    // Sending opens the aggregate receipt view, whose buttons identify tasks
+    // by UUID. Subjects belong to the separately authorized sent-mail assets.
+    const refreshedReceipts = page.waitForResponse((r) =>
+      new URL(r.url()).pathname === "/api/v1/company/submissions" &&
+      r.request().method() === "GET" && r.status() === 200,
+    );
     await page.getByRole("button", { name: "Send", exact: true }).click();
     const submitted = await send;
     assert.equal(submitted.status(), 201);
@@ -94,13 +100,20 @@ const origin = process.env.TABMAIL_E2E_ORIGIN || "http://localhost:3000";
     assert.equal(legacySendRequests, 0, "retired send endpoint must never be used");
     const submittedID = (await submitted.json()).data.id;
     assert.ok(submittedID, "submission must return a durable identity");
-    const sentRow = page.getByRole("button", { name: /Re: Browser welcome/ });
-    await expect(sentRow).toBeVisible();
-    await sentRow.click();
+    const receipts = (await (await refreshedReceipts).json()).data;
+    assert.ok(receipts.some((receipt) => receipt.id === submittedID),
+      "the refreshed receipt list must contain this submission");
+    await expect(page.getByRole("heading", { name: "Delivery status", exact: true })).toBeVisible();
+    const receiptRow = page.getByRole("button", { name: new RegExp(`Task: ${submittedID}`) });
+    await expect(receiptRow).toBeVisible();
+    // Preserve the privacy boundary: receipts expose neither subject nor body.
+    await expect(page.getByRole("button", { name: /Re: Browser welcome/ })).toHaveCount(0);
+    await expect(page.getByText("Private browser journey body.", { exact: false })).toHaveCount(0);
+    await receiptRow.click();
     const sentContent = page.waitForResponse((response) =>
       new URL(response.url()).pathname === `/api/v1/company/submissions/${submittedID}/content`,
     );
-    await page.getByRole("button", { name: "View content", exact: true }).click();
+    await page.getByRole("button", { name: "View content (re-authorized)", exact: true }).click();
     assert.equal((await sentContent).status(), 200);
     await expect(page.getByText("Private browser journey body.", { exact: false })).toBeVisible();
     const downloadReady = page.waitForEvent("download");
@@ -112,8 +125,27 @@ const origin = process.env.TABMAIL_E2E_ORIGIN || "http://localhost:3000";
     const chunks = [];
     for await (const chunk of reader) chunks.push(chunk);
     assert.equal(Buffer.concat(chunks).toString(), "Browser attachment bytes");
+    // The sent folder is an independent live asset list, populated by the
+    // same atomic submission; it does not depend on SMTP or a polling delay.
+    const sentList = page.waitForResponse((r) =>
+      new URL(r.url()).pathname === `/api/v1/company/mailboxes/${fixture.personal_mailbox}/sent` &&
+      r.request().method() === "GET" && r.status() === 200,
+    );
+    await page.getByRole("button", { name: "Sent mail", exact: true }).click();
+    const assets = (await (await sentList).json()).data;
+    assert.ok(assets.some((asset) => asset.id === submittedID && asset.subject === "Re: Browser welcome"),
+      "the sent asset list must contain the same submitted identity and reply subject");
+    const sentRow = page.getByRole("button", { name: /Re: Browser welcome/ });
+    await expect(sentRow).toBeVisible();
+    const assetContent = page.waitForResponse((response) =>
+      new URL(response.url()).pathname === `/api/v1/company/submissions/${submittedID}/content`,
+    );
+    await sentRow.click();
+    assert.equal((await assetContent).status(), 200);
+    await expect(page.getByText("Private browser journey body.", { exact: false })).toBeVisible();
+    await expect(page.getByRole("button", { name: /browser\.txt/ })).toBeVisible();
     console.log(
-      "PASS: employee read -> RFC reply -> draft -> attachment -> atomic submit -> sent content and verified download",
+      "PASS: employee read -> RFC reply -> draft -> attachment -> atomic submit -> refreshed neutral receipt -> authorized content/download -> same-ID sent asset",
     );
 
     await logout();

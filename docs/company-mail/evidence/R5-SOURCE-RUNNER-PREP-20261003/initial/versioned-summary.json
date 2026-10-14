@@ -1,0 +1,32 @@
+{
+  "status": "failed",
+  "no_missing": true,
+  "no_overlap": true,
+  "missing_test_ids": [],
+  "discovered": 664,
+  "groups": [
+    {
+      "group": "current",
+      "source_sha": "753e8f94897b92008274d42861f26bcebe3c98b8",
+      "exit": 1,
+      "requested": 660,
+      "started": 660,
+      "failures": [],
+      "errors": [
+        "test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion",
+        "test_r5_compatibility.SafeWireJoinTests.test_exact_safe_join_remains_metadata_not_product_approval"
+      ],
+      "skips": []
+    },
+    {
+      "group": "frozen-v1",
+      "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+      "exit": 0,
+      "requested": 4,
+      "started": 4,
+      "failures": [],
+      "errors": [],
+      "skips": []
+    }
+  ]
+}

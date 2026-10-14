@@ -1,0 +1,92 @@
+{"Time":"2026-10-03T17:11:37.633705093Z","Action":"start","Package":"tabmail/cmd/tabmail"}
+{"Time":"2026-10-03T17:11:37.674693546Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors"}
+{"Time":"2026-10-03T17:11:37.6747197Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors","Output":"=== RUN   TestR5APIBackgroundShutdownCallerOrderContextAndErrors\n"}
+{"Time":"2026-10-03T17:11:37.674767718Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/success"}
+{"Time":"2026-10-03T17:11:37.674772276Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/success","Output":"=== RUN   TestR5APIBackgroundShutdownCallerOrderContextAndErrors/success\n"}
+{"Time":"2026-10-03T17:11:37.674855169Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/success","Output":"--- PASS: TestR5APIBackgroundShutdownCallerOrderContextAndErrors/success (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.674863023Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/success","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.674904846Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/http_failure"}
+{"Time":"2026-10-03T17:11:37.674908277Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/http_failure","Output":"=== RUN   TestR5APIBackgroundShutdownCallerOrderContextAndErrors/http_failure\n"}
+{"Time":"2026-10-03T17:11:37.675041767Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/http_failure","Output":"--- PASS: TestR5APIBackgroundShutdownCallerOrderContextAndErrors/http_failure (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.675048019Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/http_failure","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.675093592Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/owner_failure"}
+{"Time":"2026-10-03T17:11:37.675097355Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/owner_failure","Output":"=== RUN   TestR5APIBackgroundShutdownCallerOrderContextAndErrors/owner_failure\n"}
+{"Time":"2026-10-03T17:11:37.675179332Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/owner_failure","Output":"--- PASS: TestR5APIBackgroundShutdownCallerOrderContextAndErrors/owner_failure (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.675208408Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/owner_failure","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.675241864Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/both_failures"}
+{"Time":"2026-10-03T17:11:37.675245724Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/both_failures","Output":"=== RUN   TestR5APIBackgroundShutdownCallerOrderContextAndErrors/both_failures\n"}
+{"Time":"2026-10-03T17:11:37.67534141Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/both_failures","Output":"--- PASS: TestR5APIBackgroundShutdownCallerOrderContextAndErrors/both_failures (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.675370988Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors/both_failures","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.675407562Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors","Output":"--- PASS: TestR5APIBackgroundShutdownCallerOrderContextAndErrors (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.675435342Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerOrderContextAndErrors","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.675472825Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerRealOwnerBlocksDependencyClose"}
+{"Time":"2026-10-03T17:11:37.675476335Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerRealOwnerBlocksDependencyClose","Output":"=== RUN   TestR5APIBackgroundShutdownCallerRealOwnerBlocksDependencyClose\n"}
+{"Time":"2026-10-03T17:11:37.67592369Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerRealOwnerBlocksDependencyClose","Output":"--- PASS: TestR5APIBackgroundShutdownCallerRealOwnerBlocksDependencyClose (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.675932316Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerRealOwnerBlocksDependencyClose","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.675994964Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerHTTPErrorStillJoinsOwner"}
+{"Time":"2026-10-03T17:11:37.675999088Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerHTTPErrorStillJoinsOwner","Output":"=== RUN   TestR5APIBackgroundShutdownCallerHTTPErrorStillJoinsOwner\n"}
+{"Time":"2026-10-03T17:11:37.676210025Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerHTTPErrorStillJoinsOwner","Output":"--- PASS: TestR5APIBackgroundShutdownCallerHTTPErrorStillJoinsOwner (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.676216394Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerHTTPErrorStillJoinsOwner","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.676219967Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerTimeoutIsNotDrain"}
+{"Time":"2026-10-03T17:11:37.67622287Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerTimeoutIsNotDrain","Output":"=== RUN   TestR5APIBackgroundShutdownCallerTimeoutIsNotDrain\n"}
+{"Time":"2026-10-03T17:11:37.697611179Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerTimeoutIsNotDrain","Output":"--- PASS: TestR5APIBackgroundShutdownCallerTimeoutIsNotDrain (0.02s)\n"}
+{"Time":"2026-10-03T17:11:37.69763392Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerTimeoutIsNotDrain","Elapsed":0.02}
+{"Time":"2026-10-03T17:11:37.697686977Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerExhaustedContextReachesOwner"}
+{"Time":"2026-10-03T17:11:37.69769015Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerExhaustedContextReachesOwner","Output":"=== RUN   TestR5APIBackgroundShutdownCallerExhaustedContextReachesOwner\n"}
+{"Time":"2026-10-03T17:11:37.697695194Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerExhaustedContextReachesOwner","Output":"--- PASS: TestR5APIBackgroundShutdownCallerExhaustedContextReachesOwner (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.69769845Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerExhaustedContextReachesOwner","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.697702261Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerAdmittedRequestCanSpawnDuringHTTPDrain"}
+{"Time":"2026-10-03T17:11:37.697704904Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerAdmittedRequestCanSpawnDuringHTTPDrain","Output":"=== RUN   TestR5APIBackgroundShutdownCallerAdmittedRequestCanSpawnDuringHTTPDrain\n"}
+{"Time":"2026-10-03T17:11:37.697709703Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerAdmittedRequestCanSpawnDuringHTTPDrain","Output":"--- PASS: TestR5APIBackgroundShutdownCallerAdmittedRequestCanSpawnDuringHTTPDrain (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.697718101Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerAdmittedRequestCanSpawnDuringHTTPDrain","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.697722218Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerBothFormalRolesWired"}
+{"Time":"2026-10-03T17:11:37.69772484Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerBothFormalRolesWired","Output":"=== RUN   TestR5APIBackgroundShutdownCallerBothFormalRolesWired\n"}
+{"Time":"2026-10-03T17:11:37.702947019Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerBothFormalRolesWired","Output":"--- PASS: TestR5APIBackgroundShutdownCallerBothFormalRolesWired (0.01s)\n"}
+{"Time":"2026-10-03T17:11:37.702983975Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5APIBackgroundShutdownCallerBothFormalRolesWired","Elapsed":0.01}
+{"Time":"2026-10-03T17:11:37.703190489Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerOneOriginAndSharedBudget"}
+{"Time":"2026-10-03T17:11:37.703197177Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerOneOriginAndSharedBudget","Output":"=== RUN   TestR5ShutdownCallerOneOriginAndSharedBudget\n"}
+{"Time":"2026-10-03T17:11:37.703796558Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerOneOriginAndSharedBudget","Output":"--- PASS: TestR5ShutdownCallerOneOriginAndSharedBudget (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.703806394Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerOneOriginAndSharedBudget","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.703810893Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerStopNilDoesNotJoinRun"}
+{"Time":"2026-10-03T17:11:37.703813626Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerStopNilDoesNotJoinRun","Output":"=== RUN   TestR5ShutdownCallerStopNilDoesNotJoinRun\n"}
+{"Time":"2026-10-03T17:11:37.70391938Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerStopNilDoesNotJoinRun","Output":"--- PASS: TestR5ShutdownCallerStopNilDoesNotJoinRun (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.703989873Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerStopNilDoesNotJoinRun","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.704038977Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerTimeoutKeepsOwnerAndDependencies"}
+{"Time":"2026-10-03T17:11:37.704042528Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerTimeoutKeepsOwnerAndDependencies","Output":"=== RUN   TestR5ShutdownCallerTimeoutKeepsOwnerAndDependencies\n"}
+{"Time":"2026-10-03T17:11:37.724565104Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerTimeoutKeepsOwnerAndDependencies","Output":"--- PASS: TestR5ShutdownCallerTimeoutKeepsOwnerAndDependencies (0.02s)\n"}
+{"Time":"2026-10-03T17:11:37.724640135Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerTimeoutKeepsOwnerAndDependencies","Elapsed":0.02}
+{"Time":"2026-10-03T17:11:37.724691138Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerPendingStartCannotProduceIdleJoin"}
+{"Time":"2026-10-03T17:11:37.72469485Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerPendingStartCannotProduceIdleJoin","Output":"=== RUN   TestR5ShutdownCallerPendingStartCannotProduceIdleJoin\n"}
+{"Time":"2026-10-03T17:11:37.725045191Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerPendingStartCannotProduceIdleJoin","Output":"--- PASS: TestR5ShutdownCallerPendingStartCannotProduceIdleJoin (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.725085918Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerPendingStartCannotProduceIdleJoin","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.725125629Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerStartReturnIsNotWorkerJoin"}
+{"Time":"2026-10-03T17:11:37.725129483Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerStartReturnIsNotWorkerJoin","Output":"=== RUN   TestR5ShutdownCallerStartReturnIsNotWorkerJoin\n"}
+{"Time":"2026-10-03T17:11:37.745825731Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerStartReturnIsNotWorkerJoin","Output":"--- PASS: TestR5ShutdownCallerStartReturnIsNotWorkerJoin (0.02s)\n"}
+{"Time":"2026-10-03T17:11:37.745843305Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerStartReturnIsNotWorkerJoin","Elapsed":0.02}
+{"Time":"2026-10-03T17:11:37.745891295Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerStopErrorCannotAuthorizeClose"}
+{"Time":"2026-10-03T17:11:37.745894756Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerStopErrorCannotAuthorizeClose","Output":"=== RUN   TestR5ShutdownCallerStopErrorCannotAuthorizeClose\n"}
+{"Time":"2026-10-03T17:11:37.746108139Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerStopErrorCannotAuthorizeClose","Output":"--- PASS: TestR5ShutdownCallerStopErrorCannotAuthorizeClose (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.746341551Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerStopErrorCannotAuthorizeClose","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.746349254Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerAllStopsBeginBeforeAnyJoin"}
+{"Time":"2026-10-03T17:11:37.746354731Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerAllStopsBeginBeforeAnyJoin","Output":"=== RUN   TestR5ShutdownCallerAllStopsBeginBeforeAnyJoin\n"}
+{"Time":"2026-10-03T17:11:37.746531171Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerAllStopsBeginBeforeAnyJoin","Output":"--- PASS: TestR5ShutdownCallerAllStopsBeginBeforeAnyJoin (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.746536115Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerAllStopsBeginBeforeAnyJoin","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.746540354Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerRegisteredUnscheduledRunIsOwned"}
+{"Time":"2026-10-03T17:11:37.746543154Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerRegisteredUnscheduledRunIsOwned","Output":"=== RUN   TestR5ShutdownCallerRegisteredUnscheduledRunIsOwned\n"}
+{"Time":"2026-10-03T17:11:37.770062238Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerRegisteredUnscheduledRunIsOwned","Output":"--- PASS: TestR5ShutdownCallerRegisteredUnscheduledRunIsOwned (0.02s)\n"}
+{"Time":"2026-10-03T17:11:37.770078976Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerRegisteredUnscheduledRunIsOwned","Elapsed":0.02}
+{"Time":"2026-10-03T17:11:37.770084979Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerExpiredOriginIsNotRenewed"}
+{"Time":"2026-10-03T17:11:37.77008787Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerExpiredOriginIsNotRenewed","Output":"=== RUN   TestR5ShutdownCallerExpiredOriginIsNotRenewed\n"}
+{"Time":"2026-10-03T17:11:37.770092681Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerExpiredOriginIsNotRenewed","Output":"--- PASS: TestR5ShutdownCallerExpiredOriginIsNotRenewed (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.770095497Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerExpiredOriginIsNotRenewed","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.770098486Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerLateJoinCannotCommitAfterDeadline"}
+{"Time":"2026-10-03T17:11:37.770100991Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerLateJoinCannotCommitAfterDeadline","Output":"=== RUN   TestR5ShutdownCallerLateJoinCannotCommitAfterDeadline\n"}
+{"Time":"2026-10-03T17:11:37.7701084Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerLateJoinCannotCommitAfterDeadline","Output":"--- PASS: TestR5ShutdownCallerLateJoinCannotCommitAfterDeadline (0.00s)\n"}
+{"Time":"2026-10-03T17:11:37.770111933Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerLateJoinCannotCommitAfterDeadline","Elapsed":0}
+{"Time":"2026-10-03T17:11:37.770115361Z","Action":"run","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerMainRoleWiring"}
+{"Time":"2026-10-03T17:11:37.770117649Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerMainRoleWiring","Output":"=== RUN   TestR5ShutdownCallerMainRoleWiring\n"}
+{"Time":"2026-10-03T17:11:37.774871546Z","Action":"output","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerMainRoleWiring","Output":"--- PASS: TestR5ShutdownCallerMainRoleWiring (0.01s)\n"}
+{"Time":"2026-10-03T17:11:37.774947732Z","Action":"pass","Package":"tabmail/cmd/tabmail","Test":"TestR5ShutdownCallerMainRoleWiring","Elapsed":0.01}
+{"Time":"2026-10-03T17:11:37.77504358Z","Action":"output","Package":"tabmail/cmd/tabmail","Output":"PASS\n"}
+{"Time":"2026-10-03T17:11:38.78038784Z","Action":"output","Package":"tabmail/cmd/tabmail","Output":"ok  \ttabmail/cmd/tabmail\t1.146s\n"}
+{"Time":"2026-10-03T17:11:38.780435175Z","Action":"pass","Package":"tabmail/cmd/tabmail","Elapsed":1.147}

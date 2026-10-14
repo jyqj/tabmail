@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-10-07T13:56:38.475098+00:00",
+  "source_worktree": "/workspace/scratch/458de7991ac3/tabmail-wave-verify",
+  "clone": "/workspace/scratch/458de7991ac3/tabmail-wave-build-independent",
+  "source_commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+  "source_tree": "bfa06a61ce4bc8411243d3b57de26db5e161dc8b",
+  "environment_overrides": {
+    "GOTOOLCHAIN": "local",
+    "GOMODCACHE": "/workspace/scratch/458de7991ac3/go-cache/mod",
+    "GOCACHE": "/workspace/scratch/458de7991ac3/go-cache/build",
+    "GOPROXY": "off"
+  },
+  "commands": [
+    {
+      "label": "clone",
+      "argv": [
+        "git",
+        "clone",
+        "--local",
+        "--no-hardlinks",
+        "--no-checkout",
+        "/workspace/scratch/458de7991ac3/tabmail-wave-verify",
+        "/workspace/scratch/458de7991ac3/tabmail-wave-build-independent"
+      ],
+      "shell_command": "git clone --local --no-hardlinks --no-checkout /workspace/scratch/458de7991ac3/tabmail-wave-verify /workspace/scratch/458de7991ac3/tabmail-wave-build-independent",
+      "cwd": "/workspace/scratch/458de7991ac3",
+      "started_at": "2026-10-07T13:56:38.499025+00:00",
+      "log": "clone.log",
+      "exit_code": 0,
+      "elapsed_seconds": 0.307,
+      "finished_at": "2026-10-07T13:56:38.806341+00:00",
+      "log_sha256": "e8ab54fdf9325e0d7549f033bdfb9c1fcf7b44517054488168873a9c5083c5e0",
+      "log_bytes": 87
+    },
+    {
+      "label": "checkout",
+      "argv": [
+        "git",
+        "checkout",
+        "--detach",
+        "e32564304c0c84aa80b1184e72129fb0316d989d"
+      ],
+      "shell_command": "git checkout --detach e32564304c0c84aa80b1184e72129fb0316d989d",
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-build-independent",
+      "started_at": "2026-10-07T13:56:38.808029+00:00",
+      "log": "checkout.log",
+      "exit_code": 0,
+      "elapsed_seconds": 1.445,
+      "finished_at": "2026-10-07T13:56:40.253401+00:00",
+      "log_sha256": "6c33801965081cf87d7ad79271715707401a5bb88f71a041c153ca3640baf2e7",
+      "log_bytes": 85
+    },
+    {
+      "label": "go-version",
+      "argv": [
+        "/workspace/scratch/458de7991ac3/toolchains/go/bin/go",
+        "version"
+      ],
+      "shell_command": "/workspace/scratch/458de7991ac3/toolchains/go/bin/go version",
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-build-independent",
+      "started_at": "2026-10-07T13:56:40.379351+00:00",
+      "log": "go-version.log",
+      "exit_code": 0,
+      "elapsed_seconds": 0.009,
+      "finished_at": "2026-10-07T13:56:40.388551+00:00",
+      "log_sha256": "5c6c3b76041f333573b7ce6f02858efc54e5fb57ed1d298d295c824fff748f89",
+      "log_bytes": 32
+    },
+    {
+      "label": "go-environment",
+      "argv": [
+        "/workspace/scratch/458de7991ac3/toolchains/go/bin/go",
+        "env",
+        "-json",
+        "GOFLAGS",
+        "GOWORK",
+        "GOOS",
+        "GOARCH",
+        "CGO_ENABLED",
+        "GOVCS"
+      ],
+      "shell_command": "/workspace/scratch/458de7991ac3/toolchains/go/bin/go env -json GOFLAGS GOWORK GOOS GOARCH CGO_ENABLED GOVCS",
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-build-independent",
+      "started_at": "2026-10-07T13:56:40.389143+00:00",
+      "log": "go-environment.log",
+      "exit_code": 0,
+      "elapsed_seconds": 0.006,
+      "finished_at": "2026-10-07T13:56:40.395315+00:00",
+      "log_sha256": "50d3edade3cc2937d4bfa8e3802392b114de095e5549ec8355c2fdf5e3fb0b5a",
+      "log_bytes": 107
+    },
+    {
+      "label": "build-all",
+      "argv": [
+        "/workspace/scratch/458de7991ac3/toolchains/go/bin/go",
+        "build",
+        "-mod=readonly",
+        "./..."
+      ],
+      "shell_command": "/workspace/scratch/458de7991ac3/toolchains/go/bin/go build -mod=readonly ./...",
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-build-independent",
+      "started_at": "2026-10-07T13:56:40.396165+00:00",
+      "log": "build-all.log",
+      "exit_code": 0,
+      "elapsed_seconds": 9.5,
+      "finished_at": "2026-10-07T13:56:49.895857+00:00",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log_bytes": 0
+    }
+  ],
+  "tests_rerun": false,
+  "buildvcs_default_preserved": true,
+  "original_failure_evidence": "../wave-final-go/build-all.log",
+  "original_summary": "../wave-final-go/summary.json",
+  "original_summary_sha256": "ad77d8adbab8e4d96002d0c9e4488a582132e35b0c2209dce52b9fb6abdc600c",
+  "scope": "One supplementary build in a normal independent clone of the same source; no repeated tests and no modification of earlier failure evidence.",
+  "clone_head_before": "e32564304c0c84aa80b1184e72129fb0316d989d",
+  "clone_tree_before": "bfa06a61ce4bc8411243d3b57de26db5e161dc8b",
+  "git_status_before": "",
+  "ordinary_repository_metadata_directory": true,
+  "git_common_directory_inside_clone": true,
+  "prior_manifest_sha256": "f73ee21624452a3de8bf4057c28c8ba9f7e4d6200e552c5b95434859c41e4d7a",
+  "source_and_module_hashes_match_combined_run_before": true,
+  "go_version": "go version go1.25.7 linux/amd64",
+  "selected_go_environment": {
+    "CGO_ENABLED": "1",
+    "GOARCH": "amd64",
+    "GOFLAGS": "",
+    "GOOS": "linux",
+    "GOVCS": "",
+    "GOWORK": ""
+  },
+  "build_exit_code": 0,
+  "clone_head_after": "e32564304c0c84aa80b1184e72129fb0316d989d",
+  "clone_tree_after": "bfa06a61ce4bc8411243d3b57de26db5e161dc8b",
+  "git_status_after": "",
+  "source_and_module_hashes_match_combined_run_after": true,
+  "original_failure_evidence_sha256": "c22e63c843e0f636aca439f1a8bb37724c43d8f4bcbfe0ce046e79a83c54e87f",
+  "original_summary_unchanged": true,
+  "qualification_passed": true,
+  "finished_at": "2026-10-07T13:56:49.999961+00:00",
+  "artifacts": [
+    {
+      "path": "build-all.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checkout.log",
+      "sha256": "6c33801965081cf87d7ad79271715707401a5bb88f71a041c153ca3640baf2e7",
+      "bytes": 85
+    },
+    {
+      "path": "clone.log",
+      "sha256": "e8ab54fdf9325e0d7549f033bdfb9c1fcf7b44517054488168873a9c5083c5e0",
+      "bytes": 87
+    },
+    {
+      "path": "go-environment.log",
+      "sha256": "50d3edade3cc2937d4bfa8e3802392b114de095e5549ec8355c2fdf5e3fb0b5a",
+      "bytes": 107
+    },
+    {
+      "path": "go-version.log",
+      "sha256": "5c6c3b76041f333573b7ce6f02858efc54e5fb57ed1d298d295c824fff748f89",
+      "bytes": 32
+    }
+  ]
+}

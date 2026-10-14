@@ -1,0 +1,16 @@
+{"Time":"2026-10-03T19:11:27.138149963Z","Action":"start","Package":"tabmail/internal/store/postgres"}
+{"Time":"2026-10-03T19:11:27.143427622Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR3CompanyHTTPJourney"}
+{"Time":"2026-10-03T19:11:27.143468663Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3CompanyHTTPJourney","Output":"=== RUN   TestR3CompanyHTTPJourney\n"}
+{"Time":"2026-10-03T19:11:27.67965111Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3CompanyHTTPJourney","Output":"--- PASS: TestR3CompanyHTTPJourney (0.53s)\n"}
+{"Time":"2026-10-03T19:11:27.679703958Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR3CompanyHTTPJourney","Elapsed":0.53}
+{"Time":"2026-10-03T19:11:27.679715616Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR3DraftRevisionAndAttachmentAuthorization"}
+{"Time":"2026-10-03T19:11:27.679717869Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3DraftRevisionAndAttachmentAuthorization","Output":"=== RUN   TestR3DraftRevisionAndAttachmentAuthorization\n"}
+{"Time":"2026-10-03T19:11:27.928170762Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3DraftRevisionAndAttachmentAuthorization","Output":"--- PASS: TestR3DraftRevisionAndAttachmentAuthorization (0.25s)\n"}
+{"Time":"2026-10-03T19:11:27.928382137Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR3DraftRevisionAndAttachmentAuthorization","Elapsed":0.25}
+{"Time":"2026-10-03T19:11:27.928408086Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR3SubmissionIdempotencyTemplateOnlyAndCodec"}
+{"Time":"2026-10-03T19:11:27.92841105Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3SubmissionIdempotencyTemplateOnlyAndCodec","Output":"=== RUN   TestR3SubmissionIdempotencyTemplateOnlyAndCodec\n"}
+{"Time":"2026-10-03T19:11:28.347431616Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3SubmissionIdempotencyTemplateOnlyAndCodec","Output":"--- PASS: TestR3SubmissionIdempotencyTemplateOnlyAndCodec (0.41s)\n"}
+{"Time":"2026-10-03T19:11:28.347462752Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR3SubmissionIdempotencyTemplateOnlyAndCodec","Elapsed":0.41}
+{"Time":"2026-10-03T19:11:28.34746832Z","Action":"output","Package":"tabmail/internal/store/postgres","Output":"PASS\n"}
+{"Time":"2026-10-03T19:11:28.348696301Z","Action":"output","Package":"tabmail/internal/store/postgres","Output":"ok  \ttabmail/internal/store/postgres\t1.210s\n"}
+{"Time":"2026-10-03T19:11:28.348720918Z","Action":"pass","Package":"tabmail/internal/store/postgres","Elapsed":1.211}

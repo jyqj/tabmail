@@ -1,0 +1,13 @@
+{
+  "source_head": "aeed47f0e1998d9925acb680992b051463821d69",
+  "historical_files": 36,
+  "history_unchanged": true,
+  "baseline_evidence": 528,
+  "changed_generated_only": [
+    "docs/company-mail/evidence/R5-API-MATRIX.json",
+    "docs/company-mail/evidence/R5-CLIENT-CALLS.json"
+  ],
+  "unchanged_evidence": 526,
+  "source_map_closure_drift": [],
+  "manual_boundary_annotations_equal": true
+}

@@ -1,0 +1,7 @@
+remote: 
+remote: Create a pull request for 'integration/company-mail-r5-batch2-20261003' on GitHub by visiting:        
+remote:      https://github.com/jyqj/tabmail/pull/new/integration/company-mail-r5-batch2-20261003        
+remote: 
+To https://github.com/jyqj/tabmail.git
+ * [new branch]      integration/company-mail-r5-batch2-20261003 -> integration/company-mail-r5-batch2-20261003
+branch 'integration/company-mail-r5-batch2-20261003' set up to track 'origin/integration/company-mail-r5-batch2-20261003'.

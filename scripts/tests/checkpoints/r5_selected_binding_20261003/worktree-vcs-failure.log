@@ -1,0 +1,31 @@
+setUpClass (test_r5_selected_source_binding.ActualRootBindingTests) ... ERROR
+test_duplicate_metadata_and_unknown_compiled (test_r5_selected_source_binding.SelectedNegativeTests.test_duplicate_metadata_and_unknown_compiled) ... ok
+test_forged_metadata_does_not_authorize_secret_or_evidence (test_r5_selected_source_binding.SelectedNegativeTests.test_forged_metadata_does_not_authorize_secret_or_evidence) ... ok
+test_generated_and_external_are_not_local_read_capabilities (test_r5_selected_source_binding.SelectedNegativeTests.test_generated_and_external_are_not_local_read_capabilities) ... ok
+test_missing_and_symlink_static_source (test_r5_selected_source_binding.SelectedNegativeTests.test_missing_and_symlink_static_source) ... ok
+test_source_hash_drift_detected (test_r5_selected_source_binding.SelectedNegativeTests.test_source_hash_drift_detected) ... ok
+test_unknown_nested_module_and_extra_go (test_r5_selected_source_binding.SelectedNegativeTests.test_unknown_nested_module_and_extra_go) ... ok
+test_wrongfork_and_third_replace (test_r5_selected_source_binding.SelectedNegativeTests.test_wrongfork_and_third_replace) ... ok
+
+======================================================================
+ERROR: setUpClass (test_r5_selected_source_binding.ActualRootBindingTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail-selected-binding/scripts/tests/test_r5_selected_source_binding.py", line 81, in setUpClass
+    cls.receipt=binding.capture(ROOT,GO,cache=CACHE,modulecache=MODULECACHE)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail-selected-binding/scripts/r5_selected_source_binding.py", line 205, in capture
+    rows = stream(run(ARGV))
+                  ^^^^^^^^^
+  File "/workspace/tabmail-selected-binding/scripts/r5_selected_source_binding.py", line 194, in run
+    raise ValueError('metadata command failed (stamping unchanged): '+result.stderr.decode())
+ValueError: metadata command failed (stamping unchanged): error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.932s
+
+FAILED (errors=1)

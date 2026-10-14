@@ -30,6 +30,19 @@ func (s *PgStore) UpsertSetting(ctx context.Context, key, value, description str
 	return err
 }
 
+// SeedSetting inserts an absent default atomically. A concurrent administrator
+// or startup may have already committed this key; retain that row verbatim.
+func (s *PgStore) SeedSetting(ctx context.Context, key, value, description string) (bool, error) {
+	result, err := s.pool.Exec(ctx, `
+		INSERT INTO system_settings (key, value, description, updated_at)
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (key) DO NOTHING`, key, value, description, time.Now().UTC())
+	if err != nil {
+		return false, err
+	}
+	return result.RowsAffected() == 1, nil
+}
+
 func (s *PgStore) ListSettings(ctx context.Context) ([]*models.SystemSetting, error) {
 	rows, err := s.pool.Query(ctx,
 		`SELECT key, value, description, updated_at FROM system_settings ORDER BY key`)

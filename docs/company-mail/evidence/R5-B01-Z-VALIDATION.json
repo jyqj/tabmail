@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "batch": "B01-Z",
+  "date": "2026-10-01",
+  "base_commit": "354dd71e124946c8a0d3fb52c268c9bf1a1cd6dd",
+  "tested_tree": "1ec0abde9887cf7f7609dfb5dcd5e3ad68f9d77b",
+  "source_files_verified": 726,
+  "source_hashes_verified": true,
+  "private_validation_commit": "22c3ba3d2529706b11f69fe8d5c5ceb79137ebd3",
+  "excluded_development": [
+    "internal/store/postgres/r5_tenant_delete_order_test.go",
+    "RC02/080 client/component/producer changes after354dd71"
+  ],
+  "backend": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 6022,
+    "log_sha256": "b2bb862fa392231471c96b64f73202d28b7cb12ea70a0991a8009040cb25852b",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 226,
+    "manifest_sha256": "c5e22fb844b704ddf12a9db9def0adb122a331aa6ed2a0b3bbea782216e653b5",
+    "packages": 52,
+    "process_exit_code": 0,
+    "source_sha": "1ec0abde9887cf7f7609dfb5dcd5e3ad68f9d77b",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 1405,
+    "tests_skipped": 1,
+    "tests_started": 1406
+  },
+  "postgres_package_seconds": 166.044,
+  "gates": {
+    "final-api": 0,
+    "final-backend-gate": 0,
+    "final-backend": 0,
+    "final-build": 0,
+    "final-contract": 0,
+    "final-http": 0,
+    "final-i18n": 0,
+    "final-mod-verify": 0,
+    "final-negative": 0,
+    "final-node": 0,
+    "final-protocol-components": 0,
+    "final-protocol-db": 0,
+    "final-python": 0,
+    "final-tsc": 0,
+    "final-tx-check": 0,
+    "final-vet": 0,
+    "final-web-build": 0,
+    "final-web-lint": 0,
+    "final-web-test": 0
+  },
+  "python_tests": 247,
+  "node_tests": 23,
+  "vitest_tests": 118,
+  "restore": {
+    "baseline_events": 10,
+    "baseline_pass": 8,
+    "baseline_fail": 2,
+    "candidate_rounds": [
+      {
+        "pass": 10,
+        "fail": 0
+      },
+      {
+        "pass": 10,
+        "fail": 0
+      },
+      {
+        "pass": 10,
+        "fail": 0
+      }
+    ],
+    "test_sha": "64fc23c2888cfadc5c320028431e2601ef99697fcb592ceb86020ba966bb0219",
+    "scope": "actual restored target row eligibility and actual RETURNING; strict cutoff/legacy TTL/owner/shared permanent controls; not full new mailbox-policy snapshot"
+  },
+  "template": {
+    "baseline_events": 7,
+    "pass": 7,
+    "fail": 0,
+    "test_sha": "781a41b69e87a87d788aaf5cb4315eac7af43c5ab18cb843062c98eb0aaa2b92",
+    "scope": "actual parent T mutual exclusion/CAS/immutable/audit rollback/idempotence; not a proven reverse cycle"
+  },
+  "convert": {
+    "baseline_events": 6,
+    "baseline_pass": 3,
+    "baseline_fail": 3,
+    "candidate_rounds": [
+      {
+        "pass": 6,
+        "fail": 0
+      },
+      {
+        "pass": 6,
+        "fail": 0
+      },
+      {
+        "pass": 6,
+        "fail": 0
+      }
+    ],
+    "test_sha": "d8fbca795d88b43855bd33ed3a86d352ba1e92d63b7db00fc6797f33c3ec93d9",
+    "scope": "two complete directions; stale candidate and 40P01 original; active source subset NKU NOWAIT plus actual-row retention qualification; normal/audit controls"
+  },
+  "catalog": {
+    "fresh_official_new_migrate": true,
+    "server_version": "16.13",
+    "foreign_keys": 75,
+    "user_triggers": 7,
+    "raw_sha256": "0f8072788e9b621a2af1496d6d2f5d85e46f837f5717fc9ece97eb0f132c7799",
+    "published_path": "docs/company-mail/evidence/R5-TRANSACTION-DB-CATALOG.json",
+    "published_sha256": "e20979a63441caeb077f8aa2246883fe60439bef540b958e597cec069aef8835",
+    "not_production": true,
+    "entry_link_boundary": "350 conservative literal/nameclosure links, not actual dispatch or operation-sensitive trigger firing",
+    "initial_ephemeral_tool_failure": "ConnMaxLifetime0 rather than default300s; fixed tooling only; original failure retained"
+  },
+  "protocol": {
+    "db_cases": 46,
+    "db_target_red": 29,
+    "component_cases": 16,
+    "component_variants": 23,
+    "component_target_red": 12,
+    "component_scope_pass": 11,
+    "product_green": false,
+    "controller_errors": 0,
+    "remaining": "RC02 component exact entry and BC02/03 future formal backfill write scope; no AA new code measured by this Z"
+  },
+  "bundle": {
+    "path": "docs/company-mail/evidence/R5-B01-Z-LOGS.tar.gz",
+    "members": 175,
+    "sha256": "bd4d6efdac029d85f4e33d69252714644de39985992188e18d9486c6c32ced59",
+    "excludes": "responses,DSN,privatefixture/token,sourceTar/database/node_modules"
+  },
+  "resources": {
+    "handle": "/tmp/tabmail-r5-b01y.93xK955q",
+    "pg_pid": 34679,
+    "pg_stopped": false,
+    "reason": "all Z processes terminal; one authorized serial tenant/AA lease continues, not falsely stop0"
+  },
+  "parent_completion": "6/171",
+  "p0_070_complete": false,
+  "p0_080_complete": false,
+  "remote_changes": false
+}

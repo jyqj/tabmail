@@ -1,12 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useReducer, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { RefreshCw, Search, Webhook } from "lucide-react";
 
 import { listWebhookDeliveries } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
+import { useSessionScope } from "@/lib/session";
 import { useCRUDPage } from "@/hooks/use-crud-page";
+import { useText } from "@/components/company/common";
+import { ListReadFeedback, listPending, listReady, refreshList } from "@/components/crud/list-read-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,14 +43,24 @@ const stateStyles: Record<string, string> = {
 };
 
 export default function AdminWebhooksPage() {
+  const scope = useSessionScope();
+  return <AdminWebhooksSession key={scope} />;
+}
+
+function AdminWebhooksSession() {
   const { t } = useI18n();
+  const text = useText();
+  const reader = useId();
   const [page, setPage] = useState(1);
   const [state, setState] = useState("all");
   const [eventType, setEventType] = useState("");
   const [url, setUrl] = useState("");
+  // A→B→A cannot present the first A observation as a current successful read.
+  const [readGeneration, advanceRead] = useReducer((generation: number) => generation + 1, 0);
+  const changePage = (nextPage: number) => { setPage(nextPage); advanceRead(); };
 
-  const { data: response, isLoading: loading, mutate } = useCRUDPage(
-    ["webhooks", page, state, eventType, url],
+  const list = useCRUDPage(
+    ["webhooks", reader, page, state, eventType, url, readGeneration],
     () => listWebhookDeliveries({
       page,
       per_page: PAGE_SIZE,
@@ -57,6 +70,9 @@ export default function AdminWebhooksPage() {
     }),
     "webhooks.loadFailed",
   );
+  const loading = listPending(list);
+  const ready = listReady(list);
+  const response = ready ? list.data : undefined;
   const items = useMemo(() => response?.data ?? [], [response]);
   const total = response?.meta?.total ?? 0;
 
@@ -75,7 +91,7 @@ export default function AdminWebhooksPage() {
         title={t("webhooks.title")}
         description={t("webhooks.desc")}
         actions={
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => mutate()}>
+          <Button variant="outline" size="sm" className="gap-1.5" disabled={!ready} onClick={() => refreshList(list)}>
             <RefreshCw className="h-3.5 w-3.5" />
             {t("webhooks.refresh")}
           </Button>
@@ -84,10 +100,10 @@ export default function AdminWebhooksPage() {
 
       <div className="space-y-4 p-4">
         <div className="grid gap-4 md:grid-cols-4">
-          <StatCard title={t("webhooks.currentPage")} value={items.length} />
-          <StatCard title={t("webhooks.total")} value={total} />
-          <StatCard title={t("webhooks.delivered")} value={stats.delivered || 0} />
-          <StatCard title={t("webhooks.dead")} value={stats.dead || 0} />
+          <StatCard title={t("webhooks.currentPage")} value={ready ? items.length : undefined} />
+          <StatCard title={t("webhooks.total")} value={ready ? total : undefined} />
+          <StatCard title={t("webhooks.delivered")} value={ready ? stats.delivered || 0 : undefined} />
+          <StatCard title={t("webhooks.dead")} value={ready ? stats.dead || 0 : undefined} />
         </div>
 
         <Card>
@@ -99,7 +115,7 @@ export default function AdminWebhooksPage() {
             <CardDescription>{t("webhooks.filterDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-3">
-            <Select value={state} onValueChange={(value) => { setPage(1); setState(value || "all"); }}>
+            <Select value={state} onValueChange={(value) => { setPage(1); setState(value || "all"); advanceRead(); }}>
               <SelectTrigger>
                 <SelectValue placeholder={t("webhooks.statePlaceholder")} />
               </SelectTrigger>
@@ -118,6 +134,7 @@ export default function AdminWebhooksPage() {
               onChange={(e) => {
                 setPage(1);
                 setEventType(e.target.value);
+                advanceRead();
               }}
             />
             <Input
@@ -126,6 +143,7 @@ export default function AdminWebhooksPage() {
               onChange={(e) => {
                 setPage(1);
                 setUrl(e.target.value);
+                advanceRead();
               }}
             />
           </CardContent>
@@ -140,13 +158,14 @@ export default function AdminWebhooksPage() {
             <CardDescription>{t("webhooks.detailDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
+            <ListReadFeedback list={list} />
             {loading ? (
               <div className="space-y-3">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <Skeleton key={i} className="h-10 w-full" />
                 ))}
               </div>
-            ) : items.length === 0 ? (
+            ) : !ready ? null : items.length === 0 ? (
               <div className="py-12 text-center text-sm text-muted-foreground">{t("webhooks.noDeliveries")}</div>
             ) : (
               <>
@@ -192,21 +211,21 @@ export default function AdminWebhooksPage() {
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="text-xs text-muted-foreground">
-                    {t("webhooks.pageOf", { page, total: totalPages })}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-                      {t("webhooks.previous")}
-                    </Button>
-                    <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
-                      {t("webhooks.next")}
-                    </Button>
-                  </div>
-                </div>
               </>
             )}
+            {ready && <nav aria-label={text("分页", "Pagination")} className="mt-4 flex items-center justify-between">
+              <div className="text-xs text-muted-foreground">
+                {t("webhooks.pageOf", { page, total: totalPages })}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => changePage(page - 1)}>
+                  {t("webhooks.previous")}
+                </Button>
+                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => changePage(page + 1)}>
+                  {t("webhooks.next")}
+                </Button>
+              </div>
+            </nav>}
           </CardContent>
         </Card>
       </div>
@@ -214,14 +233,14 @@ export default function AdminWebhooksPage() {
   );
 }
 
-function StatCard({ title, value }: { title: string; value: number }) {
+function StatCard({ title, value }: { title: string; value?: number }) {
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold tracking-tight">{value.toLocaleString()}</div>
+        <div className="text-3xl font-bold tracking-tight">{value?.toLocaleString() ?? "—"}</div>
       </CardContent>
     </Card>
   );

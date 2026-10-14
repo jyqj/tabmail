@@ -1,0 +1,24 @@
+{
+  "tested_source_sha": "054492fd2ea8cc24699161a0ad91c17547c4ecb3",
+  "runtime_source_sha": "054492fd2ea8cc24699161a0ad91c17547c4ecb3",
+  "base_sha": "4aec142bcffd53c6ab91f2263436aaf980833fab",
+  "product_sha": "aeed47f0e1998d9925acb680992b051463821d69",
+  "product_preserved": {
+    "cmd": true,
+    "internal": true,
+    "web": true,
+    "third_party": true,
+    "go.mod": true,
+    "go.sum": true
+  },
+  "old_evidence_changes": [],
+  "unchanged_scopes": {
+    "scripts/tests/checkpoints": true,
+    "scripts/contracts": true,
+    "scripts/check_r5_compatibility.py": true,
+    "scripts/r5_selected_source_binding_v2.py": true,
+    ".github/workflows": true
+  },
+  "whole_pg180_local": "NOTRUN; original CI gate unchanged",
+  "delivery_note": "Subsequent final evidence commit changes only this new appendix; runtime source is the SHA above."
+}

@@ -1,0 +1,655 @@
+{
+  "producer": "TestCompanyHTTPContract",
+  "spec_sha256": "9afe1749637dc9cc2f66956f4026a89244735f1242f203a75003390723a0656f",
+  "raw_private_capture_sha256": "f2fff9585f51e2c95b5b0aa77e7f2e999c486739ab3859cb5ccf8bd5fbc20f51",
+  "observations": [
+    {
+      "case_id": "settings.unconfigured",
+      "method": "GET",
+      "route": "/api/v1/company/settings",
+      "status": 200,
+      "response_sha256": "8b71c667c4b7b0ac6c857fb4b0f77887c9faaffbe816dde8f62f860f5e005cc5",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "invitations.empty",
+      "method": "GET",
+      "route": "/api/v1/company/invitations",
+      "status": 200,
+      "response_sha256": "25ac29823ea32c588d7536a57d86d5eca0f9a65b9f951dabc9de7e8c6560ad90",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "settings.configure",
+      "method": "PUT",
+      "route": "/api/v1/company/settings",
+      "status": 200,
+      "response_sha256": "0a886659a59f85077374ccd2f97d3befffdb98c5027d71b9c80d5b43e32b576a",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "domains.list",
+      "method": "GET",
+      "route": "/api/v1/company/domains",
+      "status": 200,
+      "response_sha256": "21535fd69d9c0aba7064478969ee40e7f5efb5b3d0f6ba2d6e9368f537ec12a4",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "domains.create",
+      "method": "POST",
+      "route": "/api/v1/company/domains",
+      "status": 201,
+      "response_sha256": "efd6f109b43eae03720ab5b969200ab762cefbb19f1d8e1535cb436f3c8128ab",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "domains.delete",
+      "method": "DELETE",
+      "route": "/api/v1/company/domains/{id}",
+      "status": 200,
+      "response_sha256": "99d454b0a94dde28f0a46361ad4dc1197c634cdbeead479b1977c098d56f704a",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "invitations.create",
+      "method": "POST",
+      "route": "/api/v1/company/invitations",
+      "status": 200,
+      "response_sha256": "277d99bf8a603ea976f91eaf1f0277cfd42acd728f31e17072645e4f93637917",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "invitations.activate",
+      "method": "POST",
+      "route": "/api/v1/company/activate",
+      "status": 200,
+      "response_sha256": "f6aae8e4b9c6cc40320cafb9859ee0c9fae446381fdd7eb1fdb02f1c2e28d113",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "invitations.second",
+      "method": "POST",
+      "route": "/api/v1/company/invitations",
+      "status": 200,
+      "response_sha256": "d74b6378b02e2f00e46d2d8c14e0f41acf462d5d12101efa2b4bdc82a302d02c",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "invitations.revoke",
+      "method": "DELETE",
+      "route": "/api/v1/company/invitations/{id}",
+      "status": 200,
+      "response_sha256": "d838bd80ca2c4ddecc09d1fd963a9e30076cc1055ca283c2db5000f7a1a6f731",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "invitations.list",
+      "method": "GET",
+      "route": "/api/v1/company/invitations",
+      "status": 200,
+      "response_sha256": "cdee2b8583532caa2cfec4931ebaefebd064149f6f5a68d827059008c49b8bf3",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "mailboxes.list",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes",
+      "status": 200,
+      "response_sha256": "ddcb4ce4592a4a49850dd281dbfd98fd283cb18f7dea1f0e8f394f37a614037e",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "mailboxes.create",
+      "method": "POST",
+      "route": "/api/v1/company/mailboxes",
+      "status": 200,
+      "response_sha256": "cf9ad4c0c71d0b63f92f1756c26550afb57c4705c58eae704d554542cf5846a6",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "grants.empty",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/grants",
+      "status": 200,
+      "response_sha256": "ef6f572daf8a92df0a3b182135f8c58a018ad31551c5b1e3dfce8557c898cadd",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "grants.update",
+      "method": "PUT",
+      "route": "/api/v1/company/mailboxes/{id}/grants",
+      "status": 200,
+      "response_sha256": "762312a35148895912faaaed39fc87797713831a290abcc585705ec33c7a3e22",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "grants.list",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/grants",
+      "status": 200,
+      "response_sha256": "1b0b468654d13c64842add6fc8aaa4ede5ae66e805bb175bb3bfac7ced5b08d5",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "policy.update",
+      "method": "PUT",
+      "route": "/api/v1/company/mailboxes/{id}/send-policy",
+      "status": 200,
+      "response_sha256": "3db853ba636e8631547c027d6a7d0b90220d7fe5ccb91c5cb8a8414f2a1f02cc",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "policy.conflict",
+      "method": "PUT",
+      "route": "/api/v1/company/mailboxes/{id}/send-policy",
+      "status": 409,
+      "response_sha256": "b69956ca4781489c9bb643d6bbd4a645eb69112ebdadfb72bbb8ede65641c4af",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "access.explain",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/access/{user}",
+      "status": 200,
+      "response_sha256": "357a23d9cb6d0021fb6130e603a8e5f3b81b2e0c709036a7bebbbf810e1ce85c",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "templates.empty",
+      "method": "GET",
+      "route": "/api/v1/company/templates",
+      "status": 200,
+      "response_sha256": "25ac29823ea32c588d7536a57d86d5eca0f9a65b9f951dabc9de7e8c6560ad90",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "templates.create",
+      "method": "POST",
+      "route": "/api/v1/company/templates",
+      "status": 200,
+      "response_sha256": "148306f182144824db56b1ead0054cdf26c42def28bde77433a3b99d75f3fd00",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "templates.versions.empty",
+      "method": "GET",
+      "route": "/api/v1/company/templates/{id}/versions",
+      "status": 200,
+      "response_sha256": "25ac29823ea32c588d7536a57d86d5eca0f9a65b9f951dabc9de7e8c6560ad90",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "templates.update",
+      "method": "PUT",
+      "route": "/api/v1/company/templates/{id}",
+      "status": 200,
+      "response_sha256": "ae6af180fac84010535e4575cbf4a2738c206e84e2a47aa607c27d5ef8fe6240",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "templates.publish",
+      "method": "POST",
+      "route": "/api/v1/company/templates/{id}/publish",
+      "status": 200,
+      "response_sha256": "fef3edf3d07a33b7a40385938e7ea9bb8877651ba096bbfe9dbb4dffd1bb8f43",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "templates.grant",
+      "method": "PUT",
+      "route": "/api/v1/company/templates/{id}/grants",
+      "status": 200,
+      "response_sha256": "2d04574467a7fea47b58da9476cd5ab7ed2edcb6659d3e5680f3a7cb75542401",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "templates.grants",
+      "method": "GET",
+      "route": "/api/v1/company/templates/{id}/grants",
+      "status": 200,
+      "response_sha256": "dc5e0ca204dcf49bd865b67dd45dadcebbb4d44362967c0656761198f2bf59a9",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "templates.versions",
+      "method": "GET",
+      "route": "/api/v1/company/templates/{id}/versions",
+      "status": 200,
+      "response_sha256": "5537fe5458a6ce74396a6c23afc67eb2d3fa69b9a9aa6470fad2c89d9fd1d353",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "templates.usable",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/templates",
+      "status": 200,
+      "response_sha256": "5537fe5458a6ce74396a6c23afc67eb2d3fa69b9a9aa6470fad2c89d9fd1d353",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "templates.preview",
+      "method": "POST",
+      "route": "/api/v1/company/templates/preview",
+      "status": 200,
+      "response_sha256": "0ee7259b52f460cfaa0a744e4f5a8a9a770d65a70df721837320204bfabf4b75",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "drafts.empty",
+      "method": "GET",
+      "route": "/api/v1/company/drafts",
+      "status": 200,
+      "response_sha256": "be65ba89c48e74187945568602de3e51653762dd640e3934597bfe8c99cdb13a",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "messages.empty",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/messages",
+      "status": 200,
+      "response_sha256": "be65ba89c48e74187945568602de3e51653762dd640e3934597bfe8c99cdb13a",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "attachments.upload",
+      "method": "POST",
+      "route": "/api/v1/company/mailboxes/{id}/attachments",
+      "status": 200,
+      "response_sha256": "756f16a58f8ed81b4315b5856e533c71f299e50106f28e771e150222c4a60ba3",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "attachments.download",
+      "method": "GET",
+      "route": "/api/v1/company/attachments/{id}",
+      "status": 200,
+      "response_sha256": "4f0ef949c70c844452a07bb53984de40b0e9c76d614b35dcb60059a48a587281",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "draft.incomplete",
+      "method": "POST",
+      "route": "/api/v1/company/drafts",
+      "status": 200,
+      "response_sha256": "1414d1436dece5c7ce9a72b30a3c24b0054deef925051142681c08464f18ee40",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "draft.get",
+      "method": "GET",
+      "route": "/api/v1/company/drafts/{id}",
+      "status": 200,
+      "response_sha256": "1414d1436dece5c7ce9a72b30a3c24b0054deef925051142681c08464f18ee40",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "draft.list",
+      "method": "GET",
+      "route": "/api/v1/company/drafts",
+      "status": 200,
+      "response_sha256": "b2847cdf7aeb6c6cc69844021e1656bcb3254f9f34b936b5cae57949b8a6fa1a",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "draft.update",
+      "method": "PUT",
+      "route": "/api/v1/company/drafts/{id}",
+      "status": 200,
+      "response_sha256": "9680bbd79232e9ed70abce1ab4356a2ed3372932071eac8f9a1b574221a4eb9f",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "submit.created",
+      "method": "POST",
+      "route": "/api/v1/company/drafts/{id}/submit",
+      "status": 201,
+      "response_sha256": "8e8c2732088b97c1bf82afe6a2c2bb56fc13028ffa7aecda208fcdfa20e287dc",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "submit.replayed",
+      "method": "POST",
+      "route": "/api/v1/company/drafts/{id}/submit",
+      "status": 200,
+      "response_sha256": "8e8c2732088b97c1bf82afe6a2c2bb56fc13028ffa7aecda208fcdfa20e287dc",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "submissions.list",
+      "method": "GET",
+      "route": "/api/v1/company/submissions",
+      "status": 200,
+      "response_sha256": "c08a57d8a17844fc4057203ff4dfaa5453d245c17788c5337c9f6e7b6015499a",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "submissions.get",
+      "method": "GET",
+      "route": "/api/v1/company/submissions/{id}",
+      "status": 200,
+      "response_sha256": "8e8c2732088b97c1bf82afe6a2c2bb56fc13028ffa7aecda208fcdfa20e287dc",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "submissions.content",
+      "method": "GET",
+      "route": "/api/v1/company/submissions/{id}/content",
+      "status": 200,
+      "response_sha256": "bd490431103fc7d4518b88ab59673c54549ca40c51d8d0ddd40641ceb42fccce",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "submissions.attachments",
+      "method": "GET",
+      "route": "/api/v1/company/submissions/{id}/attachments",
+      "status": 200,
+      "response_sha256": "5e07dca8a1f37ea0b71265177f6b637ecdd56bdac7cc03a56aaaa1056af1e8e1",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "submissions.download",
+      "method": "GET",
+      "route": "/api/v1/company/submissions/{id}/attachments/{aid}/download",
+      "status": 200,
+      "response_sha256": "4f0ef949c70c844452a07bb53984de40b0e9c76d614b35dcb60059a48a587281",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "recipients.list",
+      "method": "GET",
+      "route": "/api/v1/company/outbound/{id}/recipients",
+      "status": 200,
+      "response_sha256": "8e8c2732088b97c1bf82afe6a2c2bb56fc13028ffa7aecda208fcdfa20e287dc",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "archive.list",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/sent",
+      "status": 200,
+      "response_sha256": "9d5f589c752b3d48190b2004ae91a508529bb5c937be86dfaf0682407442868d",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "archive.change",
+      "method": "POST",
+      "route": "/api/v1/company/mailboxes/{id}/sent/{message}/actions",
+      "status": 200,
+      "response_sha256": "762312a35148895912faaaed39fc87797713831a290abcc585705ec33c7a3e22",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "draft.second",
+      "method": "POST",
+      "route": "/api/v1/company/drafts",
+      "status": 200,
+      "response_sha256": "1b24edb5acc95aa74cc791a459c36d1b32093e244a88cce3128ee6d8bd87ca0d",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "draft.delete",
+      "method": "DELETE",
+      "route": "/api/v1/company/drafts/{id}",
+      "status": 200,
+      "response_sha256": "99d454b0a94dde28f0a46361ad4dc1197c634cdbeead479b1977c098d56f704a",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "messages.list",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/messages",
+      "status": 200,
+      "response_sha256": "e9d4852e2f94b7287029ba6378ae9df2b1ca1f4a06693e4dc56dbce20153aee6",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "message.detail",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}",
+      "status": 200,
+      "response_sha256": "093b2ca5e09c30df48299236e3d3a6bcc75e245ffd57dc5f0d94c2242c53b9b8",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "message.conversation",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}/conversation",
+      "status": 200,
+      "response_sha256": "e9d4852e2f94b7287029ba6378ae9df2b1ca1f4a06693e4dc56dbce20153aee6",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "message.attachments",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}/attachments",
+      "status": 200,
+      "response_sha256": "93d6440cbc57e5b9422c4e20a5e7dac47d9548741a8a60af2666312bc682b774",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "message.attachment.index",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}/attachments/{index}",
+      "status": 200,
+      "response_sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "message.attachment.id",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}/parts/{attachment}",
+      "status": 200,
+      "response_sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "message.source",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}/source",
+      "status": 200,
+      "response_sha256": "24749ced3e874a852df103d1a4bf4c7471f3a44635f681380ce3764c5fa0d727",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "message.compose",
+      "method": "POST",
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}/compose",
+      "status": 200,
+      "response_sha256": "82cdda966dbab5f5021dddf631b64125d799fb4bc160636eb78cc24811453b9b",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "message.action",
+      "method": "POST",
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}/actions",
+      "status": 200,
+      "response_sha256": "2d04574467a7fea47b58da9476cd5ab7ed2edcb6659d3e5680f3a7cb75542401",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "events.ready",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/events",
+      "status": 200,
+      "response_sha256": "790124940c8a0c233bdabe64bb49a3762aa69fb342e2a06b989c9785716bc0a0",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "index.status",
+      "method": "GET",
+      "route": "/api/v1/company/mailboxes/{id}/index-status",
+      "status": 200,
+      "response_sha256": "8b0e5f86c5dc63cd7b23b62ef81dae8c853a83f6f9c457b1fe29816b1ec674b2",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "index.retry",
+      "method": "POST",
+      "route": "/api/v1/company/index/retry",
+      "status": 200,
+      "response_sha256": "445bb062a7c3609067be8cc8e4d17702e211ad8a5e86e827a56179276d0dba2a",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "recovery.list",
+      "method": "GET",
+      "route": "/api/v1/company/recovery",
+      "status": 200,
+      "response_sha256": "71fbada83772353d9e54d98963fcd78abbe5634a06df377e476ac4deaad63a2e",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "recovery.inspect",
+      "method": "POST",
+      "route": "/api/v1/company/recovery/{id}/inspect",
+      "status": 200,
+      "response_sha256": "5436b22038c4ac85cb5464358464af66006c51dbab1d52e3df347bf04bca86b8",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "recovery.retry",
+      "method": "POST",
+      "route": "/api/v1/company/recovery/{id}/retry",
+      "status": 200,
+      "response_sha256": "ad79479bc073d841ea7c795e24c7492fbf3e5ba8e7c21937edaeaf2684d0f089",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "outbound.inspect",
+      "method": "POST",
+      "route": "/api/v1/company/outbound/{id}/inspect",
+      "status": 200,
+      "response_sha256": "6f37cdd934e435d39d956a0d02a20a1c67bb8688be8a86bb900433674c9b2ead",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "outbound.reconcile",
+      "method": "POST",
+      "route": "/api/v1/company/outbound/{id}/reconcile",
+      "status": 200,
+      "response_sha256": "888ad754140af9ad7ec8848fb94c29787df211ad130fb53e3592781380e820b0",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "mailboxes.personal",
+      "method": "POST",
+      "route": "/api/v1/company/mailboxes",
+      "status": 200,
+      "response_sha256": "765f6036b6020b611a8f50f33c7279c7d1aacd1313cc7534c2789b9a0c788b15",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "mailboxes.handover",
+      "method": "POST",
+      "route": "/api/v1/company/mailboxes/{id}/handover",
+      "status": 200,
+      "response_sha256": "6ec5812a2fa14ca5af8f2bb15a14718c40b115aaefc633e0d7b573a638bcc146",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "mailboxes.convert",
+      "method": "POST",
+      "route": "/api/v1/company/mailboxes/{id}/convert-shared",
+      "status": 200,
+      "response_sha256": "1bba264576bb9459a5c3b575cc9ece23dd1563964412edc77a12fc0ebb486b3c",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "offboard.preview",
+      "method": "POST",
+      "route": "/api/v1/company/employees/{id}/offboard/preview",
+      "status": 200,
+      "response_sha256": "e3fd05b8df5236fca5491f8d78f33327af3e3c4560e8673cfa7076ee55fc18fc",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "offboard.execute",
+      "method": "POST",
+      "route": "/api/v1/company/employees/{id}/offboard",
+      "status": 200,
+      "response_sha256": "4efef0d5d4d349d0f1e8f9ce08395c9a9071cc5ffc92ace054ece353ea2da27b",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "templates.revoke",
+      "method": "POST",
+      "route": "/api/v1/company/templates/{id}/versions/{version}/revoke",
+      "status": 200,
+      "response_sha256": "d838bd80ca2c4ddecc09d1fd963a9e30076cc1055ca283c2db5000f7a1a6f731",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "templates.retire",
+      "method": "POST",
+      "route": "/api/v1/company/templates/{id}/retire",
+      "status": 200,
+      "response_sha256": "2d04574467a7fea47b58da9476cd5ab7ed2edcb6659d3e5680f3a7cb75542401",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "overview.get",
+      "method": "GET",
+      "route": "/api/v1/company/overview",
+      "status": 200,
+      "response_sha256": "a5c3937b2cea1e14bc0ae81a31b0e7c2a7fa172427e0c639c222b6cb93e116f9",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "audit.list",
+      "method": "GET",
+      "route": "/api/v1/company/audit",
+      "status": 200,
+      "response_sha256": "bf3a872ed836227f8d55c32593828f42fbc8a7bd26978232c81cf4f4d4b6cda5",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "company.events.ready",
+      "method": "GET",
+      "route": "/api/v1/company/events",
+      "status": 200,
+      "response_sha256": "3835f63d50ffec6981d2c6f4654aa0b1175a7afd2fbe6553a2fc9e5b221d372c",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "error.unauthenticated",
+      "method": "GET",
+      "route": "/api/v1/company/submissions",
+      "status": 401,
+      "response_sha256": "1e8bd4553257fbbb7785506bd540775c1cc3a86a8e7c235d538ea364266b21f5",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "error.forbidden",
+      "method": "GET",
+      "route": "/api/v1/company/domains",
+      "status": 403,
+      "response_sha256": "44586d87a68a16748187022b5b2ac44be1e00ab3772c5940930e0ab9e4ced002",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "error.bad-request",
+      "method": "GET",
+      "route": "/api/v1/company/drafts/{id}",
+      "status": 400,
+      "response_sha256": "31a2ab310301d1a822b1c742a402963832a90e503e0f7636d45c7fbbb4f6a50c",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "error.not-found",
+      "method": "GET",
+      "route": "/api/v1/company/submissions/{id}/content",
+      "status": 404,
+      "response_sha256": "687144e69c74f32deba2e82fc9182ee227ba061f473fafc80011b668dd89f10b",
+      "aspect": "http_shape_status"
+    },
+    {
+      "case_id": "error.internal",
+      "method": "GET",
+      "route": "/api/v1/company/settings",
+      "status": 500,
+      "response_sha256": "b6012f04ddeb7b234d6e5527db65b294dd8d6a2768d609efce3dd199ca455592",
+      "aspect": "http_shape_status"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+--- upstream/part.go
++++ fork/part.go
+@@ -398,6 +398,13 @@
+ 
+ // ReadParts reads a MIME document from the provided reader and parses it into tree of Part objects.
+ func (p Parser) ReadParts(r io.Reader) (*Part, error) {
++	return p.readParts(r, nil)
++}
++
++func (p Parser) readParts(r io.Reader, budget *parseBudget) (*Part, error) {
++	if err := budget.admitNode(1); err != nil {
++		return nil, err
++	}
+ 	br := bufio.NewReader(r)
+ 	root := &Part{PartID: "0", parser: &p}
+ 
+@@ -406,9 +413,16 @@
+ 		return nil, err
+ 	}
+ 
+-	if detectMultipartMessage(root, p.multipartWOBoundaryAsSinglePart) {
++	multipart := detectMultipartMessage(root, p.multipartWOBoundaryAsSinglePart)
++	if err := budget.admitProjection(root, multipart); err != nil {
++		return nil, err
++	}
++	if multipart {
+ 		// Content is multipart, parse it.
+-		if err := parseParts(root, br); err != nil {
++		if err := budget.admitBoundary(root.Boundary); err != nil {
++			return nil, err
++		}
++		if err := parseParts(root, br, budget, 1); err != nil {
+ 			return nil, err
+ 		}
+ 	} else {
+@@ -421,7 +435,7 @@
+ }
+ 
+ // parseParts recursively parses a MIME multipart document and sets each Parts PartID.
+-func parseParts(parent *Part, reader *bufio.Reader) error {
++func parseParts(parent *Part, reader *bufio.Reader, budget *parseBudget, depth int) error {
+ 	firstRecursion := parent.Parent == nil
+ 	// Loop over MIME boundaries.
+ 	br := newBoundaryReader(reader, parent.Boundary)
+@@ -438,6 +452,11 @@
+ 			break
+ 		}
+ 
++		// Budget the actual allocation event, including children discovered
++		// after an ancestor reader's temporary EOF has been consumed.
++		if err := budget.admitNode(depth + 1); err != nil {
++			return err
++		}
+ 		// Set this Part's PartID, indicating its position within the MIME Part tree.
+ 		p := &Part{parser: parent.parser}
+ 		if firstRecursion {
+@@ -457,6 +476,11 @@
+ 			return err
+ 		}
+ 
++		// Use the fields populated by the real setupHeaders, including its
++		// early return for absent/empty Content-Type. Do not reparse headers.
++		if err := budget.admitProjection(p, true); err != nil {
++			return err
++		}
+ 		// Insert this Part into the MIME tree.
+ 		if p.Boundary == "" {
+ 			// Content is text or data, decode it.
+@@ -485,9 +509,17 @@
+ 			continue
+ 		}
+ 
++		if err := budget.admitBoundary(p.Boundary); err != nil {
++			return err
++		}
+ 		parent.AddChild(p)
+ 		// Content is another multipart.
+-		if err = parseParts(p, bbr); err != nil {
++		if err = parseParts(p, bbr, budget, depth+1); err != nil {
++			// Resource/context refusal is fatal, not a malformed child that
++			// SkipMalformedParts may drop and then keep allocating siblings.
++			if budget != nil && budget.err != nil {
++				return budget.err
++			}
+ 			if p.parser.skipMalformedParts {
+ 				parent.addErrorf(ErrorMalformedChildPart, "parse parts: %s", err.Error())
+ 				continue

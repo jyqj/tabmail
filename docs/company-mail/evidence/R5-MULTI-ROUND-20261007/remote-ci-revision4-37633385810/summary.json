@@ -1,0 +1,1148 @@
+{
+  "pr73": {
+    "run": {
+      "id": 37633385810,
+      "head_sha": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe",
+      "head_tree": "1eb98c6185e7b8b1e0be5967eb3fa741f84f0097",
+      "base_sha": "e32564304c0c84aa80b1184e72129fb0316d989d",
+      "event": "pull_request",
+      "attempt": 1,
+      "url": "https://github.com/jyqj/tabmail/actions/runs/37633385810",
+      "created_at": "2026-10-07T14:02:30Z",
+      "status": "completed",
+      "conclusion": "failure",
+      "updated_at": "2026-10-07T14:10:32Z"
+    },
+    "jobs": [
+      {
+        "id": 112833169325,
+        "name": "frontend",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_id": 37633385810,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Record the tested frontend checkout",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install pinned version-test checker dependency",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Run npm ci",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Versioned source tests from independent clean Git checkouts",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Catalog and TypeScript source validation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Record full dependency audit",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Require a complete clean dependency audit",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 12
+          },
+          {
+            "name": "Run npx tsc --noEmit",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Run npm test -- --reporter=default --reporter=json --outputFile=../frontend-vitest.json",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 14
+          },
+          {
+            "name": "Run npm run lint",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Run npm run build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Retain frontend evidence after validation failures",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 32
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 33
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 34
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 35
+          }
+        ]
+      },
+      {
+        "id": 112833169730,
+        "name": "browser-journey",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 37633385810,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install pinned isolated browser driver",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Build the shipping standalone frontend",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Exercise the production UI against the real API and loopback SMTP",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Stop containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          }
+        ]
+      },
+      {
+        "id": 112833169912,
+        "name": "backend",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_id": 37633385810,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "PostgreSQL client for coordinated restore rehearsal",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Exact immutable archive boundary",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Race tests with PostgreSQL",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 8
+          },
+          {
+            "name": "Prove missing execution cannot pass",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 9
+          },
+          {
+            "name": "Install pinned contract checker dependency",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 10
+          },
+          {
+            "name": "Validation tool regressions",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 11
+          },
+          {
+            "name": "DTO field contract",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12
+          },
+          {
+            "name": "Fresh route/client compatibility inventory and upgrade plan",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 13
+          },
+          {
+            "name": "Transaction syntax and review inventory drift",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 14
+          },
+          {
+            "name": "Real protocol baseline with explicit target failures",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 15
+          },
+          {
+            "name": "Actual HTTP response contracts with PostgreSQL",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 16
+          },
+          {
+            "name": "Vet",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 17
+          },
+          {
+            "name": "Upload test evidence",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 34
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 35
+          },
+          {
+            "name": "Stop containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 36
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 37
+          }
+        ]
+      },
+      {
+        "id": 112833170157,
+        "name": "production-web",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 37633385810,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Validate company Compose contract",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Build production standalone image and inspect baked API origin",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          }
+        ]
+      }
+    ],
+    "artifacts": [
+      {
+        "id": 11487712667,
+        "name": "company-frontend-evidence",
+        "size_in_bytes": 339820,
+        "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11487712667",
+        "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11487712667/zip",
+        "expired": false,
+        "created_at": "2026-10-07T14:10:27Z",
+        "expires_at": "2026-10-21T14:10:26Z",
+        "updated_at": "2026-10-07T14:10:27Z",
+        "digest": "sha256:ef3fa966c6a746cfae051ba8b8db1f017bb1ecd989cadfb8f88f08c2d944a5c0",
+        "workflow_run": {
+          "id": 37633385810,
+          "repository_id": 1188928152,
+          "head_repository_id": 1188928152,
+          "head_branch": "fix/r5-wave-catalog-revision4-20261007",
+          "head_sha": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe"
+        }
+      },
+      {
+        "id": 11486589368,
+        "name": "dependency-audit",
+        "size_in_bytes": 1064,
+        "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11486589368",
+        "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11486589368/zip",
+        "expired": false,
+        "created_at": "2026-10-07T14:08:19Z",
+        "expires_at": "2026-10-21T14:08:18Z",
+        "updated_at": "2026-10-07T14:08:19Z",
+        "digest": "sha256:53a9c8f00d8aadd22500b2eeb7e75ec54ffcb380f098160835795378fe5fe537",
+        "workflow_run": {
+          "id": 37633385810,
+          "repository_id": 1188928152,
+          "head_repository_id": 1188928152,
+          "head_branch": "fix/r5-wave-catalog-revision4-20261007",
+          "head_sha": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe"
+        }
+      },
+      {
+        "id": 11486559494,
+        "name": "company-p0-test-evidence",
+        "size_in_bytes": 424753,
+        "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11486559494",
+        "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11486559494/zip",
+        "expired": false,
+        "created_at": "2026-10-07T14:08:10Z",
+        "expires_at": "2026-10-21T14:08:09Z",
+        "updated_at": "2026-10-07T14:08:10Z",
+        "digest": "sha256:ba74caccfd692019c1cbfda76bb37c52c925be3c816857e1e45c044e5a043c02",
+        "workflow_run": {
+          "id": 37633385810,
+          "repository_id": 1188928152,
+          "head_repository_id": 1188928152,
+          "head_branch": "fix/r5-wave-catalog-revision4-20261007",
+          "head_sha": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe"
+        }
+      },
+      {
+        "id": 11486538884,
+        "name": "company-browser-evidence",
+        "size_in_bytes": 1603,
+        "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11486538884",
+        "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11486538884/zip",
+        "expired": false,
+        "created_at": "2026-10-07T14:04:45Z",
+        "expires_at": "2026-10-21T14:04:44Z",
+        "updated_at": "2026-10-07T14:04:45Z",
+        "digest": "sha256:c9590df34cd5fc09713018864f2675bbfb680627e5834e1a6ecaa6e162d3cc42",
+        "workflow_run": {
+          "id": 37633385810,
+          "repository_id": 1188928152,
+          "head_repository_id": 1188928152,
+          "head_branch": "fix/r5-wave-catalog-revision4-20261007",
+          "head_sha": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe"
+        }
+      }
+    ],
+    "source_archive_run": 37633385737,
+    "source_archive_artifacts": [
+      {
+        "id": 11487810721,
+        "name": "review-source",
+        "size_in_bytes": 41509332,
+        "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11487810721",
+        "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11487810721/zip",
+        "expired": false,
+        "created_at": "2026-10-07T14:02:41Z",
+        "expires_at": "2026-10-14T14:02:38Z",
+        "updated_at": "2026-10-07T14:02:41Z",
+        "digest": "sha256:5e3c62d2773fdf171b3d284591356d7ae98a70d944bd72eb07fa08a8048bb7b0",
+        "workflow_run": {
+          "id": 37633385737,
+          "repository_id": 1188928152,
+          "head_repository_id": 1188928152,
+          "head_branch": "fix/r5-wave-catalog-revision4-20261007",
+          "head_sha": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe"
+        }
+      }
+    ],
+    "observed_tested_checkout": {
+      "sha": "57ae4946ea60f0021c531aefc0c091dd984ca784",
+      "tree": "1eb98c6185e7b8b1e0be5967eb3fa741f84f0097",
+      "parents": [
+        "e32564304c0c84aa80b1184e72129fb0316d989d",
+        "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe"
+      ],
+      "source": "company-browser-evidence artifact 11486538884"
+    },
+    "browser_evidence": {
+      "artifact_id": 11486538884,
+      "zip_sha256": "c9590df34cd5fc09713018864f2675bbfb680627e5834e1a6ecaa6e162d3cc42",
+      "status": "pass",
+      "tests_passed": 1,
+      "tests_failed": 0,
+      "tests_skipped": 0,
+      "source_sha": "57ae4946ea60f0021c531aefc0c091dd984ca784"
+    },
+    "backend_evidence": {
+      "artifact_id": 11486559494,
+      "zip_sha256": "ba74caccfd692019c1cbfda76bb37c52c925be3c816857e1e45c044e5a043c02",
+      "tested_checkout": "57ae4946ea60f0021c531aefc0c091dd984ca784",
+      "checker": {
+        "events": 33169,
+        "log_sha256": "45fc8082a7b974add104bd65a08a1f9b6b6a7647dbadaa2f2da979762fe3765c",
+        "mandatory_missing_or_not_passed": 180,
+        "mandatory_tests": 247,
+        "manifest_sha256": "6b5e7fc0fc37b7098d5aa8aeace43f25f0f98f5c1f2e1f73ce4495a14e692682",
+        "packages": 52,
+        "process_exit_code": 1,
+        "source_sha": "57ae4946ea60f0021c531aefc0c091dd984ca784",
+        "status": "fail",
+        "suite": "backend",
+        "tests_failed": 0,
+        "tests_passed": 7975,
+        "tests_skipped": 105,
+        "tests_started": 8093
+      },
+      "checker_errors": 100,
+      "failure_lines": [
+        {
+          "Time": "2026-10-07T14:08:09.151567714Z",
+          "Action": "output",
+          "Package": "tabmail/internal/store/postgres",
+          "Test": "TestR5EnqueueProtectsAuthorityThroughInsert/override-insert",
+          "Output": "panic: test timed out after 3m0s\n"
+        },
+        {
+          "Time": "2026-10-07T14:08:09.151595757Z",
+          "Action": "output",
+          "Package": "tabmail/internal/store/postgres",
+          "Test": "TestR5EnqueueProtectsAuthorityThroughInsert/override-insert",
+          "Output": "\trunning tests:\n"
+        },
+        {
+          "Time": "2026-10-07T14:08:09.165767508Z",
+          "Action": "output",
+          "Package": "tabmail/internal/store/postgres",
+          "Output": "FAIL\ttabmail/internal/store/postgres\t180.060s\n"
+        },
+        {
+          "Time": "2026-10-07T14:08:09.166720994Z",
+          "Action": "fail",
+          "Package": "tabmail/internal/store/postgres",
+          "Elapsed": 180.061
+        }
+      ]
+    },
+    "audit_evidence": {
+      "artifact_id": 11486589368,
+      "zip_sha256": "53a9c8f00d8aadd22500b2eeb7e75ec54ffcb380f098160835795378fe5fe537",
+      "entries": [
+        {
+          "name": "tabmail-npm-audit.json",
+          "bytes": 4220
+        }
+      ],
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 8,
+        "critical": 0,
+        "total": 8
+      },
+      "packages": [
+        "@next/eslint-plugin-next",
+        "@ts-morph/common",
+        "braces",
+        "eslint-config-next",
+        "fast-glob",
+        "micromatch",
+        "shadcn",
+        "ts-morph"
+      ]
+    },
+    "frontend_evidence": {
+      "artifact_id": 11487712667,
+      "zip_sha256": "ef3fa966c6a746cfae051ba8b8db1f017bb1ecd989cadfb8f88f08c2d944a5c0",
+      "entries": [
+        {
+          "name": "frontend-source-sha.txt",
+          "bytes": 41,
+          "sha256": "a57ea1c59ddb60ff41a5aece9650647738cead86b7b79a8678d01900232a2fe5"
+        },
+        {
+          "name": "frontend-source-version-tests.json",
+          "bytes": 2323118,
+          "sha256": "bdb439641e4329b28bc8b5d49482fe1c8ffa98a1d40eb550cb6d21109913a323"
+        },
+        {
+          "name": "frontend-vitest.json",
+          "bytes": 322360,
+          "sha256": "bbedec18c77bf6aeddd26bed4f89a84558f5507fe55f24e2f27c74dca3464d97"
+        }
+      ],
+      "tested_checkout": "57ae4946ea60f0021c531aefc0c091dd984ca784",
+      "source_runner": {
+        "status": "pass",
+        "no_missing": true,
+        "no_overlap": true,
+        "dispatch_no_missing": true,
+        "dispatch_no_overlap": true,
+        "missing_test_ids": [],
+        "discovered": 717,
+        "groups": [
+          {
+            "group": "current",
+            "source_sha": "57ae4946ea60f0021c531aefc0c091dd984ca784",
+            "exit": 0,
+            "requested": 713,
+            "tests_run": 713,
+            "failures": [],
+            "errors": [],
+            "skips": [],
+            "expected_failures": [],
+            "unexpected_successes": [],
+            "actual": 713
+          },
+          {
+            "group": "frozen-v1",
+            "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+            "exit": 0,
+            "requested": 4,
+            "tests_run": 4,
+            "failures": [],
+            "errors": [],
+            "skips": [],
+            "expected_failures": [],
+            "unexpected_successes": [],
+            "actual": 4
+          }
+        ]
+      },
+      "vitest": {
+        "success": false,
+        "numTotalTestSuites": 148,
+        "numPassedTestSuites": 147,
+        "numFailedTestSuites": 1,
+        "numTotalTests": 887,
+        "numPassedTests": 886,
+        "numFailedTests": 1,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "failed_suites": [
+          {
+            "name": "/home/runner/work/tabmail/tabmail/web/r5-external-batch-probe.test.tsx",
+            "message": "",
+            "failed_assertions": [
+              {
+                "title": "R5 batch independent realm loopback PostgreSQL",
+                "failure_messages": [
+                  "Error: explicit private fixture required\n    at /home/runner/work/tabmail/tabmail/web/r5-external-batch-probe.test.tsx:9:20\n    at file:///home/runner/work/tabmail/tabmail/web/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/runner/work/tabmail/tabmail/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/runner/work/tabmail/tabmail/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///home/runner/work/tabmail/tabmail/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///home/runner/work/tabmail/tabmail/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///home/runner/work/tabmail/tabmail/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)\n    at file:///home/runner/work/tabmail/tabmail/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "completed_observation_at": "2026-10-07 14:13:49 UTC"
+  },
+  "integration_checkpoint": {
+    "head_sha": "9bcfa4f77f27ad4f118f32e92efef740ebac2c1e",
+    "runs": [
+      {
+        "id": 37634510100,
+        "name": "Pull request source evidence",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 72,
+        "jobs_url": "https://api.github.com/repos/jyqj/tabmail/actions/runs/37634510100/jobs",
+        "logs_url": "https://api.github.com/repos/jyqj/tabmail/actions/runs/37634510100/logs",
+        "workflow_id": 361004519
+      },
+      {
+        "id": 37634509934,
+        "name": "Company mail security and release checks",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_number": 92,
+        "jobs_url": "https://api.github.com/repos/jyqj/tabmail/actions/runs/37634509934/jobs",
+        "logs_url": "https://api.github.com/repos/jyqj/tabmail/actions/runs/37634509934/logs",
+        "workflow_id": 358059474
+      }
+    ],
+    "scope": "Status only, distinct from completed PR73 checks",
+    "tree": "1eb98c6185e7b8b1e0be5967eb3fa741f84f0097",
+    "jobs": [
+      {
+        "id": 112837051088,
+        "name": "frontend",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 37634509934,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Record the tested frontend checkout",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install pinned version-test checker dependency",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Run npm ci",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Versioned source tests from independent clean Git checkouts",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 8
+          },
+          {
+            "name": "Catalog and TypeScript source validation",
+            "status": "pending",
+            "conclusion": null,
+            "number": 9
+          },
+          {
+            "name": "Record full dependency audit",
+            "status": "pending",
+            "conclusion": null,
+            "number": 10
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11
+          },
+          {
+            "name": "Require a complete clean dependency audit",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12
+          },
+          {
+            "name": "Run npx tsc --noEmit",
+            "status": "pending",
+            "conclusion": null,
+            "number": 13
+          },
+          {
+            "name": "Run npm test -- --reporter=default --reporter=json --outputFile=../frontend-vitest.json",
+            "status": "pending",
+            "conclusion": null,
+            "number": 14
+          },
+          {
+            "name": "Run npm run lint",
+            "status": "pending",
+            "conclusion": null,
+            "number": 15
+          },
+          {
+            "name": "Run npm run build",
+            "status": "pending",
+            "conclusion": null,
+            "number": 16
+          },
+          {
+            "name": "Retain frontend evidence after validation failures",
+            "status": "pending",
+            "conclusion": null,
+            "number": 17
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "pending",
+            "conclusion": null,
+            "number": 32
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 33
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 34
+          }
+        ]
+      },
+      {
+        "id": 112837051486,
+        "name": "production-web",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 37634509934,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Validate company Compose contract",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Build production standalone image and inspect baked API origin",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          }
+        ]
+      },
+      {
+        "id": 112837051563,
+        "name": "browser-journey",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 37634509934,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install pinned isolated browser driver",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Build the shipping standalone frontend",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Exercise the production UI against the real API and loopback SMTP",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 8
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 9
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 15
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "pending",
+            "conclusion": null,
+            "number": 16
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 17
+          },
+          {
+            "name": "Stop containers",
+            "status": "pending",
+            "conclusion": null,
+            "number": 18
+          }
+        ]
+      },
+      {
+        "id": 112837051606,
+        "name": "backend",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 37634509934,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "PostgreSQL client for coordinated restore rehearsal",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Exact immutable archive boundary",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Race tests with PostgreSQL",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 8
+          },
+          {
+            "name": "Prove missing execution cannot pass",
+            "status": "pending",
+            "conclusion": null,
+            "number": 9
+          },
+          {
+            "name": "Install pinned contract checker dependency",
+            "status": "pending",
+            "conclusion": null,
+            "number": 10
+          },
+          {
+            "name": "Validation tool regressions",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11
+          },
+          {
+            "name": "DTO field contract",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12
+          },
+          {
+            "name": "Fresh route/client compatibility inventory and upgrade plan",
+            "status": "pending",
+            "conclusion": null,
+            "number": 13
+          },
+          {
+            "name": "Transaction syntax and review inventory drift",
+            "status": "pending",
+            "conclusion": null,
+            "number": 14
+          },
+          {
+            "name": "Real protocol baseline with explicit target failures",
+            "status": "pending",
+            "conclusion": null,
+            "number": 15
+          },
+          {
+            "name": "Actual HTTP response contracts with PostgreSQL",
+            "status": "pending",
+            "conclusion": null,
+            "number": 16
+          },
+          {
+            "name": "Vet",
+            "status": "pending",
+            "conclusion": null,
+            "number": 17
+          },
+          {
+            "name": "Upload test evidence",
+            "status": "pending",
+            "conclusion": null,
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "pending",
+            "conclusion": null,
+            "number": 34
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 35
+          },
+          {
+            "name": "Stop containers",
+            "status": "pending",
+            "conclusion": null,
+            "number": 36
+          }
+        ]
+      }
+    ],
+    "observed_at": "2026-10-07 14:12:40 UTC"
+  }
+}

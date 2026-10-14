@@ -1,0 +1,14 @@
+{
+  "tested_source_commit": "6138113c1896cb810db567605154b5023f0340de",
+  "evidence_commit": "a71d51cb4b96d12fc7f1d2c33e3e10fe741bbcec",
+  "evidence_remote_sha_confirmed": true,
+  "branch": "fix/r5-shared-receipt-legacy-20261003",
+  "draft_pr_base": "codex/r5-current-wire-20261003",
+  "draft_pr_attempts": 1,
+  "draft_pr_status": "denied",
+  "draft_pr_error": "Post https://api.github.com/graphql: Forbidden",
+  "pr_created": false,
+  "merge_or_deploy": false,
+  "own_postgres_stopped": true,
+  "raw_private_logs_published": false
+}

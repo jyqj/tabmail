@@ -1,0 +1,951 @@
+"""Explicit batch v1/v2. Sole cooperating executor, never hostile-write protection.
+
+Old runtime v2 entry points remain unchanged. Private RPC carries case identity,
+never executable/argv. Only this leased supervisor starts and reaps Vitest groups.
+"""
+from __future__ import annotations
+import argparse
+import concurrent.futures
+import contextlib
+import hmac
+import json
+import os
+from pathlib import Path
+import secrets
+import signal
+import socket
+import socketserver
+import subprocess
+import sys
+import threading
+import time
+
+import r5_external_runtime as runtime
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import check_r5_protocol as protocol
+
+POLICY = 'r5_external_batch_validation_v1'
+V2_POLICY = 'r5_external_batch_validation_v2'
+CONTRACT_FIELDS = frozenset(('runtime required budgets go build_context argv schema_version policy status mode workers '
+    'concurrency_boundary product_green task_complete runtime_sha256 catalog_sha256 helper_sha256 '
+    'bridge_sha256 probe_config_sha256').split())
+GO_OLD = 'TestR5ProtocolComponentObservations'
+GO_NEW = 'TestR5ProtocolBatchComponentObservations'
+PROBE = 'TestR5ExternalBatchIsolationProbe'
+CATALOG = 'docs/company-mail/evidence/R5-PROTOCOL-CASES.json'
+HELPER = 'scripts/preparation/r5_external_batch.py'
+BRIDGE = 'internal/api/handlers/r5_external_batch_test.go'
+PROBE_CONFIG = 'vitest.r5batch-probe.config.ts'
+MAX_WORKERS = 4
+
+
+def derive(data):
+    """Same scope selection as the existing component consumer; no guessed cases."""
+    groups, paths, children, python = {}, set(), {}, []
+    for row in data['cases']:
+        for adapter in row.get('shared_adapters', []):
+            if adapter.get('runner') == 'vitest':
+                python.append('R5 shared receipt ' + row['id'])
+                continue
+            if 'components' not in adapter['layers'] and 'unit' not in adapter['layers']:
+                continue
+            group = (adapter['package'], adapter.get('build_tag', ''))
+            groups.setdefault(group, set()).add(adapter['test'])
+            for path in adapter.get('runtime_test_paths', []):
+                if path in paths:
+                    raise ValueError('duplicate required Go path')
+                paths.add(path)
+                if adapter.get('component_source'):
+                    prefix = GO_OLD + '/' + row['id'] + '/'
+                    if not path.startswith(prefix):
+                        raise ValueError('unknown component path')
+                    key = path.removeprefix(GO_OLD + '/')
+                    children[key] = dict(case_id=row['id'], variant=path[len(prefix):],
+                                         assertion='R5 protocol component ' + row['id'] + ' ' + path[len(prefix):] + ' secure behavior',
+                                         input_sha256=runtime.digest(runtime.canonical(row['input'])))
+    if len(python) != len(set(python)) or not paths or not children:
+        raise ValueError('duplicate/missing required terminals')
+    return dict(groups=[dict(package=p, tag=t, tests=sorted(v)) for (p,t),v in sorted(groups.items())],
+                go_paths=sorted(paths), children=children, python_assertions=sorted(python))
+
+
+def file_digest(path):
+    with runtime.descriptors() as files:
+        return runtime.digest(files.file(Path(path)))
+
+
+def runtime_gate(manifest, selected_binding_version=2, *, runtime_manifest_path=None,
+                 runtime_manifest_sha256=None):
+    """Authenticate v3 through controller-held manifest bytes, never recapture."""
+    version = runtime.consumer.selected_version(selected_binding_version)
+    if (type(manifest.get('schema_version')) is not int or manifest['schema_version'] != version
+            or manifest.get('policy') != (runtime.POLICY if version == 2 else runtime.V3_POLICY)
+            or manifest.get('status') != 'UNADOPTED'):
+        raise ValueError('batch runtime/version pairing differs')
+    if version == 2:
+        if ('selected_binding_version' in manifest or 'admitted_selection' in manifest
+                or runtime_manifest_path is not None or runtime_manifest_sha256 is not None):
+            raise ValueError('mixed batch runtime versions')
+    else:
+        if type(manifest.get('selected_binding_version')) is not int or manifest['selected_binding_version'] != 3:
+            raise ValueError('explicit runtime v3 selector required')
+        if not isinstance(runtime_manifest_path, str) or not isinstance(runtime_manifest_sha256, str):
+            raise ValueError('independent runtime manifest reference required')
+        runtime.consumer._digest(runtime_manifest_sha256)
+        if runtime.load_pinned(runtime_manifest_path, runtime_manifest_sha256,
+                               selected_binding_version=3) != manifest:
+            raise ValueError('authenticated runtime manifest differs')
+    return version
+
+
+def contract_gate(contract, selected_binding_version=2):
+    version = runtime.consumer.selected_version(selected_binding_version)
+    fields = CONTRACT_FIELDS if version == 2 else CONTRACT_FIELDS | {
+        'selected_binding_version', 'runtime_manifest_path', 'runtime_manifest_sha256'}
+    if (not isinstance(contract, dict) or set(contract) != fields
+            or type(contract.get('schema_version')) is not int
+            or contract['schema_version'] != (1 if version == 2 else 2)
+            or contract.get('policy') != (POLICY if version == 2 else V2_POLICY)
+            or contract.get('status') != 'UNADOPTED'):
+        raise ValueError('batch contract/status/version pairing differs')
+    if version == 3 and (type(contract['selected_binding_version']) is not int
+                         or contract['selected_binding_version'] != 3):
+        raise ValueError('explicit batch v2 selector required')
+    if (contract['mode'] not in ('components', 'probe') or type(contract['workers']) is not int
+            or contract['workers'] != MAX_WORKERS or contract['budgets'] != dict(go=120, process=180, case=75)
+            or any(type(v) is not int for v in contract['budgets'].values())
+            or contract['product_green'] is not False or contract['task_complete'] is not False
+            or contract['concurrency_boundary'] != runtime.BOUNDARY
+            or contract['runtime_sha256'] != runtime.digest(runtime.canonical(contract['runtime']))):
+        raise ValueError('batch fixed inputs/promotion differ')
+    return runtime_gate(contract['runtime'], version,
+        runtime_manifest_path=contract.get('runtime_manifest_path'),
+        runtime_manifest_sha256=contract.get('runtime_manifest_sha256'))
+
+
+def capture(manifest, go, mode='components', *, selected_binding_version=2,
+            runtime_manifest_path=None, runtime_manifest_sha256=None):
+    version = runtime_gate(manifest, selected_binding_version,
+        runtime_manifest_path=runtime_manifest_path, runtime_manifest_sha256=runtime_manifest_sha256)
+    if mode not in ('components', 'probe'):
+        raise ValueError('unknown batch mode')
+    source = Path(manifest['source']['path'])
+    data = protocol.load_cases(source / CATALOG, source)
+    contract = dict(schema_version=1 if version == 2 else 2, policy=POLICY if version == 2 else V2_POLICY, status='UNADOPTED', runtime=manifest,
+                    runtime_sha256=runtime.digest(runtime.canonical(manifest)),
+                    catalog_sha256=file_digest(source/CATALOG), required=derive(data),
+                    mode=mode, workers=4, budgets=dict(go=120, process=180, case=75),
+                    go=dict(path=str(go), sha256=file_digest(go), version=subprocess.check_output([str(go),'version'],text=True).strip()),
+                    build_context=dict(runtime.selected.CONTEXT,build_tag_sets=[[],['r5protocol']]),
+                    argv=dict(go_commands=[ [str(go)]+protocol.shared_command(g['package'],g['tag'],[GO_NEW if name==GO_OLD else name for name in g['tests']])[1:] for g in derive(data)['groups']] if mode=='components' else [[str(go)]+protocol.shared_command('./internal/api/handlers','r5protocol',[PROBE])[1:]],
+                              child=[manifest['node']['path'],manifest['cli']['path'],'run','--cache=false','--experimental.fsModuleCache=false','--config','vitest.r5protocol.config.ts' if mode=='components' else PROBE_CONFIG,'--reporter=json','--outputFile','<fresh-report>'],
+                              python=protocol.external_component_command(manifest,'<fresh-report>',probe=mode=='probe')),
+                    helper_sha256=file_digest(source/HELPER), bridge_sha256=file_digest(source/BRIDGE),
+                    probe_config_sha256=file_digest(source/'web'/PROBE_CONFIG),
+                    concurrency_boundary=runtime.BOUNDARY, product_green=False, task_complete=False)
+    if contract['go']['version']!='go version go1.25.7 linux/amd64':
+        raise ValueError('fixed Go1.25.7 required')
+    if mode not in ('components', 'probe'):
+        raise ValueError('unknown batch mode')
+    if version == 3:
+        contract.update(selected_binding_version=3, runtime_manifest_path=runtime_manifest_path,
+                        runtime_manifest_sha256=runtime_manifest_sha256)
+    return contract
+
+
+def validate_contract(contract, *, selected_binding_version=2):
+    version = contract_gate(contract, selected_binding_version)
+    if Path(__file__).resolve()!=Path(contract['runtime']['source']['path'])/HELPER:
+        raise ValueError('batch helper must execute from bound source')
+    if Path(sys.executable).resolve()!=Path(contract['runtime']['python']['path']):
+        raise ValueError('batch interpreter identity differs')
+    runtime.validate(contract['runtime'], selected_binding_version=version)
+    if capture(contract['runtime'], Path(contract['go']['path']), contract['mode'],
+               selected_binding_version=version, runtime_manifest_path=contract.get('runtime_manifest_path'),
+               runtime_manifest_sha256=contract.get('runtime_manifest_sha256')) != contract:
+        raise ValueError('batch contract/required inputs drift')
+
+
+def load(path, pin, *, selected_binding_version=2):
+    runtime.consumer.selected_version(selected_binding_version)
+    with runtime.descriptors() as files:
+        raw = files.file(Path(path))
+    if runtime.digest(raw) != pin:
+        raise ValueError('independent batch pin differs')
+    result = runtime.source_inventory.strict_json(raw)
+    contract_gate(result, selected_binding_version)
+    return result
+
+
+@contextlib.contextmanager
+def lease(manifest, cancelled, deadline):
+    """Serialize cooperating batches; never steal a stale or foreign token."""
+    with contextlib.ExitStack() as stack:
+        while True:
+            if cancelled.is_set() or time.monotonic()>=deadline:
+                raise ValueError('batch cancelled/deadline while acquiring lease')
+            try:
+                nonce=stack.enter_context(runtime.owner(manifest))
+                break
+            except FileExistsError:
+                cancelled.wait(0.05)
+        yield nonce
+
+
+# This registry is valid only in the dedicated sole-executor CLI. It protects
+# live registered roots from the adopted-orphan sweeper; it is not provenance
+# for an arbitrary embedded caller's subprocesses.
+_PROCESS_GUARD = threading.RLock()
+_PROCESS_ROOTS = set()
+_OWNED_PROCESSES = {}
+_ADOPTED_TAIL = False
+
+
+def sweep_adopted_tails():
+    """Kill/reap adopted orphans even while another root retains open pipes."""
+    global _ADOPTED_TAIL
+    found = False
+    with _PROCESS_GUARD:
+        children = []
+        for entry in Path('/proc').glob('[0-9]*/stat'):
+            try:
+                fields = entry.read_text().rsplit(') ', 1)[1].split()
+                pid = int(entry.parent.name)
+                if int(fields[1]) == os.getpid() and pid not in _PROCESS_ROOTS:
+                    children.append(pid)
+            except (FileNotFoundError, ProcessLookupError):
+                pass
+        for pid in children:
+            found = _ADOPTED_TAIL = True
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            # WNOHANG keeps pipe draining and other owners progressing. The
+            # final barrier must still wait for physical cleanup, even in D state.
+            try:
+                os.waitpid(pid, os.WNOHANG)
+            except ChildProcessError:
+                pass
+    return found
+
+
+class OwnedProcess:
+    """Owned process group; communicate joins pipe readers, wait reaps direct child.
+
+    Linux subreaper additionally reaps orphaned owned descendants. No group ID
+    is accepted from RPC or any external input.
+    """
+    def __init__(self, argv, *, cwd, env):
+        with _PROCESS_GUARD:
+            self.process = subprocess.Popen(argv, cwd=cwd, env=env, stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE, start_new_session=True)
+            self.group = self.process.pid
+            self.joined = False
+            self.tail = False
+            self.direct_reaped = False
+            self.pipes_closed = False
+            _PROCESS_ROOTS.add(self.process.pid)
+            _OWNED_PROCESSES[self.process.pid] = self
+
+    def kill(self):
+        try:
+            os.killpg(self.group, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+
+    def cleanup_physical(self):
+        """Independent kill/wait/close path; never calls finish/communicate.
+
+        Only the sole-executor barrier calls this after RPC threads stop using
+        the processes. A blocking kernel wait is a lease-held cleanup tail.
+        """
+        if not self.joined:
+            self.kill()
+            try:
+                pid, status = os.waitpid(self.process.pid, 0)
+                if pid != self.process.pid:
+                    raise ValueError('owned direct child not reaped')
+                self.process.returncode = os.waitstatus_to_exitcode(status)
+            except ChildProcessError:
+                # A prior communicate/poll may already have reaped the root
+                # before its pipe error. ECHILD establishes it is not waitable.
+                pass
+            self.direct_reaped = True
+            while True:
+                try:
+                    os.waitpid(-self.group, 0)
+                except ChildProcessError:
+                    break
+            try:
+                os.killpg(self.group, 0)
+            except ProcessLookupError:
+                self.joined = True
+            if not self.joined:
+                raise ValueError('owned process group cleanup remains unknown')
+        for pipe in (self.process.stdout, self.process.stderr):
+            if pipe is not None:
+                pipe.close()
+        self.pipes_closed = True
+        with _PROCESS_GUARD:
+            _PROCESS_ROOTS.discard(self.process.pid)
+
+    def finish(self, cancelled, deadline):
+        timed_out = False
+        while True:
+            if cancelled.is_set() or time.monotonic() >= deadline:
+                timed_out = True
+                self.kill()
+            if sweep_adopted_tails():
+                self.tail = True
+            try:
+                stdout, stderr = self.process.communicate(timeout=0.05)
+                break
+            except subprocess.TimeoutExpired:
+                if self.process.poll() is not None:
+                    try:
+                        os.killpg(self.group,0)
+                        self.tail = True
+                        self.kill()
+                    except ProcessLookupError:
+                        pass
+                continue
+        # A daemon can close inherited pipes and outlive the direct process.
+        try:
+            os.killpg(self.group, 0)
+            self.tail = True
+        except ProcessLookupError:
+            pass
+        if self.tail:
+            self.kill()
+        # All orphan descendants of this session are ours, never unrelated PIDs.
+        while True:
+            try:
+                pid, _ = os.waitpid(-self.group, 0)
+                if not pid:
+                    break
+            except ChildProcessError:
+                break
+        try:
+            os.killpg(self.group, 0)
+        except ProcessLookupError:
+            self.joined = True
+        if not self.joined:
+            raise ValueError('owned process group not physically joined')
+        self.direct_reaped = True
+        self.pipes_closed = all(pipe is None or pipe.closed for pipe in (self.process.stdout, self.process.stderr))
+        with _PROCESS_GUARD:
+            _PROCESS_ROOTS.discard(self.process.pid)
+        return dict(exit_code=self.process.returncode, timeout=timed_out, tail=self.tail,
+                    stdout=stdout, stderr=stderr)
+
+
+def become_subreaper():
+    import ctypes
+    if sys.platform != 'linux' or ctypes.CDLL(None, use_errno=True).prctl(36, 1, 0, 0, 0) != 0:
+        raise ValueError('Linux owned descendant subreaper required')
+
+
+def join_adopted_tails():
+    """Final subreaper barrier after all registered roots/RPC owners joined.
+
+    An owned daemon may create a new session. Such orphans are adopted by this
+    isolated supervisor; no external PID or process group is accepted as input.
+    Any tail rejects the batch, even when it is successfully terminated/reaped.
+    """
+    global _ADOPTED_TAIL
+    found = _ADOPTED_TAIL
+    # Registered roots need an independent wait path even when pipe draining
+    # failed persistently. Never erase their ownership before physical join.
+    with _PROCESS_GUARD:
+        for owned in list(_OWNED_PROCESSES.values()):
+            if not owned.joined:
+                found = _ADOPTED_TAIL = True
+            owned.cleanup_physical()
+            del _OWNED_PROCESSES[owned.process.pid]
+    while True:
+        children=[]
+        for entry in Path('/proc').glob('[0-9]*/stat'):
+            try:
+                fields=entry.read_text().rsplit(') ',1)[1].split()
+                if int(fields[1])==os.getpid():children.append(int(entry.parent.name))
+            except (FileNotFoundError,ProcessLookupError):pass
+        children=sorted(set(children))
+        if not children:
+            with _PROCESS_GUARD:
+                _PROCESS_ROOTS.clear()
+                _ADOPTED_TAIL = False
+            return found
+        found = _ADOPTED_TAIL = True
+        for pid in children:
+            try:os.kill(pid,signal.SIGKILL)
+            except ProcessLookupError:pass
+        for pid in children:
+            try:os.waitpid(pid,0)
+            except ChildProcessError:pass
+
+
+def exact_assertions(report, expected, exit_code):
+    assertions = [a for result in report.get('testResults', []) for a in result.get('assertionResults', [])]
+    names = [a.get('fullName') for a in assertions]
+    counters=('numTotalTests','numPassedTests','numFailedTests','numPendingTests')
+    return (all(type(report.get(key)) is int for key in counters)
+            and exit_code == 0 and report.get('success') is True and len(names) == len(set(names))
+            and set(names) == set(expected) and all(a.get('status') == 'passed' for a in assertions)
+            and report.get('numTotalTests') == report.get('numPassedTests') == len(expected)
+            and report.get('numFailedTests') == report.get('numPendingTests') == 0
+            and report.get('numRuntimeErrorTestSuites', 0) == 0)
+
+
+class Batch:
+    def __init__(self, contract, output, environment=None, *, selected_binding_version=2):
+        self.selected_binding_version = contract_gate(contract, selected_binding_version)
+        self.contract = contract
+        self.manifest = contract['runtime']
+        self.source = Path(self.manifest['source']['path'])
+        self.output = Path(output)
+        if not self.output.is_absolute() or '..' in self.output.parts or str(self.output)!=os.path.abspath(self.output):
+            raise ValueError('canonical absolute private output required')
+        if self.output.is_relative_to(self.source) or self.output.is_relative_to(Path(self.manifest['dependency_root']['path'])/'node_modules'):
+            raise ValueError('private output outside runtime trees required')
+        self.env = dict(os.environ if environment is None else environment)
+        runtime.clean_environment(self.env)
+        if contract.get('build_context'):
+            self.env=runtime.source_inventory.bound_environment(contract['build_context'],self.env)
+            self.env['GOTOOLCHAIN']='local'
+        self.env['TABMAIL_R5_SELECTED_BINDING_VERSION'] = str(self.selected_binding_version)
+        if self.selected_binding_version == 3:
+            self.env['TABMAIL_R5_EXTERNAL_MANIFEST'] = contract['runtime_manifest_path']
+            self.env['TABMAIL_R5_EXTERNAL_MANIFEST_SHA256'] = contract['runtime_manifest_sha256']
+        self.nonce = secrets.token_hex(32)
+        self.pin=runtime.digest(runtime.canonical(contract))
+        self.cancelled = threading.Event()
+        self.abort = threading.Event()
+        self.guard = threading.Lock()
+        self.slots = threading.BoundedSemaphore(MAX_WORKERS)
+        self.active = {}
+        self.seen = set()
+        self.results = {}
+        self.ack = None
+        self.closed = False
+        self.max_active = 0
+        self.invalid = False
+        self.published = False
+        self.started = False
+        self.leased = False
+        self.abort_requested = False
+        self.socket = self.output/'channel.sock'
+        self.cancelled_keys = set()
+        self.deadline = None
+        self.server = None
+        self.serving = None
+        self.channel_joined = False
+        self.resources_joined = False
+        self.lease_held = False
+        self.primary_error = None
+        self.owned_processes = {}
+        self.cleanup_facts = dict(state='NOT_STARTED', attempts=0, failures=[])
+        self.children = contract['required']['children'] if contract['mode'] == 'components' else {
+            'probe/'+str(i):dict(case_id='probe',variant=str(i),assertion='R5 batch independent realm loopback PostgreSQL') for i in range(8)}
+
+    def authenticate(self, request):
+        if not self.leased:
+            raise ValueError('batch capability is outside a validated owned lease')
+        if (not isinstance(request, dict) or not isinstance(request.get('nonce'), str)
+                or not hmac.compare_digest(request['nonce'], self.nonce)
+                or request.get('contract_sha256')!=self.pin):
+            raise ValueError('invalid owned batch capability')
+
+    def rpc(self, request):
+        self.authenticate(request)
+        operation = request.get('operation')
+        if operation == 'cancel':
+            if set(request) != {'nonce','contract_sha256','operation','key'} or request['key'] not in self.children:
+                raise ValueError('unbound cancel request')
+            with self.guard:
+                if self.closed or self.published:
+                    raise ValueError('case cancellation already finalized')
+                self.cancelled_keys.add(request['key'])
+                self.invalid = True
+                child = self.active.get(request['key'])
+                if child:
+                    child.kill()
+            return dict(cancelled=True)
+        if operation == 'ack':
+            if set(request) != {'nonce','contract_sha256','operation','completed'}:
+                raise ValueError('unbound owner acknowledgement')
+            completed = request['completed']
+            with self.guard:
+                if (self.ack is not None or self.active or not isinstance(completed,list)
+                        or len(completed)!=len(set(completed)) or set(completed)!=set(self.children)
+                        or self.seen!=set(self.children) or set(self.results)!=set(self.children)):
+                    self.invalid = True
+                    raise ValueError('missing/duplicate/nonterminal owner acknowledgement')
+                self.ack = sorted(completed)
+            return dict(acknowledged=True)
+        if operation != 'case' or set(request) != {'nonce','contract_sha256','operation','key','fixture'}:
+            raise ValueError('unbound batch operation/argv')
+        key = request['key']
+        with self.guard:
+            if key not in self.children or key in self.seen or self.closed or self.cancelled.is_set():
+                self.invalid = True
+                raise ValueError('duplicate/unknown/closed case')
+            self.seen.add(key)
+        with self.slots:
+            if self.cancelled.is_set() or time.monotonic() >= self.deadline:
+                raise ValueError('batch deadline/cancellation')
+            fixture = Path(request['fixture'])
+            if (not fixture.is_absolute() or fixture.is_relative_to(self.source)
+                    or fixture.is_relative_to(Path(self.manifest['dependency_root']['path'])/'node_modules')):
+                raise ValueError('private fixture required')
+            info=fixture.lstat()
+            if info.st_uid!=os.getuid() or info.st_mode&0o077:
+                raise ValueError('owned private fixture mode required')
+            with runtime.descriptors() as files:
+                fixture_bytes=files.file(fixture)
+                content = runtime.source_inventory.strict_json(fixture_bytes)
+            fixture_hash=runtime.digest(fixture_bytes)
+            row = self.children[key]
+            if self.contract['mode']=='components':
+                if (content.get('case_id') != row['case_id'] or content.get('variant') != row['variant']
+                        or content.get('case_sha256') != self.contract['catalog_sha256']
+                        or runtime.digest(runtime.canonical(content.get('input')))!=row['input_sha256']):
+                    raise ValueError('fixture/case/catalog binding differs')
+            elif content.get('case_id') != key:
+                raise ValueError('probe fixture identity differs')
+            report = self.output/'staged'/key.replace('[]','empty_array')/'vitest.json'
+            report.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+            if report.exists():
+                raise ValueError('fresh staged report required')
+            argv = [str(report) if arg=='<fresh-report>' else arg for arg in self.contract['argv']['child']]
+            env = dict(self.env, TABMAIL_R5_PROTOCOL_COMPONENT_FIXTURE=str(fixture))
+            owned = OwnedProcess(argv,cwd=self.manifest['execution']['cwd'],env=env)
+            with self.guard:
+                self.active[key] = owned
+                if key in self.cancelled_keys:
+                    owned.kill()
+                self.max_active = max(self.max_active,len(self.active))
+            try:
+                result = owned.finish(self.cancelled,min(self.deadline,time.monotonic()+75))
+                # Keep child stdout and error bodies private; RPC returns only exit/lifecycle.
+                (report.parent/'stdout').write_bytes(result.pop('stdout'))
+                (report.parent/'stderr').write_bytes(result.pop('stderr'))
+                with runtime.descriptors() as fixture_files:
+                    if runtime.digest(fixture_files.file(fixture))!=fixture_hash or runtime.preparation.identity(fixture.lstat())!=runtime.preparation.identity(info):
+                        raise ValueError('private fixture content/descriptor drift')
+                raw = report.read_bytes()
+                passed = exact_assertions(json.loads(raw),[row['assertion']],result['exit_code'])
+                packet = dict(result,passed=passed,report_sha256=runtime.digest(raw),report=str(report))
+                with self.guard:
+                    self.results[key] = packet
+                return packet
+            finally:
+                # The lease-held outer barrier owns physical cleanup even if
+                # finish itself failed. Never retry the failing drain routine.
+                with self.guard:
+                    self.active.pop(key,None)
+
+    def run_process(self, argv, cwd, env, seconds=180):
+        if self.cancelled.is_set() or time.monotonic()>=self.deadline:
+            raise ValueError('batch closed to further dispatch')
+        owned = OwnedProcess(argv,cwd=cwd,env=env)
+        return owned.finish(self.cancelled,min(self.deadline,time.monotonic()+seconds))
+
+    def validate_inventory(self):
+        """Full original checks in an owned worker, within remaining execution time.
+
+        The parent can terminate a blocked inventory worker. Reaping an OS
+        uninterruptible worker is cleanup tail, never a hard return guarantee.
+        """
+        if self.resources_joined:
+            raise ValueError('inventory already finalized')
+        if self.abort.is_set() or time.monotonic() >= self.deadline:
+            raise ValueError('inventory deadline/cancellation')
+        path = self.output/'validation-contract.json'
+        if not path.exists():
+            path.write_bytes(runtime.canonical(self.contract))
+            os.chmod(path, 0o600)
+        owned = OwnedProcess([sys.executable, str(self.source/HELPER), 'validate',
+                              '--contract', str(path), '--pin', self.pin,
+                              '--selected-binding-version', str(self.selected_binding_version)],
+                             cwd=self.source, env=dict(self.env, PYTHONDONTWRITEBYTECODE='1'))
+        result = owned.finish(self.abort, self.deadline)
+        if (result['exit_code'] != 0 or result['timeout'] or result['tail']
+                or self.abort.is_set() or time.monotonic() >= self.deadline):
+            raise ValueError('full inventory worker rejected')
+
+    def record_cleanup(self):
+        """Private facts survive the original exception; diagnostics may not mask it."""
+        with _PROCESS_GUARD:
+            self.owned_processes.update(_OWNED_PROCESSES)
+            pending_roots = sorted(_OWNED_PROCESSES)
+            process_facts = {str(pid):dict(direct_reaped=owned.direct_reaped,
+                                          group_joined=owned.joined,
+                                          pipes_closed=owned.pipes_closed)
+                             for pid,owned in sorted(self.owned_processes.items())}
+        self.cleanup_facts.update(lease_held=self.lease_held,
+                                  primary_error=type(self.primary_error).__name__ if self.primary_error else None,
+                                  registered_pending=pending_roots, processes=process_facts,
+                                  channel_joined=self.channel_joined,
+                                  resources_joined=self.resources_joined)
+        try:
+            pending = self.output/'cleanup.pending'
+            pending.write_bytes(runtime.canonical(self.cleanup_facts))
+            os.chmod(pending, 0o600)
+            pending.replace(self.output/'cleanup.json')
+        except OSError as error:
+            self.cleanup_facts['diagnostic_error'] = type(error).__name__
+
+    def close_channel(self):
+        if not self.channel_joined:
+            if self.server is not None:
+                self.server.interrupt_reads()
+                if self.serving is not None and self.serving.is_alive():
+                    self.server.shutdown()
+                    self.serving.join()
+                self.server.server_close()
+            self.channel_joined = True
+        self.socket.unlink(missing_ok=True)
+
+    def cleanup_resources(self):
+        """Hold ownership until independent physical cleanup is established.
+
+        Cleanup failures retain a blocking state and the live token; they do
+        not unwind the lease or substitute a rejected receipt for actual join.
+        """
+        if self.resources_joined:
+            return False
+        self.cancelled.set()
+        with self.guard:
+            self.closed = True
+            self.leased = False
+        found = False
+        while True:
+            self.cleanup_facts['attempts'] += 1
+            self.cleanup_facts['state'] = 'PENDING'
+            self.record_cleanup()
+            failures = []
+            with _PROCESS_GUARD:
+                for owned in _OWNED_PROCESSES.values():
+                    if not owned.joined:
+                        try:
+                            owned.kill()
+                        except OSError as error:
+                            failures.append(dict(resource='process_kill', error=type(error).__name__))
+            try:
+                self.close_channel()
+            except Exception as error:
+                failures.append(dict(resource='rpc_channel', error=type(error).__name__))
+            # A handler may still be using Popen if channel joining failed.
+            # Kill was already requested, but never race its wait/pipe owner.
+            if self.channel_joined:
+                try:
+                    found = join_adopted_tails() or found
+                except Exception as error:
+                    failures.append(dict(resource='process_reap', error=type(error).__name__))
+            if not failures:
+                self.resources_joined = True
+                self.cleanup_facts['state'] = 'JOINED'
+                self.record_cleanup()
+                return found
+            self.cleanup_facts['state'] = 'BLOCKED'
+            for failure in failures:
+                if failure not in self.cleanup_facts['failures']:
+                    self.cleanup_facts['failures'].append(failure)
+            self.record_cleanup()
+            # Cancellation/expiry do not authorize dropping unknown ownership.
+            threading.Event().wait(.05)
+
+    @contextlib.contextmanager
+    def resource_scope(self):
+        self.lease_held = True
+        try:
+            yield
+        except BaseException as error:
+            if self.primary_error is None:
+                self.primary_error = error
+            raise
+        finally:
+            self.cleanup_resources()
+            if self.primary_error is not None:
+                self.primary_error.add_note('lease-held physical cleanup established; cleanup_facts records outcome')
+
+    def request_cancel(self):
+        self.abort_requested=True
+        self.abort.set()
+        self.cancelled.set()
+
+    def run(self):
+        if self.started:
+            raise ValueError('batch instance is single-use; previous receipts are immutable')
+        self.started=True
+        try:
+            receipt=self._run()
+            if receipt['status']=='BATCH_QUALIFIED' and (self.abort_requested or time.monotonic()>=self.deadline):
+                raise ValueError('cancellation/deadline observed before return')
+            return receipt
+        except Exception as error:
+            # An observed lease-finalization failure must invalidate a receipt
+            # already staged before context-manager release. Never touch a
+            # previous attempt's existing output or any historical receipt.
+            if not self.published:
+                raise
+            path=self.output/'receipt.json'
+            receipt=runtime.source_inventory.strict_json(path.read_bytes())
+            receipt['status']='BATCH_REJECTED'
+            receipt['errors'].append('lease finalization rejected: '+type(error).__name__)
+            for child in receipt['children'].values():child['qualified']=False
+            pending=self.output/'receipt.pending'
+            pending.write_bytes(runtime.canonical(receipt));os.chmod(pending,0o600)
+            pending.replace(path)
+            return receipt
+        finally:
+            self.leased=False
+            if self.lease_held:
+                token = Path(self.manifest['dependency_root']['path'])/'.r5-runtime-owner'
+                try:
+                    self.lease_held = token.exists()
+                except OSError:
+                    self.cleanup_facts['token_state'] = 'UNKNOWN'
+                self.record_cleanup()
+
+    def _run(self):
+        self.output.mkdir(mode=0o700,parents=True,exist_ok=False)
+        os.chmod(self.output,0o700)
+        if self.output.is_relative_to(self.source) or self.output.is_relative_to(Path(self.manifest['dependency_root']['path'])/'node_modules'):
+            raise ValueError('private output outside runtime trees required')
+        become_subreaper()
+        self.deadline = time.monotonic()+180
+        errors, terminals = [], []
+        before = after = False
+        with lease(self.manifest,self.cancelled,self.deadline) as nonce, self.resource_scope(), runtime.descriptors() as anchors:
+            self.nonce=nonce
+            token=Path(self.manifest['dependency_root']['path'])/'.r5-runtime-owner'
+            token_identity=runtime.preparation.identity(token.lstat())
+            for path in (self.source,Path(self.manifest['execution']['cwd']),Path(self.manifest['dependency_root']['path'])):
+                anchors.directory(path)
+            self.validate_inventory()
+            before = True
+            self.leased=True
+            batch = self
+            class Handler(socketserver.StreamRequestHandler):
+                def handle(self):
+                    try:
+                        # Short reads participate in cancellation/remaining time;
+                        # a partial line cannot acquire a fresh 80-second lifetime.
+                        raw = bytearray()
+                        while not raw.endswith(b'\n'):
+                            remaining = batch.deadline - time.monotonic()
+                            if batch.cancelled.is_set() or remaining <= 0:
+                                raise ValueError('RPC deadline/cancellation')
+                            self.connection.settimeout(min(.05, remaining))
+                            try:
+                                chunk = self.connection.recv(1)
+                            except socket.timeout:
+                                continue
+                            if not chunk:
+                                raise ValueError('incomplete RPC')
+                            raw.extend(chunk)
+                            if len(raw) > 65536:
+                                raise ValueError('bounded RPC required')
+                        response = batch.rpc(runtime.source_inventory.strict_json(raw))
+                        response['ok'] = True
+                    except Exception as error:
+                        batch.invalid = True
+                        response = dict(ok=False,error=type(error).__name__)
+                    try:
+                        self.wfile.write(runtime.canonical(response)+b'\n')
+                    except OSError:
+                        batch.invalid = True
+            class Server(socketserver.ThreadingUnixStreamServer):
+                daemon_threads = False
+                block_on_close = True
+
+                def __init__(self, *args):
+                    self.connections = set()
+                    self.connections_guard = threading.Lock()
+                    self.stopping = False
+                    super().__init__(*args)
+
+                def process_request(self, request, address):
+                    with self.connections_guard:
+                        if self.stopping:
+                            request.close()
+                            return
+                        self.connections.add(request)
+                    super().process_request(request, address)
+
+                def shutdown_request(self, request):
+                    try:
+                        super().shutdown_request(request)
+                    finally:
+                        with self.connections_guard:
+                            self.connections.discard(request)
+
+                def interrupt_reads(self):
+                    with self.connections_guard:
+                        self.stopping = True
+                        for connection in self.connections:
+                            try:
+                                connection.shutdown(socket.SHUT_RDWR)
+                            except OSError:
+                                pass
+            server = self.server = Server(str(self.socket),Handler)
+            os.chmod(self.socket,0o600)
+            serving = self.serving = threading.Thread(target=server.serve_forever, kwargs=dict(poll_interval=.05))
+            serving.start()
+            try:
+                env = dict(self.env,TABMAIL_R5_BATCH_SOCKET=str(self.socket),TABMAIL_R5_BATCH_NONCE=self.nonce,
+                           TABMAIL_R5_BATCH_CATALOG_SHA256=self.contract['catalog_sha256'],
+                           TABMAIL_R5_BATCH_CONTRACT_SHA256=self.pin,
+                           TABMAIL_R5_PROTOCOL_COMPONENT_EVIDENCE=str(self.output/'http-pg-components'),
+                           TABMAIL_R5_PROTOCOL_OBSERVATIONS=str(self.output/'observations.json'))
+                if self.contract['mode']=='probe':
+                    groups = [dict(package='./internal/api/handlers',tag='r5protocol',tests=[PROBE])]
+                else:
+                    groups = self.contract['required']['groups']
+                for index,group in enumerate(groups):
+                    tests = [GO_NEW if name==GO_OLD else name for name in group['tests']]
+                    command = self.contract['argv']['go_commands'][index]
+                    result = self.run_process(command,self.source,env)
+                    (self.output/f'go-{index}.jsonl').write_bytes(result['stdout'])
+                    (self.output/f'go-{index}.stderr').write_bytes(result['stderr'])
+                    if result['timeout'] or result['tail']:
+                        errors.append('Go owner timeout/tail')
+                    events = [json.loads(line) for line in result['stdout'].decode().splitlines() if line.strip()]
+                    # Versioned mapping changes only the dedicated new parent name.
+                    events=[event for event in events if event.get('Test')!=GO_NEW+'/owners']
+                    for event in events:
+                        if event.get('Test','').split('/')[0]==GO_NEW:
+                            event['Test']=GO_OLD+event['Test'][len(GO_NEW):].removeprefix('/owners')
+                    expected = group['tests']
+                    text = '\n'.join(json.dumps(event) for event in events)
+                    if self.contract['mode']=='probe':
+                        checked=protocol.classify_events(text,'tabmail/internal/api/handlers',[PROBE],result['exit_code'])
+                    else:
+                        data=protocol.load_cases(self.source/CATALOG,self.source)
+                        checked=protocol.classify_shared_events(text,'tabmail/'+group['package'][2:],expected,result['exit_code'],data)
+                    if checked['errors'] or result['exit_code']!=0:
+                        errors.append('Go required terminal/assertion failure')
+                    terminals.extend(event['Test'] for event in events if event.get('Action')=='pass' and event.get('Test'))
+                    if (PROBE in tests or GO_NEW in tests) and self.ack is None:
+                        self.cancelled.set()
+                        with self.guard:
+                            for child in self.active.values():child.kill()
+                        raise ValueError('Go owner exited without physical fixture acknowledgement')
+                if self.contract['mode']=='components':
+                    selected={(g['package'],g['tag']):set(g['tests']) for g in groups}
+                    packets,_=protocol.classify_go_component_packets(data,selected,self.output,self.contract['catalog_sha256'])
+                    if len(packets)!=len(self.children) or any(packet['errors'] for packet in packets):
+                        errors.append('missing/invalid real Go-owned observation packets')
+                report=self.output/'python-vitest.json'
+                command=[str(report) if arg=='<fresh-report>' else arg.replace('--outputFile=<fresh-report>','--outputFile='+str(report)) for arg in self.contract['argv']['python']]
+                result=self.run_process(command,Path(self.manifest['execution']['cwd']),self.env)
+                (self.output/'python.stdout').write_bytes(result['stdout'])
+                (self.output/'python.stderr').write_bytes(result['stderr'])
+                raw=report.read_bytes()
+                expected_python=self.contract['required']['python_assertions'] if self.contract['mode']=='components' else ['R5 external runtime real TSX CJS ESM worker jsdom']
+                if result['timeout'] or result['tail'] or not exact_assertions(json.loads(raw),expected_python,result['exit_code']):
+                    errors.append('Python required terminal/assertion failure')
+                else:terminals.extend(expected_python)
+
+            except Exception as error:
+                self.primary_error = self.primary_error or error
+                errors.append('execution rejected: '+type(error).__name__)
+            finally:
+                self.cancelled.set()
+                with self.guard:
+                    self.closed=True
+                    for child in self.active.values():child.kill()
+                self.close_channel() # joins every RPC owner/child before postcheck
+                self.record_cleanup()
+                if join_adopted_tails():
+                    errors.append('unregistered/detached owned descendant tail')
+            if self.cancelled_keys:
+                errors.append('accepted case cancellation invalidates batch')
+            if self.invalid or self.ack!=sorted(self.children) or self.seen!=set(self.children) or set(self.results)!=set(self.children):
+                errors.append('owner acknowledgement/queue incomplete or invalid')
+            if not all(r['passed'] and not r['timeout'] and not r['tail'] for r in self.results.values()):
+                errors.append('staged child assertion/lifecycle failure')
+            required = self.contract['required']['go_paths']+self.contract['required']['python_assertions'] if self.contract['mode']=='components' else [PROBE]+[PROBE+'/owners/probe/'+str(i) for i in range(8)]+['R5 external runtime real TSX CJS ESM worker jsdom']
+            if any(terminals.count(name)!=1 for name in required):
+                errors.append('missing/duplicate/nonpassing required terminal')
+            try:
+                if self.ack!=sorted(self.children):
+                    raise ValueError('fixture owners did not acknowledge complete cleanup')
+                self.validate_inventory()
+                after=True
+            except Exception as error:
+                self.primary_error = self.primary_error or error
+                errors.append('terminal inventory rejected: '+type(error).__name__)
+            if self.cleanup_resources():
+                errors.append('inventory owned descendant tail')
+            if self.cleanup_facts['failures']:
+                errors.append('resource cleanup recovered from errors')
+            try:
+                if runtime.preparation.identity(token.lstat())!=token_identity:
+                    raise ValueError('lease token identity drift')
+                with runtime.descriptors() as token_files:
+                    if runtime.source_inventory.strict_json(token_files.file(token))!=dict(pid=os.getpid(),nonce=self.nonce):
+                        raise ValueError('lease token capability drift')
+            except Exception as error:
+                errors.append('lease token validation rejected: '+type(error).__name__)
+            if self.abort_requested:
+                errors.append('batch cancellation requested')
+            if time.monotonic()>=self.deadline:
+                errors.append('batch process180 deadline exceeded')
+            receipt=dict(schema_version=self.contract['schema_version'],policy=self.contract['policy'],status='BATCH_QUALIFIED' if not errors else 'BATCH_REJECTED',
+                         contract_sha256=runtime.digest(runtime.canonical(self.contract)),preflight=before,terminal_postcheck=after,
+                         owners_joined=self.ack==sorted(self.children),resources_joined=self.resources_joined,
+                         max_live_children=self.max_active,
+                         eligibility_scope='component_adapter_terminals' if self.contract['mode']=='components' else 'infrastructure_probe_only',
+                         required_terminal_count=len(required),terminal_count=sum(terminals.count(n)==1 for n in required),
+                         errors=errors,product_green=False,task_complete=False,
+                         concurrency_boundary=runtime.BOUNDARY,
+                         children={key:dict(report_sha256=value['report_sha256'],exit_code=value['exit_code'],
+                                            timeout=value['timeout'],tail=value['tail'],qualified=not errors) for key,value in sorted(self.results.items())})
+            if self.selected_binding_version == 3:
+                receipt['selected_binding_version'] = 3
+            pending=self.output/'receipt.pending'
+            pending.write_bytes(runtime.canonical(receipt));os.chmod(pending,0o600)
+            pending.replace(self.output/'receipt.json')
+            self.published=True
+        return receipt
+
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action',choices=['capture','validate','run'])
+    parser.add_argument('--source',type=Path)
+    parser.add_argument('--go',type=Path)
+    parser.add_argument('--mode',choices=['components','probe'],default='components')
+    parser.add_argument('--contract',type=Path)
+    parser.add_argument('--pin')
+    parser.add_argument('--output',type=Path)
+    parser.add_argument('--selected-binding-version',type=int,choices=(2,3),default=2)
+    args=parser.parse_args()
+    if args.action=='capture':
+        manifest=runtime.from_environment(args.source, selected_binding_version=args.selected_binding_version)
+        references = {} if args.selected_binding_version == 2 else dict(
+            runtime_manifest_path=os.environ.get('TABMAIL_R5_EXTERNAL_MANIFEST'),
+            runtime_manifest_sha256=os.environ.get('TABMAIL_R5_EXTERNAL_MANIFEST_SHA256'))
+        validate_contract_candidate= capture(manifest,args.go,args.mode, selected_binding_version=args.selected_binding_version, **references)
+        validate_contract(validate_contract_candidate, selected_binding_version=args.selected_binding_version)
+        print(runtime.canonical(validate_contract_candidate).decode())
+    elif args.action == 'validate':
+        validate_contract(load(args.contract, args.pin, selected_binding_version=args.selected_binding_version),
+                          selected_binding_version=args.selected_binding_version)
+    else:
+        contract=load(args.contract,args.pin, selected_binding_version=args.selected_binding_version)
+        batch=Batch(contract,args.output, selected_binding_version=args.selected_binding_version)
+        def cancel(signum,frame):batch.request_cancel()
+        for sig in (signal.SIGINT,signal.SIGTERM):signal.signal(sig,cancel)
+        receipt=batch.run()
+        print(runtime.canonical(receipt).decode())
+        return 0 if receipt['status']=='BATCH_QUALIFIED' else 1
+    return 0
+
+if __name__=='__main__':
+    try:sys.exit(main())
+    except (OSError,ValueError,KeyError) as error:
+        print('batch rejected: '+type(error).__name__,file=sys.stderr);sys.exit(1)

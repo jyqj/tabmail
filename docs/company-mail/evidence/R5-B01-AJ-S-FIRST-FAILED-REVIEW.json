@@ -1,0 +1,77 @@
+{
+  "batch": "B01-AJ",
+  "task": "R5-P0-100",
+  "status": "original_S_budget_failure_not_complete_baseline",
+  "base_commit": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+  "source_tree": "fc992677a32b3e3f4f8e050c55d98653ceaa6fee",
+  "source_sha_semantics": "git_write_tree_label_not_commit",
+  "scale": "S",
+  "population": [
+    100,
+    500,
+    100000
+  ],
+  "budget_seconds": 1800,
+  "go_elapsed_seconds": 1800.6,
+  "go_exit": 1,
+  "runner_exit": 1,
+  "failure_kind": "real_go_timeout_not_protocol_target_red",
+  "result_present": false,
+  "completed_workload_cache_pairs": 0,
+  "observed_owned_db": {
+    "messages": 100000,
+    "indexed": 100000,
+    "ready": 100000,
+    "outbound": 0,
+    "boundary": "post_timeout_database_preparation_counts_not_full_actual_distribution_fingerprint_or_performance"
+  },
+  "phase_observations": {
+    "seed_end": "2026-10-01T17:01:31.931403+08:00",
+    "index_first": "2026-10-01T17:01:31.993120+08:00",
+    "index_last": "2026-10-01T17:05:59.364219+08:00",
+    "timeout": "2026-10-01T17:06:00.524938+08:00",
+    "stack_stage": "observer streaming query at r5_benchmark_test.go:526"
+  },
+  "process_absence_verified": [
+    17647,
+    17653,
+    17773
+  ],
+  "cleanup": "Exact owned database count0/queryexit0, 3 process PIDs absent, owned group terminal, controlled runtime empty; owned PG3344 retained for next authorized fixture run, not stopped.",
+  "S_baseline_complete": false,
+  "M_baseline_complete": false,
+  "task100_complete": false,
+  "G0_accepted": false,
+  "archive": {
+    "path": "docs/company-mail/evidence/R5-B01-AJ-S-FIRST-FAILED-LOGS.tar.gz",
+    "sha256": "1963b65074128e76a3538f47bd8c7aaac0d87640a0a9e0afde76502ffd5d77c5",
+    "members": {
+      "S/cleanup-databases.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "S/cleanup-db.log": "6e0504038d9284f24a4e629866b4a95050b3e6c28d03d72a3068b6023026ad30",
+      "S/cleanup-owned-db-count.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "S/cleanup-process.txt": "25d4532e5f8352aeb64b0f6418597cfa86aa66b78d9828c37faed465783cbb85",
+      "S/cleanup-receipt.json": "f89c255bf192239385fd4fd03ea6676c9027d2e9b01a9942e7549d2dbd791fcd",
+      "S/cleanup-verify.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "S/command.json": "bf3359a16bfd03286c4a3315f1cb7af352b8a7fb8188ee3037880c8685d11a98",
+      "S/go.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "S/go.jsonl": "d10bfa1beae4b17dccf4e9566a6f9860b2b04853e863efc6afbd2412753bb113",
+      "S/go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "S/phase-timestamps.txt": "6df6f30e2d4c7376a1da3d70909d88e437bd75861e3fa7f863590841d165871d",
+      "S/post-timeout-dataset.txt": "c71ec28184c0f6b9e69f08892a922080954b161a0f359d51f46bb1b815097c31",
+      "S/preflight.json": "3c5348296e735a81d39f2d65ba614d3377458b244cb94fb360c5e68dbaf37adb",
+      "S/resource-watch.jsonl": "c9c30196de172a7d411ddc428e2600b3fb83c8431444e3ee26cd3ece8e8c64ec",
+      "S/source-closure.json": "98fdc24de8c97a9e329076b537d1912a754db9c4a915eeb9b0570745543f775f",
+      "runner/S-runner.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "runner/S-runner.json": "f6b40c229cf3c2a4f81797d40baf3092f17b2398d929b24905aa4c4b8c433a71",
+      "runner/S-runner.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "next": "fixture-only <=20 worker preparation scheduling permitted pending race/contract equivalence; no product/schema/population/seed/budget/sampling/safety changes; fresh tool then original S and M",
+  "cleanup_receipt_archive": {
+    "path": "docs/company-mail/evidence/R5-B01-AJ-S-CLEANUP-LOGS.tar.gz",
+    "sha256": "975d3355221f30d54a313dd72b9249750d2accda78faca9dcb5ce86043bd7bd5",
+    "members": {
+      "S/cleanup-receipt.json": "f89c255bf192239385fd4fd03ea6676c9027d2e9b01a9942e7549d2dbd791fcd"
+    }
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "task": "R5-P0-100",
+  "task_complete": false,
+  "product_green": false,
+  "dependency": "R5-P0-040 and R5-P0-090 accepted; P0-070/090 accepted in B01-AI. Original-scale P0-100 execution and independent evidence review remain pending.",
+  "seed": 3893945,
+  "concurrency": 20,
+  "scales": {
+    "S": {
+      "employees": 100,
+      "mailboxes": 500,
+      "messages": 100000,
+      "budget_seconds": 1800,
+      "disk_budget_gib": 10
+    },
+    "M": {
+      "employees": 1000,
+      "mailboxes": 5000,
+      "messages": 1000000,
+      "budget_seconds": 10800,
+      "disk_budget_gib": 80
+    },
+    "L": {
+      "employees": 1000,
+      "mailboxes": 5000,
+      "messages": 10000000,
+      "budget_seconds": 43200,
+      "disk_budget_gib": 450,
+      "execution": "not_requested_this_batch",
+      "release_necessity": "P0 requires actual S and M only; L 10M dataset and budget are frozen but not executed or capacity-certified here. P10/final release claiming 10M must execute L and retain actual evidence."
+    }
+  },
+  "message_sizes": [
+    {
+      "bytes": 4096,
+      "weight_per_1000": 800
+    },
+    {
+      "bytes": 32768,
+      "weight_per_1000": 180
+    },
+    {
+      "bytes": 262144,
+      "weight_per_1000": 19
+    },
+    {
+      "bytes": 2097152,
+      "weight_per_1000": 1
+    }
+  ],
+  "population": {
+    "tenant_ratio": [
+      80,
+      20
+    ],
+    "personal_per_employee": 1,
+    "shared_per_employee": 4,
+    "shared_grants_per_mailbox": 4,
+    "lifecycle": {
+      "active_inbox_percent": 80,
+      "archived_percent": 10,
+      "trash_past_purge_percent": 5,
+      "shared_hard_expired_percent": 5
+    },
+    "historical_personal_permanent": "never reinterpret anomalous expiry as shared finite retention"
+  },
+  "workloads": [
+    "inbox_list",
+    "indexed_search",
+    "indexed_message",
+    "permission_mailboxes",
+    "draft_save",
+    "submit_and_loopback_worker",
+    "gc_reference_safety"
+  ],
+  "required_metrics": [
+    "hardware",
+    "source_sha",
+    "schema_version",
+    "dataset_fingerprint",
+    "seed",
+    "concurrency",
+    "pool_size",
+    "sql_count",
+    "sql_tracer_calibration",
+    "p50_ms",
+    "p95_ms",
+    "p99_ms",
+    "alloc_bytes",
+    "rss_bytes",
+    "disk_bytes",
+    "cache_mode",
+    "safety_assertions"
+  ],
+  "cache_modes": [
+    "app_cold_db_os_unspecified",
+    "app_hot_db_os_unspecified"
+  ],
+  "candidate_thresholds": {
+    "S_list_p95_ms": 300,
+    "M_list_p95_ms": 500,
+    "M_index_ready_query_p95_ms": 1000,
+    "unexplained_regression_percent": 10,
+    "attachment_and_public_SMTP": "not_list_latency_threshold"
+  },
+  "execution_state": "original_S_first_attempt_failed_budget_no_complete_S_M_L_baseline",
+  "measurement_scope": "Real shipping API/PostgreSQL/filesystem objects; tool-only small contract validation is not any original-scale baseline",
+  "message_size_generation": "Each seeded block of 1000 has exact 800/180/19/1 bucket counts, shuffled deterministically using seed3893945; real SQL size histogram must equal contract.",
+  "lifecycle_generation": "Each block of20 creates16 inbox/2 archived/1 trash-expired/1 hard-expired; the hard-expired slot must select a shared mailbox. Tenant80/20 is assigned across blocks, not the single ordinal that would put all expired messages in the foreign tenant.",
+  "distribution_validation": {
+    "source": "actual PostgreSQL catalog and row counts, not model parameter echo",
+    "employee_and_mailbox_counts": "original scale exact; one personal and four shared per employee",
+    "shared_grants": "four distinct legal grantees per shared mailbox",
+    "message_lifecycle_counts": "exact 80/10/5/5 of generated messages, with no hard-expired personal mailbox reinterpretation",
+    "mime_size_counts": "actual messages.size grouped by bucket, source-byte lengths and parsed source hashes",
+    "index_ready_count": "actual durable mail_documents for every seeded message"
+  },
+  "fingerprints": {
+    "parameter_fingerprint": "Separate SHA256 of frozen generator parameters; not the dataset observation hash",
+    "dataset_fingerprint": "Stream SHA256 over actual canonical rows ordered by message identity: messageID, tenantName, mailboxAddress, raw key, size, actual lifecycle, durable sourceSHA256 and parserVersion; no payload/credential values are archived"
+  },
+  "required_evidence": [
+    "actual_distribution",
+    "parameter_fingerprint",
+    "dataset_fingerprint",
+    "sql_plans",
+    "resource_scope",
+    "system_memory_observation"
+  ],
+  "sql_plan_requirement": "At least one representative SQL captured from a real shipping request by the actual tracer, executed with identical bound parameters through EXPLAIN FORMAT JSON; record query/parameter digests, plan, source/schema/scale/index-ready provenance, not raw parameters.",
+  "resource_scope": {
+    "sql": "application_and_worker_pool_not_server_trigger_sql",
+    "memory": "go_alloc_and_process_high_water_rss_not_pg_redis_system",
+    "disk": "owned_raw_objects_plus_owned_pg_database_bytes",
+    "gc": "raw_reference_read_only_not_sweep_throughput",
+    "cache": "app_reset_and_reused_no_os_db_cold_claim"
+  },
+  "system_memory_observation": "not_measured",
+  "resource_unknown_policy": "Unavailable/zero RSS or disk walk/database-size errors reject the evidence; never substitute zero as a measured value.",
+  "tool_only_dataset_calibration": {
+    "employees": 20,
+    "mailboxes": 100,
+    "messages": 1000,
+    "purpose": "real SQL/API/filesystem/index distribution and fingerprint/EXPLAIN calibration only; four foreign employees permit four distinct legal grants",
+    "counts_as_S_or_M": false
+  }
+}

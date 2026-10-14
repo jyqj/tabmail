@@ -1,0 +1,82 @@
+{
+  "C_only1top1leaf300cleanup30pkg180racerootMVS_GOMAX2readOnly_strict11chainruntime20": true,
+  "SOURCE_review_then_root_separate_C_permission_required": true,
+  "allowlist_gap150_250_knownports_closedstate_join_before_reap_budgets_cleanup_unmodified": true,
+  "entry": "/private/tmp/tm-r5usage19-driver-v9-Csnapshotname-SOURCE/usage19_driver_prepared_only.py",
+  "entry_exactV8_bytes_completeCbinding": true,
+  "entry_sha256": "9e01d282ad1b22fcbb2a8338cb1615088c33ee6debb45f40554f401b88ba8ed9",
+  "execution3prepost_joint_function_exactV8_dynamically_readsNewObserver": true,
+  "fixed_startup_pin_tuple_must_use_newobserver_sourceSHA_notold52": true,
+  "newrelated_mock_only": {
+    "PASS": 3,
+    "actualGoPG_PSquerries_SIDcalls_lsof_signals_controller_main": false,
+    "argv": [
+      "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+      "-B",
+      "-m",
+      "unittest",
+      "test_snapshotname_logging_new",
+      "-v"
+    ],
+    "exit": 0,
+    "fail": 0,
+    "inheritedSyntaxWarning_kept": true,
+    "methods": 3,
+    "oldmocksets_notrepeated": true,
+    "raw": "new3-snapshotname-mocks.stderr",
+    "reportedseconds": 0.001,
+    "skip": 0,
+    "testedsourcepins": {
+      "exact_external_redis_preflight.py": "88a05cdccce775505604b15de4fdcfc96536ca32f7f37edff96792bbb34f36a7",
+      "owned_listener_observer.py": "e8532e6df59db09bf382cc1be9c65ac1696327f7c708b73a01e65d84bba8f268",
+      "test_snapshotname_logging_new.py": "385fbb5f7a5bc1842f6535725556bd1c776ec2ab724735eb8b4b6f89b35b0539",
+      "usage19_driver_prepared_only.py": "9e01d282ad1b22fcbb2a8338cb1615088c33ee6debb45f40554f401b88ba8ed9"
+    }
+  },
+  "noCqualification_wholeMethodCatalog171": true,
+  "no_originalunknowncomm_reconstruction_or_followdisappearedPID": true,
+  "observer_delta_sha256": "c3b59f8fd4293afe2ea786619620729cce428b5493cb5754293a215e007bf577",
+  "oldD1D2D3BS_PASS_batches_notrerun_and_oldC0rawpreserved": true,
+  "only_observer_delta": "afterownedUID/PGIDconfirmed purememory firsttoken basename sanitized independentlybefore SID query; SOURCE snapshotprovenance explicit; SIDfailed no longererases safe snapshotname, overallidentityUNKNOWN; unsafe name staysnull despiteSIDsuccess; uncertainowner refusesextractionquery",
+  "prospective_argv": [
+    "/usr/bin/env",
+    "-u",
+    "PYTHONOPTIMIZE",
+    "-u",
+    "PYTHONHOME",
+    "-u",
+    "PYTHONPATH",
+    "TABMAIL_USAGE19_DRIVER_RUNTIME_APPROVED=1",
+    "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+    "-B",
+    "/private/tmp/tm-r5usage19-driver-v9-Csnapshotname-SOURCE/usage19_driver_prepared_only.py"
+  ],
+  "safe_fields": [
+    "pid",
+    "uid",
+    "pgid",
+    "start",
+    "sid",
+    "executable_basename",
+    "basename_source",
+    "snapshot_basename_status",
+    "sid_status",
+    "identity_status",
+    "identity_unknown_class",
+    "basename_unknown_class"
+  ],
+  "same_original_unknown_compile_group_member_and_sticky": true,
+  "snapshot_name_not_current_executable_identity_or_allowlist": true,
+  "source_afterpins": {
+    "exact_external_redis_preflight.py": "88a05cdccce775505604b15de4fdcfc96536ca32f7f37edff96792bbb34f36a7",
+    "owned_listener_observer.py": "e8532e6df59db09bf382cc1be9c65ac1696327f7c708b73a01e65d84bba8f268",
+    "test_snapshotname_logging_new.py": "385fbb5f7a5bc1842f6535725556bd1c776ec2ab724735eb8b4b6f89b35b0539",
+    "usage19_driver_prepared_only.py": "9e01d282ad1b22fcbb2a8338cb1615088c33ee6debb45f40554f401b88ba8ed9"
+  },
+  "source_beforepins": {
+    "exact_external_redis_preflight.py": "88a05cdccce775505604b15de4fdcfc96536ca32f7f37edff96792bbb34f36a7",
+    "owned_listener_observer.py": "52c943aa6b563341176b7f0e5e3e83f22b613e188087869016f94d6e8725a3bf",
+    "usage19_driver_prepared_only.py": "9e01d282ad1b22fcbb2a8338cb1615088c33ee6debb45f40554f401b88ba8ed9"
+  },
+  "status": "SOURCE_V9_C_ONLY_SNAPSHOT_NAME_ORDER_PREPARED_NO_RUNTIME"
+}

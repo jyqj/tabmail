@@ -3,6 +3,7 @@ package api_test
 // These tests use only baseline APIs so the exact same file can run red on
 // main@6434118 and green on the proposed business tree.
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -20,6 +21,7 @@ import (
 	"tabmail/internal/api"
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/authn"
+	"tabmail/internal/company"
 	"tabmail/internal/config"
 	"tabmail/internal/models"
 	"tabmail/internal/outbound"
@@ -85,8 +87,55 @@ func TestReleaseBlockerOutboundMetadataOnly(t *testing.T) {
 				t.Errorf("%s disclosed %q", path, secret)
 			}
 		}
-		if !strings.Contains(w.Body.String(), `"content_redacted":true`) {
-			t.Error("missing redaction marker")
+		for _, secret := range []string{j.MailFrom, j.To[0], j.Subject, "content_redacted"} {
+			if strings.Contains(w.Body.String(), secret) {
+				t.Fatal("ordinary metadata receipt disclosed content or a retired marker")
+			}
+		}
+		var envelope struct{ Data json.RawMessage }
+		if err := json.Unmarshal(w.Body.Bytes(), &envelope); err != nil {
+			t.Fatal(err)
+		}
+		data := envelope.Data
+		if path == "/api/v1/outbound" {
+			var rows []json.RawMessage
+			if err := json.Unmarshal(data, &rows); err != nil || len(rows) != 1 {
+				t.Fatalf("metadata receipt list count=%d error=%v", len(rows), err)
+			}
+			data = rows[0]
+		}
+		assertFields := func(raw json.RawMessage, names string) map[string]json.RawMessage {
+			t.Helper()
+			var fields map[string]json.RawMessage
+			if err := json.Unmarshal(raw, &fields); err != nil || fields == nil {
+				t.Fatalf("receipt object missing or malformed: %v", err)
+			}
+			allowed := map[string]bool{}
+			for _, name := range strings.Fields(names) {
+				allowed[name] = true
+			}
+			for name := range fields {
+				if !allowed[name] {
+					t.Fatalf("ordinary receipt field outside explicit whitelist: %s", name)
+				}
+			}
+			return fields
+		}
+		fields := assertFields(data, "id tenant_id state status progress created_at updated_at attempt_count next_retry delivery_uncertain capabilities")
+		progress := assertFields(fields["progress"], "completeness counts")
+		assertFields(progress["counts"], "total accepted pending temporary permanent uncertain")
+		assertFields(fields["capabilities"], "view_content retry retry_block_reason")
+		var receipt company.OutboundReceipt
+		decoder := json.NewDecoder(bytes.NewReader(data))
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&receipt); err != nil {
+			t.Fatal(err)
+		}
+		if receipt.ID != j.ID || receipt.TenantID == nil || *receipt.TenantID != tenant || receipt.State != models.OutboundPending || receipt.Status != "submitted" || receipt.Progress.Completeness != "known" || receipt.Progress.Counts == nil || *receipt.Progress.Counts != (company.OutboundReceiptCounts{Total: 2, Pending: 2}) || receipt.DeliveryUncertain {
+			t.Fatal("metadata receipt lost identity or complete ledger progress")
+		}
+		if receipt.Capabilities == nil || receipt.Capabilities.ViewContent || receipt.Capabilities.Retry {
+			t.Fatal("administrative metadata visibility granted content or retry")
 		}
 	}
 }

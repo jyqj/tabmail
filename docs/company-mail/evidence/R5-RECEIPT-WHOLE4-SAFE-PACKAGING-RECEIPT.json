@@ -1,0 +1,34 @@
+{
+  "artifact_kind": "safe_repack_original_payloads_not_runtime_rerun",
+  "deliveries": [
+    {
+      "original_archive": "/private/tmp/tm-r5receipt-whole4-five.u8j99ff3/RECEIPT-five-target-BOUNDED-PASS-evidence.tar.gz",
+      "original_sha256_from_executor": "138b425d48fcd063274daa170071cb7127aca3d995b5b66eb832e64809c75a50",
+      "safe_archive": "R5-RECEIPT-WHOLE4-ORIGINAL90-SAFE89-LOGS.tar.gz",
+      "safe_wrapper_sha256_once": "920d2c2c1ae0e48d5f361bb2c1ecffb9d35d3920afd4703d299b227c51cac021",
+      "safe_payload_count": 89,
+      "excluded_private_DSN_bearing_member": [
+        "executed-controller-source.py"
+      ],
+      "included_original_bytes_changed": false,
+      "original_raw_or_archive_modified": false,
+      "no_per_member_hash": true
+    },
+    {
+      "original_archive": "/private/tmp/tm-r5receipt-whole4-five.u8j99ff3/RECEIPT-five-target-BOUNDED-PASS-exact14ref-evidence.tar.gz",
+      "original_sha256_from_executor": "fd93fe6d1fe08a9c552b9c2600e49298b24dae1335eeecef1fbcd393d4e6cf4d",
+      "safe_archive": "R5-RECEIPT-WHOLE4-EXACT14-91-SAFE90-LOGS.tar.gz",
+      "safe_wrapper_sha256_once": "16d1780403dbb05a996de4b3b641a4bab451283825b649b4458ea69b5fdca9b0",
+      "safe_payload_count": 90,
+      "excluded_private_DSN_bearing_member": [
+        "executed-controller-source.py"
+      ],
+      "included_original_bytes_changed": false,
+      "original_raw_or_archive_modified": false,
+      "no_per_member_hash": true
+    }
+  ],
+  "reason": "original executed controller source contains a literal private connection URI; kept private, not uploaded; no original file rewritten",
+  "author_URIscan0_not_reused_as_proof_for_this_member": true,
+  "tests_repeated": false
+}

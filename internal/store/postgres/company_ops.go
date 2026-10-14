@@ -4,13 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
+	"tabmail/internal/app/credentials"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
+	"tabmail/internal/delivery"
 	"tabmail/internal/models"
 )
 
@@ -25,6 +29,22 @@ func recoveryActor(ctx context.Context, tx pgx.Tx, a authz.Actor) (authz.Actor, 
 	}
 	return a, nil
 }
+
+// Audited recovery commands protect the audit tenant FK before the actor.
+// KEY SHARE permits independent operations and does not invert worker job
+// ordering: receipt/job mutation still uses NOWAIT rather than waiting on it.
+func recoveryReferencedActor(ctx context.Context, tx pgx.Tx, a authz.Actor) (authz.Actor, error) {
+	var tenant uuid.UUID
+	e := tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, a.TenantID).Scan(&tenant)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return a, app.NotFound("company not found")
+	}
+	if e != nil {
+		return a, e
+	}
+	return recoveryActor(ctx, tx, a)
+}
+
 func scanReceipt(row pgx.Row) (company.RecoveryReceipt, error) {
 	v := company.RecoveryReceipt{Targets: []company.RecoveryTarget{}}
 	e := row.Scan(&v.ID, &v.State, &v.Error, &v.UpdatedAt, &v.RawKey, &v.RawHash, &v.RawSize)
@@ -95,7 +115,8 @@ func (s *PgStore) ListRecoveryReceipts(ctx context.Context, a authz.Actor, page 
 	return out, total, tx.Commit(ctx)
 }
 func (s *PgStore) InspectRecoveryReceipt(ctx context.Context, a authz.Actor, id uuid.UUID, reason string) (*company.RecoveryReceipt, error) {
-	if !meaningfulReason(reason) {
+	reason, reasonErr := credentials.AuditReason(reason)
+	if reasonErr != nil {
 		return nil, app.BadRequest("inspection reason must be 8-1000 bytes")
 	}
 	tx, e := s.pool.Begin(ctx)
@@ -103,7 +124,7 @@ func (s *PgStore) InspectRecoveryReceipt(ctx context.Context, a authz.Actor, id 
 		return nil, e
 	}
 	defer tx.Rollback(ctx)
-	a, e = recoveryActor(ctx, tx, a)
+	a, e = recoveryReferencedActor(ctx, tx, a)
 	if e != nil {
 		return nil, e
 	}
@@ -123,8 +144,15 @@ func (s *PgStore) InspectRecoveryReceipt(ctx context.Context, a authz.Actor, id 
 	}
 	return &v, tx.Commit(ctx)
 }
-func (s *PgStore) RetryRecoveryReceipt(ctx context.Context, a authz.Actor, id uuid.UUID, version time.Time, targets []uuid.UUID, reason, verifiedHash string) error {
-	if !meaningfulReason(reason) || len(targets) == 0 || len(targets) > 200 {
+func (s *PgStore) RetryRecoveryReceipt(ctx context.Context, a authz.Actor, id uuid.UUID, version time.Time, targets []uuid.UUID, reason, verifiedHash string) (err error) {
+	defer func() {
+		var pg *pgconn.PgError
+		if errors.As(err, &pg) && (pg.Code == "55P03" || pg.Code == "40001") {
+			err = app.Conflict("receipt or destination is changing; inspect again")
+		}
+	}()
+	reason, reasonErr := credentials.AuditReason(reason)
+	if reasonErr != nil || len(targets) == 0 || len(targets) > 200 {
 		return app.BadRequest("select destinations and provide a reason (8-1000 bytes)")
 	}
 	tx, e := s.pool.Begin(ctx)
@@ -132,7 +160,7 @@ func (s *PgStore) RetryRecoveryReceipt(ctx context.Context, a authz.Actor, id uu
 		return e
 	}
 	defer tx.Rollback(ctx)
-	a, e = recoveryActor(ctx, tx, a)
+	a, e = recoveryReferencedActor(ctx, tx, a)
 	if e != nil {
 		return e
 	}
@@ -143,7 +171,7 @@ func (s *PgStore) RetryRecoveryReceipt(ctx context.Context, a authz.Actor, id uu
 		return app.NotFound("receipt not found")
 	}
 	if e != nil {
-		return app.Conflict("receipt is busy; inspect again")
+		return e
 	}
 	if v.State == "processing" || v.State == "done" || !v.UpdatedAt.Equal(version) {
 		return app.Conflict("receipt changed since inspection")
@@ -151,20 +179,32 @@ func (s *PgStore) RetryRecoveryReceipt(ctx context.Context, a authz.Actor, id uu
 	if verifiedHash == "" || verifiedHash != v.RawHash {
 		return app.Conflict("original checksum verification required")
 	}
+	targets = append([]uuid.UUID{}, targets...)
+	sort.Slice(targets, func(i, j int) bool { return targets[i].String() < targets[j].String() })
+	deadlines := make([]*time.Time, 0, len(targets))
 	seen := map[uuid.UUID]bool{}
 	for _, mb := range targets {
 		if seen[mb] {
 			return app.BadRequest("duplicate destination")
 		}
 		seen[mb] = true
-		var valid bool
-		e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM ingest_recipient_outcomes t JOIN mailboxes m ON m.id=t.mailbox_id AND m.tenant_id=t.tenant_id AND m.zone_id=t.zone_id AND m.full_address=t.address JOIN domain_zones z ON z.id=t.zone_id AND z.tenant_id=t.tenant_id WHERE t.job_id=$1 AND t.mailbox_id=$2 AND t.tenant_id=$3 AND t.state<>'delivered' AND z.is_verified AND z.mx_verified AND (m.expires_at IS NULL OR m.expires_at>now()))`, id, mb, a.TenantID).Scan(&valid)
+		var address string
+		var zone uuid.UUID
+		e = tx.QueryRow(ctx, `SELECT address,zone_id FROM ingest_recipient_outcomes WHERE job_id=$1 AND mailbox_id=$2 AND tenant_id=$3 AND state<>'delivered' FOR SHARE NOWAIT`, id, mb, a.TenantID).Scan(&address, &zone)
+		if errors.Is(e, pgx.ErrNoRows) {
+			return app.Conflict("destination delivered, changed, expired or outside selected company")
+		}
 		if e != nil {
 			return e
+		}
+		deadline, valid, err := fenceIngressDestination(ctx, tx, a.TenantID, zone, mb, address)
+		if err != nil {
+			return err
 		}
 		if !valid {
 			return app.Conflict("destination delivered, changed, expired or outside selected company")
 		}
+		deadlines = append(deadlines, deadline)
 	}
 	for _, mb := range targets {
 		if _, e = tx.Exec(ctx, `UPDATE ingest_recipient_outcomes SET state='pending',attempts=0,last_error='',updated_at=clock_timestamp() WHERE job_id=$1 AND mailbox_id=$2 AND tenant_id=$3 AND state<>'delivered'`, id, mb, a.TenantID); e != nil {
@@ -176,6 +216,13 @@ func (s *PgStore) RetryRecoveryReceipt(ctx context.Context, a authz.Actor, id uu
 	}
 	if e = companyAudit(ctx, tx, a, "ingress.retry", "ingest_job", id, map[string]any{"reason": reason, "targets": targets, "inspection_version": version, "verified_hash": verifiedHash}); e != nil {
 		return e
+	}
+	alive, e := ingressDestinationsAlive(ctx, tx, deadlines)
+	if e != nil {
+		return e
+	}
+	if !alive {
+		return app.Conflict("destination expired while retry was pending")
 	}
 	return tx.Commit(ctx)
 }
@@ -195,8 +242,15 @@ func (s *PgStore) ListOutboundRecipients(ctx context.Context, tenant, job uuid.U
 	}
 	return out, rows.Err()
 }
-func (s *PgStore) ReconcileOutbound(ctx context.Context, a authz.Actor, id uuid.UUID, version time.Time, results []company.Recipient, reason string) error {
-	if !meaningfulReason(reason) || len(results) == 0 || len(results) > 50 {
+func (s *PgStore) ReconcileOutbound(ctx context.Context, a authz.Actor, id uuid.UUID, version time.Time, results []company.Recipient, reason string) (err error) {
+	defer func() {
+		var pg *pgconn.PgError
+		if errors.As(err, &pg) && (pg.Code == "55P03" || pg.Code == "40001") {
+			err = app.Conflict("send job or recipient ledger is changing; inspect again")
+		}
+	}()
+	reason, reasonErr := credentials.AuditReason(reason)
+	if reasonErr != nil || len(results) == 0 || len(results) > 50 {
 		return app.BadRequest("explicit confirmed outcomes and reason required")
 	}
 	tx, e := s.pool.Begin(ctx)
@@ -204,30 +258,34 @@ func (s *PgStore) ReconcileOutbound(ctx context.Context, a authz.Actor, id uuid.
 		return e
 	}
 	defer tx.Rollback(ctx)
-	a, e = recoveryActor(ctx, tx, a)
+	a, e = recoveryReferencedActor(ctx, tx, a)
 	if e != nil {
 		return e
 	}
 	var state, marker string
 	var updated time.Time
 	var managed bool
-	e = tx.QueryRow(ctx, `SELECT state,in_flight_domain,updated_at,recipient_ledger FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT`, a.TenantID, id).Scan(&state, &marker, &updated, &managed)
+	var envelope []string
+	e = tx.QueryRow(ctx, `SELECT state,in_flight_domain,updated_at,recipient_ledger,rcpt_to FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT`, a.TenantID, id).Scan(&state, &marker, &updated, &managed, &envelope)
 	if errors.Is(e, pgx.ErrNoRows) {
 		return app.NotFound("send job not found")
 	}
 	if e != nil {
 		return app.Conflict("send job busy")
 	}
-	if state == "processing" || !updated.Equal(version) || !managed {
+	if state == string(models.OutboundProcessing) || !updated.Equal(version) || !managed {
 		return app.Conflict("job changed or needs legacy manual investigation")
+	}
+	if e = lockReconciliationLedger(ctx, tx, a.TenantID, id, envelope); e != nil {
+		return e
 	}
 	seen := map[string]bool{}
 	for _, v := range results {
-		if seen[v.Address] || (v.State != "accepted" && v.State != "permanent" && v.State != "temporary") {
+		if seen[v.Address] || !delivery.IsCompletion(v.State) {
 			return app.BadRequest("each recipient must have one confirmed accepted/not-accepted outcome")
 		}
 		seen[v.Address] = true
-		tag, e := tx.Exec(ctx, `UPDATE outbound_recipients SET state=$4,diagnostic='Operator confirmed outcome; see audit',updated_at=now() WHERE tenant_id=$1 AND job_id=$2 AND address=$3 AND state='uncertain'`, a.TenantID, id, v.Address, v.State)
+		tag, e := tx.Exec(ctx, `UPDATE outbound_recipients SET state=$4,diagnostic='Operator confirmed outcome; see audit',updated_at=clock_timestamp() WHERE tenant_id=$1 AND job_id=$2 AND address=$3 AND state=ANY($5::text[])`, a.TenantID, id, v.Address, v.State, delivery.RecipientSources(v.State))
 		if e != nil {
 			return e
 		}
@@ -235,15 +293,17 @@ func (s *PgStore) ReconcileOutbound(ctx context.Context, a authz.Actor, id uuid.
 			return app.Conflict("only uncertain recipients may be reconciled")
 		}
 	}
-	var unresolved int
-	if e = tx.QueryRow(ctx, `SELECT count(*) FROM outbound_recipients WHERE job_id=$1 AND state='uncertain'`, id).Scan(&unresolved); e != nil {
+	var recipientStates []string
+	if e = tx.QueryRow(ctx, `SELECT COALESCE(array_agg(state),'{}'::text[]) FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2`, a.TenantID, id).Scan(&recipientStates); e != nil {
 		return e
 	}
-	if unresolved == 0 {
-		if _, e = tx.Exec(ctx, `UPDATE outbound_jobs SET in_flight_domain='',
-        state=CASE WHEN NOT EXISTS(SELECT 1 FROM outbound_recipients WHERE job_id=$1 AND state<>'accepted') THEN 'sent'::outbound_state ELSE 'failed'::outbound_state END,
-        last_error=CASE WHEN NOT EXISTS(SELECT 1 FROM outbound_recipients WHERE job_id=$1 AND state<>'accepted') THEN '' ELSE 'Operator reconciliation complete; explicit retry required' END,
-        smtp_response='Operator confirmed downstream outcome; see audit',updated_at=clock_timestamp() WHERE id=$1`, id); e != nil {
+	if next, resolved := delivery.AfterReconciliation(recipientStates); resolved {
+		message := "Operator reconciliation complete; explicit retry required"
+		if next == models.OutboundSent {
+			message = ""
+		}
+		if _, e = tx.Exec(ctx, `UPDATE outbound_jobs SET in_flight_domain='',state=$3::outbound_state,last_error=$4,
+ smtp_response='Operator confirmed downstream outcome; see audit',updated_at=clock_timestamp() WHERE tenant_id=$1 AND id=$2`, a.TenantID, id, next, message); e != nil {
 			return e
 		}
 	} else {
@@ -260,6 +320,50 @@ func (s *PgStore) ReconcileOutbound(ctx context.Context, a authz.Actor, id uuid.
 	}
 	return tx.Commit(ctx)
 }
+
+// The job lock fixes the envelope and excludes new FK-bound ledger rows. Fence
+// every existing recipient before any outcome changes, including unselected
+// rows: a partial or mismatched ledger cannot prove whole-envelope completion.
+// Use the existing recovery cap and NOWAIT order instead of waiting on a child
+// row while holding the current administrator and job.
+func lockReconciliationLedger(ctx context.Context, tx pgx.Tx, tenant, job uuid.UUID, envelope []string) error {
+	if len(envelope) == 0 || len(envelope) > outboundInspectionMaxRecipients {
+		return app.Conflict("recipient ledger is incomplete or exceeds recovery bounds; investigate separately")
+	}
+	expected := make(map[string]bool, len(envelope))
+	for _, address := range envelope {
+		if address == "" {
+			return app.Conflict("recipient ledger does not match the envelope; investigate separately")
+		}
+		// The historical migration and inspection projection use one row per
+		// exact stored identity, even if a legacy envelope repeats it.
+		expected[address] = true
+	}
+	rows, e := tx.Query(ctx, `SELECT address FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2 ORDER BY address LIMIT $3 FOR UPDATE NOWAIT`, tenant, job, outboundInspectionMaxRecipients+1)
+	if e != nil {
+		return e
+	}
+	defer rows.Close()
+	count := 0
+	for rows.Next() {
+		var address string
+		if e = rows.Scan(&address); e != nil {
+			return e
+		}
+		count++
+		if count > outboundInspectionMaxRecipients || !expected[address] {
+			return app.Conflict("recipient ledger does not match the envelope; investigate separately")
+		}
+	}
+	if e = rows.Err(); e != nil {
+		return e
+	}
+	if count != len(expected) {
+		return app.Conflict("recipient ledger does not match the envelope; investigate separately")
+	}
+	return nil
+}
+
 func (s *PgStore) Readiness(ctx context.Context) error { return s.pool.Ping(ctx) }
 func (s *PgStore) Heartbeat(ctx context.Context, id, role string) error {
 	_, e := s.pool.Exec(ctx, `INSERT INTO runtime_instances(id,role,last_seen) VALUES($1,$2,clock_timestamp()) ON CONFLICT(id) DO UPDATE SET role=EXCLUDED.role,last_seen=EXCLUDED.last_seen`, id, role)
@@ -285,53 +389,49 @@ func (s *PgStore) CheckWorkers(ctx context.Context, outbound bool) error {
 func (s *PgStore) SweepCompanyMetadata(ctx context.Context) error {
 	for _, q := range []string{
 		`DELETE FROM sent_mail_items WHERE asset_id IN (SELECT asset_id FROM sent_mail_items WHERE purge_after<now() OR expires_at<now() ORDER BY COALESCE(purge_after,expires_at) LIMIT 1000)`,
-        `DELETE FROM sent_mail_assets a WHERE a.id IN (SELECT x.id FROM sent_mail_assets x WHERE NOT EXISTS(SELECT 1 FROM sent_mail_items i WHERE i.asset_id=x.id) AND NOT EXISTS(SELECT 1 FROM outbound_jobs j WHERE j.id=x.id) LIMIT 1000)`,
-        `DELETE FROM runtime_instances WHERE last_seen<now()-interval '1 day'`,
+		`DELETE FROM sent_mail_assets a WHERE a.id IN (SELECT x.id FROM sent_mail_assets x WHERE NOT EXISTS(SELECT 1 FROM sent_mail_items i WHERE i.asset_id=x.id) AND NOT EXISTS(SELECT 1 FROM outbound_jobs j WHERE j.id=x.id) LIMIT 1000)`,
+		`DELETE FROM runtime_instances WHERE last_seen<now()-interval '1 day'`,
 		`DELETE FROM mailbox_event_log WHERE sequence IN (SELECT sequence FROM mailbox_event_log WHERE created_at<now()-interval '7 days' ORDER BY sequence LIMIT 5000)`,
 	} {
 		if _, err := s.pool.Exec(ctx, q); err != nil {
 			return err
 		}
 	}
-	rows, err := s.pool.Query(ctx, `SELECT DISTINCT tenant_id FROM mail_attachments WHERE expires_at<now() LIMIT 20`)
-	if err != nil {
-		return err
-	}
-	tenants := []uuid.UUID{}
-	for rows.Next() {
-		var id uuid.UUID
-		if err = rows.Scan(&id); err != nil {
-			rows.Close()
-			return err
-		}
-		tenants = append(tenants, id)
-	}
-	err = rows.Err()
-	rows.Close()
-	if err != nil {
-		return err
-	}
-	for _, tenant := range tenants {
-		if err = s.sweepCompanyAttachments(ctx, tenant); err != nil {
-			return err
-		}
-	}
-	return nil
+	return s.sweepCompanyAttachmentTenants(ctx)
 }
 
 func (s *PgStore) sweepCompanyAttachments(ctx context.Context, tenant uuid.UUID) error {
-	tx, err := s.pool.Begin(ctx)
+	return sweepCompanyAttachmentsWith(ctx, s.pool, tenant)
+}
+
+// The scheduler supplies the same session that owns its advisory lock. Only
+// transaction creation is parameterized; attachment locks and SQL are shared.
+func sweepCompanyAttachmentsWith(ctx context.Context, db interface {
+	Begin(context.Context) (pgx.Tx, error)
+}, tenant uuid.UUID) error {
+	tx, err := db.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
-	// Same first lock as SaveDraft/FinishAttachment. A draft's JSON reference
-	// must not race a GC snapshot; pinning outbound attachments also takes a
-	// shared attachment-row lock and is protected by the foreign key.
+	// The tenant lock orders this sweep with company-wide disposition, not
+	// with ordinary draft/finish paths (which do not take a tenant lock).
+	// Draft and enqueue writers retain shared attachment-row locks; the
+	// candidate scan skips those busy rows. Exclude every existing metadata
+	// reference BEFORE LIMIT, so a protected prefix cannot starve later orphans.
+	// At most 100 candidates are returned/locked/deleted per tenant and there is
+	// no pagination loop. SQL may inspect more protected rows to find them;
+	// this is not a bound on physical query-plan work or cross-tenant fairness.
+	// Recheck the same JSON and FK-backed pins in a new statement after locking,
+	// and commit deletion with orphan registration. Held ingress/message object
+	// references remain protected by the separate raw-object release authority.
 	if err = lockMemberTenant(ctx, tx, tenant); err != nil {
 		return err
 	}
-	rows, err := tx.Query(ctx, `SELECT id FROM mail_attachments WHERE tenant_id=$1 AND expires_at<now() ORDER BY id LIMIT 100 FOR UPDATE SKIP LOCKED`, tenant)
+	unreferenced := `NOT EXISTS(SELECT 1 FROM outbound_attachments o WHERE o.attachment_id=a.id)
+       AND NOT EXISTS(SELECT 1 FROM sent_asset_attachments o WHERE o.attachment_id=a.id)
+       AND NOT EXISTS(SELECT 1 FROM mail_drafts d WHERE d.tenant_id=a.tenant_id AND d.payload->'attachment_ids' ? a.id::text)`
+	rows, err := tx.Query(ctx, `SELECT a.id FROM mail_attachments a WHERE a.tenant_id=$1 AND a.expires_at<now() AND `+unreferenced+` ORDER BY a.id LIMIT 100 FOR UPDATE OF a SKIP LOCKED`, tenant)
 	if err != nil {
 		return err
 	}
@@ -351,9 +451,7 @@ func (s *PgStore) sweepCompanyAttachments(ctx context.Context, tenant uuid.UUID)
 	}
 	_, err = tx.Exec(ctx, `WITH gone AS (
        DELETE FROM mail_attachments a WHERE a.tenant_id=$1 AND a.id=ANY($2::uuid[]) AND a.expires_at<now()
-       AND NOT EXISTS(SELECT 1 FROM outbound_attachments o WHERE o.attachment_id=a.id)
-       AND NOT EXISTS(SELECT 1 FROM sent_asset_attachments o WHERE o.attachment_id=a.id)
-       AND NOT EXISTS(SELECT 1 FROM mail_drafts d WHERE d.tenant_id=a.tenant_id AND d.payload->'attachment_ids' ? a.id::text)
+       AND `+unreferenced+`
        RETURNING object_key)
        INSERT INTO orphan_objects(object_key,first_failed_at,last_failed_at,attempts)
        SELECT object_key,now(),now(),1 FROM gone ON CONFLICT DO NOTHING`, tenant, ids)

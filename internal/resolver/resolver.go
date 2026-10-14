@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/google/uuid"
@@ -34,6 +35,11 @@ type Result struct {
 	Route   *models.DomainRoute
 	Mailbox *models.Mailbox
 	Created bool // true if the mailbox was auto-created
+	// Only resolver-produced results carry provenance. Explicit trusted
+	// WithResolved callers retain their contract, subject to mailbox expiry.
+	owner      *Resolver
+	generation uint64
+	validUntil time.Time
 }
 
 // Reusable reports whether this Result can short-circuit a later Resolve call.
@@ -49,14 +55,30 @@ type Result struct {
 //     concurrent retention sweep or quota change can invalidate it, and
 //     re-running Resolve lets the limiter/quota gates fire again.
 //
-// Both conditions collapse to: Mailbox is present and was not just created.
-func (r *Result) Reusable() bool { return r != nil && r.Mailbox != nil && !r.Created }
+// A mailbox must still be alive. Resolver-produced snapshots additionally
+// retain the original zone-cache deadline and invalidation generation; RCPT
+// must not renew those lifetimes when passing the result to DATA.
+func (r *Result) Reusable() bool {
+	if r == nil || r.Mailbox == nil || r.Created {
+		return false
+	}
+	now := time.Now()
+	if r.Mailbox.ExpiresAt != nil && !now.Before(*r.Mailbox.ExpiresAt) {
+		return false
+	}
+	return r.owner == nil || (r.generation == r.owner.generation.Load() && now.Before(r.validUntil))
+}
 
 // resolverCacheTTL is how long zone/route lookups stay cached. Writes from the
 // domain service invalidate entries immediately; this TTL is the crash-consistent
 // fallback (a writer that crashes between committing and invalidating is
 // eventually self-consistent).
 const resolverCacheTTL = 15 * time.Second
+
+type zoneSnapshot struct {
+	zone      *models.DomainZone
+	expiresAt time.Time
+}
 
 // Resolver maps an incoming email address to a mailbox, auto-creating if allowed.
 type Resolver struct {
@@ -67,8 +89,9 @@ type Resolver struct {
 	limiter     autoCreateLimiter
 	// zoneCache uses negative caching so the parent-domain walk in findZone
 	// does not re-hit the store for every level on each lookup.
-	zoneCache  *configcache.ConfigCache[string, *models.DomainZone]
+	zoneCache  *configcache.ConfigCache[string, zoneSnapshot]
 	routeCache *configcache.ConfigCache[uuid.UUID, []*models.DomainRoute]
+	generation atomic.Uint64
 	// Precompiled route regexes keyed by route ID; populated on first match.
 	wildcardRegexCache sync.Map
 	sequenceRegexCache sync.Map
@@ -85,17 +108,19 @@ func New(s resolverStore, namingMode policy.NamingMode, stripPlus bool, limiters
 		stripPlus:  stripPlus,
 		limiter:    limiter,
 	}
-	rv.zoneCache = configcache.New(resolverCacheTTL, func(ctx context.Context, domain string) (*models.DomainZone, error) {
+	rv.zoneCache = configcache.New(resolverCacheTTL, func(ctx context.Context, domain string) (zoneSnapshot, error) {
 		zone, err := s.GetZoneByDomain(ctx, domain)
 		if err != nil {
-			return nil, err
+			return zoneSnapshot{}, err
 		}
 		if zone != nil {
 			cp := *zone
 			zone = &cp
 		}
-		return zone, nil
-	}, configcache.WithNilCache[string, *models.DomainZone](true))
+		// This deadline is conservatively no later than the cache's own
+		// publication deadline. Negative child lookups carry it as well.
+		return zoneSnapshot{zone: zone, expiresAt: time.Now().Add(resolverCacheTTL)}, nil
+	}, configcache.WithNilCache[string, zoneSnapshot](true))
 	// routeCache uses negative caching too: a zone with no routes returns a nil
 	// slice that would otherwise be re-queried on every message. Safe because
 	// CreateRoute/DeleteRoute invalidate the zone's entry, so a freshly-added
@@ -114,12 +139,16 @@ func New(s resolverStore, namingMode policy.NamingMode, stripPlus bool, limiters
 // "no zone" negative entry). Callers should invoke it after any zone write.
 func (rv *Resolver) InvalidateZone(domain string) {
 	rv.zoneCache.Invalidate(domain)
+	// Publish the new generation after eviction. A lookup that began earlier
+	// may finish for its caller, but cannot label that old result reusable.
+	rv.generation.Add(1)
 }
 
 // InvalidateRoutes drops the cached route list for a zone. Callers should
 // invoke it after any route write (create/delete) for the zone.
 func (rv *Resolver) InvalidateRoutes(zoneID uuid.UUID) {
 	rv.routeCache.Invalidate(zoneID)
+	rv.generation.Add(1)
 }
 
 func (rv *Resolver) StripPlus() bool {
@@ -148,12 +177,17 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 		return nil, fmt.Errorf("resolver: %w", err)
 	}
 
-	zone, err := rv.findZone(ctx, domain)
+	generation := rv.generation.Load()
+	zone, validUntil, err := rv.findZoneSnapshot(ctx, domain)
 	if err != nil {
 		return nil, err
 	}
 	if zone == nil {
 		return nil, nil
+	}
+	result := func(route *models.DomainRoute, mailbox *models.Mailbox, created bool) *Result {
+		return &Result{Zone: zone, Route: route, Mailbox: mailbox, Created: created,
+			owner: rv, generation: generation, validUntil: validUntil}
 	}
 
 	mb, err := rv.store.GetMailboxByAddress(ctx, mailboxKey)
@@ -166,10 +200,10 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 		}
 	}
 	if mb != nil {
-		if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
+		if mb.ExpiresAt != nil && !time.Now().Before(*mb.ExpiresAt) {
 			return nil, nil
 		}
-		return &Result{Zone: zone, Mailbox: mb}, nil
+		return result(nil, mb, false), nil
 	}
 
 	// Company recipients must be provisioned explicitly. Never turn a legacy
@@ -187,7 +221,7 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 		if route == nil || !route.AutoCreateMailbox {
 			return nil, nil
 		}
-		return &Result{Zone: zone, Route: route}, nil
+		return result(route, nil, false), nil
 	}
 	if rv.limiter != nil {
 		allowed, err := rv.limiter.Allow(ctx, zone.TenantID, route.ID)
@@ -228,27 +262,38 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 	}
 	if err := rv.store.CreateMailbox(ctx, mb); err != nil {
 		if existing, _ := rv.store.GetMailboxByAddress(ctx, mailboxKey); existing != nil && existing.ZoneID == zone.ID {
-			return &Result{Zone: zone, Route: route, Mailbox: existing}, nil
+			return result(route, existing, false), nil
 		}
 		return nil, fmt.Errorf("resolver: create mailbox: %w", err)
 	}
-	return &Result{Zone: zone, Route: route, Mailbox: mb, Created: true}, nil
+	return result(route, mb, true), nil
 }
 
 // findZone tries exact match first, then walks up parent domains.
 func (rv *Resolver) findZone(ctx context.Context, domain string) (*models.DomainZone, error) {
-	zone, err := rv.zoneCache.Get(ctx, domain)
+	zone, _, err := rv.findZoneSnapshot(ctx, domain)
+	return zone, err
+}
+
+func (rv *Resolver) findZoneSnapshot(ctx context.Context, domain string) (*models.DomainZone, time.Time, error) {
+	snapshot, err := rv.zoneCache.Get(ctx, domain)
 	if err != nil {
-		return nil, err
+		return nil, time.Time{}, err
 	}
-	if zone != nil {
-		return zone, nil
+	if snapshot.zone != nil {
+		return snapshot.zone, snapshot.expiresAt, nil
 	}
 	parts := strings.SplitN(domain, ".", 2)
 	if len(parts) < 2 {
-		return nil, nil
+		return nil, snapshot.expiresAt, nil
 	}
-	return rv.findZone(ctx, parts[1])
+	zone, expiresAt, err := rv.findZoneSnapshot(ctx, parts[1])
+	// A newly provisioned child must become visible when its cached absence
+	// expires, even when the positive parent was refreshed more recently.
+	if snapshot.expiresAt.Before(expiresAt) {
+		expiresAt = snapshot.expiresAt
+	}
+	return zone, expiresAt, err
 }
 
 type routeCandidate struct {

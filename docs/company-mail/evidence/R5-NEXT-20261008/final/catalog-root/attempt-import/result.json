@@ -1,0 +1,32 @@
+{
+  "source_commit": "f413a9138d305cf154ed2cecaddcf9b9a2397666",
+  "local_tested_head": "9a5fb4f95f6d42e913956b0cd175d9d4bfc33aeb",
+  "local_tested_tree": "26c5a97c88487af2ba0470e304bdb218864f805e",
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "-v",
+    "scripts.tests.test_r5_catalog_reconciliation",
+    "scripts.tests.test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence",
+    "scripts.tests.test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion"
+  ],
+  "scope": "Import-loader failure only. The three unittest placeholders are not target methods: zero of the intended 17 target methods executed. Original erroneous wrapper scope and reported count are preserved in result-original.json; original stdout/stderr bytes are unchanged.",
+  "started_utc": "2026-10-07T17:58:35Z",
+  "exit_code": 1,
+  "duration_seconds": 0.204,
+  "stdout.txt": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr.txt": {
+    "bytes": 3017,
+    "sha256": "4ec9daeeeec13859524c3d3aae9e7e8a08a6ea6558619fe8932b98e3e138e4f7"
+  },
+  "unittest_ok": false,
+  "original_metadata_sha256": "25ce9a3c5772be735b9aec6bfad3d7cc5ef6ef158d223e3c206ee75d48a62bf1",
+  "reported_unittest_entries": 3,
+  "observed_target_methods": 0,
+  "loader_errors": 3,
+  "execution_stage": "module_import"
+}

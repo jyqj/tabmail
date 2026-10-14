@@ -1,11 +1,10 @@
 package handlers
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"github.com/rs/zerolog"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"tabmail/internal/app/credentials"
 	"tabmail/internal/company"
 )
 
@@ -48,13 +47,12 @@ func (h *CompanySetupHandler) Invite(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	buf := make([]byte, 32)
-	if _, e := rand.Read(buf); e != nil {
+	token, digest, e := credentials.IssueInvitation()
+	if e != nil {
 		errInternal(w)
 		return
 	}
-	token := hex.EncodeToString(buf)
-	out, e := h.repo.InviteEmployee(r.Context(), companyActor(r), v, company.Hash(token))
+	out, e := h.repo.InviteEmployee(r.Context(), companyActor(r), v, digest)
 	if e != nil {
 		h.result(w, nil, e)
 		return
@@ -79,7 +77,7 @@ func (h *CompanySetupHandler) Activate(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if len(v.Token) != 64 || len(v.Password) < 12 || len(v.Password) > 72 {
+	if len(v.Token) != 2*credentials.InvitationBytes || credentials.ValidatePassword(v.Password) != nil {
 		errBadRequest(w, "activation token and 12-72 byte password required")
 		return
 	}

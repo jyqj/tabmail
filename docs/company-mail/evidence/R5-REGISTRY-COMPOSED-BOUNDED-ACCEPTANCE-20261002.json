@@ -1,0 +1,51 @@
+{
+  "artifact_kind": "central_summary_of_delivered_independent_readonly_verdict_not_machine_raw",
+  "reviewer": "/root/registry_clock_failure_independent_audit",
+  "verdict": "ACCEPTED_BOUNDED_COMPOSED_ADAPTER_RUNTIME",
+  "original25": {
+    "executed": 4,
+    "passed": 2,
+    "error": 2,
+    "Registry21_setup_error_not_executed": true,
+    "CLI_exit": 1,
+    "source": "9b777bea inputincomplete"
+  },
+  "depfix23": {
+    "executed": 23,
+    "passed": 22,
+    "missing_migrations_error": 1,
+    "CLI_exit": 0,
+    "source": "a4e4093d153da174fabe92d622cff22100762db4",
+    "aggregate_original_clock": "UNKNOWN controller Path shadow TypeError preserved"
+  },
+  "only1": {
+    "executed": 1,
+    "passed": 1,
+    "skipped": 0,
+    "exit": 0,
+    "source": "58c7cfe30aed11dfff91e0c32a03aae58a55a5ed",
+    "complete_capture_cleanup_seconds": 0.27617311477661133,
+    "budget_seconds": 180
+  },
+  "unique_targets_PASS": 25,
+  "missing": 0,
+  "extra": 0,
+  "duplicate_PASS": 0,
+  "single_fresh25_exit0": false,
+  "input_closure_transitions": [
+    "28 to29 only original6252B corrections",
+    "29 to47 only18 actual SQL static files"
+  ],
+  "common_manifest_digests_unchanged_from_independent_review": true,
+  "common_runner_pin": "cf156af977167d9b4ece53b61e48c7e941e6ccbeff5c0279e247d7f0844e1d02",
+  "common_tests_pin": "79b3d443a04198b27a44dde978bbd4742c3c8145745d05ef40d6a93c7f04d482",
+  "actual_CLI_scope": [
+    "three historical exact S identities",
+    "852900/d286/schema16 known typed FAILED attempt"
+  ],
+  "M_baseline_complete": false,
+  "task_complete": false,
+  "product_green": false,
+  "subscope_closed": "known historical clock/typed failure adapter and 25 target set composed runtime",
+  "fullCI_G0_P0_closed": false
+}

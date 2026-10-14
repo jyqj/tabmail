@@ -1,0 +1,2 @@
+Contract check passed: 16 shared models verified across Go and TypeScript; 36 explicit company DTOs additionally verified against OpenAPI component schemas for fields, required/optional wire semantics, nullability, scalar/array/map projection, nested references and string enums.
+OpenAPI routing: 68 company operations; 61 JSON bindings, 7 non-JSON bindings, including both submit success statuses. Runtime response coverage is reported separately by check_http_contract.py.

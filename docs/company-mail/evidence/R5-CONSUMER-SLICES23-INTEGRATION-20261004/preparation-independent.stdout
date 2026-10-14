@@ -1,0 +1,367 @@
+{
+  "scope": "independent pure synthetic preparation boundaries; no runtime qualification",
+  "count": 90,
+  "controls": [
+    {
+      "name": "owned-returns-independent-complete-canonical-digests-byte-pins-and-environment",
+      "passed": true
+    },
+    {
+      "name": "producer-before-boundary-'go'",
+      "passed": true
+    },
+    {
+      "name": "producer-before-boundary-'./go'",
+      "passed": true
+    },
+    {
+      "name": "producer-before-boundary-'bin/go'",
+      "passed": true
+    },
+    {
+      "name": "producer-before-boundary-'../go'",
+      "passed": true
+    },
+    {
+      "name": "producer-before-boundary-''",
+      "passed": true
+    },
+    {
+      "name": "strict-selector-None",
+      "passed": true
+    },
+    {
+      "name": "strict-selector-True",
+      "passed": true
+    },
+    {
+      "name": "strict-selector-False",
+      "passed": true
+    },
+    {
+      "name": "strict-selector-1",
+      "passed": true
+    },
+    {
+      "name": "strict-selector-0",
+      "passed": true
+    },
+    {
+      "name": "strict-selector-4",
+      "passed": true
+    },
+    {
+      "name": "strict-selector-'3'",
+      "passed": true
+    },
+    {
+      "name": "strict-selector-3.0",
+      "passed": true
+    },
+    {
+      "name": "failed-owned-capture-0",
+      "passed": true
+    },
+    {
+      "name": "failed-owned-capture-1",
+      "passed": true
+    },
+    {
+      "name": "failed-owned-capture-2",
+      "passed": true
+    },
+    {
+      "name": "failed-owned-capture-3",
+      "passed": true
+    },
+    {
+      "name": "publication-collision-before-default-selection.json",
+      "passed": true
+    },
+    {
+      "name": "publication-ENOSPC-before-default-selection.json",
+      "passed": true
+    },
+    {
+      "name": "publication-collision-before-default-observation-pin.json",
+      "passed": true
+    },
+    {
+      "name": "publication-ENOSPC-before-default-observation-pin.json",
+      "passed": true
+    },
+    {
+      "name": "publication-collision-before-race-r5protocol-selection.json",
+      "passed": true
+    },
+    {
+      "name": "publication-ENOSPC-before-race-r5protocol-selection.json",
+      "passed": true
+    },
+    {
+      "name": "publication-collision-before-race-r5protocol-observation-pin.json",
+      "passed": true
+    },
+    {
+      "name": "publication-ENOSPC-before-race-r5protocol-observation-pin.json",
+      "passed": true
+    },
+    {
+      "name": "publication-collision-after-default-selection.json",
+      "passed": true
+    },
+    {
+      "name": "publication-ENOSPC-after-default-selection.json",
+      "passed": true
+    },
+    {
+      "name": "publication-collision-after-default-observation-pin.json",
+      "passed": true
+    },
+    {
+      "name": "publication-ENOSPC-after-default-observation-pin.json",
+      "passed": true
+    },
+    {
+      "name": "publication-collision-after-race-r5protocol-selection.json",
+      "passed": true
+    },
+    {
+      "name": "publication-ENOSPC-after-race-r5protocol-selection.json",
+      "passed": true
+    },
+    {
+      "name": "publication-collision-after-race-r5protocol-observation-pin.json",
+      "passed": true
+    },
+    {
+      "name": "publication-ENOSPC-after-race-r5protocol-observation-pin.json",
+      "passed": true
+    },
+    {
+      "name": "publication-collision-selected-observation-pins.json",
+      "passed": true
+    },
+    {
+      "name": "publication-ENOSPC-selected-observation-pins.json",
+      "passed": true
+    },
+    {
+      "name": "publication-collision-build.stdout",
+      "passed": true
+    },
+    {
+      "name": "publication-ENOSPC-build.stdout",
+      "passed": true
+    },
+    {
+      "name": "publication-collision-build.stderr",
+      "passed": true
+    },
+    {
+      "name": "publication-ENOSPC-build.stderr",
+      "passed": true
+    },
+    {
+      "name": "publication-collision-run.stdout",
+      "passed": true
+    },
+    {
+      "name": "publication-ENOSPC-run.stdout",
+      "passed": true
+    },
+    {
+      "name": "publication-collision-run.stderr",
+      "passed": true
+    },
+    {
+      "name": "publication-ENOSPC-run.stderr",
+      "passed": true
+    },
+    {
+      "name": "publication-collision-preparation.json",
+      "passed": true
+    },
+    {
+      "name": "publication-ENOSPC-preparation.json",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-before-default-reseal",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-before-default-replace-bundle",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-before-default-swap-context",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-before-default-symlink",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-before-race-r5protocol-reseal",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-before-race-r5protocol-replace-bundle",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-before-race-r5protocol-swap-context",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-before-race-r5protocol-symlink",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-after-default-reseal",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-after-default-replace-bundle",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-after-default-swap-context",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-after-default-symlink",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-after-race-r5protocol-reseal",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-after-race-r5protocol-replace-bundle",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-after-race-r5protocol-swap-context",
+      "passed": true
+    },
+    {
+      "name": "fixed-controller-pin-after-race-r5protocol-symlink",
+      "passed": true
+    },
+    {
+      "name": "full-binding-prebuild-package_records",
+      "passed": true
+    },
+    {
+      "name": "full-binding-prebuild-qualification",
+      "passed": true
+    },
+    {
+      "name": "full-binding-prebuild-root_mvs",
+      "passed": true
+    },
+    {
+      "name": "full-binding-prebuild-selected_local_packages",
+      "passed": true
+    },
+    {
+      "name": "full-binding-prebuild-environment",
+      "passed": true
+    },
+    {
+      "name": "full-binding-prebuild-go_env",
+      "passed": true
+    },
+    {
+      "name": "authenticated-wrong-identity-source_root",
+      "passed": true
+    },
+    {
+      "name": "authenticated-wrong-identity-source_commit",
+      "passed": true
+    },
+    {
+      "name": "authenticated-wrong-identity-run_id",
+      "passed": true
+    },
+    {
+      "name": "authenticated-wrong-identity-producer",
+      "passed": true
+    },
+    {
+      "name": "authenticated-wrong-identity-phase",
+      "passed": true
+    },
+    {
+      "name": "pin-publication-outside-source",
+      "passed": true
+    },
+    {
+      "name": "pin-publication-outside-build-cache",
+      "passed": true
+    },
+    {
+      "name": "pin-publication-outside-module-cache",
+      "passed": true
+    },
+    {
+      "name": "persisted-substitution-before-build-before-default-selection.json",
+      "passed": true
+    },
+    {
+      "name": "persisted-substitution-before-build-before-default-observation-pin.json",
+      "passed": true
+    },
+    {
+      "name": "persisted-substitution-before-build-selected-observation-pins.json",
+      "passed": true
+    },
+    {
+      "name": "schema-valid-complete-binding-drift-HOME",
+      "passed": true
+    },
+    {
+      "name": "schema-valid-complete-binding-drift-PATH",
+      "passed": true
+    },
+    {
+      "name": "schema-valid-complete-binding-drift-GOGCCFLAGS",
+      "passed": true
+    },
+    {
+      "name": "omitted-preparation-selector-v2-retains-legacy-shape-and-domain",
+      "passed": true
+    },
+    {
+      "name": "environment-selector-reject-'1'",
+      "passed": true
+    },
+    {
+      "name": "environment-selector-reject-'4'",
+      "passed": true
+    },
+    {
+      "name": "environment-selector-reject-'true'",
+      "passed": true
+    },
+    {
+      "name": "environment-selector-reject-''",
+      "passed": true
+    },
+    {
+      "name": "environment-selector-reject-'03'",
+      "passed": true
+    },
+    {
+      "name": "current-only-frozen-child-contamination-v2",
+      "passed": true
+    },
+    {
+      "name": "current-only-frozen-child-contamination-v3",
+      "passed": true
+    }
+  ],
+  "os_process_events": []
+}

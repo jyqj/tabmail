@@ -1,0 +1,18 @@
+{
+  "UTC": "2026-10-02T17:59:50.772341+00:00",
+  "capture_or_test_or_fulltreehash_repeated": false,
+  "correct_semantic_presence": true,
+  "exact_line": "\t\t\"C\": {\"2 3 4\"},",
+  "kind": "append_only_readonly_evidence_probe_correction",
+  "old_archive": "/private/tmp/tm-r5currentSource-policyV2.9q7pqk7b/CURRENT-SOURCE-V2-capturePASS-synthetic-20P2setupERROR-evidence.tar.gz",
+  "old_archive_sha256": "3a8967dad99ebeb5fe41d4040dfa58fcbfac813b5152349db495441495995c6a",
+  "original_SOURCE_capture_PASS_and_20P2setupERROR_unchanged": true,
+  "original_false_field": "same-receipt-actual-input-checks.json.fork_reader_mapC_actual_present and review mirrored value",
+  "original_probe": "literal substring mapC searched as identifier; root request meant literal map entry C, not variable named mapC",
+  "original_probe_false_retained": true,
+  "original_review_raw_and_archive_unmodified": true,
+  "same_original_actual_receipt_bound_file": true,
+  "source_SHA256_as_independently_singlefile_verified_by_original_reader": "fd767162ba482c553c8ecd3294374d89fb44b13ed83114f831dc2cda57e5a3b2",
+  "source_line": 268,
+  "source_path": "third_party/enmime-v2.3.0/internal/textproto/reader_test.go"
+}

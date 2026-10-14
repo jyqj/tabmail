@@ -1,0 +1,8 @@
+{
+	"CGO_ENABLED": "1",
+	"GOARCH": "amd64",
+	"GOFLAGS": "",
+	"GOOS": "linux",
+	"GOVCS": "",
+	"GOWORK": ""
+}

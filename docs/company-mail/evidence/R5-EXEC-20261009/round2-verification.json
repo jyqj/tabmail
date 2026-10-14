@@ -1,0 +1,25 @@
+{
+  "phase": "second round pre-merge; first round complete",
+  "first_round_merge": "602b17544d0cd12c04f1b90c116814ae0522199a",
+  "product_commit": "3d00799e8cbc51547efb302095d1441916ee9345",
+  "product_tree": "25c4682c5773e1afa92959087e0b993ce529c268",
+  "joint_go_passed": {
+    "internal/api/handlers_selected": 241,
+    "internal/app/admin": 28,
+    "internal/smtp": 172,
+    "github.com/emersion/go-smtp": 103
+  },
+  "joint_go_passed_total": 544,
+  "joint_go_failed_tests": 0,
+  "joint_go_skipped_tests": 0,
+  "joint_ui": {
+    "pass": 157,
+    "fail": 0,
+    "skip": 0
+  },
+  "completed": 4,
+  "remaining": 6,
+  "parent_remaining": 161,
+  "zero_read_clean_baseline": "transport-evidence/exec06-zero-before-v2.jsonl",
+  "zero_read_infra_history": "Earlier exec06-zero-before and -sparse-infra contain an extra dependency-discovery build failure; retained, not accepted as the clean baseline."
+}

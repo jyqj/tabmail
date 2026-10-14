@@ -1,0 +1,18 @@
+{
+  "Go_PG_capture_benchmark_native_dispatches": 0,
+  "cleanup": {
+    "members": [],
+    "non_zombie_live_pids": [],
+    "status": "observed"
+  },
+  "elapsed_seconds": 0.1628568172454834,
+  "errors": [],
+  "no_current_METHOD_migration_or_fullcatalog_admission": true,
+  "not_runtime_qualification": true,
+  "original_deadline_unix": 1790974275.611298,
+  "original_origin_unix": 1790974185.611298,
+  "result": null,
+  "source_closure_sha256": "52c2f082061b4fa8e9c66d8f3a6990d765f0f2481ee0b75d8724ef42be10623e",
+  "source_sha": "6710e89d677d027f3baa0498206e0baf226f3a16",
+  "status": "FAILED_OR_UNKNOWN"
+}

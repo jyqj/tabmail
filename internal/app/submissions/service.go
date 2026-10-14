@@ -318,8 +318,22 @@ func (s *Service) SubmitAuthorized(ctx context.Context, tenant *models.Tenant, a
 		}
 	}
 
-	// Check suppression list — block sending to suppressed addresses.
-	for _, rcpt := range append(append(in.To, in.CC...), in.BCC...) {
+	// Check the same canonical addresses SubmitWithReplay puts on the envelope.
+	// A display name or surrounding whitespace must not bypass the synchronous
+	// rejection and consume quota or a draft before the worker notices it.
+	// Validate every address before consulting suppression storage, without
+	// rewriting caller-owned slices or their To/CC/BCC roles.
+	recipients := make([]string, 0, len(in.To)+len(in.CC)+len(in.BCC))
+	for _, group := range [][]string{in.To, in.CC, in.BCC} {
+		for _, rcpt := range group {
+			parsed, err := outbound.ParseRecipientAddress(rcpt)
+			if err != nil {
+				return nil, false, badRequest("invalid recipient address")
+			}
+			recipients = append(recipients, parsed.Identity)
+		}
+	}
+	for _, rcpt := range recipients {
 		suppressed, err := s.store.IsSuppressed(ctx, tenant.ID, rcpt)
 		if err != nil {
 			s.logger.Err(err).Str("address", rcpt).Msg("checking suppression list")
@@ -332,6 +346,7 @@ func (s *Service) SubmitAuthorized(ctx context.Context, tenant *models.Tenant, a
 
 	// Build and submit the outbound job.
 	job, replayed, err := s.outbound.SubmitWithReplay(ctx, outbound.SendRequest{
+		Principal:         &actor,
 		TenantID:          tenant.ID,
 		SenderMailboxID:   mailboxID(mailbox),
 		UserID:            userID,
@@ -367,75 +382,46 @@ func (s *Service) SubmitAuthorized(ctx context.Context, tenant *models.Tenant, a
 			return nil, false, appFailure(err)
 		}
 		s.logger.Err(err).Msg("submitting outbound job")
-		return nil, false, plainFailure(err.Error())
+		// Business validation is typed at its origin. Unclassified repository or
+		// infrastructure errors are never a client 400 or raw error message.
+		return nil, false, appFailure(app.Internal(err))
 	}
 
 	return job, replayed, nil
 }
 
-// AccessibleOutboundJob resolves a single outbound job for the actor: tenant
-// context must exist, the actor's zone allowlist must cover the job, and
-// either the owner rule or a current content authority (sender identity or
-// mailbox read grant) must hold. Visibility failures collapse to
-// ErrOutboundJobNotFound so existence is not disclosed.
+// AccessibleOutboundJob resolves a receipt under the current principal and
+// current zone scope. The store applies the same owner-or-live-content rule
+// used by the list. Visibility and credential failures collapse to not-found;
+// the returned internal job still requires an authorized content projection.
 func (s *Service) AccessibleOutboundJob(ctx context.Context, tenant *models.Tenant, actor authz.Actor, jobID uuid.UUID) (*models.OutboundJob, error) {
-	if tenant == nil {
-		return nil, ErrOutboundJobAuthRequired
-	}
-
-	job, err := s.store.GetOutboundJob(ctx, jobID)
+	r, err := s.outboundReceipt(ctx, tenant, actor, jobID, "send:read")
 	if err != nil {
 		return nil, err
 	}
-	if job != nil && !actor.Permission.AllowsZone(job.ZoneID) {
-		return nil, ErrOutboundJobNotFound
+	return r.Job, nil
+}
+
+// Retry receipt lookup needs current send:write, not GET's send:read. This is
+// receipt admission only, not the final atomic retry authorization.
+func (s *Service) AccessibleOutboundJobForRetry(ctx context.Context, tenant *models.Tenant, actor authz.Actor, jobID uuid.UUID) (*models.OutboundJob, error) {
+	r, err := s.outboundReceipt(ctx, tenant, actor, jobID, "send:write")
+	if err != nil {
+		return nil, err
 	}
-	if !canAccessOutboundJob(actor, tenant.ID, job) {
-		allowed, err := s.ContentAllowed(ctx, actor, job)
-		if err != nil {
-			return nil, err
-		}
-		if !allowed {
-			return nil, ErrOutboundJobNotFound
-		}
-	}
-	return job, nil
+	return r.Job, nil
 }
 
 // ContentAllowed decides whether the actor may see a job's content and
-// protocol details. Content authority rests solely on a CURRENT read grant
-// for the job's original sender mailbox, matching the store layer's
-// submissionScopeFor(allowSubmitter=false). Never derive content authority
+// protocol details. The store checks a CURRENT principal/read grant and live
+// sent asset/item on the original mailbox, sharing the archive's content scope.
+// Receipt visibility does not imply that retained job content is still readable.
+// Never derive content authority
 // from an administrative role or from historical sender identity; the
 // latter is kept only for receipt visibility via AccessibleOutboundJob's
 // owner rule.
 func (s *Service) ContentAllowed(ctx context.Context, actor authz.Actor, job *models.OutboundJob) (bool, error) {
-	if job == nil || actor.TenantID != job.TenantID || !actor.Permission.AllowsZone(job.ZoneID) {
-		return false, nil
-	}
-	uid := actor.EffectiveUserID()
-	if uid == nil {
-		return false, nil
-	}
-	u, err := s.store.GetUser(ctx, *uid)
-	if err != nil {
-		return false, err
-	}
-	if u == nil || !u.IsActive || (u.TenantID != job.TenantID && !(actor.IsSuperAdmin && u.Role == models.RoleSuperAdmin)) {
-		return false, nil
-	}
-	if job.SenderMailboxID == nil {
-		return false, nil
-	}
-	mb, err := s.store.ForTenant(job.TenantID).GetMailbox(ctx, *job.SenderMailboxID)
-	if err != nil {
-		return false, err
-	}
-	if mb == nil || mb.ZoneID != job.ZoneID {
-		return false, nil
-	}
-	g, err := authz.MailboxRights(ctx, s.store, job.TenantID, uid, mb)
-	return g != nil && g.CanRead, err
+	return s.store.CanReadOutboundContent(ctx, actor, job)
 }
 
 // RetryAuthority is the single retry-authority predicate for an outbound job,
@@ -443,21 +429,18 @@ func (s *Service) ContentAllowed(ctx context.Context, actor authz.Actor, job *mo
 // two can never drift. A read grant may expose shared history, but must not
 // authorize resending it.
 func (s *Service) RetryAuthority(ctx context.Context, actor authz.Actor, job *models.OutboundJob) error {
-	if job.SenderMailboxID != nil {
-		mb, err := s.store.ForTenant(job.TenantID).GetMailbox(ctx, *job.SenderMailboxID)
-		if err != nil {
+	return outbound.ValidateRetryRequester(ctx, s.store, actor, job)
+}
+
+// RetryOutboundJob never falls back to a bare state update. Both the requester
+// and the original sender are validated inside the adapter's atomic boundary.
+func (s *Service) RetryOutboundJob(ctx context.Context, actor authz.Actor, observed *models.OutboundJob) (*models.OutboundJob, error) {
+	return s.store.RequeueOutboundJobAuthorized(ctx, actor, observed, func(ctx context.Context, reader store.OutboundRetryReader, locked *models.OutboundJob) error {
+		if err := outbound.ValidateRetryRequester(ctx, reader, actor, locked); err != nil {
 			return err
 		}
-		return authz.CheckMailboxSender(ctx, s.store, actor, mb, job.TemplateVersionID != nil)
-	}
-	uid := actor.EffectiveUserID()
-	if uid != nil && job.SenderUserID != nil && *uid == *job.SenderUserID {
-		return nil
-	}
-	if actor.Type == authz.PrincipalAPIKey && job.SenderKeyID != nil && actor.ID == *job.SenderKeyID {
-		return nil
-	}
-	return authz.ErrForbidden("send identity authority required to retry")
+		return outbound.ValidateJobAuthorization(ctx, reader, reader, locked)
+	})
 }
 
 // Capability block reasons for SubmissionCapabilities.RetryBlockReason.
@@ -485,11 +468,11 @@ func (s *Service) OutboundCapabilities(ctx context.Context, tenant *models.Tenan
 	if s.outbound == nil || tenant == nil {
 		return caps
 	}
-	job, err := s.AccessibleOutboundJob(ctx, tenant, actor, jobID)
-	if err != nil || job == nil {
+	receipt, err := s.outboundReceipt(ctx, tenant, actor, jobID, "send:read")
+	if err != nil || receipt == nil {
 		return caps
 	}
-	return s.capabilitiesForJob(ctx, actor, job)
+	return s.projectReceipt(ctx, actor, receipt, true).Capabilities
 }
 
 // capabilitiesForJob fills the capability block for an already-resolved job.
@@ -521,43 +504,15 @@ func (s *Service) capabilitiesForJob(ctx context.Context, actor authz.Actor, job
 	return caps
 }
 
-// RedactOutboundJob builds the actor-safe view of a job. Copy before
-// redacting: cached/shared store objects and delivery state must not be
-// mutated by presentation. RcptTo contains BCC; protocol errors may echo it.
+// RedactOutboundJob builds the actor-safe view of a job. It stays the single
+// entry point handlers call; the copy/redact rules and placeholder copy live
+// in redaction.go, keyed on the ContentAllowed decision below.
 func (s *Service) RedactOutboundJob(ctx context.Context, actor authz.Actor, job *models.OutboundJob) (*models.OutboundJob, error) {
 	allowed, err := s.ContentAllowed(ctx, actor, job)
 	if err != nil {
 		return nil, err
 	}
-	cp := *job
-	cp.DeliveryToken = nil
-	cp.RawMIME = nil
-	cp.ContentRedacted = !allowed
-	cp.DeliveryUncertain = job.InFlightDomain != "" && job.State != models.OutboundProcessing
-	if !allowed {
-		cp.TextBody = ""
-		cp.HTMLBody = ""
-		cp.BCC = nil
-		cp.HeadersJSON = nil
-		cp.AttachmentIDs = nil
-		cp.InFlightDomain = ""
-		cp.RcptTo = append(append([]string{}, job.To...), job.CC...)
-		if cp.LastError != "" {
-			cp.LastError = "Delivery details restricted; inspect status and SMTP code"
-		}
-		if cp.SMTPResponse != "" {
-			cp.SMTPResponse = "Protocol response restricted"
-		}
-	}
-	return &cp, nil
-}
-
-func canAccessOutboundJob(actor authz.Actor, tenantID uuid.UUID, job *models.OutboundJob) bool {
-	if job == nil || job.TenantID != tenantID {
-		return false
-	}
-	// Same owner rule as the scoped list query, via the single authz seam.
-	return authz.CanAccessOwned(actor, job.UserID, job.APIKeyID)
+	return RedactOutboundJobView(job, allowed), nil
 }
 
 // extractDomainFromAddress extracts the domain part from an email address.

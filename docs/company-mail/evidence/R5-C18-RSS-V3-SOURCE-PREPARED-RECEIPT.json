@@ -1,0 +1,90 @@
+{
+  "new_mock_run": {
+    "PASS": 8,
+    "argv": [
+      "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+      "-B",
+      "-m",
+      "unittest",
+      "test_c18_rss_resource_new.C18RSSV3NarrowRepairTests",
+      "-v"
+    ],
+    "controller_main_real_signals_Go_PG_C18grammar_executed": false,
+    "cwd": "/private/tmp/r5-C18-RSS-resource-V3-prepared",
+    "exit": 0,
+    "not_singlefresh23_or_runtimeproof": true,
+    "old15mocks_not_repeated": true,
+    "raw_exit": "V3-new8-mocks.exit",
+    "raw_stderr": "V3-new8-mocks.stderr",
+    "raw_stdout": "V3-new8-mocks.stdout",
+    "reported_unittest_seconds": 0.0,
+    "skip": 0,
+    "tested_byte_pins": {
+      "c18_audited_child.py": "3809276f44346a516febd75e9039242e98503cdd70110b1a018b66f57ce9a713",
+      "c18_rss_controller_prepared_only.py": "8782431660bff8f41901794f25f6eb843e41560026172bf5c32b42fb633eb1b2",
+      "c18_rss_protocol.py": "4751fe8e8ecd41d31b7e5737347fd9555b713d3390338201d2136bd5dbbf0005",
+      "test_c18_rss_resource_new.py": "290b18e005d5ad44585363f237111a6f420fda1b37d34617cf950f1c0708c05b"
+    },
+    "tests_run": 8
+  },
+  "original21_tests_not_executed_again": true,
+  "original_C18_7files_changed": false,
+  "original_C18_7scope_closure_sha256": "52c2f082061b4fa8e9c66d8f3a6990d765f0f2481ee0b75d8724ef42be10623e",
+  "original_C18_7scope_source_sha": "6710e89d677d027f3baa0498206e0baf226f3a16",
+  "preserved_V2_prepare": "/private/tmp/r5-C18-RSS-resource-V2-prepared",
+  "prospective_argv": [
+    "/usr/bin/env",
+    "-u",
+    "PYTHONOPTIMIZE",
+    "-u",
+    "PYTHONHOME",
+    "-u",
+    "PYTHONPATH",
+    "TABMAIL_C18_RSS_RUNTIME_APPROVED=1",
+    "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+    "-B",
+    "/private/tmp/r5-C18-RSS-resource-V3-prepared/c18_rss_controller_prepared_only.py"
+  ],
+  "prospective_entry": "/private/tmp/r5-C18-RSS-resource-V3-prepared/c18_rss_controller_prepared_only.py",
+  "protocol_fixes": {
+    "absolute_whole90_sealing": "WholeClock origin beforecapture; all normal writes check beforeafter; final sealedcandidate has no PASS, mandatoryproofwrites finish before final clockgate; separate final-admission only with postpublication clockgate; late seal/reversedclock revoke marker/exit1, revoke I/O failure propagates nonzero/unknown; original90 not reset",
+    "handshakes": "parent fully parses ready/completion, records receive-monotonic before dedicated psbegin; sample begin/end witness strictly after receive; child also verifies begin>=receive; handshake appearing midps is deferred nextsample, not accepted oldendingtimestamp",
+    "maxGap": "tick/finalize update max_gap from last sample orspawnorigin, including 240ms terminal tail; over250stickyfail retains measured gap"
+  },
+  "remaining_resources": "original90wall/75work+15cleanup/CPU60actualchild/RSS1GiBsampling not hardquota/100ms target250ms max/supplemental originalmonotonic cutoff/audit subprocess,socket,nativewrites forbidden/sessionUIDstart anchor retained through boundedTERM/KILL/unknownno signalfail",
+  "runtime_currently_authorized": false,
+  "source4_before_after": {
+    "c18_audited_child.py": {
+      "after_path": "/private/tmp/r5-C18-RSS-resource-V3-prepared/c18_audited_child.py",
+      "after_sha256": "3809276f44346a516febd75e9039242e98503cdd70110b1a018b66f57ce9a713",
+      "before_path": "/private/tmp/r5-C18-RSS-resource-V2-prepared/c18_audited_child.py",
+      "before_sha256": "ee748504e160670ea1cb351f7ef43759cc4785a8d8071b2196c7e634fdfebd3c",
+      "changed": true
+    },
+    "c18_rss_controller_prepared_only.py": {
+      "after_path": "/private/tmp/r5-C18-RSS-resource-V3-prepared/c18_rss_controller_prepared_only.py",
+      "after_sha256": "8782431660bff8f41901794f25f6eb843e41560026172bf5c32b42fb633eb1b2",
+      "before_path": "/private/tmp/r5-C18-RSS-resource-V2-prepared/c18_rss_controller_prepared_only.py",
+      "before_sha256": "bdedc5044863ca8df03d64690240314758092b27eeb5b6ccc6146230678c54df",
+      "changed": true
+    },
+    "c18_rss_protocol.py": {
+      "after_path": "/private/tmp/r5-C18-RSS-resource-V3-prepared/c18_rss_protocol.py",
+      "after_sha256": "4751fe8e8ecd41d31b7e5737347fd9555b713d3390338201d2136bd5dbbf0005",
+      "before_path": "/private/tmp/r5-C18-RSS-resource-V2-prepared/c18_rss_protocol.py",
+      "before_sha256": "17db87ab01e8c337c88ca8580f9eed24540dc4e44add061ad05c5e3c810652e6",
+      "changed": true
+    },
+    "test_c18_rss_resource_new.py": {
+      "after_path": "/private/tmp/r5-C18-RSS-resource-V3-prepared/test_c18_rss_resource_new.py",
+      "after_sha256": "290b18e005d5ad44585363f237111a6f420fda1b37d34617cf950f1c0708c05b",
+      "before_path": "/private/tmp/r5-C18-RSS-resource-V2-prepared/test_c18_rss_resource_new.py",
+      "before_sha256": "e4e7d85e752180a8ee4ba44f2ace95a605a2977c68ea565b0f50e67735367598",
+      "changed": true
+    }
+  },
+  "source_delta_patch_sha256": "1d8a8e56cab7ce6f202bb1a66b868072f39097f152c1a387dce0908efb6b73f2",
+  "source_identity_kind": "canonical_four_resource_controller_files_sha256",
+  "source_sha256": "554878b3fe8e702645694e7e4ab62b792cb15f25dc9df96f428c4445d8d8bbcb",
+  "status": "SOURCE_PREPARED_NO_C18_RUNTIME"
+}

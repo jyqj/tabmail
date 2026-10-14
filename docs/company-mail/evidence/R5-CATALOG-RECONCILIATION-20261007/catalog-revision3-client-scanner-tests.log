@@ -1,0 +1,35 @@
+✔ request verb and parameter identity (102.805903ms)
+✔ conditional path and verb stay paired (114.366704ms)
+✔ workPath and local base expand (12.319196ms)
+✔ docs strings and tests are not network calls (23.246898ms)
+✔ opt-in audit fixture calls do not become production routes (10.102008ms)
+✔ source is never evaluated (6.550428ms)
+✔ transport forwarding remains explicit (4.201315ms)
+✔ stream uses GET independent of callback options (9.894232ms)
+✔ unrelated path and method predicates are not falsely paired (7.768187ms)
+✔ client drift checks reject missing/new/verb/route mismatch (4.67365ms)
+✔ private helper suffixes enumerate actual routes including omitted default (7.21843ms)
+✔ unknown, exported, escaped and spread helper suffixes stay unresolved (29.157735ms)
+✔ recipient suffix cannot inherit the registered aggregate route (16.178969ms)
+✔ helper parameter assignment prevents finite expansion (5.632979ms)
+✔ helper parameter compound assignment prevents finite expansion (3.18384ms)
+✔ helper parameter logical assignment prevents finite expansion (5.855977ms)
+✔ helper parameter prefix update prevents finite expansion (7.711995ms)
+✔ helper parameter postfix update prevents finite expansion (8.374248ms)
+✔ helper parameter closure write prevents finite expansion (10.084347ms)
+✔ helper parameter array destructuring prevents finite expansion (18.06063ms)
+✔ helper parameter object destructuring prevents finite expansion (8.410437ms)
+✔ helper parameter renamed object destructuring prevents finite expansion (4.565491ms)
+✔ helper parameter nested destructuring prevents finite expansion (7.334615ms)
+✔ helper parameter loop target prevents finite expansion (9.619909ms)
+✔ helper parameter direct eval prevents finite expansion (3.383819ms)
+✔ writes to a shadowed parameter do not invalidate immutable helper parameter (4.33361ms)
+✔ explicit undefined remains unresolved rather than assuming its binding (5.756231ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1182.321091

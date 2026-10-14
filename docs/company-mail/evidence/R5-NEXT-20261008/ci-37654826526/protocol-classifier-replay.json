@@ -1,0 +1,87 @@
+{
+  "status": "reference_tests_passed",
+  "task_complete": false,
+  "errors": [],
+  "tests": {
+    "TestR5ProtocolProtectedGCSharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolReceiptSharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolRetentionSharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolBCCAssetSharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolGCBoundedSharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolRecoverySharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolLogicalExpiryReferenceSharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolPermissionIntentSharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolLegacyBCCObservationSharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolBCCSurfacesSharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolDomainSharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolPermissionStaleSharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolOffboardingEligibilitySharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolContentSharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolOffboardingSharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolDraftGrantOrderingSharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5LegacyBCCContractCapabilities": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolLegacyReplaySharedCases": [
+      "run",
+      "pass"
+    ],
+    "TestR5ProtocolCredentialSharedCases": [
+      "run",
+      "pass"
+    ]
+  },
+  "log_sha256": "d4214125d263c859c38518716d2385172fadc1b62cb9983879496a7cab084fbf",
+  "target_red": {},
+  "product_green": true,
+  "process_exit_code": 0
+}

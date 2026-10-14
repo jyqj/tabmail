@@ -1,0 +1,138 @@
+--- a/internal/mailcontent/mime_budget.go
++++ b/internal/mailcontent/mime_budget.go
+@@ -177,6 +177,20 @@
+ 				return err
+ 			}
+ 			cursor += end
++			if end > 0 {
++				// A nonempty Read result clears boundaryReader.atPartStart,
++				// even when returning EOF for a marker found mid-first-fill.
++				// Next() then io.Copy's the current part to Discard BEFORE
++				// looking for its next delimiter line. A mid-line marker is
++				// no longer recognized by that Read: it and any following
++				// apparent headers are discarded until a CR/LF candidate.
++				// Those bytes must not become extra preflight MIME nodes.
++				drained, err := budgetBoundaryEnd(b.ctx, body[cursor:], prefix, false)
++				if err != nil {
++					return err
++				}
++				cursor += drained
++			}
+ 			children++
+ 			continue
+ 		}
+@@ -214,6 +228,12 @@
+ // len(prefix)+padding+2; newline candidates later use the same look-ahead.
+ // Admission bounds are not a measured CPU or heap bound.
+ func budgetPartEnd(ctx context.Context, raw, prefix []byte) (int, error) {
++	return budgetBoundaryEnd(ctx, raw, prefix, true)
++}
++
++// firstFill models a newly opened part's first 4096-byte bufio fill. Drain
++// reads after a nonempty result have atPartStart=false, including at byte zero.
++func budgetBoundaryEnd(ctx context.Context, raw, prefix []byte, firstFill bool) (int, error) {
+ 	final := appendBoundaryFinal(prefix)
+ 	for pos := 0; pos < len(raw); {
+ 		if err := ctx.Err(); err != nil {
+@@ -224,6 +244,13 @@
+ 			padding = 2
+ 		} else if raw[pos] == '\n' {
+ 			padding = 1
++		} else if !firstFill || pos >= 4096 {
++			i := bytes.IndexAny(raw[pos:], "\r\n")
++			if i < 0 {
++				return len(raw), nil
++			}
++			pos += i
++			continue
+ 		}
+ 		peekLen := len(prefix) + padding + 2
+ 		if len(raw)-pos >= peekLen {
+@@ -237,7 +264,7 @@
+ 		// boundaryReader keeps atPartStart true for that entire first fill,
+ 		// not just byte zero, so even a mid-line marker can end that fill.
+ 		// Reproduce this quirk rather than undercounting its allocated nodes.
+-		if pos < 4095 {
++		if firstFill && pos < 4095 {
+ 			pos++
+ 			continue
+ 		}
+--- a/internal/mailcontent/mime_budget_test.go
++++ b/internal/mailcontent/mime_budget_test.go
+@@ -213,6 +213,76 @@
+ 				t.Fatalf("long recursive boundary %v / %v", env, err)
+ 			}
+ 		})
++	}
++}
++
++// A first-fill logical EOF does not itself advance Next to the next part.
++// Next drains with atPartStart=false before inspecting delimiter lines.
++// The apparent node after a mid-line marker is discarded, while a later
++// CRLF-delimited real child still allocates a node and projects an attachment.
++func TestMIMEPreparseBudgetBoundaryDrain(t *testing.T) {
++	for _, boundaryLen := range []int{1, 70, 4090} {
++		boundary := strings.Repeat("D", boundaryLen)
++		for _, terminator := range []bool{false, true} {
++			for _, nested := range []bool{false, true} {
++				t.Run(fmt.Sprintf("len_%d/final_%v/nested_%v", boundaryLen, terminator, nested), func(t *testing.T) {
++					header := "Content-Type: text/plain\r\n\r\n"
++					marker := "--" + boundary
++					if terminator {
++						marker += "--"
++					}
++					child := header + strings.Repeat("x", 4093-len(header)) + marker + "\r\nContent-Type: application/octet-stream\r\nContent-Disposition: inline\r\n\r\ndiscarded phantom\r\n--" + boundary + "\r\nContent-Type: text/plain\r\nContent-Disposition: attachment; filename=real.txt\r\n\r\nreal attachment\r\n--" + boundary + "--\r\n"
++					firstEnd, err := budgetPartEnd(context.Background(), []byte(child), []byte("--"+boundary))
++					if err != nil {
++						t.Fatal(err)
++					}
++					expectedEnd := 4092
++					if terminator {
++						expectedEnd = 4093
++					}
++					if firstEnd != expectedEnd {
++						t.Fatalf("initial end %d want %d", firstEnd, expectedEnd)
++					}
++					drain, err := budgetBoundaryEnd(context.Background(), []byte(child)[firstEnd:], []byte("--"+boundary), false)
++					if err != nil {
++						t.Fatal(err)
++					}
++					canonical := strings.Index(child, "\r\n--"+boundary+"\r\nContent-Type: text/plain\r\nContent-Disposition: attachment")
++					if firstEnd+drain != canonical {
++						t.Fatalf("post-EOF discard cursor %d want canonical %d", firstEnd+drain, canonical)
++					}
++					raw := []byte("Content-Type: multipart/mixed; boundary=" + boundary + "\r\n\r\n--" + boundary + "\r\n" + child)
++					expectedNodes := 3
++					if nested {
++						raw = append([]byte("Content-Type: multipart/mixed; boundary=OUTER\r\n\r\n--OUTER\r\n"), raw...)
++						raw = append(raw, []byte("\r\n--OUTER--\r\n")...)
++						expectedNodes++
++					}
++					want, err := enmime.ReadEnvelope(bytes.NewReader(raw))
++					if err != nil {
++						t.Fatal(err)
++					}
++					actualNodes := len(want.Root.DepthMatchAll(func(*enmime.Part) bool { return true }))
++					if actualNodes != expectedNodes || len(Parts(want)) != 1 {
++						t.Fatalf("original nodes/parts %d/%d want %d/1", actualNodes, len(Parts(want)), expectedNodes)
++					}
++					b := mimeBudget{ctx: context.Background()}
++					if err := b.walk(raw, 1); err != nil {
++						t.Fatal(err)
++					}
++					if b.nodes != actualNodes || b.parts != len(Parts(want)) {
++						t.Fatalf("preflight nodes/parts %d/%d original %d/%d", b.nodes, b.parts, actualNodes, len(Parts(want)))
++					}
++					got, err := ParseBounded(raw)
++					if err != nil {
++						t.Fatal(err)
++					}
++					if !reflect.DeepEqual(got, want) {
++						t.Fatal("Read-EOF-Next-discard sequence changed envelope")
++					}
++				})
++			}
++		}
+ 	}
+ }
+ 

@@ -1,0 +1,170 @@
+{
+  "before": {
+    "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+    "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+    "status": ""
+  },
+  "after": {
+    "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+    "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+    "status": ""
+  },
+  "module_inputs": {
+    "test_r5_transactions": {
+      "path": "scripts/tests/test_r5_transactions.py",
+      "sha256": "eedb1d4affbad8d561c2f0e9486c6c70bdaf8509b8159172c02d1044feee9e4d"
+    },
+    "test_r5_compatibility": {
+      "path": "scripts/tests/test_r5_compatibility.py",
+      "sha256": "85d154a95494ae29ca6e4ce1a726af778e894ebc871d18a90274d8d0ee56d187"
+    },
+    "test_r5_catalog_reconciliation": {
+      "path": "scripts/tests/test_r5_catalog_reconciliation.py",
+      "sha256": "4a2b466720b7e8d5e0f3389da62c6c73d11b87cc86eff9031c0e2a62ca74f930"
+    },
+    "test_r5_current_source_inventory": {
+      "path": "scripts/tests/test_r5_current_source_inventory.py",
+      "sha256": "d7a786f1644fd0b07fd3f8dba9e0e98e30d6cac8f750f528facb5b517f3779d8"
+    },
+    "test_r5_reviewed_web_locks": {
+      "path": "scripts/tests/test_r5_reviewed_web_locks.py",
+      "sha256": "5165c5c244a03acab2a19413744a5d9614b6d943a46b099f647f0dc7c87427c3"
+    }
+  },
+  "commands": [
+    {
+      "label": "transactions",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.616513,
+      "before": {
+        "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+        "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+        "status": ""
+      },
+      "after": {
+        "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+        "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+        "status": ""
+      },
+      "stdout": {
+        "bytes": 309,
+        "sha256": "bedf85e440c68fde48f640a126ce1279a4ea4c4284aa979db46b404ad56577b9"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "compatibility",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.527634,
+      "before": {
+        "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+        "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+        "status": ""
+      },
+      "after": {
+        "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+        "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+        "status": ""
+      },
+      "stdout": {
+        "bytes": 1117,
+        "sha256": "d1fea8bd3377af11bc27f0d8d26954d0d55db9f5616a06cf72314dd46f6bfb91"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "clients",
+      "argv": [
+        "node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.755706,
+      "before": {
+        "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+        "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+        "status": ""
+      },
+      "after": {
+        "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+        "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+        "status": ""
+      },
+      "stdout": {
+        "bytes": 73,
+        "sha256": "1313f30b4f2dae10192bce7ccd33eba481bd203dc8046c713de911aeaaf469cf"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "five-original-modules",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "test_r5_transactions",
+        "test_r5_compatibility",
+        "test_r5_catalog_reconciliation",
+        "test_r5_current_source_inventory",
+        "test_r5_reviewed_web_locks",
+        "-v"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 116.966989,
+      "before": {
+        "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+        "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+        "status": ""
+      },
+      "after": {
+        "commit": "af8ae6e35e68967ebb4b6041b2e2531e810aee85",
+        "tree": "f826d5cc3a0316e0ccd1c8657793d7b1a82bef4b",
+        "status": ""
+      },
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 20316,
+        "sha256": "bd23828e34d9371052eae2804acb5b2626ea83fd94313ec600e872f2b55695b9"
+      },
+      "unittest_terminal": {
+        "tests": 108,
+        "seconds": 115.878,
+        "tail": [
+          "Ran 108 tests in 115.878s",
+          "",
+          "OK"
+        ]
+      }
+    }
+  ],
+  "all_four_commands_passed": true,
+  "complete_source_version_runner_executed": false,
+  "implementation_todos_completed": 0,
+  "runtime_verified": false,
+  "product_green": false,
+  "task_complete": false
+}

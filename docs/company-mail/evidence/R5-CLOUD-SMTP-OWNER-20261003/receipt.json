@@ -1,0 +1,145 @@
+{
+  "base_commit": "93005b644c1f39fa85072fe913156cf3d6c798e1",
+  "base_tree": "4b17be704a63a4e4f6b546e08fe752164ff2d649",
+  "branch": "r5-cloud-smtp-owner-20261003",
+  "toolchain": "go1.25.7 linux/amd64",
+  "production_change": false,
+  "module_identity": {
+    "path": "github.com/emersion/go-smtp",
+    "version": "v0.24.0",
+    "replace": "./third_party/go-smtp",
+    "inherited_from_base": true
+  },
+  "source_sha256": {
+    "go.mod": "30eb5ba911706a9c88f5cfa77bea60eb61dbd1cb2570232d581847e12902e377",
+    "go.sum": "5b850553522724f8fa71d36a94de2da91da174270ec4d460bb135dd42f53a33f",
+    "internal/smtp/r5_cloud_loopback_owner_test.go": "42aa3b35a5c5da5c498c8adb35b02f1f28087ed83dbf326e4a3da2296e893519",
+    "internal/smtp/r5_shutdown_lifecycle_test.go": "46d9ebefd586c16b3e656c4df63dbed5546856c84d631d319e76b2592eac7023",
+    "internal/smtp/server.go": "8cc485e47897b133acc8042eef4d4db69582e6387d1d60e2801714ebef599fbe",
+    "internal/smtp/smtp_integration_test.go": "1d082563361d40dd5b466a7c1dc9d11e70fd0f343fed1736930f5138a0cd8a90",
+    "internal/smtp/tls_safety_test.go": "33df1b16567176e03f01f2e81ec6d2b010bb4786afd81142c0b60a028dac5917",
+    "third_party/go-smtp/LOCAL-PROVENANCE.md": "bb8d225f6159fbdd5571e3ba286b7e923d20446ef8e1917ead142a6556e274c5",
+    "third_party/go-smtp/UPSTREAM-MANIFEST.json": "697694fbef2690dc111c2524ae9029aa070d301466d062d8ff53e5e73d168756",
+    "third_party/go-smtp/backend.go": "7792120dd25e43fbb79656fb31ff3290e7884a3c4ea3c8266a0ff9c6d89b2438",
+    "third_party/go-smtp/client.go": "7adcc4610ff4810ab903d0a811e8a32382a2490e06d340631ef425e9cb6597de",
+    "third_party/go-smtp/client_test.go": "39f4eeac6088d41c3502534bd2fa8d5b6a88df0e7f28a0ca41473993b66cfd93",
+    "third_party/go-smtp/conn.go": "7fffcf21ae9e17c408ce857d766dc576d27ccd873f9509abf14d5043e5998eb5",
+    "third_party/go-smtp/data.go": "9dd19f115369da72cb36668f953bcc19f73fd1994e8063db5c3a75ca7481d0c8",
+    "third_party/go-smtp/example_server_test.go": "3b25705ecbe3679140e7f7deaceeb5f8357513d10b3c2b83d733629118afc958",
+    "third_party/go-smtp/example_test.go": "1ea3e758d34c28ad3eed4b70a27ce0eb6c54d669475b6eef3ec7e0dda81f4ac2",
+    "third_party/go-smtp/go.mod": "c90914c039d7a1eba0c1c07c00435f0561607cb0e56bf43664c63a45c6e17900",
+    "third_party/go-smtp/go.sum": "91f0cc69b3e71d54c3de263a771da33435278b78aad1b4be6608d0f149da8a1f",
+    "third_party/go-smtp/lengthlimit_reader.go": "ce4040c9285a3620285dcce853ef2359872a375577a6f3d2034da3b049b024f6",
+    "third_party/go-smtp/lmtp_server_test.go": "d0f53be6fdc352d1b0549bddf5fd3b06d78cf575a6dfc180a0166dbd3d98ecdc",
+    "third_party/go-smtp/owner_lifecycle_test.go": "327f684c419a30b18b5f490761d1a5fdd8f1108000f25abfc1a78ab0527795ae",
+    "third_party/go-smtp/parse.go": "47346dc8ef668dc34132b7d143016b1e186da22ecd389c51ba820e16a8d6e722",
+    "third_party/go-smtp/parse_test.go": "c6ef7e37e399a7b8a041e29a445fe0ef3f1256b701b4b74ce57638be653e9cd7",
+    "third_party/go-smtp/server.go": "75be3110a5b04e7aa48acbe6c35509c52d878ef6c32289e9511d35f637e327c2",
+    "third_party/go-smtp/server_test.go": "14e20d0dd3db489d9158eb00a26aa648c8dec08a9f57c4015dacc1d809c6428b",
+    "third_party/go-smtp/smtp.go": "fd93bf53ff98cc529960272d1ff46acee127f37114ee724bf7fd9ff96dcbda43"
+  },
+  "runs": [
+    {
+      "name": "internal",
+      "command": "env PATH=/workspace/tabmail-cloud/tools/go/bin:$PATH GOMODCACHE=/workspace/tabmail-cloud/gomod GOCACHE=/workspace/tabmail-cloud/gocache GOWORK=off GOTOOLCHAIN=local GOMAXPROCS=2 go test -mod=readonly -p=1 -race -count=1 -timeout=90s -json -run '^TestR5Cloud' ./internal/smtp",
+      "exit": 0,
+      "start": [
+        "TestR5CloudLoopbackSlowReadCancellation",
+        "TestR5CloudLoopbackSlowReadCancellation/DATA",
+        "TestR5CloudLoopbackSlowReadCancellation/BDAT",
+        "TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin",
+        "TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/DATA",
+        "TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/BDAT"
+      ],
+      "passed": [
+        "TestR5CloudLoopbackSlowReadCancellation/DATA",
+        "TestR5CloudLoopbackSlowReadCancellation/BDAT",
+        "TestR5CloudLoopbackSlowReadCancellation",
+        "TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/DATA",
+        "TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/BDAT",
+        "TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin"
+      ],
+      "failed": [],
+      "skipped": [],
+      "package_pass": true,
+      "source": "fixed base production; initial-test-source.go.txt reconstructed from recorded initial write and final diff; not an independently frozen pre-run attestation; initial run excluded from final acceptance",
+      "first_event": "2026-10-03T16:55:25.706577754Z",
+      "last_event": "2026-10-03T16:55:26.867405894Z"
+    },
+    {
+      "name": "internal-final",
+      "command": "env PATH=/workspace/tabmail-cloud/tools/go/bin:$PATH GOMODCACHE=/workspace/tabmail-cloud/gomod GOCACHE=/workspace/tabmail-cloud/gocache GOWORK=off GOTOOLCHAIN=local GOMAXPROCS=2 go test -mod=readonly -p=1 -race -count=1 -timeout=90s -json -run '^TestR5Cloud' ./internal/smtp",
+      "exit": 0,
+      "start": [
+        "TestR5CloudLoopbackSlowReadCancellation",
+        "TestR5CloudLoopbackSlowReadCancellation/DATA",
+        "TestR5CloudLoopbackSlowReadCancellation/BDAT",
+        "TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin",
+        "TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/DATA",
+        "TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/BDAT",
+        "TestR5CloudLoopbackAcceptedBeforeReplyDisconnect",
+        "TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/DATA",
+        "TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/BDAT"
+      ],
+      "passed": [
+        "TestR5CloudLoopbackSlowReadCancellation/DATA",
+        "TestR5CloudLoopbackSlowReadCancellation/BDAT",
+        "TestR5CloudLoopbackSlowReadCancellation",
+        "TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/DATA",
+        "TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin/BDAT",
+        "TestR5CloudLoopbackAcceptanceDisconnectLogoutJoin",
+        "TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/DATA",
+        "TestR5CloudLoopbackAcceptedBeforeReplyDisconnect/BDAT",
+        "TestR5CloudLoopbackAcceptedBeforeReplyDisconnect"
+      ],
+      "failed": [],
+      "skipped": [],
+      "package_pass": true,
+      "source": "final pins",
+      "first_event": "2026-10-03T16:56:31.870859906Z",
+      "last_event": "2026-10-03T16:56:33.156455629Z"
+    },
+    {
+      "name": "fork",
+      "command": "env PATH=/workspace/tabmail-cloud/tools/go/bin:$PATH GOMODCACHE=/workspace/tabmail-cloud/gomod GOCACHE=/workspace/tabmail-cloud/gocache GOWORK=off GOTOOLCHAIN=local GOMAXPROCS=2 go test -mod=readonly -p=1 -race -count=1 -timeout=90s -json -run '^TestOwnerR5Cloud' github.com/emersion/go-smtp",
+      "exit": 0,
+      "start": [
+        "TestOwnerR5CloudLogoutTailRetainedJoin"
+      ],
+      "passed": [
+        "TestOwnerR5CloudLogoutTailRetainedJoin"
+      ],
+      "failed": [],
+      "skipped": [],
+      "package_pass": true,
+      "source": "final pins",
+      "first_event": "2026-10-03T16:55:37.510216123Z",
+      "last_event": "2026-10-03T16:55:38.521784098Z"
+    }
+  ],
+  "acceptance": {
+    "top_tests": 4,
+    "leaf_tests": 7,
+    "test_nodes": 10,
+    "fail": 0,
+    "skip": 0,
+    "counts_exclude_initial_run": true
+  },
+  "limitations": [
+    "protocol ownership with synthetic Session; production Mail/Rcpt/Data business chain not exercised",
+    "no PG/Redis dependency closure or formal main caller verification",
+    "no durable ledger/retry/uncertain classification qualification",
+    "no TLS/LMTP/full upstream or full root regressions",
+    "package elapsed includes runtime overhead, not standalone compile timing",
+    "no hard OS resource/descendant containment qualification"
+  ],
+  "logs_sha256": {
+    "internal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "internal-final.jsonl": "fc3834be6ed4ec3aab31783624b3f8e8530972ce732d54cef20cf30b56c37882",
+    "fork.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "internal.jsonl": "29387a14191c142e4cc5b85f6d80aac431099778da6d16e39d61e05c54b3d8b7",
+    "fork.jsonl": "d9547a902cbd2cfd1ae25651a3605a598b6f5ddeae9f264c372531b9012e7ca0",
+    "internal-final.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "initial-test-source.go.txt": "7c9a7c8aaa18cfd0f5353eec33bf93f1b3a2a40c8f45bfb0c390e70e8b173917"
+  }
+}

@@ -1,0 +1,393 @@
+{
+  "GoList_metadata_exit": 0,
+  "Go_tool_JSON_package_start": "2026-10-03T13:38:17.641367+08:00",
+  "Goexit": 0,
+  "SOURCE_policy_declared_race_superset_not_actualruntime_race": true,
+  "actualGOMAXPROCS": 2,
+  "actual_8top29leaf34PASS_nonrace": true,
+  "actual_actions": {
+    "TestR5TemplateEncodingBoundaryBudgets": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryBudgets/body_at_byte_limit": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryBudgets/body_over_byte_limit": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryBudgets/escaped_html_over_limit": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryBudgets/escaped_html_within_limit": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryBudgets/subject_at_byte_limit": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryBudgets/subject_over_byte_limit": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryClientValue": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryIdentity": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryIdentity/company_name/referenced": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryIdentity/company_name/unreferenced": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryIdentity/employee_name/referenced": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryIdentity/employee_name/unreferenced": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryIdentity/sender_address/referenced": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryIdentity/sender_address/unreferenced": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryReservedIdentity": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryReservedIdentity/company_name/client_override": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryReservedIdentity/company_name/subject_crlf": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryReservedIdentity/employee_name/client_override": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryReservedIdentity/employee_name/subject_crlf": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryReservedIdentity/sender_address/client_override": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryReservedIdentity/sender_address/subject_crlf": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundarySource": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundarySource/html": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundarySource/subject": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundarySource/text": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundarySource/unused_option": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5TemplateEncodingBoundaryUnicode": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestTemplateValidationAndDataBoundaries": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestTemplateValidationAndDataBoundaries/header_injection": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestTemplateValidationAndDataBoundaries/identity_override": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestTemplateValidationAndDataBoundaries/long": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestTemplateValidationAndDataBoundaries/missing": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestTypedTemplateVariablesAndBoundedExpansion": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ]
+  },
+  "actual_leaf": [
+    "TestR5TemplateEncodingBoundarySource/subject",
+    "TestR5TemplateEncodingBoundarySource/text",
+    "TestR5TemplateEncodingBoundarySource/html",
+    "TestR5TemplateEncodingBoundarySource/unused_option",
+    "TestR5TemplateEncodingBoundaryIdentity/employee_name/referenced",
+    "TestR5TemplateEncodingBoundaryIdentity/employee_name/unreferenced",
+    "TestR5TemplateEncodingBoundaryIdentity/company_name/referenced",
+    "TestR5TemplateEncodingBoundaryIdentity/company_name/unreferenced",
+    "TestR5TemplateEncodingBoundaryIdentity/sender_address/referenced",
+    "TestR5TemplateEncodingBoundaryIdentity/sender_address/unreferenced",
+    "TestR5TemplateEncodingBoundaryClientValue",
+    "TestR5TemplateEncodingBoundaryUnicode",
+    "TestR5TemplateEncodingBoundaryBudgets/subject_at_byte_limit",
+    "TestR5TemplateEncodingBoundaryBudgets/subject_over_byte_limit",
+    "TestR5TemplateEncodingBoundaryBudgets/body_at_byte_limit",
+    "TestR5TemplateEncodingBoundaryBudgets/body_over_byte_limit",
+    "TestR5TemplateEncodingBoundaryBudgets/escaped_html_within_limit",
+    "TestR5TemplateEncodingBoundaryBudgets/escaped_html_over_limit",
+    "TestR5TemplateEncodingBoundaryReservedIdentity/employee_name/client_override",
+    "TestR5TemplateEncodingBoundaryReservedIdentity/employee_name/subject_crlf",
+    "TestR5TemplateEncodingBoundaryReservedIdentity/company_name/client_override",
+    "TestR5TemplateEncodingBoundaryReservedIdentity/company_name/subject_crlf",
+    "TestR5TemplateEncodingBoundaryReservedIdentity/sender_address/client_override",
+    "TestR5TemplateEncodingBoundaryReservedIdentity/sender_address/subject_crlf",
+    "TestTemplateValidationAndDataBoundaries/header_injection",
+    "TestTemplateValidationAndDataBoundaries/missing",
+    "TestTemplateValidationAndDataBoundaries/identity_override",
+    "TestTemplateValidationAndDataBoundaries/long",
+    "TestTypedTemplateVariablesAndBoundedExpansion"
+  ],
+  "actual_race": false,
+  "actual_runtime_race": false,
+  "actual_top": [
+    "TestR5TemplateEncodingBoundarySource",
+    "TestR5TemplateEncodingBoundaryIdentity",
+    "TestR5TemplateEncodingBoundaryClientValue",
+    "TestR5TemplateEncodingBoundaryUnicode",
+    "TestR5TemplateEncodingBoundaryBudgets",
+    "TestR5TemplateEncodingBoundaryReservedIdentity",
+    "TestTemplateValidationAndDataBoundaries",
+    "TestTypedTemplateVariablesAndBoundedExpansion"
+  ],
+  "cleanup": {
+    "all_owned_phasegroups_gone": true,
+    "noPG_Redis_SMTP_HTTPservices_started": true,
+    "original300elapsed": 3.5408987998962402,
+    "source_same": true,
+    "within300": true
+  },
+  "compile_evidence_separate": {
+    "GoList_phase_is_only_compilation_input_metadata_not_buildPASS": true,
+    "externalcache_rootMVS_module_versions_checksums_not_fullbytesattestation": true,
+    "isolated_compiler_duration_seconds": "unknown_not_emitted",
+    "metadata_package_rows": 165,
+    "metadata_selected_local_inputs": 36,
+    "separate_build_command_not_executed": true,
+    "status": "implicit_go_test_build_succeeded_actual_tests_executed"
+  },
+  "errors": [],
+  "first_test_run_Time": "2026-10-03T13:38:18.497783+08:00",
+  "no_actual_PG_HTTP_Redis_SMTP_services_or_networkbusiness_request": true,
+  "no_domainPASS_promoted_to_rawHTTP_PG_publish_send_P5_171": true,
+  "notRawHTTPPGpublishsendP5or171": true,
+  "original300_origin_beforecapture": null,
+  "origins_inherited_protected_source_actual300": true,
+  "package_elapsed": 0.874,
+  "package_terminal": [
+    {
+      "Action": "pass",
+      "Elapsed": 0.874,
+      "Package": "tabmail/internal/company",
+      "Time": "2026-10-03T13:38:18.515284+08:00"
+    }
+  ],
+  "package_terminal_Time": "2026-10-03T13:38:18.515284+08:00",
+  "protected_supervisor_source": "/private/tmp/tm-r5usage19-driver-v8-Cexecpost-SOURCE/usage19_driver_prepared_only.py",
+  "results": {
+    "actual-nonrace-company-deps-GoList": {
+      "absolute_phase_deadline": 1791005955.834072,
+      "actual_child_environment_allowlist": {
+        "CC": "/usr/bin/cc",
+        "CGO_ENABLED": "1",
+        "GOCACHE": "/Users/jin/Library/Caches/go-build",
+        "GOFLAGS": "-mod=readonly -p=1",
+        "GOMAXPROCS": "2",
+        "GOMODCACHE": "/Users/jin/.cache/go-mod",
+        "GOPROXY": "off",
+        "GOSUMDB": "sum.golang.org",
+        "GOTOOLCHAIN": "local",
+        "GOWORK": "off",
+        "HOME": "/private/tmp/tm-r5template-encoding.buqb472o/home",
+        "LANG": "en_US.UTF-8",
+        "PATH": "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+        "SDKROOT": "/Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk",
+        "TMPDIR": "/private/tmp/tm-r5template-encoding.buqb472o/tmp/"
+      },
+      "command": [
+        "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go",
+        "list",
+        "-mod=readonly",
+        "-deps",
+        "-test",
+        "-json",
+        "./internal/company"
+      ],
+      "cwd": "/private/tmp/tm-r5template-encoding.buqb472o/src",
+      "exit": 0,
+      "failures": [],
+      "groupgone": true,
+      "initial_identity": {
+        "pgid": 9136,
+        "pid": 9136,
+        "start": "Sat Oct 3 13:38:15 2026",
+        "uid": 501
+      },
+      "observer_joined": true,
+      "owned_start_PID": 9136,
+      "owned_start_UID": 501,
+      "private_DSN_value_omitted": true,
+      "signal_actions": []
+    },
+    "exact-template-encoding-pure": {
+      "absolute_phase_deadline": 1791006165.0593255,
+      "actual_child_environment_allowlist": {
+        "CC": "/usr/bin/cc",
+        "CGO_ENABLED": "1",
+        "GOCACHE": "/Users/jin/Library/Caches/go-build",
+        "GOFLAGS": "-mod=readonly -p=1",
+        "GOMAXPROCS": "2",
+        "GOMODCACHE": "/Users/jin/.cache/go-mod",
+        "GOPROXY": "off",
+        "GOSUMDB": "sum.golang.org",
+        "GOTOOLCHAIN": "local",
+        "GOWORK": "off",
+        "HOME": "/private/tmp/tm-r5template-encoding.buqb472o/home",
+        "LANG": "en_US.UTF-8",
+        "PATH": "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+        "SDKROOT": "/Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk",
+        "TMPDIR": "/private/tmp/tm-r5template-encoding.buqb472o/tmp/"
+      },
+      "command": [
+        "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go",
+        "test",
+        "-p=1",
+        "-count=1",
+        "-timeout=2m",
+        "-json",
+        "./internal/company",
+        "-run",
+        "^(TestR5TemplateEncodingBoundary.*|TestTemplateValidationAndDataBoundaries|TestTypedTemplateVariablesAndBoundedExpansion)$"
+      ],
+      "cwd": "/private/tmp/tm-r5template-encoding.buqb472o/src",
+      "exit": 0,
+      "failures": [],
+      "groupgone": true,
+      "initial_identity": {
+        "pgid": 9162,
+        "pid": 9162,
+        "start": "Sat Oct 3 13:38:16 2026",
+        "uid": 501
+      },
+      "observer_joined": true,
+      "owned_start_PID": 9162,
+      "owned_start_UID": 501,
+      "private_DSN_value_omitted": true,
+      "signal_actions": []
+    }
+  },
+  "root_MVS_localfork_assets_included_wholeSOURCE_kindnot_2fileclone": true,
+  "safe_wrapper_only_parameterizes_admitted_SIGCHLD_birthanchor_unreaped_postidentitydeadline_groupcleanup_supervisor": true,
+  "source_closure": "1a50523f961c484c52fbd2466ef101978cf181e2fbc4b94126eadf3ddb5f1a0d",
+  "source_sha": "51e5785a894f603742d54a963bdedd2f469b4cb9",
+  "source_task2pins": {
+    "internal/company/r5_template_encoding_boundary_test.go": "91a28cb6c48d7f928e0461db15b468fcaef6d45588c1d6cef4261cc24f73cc74",
+    "internal/company/templates.go": "e35aecef4feb2929c4140dd75c825570e8dfd25722513f0d785c6b3e50ee6010"
+  },
+  "status": "BOUNDED_PURE_DOMAIN_PASS",
+  "unfinished": []
+}

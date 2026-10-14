@@ -1,0 +1,1 @@
+{"status": "PASS", "postgres_files": 62, "functions": 395, "sql_execution_calls": 498, "direct_write_functions": 134, "write_closure_functions": 154, "migration_files": 19, "task_complete": false, "runtime_verified": false, "meaning": "syntax inventory current; no concurrency or behavior equivalence claim"}

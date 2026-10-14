@@ -1,0 +1,8 @@
+{
+  "commit": "de4ae883b33b5f903821502592f0568649d57bd2",
+  "document": "docs/company-mail/R5-ARCHIVE-INDEPENDENT-REVIEW-20261003.md",
+  "url": "https://github.com/jyqj/tabmail/blob/de4ae883b33b5f903821502592f0568649d57bd2/docs/company-mail/R5-ARCHIVE-INDEPENDENT-REVIEW-20261003.md",
+  "document_sha256": "b2a924bfa0504cc8a8302a4de98e4c6b85a6fa633027527f6a349cc6c366f88b",
+  "summary_sha256": "53ff4792253d3fbe114242e1b64b4ce82814fc36f86e124f1d7460aa3a64278f",
+  "scope": "Bounded archive/source/selected/build independent review at fixed archive input; no transfer of fullCI or new combined runtime qualification"
+}

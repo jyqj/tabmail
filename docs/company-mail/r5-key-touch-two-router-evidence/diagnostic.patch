@@ -1,0 +1,139 @@
+diff --git a/internal/store/postgres/r5_key_touch_admission_test.go b/internal/store/postgres/r5_key_touch_admission_test.go
+index 035f0e7..7ae6217 100644
+--- a/internal/store/postgres/r5_key_touch_admission_test.go
++++ b/internal/store/postgres/r5_key_touch_admission_test.go
+@@ -349,7 +349,7 @@ func r5TouchRowFree(ctx context.Context, t *testing.T, f *companyFixture, key uu
+ 	return err
+ }
+ 
+-func r5TouchRouter(f *companyFixture, st store.Store, svc *outbound.Service, obj *testutil.MemoryObjectStore) http.Handler {
++func r5TouchRouter(f *companyFixture, st store.Store, svc *outbound.Service, obj *testutil.MemoryObjectStore) *api.Router {
+ 	return api.NewRouter(api.RouterConfig{Store: st, CompanyRepository: f.st,
+ 		ObjectStore: obj, RawObjects: rawobject.NewStore(obj, f.st),
+ 		JWTSecret: companyTestJWT, MailboxTokenSecret: "test-only-mailbox-secret",
+@@ -390,6 +390,30 @@ func r5TouchCommitted(t *testing.T, ctx context.Context, f *companyFixture, st *
+ 	t.Logf("phase=telemetry_committed holder_pid=%d trigger_phase=%s calls=1 last_used_at_and_ip_verified=true", pid, phase)
+ }
+ 
++// Report each original aggregate component after physically joining both owners.
++func r5TouchDiagnose(t *testing.T, ctx context.Context, f *companyFixture, primary, other *r5TouchAdmissionStore, key uuid.UUID, pid, otherPID int32, phase string, since time.Time) {
++	t.Helper()
++	t.Logf("phase=joined_calls primary_pid=%d primary_calls=%d primary_result=%s independent_pid=%d independent_calls=%d independent_result=%s", pid, primary.calls.Load(), r5TouchErrorClass(primary.result), otherPID, other.calls.Load(), r5TouchErrorClass(other.result))
++	rows, err := f.pool.Query(ctx, `SELECT tr.holder_pid,tr.used_at,host(tr.used_ip),tr.previous_at,
++ tr.key_id=$1,tr.holder_pid=$2,tr.phase=$3,tr.usage_identity_unchanged,
++ tr.previous_at IS NULL,tr.used_at >= $4,tr.used_at <= clock_timestamp(),host(tr.used_ip)=$5,
++ k.last_used_at=tr.used_at,k.last_used_ip=tr.used_ip,(SELECT count(*) FROM r5_touch_trace)=1,
++ k.last_used_at,host(k.last_used_ip)
++ FROM r5_touch_trace tr JOIN tenant_api_key_usage k ON k.api_key_id=tr.key_id ORDER BY tr.used_at`, key, pid, phase, since, r5TouchIP)
++	must(t, err)
++	defer rows.Close()
++	for rows.Next() {
++		var holder int32
++		var used, current time.Time
++		var previous *time.Time
++		var ip, currentIP string
++		var identity, holderOK, phaseOK, unchanged, initial, lower, upper, ipOK, atEqual, ipEqual, countOne bool
++		must(t, rows.Scan(&holder, &used, &ip, &previous, &identity, &holderOK, &phaseOK, &unchanged, &initial, &lower, &upper, &ipOK, &atEqual, &ipEqual, &countOne, &current, &currentIP))
++		t.Logf("phase=original_valid_components holder_pid=%d used_at=%s used_ip=%s previous_at=%v key=%t primary_holder=%t trigger_phase=%t identity_unchanged=%t previous_null=%t lower_bound=%t upper_bound=%t expected_ip=%t current_timestamp_equal=%t current_ip_equal=%t count_one=%t current_usage_at=%s current_usage_ip=%s", holder, used.Format(time.RFC3339Nano), ip, previous, identity, holderOK, phaseOK, unchanged, initial, lower, upper, ipOK, atEqual, ipEqual, countOne, current.Format(time.RFC3339Nano), currentIP)
++	}
++	must(t, rows.Err())
++}
++
+ // Schema19 successor, NOT the frozen schema18 causal witness: the old
+ // metadata-held 409 expectation/raw belongs to its original source only.
+ // Default (untagged): four serial, separately owned databases.
+@@ -427,6 +451,8 @@ func TestR5KeyUsageAuthorityAdmissionIsolation(t *testing.T) {
+ 			t.Cleanup(func() { _ = independent.Close() })
+ 			gate := r5TouchInstallGate(t, f, key.ID, phase)
+ 			st := &r5TouchAdmissionStore{PgStore: independent, started: make(chan r5TouchCall, 1), done: make(chan struct{}), key: key.ID, job: job.ID}
++			otherStore := &r5TouchAdmissionStore{PgStore: f.st, started: make(chan r5TouchCall, 1), done: make(chan struct{}), key: key.ID, job: job.ID, before: func(context.Context) error { return nil }}
++			var routers []*api.Router
+ 			var permission pgx.Tx
+ 			requested, joined := false, false
+ 			// Later cleanup precedes trigger drops and testpg's synchronous pool
+@@ -444,6 +470,16 @@ func TestR5KeyUsageAuthorityAdmissionIsolation(t *testing.T) {
+ 						t.Error("auth telemetry not launched or not joined before owned fixture teardown")
+ 					}
+ 				}
++				// Stop both actual lifecycle owners before trigger teardown, including
++				// work admitted but not yet entered in the wrapper.
++				joinCtx, joinCancel := context.WithTimeout(context.Background(), 6*time.Second)
++				defer joinCancel()
++				for _, router := range routers {
++					if err := router.StopContext(joinCtx); err != nil {
++						t.Errorf("router telemetry join failed: %T", err)
++					}
++				}
++				otherStore.workers.Wait()
+ 				// The observed first launch is joined above. Subsequent launches
+ 				// are forbidden by the real throttle within this 12 s case; still
+ 				// join all wrapper-entered work if that invariant regresses.
+@@ -459,10 +495,11 @@ func TestR5KeyUsageAuthorityAdmissionIsolation(t *testing.T) {
+ 			}
+ 			path := "/api/v1/outbound/" + job.ID.String()
+ 			rawKey := "tm_content_" + key.ID.String()
+-			otherRouter := r5TouchRouter(f, f.st, svc, obj)
++			otherRouter := r5TouchRouter(f, otherStore, svc, obj)
++			routers = append(routers, otherRouter)
+ 			var authorityBefore string
+ 			must(t, f.pool.QueryRow(ctx, `SELECT to_jsonb(k)::text FROM tenant_api_keys k WHERE id=$1`, key.ID).Scan(&authorityBefore))
+-			var telemetryPID int32
++			var telemetryPID, otherPID int32
+ 			gatePhase := "not_entered"
+ 			otherStatus, otherCode, otherReason := 0, "not_called", "not_called"
+ 			// Keep the case timer/cancel owner, not the outer POST's request
+@@ -504,6 +541,28 @@ func TestR5KeyUsageAuthorityAdmissionIsolation(t *testing.T) {
+ 					if other.Code != http.StatusOK {
+ 						return fmt.Errorf("independent-pool router receipt HTTP=%d", other.Code)
+ 					}
++					select {
++					case call := <-otherStore.started:
++						if call.id != key.ID || call.ip != r5TouchIP {
++							return errors.New("auth launched telemetry for another key or IP")
++						}
++					case <-ctx.Done():
++						return errors.New("auth did not launch real telemetry")
++					}
++					// This second router's real UPDATE must wait on the primary's
++					// usage tuple; identify its backend from that actual lock edge.
++					err = r5TouchAwait(ctx, func() (bool, error) {
++						err := f.pool.QueryRow(ctx, `SELECT pid FROM pg_stat_activity WHERE datname=current_database()
++ AND query=$1 AND wait_event_type='Lock' AND pg_blocking_pids(pid)=ARRAY[$2::integer]`, r5TouchSQL, telemetryPID).Scan(&otherPID)
++						if errors.Is(err, pgx.ErrNoRows) {
++							return false, nil
++						}
++						return err == nil, err
++					})
++					if err != nil {
++						return err
++					}
++					t.Logf("phase=second_router_touch_wait router=independent holder_pid=%d exact_blocker_pid=%d calls=%d", otherPID, telemetryPID, otherStore.calls.Load())
+ 					t.Log("usage held: independent router/store/pool admitted same key; two pools, not two OS processes")
+ 					gatePhase = "delegate_current_receipt"
+ 					return nil
+@@ -526,6 +585,7 @@ func TestR5KeyUsageAuthorityAdmissionIsolation(t *testing.T) {
+ 				return nil
+ 			}
+ 			h := r5TouchRouter(f, st, svc, obj)
++			routers = append(routers, h)
+ 			before := r5StageOwnerlessRetryState(t, f, job.ID)
+ 			var since time.Time
+ 			must(t, f.pool.QueryRow(ctx, `SELECT clock_timestamp()`).Scan(&since))
+@@ -558,6 +618,17 @@ func TestR5KeyUsageAuthorityAdmissionIsolation(t *testing.T) {
+ 			}
+ 			r5TouchRollback(t, permission)
+ 			r5TouchRollback(t, gate)
++			select {
++			case <-st.done:
++			case <-ctx.Done():
++				t.Fatal("primary telemetry did not join")
++			}
++			if scenario == "usage_held_allows_retry" {
++				must(t, otherRouter.StopContext(ctx))
++			}
++			st.workers.Wait()
++			otherStore.workers.Wait()
++			r5TouchDiagnose(t, ctx, f, st, otherStore, key.ID, telemetryPID, otherPID, phase, since)
+ 			r5TouchCommitted(t, ctx, f, st, key.ID, telemetryPID, phase, since)
+ 			joined = true
+ 			var authorityAfter string

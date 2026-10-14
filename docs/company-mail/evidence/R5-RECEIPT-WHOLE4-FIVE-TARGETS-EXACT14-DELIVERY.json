@@ -1,0 +1,9 @@
+{
+  "new_archive": "/private/tmp/tm-r5receipt-whole4-five.u8j99ff3/RECEIPT-five-target-BOUNDED-PASS-exact14ref-evidence.tar.gz",
+  "new_archive_sha256": "fd93fe6d1fe08a9c552b9c2600e49298b24dae1335eeecef1fbcd393d4e6cf4d",
+  "new_members": 91,
+  "old90member_payload_unchanged": true,
+  "old_archive_sha256": "138b425d48fcd063274daa170071cb7127aca3d995b5b66eb832e64809c75a50",
+  "source_closure_sha256": "b3d0ea67fdca84a5a22a41389fef680db4de4dc4b4290a281085bbb676f9b76a",
+  "source_sha": "5373e23ccdf5aea57a7664f7d565ec1fcea68a7b"
+}

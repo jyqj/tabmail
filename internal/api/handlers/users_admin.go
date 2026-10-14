@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"encoding/json"
 	"net/http"
+	"net/mail"
 	"strings"
+	"tabmail/internal/app/credentials"
 	"time"
+	"unicode/utf8"
 
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/authz"
@@ -54,13 +55,22 @@ func (h *UserAdminHandler) InviteAdmin(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Email string `json:"email"`
 	}
-	if err := decodeBody(r, &req); err != nil {
+	if err := decodeAuthBody(w, r, &req); err != nil {
 		errBadRequest(w, "invalid request body")
 		return
 	}
 	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
 	if req.Email == "" {
 		errBadRequest(w, "email is required")
+		return
+	}
+	// Invitations persist the same VARCHAR(255) identity consumed on account
+	// acceptance. Reject invalid text before lookup or credential generation.
+	// Parse the address instead of rejecting quoted/Unicode local parts.
+	address, addressErr := mail.ParseAddress(req.Email)
+	if strings.ContainsRune(req.Email, 0) || utf8.RuneCountInString(req.Email) > 255 ||
+		addressErr != nil || address.Name != "" || strings.HasPrefix(req.Email, "<") || strings.HasSuffix(req.Email, ">") {
+		errBadRequest(w, "email must be a valid address of at most 255 characters")
 		return
 	}
 
@@ -176,13 +186,13 @@ func (h *UserAdminHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	patch := models.UserAdminPatch{}
-	var req struct {
+	var req *struct {
 		Role                *string         `json:"role"`
 		IsActive            *bool           `json:"is_active"`
 		DisplayName         *string         `json:"display_name"`
 		PermissionProfileID json.RawMessage `json:"permission_profile_id"`
 	}
-	if err := decodeBody(r, &req); err != nil {
+	if err := decodeAuthBody(w, r, &req); err != nil || req == nil {
 		errBadRequest(w, "invalid request body")
 		return
 	}
@@ -206,36 +216,19 @@ func (h *UserAdminHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Requ
 		patch.IsActive = req.IsActive
 	}
 	if req.DisplayName != nil {
+		// Keep PATCH's exact text and null/omission semantics, but reject text
+		// PostgreSQL cannot persist before any role/status/profile command.
+		if strings.ContainsRune(*req.DisplayName, 0) || utf8.RuneCountInString(*req.DisplayName) > 255 {
+			errBadRequest(w, "display_name must contain at most 255 characters and no NUL characters")
+			return
+		}
 		patch.DisplayName = req.DisplayName
 	}
 	if req.PermissionProfileID != nil {
-		patch.SetPermissionProfile = true
-		raw := strings.TrimSpace(string(req.PermissionProfileID))
-		if raw == "" || raw == "null" {
-			patch.PermissionProfileID = nil
-		} else {
-			var profileID uuid.UUID
-			if err := json.Unmarshal(req.PermissionProfileID, &profileID); err != nil {
-				errBadRequest(w, "invalid permission_profile_id")
-				return
-			}
-			profile, err := h.store.GetPermissionProfile(r.Context(), profileID)
-			if err != nil {
-				h.logger.Err(err).Msg("update user: lookup permission profile")
-				errInternal(w)
-				return
-			}
-			if profile == nil {
-				errBadRequest(w, "permission profile not found")
-				return
-			}
-			if profile.TenantID != nil && *profile.TenantID != user.TenantID {
-				errForbidden(w, "permission profile belongs to a different tenant")
-				return
-			}
-			patch.PermissionProfileID = &profileID
-		}
+		errConflict(w, "profile assignment protocol upgraded; use permission-editor/assignment with expected_revision")
+		return
 	}
+
 	updated, err := h.store.UpdateUserGuarded(r.Context(), actor, tenant.ID, userID, patch)
 	if err != nil {
 		h.writeMemberError(w, err)
@@ -292,11 +285,8 @@ func (h *UserAdminHandler) DeleteUserByAdmin(w http.ResponseWriter, r *http.Requ
 }
 
 func generateInviteCode() (string, error) {
-	buf := make([]byte, 24)
-	if _, err := rand.Read(buf); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(buf), nil
+	raw, _, err := credentials.IssueInvitation()
+	return raw, err
 }
 
 func chiURLParam(r *http.Request, key string) string {

@@ -1,0 +1,21 @@
+{
+  "accepted_union": "5d3a8cfc81a77581919ea0b2a93f9c352fae5208",
+  "comparison_base": "ee3308fd3217246c9bdd43b07ae0609ebae6aeb6",
+  "incoming_default": "d97d45c0ea92d3733870ea8082a09f13160abe10",
+  "incoming_sharedDB": "89e7af39aa53408225b284548bffe39ce467aa2d",
+  "integration_commit": "1150633a4948c873349743658fad2661b08f1240",
+  "accepted_union_delta_paths": 113,
+  "default_delta_paths": 113,
+  "sharedDB_delta_paths": 40,
+  "before_tracked_paths": 1990,
+  "after_tracked_paths": 2134,
+  "changed_paths": 153,
+  "overlap_default": [
+    "docs/company-mail/R5-TODO.md"
+  ],
+  "overlap_sharedDB": [],
+  "all_imported_bytes_exact_except_append_TODO": true,
+  "all_other_accepted_union_bytes_preserved": true,
+  "TODO_both_append_histories_preserved": true,
+  "ancestors_preserved": true
+}

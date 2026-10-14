@@ -11,6 +11,7 @@ const {
   listPlansMock,
   updateTenantOverridesMock,
   getTenantConfigMock,
+  getTenantOverridesMock,
   createAPIKeyMock,
   listAPIKeysMock,
   revokeAPIKeyMock,
@@ -23,6 +24,7 @@ const {
   listPlansMock: vi.fn(),
   updateTenantOverridesMock: vi.fn(),
   getTenantConfigMock: vi.fn(),
+  getTenantOverridesMock: vi.fn(),
   createAPIKeyMock: vi.fn(),
   listAPIKeysMock: vi.fn(),
   revokeAPIKeyMock: vi.fn(),
@@ -37,6 +39,7 @@ vi.mock("@/lib/api", () => ({
   listPlans: (...args: unknown[]) => listPlansMock(...args),
   updateTenantOverrides: (...args: unknown[]) => updateTenantOverridesMock(...args),
   getTenantConfig: (...args: unknown[]) => getTenantConfigMock(...args),
+  getTenantOverrides: (...args: unknown[]) => getTenantOverridesMock(...args),
   createAPIKey: (...args: unknown[]) => createAPIKeyMock(...args),
   listAPIKeys: (...args: unknown[]) => listAPIKeysMock(...args),
   revokeAPIKey: (...args: unknown[]) => revokeAPIKeyMock(...args),
@@ -205,6 +208,7 @@ describe("admin/tenants page", () => {
     listPlansMock.mockReset();
     updateTenantOverridesMock.mockReset();
     getTenantConfigMock.mockReset();
+    getTenantOverridesMock.mockReset();
     createAPIKeyMock.mockReset();
     listAPIKeysMock.mockReset();
     revokeAPIKeyMock.mockReset();
@@ -303,6 +307,11 @@ describe("admin/tenants page", () => {
   it("支持保存 tenant overrides", async () => {
     listTenantsMock.mockResolvedValue({ data: tenants });
     listPlansMock.mockResolvedValue({ data: plans });
+    getTenantOverridesMock.mockResolvedValue({ data: {
+      tenant_id: "tenant-1", max_domains: null, max_mailboxes_per_domain: null,
+      max_messages_per_mailbox: null, max_message_bytes: null,
+      retention_hours: null, rpm_limit: null, daily_quota: null,
+    } });
     getTenantConfigMock
       .mockResolvedValueOnce({
         data: {

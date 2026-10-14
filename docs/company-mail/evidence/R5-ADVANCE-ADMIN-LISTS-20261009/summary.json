@@ -1,0 +1,72 @@
+{
+  "scope": "ADVANCE-09 / issue #205",
+  "todo_count": 1,
+  "parent_todos": [
+    "R5-P9-100",
+    "R5-P9-090"
+  ],
+  "baseline_commit": "647688b191b18572e10e6c1696ee693f6e089f5a",
+  "original_batch_commit": "fdea2178759ce9842844926374ea98517bc4188b",
+  "baseline_target_product_bytes_identical_to_original_batch": true,
+  "fixed_baseline": {
+    "pass": 10,
+    "fail": 26,
+    "skip": 0,
+    "exit": 1
+  },
+  "first_candidate_diagnostic": {
+    "pass": 33,
+    "fail": 3,
+    "skip": 0,
+    "exit": 1
+  },
+  "final_new_cases": {
+    "pass": 36,
+    "fail": 0,
+    "skip": 0
+  },
+  "final_related_cases": {
+    "pass": 57,
+    "fail": 0,
+    "skip": 0,
+    "exit": 0
+  },
+  "final_case_files": {
+    "readonly-list-state.test.tsx": 36,
+    "audit-state.consumer.test.tsx": 8,
+    "session-safety.test.ts": 10,
+    "base.test.ts": 3
+  },
+  "nonincremental_typecheck_exit": 0,
+  "scoped_eslint_exit": 0,
+  "source_sha256": {
+    "web/app/(dashboard)/admin/ingest/page.tsx": "fc54d36dde75f4ef6818b276cbe8f0894ce2907fa7e558adcdc975a97570cb04",
+    "web/app/(dashboard)/admin/webhooks/page.tsx": "83005c11e81bbde38ad3b3c348ab040951ed6261e123fdaac0d242dfb3b649e7",
+    "web/app/(dashboard)/admin/audit/page.tsx": "3b2f3eaa77ffdb6dac018cd3f8fc53d0f090018c8248cff9fffefe9acda84328",
+    "web/app/(dashboard)/admin/domains/page.tsx": "e6a1a122bcd570ff5ca80df0c3212233f177f88e90efd8fcc7d66751e88efaea",
+    "web/components/crud/list-read-state.tsx": "b732d206d6f91e5c167d54cc5e475e2176d9a786346baaa9424fcf166e5f4a6e",
+    "web/app/(dashboard)/admin/readonly-list-state.test.tsx": "ee7ad5d11b1e7b306684915f4f66ac20c1ad3017b823cdec90c009621db81174"
+  },
+  "raw_uncompressed_sha256": {
+    "readonly-baseline.json": "7fa05300d2b7176c39c389b18a3ee0f24aba6de0527f05c1675a8d97063c8e72",
+    "readonly-baseline.stdout": "f45bef0080f5c33713bade8d3df51a7092422f027f23948a2a3ebc0936a5a3e0",
+    "readonly-baseline.stderr": "b4acd4f819050212c4fe3b3ed8416421330f7ff8c72cb9bb667c335f3e24a94e",
+    "readonly-candidate.json": "4b06bd560950168c09971e72f5e2cbb6da9b4475431c0f4a8ee11d29a49010c4",
+    "readonly-candidate.stdout": "243451f99b1546d9eaac4ec66bcb36924867b5c9df7bb12915e6e00196ec5a56",
+    "readonly-candidate.stderr": "b4acd4f819050212c4fe3b3ed8416421330f7ff8c72cb9bb667c335f3e24a94e",
+    "readonly-related.json": "5f937325c3fc2832eadb5ac1d2ae3152454fe5f85900a107fc7836860d4c6688",
+    "readonly-related.stdout": "1ae27b3c4c272bf631a364b48b347c9bd3ccc3ae3de76987e8ce4a527de4b105",
+    "readonly-related.stderr": "b4acd4f819050212c4fe3b3ed8416421330f7ff8c72cb9bb667c335f3e24a94e",
+    "readonly-final-tsc.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "readonly-final-tsc.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "readonly-final-eslint.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "readonly-final-eslint.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "readonly-tsc.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "readonly-tsc.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "readonly-eslint.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "readonly-eslint.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "full_frontend_qualification": false,
+  "shipping_browser_qualification": false,
+  "database_qualification": false
+}

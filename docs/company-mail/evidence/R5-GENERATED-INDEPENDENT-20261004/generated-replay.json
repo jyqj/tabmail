@@ -1,0 +1,272 @@
+{
+  "adapter_sha256": "46a43df58a17ea03966b88fe07275e60344a055960aaabfcf405a7d5eb6caa21",
+  "independent_result": {
+    "candidate": "0c9adb17559e347ed99b3661d789b80ba59762aa",
+    "controls": [
+      {
+        "name": "unchanged-positive-isolated",
+        "expected": "accept",
+        "actual": "accept",
+        "detail": "verified"
+      },
+      {
+        "name": "native-positive",
+        "expected": "accept",
+        "actual": "accept",
+        "detail": "verified"
+      },
+      {
+        "name": "local-native-missing",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "classifier local native occurrence records mismatch"
+      },
+      {
+        "name": "local-native-duplicate",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "classifier local native occurrence records mismatch"
+      },
+      {
+        "name": "local-native-package",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "classifier local native occurrence records mismatch"
+      },
+      {
+        "name": "local-native-field",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "non-native input in native records"
+      },
+      {
+        "name": "local-native-path",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "local native input outside selected inputs"
+      },
+      {
+        "name": "local-native-qualification",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "input qualification mismatch"
+      },
+      {
+        "name": "native-two-package-occurrences-positive",
+        "expected": "accept",
+        "actual": "accept",
+        "detail": "verified"
+      },
+      {
+        "name": "native-two-package-occurrences-reordered",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "classifier local native occurrence records mismatch"
+      },
+      {
+        "name": "generated-cache-positive",
+        "expected": "accept",
+        "actual": "accept",
+        "detail": "verified"
+      },
+      {
+        "name": "generated-exception-borrowed-local-non-Go",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "false Go source path"
+      },
+      {
+        "name": "generated-wrong-package",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "unclassified absolute local-package input"
+      },
+      {
+        "name": "generated-wrong-path",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "unclassified absolute local-package input"
+      },
+      {
+        "name": "generated-missing",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "unclassified absolute local-package input"
+      },
+      {
+        "name": "generated-duplicate",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "unclassified absolute local-package input"
+      },
+      {
+        "name": "generated-cache-env",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "classifier observed/requested GOCACHE mismatch"
+      },
+      {
+        "name": "generated-relative-field",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "selected package/input linkage mismatch"
+      },
+      {
+        "name": "generated-CgoFiles",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "invalid generated testmain record"
+      },
+      {
+        "name": "generated-wrong-suffix",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "invalid generated testmain record"
+      },
+      {
+        "name": "generated-count",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "local package count exceeds total"
+      },
+      {
+        "name": "external_modulecache-GoFiles-positive",
+        "expected": "accept",
+        "actual": "accept",
+        "detail": "verified"
+      },
+      {
+        "name": "external_modulecache-CgoFiles-positive",
+        "expected": "accept",
+        "actual": "accept",
+        "detail": "verified"
+      },
+      {
+        "name": "external_modulecache-TestGoFiles-positive",
+        "expected": "accept",
+        "actual": "accept",
+        "detail": "verified"
+      },
+      {
+        "name": "external_modulecache-XTestGoFiles-positive",
+        "expected": "accept",
+        "actual": "accept",
+        "detail": "verified"
+      },
+      {
+        "name": "external_modulecache-CFiles-positive",
+        "expected": "accept",
+        "actual": "accept",
+        "detail": "verified"
+      },
+      {
+        "name": "external_modulecache-wrong-extension",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "false Go source path"
+      },
+      {
+        "name": "external_modulecache-local-package",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "nonlocal classification attributed to local package"
+      },
+      {
+        "name": "external_modulecache-count",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "represented classification packages exceed total record count"
+      },
+      {
+        "name": "external_modulecache-path-escape",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "canonical relative path required"
+      },
+      {
+        "name": "external_modulecache-qualification",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "input qualification mismatch"
+      },
+      {
+        "name": "external_modulecache-version-or-goroot",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "external input outside MVS"
+      },
+      {
+        "name": "toolchain_source-GoFiles-positive",
+        "expected": "accept",
+        "actual": "accept",
+        "detail": "verified"
+      },
+      {
+        "name": "toolchain_source-CgoFiles-positive",
+        "expected": "accept",
+        "actual": "accept",
+        "detail": "verified"
+      },
+      {
+        "name": "toolchain_source-TestGoFiles-positive",
+        "expected": "accept",
+        "actual": "accept",
+        "detail": "verified"
+      },
+      {
+        "name": "toolchain_source-XTestGoFiles-positive",
+        "expected": "accept",
+        "actual": "accept",
+        "detail": "verified"
+      },
+      {
+        "name": "toolchain_source-CFiles-positive",
+        "expected": "accept",
+        "actual": "accept",
+        "detail": "verified"
+      },
+      {
+        "name": "toolchain_source-wrong-extension",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "false Go source path"
+      },
+      {
+        "name": "toolchain_source-local-package",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "nonlocal classification attributed to local package"
+      },
+      {
+        "name": "toolchain_source-count",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "represented classification packages exceed total record count"
+      },
+      {
+        "name": "toolchain_source-path-escape",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "canonical relative path required"
+      },
+      {
+        "name": "toolchain_source-qualification",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "input qualification mismatch"
+      },
+      {
+        "name": "toolchain_source-version-or-goroot",
+        "expected": "reject",
+        "actual": "reject",
+        "detail": "canonical absolute path required"
+      }
+    ],
+    "unexpected": [],
+    "os_process_events": [],
+    "isolation": "helper globals/module set unchanged; filesystem/env/capture/validation/retention mocks untouched",
+    "fixed_pin_controls": 3
+  },
+  "original_baseline_final_assertion_failed": false,
+  "os_process_events": []
+}

@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "deliveries": [
+    {
+      "archive": "R5-REGISTRY23-DEPFIX-LOGS.tar.gz",
+      "review": "R5-REGISTRY23-DEPFIX-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5registry23-depfix.xwl7j0q4/REGISTRY23-CAPTURE-INFRA-ERROR-WITH-CLI0-evidence.tar.gz",
+      "archive_sha256_from_executor": "8d554a0dcaa639bf7701d38bf22b0d956741fa29a7eb9270e4b0be87eda02c07",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 18,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-REGISTRY1-MIGRATIONS-DEPENDENCY-LOGS.tar.gz",
+      "review": "R5-REGISTRY1-MIGRATIONS-DEPENDENCY-REVIEW.json",
+      "original_archive": "/private/tmp/tabmail-registry1-migrations-packet-20261002-2hmSV1/REGISTRY-ONE-ACTUAL-MIGRATION-DEPENDENCY-evidence.tar.gz",
+      "archive_sha256_from_executor": "2a03cb4ac83ee8b16f6ef3f13f254dfd7bbbcbf6e38e3e981723f92e1ce34377",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 10,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-ALIAS43-OAS3-FAILED-LOGS.tar.gz",
+      "review": "R5-ALIAS43-OAS3-FAILED-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5alias46.uo178spx/ALIAS43-OAS3-REALCHECKER-evidence.tar.gz",
+      "archive_sha256_from_executor": "9a0b5ce8a4004ae328c411ff1cfd0d643303f2f2fc00aa11613447e632d620dd",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 15,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-RECEIPT-FALSECONTENT2-LOGS.tar.gz",
+      "review": "R5-RECEIPT-FALSECONTENT2-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5receipt-false.7p279a5d/RECEIPT-CONTENT-FALSE-EXACT-TWO-evidence.tar.gz",
+      "archive_sha256_from_executor": "c39bcfbea27dc81991a439df16a5bfb0da00f31522c81bc461e8444d625dea9a",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 11,
+      "payload_bytes_changed": false
+    }
+  ],
+  "classification": "bounded additions; composed proof is not a single fresh suite",
+  "registry_adapter_bounded_accepted": true,
+  "M_baseline_complete": false,
+  "product_green": false,
+  "task_complete": false,
+  "old_rows_reviews_raw_modified": false,
+  "tests_repeated_by_docs": false
+}

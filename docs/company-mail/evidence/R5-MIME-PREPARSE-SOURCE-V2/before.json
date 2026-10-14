@@ -1,0 +1,22 @@
+{
+  "internal/mailcontent/parser.go": {
+    "exists": true,
+    "sha256": "cab8753b99dd2af3192ad15b5b2c3a99adea830d9665bad2087cea1d96fa31f3"
+  },
+  "internal/mailcontent/mime_budget.go": {
+    "exists": true,
+    "sha256": "342ffd1ce567a943bb8b9ddde7b0812f170f143b564a9e4f7a919aca9c150391"
+  },
+  "internal/mailcontent/mime_budget_test.go": {
+    "exists": true,
+    "sha256": "cd003b9f058e2d81cc2df3fb298a3b8eddf2fb7ff909b166697d705be4ab9390"
+  },
+  "internal/app/messages/service.go": {
+    "exists": true,
+    "sha256": "a852c17b5051989cc91990f78d95f721e441346f11101e66460360c5ac708460"
+  },
+  "internal/app/messages/mime_budget_boundary_test.go": {
+    "exists": true,
+    "sha256": "b405791a97dca02eb6fddf24fa122703909dfb8fdaf96d7bffe287cd82e06a1a"
+  }
+}

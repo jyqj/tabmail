@@ -1,0 +1,416 @@
+{
+  "schema": "tabmail.r5-next1543.pg-execution-summary.v1",
+  "status": "accepted-scoped-postgresql-regressions",
+  "evidence_basis": {
+    "frontend_frozen_handoff": {
+      "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/handoff.json",
+      "bytes": 27887,
+      "sha256": "7f53cdb262047a5601f09f26ad5949974b4ff59da8fa330e21a6d0e2c77f4ead"
+    },
+    "root_event_verifications": [
+      {
+        "path": "/workspace/scratch/472e5abb7d28/root-evidence/pg-root-verification-wave1-v2.json",
+        "bytes": 1569,
+        "sha256": "a5a31d0df3958b9c6230d029cd7c836aa07617c9e2dfed3315326643e694d694"
+      },
+      {
+        "path": "/workspace/scratch/472e5abb7d28/root-evidence/pg-root-verification-wave2-v2.json",
+        "bytes": 1566,
+        "sha256": "69009c2b660aede3806edd855b5ab040fda1f02d9224440947c6fd131c565085"
+      },
+      {
+        "path": "/workspace/scratch/472e5abb7d28/root-evidence/pg-root-verification-wave3-v2.json",
+        "bytes": 1569,
+        "sha256": "7300b6f9b66735309f79facbd3e7f827ff0b829280871719dc9eda2ca3baa22e"
+      }
+    ],
+    "method": "Summarized existing frozen handoff and root raw-event verification records; referenced artifact hashes were checked without executing tests.",
+    "path_convention": "Absolute paths identify original retained artifacts and can be resolved through the final execution archive manifest."
+  },
+  "totals": {
+    "comparisons": 3,
+    "go_test_processes": 6,
+    "candidate_unique_leaves": 41,
+    "baseline": {
+      "passed": 25,
+      "failed": 16,
+      "skipped": 0,
+      "all_skip_events": 0
+    },
+    "candidate": {
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0,
+      "all_skip_events": 0
+    },
+    "strict_runner_exit_codes": [
+      0,
+      0,
+      0
+    ]
+  },
+  "test_command": {
+    "common_argv_prefix": [
+      "go",
+      "test",
+      "-mod=readonly",
+      "-race",
+      "-count=1",
+      "-timeout=120s",
+      "-json",
+      "./internal/store/postgres",
+      "-run"
+    ],
+    "pattern_per_run": "runs[].frozen_test.run_pattern",
+    "go": {
+      "path": "/workspace/scratch/472e5abb7d28/toolchain/go/bin/go",
+      "version": "go version go1.25.7 linux/amd64"
+    }
+  },
+  "runner": {
+    "source_commit": "2dfebb7692700c14906ceba351e19893fb736656",
+    "source_path": "scripts/run_r5_next1543_pg.py",
+    "sha256": "4b4360d77bd9fd1393a972a4549c1530e069fde6bad7af47d3ea5da6f39b27b5",
+    "retained_file": {
+      "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/run_r5_next1543_pg.py",
+      "bytes": 7851,
+      "sha256": "4b4360d77bd9fd1393a972a4549c1530e069fde6bad7af47d3ea5da6f39b27b5"
+    }
+  },
+  "runtime": {
+    "actual_postgresql_server": true,
+    "transport": "TCP loopback",
+    "sql_observed_identity": {
+      "version": "PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit",
+      "current_user": "tabmail_test",
+      "current_role": "tabmail_test",
+      "server_address": "127.0.0.1",
+      "server_port": 55432,
+      "listen_addresses": "127.0.0.1",
+      "unix_socket_directories": "",
+      "data_directory": "/workspace/scratch/472e5abb7d28/postgres-runtime/data",
+      "password_encryption": "scram-sha-256",
+      "postmaster_start_time": "2026-10-09T01:49:46.965538-07:00"
+    },
+    "launch_identity": {
+      "uid": 65534,
+      "euid": 65534,
+      "gid": 65534,
+      "egid": 65534
+    },
+    "normal_shutdown": true,
+    "shutdown": {
+      "server_returncode": 0,
+      "signal": "SIGINT (normal PostgreSQL fast shutdown)",
+      "postmaster_pid_file_exists_after_shutdown": false,
+      "receipt": {
+        "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/supervised-shutdown.json",
+        "bytes": 918,
+        "sha256": "c685ce06a64cc201e40f1fcbecf8674957a52f15a1ab8f957ae16f412730835d"
+      }
+    },
+    "supervisor": {
+      "exit_code": 0,
+      "completed_waves": 3,
+      "expected_waves": 3,
+      "receipt": {
+        "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/supervised-exit.json",
+        "bytes": 68,
+        "sha256": "468070d97f1577e1d102f3312ff17a58d5f468024a6485d252bc20abde8b4451"
+      }
+    },
+    "artifacts": {
+      "supervised-plan.json": {
+        "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/supervised-plan.json",
+        "bytes": 2369,
+        "sha256": "2b4018caa79115409977f75bc5fb6b9aba951e461dba17bcf923e4d30a3e7610"
+      },
+      "supervised-results.json": {
+        "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/supervised-results.json",
+        "bytes": 2152,
+        "sha256": "321767daf9964298b07648090187769725691ea0ae871d812cda4278ae04389c"
+      },
+      "supervised-sql-identity.json": {
+        "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/supervised-sql-identity.json",
+        "bytes": 531,
+        "sha256": "67192de03a654584992358447946218fe97cf2fb4b53ba67f61b9e1648de6783"
+      },
+      "package-manifest.json": {
+        "path": "/workspace/scratch/472e5abb7d28/postgres-runtime/package-manifest.json",
+        "bytes": 975,
+        "sha256": "e74eb7d6edd300d2ad785afb595205796b4fd831dba606b0a5f01a4bd7bde567"
+      },
+      "server-supervised.log": {
+        "path": "/workspace/scratch/472e5abb7d28/postgres-runtime/server-supervised.log",
+        "bytes": 41742,
+        "sha256": "e5160fa3f4c21dd1d167e7ef803ff351181eab0931c99ab97aa04e9636067792"
+      }
+    }
+  },
+  "runs": [
+    {
+      "wave": "wave1-v2",
+      "case": "mailbox-grants",
+      "github_issue": 227,
+      "frozen_test": {
+        "path": "internal/store/postgres/r5_frozen_mailbox_grant_test.go",
+        "sha256": "39d0360a979914e3aac33aa6541b44bd6794480dd792173ab197f3c74c5ceb1f",
+        "run_pattern": "^TestR5FrozenMailboxGrantRevocation$",
+        "expected_leaves": 14
+      },
+      "comparison": {
+        "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/wave1-v2/comparison.json",
+        "bytes": 7954,
+        "sha256": "98f418344611e1aa9ab846f0a5a465f51ae4b59c54adeef75f26943e6fa3a5f6"
+      },
+      "strict_runner_exit_code": 0,
+      "root_event_verification": {
+        "path": "/workspace/scratch/472e5abb7d28/root-evidence/pg-root-verification-wave1-v2.json",
+        "bytes": 1569,
+        "sha256": "a5a31d0df3958b9c6230d029cd7c836aa07617c9e2dfed3315326643e694d694"
+      },
+      "identical_baseline_candidate_leaf_sets": true,
+      "baseline": {
+        "source": {
+          "commit": "30d2d05ab6ddcc23f47d9b9786885817aef50a0f",
+          "tree": "f3de30fc777b0d9135c4ed9a75005aec8f2835c0",
+          "working_tree_status": "?? internal/store/postgres/r5_frozen_mailbox_grant_test.go",
+          "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "source_before_equals_after": true,
+        "frozen_test_sha256": "39d0360a979914e3aac33aa6541b44bd6794480dd792173ab197f3c74c5ceb1f",
+        "passed": 11,
+        "failed": 3,
+        "skipped": 0,
+        "all_skip_events": 0,
+        "exit_code": 1,
+        "raw_go_test_jsonl": {
+          "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/wave1-v2/baseline/go-test.jsonl",
+          "bytes": 15881,
+          "sha256": "6afca6bf0340c6f43aab6063d5758bf421ea5f544cf7ba27737c802763fc18cc"
+        }
+      },
+      "candidate": {
+        "source": {
+          "commit": "559d01edd58c6af5cbc5965e1202ff575e4e2cda",
+          "tree": "3b1b2644c7e7f05b57396afbf04daf8b8394da33",
+          "working_tree_status": "",
+          "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "source_before_equals_after": true,
+        "frozen_test_sha256": "39d0360a979914e3aac33aa6541b44bd6794480dd792173ab197f3c74c5ceb1f",
+        "passed": 14,
+        "failed": 0,
+        "skipped": 0,
+        "all_skip_events": 0,
+        "exit_code": 0,
+        "raw_go_test_jsonl": {
+          "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/wave1-v2/candidate/go-test.jsonl",
+          "bytes": 14915,
+          "sha256": "9d197254b98c2668f7e75401f2b4bda58d013bcc8d3cc9293f92875bf86a7345"
+        }
+      }
+    },
+    {
+      "wave": "wave2-v2",
+      "case": "derived-text",
+      "github_issue": 230,
+      "frozen_test": {
+        "path": "internal/store/postgres/r5_derived_text_persistence_test.go",
+        "sha256": "e3c7ac16ed4c3492135edfb4fbc170025af4e77385d9e7b74d3874e11852072b",
+        "run_pattern": "^TestR5DerivedTextPersistence$",
+        "expected_leaves": 8
+      },
+      "comparison": {
+        "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/wave2-v2/comparison.json",
+        "bytes": 7618,
+        "sha256": "37ed6a9e751f7677e3fe596817623099b6154e42f6ca0f4a8257eb18fc8b3f02"
+      },
+      "strict_runner_exit_code": 0,
+      "root_event_verification": {
+        "path": "/workspace/scratch/472e5abb7d28/root-evidence/pg-root-verification-wave2-v2.json",
+        "bytes": 1566,
+        "sha256": "69009c2b660aede3806edd855b5ab040fda1f02d9224440947c6fd131c565085"
+      },
+      "identical_baseline_candidate_leaf_sets": true,
+      "baseline": {
+        "source": {
+          "commit": "30d2d05ab6ddcc23f47d9b9786885817aef50a0f",
+          "tree": "f3de30fc777b0d9135c4ed9a75005aec8f2835c0",
+          "working_tree_status": "?? internal/store/postgres/r5_derived_text_persistence_test.go",
+          "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "source_before_equals_after": true,
+        "frozen_test_sha256": "e3c7ac16ed4c3492135edfb4fbc170025af4e77385d9e7b74d3874e11852072b",
+        "passed": 2,
+        "failed": 6,
+        "skipped": 0,
+        "all_skip_events": 0,
+        "exit_code": 1,
+        "raw_go_test_jsonl": {
+          "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/wave2-v2/baseline/go-test.jsonl",
+          "bytes": 10003,
+          "sha256": "8f5d0db62dd11b968088428a3bd08d21ae78d7f17012a3f8815324346897d34b"
+        }
+      },
+      "candidate": {
+        "source": {
+          "commit": "7bb9b8abff9a6a53b1d0010f96cc13728a9330c5",
+          "tree": "48f894a0417091278a9d197096d13995b9041b38",
+          "working_tree_status": "",
+          "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "source_before_equals_after": true,
+        "frozen_test_sha256": "e3c7ac16ed4c3492135edfb4fbc170025af4e77385d9e7b74d3874e11852072b",
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0,
+        "all_skip_events": 0,
+        "exit_code": 0,
+        "raw_go_test_jsonl": {
+          "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/wave2-v2/candidate/go-test.jsonl",
+          "bytes": 8184,
+          "sha256": "256ea2055cff44a0d5b2fd7bb29dc0755064fc0f409259b0e2527cee1a81aaa7"
+        }
+      }
+    },
+    {
+      "wave": "wave3-v2",
+      "case": "reconcile-ledger",
+      "github_issue": 233,
+      "frozen_test": {
+        "path": "internal/store/postgres/r5_reconcile_ledger_coverage_test.go",
+        "sha256": "6f1a8bf768b4f385cc0c5d3fff245aa11ea78ae529eed82147a459e0f1a5908c",
+        "run_pattern": "^TestR5ReconciliationRequiresCompleteLedger$",
+        "expected_leaves": 19
+      },
+      "comparison": {
+        "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/wave3-v2/comparison.json",
+        "bytes": 10055,
+        "sha256": "3eef132487219cfb18ba83d1cffe41e341bfac5de9d8a2f65b7563470b748627"
+      },
+      "strict_runner_exit_code": 0,
+      "root_event_verification": {
+        "path": "/workspace/scratch/472e5abb7d28/root-evidence/pg-root-verification-wave3-v2.json",
+        "bytes": 1569,
+        "sha256": "7300b6f9b66735309f79facbd3e7f827ff0b829280871719dc9eda2ca3baa22e"
+      },
+      "identical_baseline_candidate_leaf_sets": true,
+      "baseline": {
+        "source": {
+          "commit": "30d2d05ab6ddcc23f47d9b9786885817aef50a0f",
+          "tree": "f3de30fc777b0d9135c4ed9a75005aec8f2835c0",
+          "working_tree_status": "?? internal/store/postgres/r5_reconcile_ledger_coverage_test.go",
+          "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "source_before_equals_after": true,
+        "frozen_test_sha256": "6f1a8bf768b4f385cc0c5d3fff245aa11ea78ae529eed82147a459e0f1a5908c",
+        "passed": 12,
+        "failed": 7,
+        "skipped": 0,
+        "all_skip_events": 0,
+        "exit_code": 1,
+        "raw_go_test_jsonl": {
+          "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/wave3-v2/baseline/go-test.jsonl",
+          "bytes": 20978,
+          "sha256": "056eeac1c9cbf08da873f5b2cbb7e696d6270ccc4998316e53bbd32c8fc9aa74"
+        }
+      },
+      "candidate": {
+        "source": {
+          "commit": "17be458fb9d36e135a95962638b68ce105c16518",
+          "tree": "fd362eed901840f23f58b477104a642f2a6cbf51",
+          "working_tree_status": "",
+          "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "source_before_equals_after": true,
+        "frozen_test_sha256": "6f1a8bf768b4f385cc0c5d3fff245aa11ea78ae529eed82147a459e0f1a5908c",
+        "passed": 19,
+        "failed": 0,
+        "skipped": 0,
+        "all_skip_events": 0,
+        "exit_code": 0,
+        "raw_go_test_jsonl": {
+          "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/pg-local/wave3-v2/candidate/go-test.jsonl",
+          "bytes": 19025,
+          "sha256": "67a0cb4223ef8f2fe74fdd8b194aff9d5b12e6e62012bee30457f062c13d09fc"
+        }
+      }
+    }
+  ],
+  "v1_fixture_corrigendum": {
+    "case": "mailbox-grants",
+    "old_frozen_test_sha256": "b7a101baab0b031f6dd803aabdac79dff5c36210094c5c5c6ae49db05c0f48f6",
+    "corrected_frozen_test_sha256": "39d0360a979914e3aac33aa6541b44bd6794480dd792173ab197f3c74c5ceb1f",
+    "old_predicate": "FROM outbox_events WHERE tenant_id=$1",
+    "corrected_predicate": "FROM outbox_events WHERE payload->>'tenant_id'=$1::text",
+    "single_predicate_inverse_reproduces_original_bytes": true,
+    "other_assertion_bytes_unchanged": true,
+    "proof": {
+      "path": "/workspace/scratch/472e5abb7d28/backend-evidence/catalog17-validation-packet-v2/oracle-corrigendum/proof.json",
+      "bytes": 1930,
+      "sha256": "b2caa951ddf328b38ada12f8e2fbe13b9b18ab713568eda1d86f5bd67a4fdb80"
+    },
+    "failure_cause": "The V1 outbox snapshot referenced nonexistent outbox_events.tenant_id; twelve candidate leaves stopped at SQLSTATE 42703.",
+    "retained_v1_wave2_failure": {
+      "job_url": "https://github.com/jyqj/tabmail/actions/runs/37903966166/job/113732833358",
+      "artifact_id": 11604646928,
+      "baseline": {
+        "passed": 1,
+        "failed": 13,
+        "skipped": 0,
+        "exit_code": 1
+      },
+      "candidate": {
+        "passed": 2,
+        "failed": 12,
+        "skipped": 0,
+        "exit_code": 1
+      },
+      "qualified": false
+    },
+    "retained_failure_artifacts": [
+      {
+        "path": "/workspace/scratch/472e5abb7d28/pr-audit-artifacts/pg-wave1-113727064900.log",
+        "bytes": 82643,
+        "sha256": "9598eb8059c11f7727869f16052d38ed9c5971fbc76b9f847181a03e11787439"
+      },
+      {
+        "path": "/workspace/scratch/472e5abb7d28/pr-audit-artifacts/pg-wave2-mailbox-113732833358.log",
+        "bytes": 94942,
+        "sha256": "f9c26cc6479fc085834c4ef05493a68baab47132e7a7c930fdc5e14be401408d"
+      },
+      {
+        "path": "/workspace/scratch/472e5abb7d28/pr-audit-artifacts/pg-wave2-mailbox-result.json",
+        "bytes": 13816,
+        "sha256": "f196d85277822af58e2dd71c90053276d05150ffb6bf10e1be5dca0f1f77bbf1"
+      }
+    ],
+    "old_results_reclassified_as_pass": false,
+    "acceptance_rule": "Each V2 comparison executed the corrected frozen bytes on both baseline and its public candidate; V1 failure records remain failed."
+  },
+  "execution_integrity": {
+    "same_test_bytes_within_each_comparison": true,
+    "same_leaf_id_set_within_each_comparison": true,
+    "all_source_before_after_identities_equal": true,
+    "all_candidate_worktrees_clean": true,
+    "baseline_overlay": "Each baseline adds only its frozen regression file as an untracked file; all tracked baseline bytes retain the baseline commit tree.",
+    "all_six_go_test_stderr_files_empty": true,
+    "all_level_skip_events": 0,
+    "product_test_and_runner_bytes_unchanged_during_execution": true,
+    "retained_setup_attempts": "Earlier successful startup/SQL followed by unavailable namespace /proc metadata and separate-invocation TCP refusal remain recorded. Actual gates only began after the single-process supervisor started. No guard, identity API, product source, fixture, assertion, or runner bytes were modified for execution.",
+    "retained_optional_review_correction": "The first optional index review assumed outer runner stderr was empty. It contains only normal git worktree progress; the comparator was corrected to verify that exact scope. All six Go-test stderr files remain empty. Initial review script/diagnostic retained; original strict runner and all outputs unchanged."
+  },
+  "qualification": {
+    "bounded_pg_acceptance": true,
+    "scope": "Only the three frozen suites and their 41 candidate leaves at the exact recorded public candidate source/tree pairs.",
+    "full_postgresql_regression_suite_executed": false,
+    "later_commits_executed_by_this_evidence": false,
+    "full_product_or_release_acceptance_claimed": false,
+    "catalog_source_version_gate_covered": false,
+    "tests_reexecuted_to_write_this_summary": false,
+    "todo_completions_added_by_summary": 0,
+    "parent_todo_acceptance_changed_by_summary": false,
+    "separate_gates": "PR merge state, bounded TODO closure, original parent TODO acceptance, catalog full source-version CI, and deployment readiness retain their own evidence and decisions."
+  }
+}

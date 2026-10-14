@@ -20,6 +20,7 @@ import { TemplateVersionsView } from "./versions";
 import type { MailTemplate, TemplateVersion } from "@/lib/company";
 
 const template: MailTemplate = {
+  updated_at: "2026-10-02T12:00:00Z",
   id: "tpl-1",
   name: "Welcome",
   revision: 7,
@@ -113,4 +114,30 @@ describe("TemplateVersionsView revoke flow", () => {
     expect(revokeMock).toHaveBeenCalledWith("tpl-1", 2, 7);
     expect(mutate).toHaveBeenCalled();
   });
+
+  it.each(["missing", "throws", "undefined"])(
+    "does not revoke or refresh when confirmation is %s",
+    async (failure) => {
+      const mutate = wireUseAPI();
+      const onRevoked = vi.fn();
+      const confirm = vi.spyOn(window, "confirm");
+      if (failure === "missing") {
+        vi.stubGlobal("confirm", undefined);
+      } else if (failure === "throws") {
+        confirm.mockImplementation(() => { throw new Error("dialog blocked"); });
+      } else {
+        confirm.mockReturnValue(undefined as unknown as boolean);
+      }
+      try {
+        render(<TemplateVersionsView template={template} refreshKey={0} onRevoked={onRevoked} />);
+        fireEvent.click(screen.getByTestId("revoke-version-2"));
+        await waitFor(() => expect(screen.getByTestId("revoke-version-2")).toBeEnabled());
+        expect(revokeMock).not.toHaveBeenCalled();
+        expect(mutate).not.toHaveBeenCalled();
+        expect(onRevoked).not.toHaveBeenCalled();
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    },
+  );
 });

@@ -1,0 +1,6 @@
+{
+  "execution_stage": "module_import",
+  "unittest_loader_error_placeholders": 3,
+  "target_methods_executed": 0,
+  "cause": "PYTHONPATH did not include the repository scripts directory. No source/test changes were required. Original captured outputs and metadata are retained."
+}

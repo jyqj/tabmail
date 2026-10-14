@@ -1,0 +1,2232 @@
+{
+  "schema_version": 1,
+  "status": "BATCH_QUALIFIED",
+  "tested_source": "925264f1293120b70bfb1c6e8a865b65b1c5cad0",
+  "formal_batches_started": 1,
+  "reruns": 0,
+  "required_terminals": 43,
+  "go_terminals": 40,
+  "python_terminals": 3,
+  "handler_ids": 17,
+  "handler_variants": 26,
+  "catalog_ids": 46,
+  "full_catalog_qualified": false,
+  "budgets": {
+    "case": 75,
+    "go": 120,
+    "process": 180
+  },
+  "workers": 4,
+  "counts": {
+    "pass": 43,
+    "fail": 0,
+    "skip": 0,
+    "missing": 0
+  },
+  "qualified_terminals": 43,
+  "terminal_matrix": [
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/eight",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:58.806129059Z",
+          "elapsed": 0
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/empty",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:58.805293476Z",
+          "elapsed": 0
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/maximum",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:58.806419955Z",
+          "elapsed": 0
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/over_maximum",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:58.80651381Z",
+          "elapsed": 0
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/seven",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:58.806091264Z",
+          "elapsed": 0
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/trim_maximum",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:58.806428087Z",
+          "elapsed": 0
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/trim_seven",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:58.806118387Z",
+          "elapsed": 0
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_nine",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:58.80614651Z",
+          "elapsed": 0
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_six",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:58.806137258Z",
+          "elapsed": 0
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_twelve",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:58.806407318Z",
+          "elapsed": 0
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolAuditReasonSharedCases/OP03/whitespace",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:58.80542152Z",
+          "elapsed": 0
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF01/default",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:22.657639887Z",
+          "elapsed": 9.04
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF02/default",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:57.313185438Z",
+          "elapsed": 5.47
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF03/default",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:15.694450514Z",
+          "elapsed": 8.16
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF04/default",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:14.590510021Z",
+          "elapsed": 9.1
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF05/foreign_tenant",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:13.619510747Z",
+          "elapsed": 7.14
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF05/frozen",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:14.151075035Z",
+          "elapsed": 9.13
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF05/higher_role",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:22.110049878Z",
+          "elapsed": 7.52
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF05/self",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:23.940574814Z",
+          "elapsed": 8.25
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF06/default",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:23.283611342Z",
+          "elapsed": 9.13
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/LF07/default",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:05.490224573Z",
+          "elapsed": 7.84
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE01/default",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:06.485852843Z",
+          "elapsed": 9.3
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE02/0",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:57.313007626Z",
+          "elapsed": 7.54
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE02/[]",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:48.463904618Z",
+          "elapsed": 10.13
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE02/false",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:32.812548145Z",
+          "elapsed": 10.71
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE02/null",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:13.619462225Z",
+          "elapsed": 10.35
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE02/omitted",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:32.837595477Z",
+          "elapsed": 10.18
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE03/default",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:53.07253559Z",
+          "elapsed": 10.68
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE04/default",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:56.003196459Z",
+          "elapsed": 11.45
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/PE05/default",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:51.847950857Z",
+          "elapsed": 9.49
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/RC01/default",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:05.490273384Z",
+          "elapsed": 8.31
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/RC02/legacy_outbound_detail",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:41.620900513Z",
+          "elapsed": 9.18
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/RC02/legacy_outbound_list",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:42.067905161Z",
+          "elapsed": 9.23
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/RC02/submit_replay",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:42.361501767Z",
+          "elapsed": 9.55
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/RC03/default",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:38.335023807Z",
+          "elapsed": 7.71
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/RC04/default",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:30.628346817Z",
+          "elapsed": 7.35
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolComponentObservations/RC05/default",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:01:32.438604082Z",
+          "elapsed": 8.5
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolDeliverySharedCases/RC03",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:02:00.360180519Z",
+          "elapsed": 0
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolDeliverySharedCases/RC04",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:02:00.360761269Z",
+          "elapsed": 0
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "TestR5ProtocolDeliverySharedCases/RC05",
+      "runner": "go",
+      "status": "pass",
+      "lifecycle": [
+        {
+          "action": "pass",
+          "time": "2026-10-04T04:02:00.361610684Z",
+          "elapsed": 0
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "name": "R5 shared receipt RC03",
+      "runner": "python",
+      "status": "pass",
+      "lifecycle": [],
+      "qualified": true
+    },
+    {
+      "name": "R5 shared receipt RC04",
+      "runner": "python",
+      "status": "pass",
+      "lifecycle": [],
+      "qualified": true
+    },
+    {
+      "name": "R5 shared receipt RC05",
+      "runner": "python",
+      "status": "pass",
+      "lifecycle": [],
+      "qualified": true
+    }
+  ],
+  "layer_matrix": [
+    {
+      "case_id": "CT01",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT02",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT03",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT04",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT05",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT06",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT07",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT08",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT09",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "CT10",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RC01",
+      "scope_layers": [
+        "components"
+      ],
+      "observed_counts": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RC02",
+      "scope_layers": [
+        "components"
+      ],
+      "observed_counts": {
+        "pass": 3,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RC03",
+      "scope_layers": [
+        "components",
+        "unit"
+      ],
+      "observed_counts": {
+        "pass": 3,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components",
+        "unit"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RC04",
+      "scope_layers": [
+        "components",
+        "unit"
+      ],
+      "observed_counts": {
+        "pass": 3,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components",
+        "unit"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RC05",
+      "scope_layers": [
+        "components",
+        "unit"
+      ],
+      "observed_counts": {
+        "pass": 3,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components",
+        "unit"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "OP01",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "OP02",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "OP03",
+      "scope_layers": [
+        "unit"
+      ],
+      "observed_counts": {
+        "pass": 11,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "unit"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "OP04",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RT01",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RT02",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RT03",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RT04",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RT05",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RT06",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "RT07",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db"
+      ],
+      "missing_required_layers": [
+        "db"
+      ]
+    },
+    {
+      "case_id": "BC01",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "BC02",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "BC03",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "BC04",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "BC05",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "BC06",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "GC01",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db"
+      ],
+      "missing_required_layers": [
+        "db"
+      ]
+    },
+    {
+      "case_id": "GC02",
+      "scope_layers": [],
+      "observed_counts": {
+        "pass": 0,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [],
+      "required_layers": [
+        "db"
+      ],
+      "missing_required_layers": [
+        "db"
+      ]
+    },
+    {
+      "case_id": "LF01",
+      "scope_layers": [
+        "components"
+      ],
+      "observed_counts": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "LF02",
+      "scope_layers": [
+        "components"
+      ],
+      "observed_counts": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "LF03",
+      "scope_layers": [
+        "components"
+      ],
+      "observed_counts": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "LF04",
+      "scope_layers": [
+        "components"
+      ],
+      "observed_counts": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "LF05",
+      "scope_layers": [
+        "components"
+      ],
+      "observed_counts": {
+        "pass": 4,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "LF06",
+      "scope_layers": [
+        "components"
+      ],
+      "observed_counts": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "LF07",
+      "scope_layers": [
+        "components"
+      ],
+      "observed_counts": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "PE01",
+      "scope_layers": [
+        "components"
+      ],
+      "observed_counts": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "PE02",
+      "scope_layers": [
+        "components"
+      ],
+      "observed_counts": {
+        "pass": 5,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "PE03",
+      "scope_layers": [
+        "components"
+      ],
+      "observed_counts": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "PE04",
+      "scope_layers": [
+        "components"
+      ],
+      "observed_counts": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    },
+    {
+      "case_id": "PE05",
+      "scope_layers": [
+        "components"
+      ],
+      "observed_counts": {
+        "pass": 1,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      },
+      "qualified_layers": [
+        "components"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "missing_required_layers": [
+        "db",
+        "http"
+      ]
+    }
+  ],
+  "missing_required_layer_count": 89,
+  "receipt": {
+    "children": {
+      "LF01/default": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "9d40f9a98549aa4bb4c3801da93ba8188098b53e3b743097a86e4156042ce70c",
+        "tail": false,
+        "timeout": false
+      },
+      "LF02/default": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "23b79393cd418ffca2dd6d359592747d9b6c95c5c8e9651a3139d6e712a1cc63",
+        "tail": false,
+        "timeout": false
+      },
+      "LF03/default": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "66ed24134609837e8598377bdef64290d36195d5cdde864e7531e5c5203c76b9",
+        "tail": false,
+        "timeout": false
+      },
+      "LF04/default": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "bc8efc5bf8541edd2a5c72c27cbf835ae66b7c7341d751c59c2be3efeb7de4f7",
+        "tail": false,
+        "timeout": false
+      },
+      "LF05/foreign_tenant": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "5beb2517cd9c41594a8cadd41596e60d95c88baed80fec99909d3589e9df028c",
+        "tail": false,
+        "timeout": false
+      },
+      "LF05/frozen": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "9830c16c9cc671591964ecbca329b905c450103898e608ff7c2942a187571a6f",
+        "tail": false,
+        "timeout": false
+      },
+      "LF05/higher_role": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "e8243c8f849918a75cd28bb641977aee76b09b765f14113d0379c407ba0d4c4e",
+        "tail": false,
+        "timeout": false
+      },
+      "LF05/self": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "572a4e019874e2eca142f584adc31883cc53528de6fd4687363a485bdda946e1",
+        "tail": false,
+        "timeout": false
+      },
+      "LF06/default": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "efd57e7dc6477be462141b5c98a89b04917d492be7a1ac2897bcd1c1e0fa25de",
+        "tail": false,
+        "timeout": false
+      },
+      "LF07/default": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "f6d55d79687d407bec61f01bfaaa7509d713e55a34b62ff5ede11c01895eb0f8",
+        "tail": false,
+        "timeout": false
+      },
+      "PE01/default": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "1f6944e9f0dcc863fc4db6375154c42668eb0dae6093bd788b60fd341cfd6402",
+        "tail": false,
+        "timeout": false
+      },
+      "PE02/0": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "49df0f656624919a82ff1228455671e5a9128319be4202eed96fbad0922978b6",
+        "tail": false,
+        "timeout": false
+      },
+      "PE02/[]": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "16d6ad61cd27b9223e4c28edbb35c01f209fc8e82ec6c93de07c92cde758ea50",
+        "tail": false,
+        "timeout": false
+      },
+      "PE02/false": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "b611b7309e4acaa48cf1e05222eeae313d1e5c0beeee2f509145a840d7c17e8b",
+        "tail": false,
+        "timeout": false
+      },
+      "PE02/null": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "b3cf0c479145a5d9b7afb86e2502fe311f3d92147b04769e4ba18f3381d5a69f",
+        "tail": false,
+        "timeout": false
+      },
+      "PE02/omitted": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "609a76b87e0a432c25c23d39b6028790c1edc994a0a2d59f70126bf8c3c5946e",
+        "tail": false,
+        "timeout": false
+      },
+      "PE03/default": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "f167e9abb81b8d69d048491d2f94ea6fcc319f0b09511e60c8b5ccd8f6be013a",
+        "tail": false,
+        "timeout": false
+      },
+      "PE04/default": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "cabde3224755611ce263ad79bc05ed8c47d5cb5f7de8fd9e843ff4b1de9c55b7",
+        "tail": false,
+        "timeout": false
+      },
+      "PE05/default": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "45beff64d426fd5f30c9a15821c186efe7049b4ed8fceb2f9c1167db402f3f0f",
+        "tail": false,
+        "timeout": false
+      },
+      "RC01/default": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "ed3c7d3b36842b8b059c7a5b9a776b5cd61d6ff75deed803b911cb1c95641288",
+        "tail": false,
+        "timeout": false
+      },
+      "RC02/legacy_outbound_detail": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "af733104c3255eec2b6f019d9dee0cd420cc2b79a0d7db087dea9a13d3f8c7eb",
+        "tail": false,
+        "timeout": false
+      },
+      "RC02/legacy_outbound_list": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "fd315b8eadd83114304f191762e66e9c2ba024334975dca2996ac24244ce81ee",
+        "tail": false,
+        "timeout": false
+      },
+      "RC02/submit_replay": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "67a3689152d1e4a468e453aba2a9a5167c50ac9c589b068b2e4cad3c72402e10",
+        "tail": false,
+        "timeout": false
+      },
+      "RC03/default": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "ecb24d8ae90313390d6858485fa4475ba1b1ac0d0bc2a65ecba7cc2ed661e87a",
+        "tail": false,
+        "timeout": false
+      },
+      "RC04/default": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "d1b36eb4439becf0023986f008530c79682566db76fdf282f2eaaa8c7124aa95",
+        "tail": false,
+        "timeout": false
+      },
+      "RC05/default": {
+        "exit_code": 0,
+        "qualified": true,
+        "report_sha256": "332d4b2a28f5f5dcc64c344ad1e7ce6cde6703709d6a3ec6728e4380ab0fc548",
+        "tail": false,
+        "timeout": false
+      }
+    },
+    "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+    "contract_sha256": "1a12315de8fa6c24c6c36612297839f623ee94a88d27f49b652b87a9d14e7519",
+    "eligibility_scope": "component_adapter_terminals",
+    "errors": [],
+    "max_live_children": 4,
+    "owners_joined": true,
+    "policy": "r5_external_batch_validation_v1",
+    "preflight": true,
+    "product_green": false,
+    "required_terminal_count": 43,
+    "resources_joined": true,
+    "schema_version": 1,
+    "status": "BATCH_QUALIFIED",
+    "task_complete": false,
+    "terminal_count": 43,
+    "terminal_postcheck": true
+  },
+  "cleanup": {
+    "attempts": 1,
+    "channel_joined": true,
+    "failures": [],
+    "lease_held": false,
+    "primary_error": null,
+    "processes": {
+      "10012": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10020": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10029": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10037": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10163": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10184": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10227": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10275": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10325": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10334": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10355": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10433": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10490": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10517": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10555": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10581": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10642": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10691": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10701": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10708": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10798": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10846": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10854": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10865": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10960": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "10999": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "11040": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "11111": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "11174": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "11408": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "9917": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      },
+      "9932": {
+        "direct_reaped": true,
+        "group_joined": true,
+        "pipes_closed": true
+      }
+    },
+    "registered_pending": [],
+    "resources_joined": true,
+    "state": "JOINED"
+  },
+  "independent_pg_cleanup": {
+    "zero_fixture_databases_and_backends": true,
+    "owned_pg_stopped": true,
+    "log_sha256": "3c9b144ae3b21b819763f40e890343e569144d8fa857c6d42f9eafa65e69a767"
+  },
+  "lease_token_present": false,
+  "pins": {
+    "source_sha": "925264f1293120b70bfb1c6e8a865b65b1c5cad0",
+    "runtime_sha256": "e7b3663dd5f6ea324244cca29d1d62e88b14f9eb9bc7d9e1e4f71199d70e6d5c",
+    "contract_sha256": "038151c0f4010e54b8bcb2ed04ca74d9df544ed4df576948f4b7cbf5ed22ce4c",
+    "node": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "go": "/workspace/tabmail-cloud/tools/go/bin/go",
+    "root": "/tmp/tabmail-pe-lf-formal-tools",
+    "source": "/tmp/tabmail-pe-lf-formal-tools/source"
+  },
+  "receipt_byte_sha256": "d7baa377dd1a96b6e17c3b493fcf06e86f2dc0663523a23bbdf54f7c4fb1adf7",
+  "archive_default_race_pins": {
+    "archive": "de09e5dbf16333b405fab8210f26d158a4b059ec647c196a20aaba23771a8e3e",
+    "default": "77f14cae167f3823165c500a82e618915118877c45be78057fbed009b9cb7078",
+    "race": "6e255a5fe4de6a7d065f375fadf078ee0738608d12f847cc2405794a75ba427e"
+  },
+  "focused": {
+    "prior": "PE six top-level, LF author ten top-level, tsc/lint, unit30, protocol70, exact source guards all PASS",
+    "corrected_pair": {
+      "top_tests": 9,
+      "leaf_cases": 58,
+      "passed": true,
+      "seconds": 47.603,
+      "sha256": "d30ed7c858b8420305a5efd5dff5306177b936adadbf499331dcc73c59db2cc3"
+    },
+    "prior_55459_rejection": "preserved unchanged in PE-LF-COMBINED-GATE-20261004"
+  },
+  "preparation": {
+    "initial_install": "failed because executor stripped platform NODE_EXTRA_CA_CERTS; SELF_SIGNED_CERT_IN_CHAIN; original logs retained",
+    "corrected_install": "normal CA trust restored; lifecycle-enabled official-lock npm ci PASS; no certificate verification bypass",
+    "initial_timings": {
+      "clone": {
+        "seconds": 0.31521532300007493,
+        "exit_code": 0
+      },
+      "freeze": {
+        "seconds": 0.2084645359999513,
+        "exit_code": 0
+      },
+      "npm-ci": {
+        "seconds": 71.94628325899998,
+        "exit_code": 1
+      }
+    },
+    "corrected_timings": {
+      "npm-ci-ca-corrected": {
+        "seconds": 29.08114125299994,
+        "exit_code": 0
+      },
+      "archive": {
+        "seconds": 2.3251223229999596,
+        "exit_code": 0
+      },
+      "default": {
+        "seconds": 12.933638582999947,
+        "exit_code": 0
+      },
+      "race": {
+        "seconds": 10.312510848000102,
+        "exit_code": 0
+      },
+      "runtime-capture": {
+        "seconds": 27.796146385000043,
+        "exit_code": 0
+      },
+      "contract-capture": {
+        "seconds": 6.345650488000047,
+        "exit_code": 0
+      },
+      "compile-warmup": {
+        "seconds": 9.17860851499995,
+        "exit_code": 0
+      },
+      "prestart-validate": {
+        "seconds": 6.016846668000085,
+        "exit_code": 0
+      }
+    },
+    "install_advisory": "npm ci automatically reported eight high severity advisories; no audit/fix command or dependency change performed"
+  },
+  "execution": {
+    "exit_code": 0,
+    "elapsed": 81.64846730099998,
+    "attempts": 1
+  },
+  "go_group_stats": [
+    {
+      "file": "go-0.jsonl",
+      "first_event": "2026-10-04T04:00:57.125767499Z",
+      "last_event": "2026-10-04T04:01:58.323260322Z",
+      "package_elapsed": 61.198
+    },
+    {
+      "file": "go-1.jsonl",
+      "first_event": "2026-10-04T04:01:58.778872895Z",
+      "last_event": "2026-10-04T04:01:59.808431362Z",
+      "package_elapsed": 1.03
+    },
+    {
+      "file": "go-2.jsonl",
+      "first_event": "2026-10-04T04:02:00.309488555Z",
+      "last_event": "2026-10-04T04:02:01.364234893Z",
+      "package_elapsed": 1.055
+    }
+  ],
+  "evidence_sha256": {
+    "archive.json": "de09e5dbf16333b405fab8210f26d158a4b059ec647c196a20aaba23771a8e3e",
+    "archive.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "clone.stderr": "5d8410a33de5ffdf1de527c39fa48d8b37e235cbf8debf79b2b5037c848b0032",
+    "clone.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile-warmup.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile-warmup.stdout": "c0fca34a31ffc178cb1a2b33e142c8d1b3a0189a1217ac935a2fa592f3c2b330",
+    "components-contract.json": "038151c0f4010e54b8bcb2ed04ca74d9df544ed4df576948f4b7cbf5ed22ce4c",
+    "contract-capture.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "default.json": "77f14cae167f3823165c500a82e618915118877c45be78057fbed009b9cb7078",
+    "default.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "formal-output/cleanup.json": "9eb402bf0deeef1c51c8187ec79701078ce9802d5fbdb137d2886b2415f8a97b",
+    "formal-output/go-0.jsonl": "4011aee8ac11be56f3e681015f9a6f460aa5088978098914a5031ea81e47a88d",
+    "formal-output/go-0.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "formal-output/go-1.jsonl": "007d0e13dff43299cc988dcd1aeebdf6e5d16bffa5aea8737da7e5fc4190ae4d",
+    "formal-output/go-1.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "formal-output/go-2.jsonl": "6dfbd94a414aa38d0bc58cea8292239501778460917aa2d1bd213049d6a27885",
+    "formal-output/go-2.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "formal-output/http-pg-components/LF01/default/observations.json": "a3fedff3bbc8b30cdc62b7c574380737f3a4fc53b5a0665200cffef93ea1c214",
+    "formal-output/http-pg-components/LF01/default/vitest.json": "9d40f9a98549aa4bb4c3801da93ba8188098b53e3b743097a86e4156042ce70c",
+    "formal-output/http-pg-components/LF01/default/vitest.log": "5f24e08bb85749a087681f1839043937440c97659bbbdbd1b5bd433da743e3cc",
+    "formal-output/http-pg-components/LF02/default/observations.json": "93727d5f42289bcd54b3ccecf62f958d5f5679d2e5cfd3666ac7afdc6e38d35c",
+    "formal-output/http-pg-components/LF02/default/vitest.json": "23b79393cd418ffca2dd6d359592747d9b6c95c5c8e9651a3139d6e712a1cc63",
+    "formal-output/http-pg-components/LF02/default/vitest.log": "46456f9086a0f1463f5a18d7c92ab52e30ce49089a47c9a52e797b7f80f32e59",
+    "formal-output/http-pg-components/LF03/default/observations.json": "4cad234e85e63a7e7a2bdd5c0a6db5e4d1516f5e16dd1be79aa2a873ab0f9bee",
+    "formal-output/http-pg-components/LF03/default/vitest.json": "66ed24134609837e8598377bdef64290d36195d5cdde864e7531e5c5203c76b9",
+    "formal-output/http-pg-components/LF03/default/vitest.log": "62e1b18552bc08792288a3420c6c804298d1ebae7c4d7df6652f7320af970429",
+    "formal-output/http-pg-components/LF04/default/observations.json": "4103eb1132b1f2d8a39e87e690645fd242930bf93570d5740364ecf3bedc46d1",
+    "formal-output/http-pg-components/LF04/default/vitest.json": "bc8efc5bf8541edd2a5c72c27cbf835ae66b7c7341d751c59c2be3efeb7de4f7",
+    "formal-output/http-pg-components/LF04/default/vitest.log": "667958b9b4ec47fb72863c145d4952749502b130648e051fe0c1edc7d3995045",
+    "formal-output/http-pg-components/LF05/foreign_tenant/observations.json": "fef4d2c4baab911b080381bcb70c233e26eec8363c58108093bb488ae9d32ddd",
+    "formal-output/http-pg-components/LF05/foreign_tenant/vitest.json": "5beb2517cd9c41594a8cadd41596e60d95c88baed80fec99909d3589e9df028c",
+    "formal-output/http-pg-components/LF05/foreign_tenant/vitest.log": "1806dfb649ba0c17a382b968fcf3c940a90374757cc6369c601b7d76268e00b4",
+    "formal-output/http-pg-components/LF05/frozen/observations.json": "3f0b667549b14caea193d16a2fd4d3f2516af74f33f64d38826d757a7fd6e23c",
+    "formal-output/http-pg-components/LF05/frozen/vitest.json": "9830c16c9cc671591964ecbca329b905c450103898e608ff7c2942a187571a6f",
+    "formal-output/http-pg-components/LF05/frozen/vitest.log": "ad492c165e3eba1c200f2d86dc6165ff22c6ea1f86505491ed4cdb0ee1dc14cb",
+    "formal-output/http-pg-components/LF05/higher_role/observations.json": "6e7062a391deb7241ddfb95ccaf9faf8fea9790ed0f106e27e60b60cab3d93d1",
+    "formal-output/http-pg-components/LF05/higher_role/vitest.json": "e8243c8f849918a75cd28bb641977aee76b09b765f14113d0379c407ba0d4c4e",
+    "formal-output/http-pg-components/LF05/higher_role/vitest.log": "2310def10c73827fea111d1e930089f0d2749b25a8a20738d87294ec4c736da8",
+    "formal-output/http-pg-components/LF05/self/observations.json": "45ad7d727b1472df4dd7b1dc378408f8cf5b710ae2a82c6d96ff7db4bcd31d72",
+    "formal-output/http-pg-components/LF05/self/vitest.json": "572a4e019874e2eca142f584adc31883cc53528de6fd4687363a485bdda946e1",
+    "formal-output/http-pg-components/LF05/self/vitest.log": "0e7b710a2734bfcfca3b5a6ced7cdc92c26a625c26856bb489893072857494f1",
+    "formal-output/http-pg-components/LF06/default/observations.json": "1774bffa3765a3e66897420323b4e0a74adb14e7f28a381e0f2ed85783f72465",
+    "formal-output/http-pg-components/LF06/default/vitest.json": "efd57e7dc6477be462141b5c98a89b04917d492be7a1ac2897bcd1c1e0fa25de",
+    "formal-output/http-pg-components/LF06/default/vitest.log": "3872737c7dd4c2750783228df3421b856aa931945a101d6d08d34064b8c5e30f",
+    "formal-output/http-pg-components/LF07/default/observations.json": "77fa692496668ba1fa9277f763d118d702d712b42bbb695cb769c4b441efeeb0",
+    "formal-output/http-pg-components/LF07/default/vitest.json": "f6d55d79687d407bec61f01bfaaa7509d713e55a34b62ff5ede11c01895eb0f8",
+    "formal-output/http-pg-components/LF07/default/vitest.log": "a6b5dbfd9fe4029cbf467999a633488154e3fce3104a7179e30b7c3f0fba32a2",
+    "formal-output/http-pg-components/PE01/default/observations.json": "99e160bfd2a3457a636914a17c915ff4aaf57c829d0d413a07ce28d3ccc49abf",
+    "formal-output/http-pg-components/PE01/default/vitest.json": "1f6944e9f0dcc863fc4db6375154c42668eb0dae6093bd788b60fd341cfd6402",
+    "formal-output/http-pg-components/PE01/default/vitest.log": "c7bb62c2c26f646bb93486af0a9f7152d49ff5e168128e5ff662315aac1c4fe3",
+    "formal-output/http-pg-components/PE02/0/observations.json": "ac0b7f133bed32942d1d045aefedb08cd02f62174c009d690905d72df0883649",
+    "formal-output/http-pg-components/PE02/0/vitest.json": "49df0f656624919a82ff1228455671e5a9128319be4202eed96fbad0922978b6",
+    "formal-output/http-pg-components/PE02/0/vitest.log": "b8fe62f5753d5846314d8fb0dda561dea24f14e332166f094085fbbc318c846f",
+    "formal-output/http-pg-components/PE02/empty_array/observations.json": "5e1b7656ddeaee935eba8d2a164b7f8bdf766a2c5cee3b027ca87739fdd5cb0e",
+    "formal-output/http-pg-components/PE02/empty_array/vitest.json": "16d6ad61cd27b9223e4c28edbb35c01f209fc8e82ec6c93de07c92cde758ea50",
+    "formal-output/http-pg-components/PE02/empty_array/vitest.log": "f7510b18f893697c38ae26b1884bdb5b20dd86cfb9fa62996593919f38bcf632",
+    "formal-output/http-pg-components/PE02/false/observations.json": "c69938103fdbc94dd6349223a2a61cd6507b136875d3ac3c5de5e460d3990f95",
+    "formal-output/http-pg-components/PE02/false/vitest.json": "b611b7309e4acaa48cf1e05222eeae313d1e5c0beeee2f509145a840d7c17e8b",
+    "formal-output/http-pg-components/PE02/false/vitest.log": "4be52ce5400ebb26579af6a75dcead7d871bfcb4b0d4c373f9c4e170951c257c",
+    "formal-output/http-pg-components/PE02/null/observations.json": "7c0645c9c4a4376258d1227768c2a5f1ce0378f687847cd0d1f4f4239546f9a2",
+    "formal-output/http-pg-components/PE02/null/vitest.json": "b3cf0c479145a5d9b7afb86e2502fe311f3d92147b04769e4ba18f3381d5a69f",
+    "formal-output/http-pg-components/PE02/null/vitest.log": "ab3728b34c14ffbb6f804472512ab316ae6c5e832a2c41b86a74f2b28440e45d",
+    "formal-output/http-pg-components/PE02/omitted/observations.json": "19b5d4e2d93147826fe6afb0a4c16c97317e6b0e5306ab6456b508aa3237b29c",
+    "formal-output/http-pg-components/PE02/omitted/vitest.json": "609a76b87e0a432c25c23d39b6028790c1edc994a0a2d59f70126bf8c3c5946e",
+    "formal-output/http-pg-components/PE02/omitted/vitest.log": "66aff94cccfb2dc2e70733444b5cfc7401aebefcd3f05bc6c0ecdedca47e39c9",
+    "formal-output/http-pg-components/PE03/default/observations.json": "75f8aae4c156d7751cf2168cd3bc1d37fd50a68cb9038ca6ca7c788c18e247f4",
+    "formal-output/http-pg-components/PE03/default/vitest.json": "f167e9abb81b8d69d048491d2f94ea6fcc319f0b09511e60c8b5ccd8f6be013a",
+    "formal-output/http-pg-components/PE03/default/vitest.log": "6d2b459f083ac8aec211052ba34ccffe11ed629324afb6e2e1befe3a1c11111b",
+    "formal-output/http-pg-components/PE04/default/observations.json": "75ab0399abcd5e2b026ddb35323276f15de4c4626398dfa06f4b4e3b3402d706",
+    "formal-output/http-pg-components/PE04/default/vitest.json": "cabde3224755611ce263ad79bc05ed8c47d5cb5f7de8fd9e843ff4b1de9c55b7",
+    "formal-output/http-pg-components/PE04/default/vitest.log": "ca163c37f92cac12a2a3d3197bd84a7ccbe5141ec901c3e884e1eaec48d109a3",
+    "formal-output/http-pg-components/PE05/default/observations.json": "9d4744b53a82ae102e14bae7ba529b3f20754113ac32ad85194dee6f0301f17a",
+    "formal-output/http-pg-components/PE05/default/vitest.json": "45beff64d426fd5f30c9a15821c186efe7049b4ed8fceb2f9c1167db402f3f0f",
+    "formal-output/http-pg-components/PE05/default/vitest.log": "2199ab22fe7d611238bedae53d27d045420deb634128085c74475d928ca62089",
+    "formal-output/http-pg-components/RC01/default/observations.json": "ea6431de2963d1aeba216272c8cc41fffdb8a834b12f57c46faf3359d10fcf1e",
+    "formal-output/http-pg-components/RC01/default/vitest.json": "ed3c7d3b36842b8b059c7a5b9a776b5cd61d6ff75deed803b911cb1c95641288",
+    "formal-output/http-pg-components/RC01/default/vitest.log": "972f4418163b58300444af9631256c1242cd5df34e0187ba83848e22c4e843f3",
+    "formal-output/http-pg-components/RC02/legacy_outbound_detail/observations.json": "03cd7fa9ae638bcc1d7e4e2894e2c7b8f2d822acc115592ac0992d0893caa8d0",
+    "formal-output/http-pg-components/RC02/legacy_outbound_detail/vitest.json": "af733104c3255eec2b6f019d9dee0cd420cc2b79a0d7db087dea9a13d3f8c7eb",
+    "formal-output/http-pg-components/RC02/legacy_outbound_detail/vitest.log": "85586e06305ec61529d3da071d0dd177c9d12de15a7ddf20d6409aabf396efb2",
+    "formal-output/http-pg-components/RC02/legacy_outbound_list/observations.json": "bbf7dbdf232c931d312607f4fcf7e00da7e520ce69a71759626a9b4a50104808",
+    "formal-output/http-pg-components/RC02/legacy_outbound_list/vitest.json": "fd315b8eadd83114304f191762e66e9c2ba024334975dca2996ac24244ce81ee",
+    "formal-output/http-pg-components/RC02/legacy_outbound_list/vitest.log": "bda8f99501435b0ffdc2d3695bcd59c8b397dd32d2c7858c0b34e9e62678c46d",
+    "formal-output/http-pg-components/RC02/submit_replay/observations.json": "a604a31045d5c966b7b074abbfd3513791714402883ec47dde0314d0dffb2b0d",
+    "formal-output/http-pg-components/RC02/submit_replay/vitest.json": "67a3689152d1e4a468e453aba2a9a5167c50ac9c589b068b2e4cad3c72402e10",
+    "formal-output/http-pg-components/RC02/submit_replay/vitest.log": "1f1963be8e2623b3717aec9c73bdcc76b909d49b04396a4b06adc3f5e9482a8f",
+    "formal-output/http-pg-components/RC03/default/observations.json": "845c903421d1345112efbcdbdcdbf700c839673f8c5646e91d0dff8d1d4cc076",
+    "formal-output/http-pg-components/RC03/default/vitest.json": "ecb24d8ae90313390d6858485fa4475ba1b1ac0d0bc2a65ecba7cc2ed661e87a",
+    "formal-output/http-pg-components/RC03/default/vitest.log": "52aed1fb18e8570b2c5810e4b4d89e31432cc198ff078b3e5eede117fa66219d",
+    "formal-output/http-pg-components/RC04/default/observations.json": "0605d612c534b8c9f2c4c7f3644629dbdff9540dbc836f373762b8f35bf9144b",
+    "formal-output/http-pg-components/RC04/default/vitest.json": "d1b36eb4439becf0023986f008530c79682566db76fdf282f2eaaa8c7124aa95",
+    "formal-output/http-pg-components/RC04/default/vitest.log": "a5b062e23538311e1162bed7824e95cf72ec1b2a0b132aa50583bcff0b8e9214",
+    "formal-output/http-pg-components/RC05/default/observations.json": "5f6b777145a5aa83c8f4fcc4909203f3d4ee26f251e2ca93a7ce2c73b78b7381",
+    "formal-output/http-pg-components/RC05/default/vitest.json": "332d4b2a28f5f5dcc64c344ad1e7ce6cde6703709d6a3ec6728e4380ab0fc548",
+    "formal-output/http-pg-components/RC05/default/vitest.log": "065fccf494f9bfaca4da53d178182afd28f0f72d6a7ad97421816877d1a7d14b",
+    "formal-output/observations.json": "e36db6555567b5a6093f677e52b8a2f7f8a93c81e36a49c066d629388b685603",
+    "formal-output/python-vitest.json": "91a1f94d41fb972021290bb009a884309defa21834923cf35ed7fe156eaaaec3",
+    "formal-output/python.stderr": "b4acd4f819050212c4fe3b3ed8416421330f7ff8c72cb9bb667c335f3e24a94e",
+    "formal-output/python.stdout": "4cee9ab039df5b872dd941b2f5f7a3679948774ccdec3c8adbaca1ca0196c7ca",
+    "formal-output/receipt.json": "d7baa377dd1a96b6e17c3b493fcf06e86f2dc0663523a23bbdf54f7c4fb1adf7",
+    "formal-output/staged/LF01/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF01/default/stdout": "ab41ce41fdb6de3ef60e4c92b888aecc7f4dc5f09f86220b8929ce0b7047b866",
+    "formal-output/staged/LF01/default/vitest.json": "9d40f9a98549aa4bb4c3801da93ba8188098b53e3b743097a86e4156042ce70c",
+    "formal-output/staged/LF02/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF02/default/stdout": "bda95d3f984357e2726eab96645769165fae244c7f0f4a62c9b41f77e29b98e0",
+    "formal-output/staged/LF02/default/vitest.json": "23b79393cd418ffca2dd6d359592747d9b6c95c5c8e9651a3139d6e712a1cc63",
+    "formal-output/staged/LF03/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF03/default/stdout": "a7b120c100b1fe8a7a189157dad378c314045932b61f725b31f47cb47a3bcb8b",
+    "formal-output/staged/LF03/default/vitest.json": "66ed24134609837e8598377bdef64290d36195d5cdde864e7531e5c5203c76b9",
+    "formal-output/staged/LF04/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF04/default/stdout": "9256832d15898ef97f36d9acb105843b6233209fea4ddc72c2c9f3053b4ec19c",
+    "formal-output/staged/LF04/default/vitest.json": "bc8efc5bf8541edd2a5c72c27cbf835ae66b7c7341d751c59c2be3efeb7de4f7",
+    "formal-output/staged/LF05/foreign_tenant/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF05/foreign_tenant/stdout": "fb16e2dce927ef84a8f5ae69b39731e19d34ecf1bd6c6e085f1144a3fe7cbd00",
+    "formal-output/staged/LF05/foreign_tenant/vitest.json": "5beb2517cd9c41594a8cadd41596e60d95c88baed80fec99909d3589e9df028c",
+    "formal-output/staged/LF05/frozen/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF05/frozen/stdout": "688434876ebce05e4308a89714d679a883f361b32760b36792c1bda2ca581eb9",
+    "formal-output/staged/LF05/frozen/vitest.json": "9830c16c9cc671591964ecbca329b905c450103898e608ff7c2942a187571a6f",
+    "formal-output/staged/LF05/higher_role/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF05/higher_role/stdout": "95a34d02a36cb1a690099e4a76861ece92f2ada80b04f3f8306e8558a39869d1",
+    "formal-output/staged/LF05/higher_role/vitest.json": "e8243c8f849918a75cd28bb641977aee76b09b765f14113d0379c407ba0d4c4e",
+    "formal-output/staged/LF05/self/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF05/self/stdout": "b94ad310cef415dcb8f7a449a1369a7ad9960ab483a360a5bc9036c883c54c82",
+    "formal-output/staged/LF05/self/vitest.json": "572a4e019874e2eca142f584adc31883cc53528de6fd4687363a485bdda946e1",
+    "formal-output/staged/LF06/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF06/default/stdout": "d670fd4b7aad2b0dc15a5fdb7d6b87fd2a6765a0dc99d98f94bca6dcfdfb8237",
+    "formal-output/staged/LF06/default/vitest.json": "efd57e7dc6477be462141b5c98a89b04917d492be7a1ac2897bcd1c1e0fa25de",
+    "formal-output/staged/LF07/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/LF07/default/stdout": "09332713c1a862ad37e7ae98fab7e3a50098587d1d9f15df135e32982f257997",
+    "formal-output/staged/LF07/default/vitest.json": "f6d55d79687d407bec61f01bfaaa7509d713e55a34b62ff5ede11c01895eb0f8",
+    "formal-output/staged/PE01/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/PE01/default/stdout": "0f2974ec57bff923c7a871236cf942e1d56bd779e5814cb6ea3a9bb20082c097",
+    "formal-output/staged/PE01/default/vitest.json": "1f6944e9f0dcc863fc4db6375154c42668eb0dae6093bd788b60fd341cfd6402",
+    "formal-output/staged/PE02/0/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/PE02/0/stdout": "dde0ac840f6dd671c65a0d1cc8e2c4809c26b6b6d7f68f85be489da8d7b42eb0",
+    "formal-output/staged/PE02/0/vitest.json": "49df0f656624919a82ff1228455671e5a9128319be4202eed96fbad0922978b6",
+    "formal-output/staged/PE02/empty_array/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/PE02/empty_array/stdout": "48faa7d74753a467d703d5cef1ebc41b198c0e28fd97099a4e53ba734af08a6b",
+    "formal-output/staged/PE02/empty_array/vitest.json": "16d6ad61cd27b9223e4c28edbb35c01f209fc8e82ec6c93de07c92cde758ea50",
+    "formal-output/staged/PE02/false/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/PE02/false/stdout": "5f64efba18cca30ee4eaf232df289fad3317879b4645b2770438179434424ac9",
+    "formal-output/staged/PE02/false/vitest.json": "b611b7309e4acaa48cf1e05222eeae313d1e5c0beeee2f509145a840d7c17e8b",
+    "formal-output/staged/PE02/null/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/PE02/null/stdout": "0b2892591aa507443c57147a5d056c32fcef43e74745575665f974bdfb7a1fa3",
+    "formal-output/staged/PE02/null/vitest.json": "b3cf0c479145a5d9b7afb86e2502fe311f3d92147b04769e4ba18f3381d5a69f",
+    "formal-output/staged/PE02/omitted/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/PE02/omitted/stdout": "39c268f0d9416abfd66f2033608535366a59ff14f80e186c8477159732b6b813",
+    "formal-output/staged/PE02/omitted/vitest.json": "609a76b87e0a432c25c23d39b6028790c1edc994a0a2d59f70126bf8c3c5946e",
+    "formal-output/staged/PE03/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/PE03/default/stdout": "87d164ec992f0b0d32e1f7430d0d963392a11d329a2e78cd8be715fd1be9d82b",
+    "formal-output/staged/PE03/default/vitest.json": "f167e9abb81b8d69d048491d2f94ea6fcc319f0b09511e60c8b5ccd8f6be013a",
+    "formal-output/staged/PE04/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/PE04/default/stdout": "ddd849f6b468c8b32a5a63323d3597b050910d31795fc65a3ae72251658ef7f6",
+    "formal-output/staged/PE04/default/vitest.json": "cabde3224755611ce263ad79bc05ed8c47d5cb5f7de8fd9e843ff4b1de9c55b7",
+    "formal-output/staged/PE05/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/PE05/default/stdout": "18f52edb4c465590e6bac6e28a97566fc21aeac518d09356715c55dc98ab227e",
+    "formal-output/staged/PE05/default/vitest.json": "45beff64d426fd5f30c9a15821c186efe7049b4ed8fceb2f9c1167db402f3f0f",
+    "formal-output/staged/RC01/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/RC01/default/stdout": "7cf215b7da7a7ed5f6e5f30e9f4cee61e8a9c4a4430d04e40ede9c2042a57819",
+    "formal-output/staged/RC01/default/vitest.json": "ed3c7d3b36842b8b059c7a5b9a776b5cd61d6ff75deed803b911cb1c95641288",
+    "formal-output/staged/RC02/legacy_outbound_detail/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/RC02/legacy_outbound_detail/stdout": "a01f864e1605e8fa1cbcfbc117949a069e9e9ae9e9f3804d38376035afcb0b29",
+    "formal-output/staged/RC02/legacy_outbound_detail/vitest.json": "af733104c3255eec2b6f019d9dee0cd420cc2b79a0d7db087dea9a13d3f8c7eb",
+    "formal-output/staged/RC02/legacy_outbound_list/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/RC02/legacy_outbound_list/stdout": "655f84339f4b752d472b34d7578483ed97fd7dc36531952976466c380f73ed06",
+    "formal-output/staged/RC02/legacy_outbound_list/vitest.json": "fd315b8eadd83114304f191762e66e9c2ba024334975dca2996ac24244ce81ee",
+    "formal-output/staged/RC02/submit_replay/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/RC02/submit_replay/stdout": "37f2c5d45bdb6d87f0d4a2ad51111442f4b2c4761e5db83eb22b2d90cd84f719",
+    "formal-output/staged/RC02/submit_replay/vitest.json": "67a3689152d1e4a468e453aba2a9a5167c50ac9c589b068b2e4cad3c72402e10",
+    "formal-output/staged/RC03/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/RC03/default/stdout": "a9ff583fe2b2771105b3a6f2ed20191102c743326be6985b90f2ee9bdd787e9a",
+    "formal-output/staged/RC03/default/vitest.json": "ecb24d8ae90313390d6858485fa4475ba1b1ac0d0bc2a65ecba7cc2ed661e87a",
+    "formal-output/staged/RC04/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/RC04/default/stdout": "d3ce7da514ba0b2d3eb1441fe256e99f08737f631fe343d4ed3aafcf3677a772",
+    "formal-output/staged/RC04/default/vitest.json": "d1b36eb4439becf0023986f008530c79682566db76fdf282f2eaaa8c7124aa95",
+    "formal-output/staged/RC05/default/stderr": "1c8f82e6ce231b33dcfab0e9439c6a6a2461393a26154501f6e631ae5acee8e3",
+    "formal-output/staged/RC05/default/stdout": "1140082ca663e2f39f9ecf85e552268116efad452962503c58f6fb12831b1695",
+    "formal-output/staged/RC05/default/vitest.json": "332d4b2a28f5f5dcc64c344ad1e7ce6cde6703709d6a3ec6728e4380ab0fc548",
+    "formal-output/validation-contract.json": "1a12315de8fa6c24c6c36612297839f623ee94a88d27f49b652b87a9d14e7519",
+    "formal-process-result.json": "45a8a1e101a750e0f0a3485d40556babbdf99f279feb61831ed968a1ed04c8ac",
+    "formal-start.json": "6b56c462420dbde546a13ecff1fce57d7ee6a941dcc84ce52a28611e03305811",
+    "formal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "formal.stdout": "5b28d4973005964462336caa02b13b05bb9a628d5a27795398a3a24e24630abe",
+    "freeze.stderr": "a41290a78ad9b0f569579a7719a0fd47055a991a8afec694ba1649ed4a15f441",
+    "freeze.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "npm-ci-ca-corrected.stderr": "9c06cf1a9709d4e19ec0a9b7488f4d9a8ea575baf77ab26cfe28e8c863cc376c",
+    "npm-ci-ca-corrected.stdout": "28729ad6449ef29f9fe335beddd7e12b04f3a36eabd5a319419cd383e9224d59",
+    "npm-ci.stderr": "4b93c101c2ae01973e17acb3c4b8510b45a6d638265b86aa4ea0756d076c54ca",
+    "npm-ci.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pg-cleanup.log": "3c9b144ae3b21b819763f40e890343e569144d8fa857c6d42f9eafa65e69a767",
+    "pins.json": "c577856d0c0c1bbb309aff09401b10d0b3c28fa7e4f49b2293fc554b6218618b",
+    "preparation-corrected-timings.json": "c8e49f8928d7d65ae4b3def1bf616f773ff17cb75c7095e87c19e2994f52df05",
+    "preparation-timings.json": "a57033073a73af134af204265eb84d8472c2963abaf6338d4f56898a85a67db8",
+    "prestart-validate.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "prestart-validate.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "race.json": "6e255a5fe4de6a7d065f375fadf078ee0738608d12f847cc2405794a75ba427e",
+    "race.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runtime-capture.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runtime.json": "e7b3663dd5f6ea324244cca29d1d62e88b14f9eb9bc7d9e1e4f71199d70e6d5c"
+  },
+  "exclusions": [
+    "default675",
+    "sharedDB89e7",
+    "wholePG180",
+    "audit",
+    "central10/171",
+    "actual email",
+    "merge",
+    "deploy"
+  ],
+  "draft_api_retry": false
+}

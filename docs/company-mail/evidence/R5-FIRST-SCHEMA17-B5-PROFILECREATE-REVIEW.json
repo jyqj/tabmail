@@ -1,0 +1,557 @@
+{
+  "created_utc": "2026-10-02T07:20:36.386809+00:00",
+  "status": "currentcompile0_and_B5schema17_ProfileCreate_actualpassed_and_cleaned",
+  "source_sha": "7ffe88737b4b846ad96978b2a69a105caccf3914",
+  "source_receipt": "source-receipt.json",
+  "default_compile_and_build": "bothactual0 but no runtimeacceptance fromemptyselector",
+  "source_final_B5hashes_exact_matched": true,
+  "actual_schema17_empty_apply_and_V16populated_upgrade": "coveredrealB5andUpgradeV16BoundedTrustedBackfill; currentmigration17onlynewprivatecluster, oldM16untouched",
+  "first_schema17_infra_failure": "schema17/go-run uppercasebaseDBURI; Go1 beforeactualfixture, raw kept/notproductRED; correctedtoactualunquotedlowercasebase no code/expect/restart change",
+  "phases": {
+    "schema17B": {
+      "Go_exit": 0,
+      "tops": [
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotCompleteOutlivesJobAndLedger"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotImmutableAndAtomic"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotUsesExistingCurrentReadAndLifecycle"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotRejectsDeadlineAfterMailboxWait"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotUpgradeV16BoundedTrustedBackfill"
+        }
+      ],
+      "top_count": 5,
+      "leaf_count": 12,
+      "test_subtest_pass_events": 14,
+      "actual_leaves": [
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotCompleteOutlivesJobAndLedger/nonempty"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotCompleteOutlivesJobAndLedger/known-empty"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotImmutableAndAtomic"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotUsesExistingCurrentReadAndLifecycle/revoke"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotUsesExistingCurrentReadAndLifecycle/admin"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotUsesExistingCurrentReadAndLifecycle/cross-tenant"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotUsesExistingCurrentReadAndLifecycle/item-expiry"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotUsesExistingCurrentReadAndLifecycle/purge"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotUsesExistingCurrentReadAndLifecycle/mailbox-expiry"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotUsesExistingCurrentReadAndLifecycle/missing-item"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotRejectsDeadlineAfterMailboxWait"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5SentRecipientSnapshotUpgradeV16BoundedTrustedBackfill"
+        }
+      ],
+      "package_elapsed": {
+        "tabmail/internal/store/postgres": 7.192
+      },
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      }
+    },
+    "profilepure7": {
+      "Go_exit": 0,
+      "tops": [
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceMissingPort"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceNilSuccessFailsClosed"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceScopeForwarding"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceQuotaValidation"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceZoneBoundary"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceAuthorityErrorMapping"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestCreateProfile"
+        }
+      ],
+      "top_count": 7,
+      "leaf_count": 35,
+      "test_subtest_pass_events": 39,
+      "actual_leaves": [
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceMissingPort"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceNilSuccessFailsClosed"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceScopeForwarding/super-selected-vs-requested"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceScopeForwarding/super-global-request"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceScopeForwarding/super-no-selected-anchor"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceScopeForwarding/admin-raw-foreign-request"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceScopeForwarding/admin-raw-global-request"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceScopeForwarding/cached-super-hint"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceScopeForwarding/cached-reader-hint"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceQuotaValidation/daily_send_quota/-1"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceQuotaValidation/daily_send_quota/2147483648"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceQuotaValidation/daily_receive_quota/-1"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceQuotaValidation/daily_receive_quota/2147483648"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceQuotaValidation/max_mailboxes/-1"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceQuotaValidation/max_mailboxes/2147483648"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceQuotaValidation/max_domains/-1"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceQuotaValidation/max_domains/2147483648"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceQuotaValidation/valid/0"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceQuotaValidation/valid/2147483647"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceZoneBoundary/nil-inherit"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceZoneBoundary/explicit-empty"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceZoneBoundary/explicit-list"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceZoneBoundary/unknown-zone-port-denial"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceZoneBoundary/zero-zone-port-denial"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceZoneBoundary/duplicate-zone-port-denial"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestProfileCreateServiceAuthorityErrorMapping"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestCreateProfile/missing_name_is_bad_request"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestCreateProfile/guarded_port_rejects_admin_without_selected_company"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestCreateProfile/guarded_port_rejects_global_profile_zone_ids"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestCreateProfile/guarded_port_rejects_foreign_tenant_zone"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestCreateProfile/guarded_port_rejects_unknown_zone"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestCreateProfile/guarded_port_zone-store_failure_is_internal"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestCreateProfile/guarded_port_create-store_failure_is_internal"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestCreateProfile/tenant_admin_forwards_raw_body_scope_and_consumes_guarded_result"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestCreateProfile/super_admin_forwards_requested_tenant_independently_of_selected_company"
+        }
+      ],
+      "package_elapsed": {
+        "tabmail/internal/app/permissions": 1.415
+      },
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      }
+    },
+    "profilePGHTTP": {
+      "Go_exit": 0,
+      "tops": [
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateFreshScopeAndRevision"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateAuthorityAndZoneFailures"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateRequiredAuditOutboxRollback"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateLockWaitRechecksAuthority"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateZoneBusyAndShippingService"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateGlobalAnchorIsPersistent"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateSuppressedInsertFailsClosed"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateInvalidValuesAndMissingHome"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileCreateHTTPRevisionAuditAndDuplicate"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileCreateHTTPRefusalsAndRequiredEffects"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileCreateHTTPGlobalHasAuditNotInventedAudience"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileCreateHTTPKeyPrincipalsCannotManage"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileCreateHTTPSuppressedInsertDoesNotReturn201Null"
+        }
+      ],
+      "top_count": 13,
+      "leaf_count": 45,
+      "test_subtest_pass_events": 51,
+      "actual_leaves": [
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateFreshScopeAndRevision/admin-stale-super-hint"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateFreshScopeAndRevision/fresh-super-stale-admin-hint"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateFreshScopeAndRevision/global-no-selected"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateFreshScopeAndRevision/global-selected"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateAuthorityAndZoneFailures/employee"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateAuthorityAndZoneFailures/owned-admin-key"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateAuthorityAndZoneFailures/freeze"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateAuthorityAndZoneFailures/session-version"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateAuthorityAndZoneFailures/selected-foreign"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateAuthorityAndZoneFailures/missing-selected-admin"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateAuthorityAndZoneFailures/foreign-zone"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateAuthorityAndZoneFailures/duplicate-zone"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateAuthorityAndZoneFailures/global-zones"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateAuthorityAndZoneFailures/system"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateRequiredAuditOutboxRollback/audit"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateRequiredAuditOutboxRollback/outbox"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateLockWaitRechecksAuthority/tenant/demote"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateLockWaitRechecksAuthority/tenant/freeze"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateLockWaitRechecksAuthority/tenant/session-version"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateLockWaitRechecksAuthority/actor/demote"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateLockWaitRechecksAuthority/actor/freeze"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateLockWaitRechecksAuthority/actor/session-version"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateZoneBusyAndShippingService"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateGlobalAnchorIsPersistent"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateSuppressedInsertFailsClosed"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateInvalidValuesAndMissingHome/nil-request"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateInvalidValuesAndMissingHome/blank-name"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateInvalidValuesAndMissingHome/negative-send"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateInvalidValuesAndMissingHome/negative-receive"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateInvalidValuesAndMissingHome/negative-mailboxes"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateInvalidValuesAndMissingHome/negative-domains"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateInvalidValuesAndMissingHome/overflow-quota"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateInvalidValuesAndMissingHome/zero-target-super"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateInvalidValuesAndMissingHome/zero-zone"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateInvalidValuesAndMissingHome/zero-selected"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileCreateInvalidValuesAndMissingHome/missing-home"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileCreateHTTPRevisionAuditAndDuplicate"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileCreateHTTPRefusalsAndRequiredEffects/employee"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileCreateHTTPRefusalsAndRequiredEffects/foreign-zone"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileCreateHTTPRefusalsAndRequiredEffects/system-field"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileCreateHTTPRefusalsAndRequiredEffects/audit"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileCreateHTTPRefusalsAndRequiredEffects/outbox"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileCreateHTTPGlobalHasAuditNotInventedAudience"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileCreateHTTPKeyPrincipalsCannotManage"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileCreateHTTPSuppressedInsertDoesNotReturn201Null"
+        }
+      ],
+      "package_elapsed": {
+        "tabmail/internal/store/postgres": 10.152,
+        "tabmail/internal/api": 4.084
+      },
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      }
+    }
+  },
+  "ProfileCreate_approved7sourcepinsmatched": "profilecreate/matched-final-packets.json",
+  "scope": "onlynew5B, new7necessaryservicepure and new8PG5HTTP ProfileCreate; oldList/earlierfullCI/currentdefaultalltestsnotrerun",
+  "task_complete": false,
+  "product_green": false,
+  "M_L_retried": false,
+  "native_cleanup": {
+    "status": "firstcurrent_schema17_window_native_resources_cleaned",
+    "cleanup_UTC": "2026-10-02T07:20:36.535901+00:00",
+    "owned_pg_pid": 80633,
+    "owned_root": "/tmp/tm-r5schema17compile.A82wlgmR/schema17",
+    "port": 55501,
+    "listen_addresses": "",
+    "socket_permissions": "0700",
+    "base_database": "tm_schema17_b_validation",
+    "pg_stop_exit": 0,
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "owned_pid_observation": "absent",
+    "temporary_databases_before_stop": 0,
+    "temporary_connections_before_stop": 0,
+    "old_M_S_clusters_not_touched": true
+  }
+}

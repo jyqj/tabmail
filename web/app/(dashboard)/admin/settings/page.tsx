@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { toast } from "sonner";
 import { Settings2 } from "lucide-react";
 
@@ -14,6 +14,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAPI } from "@/hooks/use-api";
+import { sessionScope, useSessionScope } from "@/lib/session";
+import { LoadError } from "@/components/company/common";
 
 // Well-known setting definitions for rendering
 const SETTING_DEFS: Record<string, { label: string; type: "int" | "bool" | "select"; options?: string[]; group: string }> = {
@@ -28,58 +30,93 @@ const SETTING_DEFS: Record<string, { label: string; type: "int" | "bool" | "sele
 };
 
 export default function AdminSettingsPage() {
-  const { data: settingsRes, isLoading: loading, error: settingsError, mutate: mutateSettings } = useAPI(
+  const scope = useSessionScope();
+  return <SettingsEditor key={scope} scope={scope} />;
+}
+
+function SettingsEditor({ scope }: { scope: string }) {
+  const mounted = useRef(true);
+  const operation = useRef(false);
+  const read = useRef({ generation: 0, pending: false });
+  const current = () => mounted.current && scope === sessionScope();
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+  const { data: settingsRes, isLoading: loading, isValidating, error: settingsError, mutate: mutateSettings } = useAPI(
     "system-settings",
-    () => listSettings(),
+    async () => {
+      const generation = ++read.current.generation;
+      read.current.pending = true;
+      try { return await listSettings(); }
+      finally { if (generation === read.current.generation) read.current.pending = false; }
+    },
   );
   const settings = useMemo(() => settingsRes?.data ?? [], [settingsRes]);
 
   useEffect(() => { if (settingsError) toast.error("Failed to load settings"); }, [settingsError]);
 
   const [saving, setSaving] = useState(false);
-  const [edits, setEdits] = useState<Record<string, string>>({});
-  const [editsInit, setEditsInit] = useState(false);
-
-  useEffect(() => {
-    if (settings.length > 0 && !editsInit) {
-      const initial: Record<string, string> = {};
-      for (const s of settings) {
-        initial[s.key] = s.value;
-      }
-      setEdits(initial);
-      setEditsInit(true);
-    }
-  }, [settings, editsInit]);
+  // Only explicit edits belong to the draft. Unedited fields always follow the
+  // latest successful snapshot. Entry identity distinguishes edits made while
+  // a PATCH is pending, including a deliberate return to its old value.
+  const [edits, setEdits] = useState<Record<string, { value: string }>>({});
+  const blocked = !settingsRes || loading || isValidating || !!settingsError || saving;
+  function change(key: string, value: string) {
+    if (!current()) return;
+    const reverted = !operation.current && settings.find(setting => setting.key === key)?.value === value;
+    setEdits(previous => {
+      const next = { ...previous };
+      if (reverted) delete next[key];
+      else next[key] = { value };
+      return next;
+    });
+  }
+  const reload = () => {
+    if (!current() || operation.current || read.current.pending) return;
+    void mutateSettings().catch(() => {});
+  };
 
   const handleSave = async () => {
+    if (!current() || blocked || operation.current || read.current.pending) return;
+    const submitted: typeof edits = {};
+    const changed: Record<string, string> = {};
+    for (const setting of settings) {
+      const edit = edits[setting.key];
+      if (edit && edit.value !== setting.value) {
+        submitted[setting.key] = edit;
+        changed[setting.key] = edit.value;
+      }
+    }
+    if (Object.keys(changed).length === 0) {
+      toast.info("No changes to save");
+      return;
+    }
+    operation.current = true;
     setSaving(true);
     try {
-      // Only send changed values
-      const changed: Record<string, string> = {};
-      for (const s of settings) {
-        if (edits[s.key] !== undefined && edits[s.key] !== s.value) {
-          changed[s.key] = edits[s.key];
-        }
-      }
-      if (Object.keys(changed).length === 0) {
-        toast.info("No changes to save");
-        setSaving(false);
-        return;
-      }
       const res = await updateSettings(changed);
-      const updated: Record<string, string> = {};
-      for (const s of res.data || []) {
-        updated[s.key] = s.value;
-      }
-      setEdits(updated);
-      setEditsInit(true);
-      mutateSettings();
+      if (!current()) return;
+      await mutateSettings(res, { revalidate: false });
+      if (!current()) return;
+      setEdits(previous => {
+        const next = { ...previous };
+        for (const key of Object.keys(submitted)) {
+          if (next[key] === submitted[key]) delete next[key];
+        }
+        return next;
+      });
       toast.success("Settings saved");
+      // Re-read after the acknowledgement. Failure blocks another write but
+      // does not discard newer draft entries or report the PATCH as failed.
+      await mutateSettings().catch(() => {});
     } catch (e: unknown) {
+      if (!current()) return;
       const err = e as { error?: { message?: string } };
       toast.error(err?.error?.message || "Failed to save settings");
     } finally {
-      setSaving(false);
+      operation.current = false;
+      if (current()) setSaving(false);
     }
   };
 
@@ -90,7 +127,7 @@ export default function AdminSettingsPage() {
       const def = SETTING_DEFS[s.key] || null;
       const group = def?.group || "Other";
       if (!map.has(group)) map.set(group, []);
-      map.get(group)!.push({ key: s.key, value: edits[s.key] ?? s.value, def, setting: s });
+      map.get(group)!.push({ key: s.key, value: edits[s.key]?.value ?? s.value, def, setting: s });
     }
     return map;
   }, [settings, edits]);
@@ -101,13 +138,14 @@ export default function AdminSettingsPage() {
         title="System Settings"
         description="Runtime configuration persisted to database. Changes take effect within seconds."
         actions={
-          <Button onClick={handleSave} disabled={loading || saving}>
+          <Button onClick={handleSave} disabled={blocked}>
             {saving ? "Saving..." : "Save Changes"}
           </Button>
         }
       />
 
       <div className="space-y-4 p-4">
+        <LoadError error={settingsError} onRetry={reload} />
         {loading ? (
           <Card>
             <CardContent className="p-6">
@@ -142,7 +180,7 @@ export default function AdminSettingsPage() {
                     description={setting.description}
                     type={def?.type || "int"}
                     options={def?.options}
-                    onChange={(v) => setEdits((prev) => ({ ...prev, [key]: v }))}
+                    onChange={(v) => change(key, v)}
                   />
                 ))}
               </CardContent>

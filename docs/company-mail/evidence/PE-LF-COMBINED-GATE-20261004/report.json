@@ -1,0 +1,1095 @@
+{
+  "status": "COMBINED_GATE_FAILED_FORMAL_NOTRUN",
+  "fixed_product_sha": "925264f1293120b70bfb1c6e8a865b65b1c5cad0",
+  "base": "f875672dea2b68fdec9e0b986f4863724da5d7ba",
+  "historical_formal": {
+    "source": "46de5010b7dc79b841c52d6ff7245d070a846a76",
+    "report_sha256": "7dbcc94223f82606af4a646d79fb8231e677102ff71a33c7b96402c893d3c896",
+    "pass_count": 17,
+    "fail_count": 9,
+    "missing_count": 17,
+    "qualified": 0
+  },
+  "focused": {
+    "pe": {
+      "exit_code": 0,
+      "package_seconds": 69.63,
+      "top_pass": [
+        "TestPEIndependentUnmount",
+        "TestPESharedAdapterFocused",
+        "TestR5PermissionSeedSetup",
+        "TestR5PermissionSeedLegacy409AndCAS",
+        "TestR5TransportRealRouter",
+        "TestR5TransportFetchObserver"
+      ],
+      "top_fail": [],
+      "subtest_pass": 16,
+      "subtest_fail": 0
+    },
+    "lf": {
+      "exit_code": 1,
+      "package_seconds": 49.826,
+      "top_pass": [
+        "TestLF01OwnedShippingSelector",
+        "TestLF01OwnedHTTPNegativeBoundaries",
+        "TestSuccessorAuthzOwnedDirectHTTPPeerAndSelf",
+        "TestSuccessorAuthzOwnedPreviewMatrix",
+        "TestSuccessorAuthzOwnedCurrentState",
+        "TestSuccessorAuthzOwnedAfterTenantWait",
+        "TestSuccessorAuthzOwnedTenantFence",
+        "TestSuccessorAuthzOwnedSuccessorFenceThroughCommit",
+        "TestSuccessorAuthzOwnedPersistedCallerSelfAndLegacy",
+        "TestSuccessorAuthzOwnedConcurrentExecute"
+      ],
+      "top_fail": [
+        "TestPairIndependentOldPeerSelf",
+        "TestPairIndependentPreviewPolicy",
+        "TestPairIndependentStaleExecute",
+        "TestPairIndependentReplayCompletion",
+        "TestPairIndependentCompatibility",
+        "TestPairIndependentLockWait",
+        "TestPairIndependentConcurrentExecute",
+        "TestPairIndependentLocksHeldThroughCommit",
+        "TestPairIndependentShippingUI"
+      ],
+      "subtest_pass": 45,
+      "subtest_fail": 56
+    },
+    "typescript": "PASS",
+    "lint": "PASS",
+    "ui_oracle_tests": {
+      "passed": 30,
+      "failed": 0
+    },
+    "protocol_guard_tests": {
+      "passed": 70,
+      "failed": 0
+    },
+    "exact_source_guards": "PASS"
+  },
+  "blocker": {
+    "cause": "Independent pair test pairSeed requires 127.0.0.1:55447; executor started fresh owned cluster at 127.0.0.1:55459",
+    "guard": "internal/store/postgres/pair_independent_review_test.go:38",
+    "failure": "review-owned cluster required",
+    "product_assertions_reached": false,
+    "no_retry": true
+  },
+  "formal": {
+    "attempts": 0,
+    "preparation": "NOTRUN",
+    "runtime_v2_pin": null,
+    "batch_contract_pin": null,
+    "dependency_toolroot": null,
+    "required_terminals": 43,
+    "go": 40,
+    "python": 3,
+    "handler_ids": 17,
+    "handler_variants": 26,
+    "budgets": {
+      "go": 120,
+      "batch": 180,
+      "case": 75,
+      "max_workers": 4
+    },
+    "terminals": [
+      {
+        "terminal": "TestR5ProtocolAuditReasonSharedCases/OP03/eight",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolAuditReasonSharedCases/OP03/empty",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolAuditReasonSharedCases/OP03/maximum",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolAuditReasonSharedCases/OP03/over_maximum",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolAuditReasonSharedCases/OP03/seven",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolAuditReasonSharedCases/OP03/trim_maximum",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolAuditReasonSharedCases/OP03/trim_seven",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_nine",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_six",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_twelve",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolAuditReasonSharedCases/OP03/whitespace",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/LF01/default",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/LF02/default",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/LF03/default",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/LF04/default",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/LF05/foreign_tenant",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/LF05/frozen",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/LF05/higher_role",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/LF05/self",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/LF06/default",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/LF07/default",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/PE01/default",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/PE02/0",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/PE02/[]",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/PE02/false",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/PE02/null",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/PE02/omitted",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/PE03/default",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/PE04/default",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/PE05/default",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/RC01/default",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/RC02/legacy_outbound_detail",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/RC02/legacy_outbound_list",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/RC02/submit_replay",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/RC03/default",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/RC04/default",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolComponentObservations/RC05/default",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolDeliverySharedCases/RC03",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolDeliverySharedCases/RC04",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "TestR5ProtocolDeliverySharedCases/RC05",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "R5 shared receipt RC03",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "R5 shared receipt RC04",
+        "outcome": "NOTRUN",
+        "qualified": false
+      },
+      {
+        "terminal": "R5 shared receipt RC05",
+        "outcome": "NOTRUN",
+        "qualified": false
+      }
+    ],
+    "layers": [
+      {
+        "case_id": "CT01",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "CT02",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "CT03",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "CT04",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "CT05",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "CT06",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "CT07",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "CT08",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "CT09",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "CT10",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "RC01",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "RC02",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "RC03",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "RC04",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "RC05",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "OP01",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "OP02",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "OP03",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "OP04",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "RT01",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "RT02",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "RT03",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "RT04",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "RT05",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "RT06",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "RT07",
+        "required_layers": [
+          "db"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "BC01",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "BC02",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "BC03",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "BC04",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "BC05",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "BC06",
+        "required_layers": [
+          "db",
+          "http"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "GC01",
+        "required_layers": [
+          "db"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "GC02",
+        "required_layers": [
+          "db"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "LF01",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "LF02",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "LF03",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "LF04",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "LF05",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "LF06",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "LF07",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "PE01",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "PE02",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "PE03",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "PE04",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      },
+      {
+        "case_id": "PE05",
+        "required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "qualified_layers": [],
+        "missing_required_layers": [
+          "db",
+          "http",
+          "components"
+        ],
+        "formal_observation": "NOTRUN"
+      }
+    ],
+    "full_catalog_qualification": false
+  },
+  "cleanup": {
+    "owned_pg": "127.0.0.1:55459",
+    "fixture_databases": 0,
+    "fixture_backends": 0,
+    "pg_shutdown": "PASS",
+    "formal_owner_ack": "NOTRUN",
+    "formal_process_cleanup": "NOTRUN",
+    "formal_lease": "NOTCREATED",
+    "logs_root": "/tmp/tabmail-pe-lf-integration",
+    "log_hashes": {
+      "cleanup.log": {
+        "sha256": "3c9b144ae3b21b819763f40e890343e569144d8fa857c6d42f9eafa65e69a767",
+        "bytes": 60
+      },
+      "focused/PE01-default-stream.json": {
+        "sha256": "2429d27087016e342ac04bd51147bc21edc6f2e46b21461d69785db09a9d1228",
+        "bytes": 252
+      },
+      "focused/PE01-default-vitest.json": {
+        "sha256": "9471c594586a70907b9758665c2df7cb6a33bc9e1a6ea95c2d23d6d7347e227a",
+        "bytes": 916
+      },
+      "focused/PE01-default.log": {
+        "sha256": "7c350159535b5fbf84a8effbf391ab6bee29711e44b2074727b91b0cf5fabb19",
+        "bytes": 473
+      },
+      "focused/PE02-0-stream.json": {
+        "sha256": "9f6c9ab39a67da2a3387c944626cb77a9e60bee26d14aff95ad44dce1cc59e67",
+        "bytes": 246
+      },
+      "focused/PE02-0-vitest.json": {
+        "sha256": "2e2eba0e3e452893925d01aa775efc52a0f186d0fe088a4ea7a70ad019b454a2",
+        "bytes": 904
+      },
+      "focused/PE02-0.log": {
+        "sha256": "378aa726eb32982de4cd0ad57fd87d62ad91b4460368bf3e1f353897bbde79fe",
+        "bytes": 467
+      },
+      "focused/PE02-empty-stream.json": {
+        "sha256": "56218ac72e5e4ba8d050855996443c99384429b10d9d86a8bce102b4a19004a1",
+        "bytes": 247
+      },
+      "focused/PE02-empty-vitest.json": {
+        "sha256": "fb9b6b488b9045a5e1fd4f599912e664ee5e6f6c6c937e2ad8aaffc714e66d8d",
+        "bytes": 904
+      },
+      "focused/PE02-empty.log": {
+        "sha256": "1b4d82971df209b0a274063f718957e674e7bf0f3cfe2d9f3a20cddc5d433dd6",
+        "bytes": 471
+      },
+      "focused/PE02-false-stream.json": {
+        "sha256": "c8dbe3d8a79e1720ab18fe562064985af6dbb4a7ad944306ae0aec5401063027",
+        "bytes": 250
+      },
+      "focused/PE02-false-vitest.json": {
+        "sha256": "68562e8ca1b61d77731bb1b45284ce1ccdb13715685ac833e3449238477dd36d",
+        "bytes": 905
+      },
+      "focused/PE02-false.log": {
+        "sha256": "5015c9ae5d14ad0037650e6b061189996bb1032be45bd0a5c40d1a7fcb5d2c43",
+        "bytes": 471
+      },
+      "focused/PE02-null-stream.json": {
+        "sha256": "a90d811b2f32c2703e1c243bafb734d90c7be4caf372dafd5b12b876ec085a52",
+        "bytes": 249
+      },
+      "focused/PE02-null-vitest.json": {
+        "sha256": "2c8e53b72184dc165d6eab29fd4670ebaa12a94dc7bf5029bf0f3f2ee4f63ffe",
+        "bytes": 910
+      },
+      "focused/PE02-null.log": {
+        "sha256": "375446cc98a2223b791d9ab07a2c83dd972584114ef3dc470036506cc280b58c",
+        "bytes": 470
+      },
+      "focused/PE02-omitted-stream.json": {
+        "sha256": "e2a242c7a71f151641a5ef00e4db1c7502e407bf7f7203d9a5ed37bff46f2d72",
+        "bytes": 252
+      },
+      "focused/PE02-omitted-vitest.json": {
+        "sha256": "9927d2232312cf087d5a0049be9f3992f0dbbfb3200c5f02669cfe8ba1e1cdca",
+        "bytes": 916
+      },
+      "focused/PE02-omitted.log": {
+        "sha256": "7b8f14b8e2ad50d62131d6737f4a05766433fb531a1dee533bdf54acc1d65dc7",
+        "bytes": 473
+      },
+      "focused/PE03-default-stream.json": {
+        "sha256": "c54307f09fa937156a96d2c83851637c063da6355b32b4b520cd0e68db5b602f",
+        "bytes": 250
+      },
+      "focused/PE03-default-vitest.json": {
+        "sha256": "b66d1154d17a3817607fb38319f92b093689773f15852176b4f580c1bb199746",
+        "bytes": 909
+      },
+      "focused/PE03-default.log": {
+        "sha256": "d0a35822310473caada6544de592964c7a596007803704dbef28865b4733109b",
+        "bytes": 473
+      },
+      "focused/PE04-default-stream.json": {
+        "sha256": "4cc3f8bf2989c48ed8ac16bb0dd0cf21d7c1850c0c23925dc0850079b0826599",
+        "bytes": 250
+      },
+      "focused/PE04-default-vitest.json": {
+        "sha256": "dc76d92981734fc724b323c138f36f03bcffba77edc206a4cb8e2ed6cbb5b163",
+        "bytes": 908
+      },
+      "focused/PE04-default.log": {
+        "sha256": "f410d8a541a3b394e23adf5e7242eb947986ffb248970d592343cb5acdfda0ea",
+        "bytes": 473
+      },
+      "focused-lf.log": {
+        "sha256": "d7a973c9f8d08b5b999b80f1101ffcd0c6892e2d7adc4e7825c0e733abdfb3d0",
+        "bytes": 26370
+      },
+      "focused-pe.log": {
+        "sha256": "34f9a54851d095fe38addcf53abd7a82ff7b08bb380c2d4b7cb6e2b7f864dbc7",
+        "bytes": 6284
+      },
+      "focused-unit.log": {
+        "sha256": "c31f4dd8625e2bd1ccfcbb3e702b353a14a303ebcd46882dfe131b13c6dad77a",
+        "bytes": 588
+      },
+      "initdb.log": {
+        "sha256": "7c1b2cdbbaa4789ce3148fd277b322789f5fff00eebc104cb6a6fc3ca63cd436",
+        "bytes": 915
+      },
+      "lint.log": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "pg.log": {
+        "sha256": "863fbfa54e2422d2f57ac51468d758051f1c8561141cd7296f1bd5554a6a9a3f",
+        "bytes": 30246
+      },
+      "protocol-guards.log": {
+        "sha256": "7eb3e92c502690bf25ce90c93a0230f93a577877d0147ea3d6cbab9b55b33dc8",
+        "bytes": 169
+      },
+      "tsc.log": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    }
+  },
+  "exclusions": [
+    "default675",
+    "sharedDB89e7",
+    "wholePG180",
+    "audit",
+    "central10/171",
+    "actual email",
+    "merge",
+    "deploy"
+  ]
+}

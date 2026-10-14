@@ -1,0 +1,29 @@
+{"Time":"2026-09-28T10:05:59.748530669Z","Action":"start","Package":"tabmail/internal/store/postgres"}
+{"Time":"2026-09-28T10:05:59.769063377Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsConcurrentRemoval"}
+{"Time":"2026-09-28T10:05:59.769217252Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsConcurrentRemoval","Output":"=== RUN   TestR5AttachmentFinishRejectsConcurrentRemoval\n"}
+{"Time":"2026-09-28T10:06:00.021626044Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsConcurrentRemoval","Output":"    r5_attachment_finish_test.go:63: R5_FINISH_DEFECT_REMOVED: completion reported success after its reservation was deleted\n"}
+{"Time":"2026-09-28T10:06:00.023889585Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsConcurrentRemoval","Output":"--- FAIL: TestR5AttachmentFinishRejectsConcurrentRemoval (0.25s)\n"}
+{"Time":"2026-09-28T10:06:00.023986294Z","Action":"fail","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsConcurrentRemoval","Elapsed":0.25}
+{"Time":"2026-09-28T10:06:00.024051835Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsExpiryAfterWait"}
+{"Time":"2026-09-28T10:06:00.02414996Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsExpiryAfterWait","Output":"=== RUN   TestR5AttachmentFinishRejectsExpiryAfterWait\n"}
+{"Time":"2026-09-28T10:06:00.271645502Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsExpiryAfterWait","Output":"    r5_attachment_finish_test.go:86: R5_FINISH_DEFECT_EXPIRED: completion published an expired reservation after waiting\n"}
+{"Time":"2026-09-28T10:06:00.274332294Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsExpiryAfterWait","Output":"--- FAIL: TestR5AttachmentFinishRejectsExpiryAfterWait (0.25s)\n"}
+{"Time":"2026-09-28T10:06:00.274460835Z","Action":"fail","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsExpiryAfterWait","Elapsed":0.25}
+{"Time":"2026-09-28T10:06:00.274533085Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishOnlyOneChecksumWins"}
+{"Time":"2026-09-28T10:06:00.274576877Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishOnlyOneChecksumWins","Output":"=== RUN   TestR5AttachmentFinishOnlyOneChecksumWins\n"}
+{"Time":"2026-09-28T10:06:00.529715752Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishOnlyOneChecksumWins","Output":"    r5_attachment_finish_test.go:143: R5_FINISH_DEFECT_REPLAY: two completions both succeeded and allowed checksum replacement\n"}
+{"Time":"2026-09-28T10:06:00.532200877Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishOnlyOneChecksumWins","Output":"--- FAIL: TestR5AttachmentFinishOnlyOneChecksumWins (0.26s)\n"}
+{"Time":"2026-09-28T10:06:00.532297752Z","Action":"fail","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishOnlyOneChecksumWins","Elapsed":0.26}
+{"Time":"2026-09-28T10:06:00.532334627Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishOrdersMailboxRevocation"}
+{"Time":"2026-09-28T10:06:00.532415669Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishOrdersMailboxRevocation","Output":"=== RUN   TestR5AttachmentFinishOrdersMailboxRevocation\n"}
+{"Time":"2026-09-28T10:06:00.804998086Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishOrdersMailboxRevocation","Output":"    r5_attachment_finish_test.go:195: R5_FINISH_DEFECT_REVOKED: upload became ready after completed mailbox revocation\n"}
+{"Time":"2026-09-28T10:06:00.807747002Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishOrdersMailboxRevocation","Output":"--- FAIL: TestR5AttachmentFinishOrdersMailboxRevocation (0.28s)\n"}
+{"Time":"2026-09-28T10:06:00.807899336Z","Action":"fail","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishOrdersMailboxRevocation","Elapsed":0.28}
+{"Time":"2026-09-28T10:06:00.807951336Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsNonHexChecksum"}
+{"Time":"2026-09-28T10:06:00.807995336Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsNonHexChecksum","Output":"=== RUN   TestR5AttachmentFinishRejectsNonHexChecksum\n"}
+{"Time":"2026-09-28T10:06:01.050709711Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsNonHexChecksum","Output":"    r5_attachment_finish_test.go:224: R5_FINISH_DEFECT_CHECKSUM: non-hex 64-byte checksum was accepted\n"}
+{"Time":"2026-09-28T10:06:01.053263377Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsNonHexChecksum","Output":"--- FAIL: TestR5AttachmentFinishRejectsNonHexChecksum (0.25s)\n"}
+{"Time":"2026-09-28T10:06:01.053360002Z","Action":"fail","Package":"tabmail/internal/store/postgres","Test":"TestR5AttachmentFinishRejectsNonHexChecksum","Elapsed":0.25}
+{"Time":"2026-09-28T10:06:01.053478669Z","Action":"output","Package":"tabmail/internal/store/postgres","Output":"FAIL\n"}
+{"Time":"2026-09-28T10:06:01.055897961Z","Action":"output","Package":"tabmail/internal/store/postgres","Output":"FAIL\ttabmail/internal/store/postgres\t1.307s\n"}
+{"Time":"2026-09-28T10:06:01.055989419Z","Action":"fail","Package":"tabmail/internal/store/postgres","Elapsed":1.307}

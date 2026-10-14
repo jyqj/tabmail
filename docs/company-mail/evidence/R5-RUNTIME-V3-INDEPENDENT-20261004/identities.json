@@ -1,0 +1,135 @@
+{
+  "accepted_adapter_base": "632d55de566254c618bca9a54c5dbae7b355fcf9",
+  "author_replay": {
+    "errors": 0,
+    "failures": 0,
+    "os_process_events": [],
+    "synthetic_only": true,
+    "tests": 30
+  },
+  "base_to_tested_delta": [
+    "docs/company-mail/R5-GENERATED-INDEPENDENT-ACCEPTANCE-20261004.md",
+    "docs/company-mail/evidence/R5-GENERATED-INDEPENDENT-20261004/author-checks.txt",
+    "docs/company-mail/evidence/R5-GENERATED-INDEPENDENT-20261004/generated-replay.json",
+    "docs/company-mail/evidence/R5-GENERATED-INDEPENDENT-20261004/identities.json",
+    "docs/company-mail/evidence/R5-GENERATED-INDEPENDENT-20261004/previous-replay.json",
+    "docs/company-mail/evidence/R5-GENERATED-INDEPENDENT-20261004/prior-replay.json",
+    "docs/company-mail/evidence/R5-GENERATED-INDEPENDENT-20261004/provenance-results.json",
+    "docs/company-mail/evidence/R5-GENERATED-INDEPENDENT-20261004/provenance_checks.py",
+    "scripts/preparation/probe_r5_external_runtime.py",
+    "scripts/preparation/r5_external_runtime.py",
+    "scripts/preparation/run_r5_external_scoped.py",
+    "scripts/tests/r5_external_runtime_v3_checks.py"
+  ],
+  "decision": "ACCEPT_SCOPED_SYNTHETIC_IMPLEMENTATION",
+  "delivery": "97c54dc8dad6ab2da6d4dd29e43c20b7091db73f",
+  "delivery_report_sha256": "ec4fe1158e3596c37b3f0186f6e06897c0b8dc3bae3d9cfca16ccda076c98beb",
+  "design": "42f49538f7bceb6eb8e698d716c1418f85343413",
+  "design_sha256": "d85ca5d1f7029a07cfbfe9c4711c23f3d8fcc9720e7790fc3b38d463a55092f8",
+  "exact_implementation_delta": [
+    "scripts/preparation/probe_r5_external_runtime.py",
+    "scripts/preparation/r5_external_runtime.py",
+    "scripts/preparation/run_r5_external_scoped.py",
+    "scripts/tests/r5_external_runtime_v3_checks.py"
+  ],
+  "frozen_paths": [
+    "scripts/r5_selected_binding_consumer.py",
+    "scripts/r5_selected_source_binding_v2.py",
+    "scripts/r5_selected_source_binding_v3.py",
+    "scripts/r5_source_runner_prepare.py",
+    "scripts/run_r5_source_version_tests.py",
+    "scripts/check_r5_protocol.py",
+    "scripts/preparation/r5_external_batch.py",
+    "scripts/r5_source_inventory.py"
+  ],
+  "identities": {
+    "docs/company-mail/evidence/R5-RUNTIME-V3-INDEPENDENT-20261004/author-replay.log": {
+      "sha256": "ac716db491ca2991cd355d8c504388b5de2c3e64a31baaec29ab61024c9e7350"
+    },
+    "docs/company-mail/evidence/R5-RUNTIME-V3-INDEPENDENT-20261004/independent.log": {
+      "sha256": "c81d46707252082360168e7793efc001dcb686de794d956555254b8c5ce77528"
+    },
+    "docs/company-mail/evidence/R5-RUNTIME-V3-INDEPENDENT-20261004/independent_checks.py": {
+      "sha256": "d9e57a27ba6677fbfb27f14f0cca0c8651e0fd8416da60cdc0a9ed5c546ef271"
+    },
+    "docs/company-mail/evidence/R5-RUNTIME-V3-INDEPENDENT-20261004/static_review.py": {
+      "sha256": "9e7dc99062cb1c6aa82cd47353f49e2413fa721ff8dd3c81d511b53a9bb70485"
+    },
+    "scripts/check_r5_protocol.py": {
+      "git_blob": "f42995fa5be9261edcabc2a9fd5000856f6ffe4e",
+      "sha256": "8673f071517ee1d59526f89a38a7df8f29a7da2d63e7cc10789d2df0e7e94dba"
+    },
+    "scripts/preparation/probe_r5_external_runtime.py": {
+      "git_blob": "505a6438e09c627ea5798fe82e573a30408bf248",
+      "sha256": "cdc20d08fda7ef88648bbd30872dd6f9e483adffdccfa9b29f726419619ef302"
+    },
+    "scripts/preparation/r5_external_batch.py": {
+      "git_blob": "de13fdf0cf76e3aa1a60fd7b9718f8271c332ab2",
+      "sha256": "bf839d0542d52c196f27bae40a9e9fb7cc7509a38664d14e209a7e1642a7b1ec"
+    },
+    "scripts/preparation/r5_external_runtime.py": {
+      "git_blob": "4f7803834ea5e4e155426e3bc8a84f6b2255f71c",
+      "sha256": "524245ff11084f170d7cd3c41b51d28f7bcde101db3373d961f5c46f2503eb51"
+    },
+    "scripts/preparation/run_r5_external_scoped.py": {
+      "git_blob": "8c08344a37a9ca882a401975024ab604de2cb904",
+      "sha256": "7b620e1dcb28dcb01e6dfa765789b772b12c6ace2ab4d3e9e7876e8fe35b6397"
+    },
+    "scripts/r5_selected_binding_consumer.py": {
+      "git_blob": "88e3606e80318855503dff579c2d729456f48c30",
+      "sha256": "46a43df58a17ea03966b88fe07275e60344a055960aaabfcf405a7d5eb6caa21"
+    },
+    "scripts/r5_selected_source_binding_v2.py": {
+      "git_blob": "9a43bdc161750505fa217ab96987ce60673b2df9",
+      "sha256": "4bafe6a0b146c69aaf76dfaa206a95ac581739e3c0efa4a52bf36613ae817d67"
+    },
+    "scripts/r5_selected_source_binding_v3.py": {
+      "git_blob": "390f72d638a8cb3398492bab26c810802017115d",
+      "sha256": "12799a213c93510bdb449b5f610a493f517395878dd83c4b48a06e574bbf6acb"
+    },
+    "scripts/r5_source_inventory.py": {
+      "git_blob": "4215c11019249e9647cd3c4188d7854d450fccf9",
+      "sha256": "306cfcae043925d656d13b08bd439015e23348df255b363ceb8c10b6890488b2"
+    },
+    "scripts/r5_source_runner_prepare.py": {
+      "git_blob": "9893aad2fd40280070d132ad7989906efabae4b1",
+      "sha256": "a8a7396ca8aca931a4babde47afa6c53e49f6c538c3a119c7fa13e4c6eaa9b83"
+    },
+    "scripts/run_r5_source_version_tests.py": {
+      "git_blob": "6cae9cc313984845cd12a90d495241739900ed35",
+      "sha256": "2ef49fe8f085d965eeeee9ae4f0cb5d2a2c373db0a4526b7226f41a7adcace5d"
+    },
+    "scripts/tests/r5_external_runtime_v3_checks.py": {
+      "git_blob": "73fe1a654b1de4f19291f2f394fdd6c34184b1d2",
+      "sha256": "3063feb5577133e4d31818f4b2b8edeecbf327b498a9b30de909bbdcf12a7848"
+    }
+  },
+  "immediate_parent": "6d7a3979ccea031f28f12e94f058731339044f19",
+  "independent": {
+    "errors": 0,
+    "failures": 0,
+    "os_process_events": [],
+    "synthetic_only": true,
+    "tests": 13
+  },
+  "source_byte_preserved_definitions": [
+    "Descriptors",
+    "descriptors",
+    "dependency_records",
+    "clean_environment",
+    "owner",
+    "canonical",
+    "digest"
+  ],
+  "tested_implementation": "dcaf2bf91355d4c0524f34f0c767b7997a994833",
+  "tested_to_delivery_delta": [
+    "docs/company-mail/R5-RUNTIME-V3-SLICE3-20261004.md",
+    "docs/company-mail/evidence/R5-RUNTIME-V3-SLICE3-20261004/pure-result.json",
+    "docs/company-mail/evidence/R5-RUNTIME-V3-SLICE3-20261004/pure.log",
+    "docs/company-mail/evidence/R5-RUNTIME-V3-SLICE3-20261004/static.json"
+  ],
+  "unchanged_base_paths": 2211,
+  "unchanged_base_paths_manifest_sha256": "f192c82d105d62a71a64601d68454bf7e017d327c432d583ffc2945cf1034149",
+  "unchanged_immediate_parent_paths": 2219,
+  "v2_manifest_constructor_ast_equal": true
+}

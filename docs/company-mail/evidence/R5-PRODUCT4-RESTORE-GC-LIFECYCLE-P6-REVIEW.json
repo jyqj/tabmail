@@ -1,0 +1,363 @@
+{
+  "M_retry": false,
+  "P6_boundary": "fake Store fault injection around shipping deliverRecipients; no real SMTP/PG proof",
+  "P6_red_source": {
+    "actual_baseline_sha256": "d1f47862be0e40294690b80b5026848ae646cd5f50980ad2d86af5d81d3c68f1",
+    "actual_source_closure_sha256": "f65ecea096843723699ab6e50c7ef81877f049d835ecb7da6ceef92756227b22",
+    "base_source_sha": "7ffe88737b4b846ad96978b2a69a105caccf3914",
+    "only_production_file_replaced": true,
+    "overlay": {
+      "Replace": {
+        "/private/tmp/tm-r5schema17compile.A82wlgmR/src/internal/outbound/recipient_delivery.go": "/private/tmp/tm-r5product4.4euihhiy/p6-baseline.go"
+      }
+    },
+    "source_identity_kind": "canonical_source_closure_sha1_with_exact_production_overlay",
+    "source_sha": "0911cd77e838d495db190e27e14f5e04d802c87e",
+    "test_and_other_dependencies_equal_to_frozen_source": true
+  },
+  "actual_current_green_leaf_count": 96,
+  "actual_current_green_test_and_subtest_pass_count": 111,
+  "actual_current_green_top_count": 30,
+  "actual_schema_version": "17",
+  "actual_source_closure_sha256": "567f05e8d5edd1067afb16e80f5b5a8638e5aeb49c292aad122925fc737729db",
+  "cleanup": {
+    "base_database": "tm_product4_schema17",
+    "old_resources_untouched": true,
+    "owned_pg_pid": 92502,
+    "owned_pid_observation": "absent",
+    "owned_pid_ps_exit": 1,
+    "owned_root": "/private/tmp/tm-r5product4.4euihhiy",
+    "pg_stop_exit": 0,
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "test_database_query_exit": 0,
+    "test_databases": [],
+    "utc": "2026-10-02T07:42:37.346286+00:00"
+  },
+  "fullCI_green": false,
+  "infra_bootstrap_attempts": [
+    {
+      "actual_test_count": 0,
+      "cleanup": {
+        "base_database": "tm_product4_schema17",
+        "old_resources_untouched": true,
+        "owned_pg_pid": 92159,
+        "owned_pid_observation": "absent",
+        "owned_pid_ps_exit": 1,
+        "owned_root": "/private/tmp/tm-r5product4.wfogiipm",
+        "pg_stop_exit": 0,
+        "pidfile_absent": true,
+        "socket_absent": true,
+        "test_database_query_exit": 0,
+        "test_databases": [],
+        "utc": "2026-10-02T07:40:16.697223+00:00"
+      },
+      "kind": "executor_runtime_bootstrap_zero_ConnMaxLifetime_not_product_RED",
+      "official_New_exit": 1,
+      "path": "/private/tmp/tm-r5product4.wfogiipm",
+      "resolution": "bootstrap config ConnMaxLifetime=300s matching application default; no product or test bytes changed"
+    },
+    {
+      "actual_test_count": 0,
+      "cleanup": {
+        "base_database": "tm_product4_schema17",
+        "old_resources_untouched": true,
+        "owned_pg_pid": 92403,
+        "owned_pid_observation": "absent",
+        "owned_pid_ps_exit": 1,
+        "owned_root": "/private/tmp/tm-r5product4.qchx01px",
+        "pg_stop_exit": 0,
+        "pidfile_absent": true,
+        "socket_absent": true,
+        "test_database_query_exit": 0,
+        "test_databases": [],
+        "utc": "2026-10-02T07:41:10.761525+00:00"
+      },
+      "kind": "executor_runtime_bootstrap_zero_ConnMaxLifetime_not_product_RED",
+      "official_New_exit": 1,
+      "path": "/private/tmp/tm-r5product4.qchx01px",
+      "resolution": "bootstrap config ConnMaxLifetime=300s matching application default; no product or test bytes changed"
+    }
+  ],
+  "inherited_compile_build_0_not_reexecuted": true,
+  "results": {
+    "gc": {
+      "actual_test_names": [
+        "TestR5AttachmentGCProgressPastProtectedPrefix",
+        "TestR5AttachmentGCProgressPastProtectedPrefix/draft",
+        "TestR5AttachmentGCProgressPastProtectedPrefix/outbound",
+        "TestR5AttachmentGCProgressPastProtectedPrefix/sent",
+        "TestR5AttachmentGCProgressAllProtectedTerminates",
+        "TestR5AttachmentGCProgressBusyRowsAndBatchLimit",
+        "TestR5AttachmentGCProgressConcurrentDraftFence",
+        "TestR5AttachmentGCProgressOrphanFailureRollsBackBatch",
+        "TestR5AttachmentGCProgressReferenceLookupFailureIsClosed",
+        "TestR5AttachmentGCProgressHeldOriginalSurvivesMetadataCollection"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 9,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 6.884,
+          "package": "tabmail/internal/store/postgres"
+        }
+      ],
+      "pass_count": 10,
+      "run_count": 10,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 7
+    },
+    "offboarding": {
+      "actual_test_names": [
+        "TestR5OffboardingLifecycleFrozenTargetAndQualifiedReplay",
+        "TestR5OffboardingLifecycleOldCompletionEpochDenied",
+        "TestR5OffboardingLifecycleOldCompletionEpochDenied/actor-demote",
+        "TestR5OffboardingLifecycleOldCompletionEpochDenied/actor-freeze",
+        "TestR5OffboardingLifecycleOldCompletionEpochDenied/actor-session",
+        "TestR5OffboardingLifecycleOldCompletionEpochDenied/target-reactivate",
+        "TestR5OffboardingLifecycleOldCompletionEpochDenied/target-session",
+        "TestR5OffboardingLifecycleOldCompletionEpochDenied/target-role",
+        "TestR5OffboardingLifecycleOldCompletionEpochDenied/target-permission-aba",
+        "TestR5OffboardingLifecycleOldCompletionEpochDenied/successor-freeze",
+        "TestR5OffboardingLifecycleOldCompletionEpochDenied/successor-session",
+        "TestR5OffboardingLifecycleOldCompletionEpochDenied/successor-permission-aba",
+        "TestR5OffboardingLifecycleOldCompletionEpochDenied/legacy-unverified",
+        "TestR5OffboardingLifecycleOldCompletionEpochDenied/foreign-target",
+        "TestR5OffboardingLifecycleFreshReentryAndSuccessorEpoch",
+        "TestR5OffboardingLifecycleAssignedProfileContentABA",
+        "TestR5OffboardingLifecycleAssignedProfileContentABA/preview/target",
+        "TestR5OffboardingLifecycleAssignedProfileContentABA/preview/successor",
+        "TestR5OffboardingLifecycleAssignedProfileContentABA/replay/target",
+        "TestR5OffboardingLifecycleAssignedProfileContentABA/replay/successor",
+        "TestR5OffboardingLifecycleSharedAndNullableProfileReceipt",
+        "TestR5OffboardingLifecycleSharedAndNullableProfileReceipt/shared-unchanged-profile",
+        "TestR5OffboardingLifecycleSharedAndNullableProfileReceipt/explicit-null-profile-pair",
+        "TestR5OffboardingLifecycleProfileVersionFence",
+        "TestR5OffboardingLifecycleProfileVersionFence/preview/busy-profile",
+        "TestR5OffboardingLifecycleProfileVersionFence/preview/target-recreated-profile",
+        "TestR5OffboardingLifecycleProfileVersionFence/preview/successor-recreated-profile",
+        "TestR5OffboardingLifecycleProfileVersionFence/replay/busy-profile",
+        "TestR5OffboardingLifecycleProfileVersionFence/replay/target-recreated-profile",
+        "TestR5OffboardingLifecycleProfileVersionFence/replay/successor-recreated-profile",
+        "TestR5OffboardingLifecycleAuditWaitExpiryRollsBack",
+        "TestR5OffboardingLifecyclePlanWaitUsesDatabaseDeadline",
+        "TestR5OffboardingLifecyclePreviewExpiryBeforeReleaseRollsBack",
+        "TestR5OffboardingLifecycleShippingHTTP",
+        "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait",
+        "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/preview/demote",
+        "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/preview/freeze",
+        "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/preview/session",
+        "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/preview/successor-freeze",
+        "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/execute/demote",
+        "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/execute/freeze",
+        "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/execute/session",
+        "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/execute/successor-freeze",
+        "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/replay/demote",
+        "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/replay/freeze",
+        "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/replay/session",
+        "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/replay/successor-freeze"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 42,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 12.911,
+          "package": "tabmail/internal/store/postgres"
+        }
+      ],
+      "pass_count": 47,
+      "run_count": 47,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 11
+    },
+    "official-schema17-bootstrap": {
+      "execution": {
+        "absolute_deadline_wall_time": 1790926991.96877,
+        "budget_seconds": 90,
+        "elapsed_wall_seconds": 1.4508399963378906,
+        "final_owned_group_observation": {
+          "members": [],
+          "non_zombie_live_pids": [],
+          "status": "observed"
+        },
+        "observed_wall_time": 1790926903.41961,
+        "owned_process_group": 92514,
+        "process_returncode": 0,
+        "process_returncode_status": "observed_parent_poll",
+        "scope": "absolute wall deadline including host suspension; cleanup is observed after resume, never guaranteed during sleep",
+        "started_wall_time": 1790926901.96877,
+        "timed_out": false
+      },
+      "exit": 0
+    },
+    "p6-green": {
+      "actual_test_names": [
+        "TestR5RecipientCheckpointOrderKnownResults",
+        "TestR5RecipientCheckpointOrderKnownResults/accepted",
+        "TestR5RecipientCheckpointOrderKnownResults/temporary",
+        "TestR5RecipientCheckpointOrderKnownResults/permanent",
+        "TestR5RecipientCheckpointOrderBlockedTelemetryCancelKeepsAccepted",
+        "TestR5RecipientCheckpointOrderFailureKeepsUncertainNoTelemetry",
+        "TestR5RecipientCheckpointOrderFailureKeepsUncertainNoTelemetry/checkpoint_fault",
+        "TestR5RecipientCheckpointOrderFailureKeepsUncertainNoTelemetry/lost_lease_at_checkpoint",
+        "TestR5RecipientCheckpointOrderFailureKeepsUncertainNoTelemetry/cancel_before_checkpoint",
+        "TestR5RecipientCheckpointOrderUncertainTerminalBeforeTelemetry",
+        "TestR5RecipientCheckpointOrderJobMarkErrorsAreNotTelemetry",
+        "TestR5RecipientCheckpointOrderJobMarkErrorsAreNotTelemetry/uncertain=false",
+        "TestR5RecipientCheckpointOrderJobMarkErrorsAreNotTelemetry/uncertain=true",
+        "TestR5RecipientCheckpointOrderFencingBeforeNetwork",
+        "TestR5RecipientCheckpointOrderFencingBeforeNetwork/wrong_token",
+        "TestR5RecipientCheckpointOrderFencingBeforeNetwork/expired_lease",
+        "TestR5RecipientCheckpointOrderFencingBeforeNetwork/wrong_tenant",
+        "TestR5RecipientCheckpointOrderFencingBeforeNetwork/revoked_sender",
+        "TestR5RecipientCheckpointOrderAuthorizationStoreErrorPreserved"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 15,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 1.508,
+          "package": "tabmail/internal/outbound"
+        }
+      ],
+      "pass_count": 19,
+      "run_count": 19,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 7
+    },
+    "p6-red": {
+      "actual_test_names": [
+        "TestR5RecipientCheckpointOrderKnownResults",
+        "TestR5RecipientCheckpointOrderKnownResults/accepted",
+        "TestR5RecipientCheckpointOrderKnownResults/temporary",
+        "TestR5RecipientCheckpointOrderKnownResults/permanent",
+        "TestR5RecipientCheckpointOrderBlockedTelemetryCancelKeepsAccepted",
+        "TestR5RecipientCheckpointOrderFailureKeepsUncertainNoTelemetry",
+        "TestR5RecipientCheckpointOrderFailureKeepsUncertainNoTelemetry/checkpoint_fault",
+        "TestR5RecipientCheckpointOrderFailureKeepsUncertainNoTelemetry/lost_lease_at_checkpoint",
+        "TestR5RecipientCheckpointOrderFailureKeepsUncertainNoTelemetry/cancel_before_checkpoint",
+        "TestR5RecipientCheckpointOrderUncertainTerminalBeforeTelemetry",
+        "TestR5RecipientCheckpointOrderJobMarkErrorsAreNotTelemetry",
+        "TestR5RecipientCheckpointOrderJobMarkErrorsAreNotTelemetry/uncertain=false",
+        "TestR5RecipientCheckpointOrderJobMarkErrorsAreNotTelemetry/uncertain=true",
+        "TestR5RecipientCheckpointOrderFencingBeforeNetwork",
+        "TestR5RecipientCheckpointOrderFencingBeforeNetwork/wrong_token",
+        "TestR5RecipientCheckpointOrderFencingBeforeNetwork/expired_lease",
+        "TestR5RecipientCheckpointOrderFencingBeforeNetwork/wrong_tenant",
+        "TestR5RecipientCheckpointOrderFencingBeforeNetwork/revoked_sender",
+        "TestR5RecipientCheckpointOrderAuthorizationStoreErrorPreserved"
+      ],
+      "exit": 1,
+      "failed_names": [
+        "TestR5RecipientCheckpointOrderKnownResults/accepted",
+        "TestR5RecipientCheckpointOrderKnownResults/temporary",
+        "TestR5RecipientCheckpointOrderKnownResults/permanent",
+        "TestR5RecipientCheckpointOrderKnownResults",
+        "TestR5RecipientCheckpointOrderBlockedTelemetryCancelKeepsAccepted",
+        "TestR5RecipientCheckpointOrderFailureKeepsUncertainNoTelemetry/checkpoint_fault",
+        "TestR5RecipientCheckpointOrderFailureKeepsUncertainNoTelemetry/lost_lease_at_checkpoint",
+        "TestR5RecipientCheckpointOrderFailureKeepsUncertainNoTelemetry/cancel_before_checkpoint",
+        "TestR5RecipientCheckpointOrderFailureKeepsUncertainNoTelemetry",
+        "TestR5RecipientCheckpointOrderUncertainTerminalBeforeTelemetry",
+        "TestR5RecipientCheckpointOrderJobMarkErrorsAreNotTelemetry/uncertain=false",
+        "TestR5RecipientCheckpointOrderJobMarkErrorsAreNotTelemetry/uncertain=true",
+        "TestR5RecipientCheckpointOrderJobMarkErrorsAreNotTelemetry"
+      ],
+      "json_decode_error_count": 0,
+      "leaf_count": 15,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "fail",
+          "elapsed": 0.496,
+          "package": "tabmail/internal/outbound"
+        }
+      ],
+      "pass_count": 6,
+      "run_count": 19,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 7
+    },
+    "restore": {
+      "actual_test_names": [
+        "TestR5RestoreLifecyclePreservesRecordedDeadline",
+        "TestR5RestoreLifecyclePreservesRecordedDeadline/active-finite",
+        "TestR5RestoreLifecyclePreservesRecordedDeadline/archive-finite",
+        "TestR5RestoreLifecyclePreservesRecordedDeadline/personal-legacy-past",
+        "TestR5RestoreLifecyclePreservesRecordedDeadline/shared-zero-nil",
+        "TestR5RestoreLifecyclePreservesRecordedDeadline/shared-null-nil",
+        "TestR5RestoreLifecyclePreservesRecordedDeadline/shared-zero-unknown-future",
+        "TestR5RestoreLifecyclePreservesRecordedDeadline/shared-null-unknown-future",
+        "TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects",
+        "TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects/hard-past",
+        "TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects/hard-equal",
+        "TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects/purge-past",
+        "TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects/purge-equal",
+        "TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects/archive-hard-past",
+        "TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects/shared-zero-unknown-past",
+        "TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects/shared-null-unknown-past",
+        "TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects/personal-purge-past",
+        "TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects/no-organize",
+        "TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects/no-read",
+        "TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects/missing",
+        "TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects/not-trash",
+        "TestR5RestoreLifecycleRechecksClockAfterWait",
+        "TestR5RestoreLifecycleRechecksClockAfterWait/identity-hard",
+        "TestR5RestoreLifecycleRechecksClockAfterWait/mailbox-hard",
+        "TestR5RestoreLifecycleRechecksClockAfterWait/audit-purge",
+        "TestR5RestoreLifecycleRechecksClockAfterWait/outbox-purge",
+        "TestR5RestoreLifecycleRechecksClockAfterWait/audit-hard",
+        "TestR5RestoreLifecycleRechecksClockAfterWait/outbox-hard",
+        "TestR5RestoreLifecycleSourceBusyAndDeleted",
+        "TestR5RestoreLifecycleSourceBusyAndDeleted/source-nowait",
+        "TestR5RestoreLifecycleSourceBusyAndDeleted/deleted-before-restore",
+        "TestR5RestoreLifecycleSourceBusyAndDeleted/restored-before-old-purge",
+        "TestR5RestoreLifecycleCurrentProofVersusGC",
+        "TestR5RestoreLifecycleCurrentProofVersusGC/restore-waits-past-purge",
+        "TestR5RestoreLifecycleCurrentProofVersusGC/gc-owns-source"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 30,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 25.052,
+          "package": "tabmail/internal/store/postgres"
+        }
+      ],
+      "pass_count": 35,
+      "run_count": 35,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 5
+    }
+  },
+  "scope": "new_restore_gc_offboarding_P6_only",
+  "scope_verdict": "new_targets_PASS_with_real_P6_baseline_RED_preserved",
+  "source_postcheck_equal": true,
+  "source_sha": "7ffe88737b4b846ad96978b2a69a105caccf3914"
+}

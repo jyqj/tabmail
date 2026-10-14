@@ -25,7 +25,18 @@ func respondAppError(w http.ResponseWriter, logger zerolog.Logger, err error) {
 	case appcore.KindNotFound:
 		errNotFound(w, appErr.Message)
 	case appcore.KindConflict:
+		if appErr.Data != nil {
+			writeJSON(w, http.StatusConflict, envelope{
+				Data:  appErr.Data,
+				Error: &apiErr{Code: "CONFLICT", Message: appErr.Message},
+			})
+			return
+		}
 		errConflict(w, appErr.Message)
+	case appcore.KindQuotaExceeded:
+		writeJSON(w, http.StatusTooManyRequests, envelope{
+			Error: &apiErr{Code: "QUOTA_EXCEEDED", Message: appErr.Message},
+		})
 	default:
 		if appErr.Err != nil {
 			logger.Err(appErr.Err).Msg("application internal error")

@@ -1,0 +1,254 @@
+{
+  "schema_version": 1,
+  "policy": "r5_batch_g1_cleanup_fix_evidence_20261004",
+  "fixed_source": "f875672dea2b68fdec9e0b986f4863724da5d7ba",
+  "previous_fixed_source": "52dd8b9ef538b55812b35308cae8b469400e2705",
+  "independent_delta_review": "c2a5e599eae0ae7b2599c0a8bd0ea8150ca15f2b",
+  "legacy_reproduction": {
+    "synthetic_review_methods": 5,
+    "real_contract_observations": [
+      {
+        "phase": "single-finish-error",
+        "qualification": false,
+        "joined": true,
+        "lease_released": true
+      },
+      {
+        "phase": "repeated-finish-error",
+        "qualification": false,
+        "joined_before_lease_release": false,
+        "review_had_to_reap": true,
+        "lease_released": true
+      }
+    ],
+    "synthetic_log_sha256": "bbdb0a39b377954a4f98237de7e8118f69a2342ff3bbc4591b922a9d2d35864a",
+    "real_contract_log_sha256": "a8909dba894d7e4debf5c625b2ad3f3a722ba25a85b6f5765aaadde7f5a80e5d",
+    "all_controlled_processes_reaped": true,
+    "execution": "original review controls at previous fixed source; fault injected; no business qualification"
+  },
+  "controls": {
+    "batch_total": 48,
+    "new_g1": 8,
+    "retained_f1_f2_f3_and_batch": 40,
+    "runtime": 21,
+    "protocol_regressions": 70,
+    "independent_delta_regression_methods": 4,
+    "independent_full_walk_scenarios": 4,
+    "real_pinned_helper_observations": [
+      {
+        "phase": "single-finish-error",
+        "original_error_preserved": true,
+        "drain_calls": 1,
+        "physical_join_before_lease_release": true,
+        "independent_wait": true,
+        "pipes_closed": true,
+        "qualification": false
+      },
+      {
+        "phase": "persistent-finish-error",
+        "original_error_preserved": true,
+        "drain_calls": 1,
+        "physical_join_before_lease_release": true,
+        "independent_wait": true,
+        "pipes_closed": true,
+        "qualification": false
+      },
+      {
+        "phase": "persistent-finish-and-wait-error",
+        "blocking_state_observed": true,
+        "unknown_cleanup_retains_lease": true,
+        "qualification": false
+      },
+      {
+        "phase": "persistent-finish-and-wait-error",
+        "original_error_preserved": true,
+        "drain_calls": 1,
+        "physical_join_before_lease_release": true,
+        "independent_wait": true,
+        "pipes_closed": true,
+        "qualification": false
+      }
+    ],
+    "real_pinned_helper_initial_and_restoration_validation": true,
+    "real_contract_semantic_assertions": [
+      "independent byte pin rejects",
+      "semantic recapture rejects workers",
+      "semantic recapture rejects budgets",
+      "semantic recapture rejects required",
+      "actual full contract validation passes",
+      "RPC rejects outside lease",
+      "RPC rejects foreign nonce",
+      "RPC rejects foreign contract",
+      "RPC rejects argv injection",
+      "source-mutation actual preflight",
+      "source-mutation terminal full validation rejects",
+      "source-mutation invalidates every staged child",
+      "source-mutation restored full validation passes",
+      "dependency-mutation actual preflight",
+      "dependency-mutation terminal full validation rejects",
+      "dependency-mutation invalidates every staged child",
+      "dependency-mutation restored full validation passes",
+      "late-case-cancel-before-ack cancel socket accepted",
+      "late-case-cancel-before-ack ack socket accepted",
+      "late-case-cancel-before-ack actual preflight",
+      "late-case-cancel-before-ack accepted cancellation rejects all staged eligibility",
+      "late-case-cancel-before-ack restored full validation passes"
+    ]
+  },
+  "probe": {
+    "receipt": {
+      "children": {
+        "probe/0": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "6fcf0decb8e73b441214e294841627fdd17898e843cc93691bee616e6b6a6874",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/1": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "a121b7111aae3f5d3b834cbbc9a99ae8c55d60ce7162f565a7995ece99cb2685",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/2": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "1ab9dd859f4a5936a8705c6da38e7ec7b69b2990285c29968f6fe9338809725b",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/3": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "a02190950a82dc9f07be52228bca56329da56864b6a133a67bbd8a703a3058db",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/4": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "9abc89613ec4ed892eb66c45d09e8dc7775c7bf61c195116510191ab7fb8a15c",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/5": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "085eafeed7e53e445ffd7b322c7ac3ed074967a27e2b71ffc1e2d952dc53b838",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/6": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "6924fe860723dc9b35b6d78d69fc7544406d08e00142b89c3a5bdfa1107ce8f3",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/7": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "2884d75cc011ceb89c21febb91a6720e07b6c99f6d95a8db14084f6569cf4c15",
+          "tail": false,
+          "timeout": false
+        }
+      },
+      "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+      "contract_sha256": "5fc8b98c4a230fa699424b6c0ada7f177eec855e779f71b20465fd8ccdb95b8c",
+      "eligibility_scope": "infrastructure_probe_only",
+      "errors": [],
+      "max_live_children": 4,
+      "owners_joined": true,
+      "policy": "r5_external_batch_validation_v1",
+      "preflight": true,
+      "product_green": false,
+      "required_terminal_count": 10,
+      "resources_joined": true,
+      "schema_version": 1,
+      "status": "BATCH_QUALIFIED",
+      "task_complete": false,
+      "terminal_count": 10,
+      "terminal_postcheck": true
+    },
+    "receipt_sha256": "5e130ba4697b975e2a048ac07501f44894dd4bd277ea99e156a24d6958056afd",
+    "contract_independent_byte_pin": "5fc8b98c4a230fa699424b6c0ada7f177eec855e779f71b20465fd8ccdb95b8c",
+    "contract_canonical_sha256": "5fc8b98c4a230fa699424b6c0ada7f177eec855e779f71b20465fd8ccdb95b8c",
+    "runtime_manifest_independent_byte_pin": "cac74cc14ac4f15e959bffec9a66149c484edd580f2a61a3e8da7d3283c698ca",
+    "timing": {
+      "wall_seconds": 23.077175404999707,
+      "exit_code": 0
+    },
+    "raw_go_jsonl_sha256": "1eb4cda583a4b73ca38705024f3c375b14e9387afba55e0f3d0ecc7c69302c81",
+    "go_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "python_report_sha256": "9e8d9beb7334f605cc6f05746c1a0d59817acf5fe088192a408e8bde78b5f663",
+    "infrastructure_only": true
+  },
+  "inventories": {
+    "source_regular_files": 1937,
+    "dependency_regular_files": 45584,
+    "full_pre_post_equal": true
+  },
+  "cleanup": {
+    "registered_roots": 12,
+    "every_root_directly_reaped_group_joined_and_pipes_closed": true,
+    "rpc_owners_joined": true,
+    "barrier_precedes_publication": true,
+    "lease_released_after_physical_join": true,
+    "unknown_cleanup_control_retains_token_without_receipt": true,
+    "original_error_preserved": true,
+    "independent_wait_never_calls_finish_or_communicate": true,
+    "cleanup_facts_sha256": "7f224714b915f858eea297f5976c50bd970635bac08b09393f7b9f73a98fb19c",
+    "owned_fixture_databases_remaining": 0,
+    "owned_fixture_backend_connections_remaining": 0,
+    "exact_physical_fixture_ack": true,
+    "owned_postgresql_shutdown": true,
+    "pgx_backend_cancellation_guarantee": "not newly qualified"
+  },
+  "logs": {
+    "batch_sha256": "4126da095325464f646891afaf75d3d40faca2a92583fd7b3031c20ca6d45260",
+    "runtime_sha256": "c2f098e22f78287f7456db2ec528d840988c4f888adc625e99b9be6990870299",
+    "protocol_sha256": "8ff9c6181ef66745c5d0bcc2defdc78aec7c1b33bbd7e6e5e43154b860915a02",
+    "independent_regressions_sha256": "611cf6284da4f926f4182bef2ca59f063c4184856ada4d0f4d4ef08e8b4f268b",
+    "real_pinned_helper_sha256": "a9aec2ffdc5178e8e3eb817accf590aa3211b2348c95f06557b6e053732449f6",
+    "real_contract_semantics_sha256": "f1e2982cef139d6ea7fe9c9d4958afb7f040a221e2ddb929070abd4d5a2419c4"
+  },
+  "error_boundary": "all drain/wait failures injected; no spontaneous OS failure, real Go business false-pass or actual D-state wait claimed",
+  "deadline_semantics": "execution deadline unchanged; required unknown process/socket cleanup retains blocking lease ownership, potentially indefinitely; no hard physical-return bound for OS uninterruptible waits",
+  "original_budgets": {
+    "go": 120,
+    "batch": 180,
+    "case": 75,
+    "max_workers": 4
+  },
+  "scope": {
+    "catalog_ids": 46,
+    "handler_ids": 17,
+    "handler_variants": 26,
+    "required_component_terminals": 43,
+    "probe_terminals": 10,
+    "formal_execution": "NOTRUN"
+  },
+  "preserved": [
+    "all previous failure/receipt/source identities",
+    "exact fixture cleanup acknowledgement",
+    "one pinned capability lease and all-or-none staging",
+    "full source/dependency checks",
+    "authoritative catalog/markers/business expectations",
+    "Go1.25.7/go.mod/go.sum/two replaces",
+    "official package-lock/dependencies"
+  ],
+  "wholePG180": "NOTRUN",
+  "audit": "NOTRUN",
+  "actual_email": "NOTRUN",
+  "central_progress": "10/171 unchanged",
+  "excluded": [
+    "default675",
+    "sharedDB89e7"
+  ],
+  "merge_deploy": "NOTRUN",
+  "product_green": false,
+  "task_complete": false,
+  "delivery": "normal Git push to existing PR26; no additional API/draft attempt; later evidence revision has a separate identity and inherits no receipt qualification"
+}

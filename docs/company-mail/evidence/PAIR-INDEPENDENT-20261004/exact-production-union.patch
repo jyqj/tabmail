@@ -1,0 +1,47 @@
+diff --git a/internal/store/postgres/employee_disposition.go b/internal/store/postgres/employee_disposition.go
+index bf28cfa..619feb3 100644
+--- a/internal/store/postgres/employee_disposition.go
++++ b/internal/store/postgres/employee_disposition.go
+@@ -19,2 +19,3 @@ import (
+-// Lock order: tenant -> departing user -> successor -> active jobs -> owned
+-// mailboxes (ORDER BY id). Draft and upload writes take a user SHARE lock;
++// Lock order: tenant -> current caller -> plan (execute only) -> departing
++// user -> successor -> active jobs -> owned mailboxes (ORDER BY id).
++// Draft and upload writes take a user SHARE lock;
+@@ -24 +25 @@ func offboardingSubjectsTx(ctx context.Context, tx pgx.Tx, a authz.Actor, target
+-	if target == successor || target == a.ID || target == uuid.Nil || successor == uuid.Nil {
++	if target == successor || target == a.ID || successor == a.ID || target == uuid.Nil || successor == uuid.Nil {
+@@ -44 +45,5 @@ func offboardingSubjectsTx(ctx context.Context, tx pgx.Tx, a authz.Actor, target
+-	if e = tx.QueryRow(ctx, `SELECT is_active FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`, a.TenantID, successor).Scan(&active); errors.Is(e, pgx.ErrNoRows) {
++	var role models.UserRole
++	// Qualify custody recipients with the same member policy as departing
++	// employees. Read current role/activity under the existing successor fence;
++	// preview, execute and qualified receipt replay all use this validator.
++	if e = tx.QueryRow(ctx, `SELECT is_active,role FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`, a.TenantID, successor).Scan(&active, &role); errors.Is(e, pgx.ErrNoRows) {
+@@ -52,0 +58,3 @@ func offboardingSubjectsTx(ctx context.Context, tx pgx.Tx, a authz.Actor, target
++	if !authz.CanManageTenantMember(a, a.TenantID, role) {
++		return nil, app.Forbidden("cannot manage this successor")
++	}
+diff --git a/web/features/company/offboarding-panel.tsx b/web/features/company/offboarding-panel.tsx
+index b48144e..52554e5 100644
+--- a/web/features/company/offboarding-panel.tsx
++++ b/web/features/company/offboarding-panel.tsx
+@@ -14 +14 @@ export function OffboardingPanel({ employees, refresh }: {
+-    const { user } = useAuth();
++    const { user, tenantId } = useAuth();
+@@ -22 +22,8 @@ export function OffboardingPanel({ employees, refresh }: {
+-    const active = employees.filter(u => u.is_active);
++    // Suspension and completed disposition are separate server-side states.
++    // Frozen targets remain selectable; successors must still be active.
++    const selectedTenant = tenantId ?? user?.tenant_id;
++    const manageable = employees.filter(u => user && u.tenant_id === selectedTenant &&
++        (user.role === "super_admin" || selectedTenant === user.tenant_id) &&
++        u.id !== user.id && (user.role === "super_admin" || (user.role === "admin" && u.role === "user")));
++    const successors = manageable.filter(u => u.is_active && u.id !== target);
++    const validSelection = manageable.some(u => u.id === target) && successors.some(u => u.id === successor);
+@@ -26 +33 @@ export function OffboardingPanel({ employees, refresh }: {
+-   <div className="grid gap-3 md:grid-cols-2"><EmployeeField label={t("停用成员", "Employee to offboard")} value={target} onChange={setTarget} employees={active.filter(u => u.id !== user?.id && (user?.role === "super_admin" || u.role === "user"))}/><EmployeeField label={t("邮箱接管人", "Mailbox successor")} value={successor} onChange={setSuccessor} employees={active.filter(u => u.id !== target)}/></div>
++   <div className="grid gap-3 md:grid-cols-2"><EmployeeField label={t("停用成员", "Employee to offboard")} value={target} onChange={setTarget} employees={manageable}/><EmployeeField label={t("邮箱接管人", "Mailbox successor")} value={successor} onChange={setSuccessor} employees={successors}/></div>
+@@ -30 +37 @@ export function OffboardingPanel({ employees, refresh }: {
+-   <ActionButton disabled={busy || !target || !successor || target === successor || reason.trim().length < 8} onClick={() => run(async () => { const value = await previewOffboarding(target, successor, { drafts: disposition }, reason); setPlan(value); setConflict(false); })}>{t("预览交接影响", "Preview handover impact")}</ActionButton>
++   <ActionButton disabled={busy || !validSelection || reason.trim().length < 8} onClick={() => run(async () => { const value = await previewOffboarding(target, successor, { drafts: disposition }, reason); setPlan(value); setConflict(false); })}>{t("预览交接影响", "Preview handover impact")}</ActionButton>

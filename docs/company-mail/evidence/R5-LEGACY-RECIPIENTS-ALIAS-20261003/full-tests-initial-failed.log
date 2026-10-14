@@ -1,0 +1,39 @@
+
+> web@0.1.0 test
+> vitest run
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 /workspace/tabmail/web
+
+ ❯ components/company/r5-protocol.test.tsx (3 tests | 3 skipped) 25ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  components/company/r5-protocol.test.tsx [ components/company/r5-protocol.test.tsx ]
+Error: Command failed: go test -count=1 -run ^TestR5ProtocolDeliverySharedCases$ ./internal/delivery
+Go: Unknown option: test
+
+ ❯ components/company/r5-protocol.test.tsx:36:5
+     34|     temporary = mkdtempSync(resolve(tmpdir(), "tabmail-r5-protocol-com…
+     35|     observationPath = resolve(temporary, "observations.json");
+     36|     execFileSync("go", ["test", "-count=1", "-run", "^TestR5ProtocolDe…
+       |     ^
+     37|       cwd: root,
+     38|       env: { ...process.env, TABMAIL_R5_PROTOCOL_OBSERVATIONS: observa…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 38 passed (39)
+      Tests  524 passed | 3 skipped (527)
+   Start at  19:19:21
+   Duration  58.38s (transform 3.37s, setup 5.62s, import 27.99s, tests 88.99s, environment 42.06s)
+
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

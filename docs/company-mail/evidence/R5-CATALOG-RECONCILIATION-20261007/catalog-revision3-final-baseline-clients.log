@@ -1,0 +1,17 @@
+/workspace/scratch/458de7991ac3/tabmail-catalog/scripts/collect_api_calls.cjs:147
+    for (const key of Object.keys(row)) if (JSON.stringify(row[key]) !== JSON.stringify(stored[key])) throw new Error(`client source drift: ${row.source}:${row.line} ${key}`);
+                                                                                                      ^
+
+Error: client source drift: web/components/company/compose.tsx:87 line
+    at /workspace/scratch/458de7991ac3/tabmail-catalog/scripts/collect_api_calls.cjs:147:109
+    at Array.forEach (<anonymous>)
+    at validate (/workspace/scratch/458de7991ac3/tabmail-catalog/scripts/collect_api_calls.cjs:145:10)
+    at Object.<anonymous> (/workspace/scratch/458de7991ac3/tabmail-catalog/scripts/collect_api_calls.cjs:160:5)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+
+Node.js v24.19.0

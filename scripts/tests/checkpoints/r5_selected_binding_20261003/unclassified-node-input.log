@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/r5_selected_source_binding.py", line 244, in <module>
+    main()
+  File "/workspace/tabmail/scripts/r5_selected_source_binding.py", line 240, in main
+    result=capture(args.root,args.go,cache=args.cache,modulecache=args.modulecache)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_selected_source_binding.py", line 203, in capture
+    local, generated, external, native = classify(rows,root,authorized,envinfo,mvs)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_selected_source_binding.py", line 147, in classify
+    raise ValueError('unclassified local Go input: '+rel)
+ValueError: unclassified local Go input: web/node_modules/flatted/golang/pkg/flatted/flatted.go

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"io"
 	"mime"
 	"net/http"
 	"strconv"
@@ -14,7 +13,6 @@ import (
 	"tabmail/internal/app"
 	"tabmail/internal/app/companymail"
 	"tabmail/internal/app/submissions"
-	"tabmail/internal/authz"
 	"tabmail/internal/company"
 )
 
@@ -38,10 +36,7 @@ func NewCompanyMailHandler(repo mailWorkspace, mail *companymail.Service, subs *
 
 func (h *CompanyMailHandler) result(w http.ResponseWriter, v any, err error) {
 	if err != nil {
-		if authz.IsAuthzError(err) {
-			err = app.Forbidden(err.Error())
-		}
-		respondAppError(w, h.logger, err)
+		respondAppError(w, h.logger, app.FromAuthz(err))
 		return
 	}
 	ok(w, v)
@@ -104,8 +99,7 @@ func (h *CompanyMailHandler) Source(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer source.Close()
-	downloadHeaders(w, "message.eml", "message/rfc822")
-	_, _ = io.Copy(w, source)
+	h.streamMailSource(w, r, source)
 }
 
 func downloadHeaders(w http.ResponseWriter, name, ct string) {
@@ -262,32 +256,33 @@ type submitDraftRequest struct {
 
 // writeSubmitFailure maps a submissions service failure to the exact HTTP
 // response the draft submit endpoint has always produced. Order, status codes
-// and body shapes are pinned by the integration tests.
+// and body shapes are pinned by the integration tests: every kind — including
+// the quota (429) and revision-conflict (409 with Data.revision) bodies — goes
+// through respondAppError, which renders the app.Error semantics carried by
+// the failure.
 func writeSubmitFailure(w http.ResponseWriter, logger zerolog.Logger, f *submissions.Failure) {
 	switch f.Kind {
 	case submissions.FailureAuthRequired:
-		errForbidden(w, "authentication required")
+		respondAppError(w, logger, app.Forbidden("authentication required"))
 	case submissions.FailureBadRequest:
-		errBadRequest(w, f.Message)
+		respondAppError(w, logger, app.BadRequest(f.Message))
 	case submissions.FailureForbidden:
-		errForbidden(w, f.Message)
+		respondAppError(w, logger, app.Forbidden(f.Message))
 	case submissions.FailureInternal:
-		errInternal(w)
+		respondAppError(w, logger, &app.Error{Kind: app.KindInternal, Message: "internal server error"})
 	case submissions.FailureQuota:
-		writeJSON(w, http.StatusTooManyRequests, envelope{
-			Error: &apiErr{Code: "QUOTA_EXCEEDED", Message: f.Message},
-		})
+		respondAppError(w, logger, app.QuotaExceeded(f.Message))
 	case submissions.FailureConflict:
-		errConflict(w, f.Message)
+		respondAppError(w, logger, app.Conflict(f.Message))
 	case submissions.FailureRevisionConflict:
-		writeJSON(w, http.StatusConflict, envelope{
-			Data:  map[string]any{"revision": f.Revision},
-			Error: &apiErr{Code: "CONFLICT", Message: "draft revision changed; refresh the draft before retrying"},
-		})
+		respondAppError(w, logger, app.ConflictWithData(
+			"draft revision changed; refresh the draft before retrying",
+			map[string]any{"revision": f.Revision},
+		))
 	case submissions.FailureApp:
 		respondAppError(w, logger, f.Err)
 	default:
-		errBadRequest(w, f.Message)
+		respondAppError(w, logger, app.BadRequest(f.Message))
 	}
 }
 
@@ -329,7 +324,7 @@ func (h *CompanyMailHandler) SubmitDraft(w http.ResponseWriter, r *http.Request)
 		// A replay must not reopen the sent envelope: the original submitter's
 		// read grant may have been revoked since, so the receipt goes through
 		// the same redacted view as the submission read endpoints.
-		view, rerr := h.subs.RedactOutboundJob(r.Context(), companyActor(r), job)
+		view, rerr := h.subs.ReplayReceiptView(r.Context(), companyActor(r), job)
 		if rerr != nil {
 			respondAppError(w, h.logger, rerr)
 			return
@@ -337,5 +332,5 @@ func (h *CompanyMailHandler) SubmitDraft(w http.ResponseWriter, r *http.Request)
 		ok(w, view)
 		return
 	}
-	created(w, job)
+	created(w, h.subs.CommittedReceiptView(r.Context(), companyActor(r), job))
 }

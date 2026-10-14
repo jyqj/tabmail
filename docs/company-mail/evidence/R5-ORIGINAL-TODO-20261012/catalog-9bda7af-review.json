@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "reviewed_at_utc": "2026-10-12T07:47:31.104704+00:00",
+  "candidate_head": "9bda7afd5e19416ce6ba0cbd69bdb5b7b7934653",
+  "candidate_tree": "e47fd6b593d93dec23bfa36d7733e5095df03c89",
+  "verdict": "changes_required_new_preservation_guard_fails",
+  "static_source_structure_review": "No relaxation found; see catalog-structure-checks.json and method-preservation.json bound to this head.",
+  "original_cli_exit_codes": {
+    "transactions": 0,
+    "compatibility": 0,
+    "clients": 0
+  },
+  "five_original_modules": {
+    "exit_code": 1,
+    "tests_run": 108,
+    "passed": 107,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "failed_test_ids": [
+      "test_revision19_preserves_public_history_collectors_and_original_rejections (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision19_preserves_public_history_collectors_and_original_rejections)"
+    ],
+    "failure_reason": "New revision19 preservation guard expected one old substitution token but observed zero. The actual current positive passes the correct five-pair independent preservation comparison.",
+    "stderr": "/workspace/scratch/c5e5c3c93beb/pr-audit-evidence/catalog19-final-candidate/five-original-modules.stderr",
+    "stderr_sha256": "4f02d8519a2f556589c9119a2384fbf2f79f13f53e28c15380f74e6f600e13a2"
+  },
+  "before": {
+    "commit": "9bda7afd5e19416ce6ba0cbd69bdb5b7b7934653",
+    "tree": "e47fd6b593d93dec23bfa36d7733e5095df03c89",
+    "status": ""
+  },
+  "after": {
+    "commit": "9bda7afd5e19416ce6ba0cbd69bdb5b7b7934653",
+    "tree": "e47fd6b593d93dec23bfa36d7733e5095df03c89",
+    "status": ""
+  },
+  "original_todo_progress": {
+    "newly_closed_ids": [],
+    "newly_completed": 0,
+    "total": 171,
+    "accepted": 10,
+    "remaining": 161
+  },
+  "runtime_verified": false,
+  "product_green": false,
+  "task_complete": false,
+  "next_required_action": "Fix only the new producer/preservation template and regenerate current candidate pins. Preserve this failed attempt and rerun original candidate commands; do not delete or weaken the assertion."
+}

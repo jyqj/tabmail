@@ -1,0 +1,60 @@
+{
+  "status": "pass",
+  "dispatch_no_missing": true,
+  "dispatch_no_overlap": true,
+  "no_missing": true,
+  "no_overlap": true,
+  "missing_test_ids": [],
+  "artifact_id": 11542325253,
+  "artifact_sha256": "1ab13d395f6c9e4ad25c6d818998fdb7043501dbd1547a7a49e1b163c9c5c286",
+  "ci_run": 37759167593,
+  "ci_job": 113251091189,
+  "source_sha": "83c91dff12bc470b613102534d5784cad5df2d1e",
+  "discovered": 812,
+  "groups": [
+    {
+      "group": "current",
+      "source_sha": "83c91dff12bc470b613102534d5784cad5df2d1e",
+      "exit": 0,
+      "requested": 808,
+      "tests_run": 808,
+      "actual": 808,
+      "missing": [],
+      "failures": [],
+      "errors": [],
+      "skips": []
+    },
+    {
+      "group": "frozen-v1",
+      "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+      "exit": 0,
+      "requested": 4,
+      "tests_run": 4,
+      "actual": 4,
+      "missing": [],
+      "failures": [],
+      "errors": [],
+      "skips": []
+    }
+  ],
+  "frontend": {
+    "numPassedTests": 1758,
+    "numFailedTests": 1,
+    "numPendingTests": 0,
+    "numTotalTests": 1759,
+    "success": false,
+    "failed_suites": [
+      {
+        "name": "/home/runner/work/tabmail/tabmail/web/r5-external-batch-probe.test.tsx",
+        "failed_tests": [
+          {
+            "name": "R5 batch independent realm loopback PostgreSQL",
+            "failureMessages": [
+              "Error: explicit private fixture required\n    at /home/runner/work/tabmail/tabmail/web/r5-external-batch-probe.test.tsx:9:20\n    at file:///home/runner/work/tabmail/tabmail/web/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///home/runner/work/tabmail/tabmail/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///home/runner/work/tabmail/tabmail/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///home/runner/work/tabmail/tabmail/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///home/runner/work/tabmail/tabmail/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///home/runner/work/tabmail/tabmail/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)\n    at file:///home/runner/work/tabmail/tabmail/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

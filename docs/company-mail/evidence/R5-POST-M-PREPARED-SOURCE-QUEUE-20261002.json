@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "source": "baseline_dispatch delivered family-level prepared handoff, not raw runtime report",
+  "task_complete": false,
+  "product_green": false,
+  "M_failed_source": "8529007132f1d61a2571e43aaabfe15b8452baa1",
+  "prepared_main_sources_not_M_snapshot": true,
+  "rows": [
+    {
+      "family": "ProfileCreate",
+      "reported_pin_prefixes": [
+        "71d",
+        "11c",
+        "fake2closure72b"
+      ],
+      "targets": "7nilpuretop+preparedPG/HTTP; source signed only",
+      "status": "source_prepared_not_runtime_PASS"
+    },
+    {
+      "family": "Restore",
+      "packet": "/private/tmp/tm-restore-author-pin-i6fur37n",
+      "reported_pin_prefixes": [
+        "ddce",
+        "e5b"
+      ],
+      "targets": "actual2filepin independently bound; compile transcript-only/no-file",
+      "status": "source_prepared_not_runtime_PASS"
+    },
+    {
+      "family": "GC",
+      "reported_pin_prefixes": [
+        "a186",
+        "42bf"
+      ],
+      "targets": "7top9leaf source-reviewed",
+      "status": "source_prepared_not_runtime_PASS"
+    },
+    {
+      "family": "Lifecycle",
+      "packet": "/tmp/r5-offboarding-compound-profile-prepared.hzk22pb8",
+      "reported_pin_prefixes": [
+        "8e85",
+        "ac53"
+      ],
+      "targets": "11top42leaf; oldf11/f3HOLD not relabelled",
+      "status": "source_prepared_not_runtime_PASS"
+    },
+    {
+      "family": "P5DraftWriter",
+      "reported_pin_prefixes": [
+        "d6b0",
+        "4ce7"
+      ],
+      "targets": "2files/41prepared",
+      "status": "source_prepared_not_runtime_PASS"
+    },
+    {
+      "family": "P6Checkpoint",
+      "reported_pin_prefixes": [
+        "21c",
+        "fb94"
+      ],
+      "targets": "7prepared",
+      "status": "source_prepared_not_runtime_PASS"
+    },
+    {
+      "family": "RegistryAdapter",
+      "reported_pin_prefixes": [
+        "91bb",
+        "4f32"
+      ],
+      "targets": "34+realCLI static review only; newMfailedversion separate actual review/admission pending",
+      "status": "source_prepared_not_registry_PASS"
+    },
+    {
+      "family": "A_ordinaryreceipt",
+      "reported_pin_prefixes": [
+        "closure6af4"
+      ],
+      "targets": "18fileclosure+A4/A5consumer separate; newA22+5 freshsource-reviewaccepted; noPG/compile claim",
+      "status": "source_prepared_not_runtime_PASS"
+    },
+    {
+      "family": "B_sentrecipient",
+      "packet": "/tmp/r5-sent-recipient-B-prepared-20261002/",
+      "targets": "B17actual5pin/selector5roots; oldschema16/BC03upgradefixture adaptation pending",
+      "status": "source_prepared_not_runtime_PASS"
+    },
+    {
+      "family": "UI",
+      "reported_pin_prefixes": [
+        "z30om",
+        "pagebcfe",
+        "3sdpy"
+      ],
+      "targets": "12sourcepacket+separatepageDelta source accepted; not oldcold/M/runtime",
+      "status": "source_prepared_not_browser_PASS"
+    },
+    {
+      "family": "OpenAPI_ordinaryDTO_BCC",
+      "targets": "owner not awakened due branchthreadlimit; exactsource/currentcontract work still missing",
+      "status": "blocked_scope_gap_not_synchronized"
+    }
+  ],
+  "full_sha_or_paths_not_invented": true,
+  "all_rows_runtime_complete": false,
+  "execution_policy": "soleexecutor authorized to receive released prepared new-review targets in rolling serial windows; only actual receipts may upgrade layer, no replayoldgreen/filehash sweep",
+  "boundary": "OriginalSOURCE/prepared notes preserved bysource-time; actual_updates upgrade only specific boundedruntime receipts. NewfamilyGo/Node numbers notformal171/fullgates. ordinaryDTO/BCC OAS stillmissing; Node initialTDZfail and repaironly2 remain distinct.",
+  "actual_updates": [
+    {
+      "family": "ProfileCreate",
+      "source_sha": "7ffe88737b4b846ad96978b2a69a105caccf3914",
+      "pure": "7top35leaf39passGo0",
+      "PG_HTTP": "8PG5HTTPtop45leaf51passGo0",
+      "evidence": "R5-FIRST-SCHEMA17-B5-PROFILECREATE-REVIEW.json",
+      "scope": "onlythisfamily, notparent/fullCI"
+    },
+    {
+      "family": "B_sentrecipient",
+      "source_sha": "7ffe88737b4b846ad96978b2a69a105caccf3914",
+      "runtime": "5top12leaf14passGo0, empty17+populated16->17 upgradefixture real",
+      "first_infra_attempt": "uppercasebaseURI Go1 preserved, notproductRED",
+      "evidence": "R5-FIRST-SCHEMA17-B5-PROFILECREATE-REVIEW.json",
+      "scope": "B5 only, notordinaryAPI/UI/OpenAPI/currentcatalog"
+    },
+    {
+      "family": "Restore",
+      "source_sha": "7ffe88737b4b846ad96978b2a69a105caccf3914",
+      "runtime": [
+        5,
+        30,
+        35
+      ],
+      "evidence": "R5-PRODUCT4-RESTORE-GC-LIFECYCLE-P6-REVIEW.json",
+      "scope": "boundedactual, allformalTODOconditions notclosed"
+    },
+    {
+      "family": "GC",
+      "source_sha": "7ffe88737b4b846ad96978b2a69a105caccf3914",
+      "runtime": [
+        7,
+        9,
+        10
+      ],
+      "evidence": "R5-PRODUCT4-RESTORE-GC-LIFECYCLE-P6-REVIEW.json",
+      "scope": "boundedactual, allformalTODOconditions notclosed"
+    },
+    {
+      "family": "Lifecycle",
+      "source_sha": "7ffe88737b4b846ad96978b2a69a105caccf3914",
+      "runtime": [
+        11,
+        42,
+        47
+      ],
+      "evidence": "R5-PRODUCT4-RESTORE-GC-LIFECYCLE-P6-REVIEW.json",
+      "scope": "boundedactual, allformalTODOconditions notclosed"
+    },
+    {
+      "family": "P6Checkpoint_fakeStore",
+      "source_sha": "7ffe88737b4b846ad96978b2a69a105caccf3914",
+      "runtime": [
+        7,
+        15,
+        19
+      ],
+      "evidence": "R5-PRODUCT4-RESTORE-GC-LIFECYCLE-P6-REVIEW.json",
+      "scope": "boundedactual, allformalTODOconditions notclosed"
+    },
+    {
+      "family": "P5DraftWriter",
+      "source_sha": "d6bd8c8df1051e7cea11b334074f05d005dfb507",
+      "runtime": "41currentPASS CLI0 vsoldproduction41 27PASS14REDCLI1, controlledtransport only",
+      "evidence": "R5-NODE-P5-RECEIPT-UI-INITIAL-REVIEW.json"
+    },
+    {
+      "family": "UI_receipt_TDZ",
+      "initial_source_sha": "d6bd8c8df1051e7cea11b334074f05d005dfb507",
+      "initial": "whole54CLI1/53PASS1productionTDZFAIL; pageonly8selectedPASS",
+      "repair_source_sha": "f00be8daa71b2e865c23e6401c1750e0f27904a4",
+      "repair": "only2exactPASSCLI0/34filtered, nofreshwholefile; controlledtransport notAPI/PG/browser",
+      "evidence": "R5-RECEIPT-TDZ-REPAIR2-REVIEW.json"
+    }
+  ],
+  "latest_incremental_state_ref": {
+    "date": "2026-10-03",
+    "report": "R5-USAGE19-C-OBSERVER-SHUTDOWN-ENCODING-STATUS-20261003.md",
+    "usage19_status": "R5-CURRENT19-USAGE-DIAGNOSTIC-STATUS-20261003.json",
+    "components": "R5-TEMPLATE-WORKER-COMPONENT-STATUS-20261003.json",
+    "phase_watchdog": "R5-PG-PHASE-WATCHDOG-SOURCE-STATUS-20261003.json",
+    "original_PREPARED_source_runtime_tuples_retained": true,
+    "C_or_whole_Method_qualification": false
+  }
+}

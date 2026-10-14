@@ -1,0 +1,10 @@
+test_excluded_artifact_directory_alias_is_rejected (__main__.SourceV3BoundaryNegativeTests.test_excluded_artifact_directory_alias_is_rejected) ... ok
+test_nested_module_in_excluded_artifact_directory_is_rejected (__main__.SourceV3BoundaryNegativeTests.test_nested_module_in_excluded_artifact_directory_is_rejected) ... ok
+test_symlink_descendant_in_excluded_artifact_directory_is_rejected (__main__.SourceV3BoundaryNegativeTests.test_symlink_descendant_in_excluded_artifact_directory_is_rejected) ... ok
+test_upstream_manifest_traversal_and_duplicate_keys_are_rejected (__main__.SourceV3BoundaryNegativeTests.test_upstream_manifest_traversal_and_duplicate_keys_are_rejected) ... ok
+test_workspace_alias_and_overlay_environment_are_rejected (__main__.SourceV3BoundaryNegativeTests.test_workspace_alias_and_overlay_environment_are_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.143s
+
+OK

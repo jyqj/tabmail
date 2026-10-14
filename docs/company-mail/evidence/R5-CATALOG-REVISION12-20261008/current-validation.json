@@ -1,0 +1,168 @@
+{
+  "before": {
+    "docs/company-mail/evidence/R5-CLIENT-CALLS.json": {
+      "sha256": "a1ec852e3a126f41394685c19c43b94d8f6b9d333e017dbf11f67aaaa3e1c39d",
+      "bytes": 50365
+    },
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": {
+      "sha256": "e7bfb4952e0af33ab415997519a8c4d89941f8c4ff6a8329f9dab1fd35fb01a3",
+      "bytes": 41444
+    },
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": {
+      "sha256": "05293f4608ef7066b3e2257bf00e20a7347aa7914e6f63a172cb070789e43237",
+      "bytes": 409919
+    },
+    "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": {
+      "sha256": "2fd33651488b60694657ae45b9bd34f03fe1015bdd4cbfecd4afb196543169ac",
+      "bytes": 2863488
+    },
+    "scripts/tests/test_r5_catalog_reconciliation.py": {
+      "sha256": "c2b4799c7a602bff94591c7bdbf312ca97f27d4aeacad1d122ac035dd5e5f754",
+      "bytes": 276110
+    },
+    "scripts/tests/test_r5_compatibility.py": {
+      "sha256": "193447b257b2eb132da5002e386ba02db2a74f93895a453fc771dd38d9cfb143",
+      "bytes": 13605
+    },
+    "scripts/tests/test_r5_transactions.py": {
+      "sha256": "b5dde21c428d9e068a79361be178a045a57f90d84488de7270c131663a9f656e",
+      "bytes": 13558
+    }
+  },
+  "commands": [
+    {
+      "label": "transactions",
+      "argv": [
+        "/workspace/scratch/4f09dfb9aa92/backend-catalog-python/bin/python3",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.9170489870011806,
+      "stdout": {
+        "file": "transactions.stdout.txt",
+        "sha256": "75ae46d78f95d41f145e505836e8a8e30503140c248f2c561e4730322c409dfd",
+        "bytes": 309
+      },
+      "stderr": {
+        "file": "transactions.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    },
+    {
+      "label": "compatibility",
+      "argv": [
+        "/workspace/scratch/4f09dfb9aa92/backend-catalog-python/bin/python3",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 2.1294649849987763,
+      "stdout": {
+        "file": "compatibility.stdout.txt",
+        "sha256": "d0954efef62572f718c0d4a4dc38485d1e60599ce81088ee6a4efb731707ed71",
+        "bytes": 1117
+      },
+      "stderr": {
+        "file": "compatibility.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    },
+    {
+      "label": "clients",
+      "argv": [
+        "node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.907828971001436,
+      "stdout": {
+        "file": "clients.stdout.txt",
+        "sha256": "47b96ae470deec0228831298df2ab391d0e25b90aec7aaabbaa7c78ebc5536eb",
+        "bytes": 73
+      },
+      "stderr": {
+        "file": "clients.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    },
+    {
+      "label": "python",
+      "argv": [
+        "/workspace/scratch/4f09dfb9aa92/backend-catalog-python/bin/python3",
+        "-B",
+        "-m",
+        "unittest",
+        "test_r5_transactions",
+        "test_r5_compatibility",
+        "test_r5_catalog_reconciliation",
+        "test_r5_current_source_inventory",
+        "test_r5_reviewed_web_locks",
+        "-v"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 79.35885009300182,
+      "stdout": {
+        "file": "python.stdout.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "stderr": {
+        "file": "python.stderr.txt",
+        "sha256": "6026c6fc84b933607a641b287c84d20ee7e94dfcb61c27e83c70297eb2e67a0e",
+        "bytes": 17206
+      }
+    }
+  ],
+  "python": {
+    "executable": "/workspace/scratch/4f09dfb9aa92/backend-catalog-python/bin/python3",
+    "version": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]"
+  },
+  "environment": {
+    "PATH": "/workspace/scratch/4f09dfb9aa92/backend-catalog-python/bin:/workspace/scratch/9e3fd1ca3a13/toolchains/go/bin:/root/.codex/tmp/arg0/codex-arg0WX7mca:/opt/codex/codex-path:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+    "R5_TEST_GO": "/workspace/scratch/9e3fd1ca3a13/toolchains/go/bin/go",
+    "R5_TEST_CACHE": "/workspace/scratch/4f09dfb9aa92/go-build",
+    "R5_TEST_MODULECACHE": "/workspace/scratch/9e3fd1ca3a13/go-cache/mod",
+    "GOPROXY": "off",
+    "GOMAXPROCS": "4",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "source_commit": "ed81ee2fcadc9e8cfcd165947561f8b4b65589e6",
+  "source_tree": "3abdbfca4c0318644a01755c6e6bbb1929b74633",
+  "source_boundary": "Uncommitted revision12 catalog candidate on the exact public product HEAD; current catalog and test bytes are explicitly hashed before and after. Full runner remains separate.",
+  "after": {
+    "docs/company-mail/evidence/R5-CLIENT-CALLS.json": {
+      "sha256": "a1ec852e3a126f41394685c19c43b94d8f6b9d333e017dbf11f67aaaa3e1c39d",
+      "bytes": 50365
+    },
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": {
+      "sha256": "e7bfb4952e0af33ab415997519a8c4d89941f8c4ff6a8329f9dab1fd35fb01a3",
+      "bytes": 41444
+    },
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": {
+      "sha256": "05293f4608ef7066b3e2257bf00e20a7347aa7914e6f63a172cb070789e43237",
+      "bytes": 409919
+    },
+    "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": {
+      "sha256": "2fd33651488b60694657ae45b9bd34f03fe1015bdd4cbfecd4afb196543169ac",
+      "bytes": 2863488
+    },
+    "scripts/tests/test_r5_catalog_reconciliation.py": {
+      "sha256": "c2b4799c7a602bff94591c7bdbf312ca97f27d4aeacad1d122ac035dd5e5f754",
+      "bytes": 276110
+    },
+    "scripts/tests/test_r5_compatibility.py": {
+      "sha256": "193447b257b2eb132da5002e386ba02db2a74f93895a453fc771dd38d9cfb143",
+      "bytes": 13605
+    },
+    "scripts/tests/test_r5_transactions.py": {
+      "sha256": "b5dde21c428d9e068a79361be178a045a57f90d84488de7270c131663a9f656e",
+      "bytes": 13558
+    }
+  },
+  "inputs_unchanged": true
+}

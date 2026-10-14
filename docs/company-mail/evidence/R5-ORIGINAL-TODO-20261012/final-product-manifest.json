@@ -1,0 +1,76 @@
+{
+  "public_product_commit": "311593e6a837287f58d8f10d559dc0b8991be55e",
+  "public_product_tree": "6ff0a4fca8116e1f4955e443f03007f7bf83c7bc",
+  "equivalent_reviewed_local_commit": "fec134b3422b1ab44a311dca10d802d4aeb6984c",
+  "previous_product_commit": "7524e650378487e8d32e70252cf1bd77010260b5",
+  "original_base": "af1444807e1018c95b963b8c5b74e2b2e5060b9a",
+  "original_todos_closed": [],
+  "files": [
+    {
+      "path": ".github/workflows/company-p0.yml",
+      "git_blob": "13f8c447bf531c1477b9d284efaa8adff9a827bd",
+      "sha256": "262362e17de63d7df2c2902ff06ea92480c04947c8f2cb4abd28661f59c61b8c",
+      "bytes": 18643
+    },
+    {
+      "path": "internal/api/handlers/r5_external_batch_test.go",
+      "git_blob": "57cc843dfef5c6cdfbc2c382a0a47f748d313aea",
+      "sha256": "065cbf2960459743207832263450fe6d358cd5c30e30efb5eeb03b5633e6cf46",
+      "bytes": 9959
+    },
+    {
+      "path": "internal/store/postgres/company_http_test.go",
+      "git_blob": "dd1fc795afe4129da37b7104f65181a070715d85",
+      "sha256": "1d849b6b5f64035fc4b9ec41256471509528ac6e445a1bedd1cba341e4b0ef63",
+      "bytes": 13225
+    },
+    {
+      "path": "internal/store/postgres/company_safety_contracts_test.go",
+      "git_blob": "e928df91402e16980b4beb8e965f7552b7a15937",
+      "sha256": "a35c7ed55e58c3656676f7699f3a3013921e091b4a42592dd0ed1b17b4c5b2df",
+      "bytes": 11377
+    },
+    {
+      "path": "internal/store/postgres/r5_protocol_shared_test.go",
+      "git_blob": "b5860727c99e57da6a120af5103142c8a5d3314f",
+      "sha256": "7d17a2055b5282ce113a489615a804ba790e7abc0392336bc0d408afd0df0289",
+      "bytes": 81093
+    },
+    {
+      "path": "internal/testpg/r5_frontend_fixture_test.go",
+      "git_blob": "589440d87900a9a4a8a42948e4193a83bbc9375d",
+      "sha256": "16e51840e4deb646c08300f849e98a7c282ca8862146c316253945781c6b7c52",
+      "bytes": 2713
+    },
+    {
+      "path": "internal/testpg/r5_loopback_probe.go",
+      "git_blob": "a7e1aa05c34e82522322323f13ce2f9dc8a0187c",
+      "sha256": "3137e02ab0bfe5cbab8bc2c6d6916e2cffe1da54145f9250f2ca326844fc39c4",
+      "bytes": 1680
+    },
+    {
+      "path": "scripts/required_frontend_fixture_tests.json",
+      "git_blob": "32d53b3bda4af5731b397f3ce51c1e8d7b05ed54",
+      "sha256": "a82b234260078f18a0820d50876d22109474aa01344843e4fa3db2abfd41c895",
+      "bytes": 203
+    },
+    {
+      "path": "scripts/run_r5_frontend_fixture.py",
+      "git_blob": "4914c6e0840e9a88d66e1d19248ab06c53338991",
+      "sha256": "7d46fb656e66c7817ce84e660c55dc587fc037bb12ac61ebcce466859025aac7",
+      "bytes": 11362
+    },
+    {
+      "path": "scripts/tests/test_r5_frontend_fixture.py",
+      "git_blob": "b37e3977a9b594c78fe3494de4605ce6a3252825",
+      "sha256": "9124104e2228bf5b1748fb45c7d2341216e3df6c1924ba6047b7377c652232f0",
+      "bytes": 12534
+    },
+    {
+      "path": "scripts/tests/test_r5_frontend_fixture_source_inputs.py",
+      "git_blob": "01d9b0ac9cc84984ae2a6c38b2939416578dbc91",
+      "sha256": "0a4c0b55707c5f371da907b70c488683f008455277eaa6e89992565b9bd0ed8a",
+      "bytes": 4704
+    }
+  ]
+}

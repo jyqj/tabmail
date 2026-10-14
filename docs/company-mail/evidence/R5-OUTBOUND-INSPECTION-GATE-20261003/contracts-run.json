@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/tmp/r5-inspection-gate-venv/bin/python",
+    "-B",
+    "-m",
+    "unittest",
+    "-v",
+    "scripts.tests.test_permission_editor_contract",
+    "scripts.tests.test_company_admin_events_contract",
+    "scripts.tests.test_ordinary_receipt_contract",
+    "scripts.tests.test_outbound_inspection_contract",
+    "scripts.tests.test_openapi_contract",
+    "scripts.tests.test_contract_drift",
+    "scripts.tests.test_contract_source_aliases",
+    "scripts.tests.test_http_contract",
+    "scripts.tests.test_i18n_keys",
+    "scripts.tests.test_r5_smtp_owner_source_inventory"
+  ],
+  "exit": 0,
+  "typed_fixture": "absent; explicit skip expected"
+}

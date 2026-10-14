@@ -1,0 +1,440 @@
+{
+  "total": 108,
+  "passed": 108,
+  "failed": 0,
+  "pending": 0,
+  "cases": [
+    {
+      "name": "company entry point only offers employee sign-in, not disposable mailbox creation or public registration",
+      "status": "passed"
+    },
+    {
+      "name": "company entry point signs in and opens the mail workspace",
+      "status": "passed"
+    },
+    {
+      "name": "company entry point employees see their workspace, not administrative entry points",
+      "status": "passed"
+    },
+    {
+      "name": "auth-context 默认从 localStorage 读取并推导 public level",
+      "status": "passed"
+    },
+    {
+      "name": "auth-context 支持 JWT / tenant 状态写入与清理",
+      "status": "passed"
+    },
+    {
+      "name": "AuthDialog 支持账号登录并写入 JWT",
+      "status": "passed"
+    },
+    {
+      "name": "composeIdentity preserves the current authorized sender",
+      "status": "passed"
+    },
+    {
+      "name": "composeIdentity prefers free-form fallback but still supports template-only senders",
+      "status": "passed"
+    },
+    {
+      "name": "composeIdentity does not trust a stale preferred object after its rights change",
+      "status": "passed"
+    },
+    {
+      "name": "composeIdentity reports no sender instead of choosing a read-only mailbox",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateDomains' admin levels are allowed even when permissions are null (level check first)",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateDomains' admin levels are allowed even when the flag is explicitly false (backend synthetic perms)",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateDomains' user is allowed iff the flag is explicitly true",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateDomains' user is not allowed by other flags being true",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateDomains' user fails closed while permissions are loading or failed (null/undefined)",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateDomains' public sessions are never allowed",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateRoutes' admin levels are allowed even when permissions are null (level check first)",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateRoutes' admin levels are allowed even when the flag is explicitly false (backend synthetic perms)",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateRoutes' user is allowed iff the flag is explicitly true",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateRoutes' user is not allowed by other flags being true",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateRoutes' user fails closed while permissions are loading or failed (null/undefined)",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateRoutes' public sessions are never allowed",
+      "status": "passed"
+    },
+    {
+      "name": "'canSend' admin levels are allowed even when permissions are null (level check first)",
+      "status": "passed"
+    },
+    {
+      "name": "'canSend' admin levels are allowed even when the flag is explicitly false (backend synthetic perms)",
+      "status": "passed"
+    },
+    {
+      "name": "'canSend' user is allowed iff the flag is explicitly true",
+      "status": "passed"
+    },
+    {
+      "name": "'canSend' user is not allowed by other flags being true",
+      "status": "passed"
+    },
+    {
+      "name": "'canSend' user fails closed while permissions are loading or failed (null/undefined)",
+      "status": "passed"
+    },
+    {
+      "name": "'canSend' public sessions are never allowed",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateAPIKeys' admin levels are allowed even when permissions are null (level check first)",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateAPIKeys' admin levels are allowed even when the flag is explicitly false (backend synthetic perms)",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateAPIKeys' user is allowed iff the flag is explicitly true",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateAPIKeys' user is not allowed by other flags being true",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateAPIKeys' user fails closed while permissions are loading or failed (null/undefined)",
+      "status": "passed"
+    },
+    {
+      "name": "'canCreateAPIKeys' public sessions are never allowed",
+      "status": "passed"
+    },
+    {
+      "name": "canManageTenantUsers is allowed for super_admin only",
+      "status": "passed"
+    },
+    {
+      "name": "level helpers isAdminLevel covers admin and super_admin",
+      "status": "passed"
+    },
+    {
+      "name": "level helpers isSuperAdminLevel covers super_admin only",
+      "status": "passed"
+    },
+    {
+      "name": "credential and identity boundaries does not log out after a temporary refresh failure",
+      "status": "passed"
+    },
+    {
+      "name": "credential and identity boundaries coalesces concurrent refresh calls and uses the replacement token",
+      "status": "passed"
+    },
+    {
+      "name": "credential and identity boundaries does not overwrite another account with a stale refresh response",
+      "status": "passed"
+    },
+    {
+      "name": "credential and identity boundaries aborts requests and discards response bodies after account switching",
+      "status": "passed"
+    },
+    {
+      "name": "credential and identity boundaries does not automatically replay unsafe POST after renewal",
+      "status": "passed"
+    },
+    {
+      "name": "credential and identity boundaries retries an idempotent send with the same key and request body",
+      "status": "passed"
+    },
+    {
+      "name": "credential and identity boundaries keeps the current session when server logout fails",
+      "status": "passed"
+    },
+    {
+      "name": "credential and identity boundaries holds the shared cookie lock until login body and local identity are installed",
+      "status": "passed"
+    },
+    {
+      "name": "credential and identity boundaries changes scope on tenant changes but not token rotation",
+      "status": "passed"
+    },
+    {
+      "name": "credential and identity boundaries fails closed without Web Locks rather than racing refresh cookies",
+      "status": "passed"
+    },
+    {
+      "name": "settings 默认返回内置 defaults",
+      "status": "passed"
+    },
+    {
+      "name": "settings 会从 localStorage 合并设置并支持 update 持久化",
+      "status": "passed"
+    },
+    {
+      "name": "requires a reason and refreshes the company summary after bounded index recovery",
+      "status": "passed"
+    },
+    {
+      "name": "docs page 默认展示 swagger 并渲染基于 base url 的链接",
+      "status": "passed"
+    },
+    {
+      "name": "docs page 支持切换 quickstart 并复制 curl 示例",
+      "status": "passed"
+    },
+    {
+      "name": "Compose template eligibility shows the revoked notice, blocks sending, and can unpin the template",
+      "status": "passed"
+    },
+    {
+      "name": "Compose template eligibility renders a missing pin without an error and leaves sending available",
+      "status": "passed"
+    },
+    {
+      "name": "Pinned template version survives newer publication edits, previews and submits authorized v1 when the picker only contains v2",
+      "status": "passed"
+    },
+    {
+      "name": "Company domain onboarding updates the actual primary-domain selector after verification without reloading the page",
+      "status": "passed"
+    },
+    {
+      "name": "CompanyDomainsSection renders the domain list with verification badges",
+      "status": "passed"
+    },
+    {
+      "name": "CompanyDomainsSection adds a domain, refreshes the list and clears the input",
+      "status": "passed"
+    },
+    {
+      "name": "CompanyDomainsSection shows DNS records and explains a missing DKIM record",
+      "status": "passed"
+    },
+    {
+      "name": "CompanyDomainsSection runs verification, shows all five checks and refreshes",
+      "status": "passed"
+    },
+    {
+      "name": "CompanyDomainsSection confirms via safeConfirm before deleting",
+      "status": "passed"
+    },
+    {
+      "name": "GrantEditor optimistic concurrency uses the atomic grant snapshot version rather than the parent mailbox version",
+      "status": "passed"
+    },
+    {
+      "name": "GrantEditor optimistic concurrency never replays a conflicted form; reload and member review use the new snapshot",
+      "status": "passed"
+    },
+    {
+      "name": "MailboxSendPolicyEditor renders the effective policy with its description",
+      "status": "passed"
+    },
+    {
+      "name": "MailboxSendPolicyEditor falls back to the free default when no effective policy arrives",
+      "status": "passed"
+    },
+    {
+      "name": "MailboxSendPolicyEditor stores the chosen override, refreshes and toasts",
+      "status": "passed"
+    },
+    {
+      "name": "MailboxSendPolicyEditor clears the override (inherit company default) by sending an empty policy",
+      "status": "passed"
+    },
+    {
+      "name": "CompanyMailSendPolicyField offers the three policy values and reports the selection",
+      "status": "passed"
+    },
+    {
+      "name": "Policy optimistic concurrency does not silently rebase a pending choice when the mailbox changes",
+      "status": "passed"
+    },
+    {
+      "name": "DraftWriter persistence lane serializes autosave and manual flush using acknowledged revisions",
+      "status": "passed"
+    },
+    {
+      "name": "DraftWriter persistence lane recovers lost initial acknowledgement by exact UUID readback",
+      "status": "passed"
+    },
+    {
+      "name": "DraftWriter persistence lane does not overwrite a different readback after an uncertain response",
+      "status": "passed"
+    },
+    {
+      "name": "DraftWriter persistence lane latches conflicts until explicit reload and keeps all queued writes off the server",
+      "status": "passed"
+    },
+    {
+      "name": "DraftWriter persistence lane rejects queued work after account switch",
+      "status": "passed"
+    },
+    {
+      "name": "DraftWriter persistence lane ignores empty optional wire fields and key ordering, not actual edits",
+      "status": "passed"
+    },
+    {
+      "name": "Unknown draft write outcomes replays the original creation before saving new typing after both responses were lost",
+      "status": "passed"
+    },
+    {
+      "name": "Unknown draft write outcomes recovers a committed update on retry conflict without treating later typing as its input",
+      "status": "passed"
+    },
+    {
+      "name": "Unknown draft write outcomes does not adopt an unrelated later revision even if its text happens to match",
+      "status": "passed"
+    },
+    {
+      "name": "keeps an uncertain replay retryable when the conflict readback is also offline",
+      "status": "passed"
+    },
+    {
+      "name": "api/base 使用 JWT 并附带 tenant id",
+      "status": "passed"
+    },
+    {
+      "name": "api/base request 会拼接 query 参数并返回文本响应",
+      "status": "passed"
+    },
+    {
+      "name": "api/base request 在非 2xx 时抛出后端错误体",
+      "status": "passed"
+    },
+    {
+      "name": "SubmissionPane sent-content view reveals the sent body and attachment download on demand",
+      "status": "passed"
+    },
+    {
+      "name": "SubmissionPane sent-content view shows the redaction notice instead of a body when content is redacted",
+      "status": "passed"
+    },
+    {
+      "name": "SubmissionPane sent-content view keeps the content collapsed until requested",
+      "status": "passed"
+    },
+    {
+      "name": "MessagePane personal-state vs shared-organizing actions shows personal-state actions but not organizing actions to a read-only member",
+      "status": "passed"
+    },
+    {
+      "name": "MessagePane personal-state vs shared-organizing actions shows both action groups to an organizer",
+      "status": "passed"
+    },
+    {
+      "name": "SubmissionPane capabilities shows content but not retry when the server grants view only",
+      "status": "passed"
+    },
+    {
+      "name": "SubmissionPane capabilities shows retry but not content when the server grants retry only",
+      "status": "passed"
+    },
+    {
+      "name": "SubmissionPane capabilities surfaces the uncertain-outcome notice on a delivery_uncertain conflict",
+      "status": "passed"
+    },
+    {
+      "name": "Revocation while a sent message is open unmounts open content, clears cached bytes and requires an explicit reopen after regrant",
+      "status": "passed"
+    },
+    {
+      "name": "Revocation while a sent message is open does not leave cached attachment metadata visible after a denied revalidation",
+      "status": "passed"
+    },
+    {
+      "name": "Template-only fallback sender sends the reply preparation request with the template-only identity, not the unreadable sender",
+      "status": "passed"
+    },
+    {
+      "name": "admin dashboard page 加载并渲染 stats 概览、审计与 dead letters",
+      "status": "passed"
+    },
+    {
+      "name": "TemplateVersionsView revoke flow offers revoke only on live versions, never reusing the retire wording",
+      "status": "passed"
+    },
+    {
+      "name": "TemplateVersionsView revoke flow aborts without calling the API when the confirm is dismissed",
+      "status": "passed"
+    },
+    {
+      "name": "TemplateVersionsView revoke flow revokes with the current revision, states the irreversibility and refreshes",
+      "status": "passed"
+    },
+    {
+      "name": "constrained formatting editor removes active tags, remote media, attributes and javascript URLs",
+      "status": "passed"
+    },
+    {
+      "name": "constrained formatting editor keeps plain text first-class and blocks HTML drops in rich mode",
+      "status": "passed"
+    },
+    {
+      "name": "admin/monitor page 加载历史并接收实时事件",
+      "status": "passed"
+    },
+    {
+      "name": "admin/monitor page 支持筛选历史并重新连接",
+      "status": "passed"
+    },
+    {
+      "name": "admin/plans page 加载列表并支持创建 plan",
+      "status": "passed"
+    },
+    {
+      "name": "admin/plans page 支持删除 plan",
+      "status": "passed"
+    },
+    {
+      "name": "admin/tenants page 加载列表并支持创建 tenant",
+      "status": "passed"
+    },
+    {
+      "name": "admin/tenants page 支持生成 API key",
+      "status": "passed"
+    },
+    {
+      "name": "admin/tenants page 支持保存 tenant overrides",
+      "status": "passed"
+    },
+    {
+      "name": "admin/policy page 加载并展示 SMTP policy",
+      "status": "passed"
+    },
+    {
+      "name": "admin/policy page 支持编辑并保存 SMTP policy",
+      "status": "passed"
+    }
+  ]
+}

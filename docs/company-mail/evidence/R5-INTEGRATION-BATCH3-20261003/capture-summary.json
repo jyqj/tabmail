@@ -1,0 +1,24 @@
+{
+  "source_head": "c808fbe1699804d2f7f2c4de08f31975950e3f36",
+  "root": "/workspace/tabmail-batch3-selected-checkout",
+  "capture": "PASS",
+  "fresh_recapture_validation": "PASS",
+  "elapsed_seconds": 6.313045080000023,
+  "package_records": 630,
+  "local_selected": 613,
+  "static_evidence_selected": 21,
+  "generated_testmain": 60,
+  "root_mvs": 138,
+  "attestation_sha256": "057fa8201f6feccfa2ec5c7727a45f6c73c7faa2dea6a3f3437ca716102d26d6",
+  "qualification": {
+    "overall": "blocked",
+    "excluded_metadata_boundary": "blocked_pending_separate_helper_race_fix",
+    "local_static_binding": "captured",
+    "generated": "unknown",
+    "external_modulecache": "unknown",
+    "compiler_native": "unknown",
+    "Method19": "unknown",
+    "SML": "unknown",
+    "wholeCI": "unknown"
+  }
+}

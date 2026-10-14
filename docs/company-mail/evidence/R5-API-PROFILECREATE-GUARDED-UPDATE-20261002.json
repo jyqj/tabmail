@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "source_sha": "7ffe88737b4b846ad96978b2a69a105caccf3914",
+  "operation": "POST /api/v1/admin/permissions",
+  "old_5d1b_source_semantics": {
+    "method": "POST",
+    "path": "/api/v1/admin/permissions",
+    "handler": "perm.CreateProfile",
+    "middleware": [
+      "chimw.RequestID",
+      "chimw.Recoverer",
+      "cors.Handler(cors.Options{\n\tAllowedOrigins:   append([]string(nil), cfg.HTTP.AllowedOrigins...),\n\tAllowedMethods:   []string{\"GET\", \"POST\", \"PUT\", \"PATCH\", \"DELETE\", \"OPTIONS\"},\n\tAllowedHeaders:   append([]string(nil), cfg.HTTP.AllowedHeaders...),\n\tAllowCredentials: cfg.HTTP.AllowCredentials,\n\tMaxAge:           86400,\n})",
+      "middleware.Auth(cached, cfg.JWTSecret, cfg.PublicTenantID)",
+      "middleware.PermissionLoader(cached)",
+      "cfg.RateLimiter.Middleware",
+      "middleware.RequireAdmin"
+    ],
+    "conditions": [],
+    "source": "internal/api/router.go",
+    "line": 238,
+    "authority": "JWT admin/super_admin；匿名401，员工/Key403",
+    "resource": "按传入actor选择global/system或tenant创建并validateZones；仍legacy pool单INSERT，不具fresh currentMemberActor/companyTx fence",
+    "version": "64KiB strict profile创建字段；INSERT RETURNING真实sequence decimalrevision；非新CAS事务，不把timestamp当revision",
+    "audit": "创建仍沿既有service/CreatePermissionProfile路径，非本轮profileCAS mutation，不能声称全写均requiredoutbox",
+    "content": "201 APIResponse<PermissionProfile>，包含真实SQL revision；不授予邮件read",
+    "evidence": "internal/api/handlers/permissions.go:CreateProfile → internal/app/permissions/service.go:CreateProfile → internal/store/postgres/permissions.go:CreatePermissionProfile"
+  },
+  "new_guarded_source_semantics": {
+    "method": "POST",
+    "path": "/api/v1/admin/permissions",
+    "handler": "perm.CreateProfile",
+    "middleware": [
+      "chimw.RequestID",
+      "chimw.Recoverer",
+      "cors.Handler(cors.Options{\n\tAllowedOrigins:   append([]string(nil), cfg.HTTP.AllowedOrigins...),\n\tAllowedMethods:   []string{\"GET\", \"POST\", \"PUT\", \"PATCH\", \"DELETE\", \"OPTIONS\"},\n\tAllowedHeaders:   append([]string(nil), cfg.HTTP.AllowedHeaders...),\n\tAllowCredentials: cfg.HTTP.AllowCredentials,\n\tMaxAge:           86400,\n})",
+      "middleware.Auth(cached, cfg.JWTSecret, cfg.PublicTenantID)",
+      "middleware.PermissionLoader(cached)",
+      "cfg.RateLimiter.Middleware",
+      "middleware.RequireAdmin"
+    ],
+    "conditions": [],
+    "source": "internal/api/router.go",
+    "line": 238,
+    "authority": "JWT互动admin/super；formal ProfileCreationStore当前actor重载，role/active/session与selected/requested作用域事务核定；cachedsuper/reader hint不自授权，Key拒",
+    "resource": "tenant-scoped创建按fresh actor/selected/requested公司及zone归属核定；global只freshsuper，可无selected但需持久合法actor TenantID作主audit anchor，system/非法anchor拒",
+    "version": "64KiB strict create输入；quota/count 0..2147483647；guarded INSERT RETURNING真实noncycling sequence decimalrevision，不timestamp；nilport/nilsuccess禁止legacyfallback/201null",
+    "audit": "tenantScoped requiredcompanyAudit+outbox同Tx；global空audience required主audit用selectedfreshT或同Txfreshsuper持久TenantID anchor，无合法anchor拒，不捏tenant事件/不宣outbox成功；失败rollback",
+    "content": "201 APIResponse<PermissionProfile>非null且真实revision；配置元数据不授正文read；平台global无受众通知仍未closed",
+    "evidence": "source7ffe实际new7pure+8PG/5HTTP：internal/api/handlers/permissions.go:CreateProfile → internal/app/permissions/service.go:CreateProfile/ProfileCreationStore → internal/store/postgres/permission_profile_create.go:CreatePermissionProfileGuarded；旧store.CreatePermissionProfile留legacy非formalfallback"
+  },
+  "registration_tuple_changed": false,
+  "actual_references": "R5-FIRST-SCHEMA17-B5-PROFILECREATE-REVIEW.json",
+  "baseline_route132_freeze_relabelled": false,
+  "whole_API_G0_acceptance": false
+}

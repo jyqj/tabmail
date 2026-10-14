@@ -1,0 +1,161 @@
+{
+  "DB_samples": 496,
+  "actual_SQL_base_schema19": true,
+  "actual_sample_observed_non_base_DBs": [
+    "tm_test_2d9b05ddc6554bf68cbf76dcd5b88a95",
+    "tm_test_305649ae43404d03a46bd7c2ec81ea40",
+    "tm_test_4a77133051be415daea2c8ad61ee1b34",
+    "tm_test_55c6c10671194ec7bdaa82a2b4a038ec",
+    "tm_test_6386687aca354906a8aa2d987fc3cdaf",
+    "tm_test_6458deac7baa4050ba32c4d5d1e6f52a",
+    "tm_test_69b75982d65c4d3f9a52cee1dbe4bc37",
+    "tm_test_7ceb731eb0e9456a966218ad8f54728a",
+    "tm_test_7f5ca859c048498b81c0429de7e94f06",
+    "tm_test_81602734f8a54850a37361e5cd00f1b6",
+    "tm_test_8177f04cde4b4dda860ad76d5bf19b2b",
+    "tm_test_9f3dc532ff0c45a9ae6b8da6b5a6d903",
+    "tm_test_ac389324954b43eb8b0fa12e69be86d1",
+    "tm_test_e129c88d1c80459c81492894064f3227",
+    "tm_test_ecf3c1ba3bcd4b10a0f32647597cf98b",
+    "tm_test_f49f5c1012cc4770bf50b09975b8aac4",
+    "tm_test_f6c893521daf4f6e9bbf948d037733cb",
+    "tm_usage19_0f467b9e9d2249fe899423661682ad45",
+    "tm_usage19_1a1b0ccfd78c46c88604fac975db2873",
+    "tm_usage19_1afa17ed32664c70a3b1763e6c4b74f2",
+    "tm_usage19_2779b602a2744c798c99190c9bb089da",
+    "tm_usage19_3233cc56e53a47f6bec46319e6778148",
+    "tm_usage19_68046963c6ad495b9d1cf6b8ce0054fa",
+    "tm_usage19_9d897063de2b41e1b935f7db78504047",
+    "tm_usage19_c6e4c596b7a74e1fae844d1ef4bdc689",
+    "tm_usage19_f1f2e2281ffc4489a17ce3de126c8f15"
+  ],
+  "all_non_system_DB_terminal": [
+    "tm_usage19_a"
+  ],
+  "batch_results": {
+    "A": {
+      "FAILleaf": 5,
+      "FAILnodes": 7,
+      "Goexit": 1,
+      "PASSleaf": 21,
+      "PASSnodes": 25,
+      "SKIP": 0,
+      "actualGOMAXPROCS": 2,
+      "leaves": 26,
+      "package_elapsed": 23.93,
+      "package_timeout_seconds": 180,
+      "test_nodes": 32,
+      "tops": 12,
+      "unfinished": [],
+      "whole_original300_elapsed": 40.77903604507446,
+      "within300": true
+    },
+    "B": {
+      "status": "NOT_RUN_first_A_failure"
+    },
+    "C": {
+      "C_observer_or_SMTPworkers_miniredis_not_started": true,
+      "status": "NOT_RUN_first_A_failure"
+    },
+    "S": {
+      "status": "NOT_RUN_first_A_failure"
+    }
+  },
+  "classification_boundaries": {
+    "TestR5APIKeyUsageMigration19/exact18_upgrade_backfill": "actualassert fixture was notactual18, needs originalfixtureownertriage not expectation weakening",
+    "TestR5APIKeyUsageMigration19/fresh19": "actualassert legacyusagepair provision/preservation mismatch; originalowner triage required",
+    "TestR5APIKeyUsageTwoPoolsLateObservation": "actualfixturecontext.deadlineExceededError; concurrency/product/setup causality not yet determined",
+    "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry": "actualcausal gate helper refused aftersame-keyusagewait; exactsourceownertriage required",
+    "TestR5SchemaInventoryAndRestart": "CAPTURE_INPUT_INFRA_ERROR missing runtimefixture dependency docs/company-mail/evidence/R4-MIGRATION-HASHES.json; relatedtest didrun andFAIL, NOT entirewindow0tests. SOURCEpolicy selected source/compileinputs werecomplete but do not attest explicitruntimefiledependencyclosure"
+  },
+  "cleanup": {
+    "DB_connection_query_known": true,
+    "all_non_base_owned_databases": [],
+    "all_non_system_databases": [
+      "tm_usage19_a"
+    ],
+    "all_owned_connections_zero": true,
+    "all_phase_groups_gone": true,
+    "excluded_current_observer_pid": 38035,
+    "native_PID_absent": true,
+    "native_stopped": true,
+    "observer_sampler_joined": true,
+    "other_client_connections_excluding_current_observer": 0,
+    "owned_native_PID": 35560,
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "temporary_DBs_absent": true
+  },
+  "failed_diagnostic_raw_private": [
+    {
+      "Action": "output",
+      "Output": "    r5_api_key_usage_test.go:294: owned usage fixture operation failed: context.deadlineExceededError\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5APIKeyUsageTwoPoolsLateObservation",
+      "Time": "2026-10-03T09:50:30.781853+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_api_key_usage_test.go:400: official schema19 startup did not preserve/provision every legacy usage pair\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5APIKeyUsageMigration19/fresh19",
+      "Time": "2026-10-03T09:50:30.994183+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_api_key_usage_test.go:384: upgrade fixture was not actual schema18\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5APIKeyUsageMigration19/exact18_upgrade_backfill",
+      "Time": "2026-10-03T09:50:31.217057+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:401: phase=after-row telemetry_pid=37521 advisory_blocker_pid=37519 query=[RUNTIME_SQL_REDACTED]\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+      "Time": "2026-10-03T09:50:31.4955+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:403: phase=same_key_SHARE_wait waiter_pid=37524 exact_blocker_pid=37521 query=[RUNTIME_SQL_REDACTED]\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+      "Time": "2026-10-03T09:50:31.499126+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:436: causal gate evidence failed: *errors.errorString\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+      "Time": "2026-10-03T09:50:33.001456+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_schema_inventory_test.go:175: open ../../../docs/company-mail/evidence/R4-MIGRATION-HASHES.json: no such file or directory\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5SchemaInventoryAndRestart",
+      "Time": "2026-10-03T09:50:38.602737+08:00"
+    }
+  ],
+  "failed_nodes": [
+    "TestR5APIKeyUsageMigration19",
+    "TestR5APIKeyUsageMigration19/exact18_upgrade_backfill",
+    "TestR5APIKeyUsageMigration19/fresh19",
+    "TestR5APIKeyUsageTwoPoolsLateObservation",
+    "TestR5KeyUsageAuthorityAdmissionIsolation",
+    "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+    "TestR5SchemaInventoryAndRestart"
+  ],
+  "noWhole180_MethodCatalog_FourCI171_pass": true,
+  "no_auto_retry_patch_or_newbudget": true,
+  "not_exact_create_counter": true,
+  "observed_DB_names_lowerbound_count": 26,
+  "other_clients_except_terminal_observer": 0,
+  "resource_exception": "onlyexactapprovedexternalRedis13082 observeduntouched; noinheritendpoint",
+  "runtime_controller_sha256": "62697ab32cd1c1aef3013b4506f302a8cc749b9dc3eba8c7c449d28d4e9d701f",
+  "source_closure_sha256": "95a9c8216aedab9f55a66d4035e51b72f8a879754efe412fe29ea094fb79a0dd",
+  "source_kind": "policy_bound_local_input_superset_sha1_v2",
+  "source_post_equal": true,
+  "source_sha": "755a64743213016d42c6a025401368aaa4a36ccf",
+  "status": "FIRST_BATCH_A_ACTUAL_FAILED_STOP_B_S_C"
+}

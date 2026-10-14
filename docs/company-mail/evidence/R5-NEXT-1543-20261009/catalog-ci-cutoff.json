@@ -1,0 +1,717 @@
+{
+  "schema": "tabmail.catalog-pr240.original-ci-monitor.v1",
+  "observed_utc": "2026-10-09 09:08:59 UTC",
+  "repository": "jyqj/tabmail",
+  "pull_request": 240,
+  "public_commit": {
+    "sha": "026e7993fd787e39080b577811864174deed0502",
+    "tree": "e84e389228cc19bedc7dee81adff2e024cb10d46",
+    "parents": [
+      "17be458fb9d36e135a95962638b68ce105c16518"
+    ]
+  },
+  "equivalent_local_candidate": {
+    "commit": "85f99510ad805390c0b2dcf34a6b4b45909d82ae",
+    "tree": "e84e389228cc19bedc7dee81adff2e024cb10d46",
+    "reviewed_source_checks": "3 original CLI commands exit 0 and 104 original unit tests pass; independently verified raw receipts."
+  },
+  "targets": [
+    {
+      "run": 37908338430,
+      "job": 113747158025,
+      "step": "Validation tool regressions",
+      "source_requirement": "Read actual default PR merge checkout and require reviewed tree e84e389228cc19bedc7dee81adff2e024cb10d46"
+    },
+    {
+      "run": 37908338256,
+      "job": 113747156629,
+      "step": "Complete original source-version runner",
+      "source_requirement": "Existing workflow checks out exact PR public head 026e7993fd787e39080b577811864174deed0502; verify its original source-before/source-after records"
+    }
+  ],
+  "current": [
+    {
+      "run_id": 37908338430,
+      "status": "queued",
+      "conclusion": null,
+      "jobs": [
+        {
+          "id": 113747157742,
+          "name": "production-web",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 37908338430,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 113747157942,
+          "name": "browser-journey",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 37908338430,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 113747158025,
+          "name": "backend",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 37908338430,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 113747158485,
+          "name": "frontend",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 37908338430,
+          "logs_url": null,
+          "steps": null
+        }
+      ]
+    },
+    {
+      "run_id": 37908338256,
+      "status": "queued",
+      "conclusion": null,
+      "jobs": [
+        {
+          "id": 113747156420,
+          "name": "inventory",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 37908338256,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 113747156629,
+          "name": "source-version",
+          "status": "queued",
+          "conclusion": null,
+          "run_id": 37908338256,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 113747157866,
+          "name": "proposal",
+          "status": "completed",
+          "conclusion": "skipped",
+          "run_id": 37908338256,
+          "logs_url": null,
+          "steps": null
+        }
+      ]
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "time": "2026-10-09 09:00:40 UTC",
+      "runs": [
+        {
+          "run_id": 37908338430,
+          "status": "queued",
+          "conclusion": null,
+          "jobs": [
+            {
+              "id": 113747157742,
+              "name": "production-web",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747157942,
+              "name": "browser-journey",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747158025,
+              "name": "backend",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747158485,
+              "name": "frontend",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        },
+        {
+          "run_id": 37908338256,
+          "status": "queued",
+          "conclusion": null,
+          "jobs": [
+            {
+              "id": 113747156420,
+              "name": "inventory",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747156629,
+              "name": "source-version",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747157866,
+              "name": "proposal",
+              "status": "completed",
+              "conclusion": "skipped",
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "time": "2026-10-09 09:01:59 UTC",
+      "runs": [
+        {
+          "run_id": 37908338430,
+          "status": "queued",
+          "conclusion": null,
+          "jobs": [
+            {
+              "id": 113747157742,
+              "name": "production-web",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747157942,
+              "name": "browser-journey",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747158025,
+              "name": "backend",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747158485,
+              "name": "frontend",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        },
+        {
+          "run_id": 37908338256,
+          "status": "queued",
+          "conclusion": null,
+          "jobs": [
+            {
+              "id": 113747156420,
+              "name": "inventory",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747156629,
+              "name": "source-version",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747157866,
+              "name": "proposal",
+              "status": "completed",
+              "conclusion": "skipped",
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "time": "2026-10-09 09:03:36 UTC",
+      "runs": [
+        {
+          "run_id": 37908338430,
+          "status": "queued",
+          "conclusion": null,
+          "jobs": [
+            {
+              "id": 113747157742,
+              "name": "production-web",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747157942,
+              "name": "browser-journey",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747158025,
+              "name": "backend",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747158485,
+              "name": "frontend",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        },
+        {
+          "run_id": 37908338256,
+          "status": "queued",
+          "conclusion": null,
+          "jobs": [
+            {
+              "id": 113747156420,
+              "name": "inventory",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747156629,
+              "name": "source-version",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747157866,
+              "name": "proposal",
+              "status": "completed",
+              "conclusion": "skipped",
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "time": "2026-10-09 09:05:04 UTC",
+      "runs": [
+        {
+          "run_id": 37908338430,
+          "status": "queued",
+          "conclusion": null,
+          "jobs": [
+            {
+              "id": 113747157742,
+              "name": "production-web",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747157942,
+              "name": "browser-journey",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747158025,
+              "name": "backend",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747158485,
+              "name": "frontend",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        },
+        {
+          "run_id": 37908338256,
+          "status": "queued",
+          "conclusion": null,
+          "jobs": [
+            {
+              "id": 113747156420,
+              "name": "inventory",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747156629,
+              "name": "source-version",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747157866,
+              "name": "proposal",
+              "status": "completed",
+              "conclusion": "skipped",
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "time": "2026-10-09 09:06:35 UTC",
+      "runs": [
+        {
+          "run_id": 37908338430,
+          "status": "queued",
+          "conclusion": null,
+          "jobs": [
+            {
+              "id": 113747157742,
+              "name": "production-web",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747157942,
+              "name": "browser-journey",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747158025,
+              "name": "backend",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747158485,
+              "name": "frontend",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        },
+        {
+          "run_id": 37908338256,
+          "status": "queued",
+          "conclusion": null,
+          "jobs": [
+            {
+              "id": 113747156420,
+              "name": "inventory",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747156629,
+              "name": "source-version",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747157866,
+              "name": "proposal",
+              "status": "completed",
+              "conclusion": "skipped",
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "time": "2026-10-09 09:07:53 UTC",
+      "runs": [
+        {
+          "run_id": 37908338430,
+          "status": "queued",
+          "conclusion": null,
+          "jobs": [
+            {
+              "id": 113747157742,
+              "name": "production-web",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747157942,
+              "name": "browser-journey",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747158025,
+              "name": "backend",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747158485,
+              "name": "frontend",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        },
+        {
+          "run_id": 37908338256,
+          "status": "queued",
+          "conclusion": null,
+          "jobs": [
+            {
+              "id": 113747156420,
+              "name": "inventory",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747156629,
+              "name": "source-version",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747157866,
+              "name": "proposal",
+              "status": "completed",
+              "conclusion": "skipped",
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 7,
+      "time": "2026-10-09 09:08:59 UTC",
+      "runs": [
+        {
+          "run_id": 37908338430,
+          "status": "queued",
+          "conclusion": null,
+          "jobs": [
+            {
+              "id": 113747157742,
+              "name": "production-web",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747157942,
+              "name": "browser-journey",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747158025,
+              "name": "backend",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747158485,
+              "name": "frontend",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338430,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        },
+        {
+          "run_id": 37908338256,
+          "status": "queued",
+          "conclusion": null,
+          "jobs": [
+            {
+              "id": 113747156420,
+              "name": "inventory",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747156629,
+              "name": "source-version",
+              "status": "queued",
+              "conclusion": null,
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            },
+            {
+              "id": 113747157866,
+              "name": "proposal",
+              "status": "completed",
+              "conclusion": "skipped",
+              "run_id": 37908338256,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "acceptance_status": "pending-original-ci",
+  "implementation_todos": 0,
+  "read_only": true,
+  "cancel_calls": 0,
+  "permission_changes": 0,
+  "pull_request_snapshot": {
+    "number": 240,
+    "state": "open",
+    "draft": true,
+    "merged": false,
+    "head": "chore/r5-next1543-catalog17",
+    "head_sha": "026e7993fd787e39080b577811864174deed0502",
+    "base": "integration/company-mail-r5-pr-management-20261007",
+    "base_sha": "509a7dec2009486f10fa18c0f401fdbb7cdf3f4d"
+  },
+  "periodic_monitoring_stopped": true,
+  "stop_reason": "User's ten implementation TODOs are accepted and merged. Root directed stopping the wait for an additional zero-TODO maintenance CI run; PR240 remains draft until original full source-version acceptance.",
+  "results_not_upgraded": [
+    "Queued original Company backend job has not run Validation tool regressions.",
+    "Queued Catalog source-version job has not executed the complete original runner.",
+    "The skipped optional proposal job does not establish any source qualification.",
+    "Existing raw failed and cancelled runs retain their actual conclusions."
+  ]
+}

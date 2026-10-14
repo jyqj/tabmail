@@ -1,0 +1,170 @@
+[
+  {
+    "name": "braces",
+    "version": "3.0.3",
+    "location": "node_modules/braces",
+    "isWorkspace": false,
+    "dependents": [
+      {
+        "type": "prod",
+        "name": "braces",
+        "spec": "^3.0.3",
+        "from": {
+          "name": "micromatch",
+          "version": "4.0.8",
+          "location": "node_modules/micromatch",
+          "isWorkspace": false,
+          "dependents": [
+            {
+              "type": "prod",
+              "name": "micromatch",
+              "spec": "^4.0.8",
+              "from": {
+                "name": "fast-glob",
+                "version": "3.3.3",
+                "location": "node_modules/@ts-morph/common/node_modules/fast-glob",
+                "isWorkspace": false,
+                "dependents": [
+                  {
+                    "type": "prod",
+                    "name": "fast-glob",
+                    "spec": "^3.3.3",
+                    "from": {
+                      "name": "@ts-morph/common",
+                      "version": "0.27.0",
+                      "location": "node_modules/@ts-morph/common",
+                      "isWorkspace": false,
+                      "dependents": [
+                        {
+                          "type": "prod",
+                          "name": "@ts-morph/common",
+                          "spec": "~0.27.0",
+                          "from": {
+                            "name": "ts-morph",
+                            "version": "26.0.0",
+                            "location": "node_modules/ts-morph",
+                            "isWorkspace": false,
+                            "dependents": [
+                              {
+                                "type": "prod",
+                                "name": "ts-morph",
+                                "spec": "^26.0.0",
+                                "from": {
+                                  "name": "shadcn",
+                                  "version": "4.1.0",
+                                  "location": "node_modules/shadcn",
+                                  "isWorkspace": false,
+                                  "dependents": [
+                                    {
+                                      "type": "prod",
+                                      "name": "shadcn",
+                                      "spec": "^4.1.0",
+                                      "from": {
+                                        "location": "/workspace/tabmail/web"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "prod",
+              "name": "micromatch",
+              "spec": "^4.0.4",
+              "from": {
+                "name": "fast-glob",
+                "version": "3.3.1",
+                "location": "node_modules/fast-glob",
+                "isWorkspace": false,
+                "dependents": [
+                  {
+                    "type": "prod",
+                    "name": "fast-glob",
+                    "spec": "3.3.1",
+                    "from": {
+                      "name": "@next/eslint-plugin-next",
+                      "version": "16.3.6",
+                      "location": "node_modules/@next/eslint-plugin-next",
+                      "isWorkspace": false,
+                      "dependents": [
+                        {
+                          "type": "prod",
+                          "name": "@next/eslint-plugin-next",
+                          "spec": "16.3.6",
+                          "from": {
+                            "name": "eslint-config-next",
+                            "version": "16.3.6",
+                            "location": "node_modules/eslint-config-next",
+                            "isWorkspace": false,
+                            "dependents": [
+                              {
+                                "type": "dev",
+                                "name": "eslint-config-next",
+                                "spec": "16.3.6",
+                                "from": {
+                                  "location": "/workspace/tabmail/web"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "prod",
+              "name": "micromatch",
+              "spec": "^4.0.8",
+              "from": {
+                "name": "fast-glob",
+                "version": "3.3.3",
+                "location": "node_modules/shadcn/node_modules/fast-glob",
+                "isWorkspace": false,
+                "dependents": [
+                  {
+                    "type": "prod",
+                    "name": "fast-glob",
+                    "spec": "^3.3.3",
+                    "from": {
+                      "name": "shadcn",
+                      "version": "4.1.0",
+                      "location": "node_modules/shadcn",
+                      "isWorkspace": false,
+                      "dependents": [
+                        {
+                          "type": "prod",
+                          "name": "shadcn",
+                          "spec": "^4.1.0",
+                          "from": {
+                            "location": "/workspace/tabmail/web"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "dev": false,
+    "optional": false,
+    "devOptional": false,
+    "peer": false,
+    "bundled": false,
+    "overridden": false
+  }
+]

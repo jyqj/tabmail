@@ -2,11 +2,13 @@ package hooks
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
 	"tabmail/internal/metrics"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 	"tabmail/internal/workqueue"
 )
 
@@ -34,8 +36,8 @@ type outboxStore struct {
 
 type outboxClaimMark interface {
 	ClaimOutboxEvents(ctx context.Context, now time.Time, limit int) ([]*models.OutboxEvent, error)
-	MarkOutboxEventDone(ctx context.Context, id uuid.UUID) error
-	MarkOutboxEventRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time) error
+	MarkOutboxEventDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error
+	MarkOutboxEventRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time) error
 }
 
 func newOutboxStore(s outboxClaimMark) *outboxStore { return &outboxStore{store: s} }
@@ -57,17 +59,25 @@ func (a *outboxStore) Claim(ctx context.Context, now time.Time, limit int) ([]*w
 }
 
 func (a *outboxStore) MarkDone(ctx context.Context, job *workqueue.Job[*outboxPayload]) error {
-	return a.store.MarkOutboxEventDone(ctx, job.ID)
+	return claimMarkError(a.store.MarkOutboxEventDoneClaim(ctx, job.ID, job.Attempts))
 }
 
 func (a *outboxStore) MarkRetry(ctx context.Context, job *workqueue.Job[*outboxPayload], lastError string, nextAttemptAt time.Time) error {
-	return a.store.MarkOutboxEventRetry(ctx, job.ID, lastError, nextAttemptAt)
+	return claimMarkError(a.store.MarkOutboxEventRetryClaim(ctx, job.ID, job.Attempts, lastError, nextAttemptAt))
 }
 
-// MarkDead is unreachable for outbox (FixedBackoff never returns dead). It is
-// implemented as a retry to keep the Store contract satisfied.
+// MarkDead documents the adapter protocol split across the two workqueue
+// consumers. Outbound (internal/outbound/workqueue.go) is the mirror image:
+// its MarkDone is a no-op because the SMTP handler owns the durable success
+// write, while its MarkDead terminates the job. The outbox adapter is the
+// opposite — MarkDone (MarkOutboxEventDone) is the real completion write, and
+// MarkDead is unreachable in practice because FixedBackoff.Dead always
+// returns false, so the worker only routes through MarkDone/MarkRetry. Should
+// a future policy ever route here, the behavior is a retry
+// (MarkOutboxEventRetry with nextAttemptAt=now): an outbox event is never
+// dropped or dead-lettered; only webhook deliveries dead-letter.
 func (a *outboxStore) MarkDead(ctx context.Context, job *workqueue.Job[*outboxPayload], lastError string) error {
-	return a.store.MarkOutboxEventRetry(ctx, job.ID, lastError, time.Now().UTC())
+	return claimMarkError(a.store.MarkOutboxEventRetryClaim(ctx, job.ID, job.Attempts, lastError, time.Now().UTC()))
 }
 
 // ---------- delivery store adapter ----------
@@ -78,8 +88,8 @@ type deliveryStore struct {
 
 type deliveryClaimMark interface {
 	ClaimWebhookDeliveries(ctx context.Context, now time.Time, limit int) ([]*models.WebhookDelivery, error)
-	MarkWebhookDeliveryDone(ctx context.Context, id uuid.UUID) error
-	MarkWebhookDeliveryRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
+	MarkWebhookDeliveryDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error
+	MarkWebhookDeliveryRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time, dead bool) error
 }
 
 func newDeliveryStore(s deliveryClaimMark) *deliveryStore { return &deliveryStore{store: s} }
@@ -101,15 +111,24 @@ func (a *deliveryStore) Claim(ctx context.Context, now time.Time, limit int) ([]
 }
 
 func (a *deliveryStore) MarkDone(ctx context.Context, job *workqueue.Job[*deliveryPayload]) error {
-	return a.store.MarkWebhookDeliveryDone(ctx, job.ID)
+	return claimMarkError(a.store.MarkWebhookDeliveryDoneClaim(ctx, job.ID, job.Attempts))
 }
 
 func (a *deliveryStore) MarkRetry(ctx context.Context, job *workqueue.Job[*deliveryPayload], lastError string, nextAttemptAt time.Time) error {
-	return a.store.MarkWebhookDeliveryRetry(ctx, job.ID, lastError, nextAttemptAt, false)
+	return claimMarkError(a.store.MarkWebhookDeliveryRetryClaim(ctx, job.ID, job.Attempts, lastError, nextAttemptAt, false))
 }
 
 func (a *deliveryStore) MarkDead(ctx context.Context, job *workqueue.Job[*deliveryPayload], lastError string) error {
-	return a.store.MarkWebhookDeliveryRetry(ctx, job.ID, lastError, time.Now().UTC(), true)
+	return claimMarkError(a.store.MarkWebhookDeliveryRetryClaim(ctx, job.ID, job.Attempts, lastError, time.Now().UTC(), true))
+}
+
+// Both the generic worker and callers inspecting the store failure retain the
+// lease-loss identity. A stale mark must not run success/dead-letter hooks.
+func claimMarkError(err error) error {
+	if errors.Is(err, store.ErrClaimLeaseLost) {
+		return errors.Join(workqueue.ErrLeaseLost, err)
+	}
+	return err
 }
 
 // ---------- outbox hooks (retry metric only; outbox never dies) ----------

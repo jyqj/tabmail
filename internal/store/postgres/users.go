@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -134,6 +135,32 @@ func (s *PgStore) TouchUserLogin(ctx context.Context, id uuid.UUID) error {
 // ================================================================
 
 func (s *PgStore) CreateRefreshToken(ctx context.Context, rt *models.RefreshToken) error {
+	if rt == nil {
+		return errors.New("refresh token is required")
+	}
+	exec := s.pool.Exec
+	var tx pgx.Tx
+	if rt.Issuance != nil {
+		// New authenticated families serialize with password changes, member
+		// freeze and deletion on the same user row. No tenant/audit/family lock
+		// is acquired after this user lock: only its refresh-token child is
+		// inserted, so tenant-first account commands keep their lock order.
+		proof := *rt.Issuance
+		var err error
+		tx, err = s.pool.Begin(ctx)
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback(ctx)
+		current, err := scanUser(tx.QueryRow(ctx, userSelect+` WHERE id=$1 FOR SHARE`, rt.UserID))
+		if err != nil {
+			return err
+		}
+		if !proof.MatchesUser(rt.UserID, current) {
+			return store.ErrAuthenticationChanged
+		}
+		exec = tx.Exec
+	}
 	if rt.ID == uuid.Nil {
 		rt.ID = uuid.New()
 	}
@@ -141,11 +168,17 @@ func (s *PgStore) CreateRefreshToken(ctx context.Context, rt *models.RefreshToke
 		rt.FamilyID = rt.ID
 	}
 	rt.CreatedAt = time.Now()
-	_, err := s.pool.Exec(ctx, `
+	_, err := exec(ctx, `
 		INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at, created_at, family_id)
 		VALUES ($1, $2, $3, $4, $5, $6)`,
 		rt.ID, rt.UserID, rt.TokenHash, rt.ExpiresAt, rt.CreatedAt, rt.FamilyID)
-	return err
+	if err != nil {
+		return err
+	}
+	if tx != nil {
+		return tx.Commit(ctx)
+	}
+	return nil
 }
 
 func (s *PgStore) GetRefreshToken(ctx context.Context, tokenHash string) (*models.RefreshToken, error) {
@@ -264,8 +297,23 @@ func (s *PgStore) ChangePasswordAtomic(ctx context.Context, id uuid.UUID, expect
 		return e
 	}
 	defer tx.Rollback(ctx)
+	// The required audit references this tenant. Protect its parent key before
+	// acquiring the user UPDATE lock, matching tenant-first member changes.
+	// Locating the tenant is not authorization: the conditional UPDATE below
+	// rechecks both the observed tenant and the current password/active state.
 	var tenant uuid.UUID
-	e = tx.QueryRow(ctx, `UPDATE users SET password_hash=$3,session_version=session_version+1,updated_at=now() WHERE id=$1 AND password_hash=$2 AND is_active RETURNING tenant_id`, id, expectedHash, nextHash).Scan(&tenant)
+	e = tx.QueryRow(ctx, `SELECT tenant_id FROM users WHERE id=$1`, id).Scan(&tenant)
+	if e == pgx.ErrNoRows {
+		return errors.New("password or account changed during reauthentication")
+	}
+	if e != nil {
+		return e
+	}
+	var parent uuid.UUID
+	if e = tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, tenant).Scan(&parent); e != nil {
+		return e
+	}
+	e = tx.QueryRow(ctx, `UPDATE users SET password_hash=$3,session_version=session_version+1,updated_at=now() WHERE id=$1 AND password_hash=$2 AND is_active AND tenant_id=$4 RETURNING tenant_id`, id, expectedHash, nextHash, tenant).Scan(&tenant)
 	if e == pgx.ErrNoRows {
 		return errors.New("password or account changed during reauthentication")
 	}

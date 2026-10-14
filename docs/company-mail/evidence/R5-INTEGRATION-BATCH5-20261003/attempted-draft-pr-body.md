@@ -1,0 +1,5 @@
+Integrate the three reviewed PR23 test/evidence branches from fixed docs head e5e23e21abfe4c7e9f082405e56a95a7f346fa9a, retaining their complete ancestry, original failures, and scoped validation logs. Synthetic schema16 benchmark grammar fixtures, source-only transaction inventory, and deterministic descriptor fixtures are included; production source remains aeed47f0e1998d9925acb680992b051463821d69.
+
+Scoped validation: benchmark 111 + adjacent contracts 45, transaction 26 plus inventory CLI, descriptor and related modules 81 all pass. Full versioned runner execution and exact-head CI are being recorded in the batch5 integration appendix. Product source, 36 historical files, Go version, two replaces, dependency locks, audit policy, and normal PostgreSQL 180-second gate are unchanged. No local whole-PG180 rerun. Parent TODO remains 10/171; remaining migration, historical compatibility/wire, platform path, and typed-fixture gaps retain their non-green status.
+
+Draft only; no merge or deployment.

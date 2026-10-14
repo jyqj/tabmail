@@ -82,12 +82,14 @@ func (h *AdminHandler) UpdateTenantOverride(w http.ResponseWriter, r *http.Reque
 		errBadRequest(w, "invalid tenant id")
 		return
 	}
-	var body models.TenantOverride
-	if err := decodeBody(r, &body); err != nil {
+	// This endpoint replaces all overrides. A JSON null must not turn into
+	// the empty object that explicitly clears them back to inherited values.
+	var body *models.TenantOverride
+	if err := decodeBody(r, &body); err != nil || body == nil {
 		errBadRequest(w, "invalid body")
 		return
 	}
-	item, err := h.service.UpdateTenantOverride(r.Context(), tenantID, body, middleware.ActorFromContext(r.Context()).AuditLabel())
+	item, err := h.service.UpdateTenantOverride(r.Context(), tenantID, *body, middleware.ActorFromContext(r.Context()).AuditLabel())
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -193,8 +195,14 @@ func (h *AdminHandler) CreateAPIKey(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid body")
 		return
 	}
-	// Admin endpoint: no scope restriction, no owner
-	item, err := h.service.CreateAPIKey(r.Context(), tenantID, body.Label, body.Scopes, middleware.ActorFromContext(r.Context()).AuditLabel(), nil, nil, body.AllowedZoneIDs)
+	// The route is super-admin-only; the transaction also rechecks the actual
+	// JWT user and target tenant before an ownerless integration key is issued.
+	actor := middleware.ActorFromContext(r.Context())
+	if actor.Type != authz.PrincipalUser || !actor.IsGlobalAdmin() {
+		errForbidden(w, "platform administrator required")
+		return
+	}
+	item, err := h.service.CreateAPIKey(r.Context(), tenantID, body.Label, body.Scopes, actor, middleware.UserFromCtx(r.Context()), body.AllowedZoneIDs)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -278,12 +286,12 @@ func (h *AdminHandler) GetSMTPPolicy(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) UpdateSMTPPolicy(w http.ResponseWriter, r *http.Request) {
-	var body models.SMTPPolicy
-	if err := decodeBody(r, &body); err != nil {
+	body, err := decodeSMTPPolicyInput(r)
+	if err != nil {
 		errBadRequest(w, "invalid body")
 		return
 	}
-	item, err := h.service.UpdateSMTPPolicy(r.Context(), &body, middleware.ActorFromContext(r.Context()).AuditLabel())
+	item, err := h.service.UpdateSMTPPolicy(r.Context(), body, middleware.ActorFromContext(r.Context()).AuditLabel())
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -333,21 +341,7 @@ func (h *AdminHandler) UserCreateAPIKey(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	var callerPerm *models.EffectivePermission
-	var callerUserID *uuid.UUID
-
 	actor := middleware.ActorFromContext(ctx)
-	if !actor.IsTenantAdmin() {
-		if actor.Permission != nil && !actor.Permission.CanCreateAPIKeys {
-			errForbidden(w, "API key creation not allowed")
-			return
-		}
-		callerPerm = actor.Permission
-		if actor.Type == authz.PrincipalUser {
-			id := actor.ID
-			callerUserID = &id
-		}
-	}
 
 	var body struct {
 		Label          string      `json:"label"`
@@ -358,7 +352,7 @@ func (h *AdminHandler) UserCreateAPIKey(w http.ResponseWriter, r *http.Request) 
 		errBadRequest(w, "invalid body")
 		return
 	}
-	item, err := h.service.CreateAPIKey(ctx, tenant.ID, body.Label, body.Scopes, middleware.ActorFromContext(r.Context()).AuditLabel(), callerPerm, callerUserID, body.AllowedZoneIDs)
+	item, err := h.service.CreateAPIKey(ctx, tenant.ID, body.Label, body.Scopes, actor, middleware.UserFromCtx(ctx), body.AllowedZoneIDs)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return

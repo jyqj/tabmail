@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { APIKeyScopePicker } from "@/components/api-key-scope-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,20 +38,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   listTenants,
   createTenant,
   deleteTenant,
   listPlans,
-  updateTenantOverrides,
-  getTenantConfig,
-  createAPIKey,
-  listAPIKeys,
-  revokeAPIKey,
 } from "@/lib/api";
-import { DEFAULT_API_KEY_SCOPES } from "@/lib/api-key-scopes";
-import type { Tenant, TenantAPIKey, APIKeyCreated, TenantOverride, EffectiveConfig } from "@/lib/types";
+import type { Tenant } from "@/lib/types";
 import {
   Plus,
   MoreHorizontal,
@@ -62,40 +54,20 @@ import {
   Users,
   Shield,
   SlidersHorizontal,
-  Gauge,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
 import { safeConfirm } from "@/lib/utils";
 import { useAPI } from "@/hooks/use-api";
-
-const overrideFields = [
-  "max_domains",
-  "max_mailboxes_per_domain",
-  "max_messages_per_mailbox",
-  "max_message_bytes",
-  "retention_hours",
-  "rpm_limit",
-  "daily_quota",
-] as const;
-
-type TenantOverrideEditableKey = (typeof overrideFields)[number];
-type TenantOverrideForm = Record<TenantOverrideEditableKey, string>;
-
-const emptyOverrideForm: TenantOverrideForm = {
-  max_domains: "",
-  max_mailboxes_per_domain: "",
-  max_messages_per_mailbox: "",
-  max_message_bytes: "",
-  retention_hours: "",
-  rpm_limit: "",
-  daily_quota: "",
-};
-
+import { LoadError, useText } from "@/components/company/common";
+import { sessionScope, useSessionScope } from "@/lib/session";
+import { TenantAPIKeysDialog } from "./api-keys-dialog";
+import { TenantOverridesDialog } from "./overrides-dialog";
 
 export default function TenantsPage() {
   const { t } = useI18n();
+  const text = useText();
 
   const { data: tenantsRes, isLoading: tenantsLoading, error: tenantsError, mutate: mutateTenants } = useAPI(
     "tenants",
@@ -117,127 +89,146 @@ export default function TenantsPage() {
   }, [tenantsError, plansError, t]);
 
   const [createOpen, setCreateOpen] = useState(false);
-  const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [newPlanId, setNewPlanId] = useState("");
 
-  const [keysOpen, setKeysOpen] = useState(false);
-  const [keysTenantId, setKeysTenantId] = useState("");
-  const [keys, setKeys] = useState<TenantAPIKey[]>([]);
-  const [keysLoading, setKeysLoading] = useState(false);
-  const [newKeyCreated, setNewKeyCreated] = useState<APIKeyCreated | null>(null);
-  const [newKeyScopes, setNewKeyScopes] = useState<string[]>([...DEFAULT_API_KEY_SCOPES]);
+  const scope = useSessionScope();
+  const [view, setView] = useState({ scope });
+  if (view.scope !== scope) {
+    setView({ scope });
+    // A draft is a decision by the identity that opened it. Token rotation
+    // preserves that identity; account, role and tenant changes do not.
+    setCreateOpen(false);
+    setNewName("");
+    setNewPlanId("");
+  }
+  const currentView = useRef<object | null>(null);
+  useLayoutEffect(() => {
+    currentView.current = view;
+    return () => { currentView.current = null; };
+  }, [view]);
+  const ownsView = (owner: object) => currentView.current === owner && scope === sessionScope();
+  const createDialog = useRef<object>({});
+  const createDraft = useRef<object>({});
+  const activeCreate = useRef<{ view: object; dialog: object } | null>(null);
+  const [pendingCreate, setPendingCreate] = useState<{ view: object; dialog: object } | null>(null);
+  const creating = pendingCreate?.view === view && pendingCreate.dialog === createDialog.current;
+  const changeCreateOpen = (open: boolean) => {
+    if (open !== createOpen) createDialog.current = {};
+    setCreateOpen(open);
+  };
+  const currentReadback = useRef<object | null>(null);
+  const [readbackFailure, setReadbackFailure] = useState<{ view: object; error: Error } | null>(null);
+  const readbackError = readbackFailure?.view === view ? readbackFailure.error : null;
+  const deletionRows = useRef(tenants);
+  useLayoutEffect(() => { deletionRows.current = tenantsRes?.data ?? []; }, [tenantsRes]);
+  const activeDeletes = useRef(new Map<string, { view: object }>());
+  const [pendingDeletes, setPendingDeletes] = useState<{ view: object; ids: string[] }>({ view, ids: [] });
+  const deleting = (id: string) => pendingDeletes.view === view && pendingDeletes.ids.includes(id);
+  const deletable = (id: string) => deletionRows.current.some(tenant => tenant.id === id && !tenant.is_super);
+  async function refreshTenants(owner: object) {
+    if (!ownsView(owner)) return;
+    const observation = {};
+    currentReadback.current = observation;
+    try {
+      // A plain SWR revalidation can resolve with cached data after GET fails.
+      // Observe the actual read before acknowledging a recovered list.
+      await mutateTenants(async () => {
+        const response = await listTenants();
+        if (!ownsView(owner)) throw new DOMException("Tenant page changed", "AbortError");
+        return response;
+      }, { revalidate: false });
+      if (ownsView(owner) && currentReadback.current === observation) setReadbackFailure(null);
+    } catch (error) {
+      if (ownsView(owner) && currentReadback.current === observation) throw error;
+    }
+  }
+  const keysSequence = useRef(0);
+  const [keysDialog, setKeysDialog] = useState<{
+    tenantId: string; scope: string; instance: number;
+  } | null>(null);
 
-  const [overrideOpen, setOverrideOpen] = useState(false);
-  const [overrideTenant, setOverrideTenant] = useState<Tenant | null>(null);
-  const [overrideSaving, setOverrideSaving] = useState(false);
-  const [effectiveConfig, setEffectiveConfig] = useState<EffectiveConfig | null>(null);
-  const [overrideForm, setOverrideForm] = useState<TenantOverrideForm>(emptyOverrideForm);
+  const overrideSequence = useRef(0);
+  const [overrideDialog, setOverrideDialog] = useState<{
+    tenant: Tenant; scope: string; instance: number;
+  } | null>(null);
 
   const handleCreate = async () => {
-    if (!newName.trim() || !newPlanId) return;
-    setCreating(true);
+    if (!newName.trim() || !newPlanId || !ownsView(view) ||
+      (activeCreate.current?.view === view && activeCreate.current.dialog === createDialog.current)) return;
+    const operation = { view, dialog: createDialog.current };
+    const submittedDraft = createDraft.current;
+    // Claim synchronously; two activations can precede the disabled render.
+    activeCreate.current = operation;
+    setPendingCreate(operation);
     try {
       await createTenant({ name: newName.trim(), plan_id: newPlanId });
-      setNewName("");
-      setNewPlanId("");
-      setCreateOpen(false);
+      if (!ownsView(view)) return;
+      if (createDialog.current === operation.dialog && createDraft.current === submittedDraft) {
+        createDraft.current = {};
+        setNewName("");
+        setNewPlanId("");
+        changeCreateOpen(false);
+      }
       toast.success(t("tenants.tenantCreated"));
-      mutateTenants();
+      try { await refreshTenants(view); } catch {
+        if (ownsView(view)) setReadbackFailure({ view, error: new Error(text(
+          "租户已创建，但租户列表刷新失败。请重试加载以核对当前列表。",
+          "The tenant was created, but the tenant list could not be refreshed. Retry loading to check the current list.",
+        )) });
+      }
     } catch (e: unknown) {
+      if (!ownsView(view) || createDialog.current !== operation.dialog) return;
       const err = e as { error?: { message?: string } };
       toast.error(err?.error?.message || t("tenants.createFailed"));
     } finally {
-      setCreating(false);
+      if (activeCreate.current === operation) {
+        activeCreate.current = null;
+        if (ownsView(view)) setPendingCreate(null);
+      }
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!safeConfirm(t("tenants.confirmDelete"))) return;
+    if (!ownsView(view) || !deletable(id) || readbackError || activeDeletes.current.get(id)?.view === view) return;
+    const operation = { view };
+    // Reserve the row before opening confirmation; a reentrant activation
+    // must not open a second dialog or dispatch the same destructive command.
+    activeDeletes.current.set(id, operation);
+    setPendingDeletes(current => ({ view, ids: [...(current.view === view ? current.ids : []), id] }));
     try {
+      if (!safeConfirm(t("tenants.confirmDelete"))) return;
+      // The confirmation can outlive this page or the identity that saw the
+      // selected tenant. A token-only rotation retains the same scope.
+      if (!ownsView(view) || !deletable(id)) return;
       await deleteTenant(id);
+      if (!ownsView(view)) return;
       toast.success(t("tenants.tenantDeleted"));
-      mutateTenants();
+      try { await refreshTenants(view); } catch {
+        if (ownsView(view)) setReadbackFailure({ view, error: new Error(text(
+          "租户已删除，但租户列表刷新失败。请重试加载以核对当前列表。",
+          "The tenant was deleted, but the tenant list could not be refreshed. Retry loading to check the current list.",
+        )) });
+      }
     } catch {
-      toast.error(t("tenants.deleteFailed"));
-    }
-  };
-
-  const openKeys = async (tenantId: string) => {
-    setKeysTenantId(tenantId);
-    setKeysOpen(true);
-    setKeysLoading(true);
-    setNewKeyCreated(null);
-    setNewKeyScopes([...DEFAULT_API_KEY_SCOPES]);
-    try {
-      const res = await listAPIKeys(tenantId);
-      setKeys(res.data ?? []);
-    } catch {
-      toast.error(t("tenants.keysLoadFailed"));
+      if (ownsView(view)) toast.error(t("tenants.deleteFailed"));
     } finally {
-      setKeysLoading(false);
+      if (activeDeletes.current.get(id) === operation) {
+        activeDeletes.current.delete(id);
+        if (ownsView(view)) setPendingDeletes(current => current.view === view
+          ? { view, ids: current.ids.filter(pending => pending !== id) } : current);
+      }
     }
   };
 
-  const handleCreateKey = async () => {
-    try {
-      const res = await createAPIKey(keysTenantId, { scopes: newKeyScopes });
-      setNewKeyCreated(res.data);
-      const keysRes = await listAPIKeys(keysTenantId);
-      setKeys(keysRes.data ?? []);
-      setNewKeyScopes([...DEFAULT_API_KEY_SCOPES]);
-      toast.success(t("tenants.apiKeyCreated"));
-    } catch {
-      toast.error(t("tenants.apiKeyCreateFailed"));
-    }
-  };
-
-  const handleRevokeKey = async (keyId: string) => {
-    if (!safeConfirm(t("tenants.confirmRevokeKey"))) return;
-    try {
-      await revokeAPIKey(keysTenantId, keyId);
-      setKeys((prev) => prev.filter((k) => k.id !== keyId));
-      toast.success(t("tenants.keyRevoked"));
-    } catch {
-      toast.error(t("tenants.revokeFailed"));
-    }
+  const openKeys = (tenantId: string) => {
+    setKeysDialog({ tenantId, scope: sessionScope(), instance: ++keysSequence.current });
   };
 
   const planName = (id: string) => plans.find((p) => p.id === id)?.name ?? "—";
 
-  const openOverrides = async (tenant: Tenant) => {
-    setOverrideTenant(tenant);
-    setOverrideOpen(true);
-    setEffectiveConfig(null);
-    setOverrideForm(emptyOverrideForm);
-    try {
-      const res = await getTenantConfig(tenant.id);
-      setEffectiveConfig(res.data);
-    } catch {
-      toast.error(t("tenants.configLoadFailed"));
-    }
-  };
-
-  const handleSaveOverrides = async () => {
-    if (!overrideTenant) return;
-    const body = Object.fromEntries(
-      Object.entries(overrideForm).map(([key, value]) => [
-        key,
-        value.trim() === "" ? null : Number(value),
-      ])
-    ) as Pick<TenantOverride, TenantOverrideEditableKey>;
-    setOverrideSaving(true);
-    try {
-      await updateTenantOverrides(overrideTenant.id, body);
-      const res = await getTenantConfig(overrideTenant.id);
-      setEffectiveConfig(res.data);
-      toast.success(t("tenants.overridesUpdated"));
-    } catch (e: unknown) {
-      const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || t("tenants.overridesUpdateFailed"));
-    } finally {
-      setOverrideSaving(false);
-    }
+  const openOverrides = (tenant: Tenant) => {
+    setOverrideDialog({ tenant, scope: sessionScope(), instance: ++overrideSequence.current });
   };
 
   return (
@@ -246,7 +237,7 @@ export default function TenantsPage() {
         title={t("tenants.title")}
         description={t("tenants.count", { count: total })}
         actions={
-          <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+          <Dialog open={createOpen} onOpenChange={changeCreateOpen}>
             <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
               <Plus className="h-3.5 w-3.5" />
               {t("tenants.createTenant")}
@@ -264,14 +255,18 @@ export default function TenantsPage() {
                   <Input
                     placeholder={t("tenants.placeholder")}
                     value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
+                    onChange={(e) => { createDraft.current = {}; setNewName(e.target.value); }}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>{t("tenants.plan")}</Label>
-                  <Select value={newPlanId} onValueChange={(v) => v && setNewPlanId(v)}>
+                  <Select value={newPlanId} onValueChange={(v) => {
+                    if (v) { createDraft.current = {}; setNewPlanId(v); }
+                  }}>
                     <SelectTrigger>
-                      <SelectValue placeholder={t("tenants.selectPlan")} />
+                      <SelectValue placeholder={t("tenants.selectPlan")}>
+                        {newPlanId ? plans.find(plan => plan.id === newPlanId)?.name ?? newPlanId : undefined}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {plans.map((p) => (
@@ -297,6 +292,7 @@ export default function TenantsPage() {
       />
 
       <div className="p-4 space-y-4">
+        <LoadError error={readbackError} onRetry={() => { void refreshTenants(view).catch(() => undefined); }} />
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">{t("tenants.allTenants")}</CardTitle>
@@ -366,7 +362,7 @@ export default function TenantsPage() {
                             <DropdownMenuItem
                               onClick={() => handleDelete(tenant.id)}
                               className="text-destructive focus:text-destructive"
-                              disabled={tenant.is_super}
+                              disabled={tenant.is_super || deleting(tenant.id) || !!readbackError}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               {t("tenants.delete")}
@@ -381,164 +377,15 @@ export default function TenantsPage() {
         </Card>
       </div>
 
-      {/* API Keys Dialog */}
-      <Dialog open={keysOpen} onOpenChange={setKeysOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{t("tenants.apiKeysTitle")}</DialogTitle>
-            <DialogDescription>
-              {t("tenants.apiKeysDesc")}
-            </DialogDescription>
-          </DialogHeader>
+      {keysDialog && keysDialog.scope === scope && (
+        <TenantAPIKeysDialog key={keysDialog.instance} tenantId={keysDialog.tenantId}
+          onClose={() => setKeysDialog(null)} />
+      )}
 
-          {newKeyCreated && (
-            <div className="rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950 p-3">
-              <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">
-                {t("tenants.newKeyCreated")}
-              </p>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 text-xs break-all bg-white dark:bg-black/20 p-2 rounded">
-                  {newKeyCreated.key}
-                </code>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 shrink-0"
-                  onClick={() => {
-                    navigator.clipboard.writeText(newKeyCreated.key);
-                    toast.success(t("tenants.copied"));
-                  }}
-                >
-                  <Copy className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <div className="space-y-2">
-            {keysLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-            ) : keys.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                {t("tenants.noApiKeys")}
-              </p>
-            ) : (
-              keys.map((k) => (
-                <div
-                  key={k.id}
-                  className="flex items-center justify-between rounded-lg border px-3 py-2"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <code className="text-sm">{k.key_prefix}...</code>
-                      {k.label && (
-                        <Badge variant="secondary" className="text-xs">
-                          {k.label}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {t("tenants.scopes")}: {k.scopes.join(", ")}
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive shrink-0"
-                    onClick={() => handleRevokeKey(k.id)}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              ))
-            )}
-          </div>
-
-          <DialogFooter>
-            <div className="w-full space-y-3">
-              <APIKeyScopePicker value={newKeyScopes} onChange={setNewKeyScopes} />
-              <div className="flex justify-end">
-                <Button
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={handleCreateKey}
-                  disabled={newKeyScopes.length === 0}
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  {t("tenants.generateKey")}
-                </Button>
-              </div>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={overrideOpen} onOpenChange={setOverrideOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{t("tenants.overridesTitle")}</DialogTitle>
-            <DialogDescription>
-              {t("tenants.overridesDesc", { name: overrideTenant?.name ?? "" })}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-6 py-4 lg:grid-cols-[0.9fr_1.1fr]">
-            <Card className="border-primary/10 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.08),transparent_35%),var(--card)]">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Gauge className="h-4 w-4 text-primary" />
-                  {t("tenants.effectiveConfig")}
-                </CardTitle>
-                <CardDescription>{t("tenants.effectiveConfigDesc")}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {effectiveConfig ? (
-                  <>
-                    {Object.entries(effectiveConfig).map(([key, value]) => (
-                      <div key={key} className="flex items-center justify-between gap-3 text-sm">
-                        <span className="text-muted-foreground">{key}</span>
-                        <span className="font-medium tabular-nums">{String(value)}</span>
-                      </div>
-                    ))}
-                  </>
-                ) : (
-                  <div className="space-y-3">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Skeleton key={i} className="h-6 w-full" />
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <div className="space-y-4">
-              {overrideFields.map((field) => (
-                <div key={field} className="space-y-2">
-                  <Label>{field}</Label>
-                  <Input
-                    type="number"
-                    placeholder={t("tenants.inherit")}
-                    value={overrideForm[field]}
-                    onChange={(e) => setOverrideForm((prev) => ({ ...prev, [field]: e.target.value }))}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOverrideOpen(false)}>
-              {t("tenants.close")}
-            </Button>
-            <Button onClick={handleSaveOverrides} disabled={overrideSaving || !overrideTenant}>
-              {overrideSaving ? t("tenants.saving") : t("tenants.saveOverrides")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {overrideDialog && overrideDialog.scope === scope && (
+        <TenantOverridesDialog key={overrideDialog.instance} tenant={overrideDialog.tenant}
+          onClose={() => setOverrideDialog(null)} />
+      )}
     </div>
   );
 }

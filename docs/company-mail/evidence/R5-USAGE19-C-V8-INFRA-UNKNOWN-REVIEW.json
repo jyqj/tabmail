@@ -1,0 +1,107 @@
+{
+  "C_fail_is_not_productRED": true,
+  "Go_package_and_test_event_counts": {
+    "fail": 0,
+    "package_terminal": 0,
+    "pass": 0,
+    "run": 0,
+    "skip": 0,
+    "unfinished": 0
+  },
+  "Go_process_return": -15,
+  "actual_SQL_base19": true,
+  "cleanup": {
+    "DB_connection_query_known": true,
+    "all_non_base_owned_databases": [],
+    "all_non_system_databases": [
+      "tm_usage19_c"
+    ],
+    "all_owned_connections_zero": true,
+    "all_phase_groups_gone": true,
+    "excluded_current_observer_pid": 95531,
+    "native_PID_absent": true,
+    "native_stopped": true,
+    "observer_sampler_joined": true,
+    "other_client_connections_excluding_current_observer": 0,
+    "owned_native_PID": 95235,
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "temporary_DBs_absent": true
+  },
+  "code_closure_sha256": "e281399a4d32c013e9b485a088cf253670ee97559b338f1b9e79332a343bf9ac",
+  "code_source_sha": "f79eb4d71716da1357bac706427163ca41a35d79",
+  "controller_tool_exit": 1,
+  "execution_prepost": {
+    "execution_error": null,
+    "execution_post": {
+      "exact_external_redis_preflight.py": "88a05cdccce775505604b15de4fdcfc96536ca32f7f37edff96792bbb34f36a7",
+      "owned_listener_observer.py": "52c943aa6b563341176b7f0e5e3e83f22b613e188087869016f94d6e8725a3bf",
+      "usage19_driver_prepared_only.py": "9e01d282ad1b22fcbb2a8338cb1615088c33ee6debb45f40554f401b88ba8ed9"
+    },
+    "execution_pre": {
+      "exact_external_redis_preflight.py": "88a05cdccce775505604b15de4fdcfc96536ca32f7f37edff96792bbb34f36a7",
+      "owned_listener_observer.py": "52c943aa6b563341176b7f0e5e3e83f22b613e188087869016f94d6e8725a3bf",
+      "usage19_driver_prepared_only.py": "9e01d282ad1b22fcbb2a8338cb1615088c33ee6debb45f40554f401b88ba8ed9"
+    },
+    "execution_same": true
+  },
+  "joint_dependency_sha256": "7316a063c312b9aeae8d7d8b11796f1275b3069482d612a335851f6e7769d1dc",
+  "no_oldPASS_batches_rerun_or_C_autoretry": true,
+  "no_sampled_endpoint_or_qualified_worker_body": "0testevents andno childregistration; do not claim absolute never transientservice/goroutine execution from samplingabsence",
+  "notWhole_MethodCatalog171": true,
+  "observer_unknown": {
+    "closed_observed": false,
+    "complete": false,
+    "failures": [
+      "Unknown:unknown_compile_group_member",
+      "receipt:sticky_observer_failure",
+      "child_end_not_observed"
+    ],
+    "groupgone": true,
+    "listener_failures": [],
+    "max_gap_seconds": 0.012823541997931898,
+    "observer_joined": true,
+    "owned_miniredis_sourceorder_added_address": null,
+    "rejected_members_safe": [
+      {
+        "executable_basename": null,
+        "identity_status": "UNKNOWN",
+        "identity_unknown_class": "ProcessLookupError",
+        "pgid": 95390,
+        "pid": 95501,
+        "sid": null,
+        "start": "Sat Oct 3 13:08:46 2026",
+        "uid": 501
+      }
+    ],
+    "samples": [],
+    "sampling_not_proof_of_no_short_external_connection": true,
+    "smtp_sourceorder_solo_address": null,
+    "source_environment_isolation_independent": true
+  },
+  "original300_elapsed": 6.273191928863525,
+  "process_signal_actions": [
+    "TERM"
+  ],
+  "raw_GoJSONL_stdout_bytes": 0,
+  "rejected_basename_SID": "UNKNOWN dueactualProcessLookupError; no currentorhistoricalbuildid inference",
+  "rejected_member_safe_identity": [
+    {
+      "executable_basename": null,
+      "identity_status": "UNKNOWN",
+      "identity_unknown_class": "ProcessLookupError",
+      "pgid": 95390,
+      "pid": 95501,
+      "sid": null,
+      "start": "Sat Oct 3 13:08:46 2026",
+      "uid": 501
+    }
+  ],
+  "runtime_inputs_closure_sha256": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+  "signed_driver_sha256": "9e01d282ad1b22fcbb2a8338cb1615088c33ee6debb45f40554f401b88ba8ed9",
+  "signed_observer_sha256": "52c943aa6b563341176b7f0e5e3e83f22b613e188087869016f94d6e8725a3bf",
+  "status": "C_ONLY_V8_PRETEST_OBSERVER_INFRA_UNKNOWN",
+  "strict_allowlist_budget_gap_state_and_stopjoin_before_reap_kept": true,
+  "threefold_code_runtime_execution_same": true,
+  "within300": true
+}

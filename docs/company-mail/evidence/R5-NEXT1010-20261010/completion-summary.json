@@ -1,0 +1,160 @@
+{
+  "schema": "r5-next1010-completed-batch-v1",
+  "repository": "https://github.com/jyqj/tabmail",
+  "batch": "NEXT-1010",
+  "acceptance_date_utc": "2026-10-09",
+  "batch_total": 10,
+  "batch_completed": 10,
+  "batch_remaining": 0,
+  "parent_checklist": {
+    "total": 171,
+    "completed": 10,
+    "remaining": 161
+  },
+  "integration_branch": "integration/company-mail-r5-pr-management-20261007",
+  "integration_pr": 56,
+  "integration_before_completion_docs": "f92517a2fe39cf2bc186ec1f57601cd438d81d72",
+  "main_unchanged": "d6d512172fb6b874c3283d9df3f4d56758684a13",
+  "rounds": [
+    {
+      "round": 1,
+      "issues": [
+        242,
+        243,
+        244,
+        245
+      ],
+      "round_completed": 4,
+      "cumulative_completed": 4,
+      "remaining": 6,
+      "pr": 254,
+      "head": "b458e917c6b084fbc557f351f03ca762b1c11924",
+      "merge": "a6a0090fc069d131213b559f94c669184525f312",
+      "tree": "8dba655927b80a1e5ee66228fd3d29bab3a8bee2"
+    },
+    {
+      "round": 2,
+      "issues": [
+        246,
+        247,
+        252
+      ],
+      "round_completed": 3,
+      "cumulative_completed": 7,
+      "remaining": 3,
+      "pr": 255,
+      "head": "13a2a07979b2939fe30330e81cc5e12bec253be2",
+      "merge": "421293164295073a024799c5bf5bc2cc328647a0",
+      "tree": "184992fa8a7c8cf3975f2ffb77f91629f4371b2b"
+    },
+    {
+      "round": 3,
+      "issues": [
+        249,
+        250,
+        253
+      ],
+      "round_completed": 3,
+      "cumulative_completed": 10,
+      "remaining": 0,
+      "pr": 256,
+      "head": "177ee571b194836678cc9a473f178c655326ba7c",
+      "merge": "66a059d90cd93069926595af4587e42998f0b53a",
+      "tree": "2d5d2c44680f6a6cb2b2d1166e2923806beafcc8"
+    }
+  ],
+  "maintenance": {
+    "catalog_pr": 257,
+    "catalog_merge": "f92517a2fe39cf2bc186ec1f57601cd438d81d72",
+    "catalog_head": "6a402ce1269bfc41c932a67b592fee5bca235774",
+    "catalog_tree": "e8a04cbe516889f225d24ae7aed5d81d8e073650",
+    "replay_pr": 258,
+    "replay_branch_retained": "verification/r5-next1010-r2-replay-base",
+    "replay_merge": "c8bd2173b804654c4cd4e0ca6fb77cabdd2fd719",
+    "replay_workflow_tree": "47955583e2c043134d9a91aac587e4f5cc5d8ef0",
+    "counted_implementation_todos": 0
+  },
+  "withdrawn_not_planned_not_counted": [
+    248,
+    251
+  ],
+  "acceptance_files": {
+    "round1-postgres.json": {
+      "archived_source_path": "recovered/r1-public/recovered-r1-comparisons.json",
+      "bytes": 11687,
+      "sha256": "9a069524513df48c6977bf36bd484c198d4eb1fc257d864d82a0bf93f4f21536"
+    },
+    "round2-postgres.json": {
+      "archived_source_path": "backend/ci-r2-replay/acceptance.json",
+      "bytes": 25844,
+      "sha256": "cd8346ce0224f7e7e8e34e3fde53d10de505cb59f875e8efe63329f6651f4773"
+    },
+    "round3-postgres.json": {
+      "archived_source_path": "recovered/final-round3-pg/acceptance.json",
+      "bytes": 7633,
+      "sha256": "084813041a33eac182d8d40b57bdb4c0f780b029534058f7362d9917cb028aa8"
+    },
+    "exec-go.json": {
+      "archived_source_path": "recovered/final-exec-go/recovered-acceptance.json",
+      "bytes": 10598,
+      "sha256": "4ce5f0bc3241aaad5e12156aea3f9ec479655a680ff4f8cddaac49629e251dc9"
+    },
+    "exec-web.json": {
+      "archived_source_path": "recovered/final-exec-web/acceptance.json",
+      "bytes": 6489,
+      "sha256": "fb46ffa330c729670ea330eae60c8c77241c6cd0d3af30211652338f7d903c7f"
+    },
+    "native-frontend129.json": {
+      "archived_source_path": "recovered/native129/acceptance.json",
+      "bytes": 15402,
+      "sha256": "6cdcea59589effd85f31f30c81ce757e04e94392d9ecca77e4f4e3d28e4ce4a5"
+    },
+    "catalog.json": {
+      "archived_source_path": "recovered/catalog257/acceptance.json",
+      "bytes": 8375,
+      "sha256": "4771f5ff43f2f37d32d98b8937b9f1a7b28cfc37f03b21da2a06fa3629704fd2"
+    },
+    "root-replay-review.json": {
+      "archived_source_path": "backend/ci-r2-replay/root-independent-replay-review.json",
+      "bytes": 3855,
+      "sha256": "1960649778f34f2627a4224ec244bdf197ade8bbf661b382649316adfe70e67b"
+    },
+    "final-branch-issue-audit.json": {
+      "archived_source_path": "recovered/branch-audit/final-merge-branch-issue-audit.json",
+      "bytes": 66141,
+      "sha256": "c4d70068af07f338aeb77151548d381a801c821b44429a70ae5924db09a4aefd"
+    }
+  },
+  "verification_counts": {
+    "round1_pg": 19,
+    "round2_pg": 30,
+    "round3_pg": 50,
+    "original_exec_go_distinct_leaves": 1857,
+    "original_exec_web_assertions": 229,
+    "fresh_final_source_frontend_assertions": 129,
+    "catalog_full": 875,
+    "catalog_inventory": 106,
+    "catalog_cli": 3
+  },
+  "qualifications": [
+    "Selections overlap; their counts must not be added into one full-suite total.",
+    "Native-only old logs/reports and old native bundle lost in the transient reset are not fabricated or delivered.",
+    "Original remote evidence was fetched again, source identities and available prior raw hashes were checked, and fresh derived reports are explicitly marked.",
+    "Frontend129 is a real new run on public177 after the reset, not restored old native16b bytes.",
+    "Original failed Docker/setup/diagnostic/release workflows remain failed.",
+    "Artifact ZIP hashes are API-reported unless explicitly identified as this locally generated and verified evidence archive.",
+    "Implementation completion does not close broad parent tasks or grant full release qualification; PR56 stays draft."
+  ],
+  "branch_snapshot": {
+    "remote_branch_count": 118,
+    "open_draft_prs": [
+      17,
+      20,
+      24,
+      40,
+      56
+    ],
+    "completed_head_branches_absent": 5,
+    "snapshot_scope": "Before this completion-only documentation PR; all implementation/catalog/replay merges final."
+  }
+}

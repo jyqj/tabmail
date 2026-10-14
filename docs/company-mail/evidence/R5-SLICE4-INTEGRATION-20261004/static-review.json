@@ -1,0 +1,383 @@
+{
+  "F52": "historical failures unchanged",
+  "Go": "text reconstruction only; no Go parse, format, compile or execution",
+  "TODO": "byte-identical; proposed substeps only",
+  "ancestry_preserved": true,
+  "base": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+  "batch": {
+    "delivery": "5ebf159302520507829b93c5502b94b0f768f94e",
+    "independent": "3637d25c80f85993509edd825089c7af25c0c4a9",
+    "source": "7fea1edeee6bcad3e77edab767997b8757873db1"
+  },
+  "batch_run_only_receipt_version": true,
+  "batch_source_byte_identical_definitions": [
+    "derive",
+    "file_digest",
+    "lease",
+    "sweep_adopted_tails",
+    "OwnedProcess",
+    "become_subreaper",
+    "join_adopted_tails",
+    "exact_assertions",
+    "Batch.authenticate",
+    "Batch.rpc",
+    "Batch.run_process",
+    "Batch.record_cleanup",
+    "Batch.close_channel",
+    "Batch.cleanup_resources",
+    "Batch.resource_scope",
+    "Batch.request_cancel",
+    "Batch.run"
+  ],
+  "bridge": {
+    "delivery": "4643de904ff171b9b14189f63ff5e28470a73c72",
+    "independent": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+    "source": "13ac32bbb8576a8a237dfbed46596ede8f3276ad"
+  },
+  "central": "10/171 unchanged",
+  "changed_paths": {
+    "docs/company-mail/R5-BATCH-V2-SLICE4-20261004.md": {
+      "base": null,
+      "git_blob": "2a8be85d7137fe7b07699b7d8049519b323fd798",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "7e7f35430dd06bef44383fde9bff02667d8abb03891d594c9e4b521123ae6522"
+    },
+    "docs/company-mail/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004.md": {
+      "base": null,
+      "git_blob": "fae224dc299080fb3098aae0d137e54002d39a94",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "a05530617feb47b35ab1ae430c977b9732aa194bad351a97151e22c42eccae7a"
+    },
+    "docs/company-mail/R5-SLICE4-BRIDGE-CALLER-20261004.md": {
+      "base": null,
+      "git_blob": "033fbc34b3dcf168fa35dfc77334ecdfcf7bd60e",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "705cd91a24646dee63ca6fcc4a823cafaee1e14f80344cdfe30d613264790767"
+    },
+    "docs/company-mail/R5-SLICE4-BRIDGE-INDEPENDENT-REVIEW-20261004.md": {
+      "base": null,
+      "git_blob": "ac691775f0d628eacb627fa760821f0090465d2d",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "003ff9d105ad0be09cd7a0bc196e9b2f69fa799bef01034213bc09e8382cb8f9"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-20261004/identities.json": {
+      "base": null,
+      "git_blob": "d36ab00db6a937b8b544f0699391984d2bf47eb6",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "66ae5d02827a3ad7fcf5803dab54b2f0c1ea2dbe1a4fc153dbc0453b2917e34d"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-20261004/preserved-tree.json": {
+      "base": null,
+      "git_blob": "4668de9edbecff5d03674d9499edae08bd1c0107",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "805d9b0360e1bff28f6278861cc409c75b264c9db38304fb99184424f78feccb"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-20261004/pure.stderr": {
+      "base": null,
+      "git_blob": "6accae49f00d87daaf5023456639212e91c4dc17",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "a576ccb79def0f91a1b4bc8b06971aa948c4383d24bdb813a41a9f64a8f021ad"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-20261004/pure.stdout": {
+      "base": null,
+      "git_blob": "2b350f2d7703702fd04b4be5bef3d7e7aaa65075",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "ef8dca9c70c879258c771b13293a1b16b034556480eddb3e3064aed29a76b613"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-20261004/static-results.json": {
+      "base": null,
+      "git_blob": "19850f8f68910f98842b7412960e06bc60a05521",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "257d02f154a4e99385c3b597374110a3a578243b58c77bc006cc147c0d62c230"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-20261004/static_checks.py": {
+      "base": null,
+      "git_blob": "27dd5d27dd381942ef00eb546600011d1271736e",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "878b8fcb5615a3535992de088cbbc59b85c6adcfa20d0d4008b8510798923db9"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/author.stderr": {
+      "base": null,
+      "git_blob": "7d29c5492b61ee25881d68436bf2f461e620ed8f",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "d5747c7f7fcce748f3fe29380b4cdd5026ec04e92004a9f87c266a97bf7483ce"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/author.stdout": {
+      "base": null,
+      "git_blob": "2b350f2d7703702fd04b4be5bef3d7e7aaa65075",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "ef8dca9c70c879258c771b13293a1b16b034556480eddb3e3064aed29a76b613"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/independent.stderr": {
+      "base": null,
+      "git_blob": "05b270ff4695afc9fb6abd121a87e83669595953",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "13b799b9b516584ca1fd89e09f66da048e19194afae6bb9335430f979419ea2c"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/independent.stdout": {
+      "base": null,
+      "git_blob": "b3b1223d1f954c201312e6a8193e8894b7e3eca7",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "ea4d1f25a9983304d9a975f798206aca19a7e5961512d04fd15f2e350204f750"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/independent_checks.py": {
+      "base": null,
+      "git_blob": "5d01a38ab2cf8a7a8916938d56848159e97acf70",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "f97d923e3334ead52dd7a34fe747f56857e4976e7a6b781932610a678a5c0283"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/preserved-tree.json": {
+      "base": null,
+      "git_blob": "4668de9edbecff5d03674d9499edae08bd1c0107",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "805d9b0360e1bff28f6278861cc409c75b264c9db38304fb99184424f78feccb"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/review.json": {
+      "base": null,
+      "git_blob": "fc67a06831deac60d897637ab18a66bdab47360f",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "8527437c0f9cb780a111d623e7f3abc19821f4df4571c8fd4a545cdb0806eb1a"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/static-results.json": {
+      "base": null,
+      "git_blob": "d46071c8ff1bedb4473a890050b960bf2dd15848",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "3e647da094a82f8bb3b911f65121fa39ab1291a2cba4e0877ddf6532ad512656"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/static.stderr": {
+      "base": null,
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/static.stdout": {
+      "base": null,
+      "git_blob": "4a7450770b740925d9b0d5eb133de17c55124844",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "e912a612175ec50e6398cd1130615a27e55a2a544b9a5657a3a5af9b5dd5ecfe"
+    },
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/static_review.py": {
+      "base": null,
+      "git_blob": "24e7c2ad14f690b789e58a4888f7830db2a70ceb",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "e931e206ae9c3f7fa4ec447eae49250cf8c578c1579f78255f8309ce2b8e0d25"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-CALLER-20261004/frozen-caller.py.txt": {
+      "base": null,
+      "git_blob": "f42995fa5be9261edcabc2a9fd5000856f6ffe4e",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "8673f071517ee1d59526f89a38a7df8f29a7da2d63e7cc10789d2df0e7e94dba"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-CALLER-20261004/frozen-component.go.txt": {
+      "base": null,
+      "git_blob": "303813d799fb7be3ecb2dc7166e6995f5a2fae0e",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "42deed5c10a1bcc510ea144e36ecac6af377a8fe8a08cea57bf3190eecb73757"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-CALLER-20261004/frozen-probe.go.txt": {
+      "base": null,
+      "git_blob": "508ec35b264b2962e26a0d9b2b22203b60dbc3f0",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "ca4af3b2b16ef14e56670434f553918b2b5c045aae9669ab6ea977e71c869f8a"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-CALLER-20261004/frozen-tree.json": {
+      "base": null,
+      "git_blob": "4034aba7c2061936fb3ca944107c356b525552ca",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "da76bccc72e4de2ddd03ff728956a0ccabfe90d33b021b7750dc3afb0a45cfc4"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-CALLER-20261004/identities.json": {
+      "base": null,
+      "git_blob": "caa6bb095405b6c1a965236686035f4f2ff57939",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "6d81e1d790e55ca4da54d7c940917c2f19fcd9609d2fe3627f6879f742855970"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-CALLER-20261004/pure-results.json": {
+      "base": null,
+      "git_blob": "6c3108dbbcc4eff14906733ebee8ae882eae93ec",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "775377bb94c4f0331625a9b2614ec41b80cd73e2ef2208605e98d0f7380b923d"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-CALLER-20261004/reviewed-delta.json": {
+      "base": null,
+      "git_blob": "7fbb4f16be23bf90fc52c7d146f8f661d40ac028",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "fcefba5a14549723787dad9ea36c092337ae1b37dc576658bd70a097cb9794e3"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-CALLER-20261004/static-results.json": {
+      "base": null,
+      "git_blob": "e87b1b3feb9f8c594a5389f6e858ef8b01e93df6",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "c1f98350f27455b4665079a8652911f3dcf72795dfead361b1911e6c1c807955"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-CALLER-20261004/static_checks.py": {
+      "base": null,
+      "git_blob": "2ddc21570df6bda166cada2a5c701e44d5cc3ff7",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "89d8f23311f78b05bf2fe3d193b04617137675580efcf212e8bb13bdb82550d6"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-INDEPENDENT-20261004/author-pure-replay.json": {
+      "base": null,
+      "git_blob": "6c3108dbbcc4eff14906733ebee8ae882eae93ec",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "775377bb94c4f0331625a9b2614ec41b80cd73e2ef2208605e98d0f7380b923d"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-INDEPENDENT-20261004/author-static-replay.json": {
+      "base": null,
+      "git_blob": "e87b1b3feb9f8c594a5389f6e858ef8b01e93df6",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "c1f98350f27455b4665079a8652911f3dcf72795dfead361b1911e6c1c807955"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-INDEPENDENT-20261004/independent-results.json": {
+      "base": null,
+      "git_blob": "98ee1224380b3edf07dd26f2743f97e28108f924",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "a970fbdb6144cf00afb80bfcdf348930ffcde7e666bcef9a60f575d889637d54"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-INDEPENDENT-20261004/independent_checks.py": {
+      "base": null,
+      "git_blob": "a50db73a794e1d828e83cb361f91c56203f5f4c3",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "b39b768fedf7093bbd59172bc21557692ba61d68293039531185e25a278d6d24"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-INDEPENDENT-20261004/review.json": {
+      "base": null,
+      "git_blob": "bf1c33a6dca29caa05264d7ad30651421e33d6ab",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "98ddd8be244436eab5bc286c4fc6b28d4d072e0c75d37c3e98cef3854d2d2f9e"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-INDEPENDENT-20261004/static-results.json": {
+      "base": null,
+      "git_blob": "b8eceeb2cec228b04cedd2fe84f2137e5f0ca491",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "e32841ed56d2bff85c449bb75f02e113d169f4d8fe3e4e759f980c1ab89a9435"
+    },
+    "docs/company-mail/evidence/R5-SLICE4-BRIDGE-INDEPENDENT-20261004/static_review.py": {
+      "base": null,
+      "git_blob": "36b2600064fd328afff7074dccae7adbd90644c5",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "0b504e1a077d4170448c81686f0ff51ab2259dbd9b4b1e24afdd4695f599e221"
+    },
+    "internal/api/handlers/r5_external_runtime_probe_test.go": {
+      "base": {
+        "git_blob": "508ec35b264b2962e26a0d9b2b22203b60dbc3f0",
+        "mode": "100644"
+      },
+      "git_blob": "0f340d48458b4ff55803e466e59ceb2352e9629f",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "addb72c44b11167810bb888c74d20954086390fa2c9a5a44ccd9332c4988a4b7"
+    },
+    "internal/api/handlers/r5_protocol_component_observations_test.go": {
+      "base": {
+        "git_blob": "303813d799fb7be3ecb2dc7166e6995f5a2fae0e",
+        "mode": "100644"
+      },
+      "git_blob": "5cda68abada21a27a109020331c449097089960b",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "22c7eff281505fef03e4adfd8b6d7fe1724e157446153ede9640d3c0ff588dc7"
+    },
+    "scripts/check_r5_protocol.py": {
+      "base": {
+        "git_blob": "f42995fa5be9261edcabc2a9fd5000856f6ffe4e",
+        "mode": "100644"
+      },
+      "git_blob": "ad5c7f7d41b43f2d064e7543b8ef0fd53e4b31df",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "4c2a066323b9e6871f99c98ef1ea62e770f03bdb4cfaea4911414e36dd1933e8"
+    },
+    "scripts/contracts/r5-external-batch-v2.schema.json": {
+      "base": null,
+      "git_blob": "efdd6bf2d5e9316147622d73d2310aae7705388c",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "60f3bbf12dbfc28a2cc72e0d5ed38110425514621a11e10eddf1d92007ca9c0a"
+    },
+    "scripts/preparation/r5_external_batch.py": {
+      "base": {
+        "git_blob": "de13fdf0cf76e3aa1a60fd7b9718f8271c332ab2",
+        "mode": "100644"
+      },
+      "git_blob": "41625cd77275e0b9b869ac7d4dab367a42bb0f9b",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "83ff36965120115c6365e40df0eef8da2df20eb33129faba81def89261cd5a12"
+    },
+    "scripts/tests/r5_external_batch_v2_checks.py": {
+      "base": null,
+      "git_blob": "4b151f147144982c5d28479abdb7182f887a54fd",
+      "mode": "100644",
+      "reviewed_origin": "3637d25c80f85993509edd825089c7af25c0c4a9",
+      "sha256": "dca70ff40eeccd11bdcd8f28e4e4d83d7f7bfdf7dcbd9f95b3481fdd12cd2ede"
+    },
+    "scripts/tests/r5_slice4_bridge_caller_checks.py": {
+      "base": null,
+      "git_blob": "aaea8317e8fe1ee2f405c88c65dd8907482d0a48",
+      "mode": "100644",
+      "reviewed_origin": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+      "sha256": "02c27ec7f165056e8fb1134fb57c6ee3deae96f9aee166c17a9c103db706b724"
+    }
+  },
+  "design": "42f49538f7bceb6eb8e698d716c1418f85343413",
+  "exact_union": true,
+  "existing_implementation_changes": [
+    "internal/api/handlers/r5_external_runtime_probe_test.go",
+    "internal/api/handlers/r5_protocol_component_observations_test.go",
+    "scripts/check_r5_protocol.py",
+    "scripts/preparation/r5_external_batch.py"
+  ],
+  "full_manifest_sha256": "9f848de7b56907d8175e998f147f969ae112fca69b83b28efc0bed0ae2bd9079",
+  "inventory_worker_only_selector": true,
+  "new_implementation_controls_and_schema": [
+    "scripts/contracts/r5-external-batch-v2.schema.json",
+    "scripts/tests/r5_external_batch_v2_checks.py",
+    "scripts/tests/r5_slice4_bridge_caller_checks.py"
+  ],
+  "ownership_collisions": [],
+  "preserved_count": 2256,
+  "preserved_manifest_sha256": "224af99a1c2703740b1b0b2a511fe86f037088b7bcabd9f4769d262bcdfcf512",
+  "semantic_resolutions": [],
+  "source": "73777de3f51ff185d02ab2e1193421fa91cde9d4",
+  "source_tree": "f27e02ce4987488d783a22f7cc1620dfe3795cd4",
+  "v1_constructor_ast_equivalent": true,
+  "v1_schema_byte_identical": true
+}

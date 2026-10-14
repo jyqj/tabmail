@@ -1,0 +1,216 @@
+{
+  "batch": "R5-PARALLEL-20261008-929",
+  "issue": 81,
+  "round": 2,
+  "implemented": [
+    "04",
+    "05",
+    "09"
+  ],
+  "completed": 7,
+  "total": 10,
+  "remaining": 3,
+  "parent_completed": 10,
+  "parent_total": 171,
+  "parent_remaining": 161,
+  "tested_commit": "f327dcb7b5e400e0bdbb91fc99b667117d3cc511",
+  "tested_tree": "1cbf8e72ac49569dd7bd33d4b11548bd9d5c958e",
+  "verification": {
+    "go_packages": [
+      "hooks",
+      "workqueue",
+      "policy",
+      "resolver"
+    ],
+    "go_race": true,
+    "go_leaf": {
+      "pass": 224
+    },
+    "go_skip": 0,
+    "templates": {
+      "pass": 126,
+      "fail": 0,
+      "skip": 0
+    },
+    "typecheck": "pass",
+    "lint": "pass"
+  },
+  "review": {
+    "04": "frontend_work independently reviewed identity origin, stable retry IDs, payload/HMAC compatibility and docs; root reviewed changes",
+    "05": "root reviewed keyed form lifetime, session matching, stale result guards and preserved selection semantics",
+    "09": "root reviewed RFC5321 label grammar change, existing edge/length rules and provisioned mailbox consumer regressions"
+  },
+  "archive": {
+    "path": "raw-evidence.zip",
+    "bytes": 48236,
+    "sha256": "484c709df64e6b7429ce06f95b0ec7ab3b5577307a8b1b983fdc6ceda0e375af",
+    "files_location": "All files listed below are original bytes inside this archive."
+  },
+  "files": [
+    {
+      "path": "round2-go.jsonl",
+      "bytes": 213516,
+      "sha256": "68ba167a0ba00fce4613ed26e8bf9842ea8ee9967be97ba1d4e11238e5574939"
+    },
+    {
+      "path": "backend-04-webhook-identity-related-race.jsonl",
+      "bytes": 163904,
+      "sha256": "8c175b3618d5f4c1d1aa14ee85164f3b81a9178a08ce125a05dbfc5dee9f57bc"
+    },
+    {
+      "path": "backend-04-webhook-identity-baseline.jsonl",
+      "bytes": 6533,
+      "sha256": "aecc170e503ccdbe5a24dabd78b02c12fbb9742e24dba7f29e921217f2b33d05"
+    },
+    {
+      "path": "backend-04-webhook-identity-vet.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend-04-webhook-identity-command-results.json",
+      "bytes": 503,
+      "sha256": "5a9ee4c4178dbc05848abf4f8e6c2c3ef770a30d7328cd08f8adb07edf50e84b"
+    },
+    {
+      "path": "backend-04-webhook-identity-fixed.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend-04-webhook-identity-vet.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend-04-webhook-identity-baseline.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend-04-webhook-identity-related-race.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend-04-webhook-identity-fixed.jsonl",
+      "bytes": 5442,
+      "sha256": "5f6eaa5d8aaba6931d2ef4a6514593cf9b186aab6be8beab58d558f948f6e59a"
+    },
+    {
+      "path": "backend-04-webhook-identity-summary.json",
+      "bytes": 4150,
+      "sha256": "6da8976afbee8e89f96fe169f936f26af748c9daa83eb25f344c6aaa5a38070a"
+    },
+    {
+      "path": "frontend-05-lint.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "frontend-05-related.log",
+      "bytes": 623,
+      "sha256": "7e81c0a75c8eda1b124377f88e7c8fa359c7d3a3fc1601fb489632abf5fede29"
+    },
+    {
+      "path": "frontend-05-related.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "frontend-05-typecheck.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "frontend-05-green.log",
+      "bytes": 618,
+      "sha256": "cc4e2b4e90b8b20668550f699128b4ae9a65afb6ca12b8290da24ffd270122e1"
+    },
+    {
+      "path": "frontend-05-summary.json",
+      "bytes": 1384,
+      "sha256": "1af89c293e8ffa90f91b8a7294ff43fc13a725f7764b0f8a511f14bdb0ddb175"
+    },
+    {
+      "path": "frontend-05-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "frontend-05-red.exit",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "path": "frontend-05-green.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "frontend-05-red.log",
+      "bytes": 13289,
+      "sha256": "ec1840a1b0fba556da53d8a335cfdde8c7c66fbbb5ee92a2241c81df3595420b"
+    },
+    {
+      "path": "frontend-05-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "frontend-04-independent-source-review.json",
+      "bytes": 1370,
+      "sha256": "89eacf0380d02ccb706676a278acf4904374c2cc61784ac47942a61f101a84d8"
+    },
+    {
+      "path": "transport-09-candidate-summary.json",
+      "bytes": 1869,
+      "sha256": "e2b9ec64e500378b47225b224096d99ccebf2fbc4bc0a6be32da1f3a4a770dfa"
+    },
+    {
+      "path": "transport-09-vet.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "transport-09-vet.jsonl",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "transport-09-baseline-summary.json",
+      "bytes": 1493,
+      "sha256": "ec3174d017e27b2309fbc002c0142f326904f734511b3439dd51ed9204c32289"
+    },
+    {
+      "path": "transport-09-candidate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "transport-09-baseline.jsonl",
+      "bytes": 22981,
+      "sha256": "75c0bbcc715ebb001b7e8309ea159d690b6370a6582bccae5b868b0d7b935ecd"
+    },
+    {
+      "path": "transport-09-baseline.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "transport-09-candidate.jsonl",
+      "bytes": 49602,
+      "sha256": "88a721f27f2cbef103549d4aa07792aa10bc1d0661df962bcf665c31205648bb"
+    },
+    {
+      "path": "transport-03-independent-review.json",
+      "bytes": 3507,
+      "sha256": "3d38d05c01726796129fa566ecf65fcdd40f14647d09f10f350cb98167e3b1e5"
+    }
+  ],
+  "limitations": [
+    "Webhook IDs do not extend the original body-only HMAC or promise exactly once",
+    "Persistent webhook tests use FakeStore; no PostgreSQL multi-instance claim",
+    "Parent/full CI/private fixture/audit/M-G0 gates remain open"
+  ]
+}

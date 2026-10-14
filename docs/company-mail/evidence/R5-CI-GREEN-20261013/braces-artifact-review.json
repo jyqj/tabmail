@@ -1,0 +1,46 @@
+{
+  "source_commit": "305a2e4bfe324bb53c336c1b03387ee1251c926f",
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "35bdd8a44339719441900fb50fbefc5e2dca1ca662cbaed7a687de842c8b70f2"
+    },
+    {
+      "path": "README.md",
+      "sha256": "f06ecffb78d40201813ecf840cd06b280a5a56ee85a7f9a6224df3bc1453c53d"
+    },
+    {
+      "path": "index.js",
+      "sha256": "332ea07c7b006361aad12aa994ca75dc1db8e8382b884909e2f38f10b85c88a4"
+    },
+    {
+      "path": "lib/compile.js",
+      "sha256": "20ea98b7f04c8969ca478db458e3e08e0f3b47cc9f810a75336370bfedbf9436"
+    },
+    {
+      "path": "lib/constants.js",
+      "sha256": "f9fb688959232eee3e6ad7906a5b0e3234815db49ee857ef86983d65b917dc7c"
+    },
+    {
+      "path": "lib/expand.js",
+      "sha256": "3fb6a53995e05263b594485975c2ac9312e0c3b6b8bf37bd3b4ec6e5deb43a9e"
+    },
+    {
+      "path": "lib/parse.js",
+      "sha256": "43d983a546dce1ed446dbe8535438a717de9e85040ab701edae3a5a50acdc1d4"
+    },
+    {
+      "path": "lib/stringify.js",
+      "sha256": "dd47ae5c9ac1f1a0e65de7160e25500a9dd724279a65fe96011c7f1b7b7ed36c"
+    },
+    {
+      "path": "lib/utils.js",
+      "sha256": "34b39e1b7d634c5460c30b1fe271dd337cfc383709b3659c31e5d84b12e92e61"
+    },
+    {
+      "path": "package.json",
+      "sha256": "6a966416d58086ffe4cb6d5f6af14c380953bba178d2865c536a9ecb4dab4e74"
+    }
+  ],
+  "artifact_matches_provenance_subject": true
+}

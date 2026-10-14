@@ -11,11 +11,19 @@ import (
 	"github.com/google/uuid"
 	"tabmail/internal/authz"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 )
 
 func (s *FakeStore) CreateZone(_ context.Context, z *models.DomainZone) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	for id, existing := range s.zones {
+		// SeedZone intentionally replaces the same ID. Different rows follow
+		// PostgreSQL's global domain-name uniqueness, across tenants too.
+		if id != z.ID && existing.Domain == z.Domain {
+			return store.ErrDomainAlreadyExists
+		}
+	}
 	cp := *z
 	if cp.Visibility == "" {
 		cp.Visibility = models.VisibilityPrivate

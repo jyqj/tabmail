@@ -1,0 +1,132 @@
+{
+  "run_id": 37826809127,
+  "job_id": 113481651794,
+  "head": "f8ad0533246fdf0d9257a31ade956b581a0c4426",
+  "conclusion": "success",
+  "artifact_id": 11571409030,
+  "artifact_sha256": "a54ad91e8ddbc8226660b027009bacf2e96f9a1a3a4d803983d53c4a03f386f2",
+  "raw_summary": {
+    "baseline": "fdea2178759ce9842844926374ea98517bc4188b",
+    "test_sha256": "90fd26b6ce36a867a0ba56da1b32486bf76eb1489ebfa1af52e56afac7def5f9",
+    "results": {
+      "baseline": {
+        "before": {
+          "commit": "193c342142e6ebf5259e6a73106faefefd9fd272",
+          "tree": "e10495b876372974ee1f2f7677ac59e32c18d142",
+          "test_sha256": "90fd26b6ce36a867a0ba56da1b32486bf76eb1489ebfa1af52e56afac7def5f9"
+        },
+        "after": {
+          "commit": "193c342142e6ebf5259e6a73106faefefd9fd272",
+          "tree": "e10495b876372974ee1f2f7677ac59e32c18d142",
+          "test_sha256": "90fd26b6ce36a867a0ba56da1b32486bf76eb1489ebfa1af52e56afac7def5f9"
+        },
+        "command": [
+          "go",
+          "test",
+          "-mod=readonly",
+          "-json",
+          "-race",
+          "-p",
+          "1",
+          "-count=1",
+          "-timeout=120s",
+          "-run",
+          "^TestAdvanceAPIKeyIssuancePostgres$",
+          "./internal/api/handlers"
+        ],
+        "exit_code": 1,
+        "timed_out": false,
+        "stdout_sha256": "e5e39b6906edf7d5ec1ff11a90036ced54429667b4c996d4f14917e8c618d504",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "results": {
+          "started_ids": [
+            "TestAdvanceAPIKeyIssuancePostgres",
+            "TestAdvanceAPIKeyIssuancePostgres/admin_demoted",
+            "TestAdvanceAPIKeyIssuancePostgres/cancellation_after_auth",
+            "TestAdvanceAPIKeyIssuancePostgres/cross_home_super_demoted",
+            "TestAdvanceAPIKeyIssuancePostgres/employee_freeze",
+            "TestAdvanceAPIKeyIssuancePostgres/employee_freeze_unfreeze",
+            "TestAdvanceAPIKeyIssuancePostgres/employee_password",
+            "TestAdvanceAPIKeyIssuancePostgres/employee_promoted",
+            "TestAdvanceAPIKeyIssuancePostgres/holds_current_user",
+            "TestAdvanceAPIKeyIssuancePostgres/holds_permission_profile",
+            "TestAdvanceAPIKeyIssuancePostgres/key_insert_rollback",
+            "TestAdvanceAPIKeyIssuancePostgres/normal_admin",
+            "TestAdvanceAPIKeyIssuancePostgres/normal_cross_home_super",
+            "TestAdvanceAPIKeyIssuancePostgres/normal_employee",
+            "TestAdvanceAPIKeyIssuancePostgres/permission_revoked",
+            "TestAdvanceAPIKeyIssuancePostgres/required_audit_rollback",
+            "TestAdvanceAPIKeyIssuancePostgres/send_permission_revoked",
+            "TestAdvanceAPIKeyIssuancePostgres/usage_insert_rollback",
+            "TestAdvanceAPIKeyIssuancePostgres/zone_permission_revoked"
+          ],
+          "leaf_count": 18,
+          "passed": 6,
+          "failed": 12,
+          "skipped": 0,
+          "exit_code": 1
+        }
+      },
+      "candidate": {
+        "before": {
+          "commit": "7d5e91efadcaa5add628499c25e3ad26b769d0b3",
+          "tree": "437de0716fc9247e188f0409654f4f178905dc33",
+          "test_sha256": "90fd26b6ce36a867a0ba56da1b32486bf76eb1489ebfa1af52e56afac7def5f9"
+        },
+        "after": {
+          "commit": "7d5e91efadcaa5add628499c25e3ad26b769d0b3",
+          "tree": "437de0716fc9247e188f0409654f4f178905dc33",
+          "test_sha256": "90fd26b6ce36a867a0ba56da1b32486bf76eb1489ebfa1af52e56afac7def5f9"
+        },
+        "command": [
+          "go",
+          "test",
+          "-mod=readonly",
+          "-json",
+          "-race",
+          "-p",
+          "1",
+          "-count=1",
+          "-timeout=120s",
+          "-run",
+          "^TestAdvanceAPIKeyIssuancePostgres$",
+          "./internal/api/handlers"
+        ],
+        "exit_code": 0,
+        "timed_out": false,
+        "stdout_sha256": "aec71402f3ce81cf0b199fd89c347569c6b41bbbb11db3da5827512585f93d93",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "results": {
+          "started_ids": [
+            "TestAdvanceAPIKeyIssuancePostgres",
+            "TestAdvanceAPIKeyIssuancePostgres/admin_demoted",
+            "TestAdvanceAPIKeyIssuancePostgres/cancellation_after_auth",
+            "TestAdvanceAPIKeyIssuancePostgres/cross_home_super_demoted",
+            "TestAdvanceAPIKeyIssuancePostgres/employee_freeze",
+            "TestAdvanceAPIKeyIssuancePostgres/employee_freeze_unfreeze",
+            "TestAdvanceAPIKeyIssuancePostgres/employee_password",
+            "TestAdvanceAPIKeyIssuancePostgres/employee_promoted",
+            "TestAdvanceAPIKeyIssuancePostgres/holds_current_user",
+            "TestAdvanceAPIKeyIssuancePostgres/holds_permission_profile",
+            "TestAdvanceAPIKeyIssuancePostgres/key_insert_rollback",
+            "TestAdvanceAPIKeyIssuancePostgres/normal_admin",
+            "TestAdvanceAPIKeyIssuancePostgres/normal_cross_home_super",
+            "TestAdvanceAPIKeyIssuancePostgres/normal_employee",
+            "TestAdvanceAPIKeyIssuancePostgres/permission_revoked",
+            "TestAdvanceAPIKeyIssuancePostgres/required_audit_rollback",
+            "TestAdvanceAPIKeyIssuancePostgres/send_permission_revoked",
+            "TestAdvanceAPIKeyIssuancePostgres/usage_insert_rollback",
+            "TestAdvanceAPIKeyIssuancePostgres/zone_permission_revoked"
+          ],
+          "leaf_count": 18,
+          "passed": 18,
+          "failed": 0,
+          "skipped": 0,
+          "exit_code": 0
+        }
+      }
+    },
+    "errors": {}
+  },
+  "scope": "Exactly18 declared actual PostgreSQL cases; no whole-PG/M/G0/private-fixture qualification implied."
+}

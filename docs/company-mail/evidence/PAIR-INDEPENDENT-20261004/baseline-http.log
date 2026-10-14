@@ -1,0 +1,10 @@
+=== RUN   TestPairIndependentOldPeerSelf
+=== RUN   TestPairIndependentOldPeerSelf/peer
+    pair_independent_review_test.go:159: real HTTP 200
+=== RUN   TestPairIndependentOldPeerSelf/self
+    pair_independent_review_test.go:159: real HTTP 200
+--- PASS: TestPairIndependentOldPeerSelf (0.39s)
+    --- PASS: TestPairIndependentOldPeerSelf/peer (0.20s)
+    --- PASS: TestPairIndependentOldPeerSelf/self (0.19s)
+PASS
+ok  	tabmail/internal/store/postgres	0.393s

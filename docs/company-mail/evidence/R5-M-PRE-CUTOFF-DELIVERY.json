@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "source_sha": "5d1b723b7dae6d4fbc94bb0405bd35af91ceb396",
+  "original_archive": "/tmp/tm-r5shortfix.3sp1awTN/M-PRE-CUTOFF-evidence.tar.gz",
+  "original_archive_sha256_from_author": "342f53d2b6f12e78d0a43702b8ddf7b74299f407c48ec62bb0f0b81a10bf7e73",
+  "original_archive_hash_recomputed": false,
+  "archive": "R5-M-PRE-CUTOFF-LOGS.tar.gz",
+  "archive_sha256": "342f53d2b6f12e78d0a43702b8ddf7b74299f407c48ec62bb0f0b81a10bf7e73",
+  "archive_bytes": 210029,
+  "payload_file_count": 50,
+  "excluded_members": [],
+  "payload_bytes_changed": false,
+  "test_reexecuted_by_document_owner": false,
+  "per_file_hashes_recomputed": false,
+  "task_complete": false,
+  "product_green": false,
+  "old_fullGo2aa9_preserved": true,
+  "actual_registry21_exit": 1,
+  "registry21_boundary": "14originalsafe dependency refs now present; KeyError archive reviewshape remains a fixture schema problem, not a successful registry suite or product RED"
+}

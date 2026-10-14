@@ -1,0 +1,979 @@
+{
+  "base": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+  "tested_source_sha": "58a50ee7ff8cde0b434f8492426d2263cedf280d",
+  "delivery_sha": "the later documentation-only commit, returned in final handoff; not a tested-source pin",
+  "central_progress": "10/171 unchanged",
+  "runtime_qualified": false,
+  "tests": {
+    "catalog": {
+      "mode": "catalog",
+      "source_sha": "58a50ee7ff8cde0b434f8492426d2263cedf280d",
+      "tests_run": 51,
+      "ids": [
+        "test_r5_transactions.TransactionInventoryTests.test_cache_has_specific_message_fence_not_ancestor_lock",
+        "test_r5_transactions.TransactionInventoryTests.test_callback_signature_drift_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_constant_backed_observation_is_write_despite_ast_heuristic",
+        "test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence",
+        "test_r5_transactions.TransactionInventoryTests.test_current_trigger_and_package_constant_changes_remain_fenced",
+        "test_r5_transactions.TransactionInventoryTests.test_duplicate_entry_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_external_caller_change_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_fk_or_trigger_drift_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_gc_round_and_receipt_projection_are_not_transaction_acceptance",
+        "test_r5_transactions.TransactionInventoryTests.test_literal_and_concatenated_dynamic_sql_distinguished",
+        "test_r5_transactions.TransactionInventoryTests.test_missing_callback_effect_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_missing_file_type_review_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_missing_function_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_missing_specific_assertion_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_missing_specific_sql_effect_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_new_file_without_functions_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_new_migration_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_new_pure_function_is_also_rejected_and_no_inventory_allowlist",
+        "test_r5_transactions.TransactionInventoryTests.test_new_write_function_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_new_write_in_old_function_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_obsolete_function_and_wrong_receiver_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_package_sql_constant_drift_rejected",
+        "test_r5_transactions.TransactionInventoryTests.test_pr23_each_added_and_changed_body_has_independent_source_review",
+        "test_r5_transactions.TransactionInventoryTests.test_read_preview_and_sse_have_real_lock_and_callback_boundaries",
+        "test_r5_transactions.TransactionInventoryTests.test_structure_cannot_claim_runtime_or_parent_acceptance",
+        "test_r5_transactions.TransactionInventoryTests.test_update_detected_but_row_lock_not_mutation",
+        "test_r5_compatibility.CompatibilityGateTests.test_cannot_waive_dependency_runtime_or_legacy_client_unknowns",
+        "test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion",
+        "test_r5_compatibility.CompatibilityGateTests.test_dns_exclusions_match_real_HTTP_methods_not_create",
+        "test_r5_compatibility.CompatibilityGateTests.test_duplicate_and_nonfinite_json_rejected",
+        "test_r5_compatibility.CompatibilityGateTests.test_future_rejection_upgrade_and_task_strategies_mandatory",
+        "test_r5_compatibility.CompatibilityGateTests.test_malformed_and_untrusted_producer_sources_rejected",
+        "test_r5_compatibility.CompatibilityGateTests.test_missing_duplicate_and_source_drift_rejected",
+        "test_r5_compatibility.CompatibilityGateTests.test_route_schema_client_and_test_fact_mutations_rejected",
+        "test_r5_compatibility.CompatibilityGateTests.test_routes_and_successor_tasks_match_original_stage_semantics",
+        "test_r5_compatibility.CurrentHistoricalBoundaryTests.test_current_source_rejects_historical_wire",
+        "test_r5_compatibility.CurrentHistoricalBoundaryTests.test_fabricated_client_producer_not_accepted_as_source",
+        "test_r5_compatibility.CurrentHistoricalBoundaryTests.test_future_and_wrong_handler_producer_routes_rejected",
+        "test_r5_compatibility.CurrentHistoricalBoundaryTests.test_new_routes_preserve_release_semantics",
+        "test_r5_compatibility.CurrentHistoricalBoundaryTests.test_old_runtime_cannot_be_re_signed_with_current_spec",
+        "test_r5_compatibility.CurrentHistoricalBoundaryTests.test_re_signing_history_and_current_artifact_claims_rejected",
+        "test_r5_compatibility.SafeWireJoinTests.test_exact_safe_join_remains_metadata_not_product_approval",
+        "test_r5_compatibility.SafeWireJoinTests.test_not_observed_cannot_be_laundered_as_runtime_pass",
+        "test_r5_compatibility.SafeWireJoinTests.test_unknown_private_fields_bad_status_and_aspects_rejected",
+        "test_r5_compatibility.SafeWireJoinTests.test_wrong_tree_report_spec_case_and_closure_hashes_rejected",
+        "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_old_pins_reject_and_current_revision_passes_same_actual_facts",
+        "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_only_reviewed_body_and_two_closure_hashes_change",
+        "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_closure_bytes_rejected",
+        "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_route_source_rejected_by_original_collector",
+        "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_source_and_ast_changes_rejected",
+        "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_route_and_ast_fact_changes_rejected"
+      ],
+      "failures": [],
+      "errors": [],
+      "skips": [],
+      "expected_failures": [],
+      "unexpected_successes": [],
+      "elapsed_seconds": 47.891888230000006,
+      "allowed_subprocesses": [
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "run",
+            "./cmd/r5txinventory",
+            "/workspace/tabmail-integration"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "test",
+            "-mod=readonly",
+            "-count=1",
+            "./internal/architecture",
+            "-run",
+            "^TestR5RouteInventory$"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "node",
+            "scripts/collect_api_calls.cjs"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "test",
+            "-mod=readonly",
+            "-count=1",
+            "./internal/architecture",
+            "-run",
+            "^TestR5RouteInventory$"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "node",
+            "scripts/collect_api_calls.cjs"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "run",
+            "./cmd/r5txinventory",
+            "/workspace/tabmail-integration"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "test",
+            "-mod=readonly",
+            "-count=1",
+            "./internal/architecture",
+            "-run",
+            "^TestR5RouteInventory$"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "node",
+            "scripts/collect_api_calls.cjs"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "test",
+            "-mod=readonly",
+            "-count=1",
+            "./internal/architecture",
+            "-run",
+            "^TestR5RouteInventory$"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "test",
+            "-mod=readonly",
+            "-count=1",
+            "./internal/architecture",
+            "-run",
+            "^TestR5RouteInventory$"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "run",
+            "./cmd/r5txinventory",
+            "/tmp/r5-catalog-negative-04kxbc4b"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "run",
+            "./cmd/r5txinventory",
+            "/tmp/r5-catalog-negative-04kxbc4b"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "run",
+            "./cmd/r5txinventory",
+            "/tmp/r5-catalog-negative-04kxbc4b"
+          ],
+          "allowed": true
+        }
+      ],
+      "blocked_subprocesses": [],
+      "passed": true
+    },
+    "pure": {
+      "mode": "pure",
+      "source_sha": "58a50ee7ff8cde0b434f8492426d2263cedf280d",
+      "tests_run": 81,
+      "ids": [
+        "r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_absolute_capture_keeps_all_twelve_commands_and_pin",
+        "r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_bare_names_reject_before_source_or_command",
+        "r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_cli_help_explains_absolute_path_requirement",
+        "r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_cli_rejects_bare_and_relative_before_source_or_command",
+        "r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_production_sha256_pin_is_unchanged",
+        "r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_relative_paths_reject_before_source_or_command",
+        "r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_validate_rejects_nonabsolute_after_valid_external_pin",
+        "r5_selected_source_binding_v3_checks.AuthorityTests.test_context_and_unapproved_producer_reject_before_command",
+        "r5_selected_source_binding_v3_checks.AuthorityTests.test_v3_reuses_unchanged_v2_authority_predicates",
+        "r5_selected_source_binding_v3_checks.AuthorityTests.test_v3_source_archive_package_coverage_and_replacement_rejections",
+        "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_all_package_roles_projected_including_hydration_and_repetitions",
+        "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_producer_failure_interface_and_timeout_preserved",
+        "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_retained_mutation_in_each_repeated_role_rejected",
+        "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_source_before_after_drift_rejected",
+        "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_unknown_or_diagnostic_type_in_every_package_role_rejected",
+        "r5_selected_source_binding_v3_checks.EnvelopeTests.test_external_pin_required_and_resigning_rejected",
+        "r5_selected_source_binding_v3_checks.EnvelopeTests.test_observation_change_can_preserve_binding_and_stays_separately_pinned",
+        "r5_selected_source_binding_v3_checks.EnvelopeTests.test_validation_fresh_binding_mismatch_and_external_pin_precedes_execution",
+        "r5_selected_source_binding_v3_checks.EnvelopeTests.test_version_rejection_before_capture_no_fallback",
+        "r5_selected_source_binding_v3_checks.ProjectionTests.test_diagnostic_values_and_presence_equal_binding_different_observation",
+        "r5_selected_source_binding_v3_checks.ProjectionTests.test_duplicates_nonfinite_and_malformed_streams",
+        "r5_selected_source_binding_v3_checks.ProjectionTests.test_error_serialization_requires_complete_records",
+        "r5_selected_source_binding_v3_checks.ProjectionTests.test_every_retained_field_and_nested_leaf_is_bound",
+        "r5_selected_source_binding_v3_checks.ProjectionTests.test_invalid_types_for_every_registry_field",
+        "r5_selected_source_binding_v3_checks.ProjectionTests.test_order_arrays_multiplicity_and_presence_bound",
+        "r5_selected_source_binding_v3_checks.ProjectionTests.test_recursive_module_field_presence_bound",
+        "r5_selected_source_binding_v3_checks.ProjectionTests.test_registry_source_shape_and_time",
+        "r5_selected_source_binding_v3_checks.ProjectionTests.test_unknown_fields_in_all_nested_domains_fail_closed",
+        "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_altered_envelope_rejects_before_capture",
+        "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_capture_failure_object_is_unchanged",
+        "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_constructor_failure_keeps_binding_mismatch",
+        "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_context_cleanup_failure_keeps_binding_mismatch",
+        "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_disk_full_keeps_binding_mismatch",
+        "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_matching_binding_keeps_normal_success",
+        "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_retention_limit_keeps_binding_mismatch",
+        "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_successful_retention_records_observed_then_rejects",
+        "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_coverage_omission_fork_mismatch_unknown_root",
+        "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_cross_identity_rejected_before_commands",
+        "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_metadata_never_authorizes_private_archive_or_unknown_body",
+        "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_selected_archive_package_rejected",
+        "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_unsupported_context",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_archive_extra_controls_and_files",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_archive_family_extra_capsule_and_ancestor_symlink",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_budget_and_unavailable_metadata_fail_closed",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_descriptor_second_stat_replacement",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_every_historical_file_byte_delete_rename",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_exact_baseline_hashes_and_six_modules",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_import_embed_generate_archive_rejected",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_marker_bytes_value_case_directives",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_marker_deletion_and_module_in_all_roots",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_production_all_variants_change_static_domain",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_read_leaf_replacement_never_opens_fifo_body",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_registry_duplicate_traversal_forgery",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_symlink_ancestors_fifo_and_metadata_only",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_third_replace",
+        "test_r5_archive_boundary.ArchiveBoundaryTests.test_unknown_root_and_ignored_go_not_hidden",
+        "test_r5_env_diagnostics.DiagnosticTests.test_capture_sink_is_closed_after_failure",
+        "test_r5_env_diagnostics.DiagnosticTests.test_command_failure_and_timeout_retained_by_capture",
+        "test_r5_env_diagnostics.DiagnosticTests.test_disabled_does_not_create_files",
+        "test_r5_env_diagnostics.DiagnosticTests.test_escape_duplicate_and_symlink_file_refused",
+        "test_r5_env_diagnostics.DiagnosticTests.test_failed_compatibility_preserves_exception_and_raw",
+        "test_r5_env_diagnostics.DiagnosticTests.test_file_total_and_count_bounds_refuse_new_output",
+        "test_r5_env_diagnostics.DiagnosticTests.test_private_modes_hashes_and_fd_cleanup",
+        "test_r5_env_diagnostics.DiagnosticTests.test_rejected_observation_is_diagnostic_and_still_rejected",
+        "test_r5_env_diagnostics.DiagnosticTests.test_symlink_ancestor_and_git_roots_refused",
+        "test_r5_env_diagnostics.DiagnosticTests.test_unowned_and_public_root_refused",
+        "test_r5_env_diagnostics.DiagnosticTests.test_valid_and_extra_or_changed_hash_receipts",
+        "test_r5_env_diagnostics.DiagnosticTests.test_write_failure_removes_partial_and_closes_descriptor",
+        "test_r5_env_diagnostics.EnvironmentTests.test_compatibility_uses_selected_tool_and_original_command",
+        "test_r5_env_diagnostics.EnvironmentTests.test_explicit_tool_caches_and_no_inherited_flags",
+        "test_r5_env_diagnostics.EnvironmentTests.test_legacy_selector_and_default_cache_preserved",
+        "test_r5_env_diagnostics.EnvironmentTests.test_runner_dispatches_owned_environment_to_both_groups",
+        "test_r5_env_diagnostics.EnvironmentTests.test_transaction_uses_selected_tool_and_offline_policy",
+        "test_r5_retention_failures.RetentionFailureTests.test_compatibility_limit_records_secondary_and_preserves_original_fields",
+        "test_r5_retention_failures.RetentionFailureTests.test_compatibility_timeout_records_write_fault_without_replacement",
+        "test_r5_retention_failures.RetentionFailureTests.test_fdopen_failure_closes_only_still_owned_raw_descriptor",
+        "test_r5_retention_failures.RetentionFailureTests.test_metadata_failure_constructed_before_secondary_write_fault",
+        "test_r5_retention_failures.RetentionFailureTests.test_secondary_records_accumulate_without_replacing_existing_note",
+        "test_r5_retention_failures.RetentionFailureTests.test_selected_timeout_preserves_object_and_records_secondary_limit",
+        "test_r5_retention_failures.RetentionFailureTests.test_successful_compatibility_remains_fail_closed_on_retention_failure",
+        "test_r5_retention_failures.RetentionFailureTests.test_successful_selected_command_remains_fail_closed"
+      ],
+      "failures": [],
+      "errors": [],
+      "skips": [],
+      "expected_failures": [],
+      "unexpected_successes": [],
+      "elapsed_seconds": 1.1516906049999989,
+      "allowed_subprocesses": [],
+      "blocked_subprocesses": [],
+      "passed": true
+    },
+    "cli": {
+      "mode": "cli",
+      "source_sha": "58a50ee7ff8cde0b434f8492426d2263cedf280d",
+      "commands": [
+        {
+          "script": "check_r5_transactions.py",
+          "exit_code": 0
+        },
+        {
+          "script": "check_r5_compatibility.py",
+          "exit_code": 0
+        }
+      ],
+      "elapsed_seconds": 2.3672349219999944,
+      "allowed_subprocesses": [
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "run",
+            "./cmd/r5txinventory",
+            "/workspace/tabmail-integration"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "test",
+            "-mod=readonly",
+            "-count=1",
+            "./internal/architecture",
+            "-run",
+            "^TestR5RouteInventory$"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "node",
+            "scripts/collect_api_calls.cjs"
+          ],
+          "allowed": true
+        }
+      ],
+      "blocked_subprocesses": [],
+      "passed": true
+    },
+    "review": {
+      "mode": "review",
+      "source_sha": "58a50ee7ff8cde0b434f8492426d2263cedf280d",
+      "original_script_sha256": "3ae56dafdbaea93ce7de5e177756e73bcfef7c718c05c43f5d553c28f4c5f141",
+      "elapsed_seconds": 5.661472522999986,
+      "allowed_subprocesses": [
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "diff",
+            "--name-only",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3",
+            "4540fb91ba742443dcf0a872b80261e58af7b3ab"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3:docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3:docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "23228449254bc0312171640a637e359187169192^:internal/store/postgres/employee_disposition.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "23228449254bc0312171640a637e359187169192:internal/store/postgres/employee_disposition.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3:docs/company-mail/OFFBOARDING-SUCCESSOR-AUTHZ-20261004.md"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            "23228449254bc0312171640a637e359187169192",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "dc350c3e6c66553cf3a16b9771abb091cd6de1a8^:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "dc350c3e6c66553cf3a16b9771abb091cd6de1a8:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3:docs/company-mail/R5-EXTERNAL-DEPENDENCY-RUNTIME-V1.md"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            "dc350c3e6c66553cf3a16b9771abb091cd6de1a8",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "7beb93faf99fd50323edb4ddd00ed19a3e6ab405^:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "7beb93faf99fd50323edb4ddd00ed19a3e6ab405:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3:docs/company-mail/R5-EXTERNAL-DEPENDENCY-RUNTIME-V2.md"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            "7beb93faf99fd50323edb4ddd00ed19a3e6ab405",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "20b51d48c4a849615817ee461699d31fe3e0cb4c^:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "20b51d48c4a849615817ee461699d31fe3e0cb4c:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3:docs/company-mail/R5-RC-RECEIPT-CONTRACT-20261003.md"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            "20b51d48c4a849615817ee461699d31fe3e0cb4c",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "5b2715332d56c113e69a51bab2728f601ec0a82a^:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "5b2715332d56c113e69a51bab2728f601ec0a82a:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3:docs/company-mail/R5-FIXTURE-OWNER-JOIN-20261004.md"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            "5b2715332d56c113e69a51bab2728f601ec0a82a",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "c8df5721bc3411d23d1e3b5ba4be917893d65fc2^:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "c8df5721bc3411d23d1e3b5ba4be917893d65fc2:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3:docs/company-mail/R5-PE-SEED-FIX-20261004.md"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            "c8df5721bc3411d23d1e3b5ba4be917893d65fc2",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "850f067cf41e082d4134b1b58cccf17a27ce51bd^:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "850f067cf41e082d4134b1b58cccf17a27ce51bd:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3:docs/company-mail/evidence/R5-TRANSPORT-DIAGNOSTIC-20261004/report.json"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            "850f067cf41e082d4134b1b58cccf17a27ce51bd",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "6138113c1896cb810db567605154b5023f0340de^:internal/store/postgres/r5_protocol_shared_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "6138113c1896cb810db567605154b5023f0340de:internal/store/postgres/r5_protocol_shared_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3:docs/company-mail/evidence/R5-SHARED-RECEIPT-LEGACY-V2-20261003/README.md"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            "6138113c1896cb810db567605154b5023f0340de",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "4540fb91ba742443dcf0a872b80261e58af7b3ab:internal/store/postgres/employee_disposition.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "log",
+            "--format=%H",
+            "23228449254bc0312171640a637e359187169192^..3f34c31ed51a721b318a76512805e4a14dc292c3",
+            "--",
+            "internal/store/postgres/employee_disposition.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "23228449254bc0312171640a637e359187169192:internal/store/postgres/employee_disposition.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "4540fb91ba742443dcf0a872b80261e58af7b3ab:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "log",
+            "--format=%H",
+            "006ff6939edbe5f9fa5732cd1ab1a2efb8ece4cf..3f34c31ed51a721b318a76512805e4a14dc292c3",
+            "--",
+            "internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "850f067cf41e082d4134b1b58cccf17a27ce51bd:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "c8df5721bc3411d23d1e3b5ba4be917893d65fc2:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "5b2715332d56c113e69a51bab2728f601ec0a82a:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "20b51d48c4a849615817ee461699d31fe3e0cb4c:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "7beb93faf99fd50323edb4ddd00ed19a3e6ab405:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "dc350c3e6c66553cf3a16b9771abb091cd6de1a8:internal/api/handlers/r5_protocol_component_observations_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "4540fb91ba742443dcf0a872b80261e58af7b3ab:internal/store/postgres/r5_protocol_shared_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "log",
+            "--format=%H",
+            "006ff6939edbe5f9fa5732cd1ab1a2efb8ece4cf..3f34c31ed51a721b318a76512805e4a14dc292c3",
+            "--",
+            "internal/store/postgres/r5_protocol_shared_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "6138113c1896cb810db567605154b5023f0340de:internal/store/postgres/r5_protocol_shared_test.go"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3:docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "git",
+            "show",
+            "3f34c31ed51a721b318a76512805e4a14dc292c3:docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "run",
+            "./cmd/r5txinventory",
+            "/workspace/tabmail-integration"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "test",
+            "-mod=readonly",
+            "-count=1",
+            "./internal/architecture",
+            "-run",
+            "^TestR5RouteInventory$"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "node",
+            "scripts/collect_api_calls.cjs"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "run",
+            "./cmd/r5txinventory",
+            "/tmp/R5-CATALOG-INDEPENDENT-CLOUD-20261004-source-sbmgb28z"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "run",
+            "./cmd/r5txinventory",
+            "/tmp/R5-CATALOG-INDEPENDENT-CLOUD-20261004-source-sbmgb28z"
+          ],
+          "allowed": true
+        },
+        {
+          "event": "subprocess.Popen",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "run",
+            "./cmd/r5txinventory",
+            "/tmp/R5-CATALOG-INDEPENDENT-CLOUD-20261004-source-sbmgb28z"
+          ],
+          "allowed": true
+        }
+      ],
+      "blocked_subprocesses": [],
+      "passed": true
+    },
+    "schema": {
+      "mode": "schema",
+      "source_sha": "58a50ee7ff8cde0b434f8492426d2263cedf280d",
+      "sources": [
+        {
+          "installed_path": "/workspace/tabmail-cloud/tools/go/src/cmd/go/internal/load/pkg.go",
+          "official_source_url": "https://raw.githubusercontent.com/golang/go/go1.25.7/src/cmd/go/internal/load/pkg.go",
+          "sha256": "ae3866bb04014e27f186572df158068f954b30b72166d30eb34f9f29edb48d31",
+          "bytes": 125167
+        },
+        {
+          "installed_path": "/workspace/tabmail-cloud/tools/go/src/cmd/go/internal/modinfo/info.go",
+          "official_source_url": "https://raw.githubusercontent.com/golang/go/go1.25.7/src/cmd/go/internal/modinfo/info.go",
+          "sha256": "00f9f50ed29686734903d96c70a3da381c0aa4da607377b8aca143a5718b4aec",
+          "bytes": 3162
+        },
+        {
+          "installed_path": "/workspace/tabmail-cloud/tools/go/src/cmd/go/internal/modfetch/codehost/codehost.go",
+          "official_source_url": "https://raw.githubusercontent.com/golang/go/go1.25.7/src/cmd/go/internal/modfetch/codehost/codehost.go",
+          "sha256": "6372669c5429b484391ecabecfc89f278d4470702e875c0d35e9dd1aebc63132",
+          "bytes": 13464
+        }
+      ],
+      "original_script_sha256": "95faeab12b5678cfe5f27f00cc75a5decd6a2f414649aa4935654927f7cef68f",
+      "elapsed_seconds": 0.007826813000008315,
+      "allowed_subprocesses": [],
+      "blocked_subprocesses": [],
+      "passed": true
+    }
+  },
+  "private_logs": {
+    "catalog": {
+      "private_path": "/tmp/R5-CATALOG-V3-INTEGRATION-20261004/catalog.log",
+      "bytes": 8310,
+      "sha256": "fd3af233fd2f71cbcd87c318a6d8c5ed89242b0fdc4ceaa43f82e401249138b3"
+    },
+    "pure": {
+      "private_path": "/tmp/R5-CATALOG-V3-INTEGRATION-20261004/pure.log",
+      "bytes": 13173,
+      "sha256": "ba25313ffc8c1027381eec30dddd4f36d23f66c71b79dc4d97978e05be0ba5d0"
+    },
+    "cli": {
+      "private_path": "/tmp/R5-CATALOG-V3-INTEGRATION-20261004/cli.log",
+      "bytes": 1426,
+      "sha256": "fb2407cdb68f6562dd57d01a0d9960863b88f6db8c9de1f94ccadad9b6d9d9f8"
+    },
+    "review": {
+      "private_path": "/tmp/R5-CATALOG-V3-INTEGRATION-20261004/review.log",
+      "bytes": 87,
+      "sha256": "1637300a250bb5e2b2bf1d7a4ce3a5ad82746385bb2994cfadce9961f2c12eb2"
+    },
+    "schema": {
+      "private_path": "/tmp/R5-CATALOG-V3-INTEGRATION-20261004/schema.log",
+      "bytes": 898,
+      "sha256": "d8be4ab20655024e5b77b40ec7fa15b29fd0ce01212e472b30e74312be043e29"
+    }
+  },
+  "historical_82_independent_checks": "preserved original acceptance only; private independent test sources unavailable here and not freshly re-executed",
+  "fresh_catalog_review": "fresh-catalog-review.json",
+  "guard_recipe": "verify.py"
+}

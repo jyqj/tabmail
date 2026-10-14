@@ -1,0 +1,140 @@
+{"Time":"2026-10-03T17:11:14.630341733Z","Action":"start","Package":"tabmail/internal/api"}
+{"Time":"2026-10-03T17:11:14.664817915Z","Action":"run","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterAPIKeyRealWiring"}
+{"Time":"2026-10-03T17:11:14.664837546Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterAPIKeyRealWiring","Output":"=== RUN   TestR5APIBackgroundShutdownRouterAPIKeyRealWiring\n"}
+{"Time":"2026-10-03T17:11:14.664928405Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterAPIKeyRealWiring","Output":"--- PASS: TestR5APIBackgroundShutdownRouterAPIKeyRealWiring (0.00s)\n"}
+{"Time":"2026-10-03T17:11:14.664932505Z","Action":"pass","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterAPIKeyRealWiring","Elapsed":0}
+{"Time":"2026-10-03T17:11:14.664984598Z","Action":"run","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterLoginRealWiring"}
+{"Time":"2026-10-03T17:11:14.664987038Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterLoginRealWiring","Output":"=== RUN   TestR5APIBackgroundShutdownRouterLoginRealWiring\n"}
+{"Time":"2026-10-03T17:11:14.698195553Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterLoginRealWiring","Output":"--- PASS: TestR5APIBackgroundShutdownRouterLoginRealWiring (0.03s)\n"}
+{"Time":"2026-10-03T17:11:14.698212993Z","Action":"pass","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterLoginRealWiring","Elapsed":0.03}
+{"Time":"2026-10-03T17:11:14.698257865Z","Action":"run","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterAdmissionCoversHealthAndAuth"}
+{"Time":"2026-10-03T17:11:14.698262363Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterAdmissionCoversHealthAndAuth","Output":"=== RUN   TestR5APIBackgroundShutdownRouterAdmissionCoversHealthAndAuth\n"}
+{"Time":"2026-10-03T17:11:14.698559104Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterAdmissionCoversHealthAndAuth","Output":"--- PASS: TestR5APIBackgroundShutdownRouterAdmissionCoversHealthAndAuth (0.00s)\n"}
+{"Time":"2026-10-03T17:11:14.698563972Z","Action":"pass","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterAdmissionCoversHealthAndAuth","Elapsed":0}
+{"Time":"2026-10-03T17:11:14.698594629Z","Action":"run","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterInstancesDoNotShareThrottle"}
+{"Time":"2026-10-03T17:11:14.698599437Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterInstancesDoNotShareThrottle","Output":"=== RUN   TestR5APIBackgroundShutdownRouterInstancesDoNotShareThrottle\n"}
+{"Time":"2026-10-03T17:11:14.699363152Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterInstancesDoNotShareThrottle","Output":"--- PASS: TestR5APIBackgroundShutdownRouterInstancesDoNotShareThrottle (0.00s)\n"}
+{"Time":"2026-10-03T17:11:14.699368952Z","Action":"pass","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterInstancesDoNotShareThrottle","Elapsed":0}
+{"Time":"2026-10-03T17:11:14.69941209Z","Action":"run","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterOwnsActualSSEBody"}
+{"Time":"2026-10-03T17:11:14.699414731Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterOwnsActualSSEBody","Output":"=== RUN   TestR5APIBackgroundShutdownRouterOwnsActualSSEBody\n"}
+{"Time":"2026-10-03T17:11:14.700382678Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterOwnsActualSSEBody","Output":"--- PASS: TestR5APIBackgroundShutdownRouterOwnsActualSSEBody (0.00s)\n"}
+{"Time":"2026-10-03T17:11:14.700387767Z","Action":"pass","Package":"tabmail/internal/api","Test":"TestR5APIBackgroundShutdownRouterOwnsActualSSEBody","Elapsed":0}
+{"Time":"2026-10-03T17:11:14.700429608Z","Action":"run","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPAdmittedLateChild"}
+{"Time":"2026-10-03T17:11:14.700437845Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPAdmittedLateChild","Output":"=== RUN   TestR5CloudBackgroundHTTPAdmittedLateChild\n"}
+{"Time":"2026-10-03T17:11:14.700485805Z","Action":"run","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPAdmittedLateChild/key"}
+{"Time":"2026-10-03T17:11:14.70048821Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPAdmittedLateChild/key","Output":"=== RUN   TestR5CloudBackgroundHTTPAdmittedLateChild/key\n"}
+{"Time":"2026-10-03T17:11:14.701295162Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPAdmittedLateChild/key","Output":"--- PASS: TestR5CloudBackgroundHTTPAdmittedLateChild/key (0.00s)\n"}
+{"Time":"2026-10-03T17:11:14.701383039Z","Action":"pass","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPAdmittedLateChild/key","Elapsed":0}
+{"Time":"2026-10-03T17:11:14.701509179Z","Action":"run","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPAdmittedLateChild/login"}
+{"Time":"2026-10-03T17:11:14.701511422Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPAdmittedLateChild/login","Output":"=== RUN   TestR5CloudBackgroundHTTPAdmittedLateChild/login\n"}
+{"Time":"2026-10-03T17:11:14.74514797Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPAdmittedLateChild/login","Output":"--- PASS: TestR5CloudBackgroundHTTPAdmittedLateChild/login (0.04s)\n"}
+{"Time":"2026-10-03T17:11:14.7451656Z","Action":"pass","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPAdmittedLateChild/login","Elapsed":0.04}
+{"Time":"2026-10-03T17:11:14.745241149Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPAdmittedLateChild","Output":"--- PASS: TestR5CloudBackgroundHTTPAdmittedLateChild (0.04s)\n"}
+{"Time":"2026-10-03T17:11:14.745245603Z","Action":"pass","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPAdmittedLateChild","Elapsed":0.04}
+{"Time":"2026-10-03T17:11:14.745304196Z","Action":"run","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPSSERevalidationLease"}
+{"Time":"2026-10-03T17:11:14.745308327Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPSSERevalidationLease","Output":"=== RUN   TestR5CloudBackgroundHTTPSSERevalidationLease\n"}
+{"Time":"2026-10-03T17:11:14.746871254Z","Action":"output","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPSSERevalidationLease","Output":"--- PASS: TestR5CloudBackgroundHTTPSSERevalidationLease (0.00s)\n"}
+{"Time":"2026-10-03T17:11:14.746972749Z","Action":"pass","Package":"tabmail/internal/api","Test":"TestR5CloudBackgroundHTTPSSERevalidationLease","Elapsed":0}
+{"Time":"2026-10-03T17:11:14.748405387Z","Action":"output","Package":"tabmail/internal/api","Output":"PASS\n"}
+{"Time":"2026-10-03T17:11:15.753195754Z","Action":"output","Package":"tabmail/internal/api","Output":"ok  \ttabmail/internal/api\t1.122s\n"}
+{"Time":"2026-10-03T17:11:15.753261958Z","Action":"pass","Package":"tabmail/internal/api","Elapsed":1.123}
+{"Time":"2026-10-03T17:11:16.233327693Z","Action":"start","Package":"tabmail/internal/api/lifecycle"}
+{"Time":"2026-10-03T17:11:16.247475037Z","Action":"run","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownRegistrationAndRealReturn"}
+{"Time":"2026-10-03T17:11:16.247493123Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownRegistrationAndRealReturn","Output":"=== RUN   TestR5APIBackgroundShutdownRegistrationAndRealReturn\n"}
+{"Time":"2026-10-03T17:11:16.248287398Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownRegistrationAndRealReturn","Output":"--- PASS: TestR5APIBackgroundShutdownRegistrationAndRealReturn (0.00s)\n"}
+{"Time":"2026-10-03T17:11:16.248298018Z","Action":"pass","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownRegistrationAndRealReturn","Elapsed":0}
+{"Time":"2026-10-03T17:11:16.248306345Z","Action":"run","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownPendingLeaseCanStillSpawn"}
+{"Time":"2026-10-03T17:11:16.248309958Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownPendingLeaseCanStillSpawn","Output":"=== RUN   TestR5APIBackgroundShutdownPendingLeaseCanStillSpawn\n"}
+{"Time":"2026-10-03T17:11:16.248357074Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownPendingLeaseCanStillSpawn","Output":"--- PASS: TestR5APIBackgroundShutdownPendingLeaseCanStillSpawn (0.00s)\n"}
+{"Time":"2026-10-03T17:11:16.24839045Z","Action":"pass","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownPendingLeaseCanStillSpawn","Elapsed":0}
+{"Time":"2026-10-03T17:11:16.24842843Z","Action":"run","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownInvalidLeaseRejected"}
+{"Time":"2026-10-03T17:11:16.248432986Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownInvalidLeaseRejected","Output":"=== RUN   TestR5APIBackgroundShutdownInvalidLeaseRejected\n"}
+{"Time":"2026-10-03T17:11:16.248501087Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownInvalidLeaseRejected","Output":"--- PASS: TestR5APIBackgroundShutdownInvalidLeaseRejected (0.00s)\n"}
+{"Time":"2026-10-03T17:11:16.248534904Z","Action":"pass","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownInvalidLeaseRejected","Elapsed":0}
+{"Time":"2026-10-03T17:11:16.248563579Z","Action":"run","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownWrapRejectsBeforeEffects"}
+{"Time":"2026-10-03T17:11:16.248571534Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownWrapRejectsBeforeEffects","Output":"=== RUN   TestR5APIBackgroundShutdownWrapRejectsBeforeEffects\n"}
+{"Time":"2026-10-03T17:11:16.248697272Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownWrapRejectsBeforeEffects","Output":"--- PASS: TestR5APIBackgroundShutdownWrapRejectsBeforeEffects (0.00s)\n"}
+{"Time":"2026-10-03T17:11:16.248724303Z","Action":"pass","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownWrapRejectsBeforeEffects","Elapsed":0}
+{"Time":"2026-10-03T17:11:16.248781999Z","Action":"run","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownOriginalDeadlineNotReplaced"}
+{"Time":"2026-10-03T17:11:16.248785461Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownOriginalDeadlineNotReplaced","Output":"=== RUN   TestR5APIBackgroundShutdownOriginalDeadlineNotReplaced\n"}
+{"Time":"2026-10-03T17:11:16.248888952Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownOriginalDeadlineNotReplaced","Output":"--- PASS: TestR5APIBackgroundShutdownOriginalDeadlineNotReplaced (0.00s)\n"}
+{"Time":"2026-10-03T17:11:16.248914949Z","Action":"pass","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownOriginalDeadlineNotReplaced","Elapsed":0}
+{"Time":"2026-10-03T17:11:16.248943736Z","Action":"run","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownRestoreStreamLease"}
+{"Time":"2026-10-03T17:11:16.24894635Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownRestoreStreamLease","Output":"=== RUN   TestR5APIBackgroundShutdownRestoreStreamLease\n"}
+{"Time":"2026-10-03T17:11:16.249036795Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownRestoreStreamLease","Output":"--- PASS: TestR5APIBackgroundShutdownRestoreStreamLease (0.00s)\n"}
+{"Time":"2026-10-03T17:11:16.249058979Z","Action":"pass","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownRestoreStreamLease","Elapsed":0}
+{"Time":"2026-10-03T17:11:16.249086253Z","Action":"run","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownConcurrentStopIsIdempotent"}
+{"Time":"2026-10-03T17:11:16.249088204Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownConcurrentStopIsIdempotent","Output":"=== RUN   TestR5APIBackgroundShutdownConcurrentStopIsIdempotent\n"}
+{"Time":"2026-10-03T17:11:16.249495694Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownConcurrentStopIsIdempotent","Output":"--- PASS: TestR5APIBackgroundShutdownConcurrentStopIsIdempotent (0.00s)\n"}
+{"Time":"2026-10-03T17:11:16.24952449Z","Action":"pass","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownConcurrentStopIsIdempotent","Elapsed":0}
+{"Time":"2026-10-03T17:11:16.249550406Z","Action":"run","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownRequestPanicKeepsDetachedOwner"}
+{"Time":"2026-10-03T17:11:16.249552978Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownRequestPanicKeepsDetachedOwner","Output":"=== RUN   TestR5APIBackgroundShutdownRequestPanicKeepsDetachedOwner\n"}
+{"Time":"2026-10-03T17:11:16.249688253Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownRequestPanicKeepsDetachedOwner","Output":"--- PASS: TestR5APIBackgroundShutdownRequestPanicKeepsDetachedOwner (0.00s)\n"}
+{"Time":"2026-10-03T17:11:16.249707188Z","Action":"pass","Package":"tabmail/internal/api/lifecycle","Test":"TestR5APIBackgroundShutdownRequestPanicKeepsDetachedOwner","Elapsed":0}
+{"Time":"2026-10-03T17:11:16.249740222Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Output":"PASS\n"}
+{"Time":"2026-10-03T17:11:17.255351626Z","Action":"output","Package":"tabmail/internal/api/lifecycle","Output":"ok  \ttabmail/internal/api/lifecycle\t1.022s\n"}
+{"Time":"2026-10-03T17:11:17.25541227Z","Action":"pass","Package":"tabmail/internal/api/lifecycle","Elapsed":1.022}
+{"Time":"2026-10-03T17:11:19.157177379Z","Action":"start","Package":"tabmail/internal/api/middleware"}
+{"Time":"2026-10-03T17:11:19.184068705Z","Action":"run","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyOutlivesResponse"}
+{"Time":"2026-10-03T17:11:19.184090971Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyOutlivesResponse","Output":"=== RUN   TestR5APIBackgroundShutdownAPIKeyOutlivesResponse\n"}
+{"Time":"2026-10-03T17:11:19.184903779Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyOutlivesResponse","Output":"--- PASS: TestR5APIBackgroundShutdownAPIKeyOutlivesResponse (0.00s)\n"}
+{"Time":"2026-10-03T17:11:19.18494347Z","Action":"pass","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyOutlivesResponse","Elapsed":0}
+{"Time":"2026-10-03T17:11:19.185032431Z","Action":"run","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyPendingResolve"}
+{"Time":"2026-10-03T17:11:19.185036586Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyPendingResolve","Output":"=== RUN   TestR5APIBackgroundShutdownAPIKeyPendingResolve\n"}
+{"Time":"2026-10-03T17:11:19.185250615Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyPendingResolve","Output":"--- PASS: TestR5APIBackgroundShutdownAPIKeyPendingResolve (0.00s)\n"}
+{"Time":"2026-10-03T17:11:19.185284236Z","Action":"pass","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyPendingResolve","Elapsed":0}
+{"Time":"2026-10-03T17:11:19.185312718Z","Action":"run","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyStillBeforeOwnerRejection"}
+{"Time":"2026-10-03T17:11:19.185317842Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyStillBeforeOwnerRejection","Output":"=== RUN   TestR5APIBackgroundShutdownAPIKeyStillBeforeOwnerRejection\n"}
+{"Time":"2026-10-03T17:11:19.185633108Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyStillBeforeOwnerRejection","Output":"--- PASS: TestR5APIBackgroundShutdownAPIKeyStillBeforeOwnerRejection (0.00s)\n"}
+{"Time":"2026-10-03T17:11:19.185664228Z","Action":"pass","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyStillBeforeOwnerRejection","Elapsed":0}
+{"Time":"2026-10-03T17:11:19.185721814Z","Action":"run","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyThrottleIsInstanceLocal"}
+{"Time":"2026-10-03T17:11:19.185724392Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyThrottleIsInstanceLocal","Output":"=== RUN   TestR5APIBackgroundShutdownAPIKeyThrottleIsInstanceLocal\n"}
+{"Time":"2026-10-03T17:11:19.186182592Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyThrottleIsInstanceLocal","Output":"--- PASS: TestR5APIBackgroundShutdownAPIKeyThrottleIsInstanceLocal (0.00s)\n"}
+{"Time":"2026-10-03T17:11:19.186222633Z","Action":"pass","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyThrottleIsInstanceLocal","Elapsed":0}
+{"Time":"2026-10-03T17:11:19.186270881Z","Action":"run","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyOriginalFiveSecondContext"}
+{"Time":"2026-10-03T17:11:19.186273399Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyOriginalFiveSecondContext","Output":"=== RUN   TestR5APIBackgroundShutdownAPIKeyOriginalFiveSecondContext\n"}
+{"Time":"2026-10-03T17:11:19.186522338Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyOriginalFiveSecondContext","Output":"--- PASS: TestR5APIBackgroundShutdownAPIKeyOriginalFiveSecondContext (0.00s)\n"}
+{"Time":"2026-10-03T17:11:19.186526429Z","Action":"pass","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyOriginalFiveSecondContext","Elapsed":0}
+{"Time":"2026-10-03T17:11:19.186621009Z","Action":"run","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyInvalidLeaseNotSuccess"}
+{"Time":"2026-10-03T17:11:19.186623363Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyInvalidLeaseNotSuccess","Output":"=== RUN   TestR5APIBackgroundShutdownAPIKeyInvalidLeaseNotSuccess\n"}
+{"Time":"2026-10-03T17:11:19.186723382Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyInvalidLeaseNotSuccess","Output":"--- PASS: TestR5APIBackgroundShutdownAPIKeyInvalidLeaseNotSuccess (0.00s)\n"}
+{"Time":"2026-10-03T17:11:19.186751677Z","Action":"pass","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownAPIKeyInvalidLeaseNotSuccess","Elapsed":0}
+{"Time":"2026-10-03T17:11:19.187036865Z","Action":"run","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownStandaloneAuthHasJoinPort"}
+{"Time":"2026-10-03T17:11:19.187040798Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownStandaloneAuthHasJoinPort","Output":"=== RUN   TestR5APIBackgroundShutdownStandaloneAuthHasJoinPort\n"}
+{"Time":"2026-10-03T17:11:19.18704445Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownStandaloneAuthHasJoinPort","Output":"--- PASS: TestR5APIBackgroundShutdownStandaloneAuthHasJoinPort (0.00s)\n"}
+{"Time":"2026-10-03T17:11:19.187047556Z","Action":"pass","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownStandaloneAuthHasJoinPort","Elapsed":0}
+{"Time":"2026-10-03T17:11:19.187075324Z","Action":"run","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownStreamRevalidationSharesOwnerAndThrottle"}
+{"Time":"2026-10-03T17:11:19.187079095Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownStreamRevalidationSharesOwnerAndThrottle","Output":"=== RUN   TestR5APIBackgroundShutdownStreamRevalidationSharesOwnerAndThrottle\n"}
+{"Time":"2026-10-03T17:11:19.18730148Z","Action":"output","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownStreamRevalidationSharesOwnerAndThrottle","Output":"--- PASS: TestR5APIBackgroundShutdownStreamRevalidationSharesOwnerAndThrottle (0.00s)\n"}
+{"Time":"2026-10-03T17:11:19.187356934Z","Action":"pass","Package":"tabmail/internal/api/middleware","Test":"TestR5APIBackgroundShutdownStreamRevalidationSharesOwnerAndThrottle","Elapsed":0}
+{"Time":"2026-10-03T17:11:19.187410006Z","Action":"output","Package":"tabmail/internal/api/middleware","Output":"PASS\n"}
+{"Time":"2026-10-03T17:11:20.190180975Z","Action":"output","Package":"tabmail/internal/api/middleware","Output":"ok  \ttabmail/internal/api/middleware\t1.033s\n"}
+{"Time":"2026-10-03T17:11:20.190228458Z","Action":"pass","Package":"tabmail/internal/api/middleware","Elapsed":1.033}
+{"Time":"2026-10-03T17:11:25.907048807Z","Action":"start","Package":"tabmail/internal/api/handlers"}
+{"Time":"2026-10-03T17:11:25.948405029Z","Action":"run","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownLoginOriginalAsyncPositionAndBackground"}
+{"Time":"2026-10-03T17:11:25.948425389Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownLoginOriginalAsyncPositionAndBackground","Output":"=== RUN   TestR5APIBackgroundShutdownLoginOriginalAsyncPositionAndBackground\n"}
+{"Time":"2026-10-03T17:11:26.001126602Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownLoginOriginalAsyncPositionAndBackground","Output":"--- PASS: TestR5APIBackgroundShutdownLoginOriginalAsyncPositionAndBackground (0.05s)\n"}
+{"Time":"2026-10-03T17:11:26.001148978Z","Action":"pass","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownLoginOriginalAsyncPositionAndBackground","Elapsed":0.05}
+{"Time":"2026-10-03T17:11:26.001250824Z","Action":"run","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownPendingLoginNotDropped"}
+{"Time":"2026-10-03T17:11:26.00125412Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownPendingLoginNotDropped","Output":"=== RUN   TestR5APIBackgroundShutdownPendingLoginNotDropped\n"}
+{"Time":"2026-10-03T17:11:26.001340552Z","Action":"run","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownPendingLoginNotDropped/lookup"}
+{"Time":"2026-10-03T17:11:26.001343267Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownPendingLoginNotDropped/lookup","Output":"=== RUN   TestR5APIBackgroundShutdownPendingLoginNotDropped/lookup\n"}
+{"Time":"2026-10-03T17:11:26.035889189Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownPendingLoginNotDropped/lookup","Output":"--- PASS: TestR5APIBackgroundShutdownPendingLoginNotDropped/lookup (0.03s)\n"}
+{"Time":"2026-10-03T17:11:26.035947292Z","Action":"pass","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownPendingLoginNotDropped/lookup","Elapsed":0.03}
+{"Time":"2026-10-03T17:11:26.036054277Z","Action":"run","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownPendingLoginNotDropped/token"}
+{"Time":"2026-10-03T17:11:26.036057338Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownPendingLoginNotDropped/token","Output":"=== RUN   TestR5APIBackgroundShutdownPendingLoginNotDropped/token\n"}
+{"Time":"2026-10-03T17:11:26.073290611Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownPendingLoginNotDropped/token","Output":"--- PASS: TestR5APIBackgroundShutdownPendingLoginNotDropped/token (0.04s)\n"}
+{"Time":"2026-10-03T17:11:26.073314303Z","Action":"pass","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownPendingLoginNotDropped/token","Elapsed":0.04}
+{"Time":"2026-10-03T17:11:26.073368048Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownPendingLoginNotDropped","Output":"--- PASS: TestR5APIBackgroundShutdownPendingLoginNotDropped (0.07s)\n"}
+{"Time":"2026-10-03T17:11:26.07344554Z","Action":"pass","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownPendingLoginNotDropped","Elapsed":0.07}
+{"Time":"2026-10-03T17:11:26.07383716Z","Action":"run","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownNewLoginRejectedBeforeTokenEffects"}
+{"Time":"2026-10-03T17:11:26.073841991Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownNewLoginRejectedBeforeTokenEffects","Output":"=== RUN   TestR5APIBackgroundShutdownNewLoginRejectedBeforeTokenEffects\n"}
+{"Time":"2026-10-03T17:11:26.097684335Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownNewLoginRejectedBeforeTokenEffects","Output":"--- PASS: TestR5APIBackgroundShutdownNewLoginRejectedBeforeTokenEffects (0.02s)\n"}
+{"Time":"2026-10-03T17:11:26.097692527Z","Action":"pass","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownNewLoginRejectedBeforeTokenEffects","Elapsed":0.02}
+{"Time":"2026-10-03T17:11:26.097761294Z","Action":"run","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownLoginReleasedLeaseIsNotSuccess"}
+{"Time":"2026-10-03T17:11:26.097770478Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownLoginReleasedLeaseIsNotSuccess","Output":"=== RUN   TestR5APIBackgroundShutdownLoginReleasedLeaseIsNotSuccess\n"}
+{"Time":"2026-10-03T17:11:26.11893548Z","Action":"output","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownLoginReleasedLeaseIsNotSuccess","Output":"--- PASS: TestR5APIBackgroundShutdownLoginReleasedLeaseIsNotSuccess (0.02s)\n"}
+{"Time":"2026-10-03T17:11:26.119013045Z","Action":"pass","Package":"tabmail/internal/api/handlers","Test":"TestR5APIBackgroundShutdownLoginReleasedLeaseIsNotSuccess","Elapsed":0.02}
+{"Time":"2026-10-03T17:11:26.119131023Z","Action":"output","Package":"tabmail/internal/api/handlers","Output":"PASS\n"}
+{"Time":"2026-10-03T17:11:27.122698372Z","Action":"output","Package":"tabmail/internal/api/handlers","Output":"ok  \ttabmail/internal/api/handlers\t1.216s\n"}
+{"Time":"2026-10-03T17:11:27.122731269Z","Action":"pass","Package":"tabmail/internal/api/handlers","Elapsed":1.216}

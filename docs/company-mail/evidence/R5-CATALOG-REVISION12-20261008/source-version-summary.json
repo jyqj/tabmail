@@ -1,0 +1,126 @@
+{
+  "status": "failed",
+  "dispatch_no_missing": true,
+  "dispatch_no_overlap": true,
+  "no_missing": false,
+  "no_overlap": true,
+  "preparation_output": "/workspace/scratch/4f09dfb9aa92/backend-catalog-prep/final-public/full-source-b87df7a/r5-source-preparation-thwlytqd",
+  "discovered": 812,
+  "missing_test_ids": [
+    "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_actual_default_and_race_production_fork_coverage",
+    "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_capture_marker_registry_archive_source_drift",
+    "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_dirty_ignored_go_actual_selected_and_rejected",
+    "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_hydration_failure_retains_execution_and_raw_diagnostics",
+    "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_live_capture_control_and_archive_mutations",
+    "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_real_receipt_roundtrip",
+    "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_real_unimported_package_and_undefined_build"
+  ],
+  "groups": [
+    {
+      "group": "current",
+      "source_sha": "b87df7a77656457549d6f2d678c56d321ae0d869",
+      "exit_code": 1,
+      "requested": 808,
+      "loaded": 808,
+      "actual_methods": 801,
+      "unittest_tests_run": 801,
+      "missing_test_ids": [
+        "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_actual_default_and_race_production_fork_coverage",
+        "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_capture_marker_registry_archive_source_drift",
+        "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_dirty_ignored_go_actual_selected_and_rejected",
+        "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_hydration_failure_retains_execution_and_raw_diagnostics",
+        "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_live_capture_control_and_archive_mutations",
+        "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_real_receipt_roundtrip",
+        "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_real_unimported_package_and_undefined_build"
+      ],
+      "failures": {
+        "occurrences": 4,
+        "method_count": 4,
+        "method_ids": [
+          "test_r5_benchmark.BenchmarkProcessTests.test_real_timeout_terminal_leader_keeps_group_identity_until_kill",
+          "test_r5_cold_web.ColdWebTests.test_interruption_persists_current_group_cleanup_in_terminal_receipt",
+          "test_r5_cold_web.ColdWebTests.test_owned_child_group_cleanup_even_when_leader_exits_zero",
+          "test_r5_cold_web.ColdWebTests.test_wrong_node_major_records_rejection"
+        ],
+        "unassociated_ids": []
+      },
+      "errors": {
+        "occurrences": 7,
+        "method_count": 5,
+        "method_ids": [
+          "test_r5_cold_web.ColdWebTests.test_failed_build_preserves_red_raw_and_exit",
+          "test_r5_cold_web.ColdWebTests.test_fake_build_command_receipts_are_exact_and_not_shipping_browser_G0",
+          "test_r5_cold_web.ColdWebTests.test_zero_exit_without_standalone_artifacts_is_not_pass",
+          "test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_nested_module_links_fifo_socket_public_entries",
+          "test_r5_source_excluded_metadata.ExcludedMetadataTests.test_multilevel_modules_links_and_special_files_rejected_by_cli"
+        ],
+        "unassociated_ids": [
+          "setUpClass (test_r5_selected_source_binding_v2.ActualRootBindingV2Tests)"
+        ]
+      },
+      "skips": {
+        "occurrences": 0,
+        "method_count": 0,
+        "method_ids": [],
+        "unassociated_ids": []
+      },
+      "expected_failures": {
+        "occurrences": 0,
+        "method_count": 0,
+        "method_ids": [],
+        "unassociated_ids": []
+      },
+      "unexpected_successes": {
+        "occurrences": 0,
+        "method_count": 0,
+        "method_ids": [],
+        "unassociated_ids": []
+      },
+      "passed_methods": 792,
+      "requested_equals_actual_ordered": false
+    },
+    {
+      "group": "frozen-v1",
+      "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+      "exit_code": 0,
+      "requested": 4,
+      "loaded": 4,
+      "actual_methods": 4,
+      "unittest_tests_run": 4,
+      "missing_test_ids": [],
+      "failures": {
+        "occurrences": 0,
+        "method_count": 0,
+        "method_ids": [],
+        "unassociated_ids": []
+      },
+      "errors": {
+        "occurrences": 0,
+        "method_count": 0,
+        "method_ids": [],
+        "unassociated_ids": []
+      },
+      "skips": {
+        "occurrences": 0,
+        "method_count": 0,
+        "method_ids": [],
+        "unassociated_ids": []
+      },
+      "expected_failures": {
+        "occurrences": 0,
+        "method_count": 0,
+        "method_ids": [],
+        "unassociated_ids": []
+      },
+      "unexpected_successes": {
+        "occurrences": 0,
+        "method_count": 0,
+        "method_ids": [],
+        "unassociated_ids": []
+      },
+      "passed_methods": 4,
+      "requested_equals_actual_ordered": true
+    }
+  ],
+  "boundary": "Counts derive from original requested/actual method IDs and outcome IDs. Subtest outcome occurrences are retained separately; class initialization errors are not silently converted to method passes. Nested test harness diagnostic FAIL/skip text is not an outer outcome."
+}

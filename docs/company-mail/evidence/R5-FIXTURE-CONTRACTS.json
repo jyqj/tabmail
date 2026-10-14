@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "task": "R5-P0-090",
+  "task_complete": false,
+  "product_green": false,
+  "dependency": {
+    "R5-P0-040": "accepted",
+    "R5-P0-070": "not_accepted_new_slot46_fence_unproven"
+  },
+  "scope": "AG fresh unified 14 Go fixture/port sources verified; two documentation metadata files updated after runtime. Facilities delivered; P0-090 blocked by unaccepted P0-070 dependency.",
+  "implemented": [
+    {
+      "entry": "testpg.NewR5Fixture",
+      "source": "internal/testpg/r5_fixture.go",
+      "truth": "real PgStore company commands and isolated testpg owned database",
+      "test": "TestR5FixtureTenantRolesAndMailboxIdentity",
+      "execution": "AG_unified_actual_tagged_or_default_port_passed"
+    },
+    {
+      "entry": "testpg.R5WaitBlockedBy/R5DatabaseNow",
+      "source": "internal/testpg/r5_barrier.go",
+      "truth": "actual clock_timestamp and exact pg_blocking_pids wait edge; deadline required",
+      "test": "TestR5FixtureExactBlockingBarrierAndRealClock",
+      "execution": "AG_unified_actual_tagged_or_default_port_passed"
+    },
+    {
+      "entry": "testutil.R5ObjectFault",
+      "source": "internal/testutil/r5_object_fault.go",
+      "truth": "actual ObjectStore delegation with explicit single-shot faults/short stream/cancellation",
+      "tests": [
+        "TestR5ObjectFaultRealPortAndPrivacy",
+        "TestR5ObjectFaultCancellationAndInvalidConfiguration"
+      ],
+      "execution": "AG_unified_actual_tagged_or_default_port_passed"
+    },
+    {
+      "entry": "testutil.StartR5SMTP",
+      "source": "internal/testutil/r5_smtp_script.go",
+      "truth": "real loopback listener and production outbound.DeliverRelay",
+      "tests": [
+        "TestR5SMTPRealRelayPhasesAndCleanup",
+        "TestR5SMTPRequiresBoundedOwnership"
+      ],
+      "variants": [
+        "accepted",
+        "rcpt_temporary",
+        "rcpt_permanent",
+        "data_rejected",
+        "final_reply_lost",
+        "accepted_quit_lost"
+      ],
+      "execution": "AG_unified_actual_tagged_or_default_port_passed"
+    },
+    {
+      "entry": "testpg.NewR5HTTPFixture",
+      "source": "internal/testpg/r5_http_fixture.go",
+      "tests": [
+        "TestR5FixtureHTTPJWTAndTenantBoundary",
+        "TestR5FixtureHTTPKeyScopeRevocationAndExpiry",
+        "TestR5FixtureHTTPQuotaAndRequiredAuditRollback"
+      ],
+      "truth": "actual router/signature/middleware/Redis/PG schema15 legal nonempty Key scopes; five-effect rollback, retained draft and same command replay"
+    },
+    {
+      "entry": "sealed draft and immutable raw/index fixtures",
+      "source": "internal/testpg/r5_lifecycle_fixture_test.go",
+      "tests": [
+        "TestR5FixtureLifecycleSealedDraftAndReceipt",
+        "TestR5FixtureIndexSourceLeaseAndObjectBoundary"
+      ],
+      "truth": "formal offboarding HTTP and PG custody/receipt; actual parser/hash/version/index lease"
+    },
+    {
+      "entry": "actual worker and mixed recipient ledger",
+      "source": "internal/testpg/r5_delivery_fixture_test.go",
+      "tests": [
+        "TestR5FixtureWorkerRealSMTPAndRecipientLedger",
+        "TestR5FixtureMixedLedgerNeverResendsAcceptedRecipient"
+      ],
+      "truth": "real SMTP six faults plus accepted/pending checkpoint continuation; no fake adapter outcome"
+    },
+    {
+      "entry": "real multipart object failure and integrity",
+      "source": "internal/testpg/r5_http_object_fault_fixture_test.go",
+      "tests": [
+        "TestR5FixtureHTTPObjectPutAndFinishFailurePreserveReservation",
+        "TestR5FixtureHTTPObjectShortReadIntegrityAndStableMetadata"
+      ],
+      "truth": "uploading reservation retained on Put/finish failure; short stream 500 without download header/content; normal retry200"
+    },
+    {
+      "entry": "expected failing child cleanup isolation",
+      "source": "internal/testpg/r5_failure_cleanup_fixture_test.go",
+      "test": "TestR5FixtureFailureCleanup",
+      "truth": "observer runs after helper cleanup while child still alive, then parent verifies exactDB removed/loopback closed/sentinel preserved; deliberate child exit1 is not product red"
+    }
+  ],
+  "pending_required_contracts": [
+    "Formal acceptance of R5-P0-070 (including currently unproven slot46 fence)",
+    "Operator final task acceptance; runtime facilities pass does not waive dependency"
+  ],
+  "not_claimed": [
+    "P0-090 completion",
+    "P0-070 dependency closure",
+    "future P0-100 S/M/L performance baseline",
+    "production clock/provider/router changes",
+    "fake HTTP or fake expected adapter outputs"
+  ],
+  "privacy": "DSN remains child environment; no payload/body/token/raw object key is archived",
+  "verification": {
+    "source_tree": "9516c2a5a152d66a1bf057bf1e64934588419fae",
+    "source_file_count": 774,
+    "code_source_hashes": {
+      "internal/testpg/r5_barrier.go": "e925943208e2c2bd610a8c5e11ffb70fab9fc8159080b7fc0a1ec4d4aabfcd82",
+      "internal/testpg/r5_barrier_test.go": "2e083fd13a32623be41aff6189f46235e3a86291216b2cfdb92de161fe79b2c6",
+      "internal/testpg/r5_delivery_fixture_test.go": "741b24aad5ff79dc1acbdbf0cbb92139bc5d6b92a2f748e3d4569dd9830e7a95",
+      "internal/testpg/r5_failure_cleanup_fixture_test.go": "6f8f3811c04a6f6ccc27ec772ebfa886ad8427d6283dec88ce58535914038517",
+      "internal/testpg/r5_fixture.go": "3c6aa14f55a039c5378791a3eaaa46bc1436eeb1b59d6887b50672fb342ac62e",
+      "internal/testpg/r5_fixture_test.go": "f2d661aa23997c613c22ccd805927484677cda3310feed92d712e829eb61487f",
+      "internal/testpg/r5_http_fixture.go": "9e388f5712be890cdcc7457586c27fa0b459be005a0f081f2ac898240ced4474",
+      "internal/testpg/r5_http_fixture_test.go": "31cb5a58fcc3276c6dd9d46cbc2925f66abd3922068bf5091506247265d20fe9",
+      "internal/testpg/r5_http_object_fault_fixture_test.go": "8b778135d39bf0c1f468d37510451c711e31caecb1699695688191eb895f7f23",
+      "internal/testpg/r5_lifecycle_fixture_test.go": "500c79ccd2dfc3fdff3f28e5d4a41565bd57d1aa25c654a7703ef1bb89e585f9",
+      "internal/testutil/r5_object_fault.go": "73ff40c43b65637e8a4ac3251d898ac67ff1cf58ec2b859cb8a76b12e701996a",
+      "internal/testutil/r5_object_fault_test.go": "5314bd72f929d4c6e7ca02ef7be2f54694dca23c17866cf3a5253fc7c94d928f",
+      "internal/testutil/r5_smtp_script.go": "734ce1acf2000524845853d0fcedcaf0658fdbd386a443bc2e20a13a8612681a",
+      "internal/testutil/r5_smtp_script_test.go": "4639128de887a98c8ad9256e68826afb89baedc5ce73c477feaa6d614ac4cab6"
+    },
+    "phase": "AG actual unified full23 controller steps passed, then documentation metadata only post-update",
+    "default_backend": {
+      "passed": 1451,
+      "failed": 0,
+      "skipped": 1,
+      "mandatory": 244,
+      "skip_scope": "existing shipping browser only; not fixture skip"
+    },
+    "r5fixtures": {
+      "passed_events": 18,
+      "failed": 0,
+      "skipped": 0,
+      "required_top_level": 12,
+      "artifact": "ag/evidence/final-tag-fixtures.jsonl",
+      "gate_artifact": "ag/evidence/final-tag-fixtures-gate.log"
+    },
+    "mandatory_manifest_sha256": "936951ce63a987ddd33b2cb90fff93746196c5d6f48d8abe8c93dff23c6d2469",
+    "negative_missing_dsn": {
+      "process_exit": 1,
+      "failed": 1,
+      "skipped": 0,
+      "artifact": "ag/evidence/fixture-missing-dsn.jsonl"
+    },
+    "negative_zero_tests": {
+      "process_exit": 0,
+      "runtime_tests": 0,
+      "controller_exit": 1,
+      "missing_required": 12,
+      "artifact": "ag/evidence/fixture-zero-tests-rejected.json"
+    },
+    "safe_artifact_hashes": {
+      "final-tag-fixtures.jsonl": "de1bb07d561eb4cb6ba5d21f5fd1e19acb7cd792d135a6156d72cce8a1c23a9a",
+      "final-tag-fixtures-gate.log": "9d0dc8134c690e49d6f4dac15eef4f4339345343095c4fb47e667ba961eeb20b",
+      "fixture-missing-dsn.jsonl": "13818450c7eb96004b5ebac762862f67f2a4a2b1b99a3e35f090d9f83e881a1c",
+      "fixture-zero-tests.jsonl": "d1c099f89475b2501c6295f81378f86f2f1f5185e26f49f76e5e7b5f1b58dd6f",
+      "fixture-zero-tests-rejected.json": "ba6368c19ceb226702bd2dd49eba4dc3115687b05302a4fbf093771e18d30e3c",
+      "final-backend-gate.log": "14d982963e2804391256186a73a5de53ffcab28eaec96fd6e12e382f0ad0513c"
+    }
+  },
+  "historical_failed_runs": [
+    "AD27470 A3pass/2fixture failures (wrong outbox column and APIKey header), B10pass separate scope",
+    "AD65587 transport fix:14pass/1strict500 failure; owned audit PG error incorrectly returned400/raw message",
+    "AD64391 same strict test:ownedFault/P0001 confirmed, five effects/replay/quota preserved; production typed-origin correction3dfc/257e followed focused three rounds/all14 pass",
+    "AD36744 hash rejection and only2 HTTP object tests passed; cleanup not executed",
+    "AD27115 exact cleanup6f8f+object8b778:3top pass; subsequent AG unified run supersedes aggregate-only inference"
+  ]
+}

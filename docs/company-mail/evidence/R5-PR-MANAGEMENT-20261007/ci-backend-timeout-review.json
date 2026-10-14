@@ -1,0 +1,558 @@
+{
+  "schema_version": 1,
+  "review": "bounded_ci_backend_timeout_attribution",
+  "generated_at_utc": "2026-10-07T12:45:21.576989+00:00",
+  "run_id": 37619817397,
+  "package": "tabmail/internal/store/postgres",
+  "review_mode": "existing_artifact_and_read_only_source; no PostgreSQL execution",
+  "artifact": {
+    "path": "/workspace/scratch/458de7991ac3/attachments/eaecfe75-5a44-48b3-a06b-3d698f0e3c6d/tabmail-ci-37619817397-backend-evidence.zip",
+    "sha256": "1a3e2afaf9240c474151df259b541630d996edb4772c6b2c1ec0461bb8620dbc",
+    "source_sha": "49f6a43483c9f8f5aca4a615071eb3818975d239",
+    "log_member": "go-test.jsonl",
+    "log_sha256": "5e9748d086701d47251f6a66be9895ef15debaf5b9c62d205de67944e578ba50",
+    "log_line_numbers_are": "one-based JSONL lines"
+  },
+  "conclusion": {
+    "timeout_mode": "cumulative_package_budget_exhaustion",
+    "confidence": "high",
+    "active_test": "TestR5IngressAuditFailureRollsBackCheckpointAndQuota",
+    "active_phase": "fixture schema migration COMMIT; before business test body",
+    "single_test_180s_wait": "not supported",
+    "database_deadlock": "not established",
+    "fixture_mismatch": "not observed on the active path; not a global fixture correctness claim"
+  },
+  "timeline": {
+    "package_start": {
+      "time_utc": "2026-10-07T12:18:40.332466553Z",
+      "log_line": 30070
+    },
+    "active_test_start": {
+      "time_utc": "2026-10-07T12:21:39.967149843Z",
+      "log_line": 32653
+    },
+    "panic": {
+      "time_utc": "2026-10-07T12:21:40.368853978Z",
+      "log_line": 32655
+    },
+    "package_time_before_active_start_seconds": 179.634683,
+    "active_age_at_panic_seconds": 0.401704,
+    "package_terminal_elapsed_seconds": 180.052,
+    "package_terminal_log_line": 33004
+  },
+  "test_accounting": {
+    "completed_top_level": {
+      "pass": 173,
+      "skip": 8
+    },
+    "completed_top_level_total": 181,
+    "completed_top_level_elapsed_sum_seconds": 179.58,
+    "note": "sum includes each completed top-level once; subtests not added again; Go Elapsed is rounded",
+    "package_test_events": {
+      "run": 444,
+      "pass": 319,
+      "skip": 105,
+      "pause": 19
+    },
+    "paused_count": 19,
+    "continued_count": 0,
+    "admission_acquired_log_count": 0
+  },
+  "paused_tests": [
+    {
+      "test": "TestR5AccessExplanationWaitsForTargetWrites",
+      "state": "pause",
+      "log_line": 31754,
+      "time_utc": "2026-10-07T12:19:38.850619566Z"
+    },
+    {
+      "test": "TestR5AccessExplanationOrdersPermissionChanges",
+      "state": "pause",
+      "log_line": 31770,
+      "time_utc": "2026-10-07T12:19:40.234054317Z"
+    },
+    {
+      "test": "TestR5AccessExplanationFailureReturnsNoProjection",
+      "state": "pause",
+      "log_line": 31778,
+      "time_utc": "2026-10-07T12:19:40.814790339Z"
+    },
+    {
+      "test": "TestR5AccessExplanationPreservesCanonicalDecisions",
+      "state": "pause",
+      "log_line": 31786,
+      "time_utc": "2026-10-07T12:19:41.322154087Z"
+    },
+    {
+      "test": "TestR5ActivationExpiryAfterRealWaitRollsBack",
+      "state": "pause",
+      "log_line": 31790,
+      "time_utc": "2026-10-07T12:19:41.322232295Z"
+    },
+    {
+      "test": "TestR5AttachmentFinishUsesTimeAfterLockWait",
+      "state": "pause",
+      "log_line": 31976,
+      "time_utc": "2026-10-07T12:20:07.956534609Z"
+    },
+    {
+      "test": "TestR5AttachmentGCTenantLockTimeoutContinuesRound",
+      "state": "pause",
+      "log_line": 32085,
+      "time_utc": "2026-10-07T12:20:27.483708316Z"
+    },
+    {
+      "test": "TestR5SentMutationRejectsExpiryAfterItemWait",
+      "state": "pause",
+      "log_line": 32386,
+      "time_utc": "2026-10-07T12:21:15.354312241Z"
+    },
+    {
+      "test": "TestR5SentMutationRollsBackExpiryDuringAuditWait",
+      "state": "pause",
+      "log_line": 32390,
+      "time_utc": "2026-10-07T12:21:15.354485131Z"
+    },
+    {
+      "test": "TestR5SentReadUsesTimeAfterIdentityWait",
+      "state": "pause",
+      "log_line": 32410,
+      "time_utc": "2026-10-07T12:21:17.035809365Z"
+    },
+    {
+      "test": "TestR5EnqueueRechecksAuthorityAfterParentWait",
+      "state": "pause",
+      "log_line": 32471,
+      "time_utc": "2026-10-07T12:21:21.05643434Z"
+    },
+    {
+      "test": "TestR5EnqueueAuditWaitExpiryAndCancellation",
+      "state": "pause",
+      "log_line": 32504,
+      "time_utc": "2026-10-07T12:21:23.99220717Z"
+    },
+    {
+      "test": "TestR5GlobalProfileFanoutRecipients",
+      "state": "pause",
+      "log_line": 32579,
+      "time_utc": "2026-10-07T12:21:33.050726453Z"
+    },
+    {
+      "test": "TestR5GlobalProfileFanoutRequiredRollback",
+      "state": "pause",
+      "log_line": 32583,
+      "time_utc": "2026-10-07T12:21:33.050827846Z"
+    },
+    {
+      "test": "TestR5GlobalProfileFanoutAuthority",
+      "state": "pause",
+      "log_line": 32599,
+      "time_utc": "2026-10-07T12:21:34.448135312Z"
+    },
+    {
+      "test": "TestR5IndexCompleteRechecksAfterJobWait",
+      "state": "pause",
+      "log_line": 32623,
+      "time_utc": "2026-10-07T12:21:37.666086223Z"
+    },
+    {
+      "test": "TestR5IndexFailRechecksAfterJobWait",
+      "state": "pause",
+      "log_line": 32627,
+      "time_utc": "2026-10-07T12:21:37.66612437Z"
+    },
+    {
+      "test": "TestR5IndexCompleteRechecksAfterDocumentWait",
+      "state": "pause",
+      "log_line": 32631,
+      "time_utc": "2026-10-07T12:21:37.666164491Z"
+    },
+    {
+      "test": "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack",
+      "state": "pause",
+      "log_line": 32652,
+      "time_utc": "2026-10-07T12:21:39.96714131Z"
+    }
+  ],
+  "goroutines": [
+    {
+      "id": 19826,
+      "state": "running",
+      "classification": "timeout_alarm"
+    },
+    {
+      "id": 1,
+      "state": "chan receive",
+      "classification": "main_waiting_test"
+    },
+    {
+      "id": 11,
+      "state": "chan receive",
+      "classification": "background_worker"
+    },
+    {
+      "id": 19418,
+      "state": "chan receive",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 19417,
+      "state": "chan receive",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 6685,
+      "state": "chan receive, 1 minutes",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 17272,
+      "state": "chan receive",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 6744,
+      "state": "chan receive, 1 minutes",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 6743,
+      "state": "chan receive, 1 minutes",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 18893,
+      "state": "chan receive",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 19812,
+      "state": "runnable",
+      "classification": "background_worker"
+    },
+    {
+      "id": 9899,
+      "state": "chan receive, 1 minutes",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 17662,
+      "state": "chan receive",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 19745,
+      "state": "runnable",
+      "classification": "active_fixture_migration"
+    },
+    {
+      "id": 16451,
+      "state": "chan receive",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 19767,
+      "state": "select",
+      "classification": "background_worker"
+    },
+    {
+      "id": 11434,
+      "state": "chan receive, 1 minutes",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 19744,
+      "state": "chan receive",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 16452,
+      "state": "chan receive",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 16699,
+      "state": "chan receive",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 6475,
+      "state": "chan receive, 2 minutes",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 6643,
+      "state": "chan receive, 2 minutes",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 19762,
+      "state": "select",
+      "classification": "background_worker"
+    },
+    {
+      "id": 19705,
+      "state": "select",
+      "classification": "background_worker"
+    },
+    {
+      "id": 19084,
+      "state": "chan receive",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 18894,
+      "state": "chan receive",
+      "classification": "paused_test_parent_barrier"
+    },
+    {
+      "id": 19416,
+      "state": "chan receive",
+      "classification": "paused_test_parent_barrier"
+    }
+  ],
+  "waiting_relationships": [
+    {
+      "from": "goroutine 1",
+      "to": "goroutine 19745 / current test",
+      "kind": "testing.T.Run channel wait",
+      "evidence_log_lines": [
+        32665,
+        32679
+      ]
+    },
+    {
+      "from": "goroutine 19745",
+      "to": "PostgreSQL socket while committing a Goose migration",
+      "kind": "runnable syscall.Write; no observed wait duration or SQL lock owner",
+      "evidence_log_lines": [
+        32801,
+        32861
+      ]
+    },
+    {
+      "from": "19 paused test goroutines",
+      "to": "testing parent barrier",
+      "kind": "t.Parallel has not resumed; before fixture and admission acquisition",
+      "evidence_log_lines": [
+        32687,
+        32721,
+        32893,
+        32903
+      ],
+      "meaning": "scheduler deferral, not evidence of 19 database lock waits"
+    },
+    {
+      "from": "goroutine 19826",
+      "to": "whole package test process",
+      "kind": "testing.M.startAlarm after unchanged 180 seconds",
+      "evidence_log_lines": [
+        32655,
+        32663
+      ]
+    }
+  ],
+  "source_mapping": {
+    "tested_merge_commit_locally_available": true,
+    "mapped_readable_baseline_commit": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+    "exact_tested_merge_bytes_verified": true,
+    "qualification": "After the initial review, root fetched the exact tested merge read-only and verified its complete Git tree equals the baseline tree; each mapped file SHA256 below was also checked against that merge.",
+    "points": [
+      {
+        "path": "internal/store/postgres/r5_ingress_transaction_test.go",
+        "line": 149,
+        "meaning": "Test begins with seedCompany; audit-fault setup at line 152 and DeliverIngress at line 154 have not been reached.",
+        "baseline_sha256": "4941ed66106432b70e4896df50a60979314d6cb3426cb5b9313871241aed2b0e",
+        "current_worktree_bytes_equal_baseline": true,
+        "tested_merge_sha256": "4941ed66106432b70e4896df50a60979314d6cb3426cb5b9313871241aed2b0e"
+      },
+      {
+        "path": "internal/store/postgres/company_workflows_test.go",
+        "line": 36,
+        "meaning": "seedCompany calls NewPostgres before any company seed records.",
+        "baseline_sha256": "de3742292d0cfcef550f31a4d34f7ecb19884e70b8ab4f1d93deaae0820d945c",
+        "current_worktree_bytes_equal_baseline": true,
+        "tested_merge_sha256": "de3742292d0cfcef550f31a4d34f7ecb19884e70b8ab4f1d93deaae0820d945c"
+      },
+      {
+        "path": "internal/testpg/fixture.go",
+        "line": 55,
+        "meaning": "NewPostgres creates a unique database, then calls postgres.New with context.Background().",
+        "baseline_sha256": "cd58746b23e0c376a1c48c01ed2837091bbbfc85a7e5bdc49c8eefbbccd17153",
+        "current_worktree_bytes_equal_baseline": true,
+        "tested_merge_sha256": "cd58746b23e0c376a1c48c01ed2837091bbbfc85a7e5bdc49c8eefbbccd17153"
+      },
+      {
+        "path": "internal/store/postgres/postgres.go",
+        "line": 38,
+        "meaning": "postgres.New has passed pool.Ping and calls Migrate.",
+        "baseline_sha256": "bdb7ea7dc488b6e9c5dc5b174c105831eb86d9b2e91c1c24e1f051e98d90e11e",
+        "current_worktree_bytes_equal_baseline": true,
+        "tested_merge_sha256": "bdb7ea7dc488b6e9c5dc5b174c105831eb86d9b2e91c1c24e1f051e98d90e11e"
+      },
+      {
+        "path": "internal/store/postgres/migrate.go",
+        "line": 79,
+        "meaning": "Migrate invokes Goose Provider.Up using the caller context.",
+        "baseline_sha256": "6900795bc4f5f0c7754881cae77b0b0dc09035ef74ebfabae65cb7e95b4e2860",
+        "current_worktree_bytes_equal_baseline": true,
+        "tested_merge_sha256": "6900795bc4f5f0c7754881cae77b0b0dc09035ef74ebfabae65cb7e95b4e2860"
+      },
+      {
+        "path": "internal/store/postgres/r5_parallel_admission_test.go",
+        "line": 58,
+        "meaning": "t.Parallel blocks before line 59 acquires the two-slot admission permit.",
+        "baseline_sha256": "cf384505444f6fa9503ae33e71043583ba18a1bea789876dd7a95b1d549a9b6a",
+        "current_worktree_bytes_equal_baseline": true,
+        "tested_merge_sha256": "cf384505444f6fa9503ae33e71043583ba18a1bea789876dd7a95b1d549a9b6a"
+      }
+    ],
+    "initial_review_qualification": "Artifact proves runtime file/line stack; mapped files match the PR head baseline, but merge commit object is absent locally. No claim that the complete merge tree was independently verified.",
+    "tested_merge_commit": "49f6a43483c9f8f5aca4a615071eb3818975d239",
+    "tested_merge_tree": "25f28cde1bd6ad4bd3238d5c7b75a77431b385d0",
+    "mapped_baseline_tree": "25f28cde1bd6ad4bd3238d5c7b75a77431b385d0"
+  },
+  "slowest_completed_top_level": [
+    {
+      "test": "TestR5AtomicRetryOrdersAuthorizationChanges",
+      "action": "pass",
+      "elapsed_seconds": 7.56,
+      "start_log_line": 31831,
+      "terminal_log_line": 31884
+    },
+    {
+      "test": "TestR5AttachmentGCTenantInterruptedSessionResumes",
+      "action": "pass",
+      "elapsed_seconds": 7.56,
+      "start_log_line": 32098,
+      "terminal_log_line": 32113
+    },
+    {
+      "test": "TestR5CacheWriteVersusPhysicalDeleteLockOrder",
+      "action": "pass",
+      "elapsed_seconds": 4.4,
+      "start_log_line": 32310,
+      "terminal_log_line": 32325
+    },
+    {
+      "test": "TestR5EnqueueQuotaUsesCurrentPermissionAfterParentWait",
+      "action": "pass",
+      "elapsed_seconds": 3.74,
+      "start_log_line": 32518,
+      "terminal_log_line": 32545
+    },
+    {
+      "test": "TestR5AttachmentGCProgressPastProtectedPrefix",
+      "action": "pass",
+      "elapsed_seconds": 3.46,
+      "start_log_line": 32030,
+      "terminal_log_line": 32045
+    },
+    {
+      "test": "TestR5AtomicRetryAuditWaitExpiryAndCancellation",
+      "action": "pass",
+      "elapsed_seconds": 3.17,
+      "start_log_line": 31905,
+      "terminal_log_line": 31916
+    },
+    {
+      "test": "TestR5AuditedWritesOrderMemberFreeze",
+      "action": "pass",
+      "elapsed_seconds": 3.1,
+      "start_log_line": 32142,
+      "terminal_log_line": 32165
+    },
+    {
+      "test": "TestR5EnqueueProtectsAuthorityThroughInsert",
+      "action": "pass",
+      "elapsed_seconds": 2.94,
+      "start_log_line": 32472,
+      "terminal_log_line": 32500
+    },
+    {
+      "test": "TestR5AttachmentGCTenantDoubleProcessDoesNotReenterBatch",
+      "action": "pass",
+      "elapsed_seconds": 2.93,
+      "start_log_line": 32094,
+      "terminal_log_line": 32097
+    },
+    {
+      "test": "TestR5AttachmentGCTenantActualProcessRestart",
+      "action": "pass",
+      "elapsed_seconds": 2.85,
+      "start_log_line": 32090,
+      "terminal_log_line": 32093
+    }
+  ],
+  "supported_observations": [
+    "The panic lists only the active ingress audit test, shown as 0s; its recorded age is 0.401704 seconds.",
+    "Completed top-level tests consume 179.58 seconds in aggregate, with continuing PASS events immediately before the timeout.",
+    "The active stack is in seedCompany -> NewPostgres -> postgres.New -> Migrate -> Goose transaction Commit, not DeliverIngress or the injected audit constraint.",
+    "Nineteen PAUSE events have zero CONT events and zero fixture admission acquired logs; stacks stop at testing parent.barrier.",
+    "The two slowest completed top-level groups each take 7.56 seconds and pass; one contains ten sequential fresh-company subcases, the other includes a 6.02-second passing process_killed subcase."
+  ],
+  "unknowns": [
+    "Exact migration version and SQL statement within the committing transaction; artifact has no per-migration timing or query trace.",
+    "PostgreSQL pg_stat_activity / pg_locks owners and wait events, disk latency, CPU/race overhead, connection contention, and their shares of elapsed time.",
+    "Per-test CREATE DATABASE, migration, company seed, business operation, and cleanup elapsed shares; repeated setup is visible in source but its total cost is not measured.",
+    "Whether the active case passes alone, how much time the not-yet-resumed parallel group and unstarted tests need, and whether the unchanged full suite can finish within 180 seconds after an implementation change."
+  ],
+  "next_batch": [
+    {
+      "id": "T1",
+      "scope": "diagnostic CI run of the exact active test at the tested source, with the existing PostgreSQL service and unchanged 180s/race flags",
+      "command": "go test -json -race -count=1 -timeout=180s ./internal/store/postgres -run ^TestR5IngressAuditFailureRollsBackCheckpointAndQuota$",
+      "required_evidence": [
+        "source SHA",
+        "test terminal event",
+        "fixture phase timings if added",
+        "PostgreSQL wait snapshot only if a phase actually stalls"
+      ],
+      "qualification": "diagnostic selection only, not replacement of the full acceptance suite"
+    },
+    {
+      "id": "T2",
+      "scope": "fixture-only monotonic phase timing and review of the existing serial schedule",
+      "paths": [
+        "internal/testpg/fixture.go",
+        "internal/store/postgres/company_workflows_test.go",
+        "internal/store/postgres/r5_parallel_admission_test.go"
+      ],
+      "required_evidence": [
+        "CREATE/migrate/seed/body/cleanup durations",
+        "PAUSE/CONT timeline",
+        "exact same test ID set and source hash"
+      ],
+      "constraints": [
+        "no PG run in this review",
+        "do not increase timeout",
+        "do not skip tests or shrink original assertions",
+        "do not move admission acquire before t.Parallel",
+        "do not assume a shared migrated template is equivalent to fresh migration"
+      ]
+    },
+    {
+      "id": "T3",
+      "scope": "bounded cost attribution for the ten-case atomic retry group and the three-case interrupted GC group before any optimization",
+      "paths": [
+        "internal/store/postgres/r5_atomic_retry_test.go:58",
+        "internal/store/postgres/r5_attachment_gc_tenant_fairness_test.go:281"
+      ],
+      "required_evidence": [
+        "subcase and fixture phase times",
+        "child start/kill/wait/session-release times for process_killed"
+      ],
+      "constraints": [
+        "preserve actual lock/restart/kill proofs",
+        "6.02s is measured passing duration, not proof of a bug",
+        "the original complete 180s gate remains required after any reviewed change"
+      ]
+    }
+  ],
+  "not_done": [
+    "no database execution",
+    "no product, fixture, timeout, test selection, skip or CI gate edits",
+    "no re-investigation of the three already-known missing opt-ins",
+    "no full-suite pass, release or deployment qualification"
+  ]
+}

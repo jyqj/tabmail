@@ -1,0 +1,678 @@
+{
+  "errors": [],
+  "excluded_liveDNS": [
+    {
+      "method": "GET",
+      "path": "/api/v1/company/domains/{id}/verification",
+      "reason": "Live DNS status lookups are outside this loopback HTTP/PG fixture."
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/company/domains/{id}/verify",
+      "reason": "Live DNS verification is outside this loopback HTTP/PG fixture."
+    }
+  ],
+  "freshformal_CLI0_or_newGoPG_run": false,
+  "new_document_sha256": "9afe1749637dc9cc2f66956f4026a89244735f1242f203a75003390723a0656f",
+  "observed_success_variants": 67,
+  "old_actual_capture_sha256": "b09e44518f7e4c97e9dcc81c30df29ebe5adc40ddbc5da4b804d778ed90f6ced",
+  "old_capture_embedded_spec_sha256_unchanged": "a4935966318d065e68f24bcd779d22ec9393aff7c2d2056c3f5f5ccb4260473f",
+  "old_spec_is_not_claimed_equal_new_spec": true,
+  "original_CLI1_and_result_unchanged": true,
+  "original_go_source_sha": "33307f7bfd87a24b758f5020669c9b313337e3d3",
+  "original_validate_capture_stale_spec_guard_unmodified": true,
+  "per_case_results": [
+    {
+      "errors": [],
+      "id": "settings.unconfigured",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/settings",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "invitations.empty",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/invitations",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "settings.configure",
+      "method": "PUT",
+      "passed": true,
+      "route": "/api/v1/company/settings",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "domains.list",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/domains",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "domains.create",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/domains",
+      "status": 201
+    },
+    {
+      "errors": [],
+      "id": "domains.delete",
+      "method": "DELETE",
+      "passed": true,
+      "route": "/api/v1/company/domains/{id}",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "invitations.create",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/invitations",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "invitations.activate",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/activate",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "invitations.second",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/invitations",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "invitations.revoke",
+      "method": "DELETE",
+      "passed": true,
+      "route": "/api/v1/company/invitations/{id}",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "invitations.list",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/invitations",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "mailboxes.list",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "mailboxes.create",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "grants.empty",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/grants",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "grants.update",
+      "method": "PUT",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/grants",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "grants.list",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/grants",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "policy.update",
+      "method": "PUT",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/send-policy",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "policy.conflict",
+      "method": "PUT",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/send-policy",
+      "status": 409
+    },
+    {
+      "errors": [],
+      "id": "access.explain",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/access/{user}",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "templates.empty",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/templates",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "templates.create",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/templates",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "templates.versions.empty",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/templates/{id}/versions",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "templates.update",
+      "method": "PUT",
+      "passed": true,
+      "route": "/api/v1/company/templates/{id}",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "templates.publish",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/templates/{id}/publish",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "templates.grant",
+      "method": "PUT",
+      "passed": true,
+      "route": "/api/v1/company/templates/{id}/grants",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "templates.grants",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/templates/{id}/grants",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "templates.versions",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/templates/{id}/versions",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "templates.usable",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/templates",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "templates.preview",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/templates/preview",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "drafts.empty",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/drafts",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "messages.empty",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/messages",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "attachments.upload",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/attachments",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "attachments.download",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/attachments/{id}",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "draft.incomplete",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/drafts",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "draft.get",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/drafts/{id}",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "draft.list",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/drafts",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "draft.update",
+      "method": "PUT",
+      "passed": true,
+      "route": "/api/v1/company/drafts/{id}",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "submit.created",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/drafts/{id}/submit",
+      "status": 201
+    },
+    {
+      "errors": [],
+      "id": "submit.replayed",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/drafts/{id}/submit",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "submissions.list",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/submissions",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "submissions.get",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/submissions/{id}",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "submissions.content",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/submissions/{id}/content",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "submissions.attachments",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/submissions/{id}/attachments",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "submissions.download",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/submissions/{id}/attachments/{aid}/download",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "recipients.list",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/outbound/{id}/recipients",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "archive.list",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/sent",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "archive.change",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/sent/{message}/actions",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "draft.second",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/drafts",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "draft.delete",
+      "method": "DELETE",
+      "passed": true,
+      "route": "/api/v1/company/drafts/{id}",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "messages.list",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/messages",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "message.detail",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "message.conversation",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}/conversation",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "message.attachments",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}/attachments",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "message.attachment.index",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}/attachments/{index}",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "message.attachment.id",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}/parts/{attachment}",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "message.source",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}/source",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "message.compose",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}/compose",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "message.action",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/messages/{message}/actions",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "events.ready",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/events",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "index.status",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/index-status",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "index.retry",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/index/retry",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "recovery.list",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/recovery",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "recovery.inspect",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/recovery/{id}/inspect",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "recovery.retry",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/recovery/{id}/retry",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "outbound.inspect",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/outbound/{id}/inspect",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "outbound.reconcile",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/outbound/{id}/reconcile",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "mailboxes.personal",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "mailboxes.handover",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/handover",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "mailboxes.convert",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/mailboxes/{id}/convert-shared",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "offboard.preview",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/employees/{id}/offboard/preview",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "offboard.execute",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/employees/{id}/offboard",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "templates.revoke",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/templates/{id}/versions/{version}/revoke",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "templates.retire",
+      "method": "POST",
+      "passed": true,
+      "route": "/api/v1/company/templates/{id}/retire",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "overview.get",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/overview",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "audit.list",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/audit",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "company.events.ready",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/events",
+      "status": 200
+    },
+    {
+      "errors": [],
+      "id": "error.unauthenticated",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/submissions",
+      "status": 401
+    },
+    {
+      "errors": [],
+      "id": "error.forbidden",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/domains",
+      "status": 403
+    },
+    {
+      "errors": [],
+      "id": "error.bad-request",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/drafts/{id}",
+      "status": 400
+    },
+    {
+      "errors": [],
+      "id": "error.not-found",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/submissions/{id}/content",
+      "status": 404
+    },
+    {
+      "errors": [],
+      "id": "error.internal",
+      "method": "GET",
+      "passed": true,
+      "route": "/api/v1/company/settings",
+      "status": 500
+    }
+  ],
+  "required_success_variants": 67,
+  "response_count": 81,
+  "status": "readonly_oldcapture_newdoc_pass",
+  "successful_operations": 66
+}

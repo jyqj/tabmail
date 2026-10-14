@@ -33,7 +33,7 @@ func (s *PgStore) CreateZone(ctx context.Context, z *models.DomainZone) error {
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
 		z.ID, z.TenantID, z.OwnerUserID, z.ParentZoneID, z.Domain, z.Visibility,
 		z.AllowRandomSubdomains, z.IsVerified, z.MXVerified, z.TXTRecord, z.DKIMPrivateKeyPEM, z.DKIMSelector, z.DKIMEnabled, z.DKIMRequiredForSend, z.CreatedAt)
-	return err
+	return classifyZoneCreateError(err)
 }
 
 const zoneSelect = `SELECT id,tenant_id,owner_user_id,parent_zone_id,domain,visibility,

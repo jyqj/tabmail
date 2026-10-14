@@ -1,0 +1,212 @@
+{
+  "schema": "recovered-catalog257-acceptance-v1",
+  "checks": {
+    "source_raw_matches_pre_loss_identity": true,
+    "inventory_raw_matches_pre_loss_identity": true,
+    "both_jobs_direct_exact_clean_source_before_after": true,
+    "report_schema_and_status": true,
+    "no_preparation_error": true,
+    "all_original_dispatch_flags_true": true,
+    "original_missing_list_empty": true,
+    "discovered_875_unique": true,
+    "exact_two_original_groups": true,
+    "current_source_and_exit": true,
+    "current_exact_requested_loaded_started": true,
+    "current_no_failure_error_skip_or_missing": true,
+    "current_original_partition": true,
+    "frozen-v1_source_and_exit": true,
+    "frozen-v1_exact_requested_loaded_started": true,
+    "frozen-v1_no_failure_error_skip_or_missing": true,
+    "frozen-v1_original_partition": true,
+    "full_union_no_missing_extra_or_overlap": true,
+    "both_original_unittest_terminals_ok": true,
+    "original_preparation_success_bound_to_source": true,
+    "inventory_106_unique_all_ok": true,
+    "exact_five_original_inventory_modules": true,
+    "original_three_cli_outputs": true,
+    "original_unfinished_qualification_preserved": true,
+    "api_run_and_commit_tree": true,
+    "inventory_job_identity": true,
+    "inventory_job_successful": true,
+    "inventory_job_all_reported_steps_successful": true,
+    "inventory_job_all_required_steps_present_once": true,
+    "inventory_original_direct_head_checkout": true,
+    "source-version_job_identity": true,
+    "source-version_job_successful": true,
+    "source-version_job_all_reported_steps_successful": true,
+    "source-version_job_all_required_steps_present_once": true,
+    "source-version_original_direct_head_checkout": true,
+    "proposal_skip_reported_without_pass_credit": true,
+    "catalog16-source-version-37986871640-1_artifact_api_and_upload_log_binding": true,
+    "catalog16-inventory-37986871640-1_artifact_api_and_upload_log_binding": true
+  },
+  "original_run_id": 37986871640,
+  "source": {
+    "commit": "6a402ce1269bfc41c932a67b592fee5bca235774",
+    "tree": "e8a04cbe516889f225d24ae7aed5d81d8e073650",
+    "status": ""
+  },
+  "groups": [
+    {
+      "group": "current",
+      "source_sha": "6a402ce1269bfc41c932a67b592fee5bca235774",
+      "tests": 871,
+      "child_exit": 0,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0
+    },
+    {
+      "group": "frozen-v1",
+      "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+      "tests": 4,
+      "child_exit": 0,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0
+    }
+  ],
+  "invocation_semantics": "actual_test_ids records startTest calls; exact invocation lists plus normally completed children and zero failure events establish this pass. No per-ID stopTest receipt is claimed.",
+  "inventory": {
+    "tests": 106,
+    "module_counts": {
+      "test_r5_catalog_reconciliation": 39,
+      "test_r5_compatibility": 19,
+      "test_r5_current_source_inventory": 15,
+      "test_r5_reviewed_web_locks": 7,
+      "test_r5_transactions": 26
+    },
+    "original_clis": 3
+  },
+  "jobs": [
+    {
+      "id": 114011053321,
+      "name": "inventory",
+      "required_steps": [
+        "Record exact source before validation",
+        "Install the original pinned contract dependencies",
+        "Download the existing Go module graph",
+        "Prepare the original locked TypeScript compiler",
+        "Original transaction inventory CLI",
+        "Original compatibility inventory CLI",
+        "Original client inventory CLI",
+        "All five original modules with current and historical guards",
+        "Record exact source after validation",
+        "Preserve all original outputs and source identities"
+      ],
+      "conclusion": "success"
+    },
+    {
+      "id": 114011053379,
+      "name": "source-version",
+      "required_steps": [
+        "Record exact source before validation",
+        "Install the original pinned contract dependencies",
+        "Download the existing Go module graph",
+        "Prepare the original locked TypeScript compiler",
+        "Complete original source-version runner",
+        "Print the original source-version report",
+        "Record exact source after validation",
+        "Preserve all original outputs and source identities"
+      ],
+      "conclusion": "success"
+    }
+  ],
+  "proposal": {
+    "job_id": 114011048101,
+    "conclusion": "skipped",
+    "pass_credit": false
+  },
+  "artifacts": [
+    {
+      "id": 11644752912,
+      "name": "catalog16-source-version-37986871640-1",
+      "api_digest": "sha256:165ee3b670b73e17398c513492ff9bcc4a8bbc505c329bb026f15b9fe8d69a05",
+      "api_size": 17626690,
+      "upload_log_digest_matches_api": true,
+      "zip_downloaded": false,
+      "zip_digest_locally_verified": false
+    },
+    {
+      "id": 11644268136,
+      "name": "catalog16-inventory-37986871640-1",
+      "api_digest": "sha256:ae8077d6c50b6b09a8d105f3e1ff19189feeb3492998b020396c0781548db0da",
+      "api_size": 11599,
+      "upload_log_digest_matches_api": true,
+      "zip_downloaded": false,
+      "zip_digest_locally_verified": false
+    }
+  ],
+  "optional_bom_prefix_lines": {
+    "source_version": [
+      1,
+      25370,
+      56375
+    ],
+    "inventory": [
+      1
+    ]
+  },
+  "accepted": true,
+  "recovered_at_utc": "2026-10-09T21:33:35.148599+00:00",
+  "evidence_files": [
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/catalog257/artifacts.json",
+      "bytes": 1455,
+      "sha256": "d11c5f1f1a1275f8794543addec79e635e542014a19b52bd13101958b8713f97"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/catalog257/commit.json",
+      "bytes": 1345,
+      "sha256": "4eebc8a64d8b1c419756e9365be2f360384077ba6c5033638e37561ee6c81006"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/catalog257/inventory.log",
+      "bytes": 95480,
+      "sha256": "abcb089c831d312cb0eb7cbfb854a7efce63606e44334138db646088421a0076"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/catalog257/jobs.json",
+      "bytes": 8670,
+      "sha256": "53803ebdfa4f716bfd01528c59df49bb819b885c1e8f580f30c31f8ec92381be"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/catalog257/original-source-version-runner.py",
+      "bytes": 9331,
+      "sha256": "f0c3f43ba9596ab5aa9563325858fbfa4f51944a445042579c7b208e3ba16303"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/catalog257/original-workflow.yml",
+      "bytes": 18633,
+      "sha256": "d83dac79c447a597179ba0763d77c583156c0d5f874fcecae8b634d7201e420f"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/catalog257/run.json",
+      "bytes": 11982,
+      "sha256": "0798d42da8ac4f24fc910d6c553eff3d845d1797a3647078ed843bc6d0dc9c84"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/catalog257/source-version.json",
+      "bytes": 2963082,
+      "sha256": "c01ebdbb52288e373680908841d303838286425c62f788196088c334e8213145"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/catalog257/source-version.log",
+      "bytes": 5187696,
+      "sha256": "fb6488c5ae551b3736bd004975680e12a5a419117f61fce48c8b94ffe7bc6c1b"
+    }
+  ],
+  "reader": {
+    "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/verify_recovered_ci.py",
+    "bytes": 16389,
+    "sha256": "577c695e4bc5dc588e11b4a50c4952abf329172cee77e65188901a5f16c91e1f"
+  },
+  "recovery_limitations": [
+    "Original CI job logs and API metadata were fetched again; derived JSON and this acceptance report were newly generated from those raw inputs.",
+    "Job log decoding removes only a timestamp prefix and its optional leading BOM. Raw UTF-8 files remain unchanged.",
+    "Artifact identity and digests are corroborated by API metadata and upload logs; no ZIP was downloaded or locally digest-verified.",
+    "Lost native 129-test logs, local 875-test failure traces, old local review files and continuous poll snapshots were not reconstructed from conversation summaries.",
+    "No original tests, collectors or runners were re-executed during recovery; no new TODO credit or issue-completion claim is granted."
+  ],
+  "todo_credit": 0
+}

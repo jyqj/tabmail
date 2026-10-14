@@ -1,0 +1,234 @@
+{
+  "started_at": "2026-10-07T13:46:21.764625+00:00",
+  "worktree": "/workspace/scratch/458de7991ac3/tabmail-wave-compose",
+  "before": {
+    "commit": "6c73230d7f3c00ab640e2a8b7ce10b20bb88a2f4",
+    "tree": "d637625d3de97c3dcd8db8e57130dd09dbf743d1",
+    "web_tree": "24f095f234179d15ba692e003fc2f34709026817",
+    "status_porcelain": "",
+    "sha256": {
+      "web/package.json": "6e9773cbcd93725430a305ea0e9284fb753a6970bdf124a4747f16d57565f6e8",
+      "web/package-lock.json": "b1c85223bc1171b16a5994c2f069ada51a5574719445142c31a213e9fda84e89",
+      "web/vitest.config.ts": "3d754d8f3bd75d472d2025142426e1190fa8a417739e22411424308eceecffe4",
+      "web/next.config.ts": "130300c1a402a8162d4f1ddfb864c4a14fe3f02d9e3d7d970d76b2543cb5c33e",
+      "web/lib/api/base.ts": "8a8fe993b3694ab4578cef5f7e63023ac21e7da0239bb6ec653f559be3e487bf",
+      "web/app/(dashboard)/company/recovery/page.tsx": "fb7c45ece2271935716c7ab20fce5526d8a74fa3bf7acdb7b879188f42158ba5",
+      "web/lib/refresh-scope.test.ts": "5623c542fb8fea02be8f1077b4f73481442aa731216bc1c64c2834a3bd719fdc",
+      "web/features/company/recovery-reinspection.consumer.test.tsx": "591e3ebe431c87536807f794875493f43859b6b2fbcee80ff45183c241498fb3",
+      "web/features/company/recovery-queue-state.consumer.test.tsx": "d6a8c81b7686495dd9ed93d1987483ba7d75c582b46f64c2ace1a80a08ef39ab",
+      "web/r5-external-batch-probe.test.tsx": "69283e7944d503b24aaf0f643b37dbd584d3a3454d80e09aa1c1fe933799c3e0",
+      "web/components/company/r5-protocol.test.tsx": "8cb988818377c82243f019e66095efadb2e2e0a437a35658df4e2e1c5325543a"
+    }
+  },
+  "environment": {
+    "node": "v24.19.0",
+    "npm": "11.9.0",
+    "go": "go version go1.25.7 linux/amd64",
+    "GOTOOLCHAIN": "local",
+    "GOCACHE": "/workspace/scratch/458de7991ac3/go-cache/build",
+    "GOMODCACHE": "/workspace/scratch/458de7991ac3/go-cache/mod",
+    "protocol_component_fixture_configured": false,
+    "protocol_observations_configured": false,
+    "dependencies": {
+      "path": "/workspace/scratch/458de7991ac3/tabmail-wave-compose/web/node_modules",
+      "mode": "Independent copy of existing lock-installed packages; original read only",
+      "source": "/workspace/scratch/458de7991ac3/tabmail-deps/web/node_modules",
+      "next": "16.3.6",
+      "react": "19.2.4",
+      "vitest": "4.1.11"
+    }
+  },
+  "selection": {
+    "mode": "Default Vitest selection; no added filters, exclusions, or skips",
+    "max_workers": 2,
+    "existing_config_exclusion": "components/company/r5-protocol-shared-components.test.tsx",
+    "fixture_policy": "Preserve provided environment; no generated substitute fixture"
+  },
+  "steps": [
+    {
+      "name": "vitest",
+      "command": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/458de7991ac3/validation/wave-combined-web-vitest.results.json"
+      ],
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-compose/web",
+      "log": "/workspace/scratch/458de7991ac3/validation/wave-combined-web-vitest.log",
+      "started_at": "2026-10-07T13:46:22.158254+00:00",
+      "exit_code": 1,
+      "duration_seconds": 144.32,
+      "finished_at": "2026-10-07T13:48:46.479817+00:00",
+      "results": {
+        "raw_json": "/workspace/scratch/458de7991ac3/validation/wave-combined-web-vitest.results.json",
+        "total_tests": 887,
+        "passed_tests": 886,
+        "failed_tests": 1,
+        "pending_tests": 0,
+        "todo_tests": 0,
+        "total_files": 63,
+        "passed_files": 62,
+        "failed_files": 1,
+        "failures": [
+          {
+            "file": "/workspace/scratch/458de7991ac3/tabmail-wave-compose/web/r5-external-batch-probe.test.tsx",
+            "title": "R5 batch independent realm loopback PostgreSQL",
+            "messages": [
+              "Error: explicit private fixture required\n    at /workspace/scratch/458de7991ac3/tabmail-wave-compose/web/r5-external-batch-probe.test.tsx:9:20\n    at file:///workspace/scratch/458de7991ac3/tabmail-wave-compose/web/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///workspace/scratch/458de7991ac3/tabmail-wave-compose/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///workspace/scratch/458de7991ac3/tabmail-wave-compose/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///workspace/scratch/458de7991ac3/tabmail-wave-compose/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///workspace/scratch/458de7991ac3/tabmail-wave-compose/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///workspace/scratch/458de7991ac3/tabmail-wave-compose/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)\n    at file:///workspace/scratch/458de7991ac3/tabmail-wave-compose/web/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64"
+            ]
+          }
+        ],
+        "go_receipt_component": [
+          {
+            "file": "/workspace/scratch/458de7991ac3/tabmail-wave-compose/web/components/company/r5-protocol.test.tsx",
+            "status": "passed",
+            "tests": 3
+          }
+        ]
+      }
+    },
+    {
+      "name": "lint",
+      "command": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-compose/web",
+      "log": "/workspace/scratch/458de7991ac3/validation/wave-combined-web-lint.log",
+      "started_at": "2026-10-07T13:48:46.488044+00:00",
+      "exit_code": 0,
+      "duration_seconds": 35.104,
+      "finished_at": "2026-10-07T13:49:21.593756+00:00"
+    },
+    {
+      "name": "build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-compose/web",
+      "log": "/workspace/scratch/458de7991ac3/validation/wave-combined-web-build.log",
+      "started_at": "2026-10-07T13:49:21.594779+00:00",
+      "exit_code": 0,
+      "duration_seconds": 64.948,
+      "finished_at": "2026-10-07T13:50:26.543959+00:00"
+    }
+  ],
+  "after": {
+    "commit": "6c73230d7f3c00ab640e2a8b7ce10b20bb88a2f4",
+    "tree": "d637625d3de97c3dcd8db8e57130dd09dbf743d1",
+    "web_tree": "24f095f234179d15ba692e003fc2f34709026817",
+    "status_porcelain": "",
+    "sha256": {
+      "web/package.json": "6e9773cbcd93725430a305ea0e9284fb753a6970bdf124a4747f16d57565f6e8",
+      "web/package-lock.json": "b1c85223bc1171b16a5994c2f069ada51a5574719445142c31a213e9fda84e89",
+      "web/vitest.config.ts": "3d754d8f3bd75d472d2025142426e1190fa8a417739e22411424308eceecffe4",
+      "web/next.config.ts": "130300c1a402a8162d4f1ddfb864c4a14fe3f02d9e3d7d970d76b2543cb5c33e",
+      "web/lib/api/base.ts": "8a8fe993b3694ab4578cef5f7e63023ac21e7da0239bb6ec653f559be3e487bf",
+      "web/app/(dashboard)/company/recovery/page.tsx": "fb7c45ece2271935716c7ab20fce5526d8a74fa3bf7acdb7b879188f42158ba5",
+      "web/lib/refresh-scope.test.ts": "5623c542fb8fea02be8f1077b4f73481442aa731216bc1c64c2834a3bd719fdc",
+      "web/features/company/recovery-reinspection.consumer.test.tsx": "591e3ebe431c87536807f794875493f43859b6b2fbcee80ff45183c241498fb3",
+      "web/features/company/recovery-queue-state.consumer.test.tsx": "d6a8c81b7686495dd9ed93d1987483ba7d75c582b46f64c2ace1a80a08ef39ab",
+      "web/r5-external-batch-probe.test.tsx": "69283e7944d503b24aaf0f643b37dbd584d3a3454d80e09aa1c1fe933799c3e0",
+      "web/components/company/r5-protocol.test.tsx": "8cb988818377c82243f019e66095efadb2e2e0a437a35658df4e2e1c5325543a"
+    }
+  },
+  "source_unchanged": true,
+  "finished_at": "2026-10-07T13:50:26.576838+00:00",
+  "assessment": {
+    "default_suite_qualification": "FAIL: one unchanged private fixture preflight is unsatisfied",
+    "failure_classification": {
+      "file": "web/r5-external-batch-probe.test.tsx",
+      "line": 9,
+      "required_environment_variable": "TABMAIL_R5_PROTOCOL_COMPONENT_FIXTURE",
+      "configured": false,
+      "message": "explicit private fixture required",
+      "phase": "Before fixture JSON parsing, component render, or any HTTP/PG operation",
+      "source_and_config_unchanged_since_base": true,
+      "baseline_commit": "4065c4909c8f21a401a9a1af6370fa3f72670b99",
+      "compared_paths": [
+        "web/r5-external-batch-probe.test.tsx",
+        "web/vitest.config.ts",
+        "web/next.config.ts",
+        "web/package-lock.json"
+      ],
+      "new_skips_or_exclusions": false,
+      "fixture_substituted": false
+    },
+    "prior_full_run_comparison": {
+      "previous_results": "/workspace/scratch/458de7991ac3/validation/combined-web-vitest.results.json",
+      "previous_passed": 865,
+      "previous_failed": 1,
+      "current_passed": 886,
+      "current_failed": 1,
+      "comparison_key": [
+        "file relative to web",
+        "fullName",
+        "status"
+      ],
+      "additional_passed_cases": 21,
+      "removed_or_changed_previous_results": 0
+    },
+    "full_lint": {
+      "exit_code": 0,
+      "errors": 0,
+      "existing_warnings": 4,
+      "warnings": [
+        {
+          "file": "web/features/company/profile-management.tsx",
+          "line": 277,
+          "rule": "react-hooks/exhaustive-deps"
+        },
+        {
+          "file": "web/features/mail/components/submission-content.tsx",
+          "line": 54,
+          "rule": "react-hooks/exhaustive-deps"
+        },
+        {
+          "file": "web/profile-refresh-browser/entry.jsx",
+          "line": 34,
+          "rule": "@typescript-eslint/no-unused-vars"
+        },
+        {
+          "file": "web/review-independent/entry.jsx",
+          "line": 34,
+          "rule": "@typescript-eslint/no-unused-vars"
+        }
+      ]
+    },
+    "production_build": {
+      "exit_code": 0,
+      "next": "16.3.6",
+      "bundler": "Turbopack",
+      "static_pages_generated": 29,
+      "static_pages_total": 29,
+      "page_workers": 8,
+      "configuration": "unchanged default Next build",
+      "standalone_tsc_repeated": false
+    },
+    "last_full_nonincremental_typecheck": {
+      "command": [
+        "npx",
+        "tsc",
+        "--noEmit",
+        "--incremental",
+        "false"
+      ],
+      "exit_code": 0,
+      "log": "/workspace/scratch/458de7991ac3/validation/wave3-queue-typecheck.log",
+      "same_final_web_product_and_test_bytes": true
+    },
+    "limits": [
+      "The complete default test suite remains red until its private fixture is supplied.",
+      "The Go-backed receipt producer passed its three component scenarios against this exact 6c73230d repository tree.",
+      "No live private HTTP/PostgreSQL batch fixture was generated or invoked; no additional SMTP/full Go/PG runner was executed.",
+      "Root must compare final integration web subtree with 24f095f234179d15ba692e003fc2f34709026817 before attaching this qualification."
+    ],
+    "additional_todo_count": 0
+  }
+}

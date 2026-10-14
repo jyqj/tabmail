@@ -10,9 +10,9 @@ import (
 	"github.com/rs/zerolog"
 	"golang.org/x/crypto/bcrypt"
 	"tabmail/internal/app"
+	"tabmail/internal/authn"
 	"tabmail/internal/authz"
 	"tabmail/internal/hooks"
-	"tabmail/internal/mailtoken"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
 	"tabmail/internal/rawobject"
@@ -319,7 +319,7 @@ func (s *Service) IssueToken(ctx context.Context, address, password, actor strin
 			ttl = remaining
 		}
 	}
-	token, err := mailtoken.Issue(s.tokenSecret, mb.ID.String(), mb.FullAddress, ttl)
+	token, err := authn.IssueMailboxToken(s.tokenSecret, mb.ID.String(), mb.FullAddress, ttl)
 	if err != nil {
 		return nil, app.Internal(err)
 	}

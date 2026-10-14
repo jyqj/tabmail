@@ -1,0 +1,30 @@
+{
+  "scope": "ADVANCE-02 / issue #198",
+  "baseline_commit": "fdea2178759ce9842844926374ea98517bc4188b",
+  "baseline": {
+    "passed": 3,
+    "failed": 12,
+    "skipped": 0
+  },
+  "candidate_new": {
+    "passed": 15,
+    "failed": 0,
+    "skipped": 0
+  },
+  "candidate_related": {
+    "passed": 64,
+    "failed": 0,
+    "skipped": 0
+  },
+  "typecheck_exit": 0,
+  "scoped_eslint_exit": 0,
+  "node": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "source_sha256": {
+    "web/features/company/employees.tsx": "01ac9442f13ce0707c7e03bad1f614d352985a85f30d9c7eb040bc89598a1d17",
+    "web/features/company/offboarding-panel.tsx": "31c2e8a2b46069513b2e83b535604305aa7d3f122bd66a1b8daf6f887ff1a6ce",
+    "web/features/company/offboarding-read-state.test.tsx": "52f4c04cd8692af8d72bb38642fa60bdf952efed989b25078304d7f2ec91616b"
+  },
+  "full_frontend_qualification": false,
+  "shipping_browser_qualification": false,
+  "database_qualification": false
+}

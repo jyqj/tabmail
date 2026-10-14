@@ -1,0 +1,303 @@
+{
+  "candidate": "632d55de566254c618bca9a54c5dbae7b355fcf9",
+  "controls": [
+    {
+      "name": "ordinary-positive",
+      "expected": "accept",
+      "actual": "accept",
+      "detail": "verified"
+    },
+    {
+      "name": "generated-positive",
+      "expected": "accept",
+      "actual": "accept",
+      "detail": "verified"
+    },
+    {
+      "name": "mixed-legitimate-source-and-generated-positive",
+      "expected": "accept",
+      "actual": "accept",
+      "detail": "verified"
+    },
+    {
+      "name": "fork-generated-positive",
+      "expected": "accept",
+      "actual": "accept",
+      "detail": "verified"
+    },
+    {
+      "name": "source-owned-GoFiles-.txt-True",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "source-owned-GoFiles-.txt-False",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "source-owned-GoFiles--d-True",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "source-owned-GoFiles--d-False",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "ordinary-source-go-in-test-package-GoFiles",
+      "expected": "accept",
+      "actual": "accept",
+      "detail": "verified"
+    },
+    {
+      "name": "source-owned-CgoFiles-.txt-True",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "source-owned-CgoFiles-.txt-False",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "source-owned-CgoFiles--d-True",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "source-owned-CgoFiles--d-False",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "ordinary-source-go-in-test-package-CgoFiles",
+      "expected": "accept",
+      "actual": "accept",
+      "detail": "verified"
+    },
+    {
+      "name": "source-owned-TestGoFiles-.txt-True",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "source-owned-TestGoFiles-.txt-False",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "source-owned-TestGoFiles--d-True",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "source-owned-TestGoFiles--d-False",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "ordinary-source-go-in-test-package-TestGoFiles",
+      "expected": "accept",
+      "actual": "accept",
+      "detail": "verified"
+    },
+    {
+      "name": "source-owned-XTestGoFiles-.txt-True",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "source-owned-XTestGoFiles-.txt-False",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "source-owned-XTestGoFiles--d-True",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "source-owned-XTestGoFiles--d-False",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "ordinary-source-go-in-test-package-XTestGoFiles",
+      "expected": "accept",
+      "actual": "accept",
+      "detail": "verified"
+    },
+    {
+      "name": "cache-beneath-source-owned-minus-d",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "cache-is-source-root",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "selected package/input linkage mismatch"
+    },
+    {
+      "name": "cache-ancestor-input-outside-source-positive",
+      "expected": "accept",
+      "actual": "accept",
+      "detail": "verified"
+    },
+    {
+      "name": "generated-record-path",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "unclassified absolute local-package input"
+    },
+    {
+      "name": "generated-record-package",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "unclassified absolute local-package input"
+    },
+    {
+      "name": "generated-record-field",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "unclassified absolute local-package input"
+    },
+    {
+      "name": "generated-record-category",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "input classification mismatch"
+    },
+    {
+      "name": "generated-record-qualification",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "input qualification mismatch"
+    },
+    {
+      "name": "generated-record-missing",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "unclassified absolute local-package input"
+    },
+    {
+      "name": "generated-record-duplicate",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "unclassified absolute local-package input"
+    },
+    {
+      "name": "generated-path-cache-prefix-lookalike",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "unclassified absolute local-package input"
+    },
+    {
+      "name": "generated-path-source-prefix-lookalike",
+      "expected": "accept",
+      "actual": "accept",
+      "detail": "verified"
+    },
+    {
+      "name": "generated-path-cache-equals-file",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "unclassified absolute local-package input"
+    },
+    {
+      "name": "generated-path-outside-cache",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "unclassified absolute local-package input"
+    },
+    {
+      "name": "generated-path-parent-component",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "canonical absolute path required"
+    },
+    {
+      "name": "generated-path-wrong-suffix",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "invalid generated testmain record"
+    },
+    {
+      "name": "generated-path-go-extension",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "invalid generated testmain record"
+    },
+    {
+      "name": "generated-path-package-suffix",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "invalid generated testmain record"
+    },
+    {
+      "name": "generated-path-relative",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "selected package/input linkage mismatch"
+    },
+    {
+      "name": "distinct-valid-cache-/independent/new-cache",
+      "expected": "accept",
+      "actual": "accept",
+      "detail": "verified"
+    },
+    {
+      "name": "distinct-valid-cache-/independent/cache/build/subcache",
+      "expected": "accept",
+      "actual": "accept",
+      "detail": "verified"
+    },
+    {
+      "name": "observed-cache-missing",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "classifier observed/requested GOCACHE mismatch"
+    },
+    {
+      "name": "observed-cache-mismatch",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "classifier observed/requested GOCACHE mismatch"
+    },
+    {
+      "name": "extra-orphan",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "classifier generated occurrence records mismatch"
+    },
+    {
+      "name": "mixed-invalid-source",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "false Go source path"
+    }
+  ],
+  "unexpected": [],
+  "os_process_events": [],
+  "fixed_pin_controls": 3,
+  "helper_global_and_module_identity": "unchanged"
+}

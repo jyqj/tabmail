@@ -1,0 +1,13 @@
+test_actual_enums_and_fallback_optional_metadata (scripts.tests.test_ordinary_receipt_contract.OrdinaryReceiptContractTests.test_actual_enums_and_fallback_optional_metadata) ... ok
+test_all_actual_routes_are_closed_receipt_envelopes (scripts.tests.test_ordinary_receipt_contract.OrdinaryReceiptContractTests.test_all_actual_routes_are_closed_receipt_envelopes) ... ok
+test_content_bcc_complete_empty_and_legacy_unknown_are_distinct (scripts.tests.test_ordinary_receipt_contract.OrdinaryReceiptContractTests.test_content_bcc_complete_empty_and_legacy_unknown_are_distinct) ... ok
+test_fresh_typed_shipping_envelope_bytes (scripts.tests.test_ordinary_receipt_contract.OrdinaryReceiptContractTests.test_fresh_typed_shipping_envelope_bytes) ... ok
+test_inspection_remains_separate (scripts.tests.test_ordinary_receipt_contract.OrdinaryReceiptContractTests.test_inspection_remains_separate) ... ok
+test_parse_and_typed_closed_field_sets (scripts.tests.test_ordinary_receipt_contract.OrdinaryReceiptContractTests.test_parse_and_typed_closed_field_sets) ... ok
+test_progress_distinguishes_unknown_from_complete_ledger (scripts.tests.test_ordinary_receipt_contract.OrdinaryReceiptContractTests.test_progress_distinguishes_unknown_from_complete_ledger) ... ok
+test_sensitive_and_unknown_fields_fail_closed_on_every_route (scripts.tests.test_ordinary_receipt_contract.OrdinaryReceiptContractTests.test_sensitive_and_unknown_fields_fail_closed_on_every_route) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.005s
+
+OK

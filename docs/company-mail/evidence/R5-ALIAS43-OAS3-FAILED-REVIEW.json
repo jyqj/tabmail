@@ -1,0 +1,56 @@
+{
+  "actual_source_closure_sha256": "010b187252c8dcbd043c107e8f01c1f186b189c3c67ce18e39d3643a7850b165",
+  "boundary": "source/schema parity tool including recursive nullability and booleanliteral/aliases; no UIfalse/runtimeCurrentAuthority/wholeCI",
+  "cleanup": {
+    "all_owned_groups_absent": true,
+    "noGoPGNode_S_M_browser_or_build": true,
+    "source_three_signed_pins_equal": true
+  },
+  "original_whole_failure_not_overwritten": true,
+  "results": {
+    "new43-plus-affected3": {
+      "CLI_exit": 1,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false,
+      "wall_seconds": 0.6245172023773193
+    },
+    "real-contract-checker-CLI": {
+      "CLI_exit": 1,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false,
+      "wall_seconds": 0.3162670135498047
+    }
+  },
+  "source_sha": "ccd389e48c79c2143401bc0d96d6575304e457cf",
+  "unit_actual": {
+    "actual_failed_or_error": [
+      {
+        "class": "scripts.tests.test_openapi_contract.OpenAPIRepositoryTests.test_real_repository_contract",
+        "name": "test_real_repository_contract",
+        "status": "FAIL"
+      },
+      {
+        "class": "scripts.tests.test_openapi_contract.OpenAPIRepositoryTests.test_real_enum_order_is_not_semantic_drift",
+        "name": "test_real_enum_order_is_not_semantic_drift",
+        "status": "FAIL"
+      }
+    ],
+    "actual_method_count": 46,
+    "actual_pass_count": 44,
+    "actual_skip_count": 0,
+    "actual_unittest_terminal_summary": [
+      "Ran 46 tests in 0.430s",
+      "FAILED (failures=2)"
+    ],
+    "exact_original_full17_OAS_not_rerun": true,
+    "expected_count46_presence": true
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "artifact_kind": "central_bounded_status_summary_NOT_new_execution_receipt",
+  "frozen18": {
+    "private_editable_tree": "/private/tmp/tm-r5current18-complete-SOURCE.7vf5gy3_/editable-source-tree",
+    "source_sha": "c7bf9155f89cd10371665cbd896309385a20dbc0",
+    "closure": "47fd3642eefab51ed9c19db7bc31167ce19f87f864781f36ffbcb3d8ecce9f0f",
+    "files": 1309,
+    "bytes": 20747066,
+    "migrations": "1..18 only",
+    "metadata": "completeeditable_SOURCE checkpoint not build or runtimeMethod signature",
+    "not_current19": true
+  },
+  "catalog15": {
+    "collector_prefix": "cbc7",
+    "top_children_leaf_nodes": [
+      15,
+      155,
+      157,
+      170
+    ],
+    "Go_exit": 0,
+    "skip_unfinished_owned_SQL": 0,
+    "source_scope": "frozen18 c7bf/47fd",
+    "tags": "r5benchmark",
+    "GoList_packages": 402,
+    "local_inputs": 371,
+    "embeds": 22,
+    "fork_selected": 34,
+    "package_elapsed": 3.917,
+    "Go_includingcompile_seconds": 14.395,
+    "outer300_seconds": 15.524127960205078,
+    "RSS_samples": 144,
+    "RSS_peak_bytes": 499302400,
+    "RSS_maxgap_seconds": 0.1266188621520996,
+    "sampledRSS_not_hardquota": true,
+    "CPU": "psobserved plusGOMAX2 not hardCPUlimit",
+    "no_network_PG_SQL_owner_fullreference_SML": true,
+    "extra_independent_actual_machine_report_not_located_at_integration": true
+  },
+  "keytouch18": {
+    "source": "42126f8ed039fa143031689ecf3d4c6266721c50",
+    "closure": "85fd37c1eb40dcca3779aa06b70a134973eb5e709f17f4aa15f0d7968a8d1977",
+    "top_leaf_nodes": [
+      1,
+      4,
+      5
+    ],
+    "race_Go_exit": 0,
+    "outer180_seconds": 22.929187059402466,
+    "causal_fixture_only": "samekey blocker and actualasyncTouch oncecommit witnessed in controlledfixture; not historicalholder89451 proof or productfix",
+    "no_current19_runtime_transfer": true,
+    "cleanup": "native97643stop0 PIDsocketgroupsgone tempDBnone base0conn private stoppedroot"
+  },
+  "pg_phase_a331": {
+    "source_scope": "private derivative olda331/schema18 only not current19",
+    "capsule": "/private/tmp/tm-r5-pg-phase-a331-3r5aftg3",
+    "files": 1256,
+    "originalfiles": 1255,
+    "delta_files": 12,
+    "after_manifest_sha256_from_author": "dd0514e7520d390baec208d3783edb21b2cd04f7d71c4c1f790051d26c7c16bc",
+    "patch_sha256_from_author": "2b2f62dadcb60382a42398d6e5637a7511819296ed0862d2b86b5a7f4988b93a",
+    "independent_source_verdict": "BLOCKED",
+    "reviewer": "pg_phase_a331_source_review delivered via PM; machine_report_not_located",
+    "blockers": [
+      "packet selector andcontrollerhash unbound",
+      "parser completeness emiterror unmatched andGo8terminal checks missing",
+      "sampler health missing",
+      "allDB/group/nativecleanup omissions",
+      "terminal/postcheck budget exception handling",
+      "instanceaggregate waits not perfixture attribution andsource attrs dropped"
+    ],
+    "runtime": "NOT_RUN",
+    "legacySuppression16_vs18_assertion": "preserved notfixed"
+  },
+  "Docker_ready_confirmed": false,
+  "fourCI_complete": false,
+  "task_complete": false,
+  "product_green": false
+}

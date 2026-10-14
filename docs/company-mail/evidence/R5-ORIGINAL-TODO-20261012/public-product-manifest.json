@@ -1,0 +1,68 @@
+{
+  "public_product_commit": "7524e650378487e8d32e70252cf1bd77010260b5",
+  "public_product_tree": "4eb493c2b1a1b98353229500e2b840f61a297e81",
+  "original_base": "af1444807e1018c95b963b8c5b74e2b2e5060b9a",
+  "original_todos_closed": [],
+  "files": [
+    {
+      "path": ".github/workflows/company-p0.yml",
+      "git_blob": "13f8c447bf531c1477b9d284efaa8adff9a827bd",
+      "sha256": "262362e17de63d7df2c2902ff06ea92480c04947c8f2cb4abd28661f59c61b8c",
+      "bytes": 18643
+    },
+    {
+      "path": "internal/api/handlers/r5_external_batch_test.go",
+      "git_blob": "57cc843dfef5c6cdfbc2c382a0a47f748d313aea",
+      "sha256": "065cbf2960459743207832263450fe6d358cd5c30e30efb5eeb03b5633e6cf46",
+      "bytes": 9959
+    },
+    {
+      "path": "internal/store/postgres/company_http_test.go",
+      "git_blob": "dd1fc795afe4129da37b7104f65181a070715d85",
+      "sha256": "1d849b6b5f64035fc4b9ec41256471509528ac6e445a1bedd1cba341e4b0ef63",
+      "bytes": 13225
+    },
+    {
+      "path": "internal/store/postgres/company_safety_contracts_test.go",
+      "git_blob": "e928df91402e16980b4beb8e965f7552b7a15937",
+      "sha256": "a35c7ed55e58c3656676f7699f3a3013921e091b4a42592dd0ed1b17b4c5b2df",
+      "bytes": 11377
+    },
+    {
+      "path": "internal/store/postgres/r5_protocol_shared_test.go",
+      "git_blob": "b5860727c99e57da6a120af5103142c8a5d3314f",
+      "sha256": "7d17a2055b5282ce113a489615a804ba790e7abc0392336bc0d408afd0df0289",
+      "bytes": 81093
+    },
+    {
+      "path": "internal/testpg/r5_frontend_fixture_test.go",
+      "git_blob": "244049108c3ac80b25d255ed295221c29da5abc5",
+      "sha256": "a90d59ac434be687fdd05dbd9fa5e6a3ae079d26ae57e557b92d274fdad3c559",
+      "bytes": 2510
+    },
+    {
+      "path": "internal/testpg/r5_loopback_probe.go",
+      "git_blob": "a7e1aa05c34e82522322323f13ce2f9dc8a0187c",
+      "sha256": "3137e02ab0bfe5cbab8bc2c6d6916e2cffe1da54145f9250f2ca326844fc39c4",
+      "bytes": 1680
+    },
+    {
+      "path": "scripts/required_frontend_fixture_tests.json",
+      "git_blob": "32d53b3bda4af5731b397f3ce51c1e8d7b05ed54",
+      "sha256": "a82b234260078f18a0820d50876d22109474aa01344843e4fa3db2abfd41c895",
+      "bytes": 203
+    },
+    {
+      "path": "scripts/run_r5_frontend_fixture.py",
+      "git_blob": "80e889ef64f549cd89fecfd0998d6dea3fe5ac86",
+      "sha256": "4753e9641016463d69ac3db4e815f2f1b631ffd326845ab003b1cbbe8d824e46",
+      "bytes": 11369
+    },
+    {
+      "path": "scripts/tests/test_r5_frontend_fixture.py",
+      "git_blob": "4684680d9ffaefc66f48b5d1d26a4eaca453fd52",
+      "sha256": "b88cbd3f7cef72965e6db31ebb716530c9bbb6599ceb27d777d11af80dd78e31",
+      "bytes": 10837
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+PASSED description-only conflict preserves all remote revocations/quotas and raw NULL 
+PASSED explicit false / zero / empty list survive conflict confirmation 
+PASSED NULL profile zones remain omitted on ordinary description save; no override inherit field 
+PASSED unchanged form cannot submit 
+PASSED same-field remote conflict is visible and deliberate preserved edit wins only after confirmation 
+PASSED explicit same-field choice of ORIGINAL quota after seeing remote change is transmitted 
+PASSED refresh GET 500 freezes draft and successful retry recovers 
+PASSED refresh GET 409 freezes draft and successful retry recovers 
+PASSED read 401 locks current session and SAME account re-login recovers 
+PASSED write 401 locks current session and SAME account re-login recovers 
+PASSED read 403 locks current session and SAME account re-login recovers 
+PASSED write 403 locks current session and SAME account re-login recovers 
+PASSED cancel close/reopen discards edits and binds fresh baseline; A to B has no leaked intent 
+PASSED delayed old refresh cannot contaminate new account draft 
+PASSED delayed old refresh cannot contaminate new tenant draft 
+PASSED delayed old refresh cannot contaminate new relogin draft 
+PASSED delayed old PATCH cannot close or unlock a new session PATCH 
+PASSED repeated 409 never blindly replays and can recover after new refresh 
+PASSED SSE invalidation drops prior confirmation and requires fresh manual review 
+PASSED missing target during refresh freezes; close and select valid B recovers 
+PASSED unchecking confirmation and refreshing again remove write eligibility 
+PASSED refresh 500 then page reload restores editing without frozen old draft 
+PASSED refresh rejects incomplete snapshot then recovers after valid authoritative read 
+PASSED refresh rejects foreign-tenant snapshot then recovers after valid authoritative read 
+PASSED refresh rejects system snapshot then recovers after valid authoritative read 
+PASSED batch2 independent: successful rebase then interrupted refresh retains baseline and manual fence 

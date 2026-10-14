@@ -1,10 +1,11 @@
-import type { DraftPayload, MailDraft } from "@/lib/company";
+import { errorCode, isConflict, isDeterministicErrorCode } from "@/lib/error-code";
+import type { DraftPayload, MailDraft, MailDraftInput, MailDraftEditor } from "@/lib/company";
 export type DraftInput = {
     mailbox_id: string;
     payload: DraftPayload;
 };
 export type DraftTransport = {
-    write: (draft: MailDraft, create: boolean) => Promise<MailDraft>;
+    write: (draft: MailDraftInput, create: boolean) => Promise<MailDraft>;
     read: (id: string) => Promise<MailDraft>;
 };
 // Same wire semantics as Go's omitempty; object ordering is not an edit.
@@ -26,26 +27,21 @@ export function draftKey(input: DraftInput): string {
         return value;
     });
 }
-export function draftErrorCode(e: unknown): string | undefined {
-    return (e as {
-        error?: {
-            code?: string;
-        };
-    })?.error?.code;
-}
-// One revision lane shared by autosave, explicit save and submit flush. No
+// One revision lane shared by autosave, explicit save, submit flush and reload. No
 // request can observe a stale locally acknowledged revision, and a conflict
 // latches the lane until the user explicitly reloads or creates a copy.
-type PendingWrite = { draft: MailDraft; create: boolean; uncertain: boolean };
+type PendingWrite = { draft: MailDraftInput; create: boolean; uncertain: boolean };
 
 export class DraftWriter {
-    private snapshot: MailDraft;
+    private snapshot: MailDraftInput & { id: string };
+    private confirmed?: MailDraft;
     private tail: Promise<unknown> = Promise.resolve();
     private closed = false;
     private conflict: unknown;
     private pending?: PendingWrite;
-    constructor(initial: MailDraft, private transport: DraftTransport, private guard: () => void = () => { }) {
+    constructor(initial: MailDraftEditor, private transport: DraftTransport, private guard: () => void = () => { }) {
         this.snapshot = structuredClone({ ...initial, id: initial.id || crypto.randomUUID() });
+        if ("updated_at" in initial) this.confirmed = structuredClone(initial);
     }
     get id() { return this.snapshot.id!; }
     close() { this.closed = true; }
@@ -55,7 +51,9 @@ export class DraftWriter {
             throw new DOMException("Editor closed", "AbortError");
     }
     private acknowledgementMatches(observed: MailDraft, command: PendingWrite): boolean {
-        return observed.id === command.draft.id &&
+        return Number.isSafeInteger(command.draft.revision) && command.draft.revision >= 0 &&
+            Number.isSafeInteger(observed.revision) && observed.revision >= 1 &&
+            observed.id === command.draft.id &&
             observed.revision === command.draft.revision + 1 &&
             draftKey(observed) === draftKey(command.draft);
     }
@@ -63,26 +61,29 @@ export class DraftWriter {
         this.check();
         let saved: MailDraft;
         try {
-            saved = await this.transport.write(structuredClone(command.draft), command.create);
+            // Transport/cache responses are borrowed objects, just like write
+            // inputs. Own the complete response before validating or retaining it.
+            saved = structuredClone(await this.transport.write(structuredClone(command.draft), command.create));
             this.check();
             if (!this.acknowledgementMatches(saved, command))
                 throw new Error("Draft acknowledgement does not match the submitted revision");
         } catch (e) {
             this.check();
-            const code = draftErrorCode(e);
+            const code = errorCode(e);
             const unknown = !code || code === "INTERNAL_ERROR" || code === "INTERNAL";
-            const mayReplayConflict = command.uncertain && code === "CONFLICT";
+            const mayReplayConflict = command.uncertain && isConflict(e);
             if (unknown || mayReplayConflict) {
                 command.uncertain = true;
                 // Pin the exact UUID, revision AND input until its outcome is
                 // known. New typing must not change a retried creation/update.
                 this.pending = command;
                 let observed: MailDraft | undefined;
-                try { observed = await this.transport.read(this.id); }
+                try { observed = structuredClone(await this.transport.read(this.id)); }
                 catch { /* a failed readback is not proof that the write failed */ }
                 this.check();
                 if (observed && this.acknowledgementMatches(observed, command)) {
                     this.snapshot = observed;
+                    this.confirmed = observed;
                     this.pending = undefined;
                     return structuredClone(observed);
                 }
@@ -93,13 +94,14 @@ export class DraftWriter {
             }
             if (mayReplayConflict)
                 throw new Error("Draft save is still unconfirmed; retry the original request when connected");
-            if (["CONFLICT", "FORBIDDEN", "NOT_FOUND", "UNAUTHORIZED"].includes(code ?? ""))
+            if (isDeterministicErrorCode(code))
                 this.conflict = e;
             if (!unknown && !mayReplayConflict)
                 this.pending = undefined;
             throw e;
         }
         this.snapshot = saved;
+        this.confirmed = saved;
         this.pending = undefined;
         return structuredClone(saved);
     }
@@ -112,23 +114,33 @@ export class DraftWriter {
             if (this.pending)
                 await this.persist(this.pending);
             this.check();
-            if (this.snapshot.revision > 0 && draftKey(copy) === draftKey(this.snapshot))
-                return structuredClone(this.snapshot);
+            if (!Number.isSafeInteger(this.snapshot.revision) || this.snapshot.revision < 0)
+                throw new Error("Draft revision cannot be represented safely in this editor");
+            if (this.confirmed && this.snapshot.revision > 0 && draftKey(copy) === draftKey(this.snapshot))
+                return structuredClone(this.confirmed);
+            if (this.snapshot.revision === Number.MAX_SAFE_INTEGER)
+                throw new Error("Draft next revision cannot be represented safely in this editor");
             return this.persist({ draft: { ...this.snapshot, ...copy }, create: this.snapshot.revision === 0, uncertain: false });
         });
         this.tail = operation;
         return operation;
     }
-    async reload(): Promise<MailDraft> {
-        await this.tail.catch(() => { });
-        this.check();
-        const observed = await this.transport.read(this.id);
-        this.check();
-        if (observed.id !== this.id || observed.revision < 1)
-            throw new Error("Draft readback identity does not match this editor");
-        this.snapshot = observed;
-        this.conflict = undefined;
-        this.pending = undefined;
-        return structuredClone(observed);
+    reload(): Promise<MailDraft> {
+        const operation = this.tail.catch(() => { }).then(async () => {
+            this.check();
+            const observed = structuredClone(await this.transport.read(this.id));
+            this.check();
+            if (observed.id !== this.id || !Number.isSafeInteger(observed.revision) || observed.revision < 1)
+                throw new Error("Draft readback identity does not match this editor");
+            this.snapshot = observed;
+            this.confirmed = observed;
+            this.conflict = undefined;
+            this.pending = undefined;
+            return structuredClone(observed);
+        });
+        // Reserve the lane before returning, so later writes and reloads cannot
+        // start against a snapshot that this read may replace.
+        this.tail = operation;
+        return operation;
     }
 }

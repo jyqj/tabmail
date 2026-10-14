@@ -1,0 +1,51 @@
+{
+  "run_id": 37619817397,
+  "pr": 56,
+  "head_sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+  "backend_tested_merge_sha": "49f6a43483c9f8f5aca4a615071eb3818975d239",
+  "jobs": {
+    "production-web": "success",
+    "browser-journey": "success",
+    "backend": "failure at Race tests with PostgreSQL",
+    "frontend": "failure at Versioned source tests from independent clean Git checkouts"
+  },
+  "backend_artifact": {
+    "id": 11481926140,
+    "sha256": "1a3e2afaf9240c474151df259b541630d996edb4772c6b2c1ec0461bb8620dbc",
+    "filename": "tabmail-ci-37619817397-backend-evidence.zip"
+  },
+  "backend": {
+    "source_sha": "49f6a43483c9f8f5aca4a615071eb3818975d239",
+    "process_exit_code": 1,
+    "status": "fail",
+    "events": 33005,
+    "tests_started": 8023,
+    "tests_passed": 7898,
+    "tests_failed": 0,
+    "tests_skipped": 105,
+    "mandatory_tests": 247,
+    "mandatory_missing_or_not_passed": 180,
+    "log_sha256": "5e9748d086701d47251f6a66be9895ef15debaf5b9c62d205de67944e578ba50"
+  },
+  "backend_findings": [
+    "PostgreSQL package timed out at 180.053 seconds; no individual test assertion failure event recorded",
+    "Current LF01/successor/pair opt-in tests skip without their explicit environment flags; the unchanged evidence gate rejects those skips",
+    "Pair fixture additionally pins DSN host/port to 127.0.0.1:55447; enabling flags alone on the current CI PostgreSQL port is insufficient"
+  ],
+  "frontend": {
+    "current_tests": 702,
+    "current_failures": 2,
+    "current_errors": 4,
+    "frozen_tests_reported_separately": 4,
+    "failure_roots": [
+      "Current API client inventory differs from saved reviewed clients.json",
+      "Transaction inventory has stale caller locations following later product changes"
+    ],
+    "log_job_id": 112786946042
+  },
+  "limits": [
+    "A passing archive job does not qualify release tests",
+    "Counts are test events including parent/subtests, not additive product coverage",
+    "No timeout, selection, audit threshold, frozen artifact or skip-allowlist change recommended"
+  ]
+}

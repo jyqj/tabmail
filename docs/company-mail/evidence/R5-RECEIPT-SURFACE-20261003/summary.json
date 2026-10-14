@@ -1,0 +1,76 @@
+{
+  "base": "4b2eb09c18adb50aa128af1907b53820e7305f95",
+  "prior_formal_source": "20b51d48c4a849615817ee461699d31fe3e0cb4c",
+  "scope": "receipt TSX acceptance, oracle, separate unit tests and safe documentation only",
+  "source_sha256": {
+    "web/components/company/r5-protocol-shared-components.test.tsx": "72d5ef8698c8d06e808d277f100aa9e858a6d50aac3260c485be5e736d91bccc",
+    "web/components/company/r5-receipt-contract-oracle.ts": "6382e58c848d3a211329650ccc231c6715c048c856af8c1135baf7400539505a",
+    "web/components/company/r5-receipt-surface-oracle.test.ts": "6bb2744b71bc0062765464d6fc4edac6ecfc93853bd9b61538d444a8abdde9f3",
+    "web/lib/receipt-types.test.ts": "754af01ac5111f5245d89ecc74112cbf89b8e406da6cefb18be3f61a097530d6",
+    "web/components/company/r5-protocol.test.tsx": "8cb988818377c82243f019e66095efadb2e2e0a437a35658df4e2e1c5325543a",
+    "web/components/company/r5-receipt-contract-oracle.test.ts": "7a87ad29a6a07bbbc30941ada7213168964740d4a3d646123a1c028b691ba63e",
+    "docs/company-mail/evidence/R5-PROTOCOL-CASES.json": "f46d58c45dbf66e48eb1e379fd019aa5c02dc153f004548a69752f45dc52b1b7",
+    "docs/company-mail/evidence/R5-EXTERNAL-RUNTIME-20261003/README.md": "6f1dfd81de3605022628010acb34d694876fa768f5c686b7456bd0edb6f318e3",
+    "docs/company-mail/evidence/R5-EXTERNAL-RUNTIME-V2-20261003/README.md": "ba60911fccbeb9d1f1f45b0ea3382f00b62e012eb46d127e79f5d3ae4838708c",
+    "web/r5-external-runtime-probe.test.tsx": "eaf94242dca198c55af5369464744a0c582ab6c201109475bb437aa6e9c47420"
+  },
+  "unchanged_from_base": [
+    "web/lib/receipt-types.test.ts",
+    "web/components/company/r5-protocol.test.tsx",
+    "web/components/company/r5-receipt-contract-oracle.test.ts",
+    "docs/company-mail/evidence/R5-PROTOCOL-CASES.json",
+    "docs/company-mail/evidence/R5-EXTERNAL-RUNTIME-20261003/README.md",
+    "docs/company-mail/evidence/R5-EXTERNAL-RUNTIME-V2-20261003/README.md",
+    "web/r5-external-runtime-probe.test.tsx"
+  ],
+  "validation": {
+    "original_unit": {
+      "passed": 63,
+      "failed": 0,
+      "command": "env PATH=/workspace/tabmail-cloud/tools/go/bin:$PATH GOMODCACHE=/workspace/tabmail-cloud/gomod GOCACHE=/workspace/tabmail-cloud/gocache GOWORK=off GOPROXY=off GOSUMDB=off GOFLAGS=-mod=readonly npx vitest run lib/receipt-types.test.ts components/company/r5-protocol.test.tsx components/company/r5-receipt-contract-oracle.test.ts"
+    },
+    "new_unit": {
+      "passed": 19,
+      "failed": 0,
+      "command": "npx vitest run components/company/r5-receipt-surface-oracle.test.ts"
+    },
+    "additional_unchanged_consumer_run": {
+      "passed": 79,
+      "failed": 0,
+      "command": "npx vitest run lib/receipt-types.test.ts features/mail/components/receipt-consumer.test.tsx components/company/r5-receipt-contract-oracle.test.ts"
+    },
+    "eslint": {
+      "exit_code": 0,
+      "command": "npx eslint components/company/r5-protocol-shared-components.test.tsx components/company/r5-receipt-contract-oracle.ts components/company/r5-receipt-surface-oracle.test.ts"
+    },
+    "full_typescript": {
+      "exit_code": 2,
+      "command": "npx tsc --noEmit --incremental false",
+      "existing_blocker": "TS7016 at unchanged r5-external-runtime-probe.test.tsx:9; missing jsdom declaration"
+    },
+    "scoped_typescript": {
+      "exit_code": 0,
+      "command": "npx tsc --project /tmp/r5-receipt-surface-tsconfig.json --noEmit --incremental false",
+      "config": {
+        "extends": "/workspace/tabmail/web/tsconfig.json",
+        "exclude": [
+          "/workspace/tabmail/web/node_modules",
+          "/workspace/tabmail/web/r5-external-runtime-probe.test.tsx"
+        ]
+      }
+    },
+    "first_original_unit_attempt": {
+      "exit_code": 1,
+      "passed": 60,
+      "skipped": 3,
+      "reason": "/usr/bin/go is not Go toolchain; Unknown option: test"
+    }
+  },
+  "formal_pg_components_run": false,
+  "prior_formal_failure_preserved": true,
+  "task_complete": false,
+  "product_green": false,
+  "central": "10/171 unchanged",
+  "response_or_token_published": false,
+  "merge_or_deploy": false
+}

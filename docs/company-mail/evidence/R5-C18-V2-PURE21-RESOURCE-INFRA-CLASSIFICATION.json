@@ -1,0 +1,42 @@
+{
+  "actual_exception": "ValueError: current limit exceeds maximum limit",
+  "actual_product_tests": 0,
+  "audit_hook": "not armed because resource initialization precedes audit setup",
+  "child_exit": 1,
+  "classification": "CAPTURE_CONTROLLER_RESOURCE_SETUP_INFRAERROR",
+  "cpu_limit_before_failure": "CPU setrlimit60 completed before failing AS statement; no workload ran",
+  "failing_statement": "resource.setrlimit(resource.RLIMIT_AS,(1073741824,1073741824))",
+  "memory_1GiB_cap": "not established; acceptance unknown/failure",
+  "no_retry": true,
+  "original_archive_sha256": "991a1d040db0e9083bee30725a765fc805cf30f1836bc8fac94982e998f276f1",
+  "owned_group": 66823,
+  "owned_group_final_observation": {
+    "members": [],
+    "non_zombie_live_pids": [],
+    "status": "observed"
+  },
+  "postterminal_readonly_resource_probe": {
+    "RLIMIT_AS": [
+      9223372036854775807,
+      9223372036854775807
+    ],
+    "RLIMIT_CPU": [
+      9223372036854775807,
+      9223372036854775807
+    ],
+    "RLIMIT_DATA": [
+      9223372036854775807,
+      9223372036854775807
+    ],
+    "RLIMIT_RSS": [
+      9223372036854775807,
+      9223372036854775807
+    ],
+    "scope": "separate no-workload parent environment getrlimit only; not proof of failed child memory enforcement"
+  },
+  "scope_boundary": "7 signed C18 files copied readonly; no Go/PG/runtime source capture/benchmark; pure grammar not yet executed",
+  "test_assertion_failure": false,
+  "tests_started": 0,
+  "tests_terminal": 0,
+  "unittest_discovery_started": false
+}

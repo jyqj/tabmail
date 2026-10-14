@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "run_id": 37631117018,
+  "run_url": "https://github.com/jyqj/tabmail/actions/runs/37631117018",
+  "event": "pull_request",
+  "head_sha": "e32564304c0c84aa80b1184e72129fb0316d989d",
+  "actual_backend_checkout_sha": "8a6fe55db05bb11f9b6b0d21edd3331490d9d055",
+  "backend": {
+    "status": "fail",
+    "process_exit_code": 1,
+    "tests_started": 8095,
+    "tests_passed": 7977,
+    "tests_failed": 0,
+    "tests_skipped": 105,
+    "mandatory_tests": 247,
+    "mandatory_missing_or_not_passed": 180,
+    "package_failures": [
+      {
+        "Package": "tabmail/internal/store/postgres",
+        "Elapsed": 180.059
+      }
+    ],
+    "timeout_messages": [
+      "panic: test timed out after 3m0s"
+    ],
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "unqualified": true
+  },
+  "audit": {
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 8,
+        "critical": 0,
+        "total": 8
+      },
+      "dependencies": {
+        "prod": 418,
+        "dev": 401,
+        "optional": 117,
+        "peer": 9,
+        "peerOptional": 0,
+        "total": 856
+      }
+    },
+    "strict_gate": "failure; zero-vulnerability predicate unchanged"
+  },
+  "backend_archive": {
+    "artifact_id": 11486461863,
+    "sha256": "9bb01164a2d8560fd2b72348532c698ba5e5aa411659bf619ff7bf0936a566e2",
+    "bytes": 428382,
+    "digest_verified": true,
+    "raw_jsonl_sha256": "bf7524a3627970da881b215ab3a7de4a831547948e5e7d26c22b269eb02ca670",
+    "raw_jsonl_bytes": 7256944
+  },
+  "audit_archive": {
+    "artifact_id": 11487036091,
+    "sha256": "ff871f5f1cf193f66516797be7f5ae35ec42f88dd64e1cab8744f6acbb95c7a4",
+    "bytes": 1064,
+    "digest_verified": true
+  },
+  "retained_extract": {
+    "path": "backend-failure-events.jsonl",
+    "sha256": "3d7a7e21c3ab59ab0ebce772328e3367f5ae7af83fc65743747357eda50d6578",
+    "bytes": 19634,
+    "description": "Derived JSONL subset of original fail/skip events and timeout messages; not the complete original test log."
+  },
+  "limits": [
+    "Raw event counts include parent and child events and are not independent scenario counts.",
+    "This actual run has a package timeout; zero explicit test failure events does not mean the package passed.",
+    "Earlier cumulative serial-budget diagnosis is historical evidence, not a new per-test timing analysis of this run.",
+    "Current-source catalog checks failed with revision3 before revision4 reconciliation; no overall CI or release qualification is asserted."
+  ]
+}

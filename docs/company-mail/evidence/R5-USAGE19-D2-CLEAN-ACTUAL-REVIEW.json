@@ -1,0 +1,92 @@
+{
+  "DBsamples": 195,
+  "Goexit": 0,
+  "actualGOMAXPROCS": 2,
+  "actual_phases_PID_status_classification": [
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:488: phase=after-row telemetry_pid=72229 advisory_blocker_pid=72227 query_class=usage_update\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+      "Time": "2026-10-03T12:03:20.544984+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:491: phase=same_key_SHARE_wait waiter_pid=72232 exact_blocker_pid=72229 holder_query_class=usage_update\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+      "Time": "2026-10-03T12:03:20.548519+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:498: phase=authority_row_free_after_usage_waiter_join outcome=pass\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+      "Time": "2026-10-03T12:03:22.048483+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:503: phase=independent_router_receipt http_status=200 error_code=no_error_code reason_class=no_error_message\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+      "Time": "2026-10-03T12:03:22.055801+08:00"
+    },
+    {
+      "Action": "output",
+      "Output": "    r5_key_touch_admission_test.go:561: phase=telemetry_committed holder_pid=72229 trigger_phase=after-row calls=1 last_used_at_and_ip_verified=true\n",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+      "Time": "2026-10-03T12:03:22.071772+08:00"
+    }
+  ],
+  "actualleaf": 1,
+  "actualtops": 1,
+  "afterfixture_exact8158445_pinned": "8158445c6bb9969b49c9f7d00da19b475e320bda781a0dba3882399bcd6a212f",
+  "base_SQL_actual19": true,
+  "clean_manifest_SHA1938_chain_bound": true,
+  "cleanup": {
+    "DB_connection_query_known": true,
+    "all_non_base_owned_databases": [],
+    "all_non_system_databases": [
+      "tm_usage19_d2"
+    ],
+    "all_owned_connections_zero": true,
+    "all_phase_groups_gone": true,
+    "excluded_current_observer_pid": 72379,
+    "native_PID_absent": true,
+    "native_stopped": true,
+    "observer_sampler_joined": true,
+    "other_client_connections_excluding_current_observer": 0,
+    "owned_native_PID": 71177,
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "temporary_DBs_absent": true
+  },
+  "code_kind": "policy_bound_local_input_superset_sha1_v2",
+  "code_source_closure_sha256": "e281399a4d32c013e9b485a088cf253670ee97559b338f1b9e79332a343bf9ac",
+  "code_source_sha": "f79eb4d71716da1357bac706427163ca41a35d79",
+  "controller_actual_tool_exit": 0,
+  "independent_actualHTTP200_logged": true,
+  "joint_dependency_sha256": "aca2dcc226494eab9ca6207e1e5416635bafceee20c90fddee4b646e2e4833fa",
+  "no_D1D3BSC_originalA_or_SMTPminiredis_Cobserver_run": true,
+  "no_retries": true,
+  "no_whole180_MethodCatalog_171_green": true,
+  "observed_fresh_DBs_lowerbound": [
+    "tm_test_1b8cb73e0de7457f80553620ac52c449"
+  ],
+  "original300initcapturecompilecleanup_elapsed": 19.04020881652832,
+  "original_D1PASS_originalD2FAIL_private_and4988_archive_preserved": true,
+  "package180_actual_elapsed": 3.561,
+  "postchecks": {
+    "code_same": true,
+    "runtime_closure_sha256": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+    "runtime_same": true
+  },
+  "racePASSnodes": 2,
+  "retryHTTP200_assertion_actually_passed": "exactsource branch r5TouchHTTP POSTretry requires200 and committedreceipt/pending/nohiddeneffects; no emitted retry statuslog claimed",
+  "runtime_inputs_closure_sha256": "4d76b35caa9c5e4c84f4ab438e21b7e2fe3a6a208a4d37ccad79bf0622e68ecc",
+  "signed_controller_sha256": "1590ae760c9bd8f0a099f0ee89bc189b7bc43115d24feb17053cab1d6241f50b",
+  "status": "D2_ONLY_CLEAN_CONTEXT_BOUNDED_PASS",
+  "telemetry_same_key_usagewaiter_authorityrowfree_then_actual_oncecommit_timestampIP_assertions_PASS": true,
+  "zeroSkipFAILunfinished": true
+}

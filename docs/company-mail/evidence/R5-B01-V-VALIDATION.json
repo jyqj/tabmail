@@ -1,0 +1,196 @@
+{
+  "version": 1,
+  "batch": "B01-V",
+  "date": "2026-09-30",
+  "base_commit": "c1b4deb17e02225804e30536e369a9905ce2cb94",
+  "tested_tree": "f6acecfd2657f7550f6c6424f2f4cffe36003a0f",
+  "source_files_verified": 687,
+  "source_hashes_verified": true,
+  "baseline": {
+    "run": 52,
+    "pass": 8,
+    "fail": 44
+  },
+  "intermediate": [
+    {
+      "run": "candidate1",
+      "counts": {
+        "run": 31,
+        "pass": 29,
+        "fail": 2
+      },
+      "remaining": "template grant row protection"
+    },
+    {
+      "run": "integrated-focused-1",
+      "counts": {
+        "run": 52,
+        "pass": 48,
+        "fail": 4
+      },
+      "remaining": "test expected 403 for receipt; existing protocol is exactly 404"
+    }
+  ],
+  "focused_runs": [
+    {
+      "allowed_skips_observed": [],
+      "errors": [],
+      "events": 235,
+      "log_sha256": "be49b4c02db2fd8d0fc1cc07f9eb08b037161cec5e2f74ac44592f07b8553673",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 9,
+      "manifest_sha256": "3d3c5c4d5342f72a67c389b739502fad3abb7468b6f6cfbbe2e47ac12df3766a",
+      "packages": 1,
+      "process_exit_code": 0,
+      "source_sha": "f6acecfd2657f7550f6c6424f2f4cffe36003a0f",
+      "status": "pass",
+      "suite": "b01-v",
+      "tests_failed": 0,
+      "tests_passed": 52,
+      "tests_skipped": 0,
+      "tests_started": 52
+    },
+    {
+      "allowed_skips_observed": [],
+      "errors": [],
+      "events": 235,
+      "log_sha256": "72732444acb6be454a4997f727259db6ef66835af1115664e1589dcfe56555ca",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 9,
+      "manifest_sha256": "3d3c5c4d5342f72a67c389b739502fad3abb7468b6f6cfbbe2e47ac12df3766a",
+      "packages": 1,
+      "process_exit_code": 0,
+      "source_sha": "f6acecfd2657f7550f6c6424f2f4cffe36003a0f",
+      "status": "pass",
+      "suite": "b01-v",
+      "tests_failed": 0,
+      "tests_passed": 52,
+      "tests_skipped": 0,
+      "tests_started": 52
+    },
+    {
+      "allowed_skips_observed": [],
+      "errors": [],
+      "events": 235,
+      "log_sha256": "74e017a12bf55eff330580ee40e3525b37361d644ffdab3ddb929abb8670bbef",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 9,
+      "manifest_sha256": "3d3c5c4d5342f72a67c389b739502fad3abb7468b6f6cfbbe2e47ac12df3766a",
+      "packages": 1,
+      "process_exit_code": 0,
+      "source_sha": "f6acecfd2657f7550f6c6424f2f4cffe36003a0f",
+      "status": "pass",
+      "suite": "b01-v",
+      "tests_failed": 0,
+      "tests_passed": 52,
+      "tests_skipped": 0,
+      "tests_started": 52
+    }
+  ],
+  "backend": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 5276,
+    "log_sha256": "f69198d4d2f33d6072f0e518bf8e69344bc33c9cf2935a2bff712b67fd8c7b70",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 171,
+    "manifest_sha256": "f4cb71524d628429074cb6b463c462e236a3e373a5571e8a76a2b0c5b1c2e1b3",
+    "packages": 50,
+    "process_exit_code": 0,
+    "source_sha": "f6acecfd2657f7550f6c6424f2f4cffe36003a0f",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 1232,
+    "tests_skipped": 1,
+    "tests_started": 1233
+  },
+  "http": {
+    "status": "pass",
+    "source_sha": "f6acecfd2657f7550f6c6424f2f4cffe36003a0f",
+    "errors": [],
+    "responses": 80,
+    "successful_operations": 65,
+    "required_success_variants": 66,
+    "excluded_operations": [
+      {
+        "method": "GET",
+        "path": "/api/v1/company/domains/{id}/verification",
+        "reason": "Live DNS status lookups are outside this loopback HTTP/PG fixture."
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/company/domains/{id}/verify",
+        "reason": "Live DNS verification is outside this loopback HTTP/PG fixture."
+      }
+    ],
+    "spec_sha256": "2c39ce1a1495af06204cebd12774ecf7fc64aa6bbd5784bb0fb46ac9d451c060",
+    "capture_sha256": "ab93f3bc14f9ef6edd04d9a154ec1e74e9892651da40d27de060864336f0d8a0"
+  },
+  "tools": {
+    "go": "1.25.7",
+    "postgres": "16.13",
+    "node": "22.23.2",
+    "python": "3.12.11",
+    "SDKROOT": "MacOSX15.4.sdk",
+    "postgres_source": "https://ftp.postgresql.org/pub/source/v16.13/postgresql-16.13.tar.bz2",
+    "postgres_source_sha256": "dc2ddbbd245c0265a689408e3d2f2f3f9ba2da96bd19318214b313cdd9797287"
+  },
+  "gates": {
+    "python_pass": 196,
+    "node_pass": 23,
+    "vitest_pass": 118,
+    "build": "pass",
+    "vet": "pass",
+    "tsc": "pass",
+    "eslint": "pass",
+    "next_build": "pass",
+    "contract": "16 models / 33 projections / 67 operations",
+    "missing_execution_negatives": "missing DSN / zero tests / disabled browser all rejected"
+  },
+  "protocol": {
+    "structured_cases": 46,
+    "shared_input_scoped_cases": 4,
+    "unit_cases": [
+      "RC03",
+      "RC04",
+      "RC05",
+      "OP03"
+    ],
+    "components_cases": [
+      "RC03",
+      "RC04",
+      "RC05"
+    ],
+    "task_complete": false,
+    "remaining": "HTTP/PG and other 42 shared cases; literal reasons not frozen"
+  },
+  "cleanup": {
+    "pg_stop_exit": 0,
+    "pidfile_removed": true,
+    "temporary_root": "/tmp/tabmail-r5-enqueue.LUPWmvR1"
+  },
+  "bundle": {
+    "path": "docs/company-mail/evidence/R5-B01-V-LOGS.tar.gz",
+    "members": 96,
+    "sha256": "d548dba1ef66332d4605e294c886fb975e78f2059342212b34d8676db8d4fb98"
+  },
+  "remaining": [
+    "current quota changes at final enqueue",
+    "old POST/idempotent replay authority",
+    "JWT enqueue/retry and other entrypoint competition",
+    "recovery target identity/deadline races",
+    "other FK/GC paths",
+    "P0-080 complete protocol consumers",
+    "P0-090/100/110/120 and all later phase gates",
+    "shipping browser / real DNS / SSE / scale performance / production upgrade readiness"
+  ],
+  "parent_completion": "6/171",
+  "remote_changes": false
+}

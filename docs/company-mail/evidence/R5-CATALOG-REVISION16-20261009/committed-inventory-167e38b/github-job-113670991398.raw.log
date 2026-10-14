@@ -1,0 +1,835 @@
+﻿2026-10-09T04:32:53.5228016Z Current runner version: '2.337.0'
+2026-10-09T04:32:53.5247839Z ##[group]Runner Image Provisioner
+2026-10-09T04:32:53.5248410Z Hosted Compute Agent
+2026-10-09T04:32:53.5249012Z Version: 20261002.596
+2026-10-09T04:32:53.5249390Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-09T04:32:53.5249813Z Build Date: 2026-10-02T22:28:27Z
+2026-10-09T04:32:53.5250253Z Worker ID: {0d6f93f9-ca6a-4ca4-9363-ea6a54f94cce}
+2026-10-09T04:32:53.5250681Z Region: centralus
+2026-10-09T04:32:53.5250994Z Cloud: Azure
+2026-10-09T04:32:53.5251350Z ##[endgroup]
+2026-10-09T04:32:53.5252146Z ##[group]Operating System
+2026-10-09T04:32:53.5252526Z Ubuntu
+2026-10-09T04:32:53.5252873Z 24.04.5
+2026-10-09T04:32:53.5253186Z LTS
+2026-10-09T04:32:53.5253531Z ##[endgroup]
+2026-10-09T04:32:53.5253848Z ##[group]Runner Image
+2026-10-09T04:32:53.5254234Z Image: ubuntu-24.04
+2026-10-09T04:32:53.5254607Z Version: 20261004.327.1
+2026-10-09T04:32:53.5255395Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-09T04:32:53.5256243Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+2026-10-09T04:32:53.5256819Z ##[endgroup]
+2026-10-09T04:32:53.5257520Z ##[group]GITHUB_TOKEN Permissions
+2026-10-09T04:32:53.5258909Z Contents: read
+2026-10-09T04:32:53.5259256Z Metadata: read
+2026-10-09T04:32:53.5259582Z ##[endgroup]
+2026-10-09T04:32:53.5261053Z Secret source: Actions
+2026-10-09T04:32:53.5261598Z Cache mode: write
+2026-10-09T04:32:53.5262057Z Prepare workflow directory
+2026-10-09T04:32:53.5482529Z Prepare all required actions
+2026-10-09T04:32:53.5526986Z Getting action download info
+2026-10-09T04:32:53.7805850Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-09T04:32:53.8753653Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+2026-10-09T04:32:54.3901266Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-09T04:32:54.5016229Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-09T04:32:54.6907326Z Complete job name: inventory
+2026-10-09T04:32:54.7425996Z ##[group]Run actions/checkout@v4
+2026-10-09T04:32:54.7426436Z with:
+2026-10-09T04:32:54.7426690Z   ref: 167e38b1541c027107fc81900f3e37fda7289677
+2026-10-09T04:32:54.7427041Z   persist-credentials: false
+2026-10-09T04:32:54.7427323Z   fetch-depth: 0
+2026-10-09T04:32:54.7427564Z   repository: jyqj/tabmail
+2026-10-09T04:32:54.7430076Z   token: ***
+2026-10-09T04:32:54.7430307Z   ssh-strict: true
+2026-10-09T04:32:54.7430548Z   ssh-user: git
+2026-10-09T04:32:54.7430779Z   clean: true
+2026-10-09T04:32:54.7431033Z   sparse-checkout-cone-mode: true
+2026-10-09T04:32:54.7431337Z   fetch-tags: false
+2026-10-09T04:32:54.7431602Z   show-progress: true
+2026-10-09T04:32:54.7431851Z   lfs: false
+2026-10-09T04:32:54.7432076Z   submodules: false
+2026-10-09T04:32:54.7432323Z   set-safe-directory: true
+2026-10-09T04:32:54.7432633Z   allow-unsafe-pr-checkout: false
+2026-10-09T04:32:54.7433003Z ##[endgroup]
+2026-10-09T04:32:54.8066395Z Syncing repository: jyqj/tabmail
+2026-10-09T04:32:54.8067611Z ##[group]Getting Git version info
+2026-10-09T04:32:54.8068028Z Working directory is '/home/runner/work/tabmail/tabmail'
+2026-10-09T04:32:54.8068785Z [command]/usr/bin/git version
+2026-10-09T04:32:54.8133958Z git version 2.55.0
+2026-10-09T04:32:54.8146052Z ##[endgroup]
+2026-10-09T04:32:54.8156235Z Temporarily overriding HOME='/home/runner/work/_temp/c9d08dda-83f8-4bdf-ba7b-4f67a8fd5708' before making global git config changes
+2026-10-09T04:32:54.8157733Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T04:32:54.8160211Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/tabmail/tabmail
+2026-10-09T04:32:54.8267784Z Deleting the contents of '/home/runner/work/tabmail/tabmail'
+2026-10-09T04:32:54.8268874Z ##[group]Initializing the repository
+2026-10-09T04:32:54.8269571Z [command]/usr/bin/git init /home/runner/work/tabmail/tabmail
+2026-10-09T04:32:54.8364345Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-09T04:32:54.8365314Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-09T04:32:54.8366233Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-09T04:32:54.8366812Z hint: call:
+2026-10-09T04:32:54.8367038Z hint:
+2026-10-09T04:32:54.8367389Z hint: 	git config --global init.defaultBranch <name>
+2026-10-09T04:32:54.8367893Z hint:
+2026-10-09T04:32:54.8368421Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-09T04:32:54.8369489Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-09T04:32:54.8370206Z hint:
+2026-10-09T04:32:54.8370552Z hint: 	git branch -m <name>
+2026-10-09T04:32:54.8370952Z hint:
+2026-10-09T04:32:54.8371508Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-09T04:32:54.8372454Z Initialized empty Git repository in /home/runner/work/tabmail/tabmail/.git/
+2026-10-09T04:32:54.8377269Z [command]/usr/bin/git remote add origin https://github.com/jyqj/tabmail
+2026-10-09T04:32:54.8420658Z ##[endgroup]
+2026-10-09T04:32:54.8421327Z ##[group]Disabling automatic garbage collection
+2026-10-09T04:32:54.8423670Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-09T04:32:54.8446178Z ##[endgroup]
+2026-10-09T04:32:54.8446597Z ##[group]Setting up auth
+2026-10-09T04:32:54.8450709Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T04:32:54.8473301Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T04:32:54.8766995Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T04:32:54.8791269Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T04:32:54.8962636Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T04:32:54.8987613Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T04:32:54.9158433Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-09T04:32:54.9188975Z ##[endgroup]
+2026-10-09T04:32:54.9189644Z ##[group]Fetching the repository
+2026-10-09T04:32:54.9195454Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+2026-10-09T04:32:59.6758986Z From https://github.com/jyqj/tabmail
+2026-10-09T04:32:59.6759598Z  * [new branch]      audit-pr21-41b015c       -> origin/audit-pr21-41b015c
+2026-10-09T04:32:59.6760194Z  * [new branch]      candidate/r5-consumer-adapter-20261004 -> origin/candidate/r5-consumer-adapter-20261004
+2026-10-09T04:32:59.6760712Z  * [new branch]      candidate/r5-consumer-adapter-corrected-20261004 -> origin/candidate/r5-consumer-adapter-corrected-20261004
+2026-10-09T04:32:59.6761405Z  * [new branch]      candidate/r5-consumer-classifier-contract-20261004 -> origin/candidate/r5-consumer-classifier-contract-20261004
+2026-10-09T04:32:59.6762196Z  * [new branch]      candidate/r5-consumer-generated-provenance-20261004 -> origin/candidate/r5-consumer-generated-provenance-20261004
+2026-10-09T04:32:59.6762900Z  * [new branch]      candidate/r5-runtime-v3-20261004 -> origin/candidate/r5-runtime-v3-20261004
+2026-10-09T04:32:59.6763487Z  * [new branch]      candidate/r5-slice4-batch-20261004 -> origin/candidate/r5-slice4-batch-20261004
+2026-10-09T04:32:59.6764132Z  * [new branch]      candidate/slice4-bridge-caller-20261004 -> origin/candidate/slice4-bridge-caller-20261004
+2026-10-09T04:32:59.6764844Z  * [new branch]      chore/company-mail-r5-checkpoint-20260930 -> origin/chore/company-mail-r5-checkpoint-20260930
+2026-10-09T04:32:59.6765353Z  * [new branch]      chore/selected-v3-metadata-gate-20261004-pnkZA9ce -> origin/chore/selected-v3-metadata-gate-20261004-pnkZA9ce
+2026-10-09T04:32:59.6765883Z  * [new branch]      chore/tabmail-catalog16-exec-20261009 -> origin/chore/tabmail-catalog16-exec-20261009
+2026-10-09T04:32:59.6766299Z  * [new branch]      ci/company-mail-r5-wiring-20261003 -> origin/ci/company-mail-r5-wiring-20261003
+2026-10-09T04:32:59.6766713Z  * [new branch]      cloud/r5-source-integration-20261004 -> origin/cloud/r5-source-integration-20261004
+2026-10-09T04:32:59.6767244Z  * [new branch]      cloud/r5-union-components-f52-20261004-prestart-c741 -> origin/cloud/r5-union-components-f52-20261004-prestart-c741
+2026-10-09T04:32:59.6767782Z  * [new branch]      cloud/r5-union-dbhttp-f52-20261004-0449 -> origin/cloud/r5-union-dbhttp-f52-20261004-0449
+2026-10-09T04:32:59.6768229Z  * [new branch]      cloud/r5-union-default-f52-20261004-0441 -> origin/cloud/r5-union-default-f52-20261004-0441
+2026-10-09T04:32:59.6768800Z  * [new branch]      codex/pe-independent-review -> origin/codex/pe-independent-review
+2026-10-09T04:32:59.6769296Z  * [new branch]      codex/pe-shared-adapter  -> origin/codex/pe-shared-adapter
+2026-10-09T04:32:59.6769973Z  * [new branch]      codex/r5-approved-catalog-reconciliation-20261004 -> origin/codex/r5-approved-catalog-reconciliation-20261004
+2026-10-09T04:32:59.6770729Z  * [new branch]      codex/r5-compatibility-source-boundary -> origin/codex/r5-compatibility-source-boundary
+2026-10-09T04:32:59.6771372Z  * [new branch]      codex/r5-compile-stability-20261004 -> origin/codex/r5-compile-stability-20261004
+2026-10-09T04:32:59.6771982Z  * [new branch]      codex/r5-current-wire-20261003 -> origin/codex/r5-current-wire-20261003
+2026-10-09T04:32:59.6772431Z  * [new branch]      codex/r5-env-evidence-20261004 -> origin/codex/r5-env-evidence-20261004
+2026-10-09T04:32:59.6772817Z  * [new branch]      codex/r5-external-runtime-20261003 -> origin/codex/r5-external-runtime-20261003
+2026-10-09T04:32:59.6773315Z  * [new branch]      codex/r5-v3-preparation-slice2 -> origin/codex/r5-v3-preparation-slice2
+2026-10-09T04:32:59.6773712Z  * [new branch]      design/r5-v3-consumer-opt-in-20261004 -> origin/design/r5-v3-consumer-opt-in-20261004
+2026-10-09T04:32:59.6774085Z  * [new branch]      docs/r5-archive-boundary-v1 -> origin/docs/r5-archive-boundary-v1
+2026-10-09T04:32:59.6774552Z  * [new branch]      evidence/r5-catalog-rev11-3a-20261008-b8f95a -> origin/evidence/r5-catalog-rev11-3a-20261008-b8f95a
+2026-10-09T04:32:59.6775140Z  * [new branch]      experiment/goose-buffer-64k -> origin/experiment/goose-buffer-64k
+2026-10-09T04:32:59.6775667Z  * [new branch]      feat/r5-archive-boundary-v1 -> origin/feat/r5-archive-boundary-v1
+2026-10-09T04:32:59.6776017Z  * [new branch]      feat/runtime-batch-validation -> origin/feat/runtime-batch-validation
+2026-10-09T04:32:59.6776375Z  * [new branch]      fix/auth-body-limit-20261005 -> origin/fix/auth-body-limit-20261005
+2026-10-09T04:32:59.6776802Z  * [new branch]      fix/batch-supervisor-lifecycle-20261004 -> origin/fix/batch-supervisor-lifecycle-20261004
+2026-10-09T04:32:59.6777225Z  * [new branch]      fix/browser-reply-journey-20261003 -> origin/fix/browser-reply-journey-20261003
+2026-10-09T04:32:59.6777637Z  * [new branch]      fix/compose-query-completion-20261005 -> origin/fix/compose-query-completion-20261005
+2026-10-09T04:32:59.6778048Z  * [new branch]      fix/compose-send-lifecycle-20261005 -> origin/fix/compose-send-lifecycle-20261005
+2026-10-09T04:32:59.6778412Z  * [new branch]      fix/direct-null-mx-20261006 -> origin/fix/direct-null-mx-20261006
+2026-10-09T04:32:59.6779083Z  * [new branch]      fix/draft-reload-serialization-20261005 -> origin/fix/draft-reload-serialization-20261005
+2026-10-09T04:32:59.6779767Z  * [new branch]      fix/editor-opening-ownership-20261005 -> origin/fix/editor-opening-ownership-20261005
+2026-10-09T04:32:59.6780472Z  * [new branch]      fix/lf01-frozen-offboarding -> origin/fix/lf01-frozen-offboarding
+2026-10-09T04:32:59.6780903Z  * [new branch]      fix/live-content-refresh-20261005 -> origin/fix/live-content-refresh-20261005
+2026-10-09T04:32:59.6781314Z  * [new branch]      fix/mail-reader-invalidation-20261004 -> origin/fix/mail-reader-invalidation-20261004
+2026-10-09T04:32:59.6781769Z  * [new branch]      fix/message-action-reconciliation-20261005 -> origin/fix/message-action-reconciliation-20261005
+2026-10-09T04:32:59.6782205Z  * [new branch]      fix/offboarding-successor-authz -> origin/fix/offboarding-successor-authz
+2026-10-09T04:32:59.6782558Z  * [new branch]      fix/pr21-client-inventory -> origin/fix/pr21-client-inventory
+2026-10-09T04:32:59.6782904Z  * [new branch]      fix/pr21-harness-lint-41b015c -> origin/fix/pr21-harness-lint-41b015c
+2026-10-09T04:32:59.6783307Z  * [new branch]      fix/profile-refresh-three-way-20261003 -> origin/fix/profile-refresh-three-way-20261003
+2026-10-09T04:32:59.6783785Z  * [new branch]      fix/r5-benchmark-strict-evidence-20261001 -> origin/fix/r5-benchmark-strict-evidence-20261001
+2026-10-09T04:32:59.6784272Z  * [new branch]      fix/r5-descriptor-tests  -> origin/fix/r5-descriptor-tests
+2026-10-09T04:32:59.6784602Z  * [new branch]      fix/r5-excluded-metadata -> origin/fix/r5-excluded-metadata
+2026-10-09T04:32:59.6784933Z  * [new branch]      fix/r5-fixture-owner-join -> origin/fix/r5-fixture-owner-join
+2026-10-09T04:32:59.6785335Z  * [new branch]      fix/r5-legacy-recipients-alias-20261003 -> origin/fix/r5-legacy-recipients-alias-20261003
+2026-10-09T04:32:59.6785718Z  * [new branch]      fix/r5-pe-seed-f875      -> origin/fix/r5-pe-seed-f875
+2026-10-09T04:32:59.6786084Z  * [new branch]      fix/r5-rc-receipt-contract-20261003 -> origin/fix/r5-rc-receipt-contract-20261003
+2026-10-09T04:32:59.6786505Z  * [new branch]      fix/r5-receipt-inspection-test-gate -> origin/fix/r5-receipt-inspection-test-gate
+2026-10-09T04:32:59.6786971Z  * [new branch]      fix/r5-receipt-surface-contract-20261003 -> origin/fix/r5-receipt-surface-contract-20261003
+2026-10-09T04:32:59.6787462Z  * [new branch]      fix/r5-router-touch-oracle -> origin/fix/r5-router-touch-oracle
+2026-10-09T04:32:59.6787848Z  * [new branch]      fix/r5-schema16-benchmark-fixtures -> origin/fix/r5-schema16-benchmark-fixtures
+2026-10-09T04:32:59.6788285Z  * [new branch]      fix/r5-selected-source-binding-20261003 -> origin/fix/r5-selected-source-binding-20261003
+2026-10-09T04:32:59.6789125Z  * [new branch]      fix/r5-shared-receipt-legacy-20261003 -> origin/fix/r5-shared-receipt-legacy-20261003
+2026-10-09T04:32:59.6789841Z  * [new branch]      fix/r5-source-excluded-metadata-20261003 -> origin/fix/r5-source-excluded-metadata-20261003
+2026-10-09T04:32:59.6790513Z  * [new branch]      fix/r5-source-runner-preparation -> origin/fix/r5-source-runner-preparation
+2026-10-09T04:32:59.6791084Z  * [new branch]      fix/r5-stream-transport  -> origin/fix/r5-stream-transport
+2026-10-09T04:32:59.6791629Z  * [new branch]      fix/r5-transaction-inventory -> origin/fix/r5-transaction-inventory
+2026-10-09T04:32:59.6792253Z  * [new branch]      fix/r5-v3-producer-path-20261004 -> origin/fix/r5-v3-producer-path-20261004
+2026-10-09T04:32:59.6792978Z  * [new branch]      fix/r5-v3-rejection-evidence-20261004 -> origin/fix/r5-v3-rejection-evidence-20261004
+2026-10-09T04:32:59.6793673Z  * [new branch]      fix/receipt-aggregate-refresh-20261005 -> origin/fix/receipt-aggregate-refresh-20261005
+2026-10-09T04:32:59.6794215Z  * [new branch]      fix/recipient-reload-display-20261005 -> origin/fix/recipient-reload-display-20261005
+2026-10-09T04:32:59.6794896Z  * [new branch]      fix/selected-attestation-stable-capture -> origin/fix/selected-attestation-stable-capture
+2026-10-09T04:32:59.6795398Z  * [new branch]      fix/sent-action-lifecycle-20261005 -> origin/fix/sent-action-lifecycle-20261005
+2026-10-09T04:32:59.6795968Z  * [new branch]      fix/smtp-data-cause-20261006 -> origin/fix/smtp-data-cause-20261006
+2026-10-09T04:32:59.6796467Z  * [new branch]      fix/smtp-owner-logger-gate -> origin/fix/smtp-owner-logger-gate
+2026-10-09T04:32:59.6796995Z  * [new branch]      fix/sse-framing-20261004 -> origin/fix/sse-framing-20261004
+2026-10-09T04:32:59.6797556Z  * [new branch]      fix/subject-wire-encoding-20261006 -> origin/fix/subject-wire-encoding-20261006
+2026-10-09T04:32:59.6797995Z  * [new branch]      fix/tabmail-followup-recovery-20261008 -> origin/fix/tabmail-followup-recovery-20261008
+2026-10-09T04:32:59.6798441Z  * [new branch]      integration/catalog-v3-frozen-20261004 -> origin/integration/catalog-v3-frozen-20261004
+2026-10-09T04:32:59.6799548Z  * [new branch]      integration/company-mail-r5-20261003 -> origin/integration/company-mail-r5-20261003
+2026-10-09T04:32:59.6800129Z  * [new branch]      integration/company-mail-r5-batch2-20261003 -> origin/integration/company-mail-r5-batch2-20261003
+2026-10-09T04:32:59.6800910Z  * [new branch]      integration/company-mail-r5-batch3-20261003 -> origin/integration/company-mail-r5-batch3-20261003
+2026-10-09T04:32:59.6801474Z  * [new branch]      integration/company-mail-r5-batch4-20261003 -> origin/integration/company-mail-r5-batch4-20261003
+2026-10-09T04:32:59.6801953Z  * [new branch]      integration/company-mail-r5-batch5-20261003 -> origin/integration/company-mail-r5-batch5-20261003
+2026-10-09T04:32:59.6802600Z  * [new branch]      integration/company-mail-r5-pr-management-20261007 -> origin/integration/company-mail-r5-pr-management-20261007
+2026-10-09T04:32:59.6803089Z  * [new branch]      integration/pe-lf-components-20261004 -> origin/integration/pe-lf-components-20261004
+2026-10-09T04:32:59.6803531Z  * [new branch]      integration/r5-consumer-slices23-20261004 -> origin/integration/r5-consumer-slices23-20261004
+2026-10-09T04:32:59.6804231Z  * [new branch]      integration/r5-slice4-combined-20261004 -> origin/integration/r5-slice4-combined-20261004
+2026-10-09T04:32:59.6804738Z  * [new branch]      integration/r5-source-combined-20261003 -> origin/integration/r5-source-combined-20261003
+2026-10-09T04:32:59.6805157Z  * [new branch]      investigate/pe03-profile-editor -> origin/investigate/pe03-profile-editor
+2026-10-09T04:32:59.6805670Z  * [new branch]      main                     -> origin/main
+2026-10-09T04:32:59.6805975Z  * [new branch]      prep/source-policy-20261003 -> origin/prep/source-policy-20261003
+2026-10-09T04:32:59.6806331Z  * [new branch]      r5-cloud-background-20261003 -> origin/r5-cloud-background-20261003
+2026-10-09T04:32:59.6806686Z  * [new branch]      r5-cloud-smtp-owner-20261003 -> origin/r5-cloud-smtp-owner-20261003
+2026-10-09T04:32:59.6807043Z  * [new branch]      r5-permission-audit-20261003 -> origin/r5-permission-audit-20261003
+2026-10-09T04:32:59.6807430Z  * [new branch]      r5-source-v3-pure-isolated-20261003 -> origin/r5-source-v3-pure-isolated-20261003
+2026-10-09T04:32:59.6807836Z  * [new branch]      r5/formal-components-f875-20261004 -> origin/r5/formal-components-f875-20261004
+2026-10-09T04:32:59.6808279Z  * [new branch]      review/external-batch-independent-20261004 -> origin/review/external-batch-independent-20261004
+2026-10-09T04:32:59.6808809Z  * [new branch]      review/independent-frontend-7a43654 -> origin/review/independent-frontend-7a43654
+2026-10-09T04:32:59.6809301Z  * [new branch]      review/offboarding-pair-independent-20261004 -> origin/review/offboarding-pair-independent-20261004
+2026-10-09T04:32:59.6809830Z  * [new branch]      review/r5-archive-fixed-0c1f4f6 -> origin/review/r5-archive-fixed-0c1f4f6
+2026-10-09T04:32:59.6810270Z  * [new branch]      review/r5-catalog-independent-cloud-20261004 -> origin/review/r5-catalog-independent-cloud-20261004
+2026-10-09T04:32:59.6810742Z  * [new branch]      review/r5-classifier-independent-20261004 -> origin/review/r5-classifier-independent-20261004
+2026-10-09T04:32:59.6811191Z  * [new branch]      review/r5-corrected-independent-20261004 -> origin/review/r5-corrected-independent-20261004
+2026-10-09T04:32:59.6811608Z  * [new branch]      review/r5-env-independent-20261004 -> origin/review/r5-env-independent-20261004
+2026-10-09T04:32:59.6812131Z  * [new branch]      review/r5-env-p2-delta-independent-20261004 -> origin/review/r5-env-p2-delta-independent-20261004
+2026-10-09T04:32:59.6812586Z  * [new branch]      review/r5-generated-independent-20261004 -> origin/review/r5-generated-independent-20261004
+2026-10-09T04:32:59.6812990Z  * [new branch]      review/r5-independent-20261004 -> origin/review/r5-independent-20261004
+2026-10-09T04:32:59.6813443Z  * [new branch]      review/r5-preparation-slice2-independent-20261004 -> origin/review/r5-preparation-slice2-independent-20261004
+2026-10-09T04:32:59.6813971Z  * [new branch]      review/r5-runtime-v3-slice3-independent-20261004 -> origin/review/r5-runtime-v3-slice3-independent-20261004
+2026-10-09T04:32:59.6814464Z  * [new branch]      review/r5-slice4-batch-independent-20261004 -> origin/review/r5-slice4-batch-independent-20261004
+2026-10-09T04:32:59.6814909Z  * [new branch]      review/r5-slice5-independent-20261004 -> origin/review/r5-slice5-independent-20261004
+2026-10-09T04:32:59.6815405Z  * [new branch]      review/selected-attestation-v1-independent-20261003 -> origin/review/selected-attestation-v1-independent-20261003
+2026-10-09T04:32:59.6815903Z  * [new branch]      review/slice4-bridge-independent-20261004 -> origin/review/slice4-bridge-independent-20261004
+2026-10-09T04:32:59.6816370Z  * [new branch]      review/source-excluded-independent-20261003 -> origin/review/source-excluded-independent-20261003
+2026-10-09T04:32:59.6816810Z  * [new branch]      tooling/selected-binding-v3-20261004 -> origin/tooling/selected-binding-v3-20261004
+2026-10-09T04:32:59.6817228Z  * [new branch]      verification/r5-slice5-closure-20261004 -> origin/verification/r5-slice5-closure-20261004
+2026-10-09T04:32:59.6817701Z  * [new branch]      verification/r5-slice5-physical-plan-v2-20261004 -> origin/verification/r5-slice5-physical-plan-v2-20261004
+2026-10-09T04:32:59.6818148Z  * [new branch]      work/company-mail-r5-goal-20260930 -> origin/work/company-mail-r5-goal-20260930
+2026-10-09T04:32:59.6818640Z  * [new branch]      work/r5-followup-round3-source-20261007 -> origin/work/r5-followup-round3-source-20261007
+2026-10-09T04:32:59.6819095Z  * [new tag]         archive/codex-deep-authz -> archive/codex-deep-authz
+2026-10-09T04:32:59.6819434Z  * [new tag]         archive/ingress-operations-console -> archive/ingress-operations-console
+2026-10-09T04:32:59.6819801Z  * [new tag]         baseline/company-mail-r4-20260928 -> baseline/company-mail-r4-20260928
+2026-10-09T04:32:59.6820176Z  * [new tag]         baseline/company-mail-r5-b01u-20260930 -> baseline/company-mail-r5-b01u-20260930
+2026-10-09T04:32:59.6820484Z  * [new tag]         v1.0.0                   -> v1.0.0
+2026-10-09T04:32:59.6821531Z [command]/usr/bin/git rev-parse --verify --quiet 167e38b1541c027107fc81900f3e37fda7289677^{object}
+2026-10-09T04:32:59.6821847Z 167e38b1541c027107fc81900f3e37fda7289677
+2026-10-09T04:32:59.6822360Z ##[endgroup]
+2026-10-09T04:32:59.6822622Z ##[group]Determining the checkout info
+2026-10-09T04:32:59.6822898Z ##[endgroup]
+2026-10-09T04:32:59.6823069Z [command]/usr/bin/git sparse-checkout disable
+2026-10-09T04:32:59.6895235Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-09T04:32:59.6917098Z ##[group]Checking out the ref
+2026-10-09T04:32:59.6920343Z [command]/usr/bin/git checkout --progress --force 167e38b1541c027107fc81900f3e37fda7289677
+2026-10-09T04:32:59.9955136Z Note: switching to '167e38b1541c027107fc81900f3e37fda7289677'.
+2026-10-09T04:32:59.9955438Z 
+2026-10-09T04:32:59.9955610Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-09T04:32:59.9955979Z changes and commit them, and you can discard any commits you make in this
+2026-10-09T04:32:59.9956344Z state without impacting any branches by switching back to a branch.
+2026-10-09T04:32:59.9956563Z 
+2026-10-09T04:32:59.9956712Z If you want to create a new branch to retain commits you create, you may
+2026-10-09T04:32:59.9957081Z do so (now or later) by using -c with the switch command. Example:
+2026-10-09T04:32:59.9957565Z 
+2026-10-09T04:32:59.9957666Z   git switch -c <new-branch-name>
+2026-10-09T04:32:59.9957800Z 
+2026-10-09T04:32:59.9957921Z Or undo this operation with:
+2026-10-09T04:32:59.9958055Z 
+2026-10-09T04:32:59.9958130Z   git switch -
+2026-10-09T04:32:59.9958233Z 
+2026-10-09T04:32:59.9958409Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-09T04:32:59.9958858Z 
+2026-10-09T04:32:59.9959093Z HEAD is now at 167e38b chore(r5): adopt actual revision16 producer outputs and preserved historical guards
+2026-10-09T04:32:59.9994150Z ##[endgroup]
+2026-10-09T04:33:00.0031117Z [command]/usr/bin/git log -1 --format=%H
+2026-10-09T04:33:00.0054629Z 167e38b1541c027107fc81900f3e37fda7289677
+2026-10-09T04:33:00.0062615Z ##[group]Removing auth
+2026-10-09T04:33:00.0065165Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T04:33:00.0088422Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T04:33:00.0279039Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T04:33:00.0309442Z http.https://github.com/.extraheader
+2026-10-09T04:33:00.0310414Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-09T04:33:00.0336569Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T04:33:00.0529792Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T04:33:00.0546992Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T04:33:00.0728159Z ##[endgroup]
+2026-10-09T04:33:00.0888442Z ##[group]Run mkdir -p "$RUNNER_TEMP/tabmail-catalog16-inventory"
+2026-10-09T04:33:00.0889061Z [36;1mmkdir -p "$RUNNER_TEMP/tabmail-catalog16-inventory"[0m
+2026-10-09T04:33:00.0889266Z [36;1mpython3 -B - <<'PY'[0m
+2026-10-09T04:33:00.0889414Z [36;1mimport json, os, subprocess[0m
+2026-10-09T04:33:00.0889572Z [36;1mfrom pathlib import Path[0m
+2026-10-09T04:33:00.0889717Z [36;1mdef git(*args):[0m
+2026-10-09T04:33:00.0889890Z [36;1m    return subprocess.check_output(['git', *args]).decode()[0m
+2026-10-09T04:33:00.0890123Z [36;1msource = dict(commit=git('rev-parse','HEAD').strip(),[0m
+2026-10-09T04:33:00.0890335Z [36;1m              tree=git('rev-parse','HEAD^{tree}').strip(),[0m
+2026-10-09T04:33:00.0890567Z [36;1m              status=git('status','--porcelain','--untracked-files=all'))[0m
+2026-10-09T04:33:00.0890842Z [36;1moutput = Path(os.environ['RUNNER_TEMP']) / 'tabmail-catalog16-inventory'[0m
+2026-10-09T04:33:00.0891180Z [36;1m(output / 'source-before.json').write_text(json.dumps(source, indent=2) + '\n')[0m
+2026-10-09T04:33:00.0891425Z [36;1mprint(json.dumps(source, indent=2))[0m
+2026-10-09T04:33:00.0891584Z [36;1mif source['status']:[0m
+2026-10-09T04:33:00.0891767Z [36;1m    raise SystemExit('exact clean source checkout required')[0m
+2026-10-09T04:33:00.0891950Z [36;1mPY[0m
+2026-10-09T04:33:00.1250531Z shell: /usr/bin/bash -e {0}
+2026-10-09T04:33:00.1250737Z ##[endgroup]
+2026-10-09T04:33:00.3883612Z {
+2026-10-09T04:33:00.3884093Z   "commit": "167e38b1541c027107fc81900f3e37fda7289677",
+2026-10-09T04:33:00.3884460Z   "tree": "2e254469358541c8aedb1e98c88d5d2edf6d44f8",
+2026-10-09T04:33:00.3884763Z   "status": ""
+2026-10-09T04:33:00.3884933Z }
+2026-10-09T04:33:00.4000234Z ##[group]Run actions/setup-go@v5
+2026-10-09T04:33:00.4000389Z with:
+2026-10-09T04:33:00.4000508Z   go-version-file: go.mod
+2026-10-09T04:33:00.4000646Z   check-latest: false
+2026-10-09T04:33:00.4002059Z   token: ***
+2026-10-09T04:33:00.4002166Z   cache: true
+2026-10-09T04:33:00.4002409Z ##[endgroup]
+2026-10-09T04:33:00.4859685Z Setup go version spec 1.25.7
+2026-10-09T04:33:00.4864632Z Attempting to download 1.25.7...
+2026-10-09T04:33:00.4939187Z (node:2193) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T04:33:00.4939759Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T04:33:01.2391130Z matching 1.25.7...
+2026-10-09T04:33:01.2421794Z Acquiring 1.25.7 from https://github.com/actions/go-versions/releases/download/1.25.7-21696103256/go-1.25.7-linux-x64.tar.gz
+2026-10-09T04:33:01.8518173Z Extracting Go...
+2026-10-09T04:33:01.8598243Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/86a08c03-03b5-436a-8d5d-5eade215130b -f /home/runner/work/_temp/f12b16bc-c28f-42b8-b754-d8a09fd86383
+2026-10-09T04:33:02.9932618Z Successfully extracted go to /home/runner/work/_temp/86a08c03-03b5-436a-8d5d-5eade215130b
+2026-10-09T04:33:02.9932911Z Adding to the cache ...
+2026-10-09T04:33:06.8956057Z Successfully cached go to /opt/hostedtoolcache/go/1.25.7/x64
+2026-10-09T04:33:06.8957311Z Added go to the path
+2026-10-09T04:33:06.8959580Z Successfully set up Go version 1.25.7
+2026-10-09T04:33:06.9123595Z [command]/opt/hostedtoolcache/go/1.25.7/x64/bin/go env GOMODCACHE
+2026-10-09T04:33:06.9156129Z [command]/opt/hostedtoolcache/go/1.25.7/x64/bin/go env GOCACHE
+2026-10-09T04:33:06.9189461Z /home/runner/go/pkg/mod
+2026-10-09T04:33:06.9202541Z /home/runner/.cache/go-build
+2026-10-09T04:33:07.0535258Z Cache hit for: setup-go-Linux-x64-ubuntu24-go-1.25.7-4513745f7b95ab0bc8e1f9edd24c294514fb4a9ee51f2290b342654582d5d782
+2026-10-09T04:33:07.0596271Z (node:2193) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T04:33:08.2148861Z Received 109051904 of 266857975 (40.9%), 104.1 MBs/sec
+2026-10-09T04:33:08.9640911Z Received 266857975 of 266857975 (100.0%), 145.6 MBs/sec
+2026-10-09T04:33:08.9641651Z Cache Size: ~254 MB (266857975 B)
+2026-10-09T04:33:08.9690801Z [command]/usr/bin/tar -xf /home/runner/work/_temp/4c81e9fc-f505-4299-84e8-a0261f1c10ca/cache.tzst -P -C /home/runner/work/tabmail/tabmail --use-compress-program unzstd
+2026-10-09T04:33:09.9749247Z Cache restored successfully
+2026-10-09T04:33:09.9872270Z Cache restored from key: setup-go-Linux-x64-ubuntu24-go-1.25.7-4513745f7b95ab0bc8e1f9edd24c294514fb4a9ee51f2290b342654582d5d782
+2026-10-09T04:33:09.9897992Z go version go1.25.7 linux/amd64
+2026-10-09T04:33:09.9898173Z 
+2026-10-09T04:33:09.9898422Z ##[group]go env
+2026-10-09T04:33:10.0026231Z AR='ar'
+2026-10-09T04:33:10.0026486Z CC='gcc'
+2026-10-09T04:33:10.0026679Z CGO_CFLAGS='-O2 -g'
+2026-10-09T04:33:10.0026922Z CGO_CPPFLAGS=''
+2026-10-09T04:33:10.0027118Z CGO_CXXFLAGS='-O2 -g'
+2026-10-09T04:33:10.0027325Z CGO_ENABLED='1'
+2026-10-09T04:33:10.0027515Z CGO_FFLAGS='-O2 -g'
+2026-10-09T04:33:10.0027705Z CGO_LDFLAGS='-O2 -g'
+2026-10-09T04:33:10.0027906Z CXX='g++'
+2026-10-09T04:33:10.0028079Z GCCGO='gccgo'
+2026-10-09T04:33:10.0028259Z GO111MODULE=''
+2026-10-09T04:33:10.0028441Z GOAMD64='v1'
+2026-10-09T04:33:10.0028737Z GOARCH='amd64'
+2026-10-09T04:33:10.0028913Z GOAUTH='netrc'
+2026-10-09T04:33:10.0029089Z GOBIN=''
+2026-10-09T04:33:10.0029292Z GOCACHE='/home/runner/.cache/go-build'
+2026-10-09T04:33:10.0029479Z GOCACHEPROG=''
+2026-10-09T04:33:10.0029597Z GODEBUG=''
+2026-10-09T04:33:10.0029725Z GOENV='/home/runner/.config/go/env'
+2026-10-09T04:33:10.0029881Z GOEXE=''
+2026-10-09T04:33:10.0029991Z GOEXPERIMENT=''
+2026-10-09T04:33:10.0030113Z GOFIPS140='off'
+2026-10-09T04:33:10.0030230Z GOFLAGS=''
+2026-10-09T04:33:10.0030880Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build2851223412=/tmp/go-build -gno-record-gcc-switches'
+2026-10-09T04:33:10.0031253Z GOHOSTARCH='amd64'
+2026-10-09T04:33:10.0031379Z GOHOSTOS='linux'
+2026-10-09T04:33:10.0031503Z GOINSECURE=''
+2026-10-09T04:33:10.0031778Z GOMOD='/home/runner/work/tabmail/tabmail/go.mod'
+2026-10-09T04:33:10.0031974Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-10-09T04:33:10.0032127Z GONOPROXY=''
+2026-10-09T04:33:10.0032248Z GONOSUMDB=''
+2026-10-09T04:33:10.0032361Z GOOS='linux'
+2026-10-09T04:33:10.0032488Z GOPATH='/home/runner/go'
+2026-10-09T04:33:10.0032622Z GOPRIVATE=''
+2026-10-09T04:33:10.0032793Z GOPROXY='https://proxy.golang.org,direct'
+2026-10-09T04:33:10.0032994Z GOROOT='/opt/hostedtoolcache/go/1.25.7/x64'
+2026-10-09T04:33:10.0033175Z GOSUMDB='sum.golang.org'
+2026-10-09T04:33:10.0033314Z GOTELEMETRY='local'
+2026-10-09T04:33:10.0033474Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-10-09T04:33:10.0033653Z GOTMPDIR=''
+2026-10-09T04:33:10.0033773Z GOTOOLCHAIN='auto'
+2026-10-09T04:33:10.0033964Z GOTOOLDIR='/opt/hostedtoolcache/go/1.25.7/x64/pkg/tool/linux_amd64'
+2026-10-09T04:33:10.0034167Z GOVCS=''
+2026-10-09T04:33:10.0034282Z GOVERSION='go1.25.7'
+2026-10-09T04:33:10.0034408Z GOWORK=''
+2026-10-09T04:33:10.0034536Z PKG_CONFIG='pkg-config'
+2026-10-09T04:33:10.0034626Z 
+2026-10-09T04:33:10.0034898Z ##[endgroup]
+2026-10-09T04:33:10.0256365Z ##[group]Run actions/setup-node@v4
+2026-10-09T04:33:10.0256539Z with:
+2026-10-09T04:33:10.0256657Z   node-version: 22
+2026-10-09T04:33:10.0256782Z   always-auth: false
+2026-10-09T04:33:10.0256909Z   check-latest: false
+2026-10-09T04:33:10.0258227Z   token: ***
+2026-10-09T04:33:10.0258350Z ##[endgroup]
+2026-10-09T04:33:10.1227180Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+2026-10-09T04:33:10.1230347Z (node:2251) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T04:33:10.1230922Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T04:33:10.1232470Z ##[group]Environment details
+2026-10-09T04:33:10.4318162Z node: v22.23.3
+2026-10-09T04:33:10.4318443Z npm: 10.9.9
+2026-10-09T04:33:10.4318994Z yarn: 1.22.22
+2026-10-09T04:33:10.4319473Z ##[endgroup]
+2026-10-09T04:33:10.4421790Z ##[group]Run python3 -m pip install --disable-pip-version-check -r scripts/requirements-contract.txt
+2026-10-09T04:33:10.4422221Z [36;1mpython3 -m pip install --disable-pip-version-check -r scripts/requirements-contract.txt[0m
+2026-10-09T04:33:10.4481002Z shell: /usr/bin/bash -e {0}
+2026-10-09T04:33:10.4481177Z ##[endgroup]
+2026-10-09T04:33:10.7539426Z Defaulting to user installation because normal site-packages is not writeable
+2026-10-09T04:33:11.0929844Z Collecting PyYAML==6.0.3 (from -r scripts/requirements-contract.txt (line 1))
+2026-10-09T04:33:11.1561358Z   Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+2026-10-09T04:33:11.1901532Z Collecting jsonschema==4.26.0 (from -r scripts/requirements-contract.txt (line 3))
+2026-10-09T04:33:11.2003856Z   Downloading jsonschema-4.26.0-py3-none-any.whl.metadata (7.6 kB)
+2026-10-09T04:33:11.2196037Z Collecting rfc3339-validator==0.1.4 (from -r scripts/requirements-contract.txt (line 4))
+2026-10-09T04:33:11.2297330Z   Downloading rfc3339_validator-0.1.4-py2.py3-none-any.whl.metadata (1.5 kB)
+2026-10-09T04:33:11.2523321Z Collecting attrs==26.1.0 (from -r scripts/requirements-contract.txt (line 6))
+2026-10-09T04:33:11.2624743Z   Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+2026-10-09T04:33:11.2835100Z Collecting jsonschema-specifications==2025.9.1 (from -r scripts/requirements-contract.txt (line 7))
+2026-10-09T04:33:11.2936742Z   Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata (2.9 kB)
+2026-10-09T04:33:11.3229957Z Collecting referencing==0.37.0 (from -r scripts/requirements-contract.txt (line 8))
+2026-10-09T04:33:11.3348878Z   Downloading referencing-0.37.0-py3-none-any.whl.metadata (2.8 kB)
+2026-10-09T04:33:11.5401493Z Collecting rpds-py==2026.6.3 (from -r scripts/requirements-contract.txt (line 9))
+2026-10-09T04:33:11.5504972Z   Downloading rpds_py-2026.6.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.1 kB)
+2026-10-09T04:33:11.5707136Z Collecting six==1.17.0 (from -r scripts/requirements-contract.txt (line 10))
+2026-10-09T04:33:11.5807487Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-09T04:33:11.6040453Z Collecting typing_extensions==4.16.0 (from -r scripts/requirements-contract.txt (line 11))
+2026-10-09T04:33:11.6139903Z   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+2026-10-09T04:33:11.6571709Z Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+2026-10-09T04:33:11.7071793Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.9/807.9 kB 16.7 MB/s eta 0:00:00
+2026-10-09T04:33:11.7171120Z Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+2026-10-09T04:33:11.7200933Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 90.6/90.6 kB 47.4 MB/s eta 0:00:00
+2026-10-09T04:33:11.7300750Z Downloading rfc3339_validator-0.1.4-py2.py3-none-any.whl (3.5 kB)
+2026-10-09T04:33:11.7420022Z Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+2026-10-09T04:33:11.7448581Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 67.5/67.5 kB 36.1 MB/s eta 0:00:00
+2026-10-09T04:33:11.7547189Z Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+2026-10-09T04:33:11.7661633Z Downloading referencing-0.37.0-py3-none-any.whl (26 kB)
+2026-10-09T04:33:11.7776473Z Downloading rpds_py-2026.6.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (366 kB)
+2026-10-09T04:33:11.7819121Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 366.2/366.2 kB 124.2 MB/s eta 0:00:00
+2026-10-09T04:33:11.7917242Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-09T04:33:11.8031436Z Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+2026-10-09T04:33:11.8058272Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 45.6/45.6 kB 23.9 MB/s eta 0:00:00
+2026-10-09T04:33:12.0067243Z Installing collected packages: typing_extensions, six, rpds-py, PyYAML, attrs, rfc3339-validator, referencing, jsonschema-specifications, jsonschema
+2026-10-09T04:33:12.1793782Z Successfully installed PyYAML-6.0.3 attrs-26.1.0 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 referencing-0.37.0 rfc3339-validator-0.1.4 rpds-py-2026.6.3 six-1.17.0 typing_extensions-4.16.0
+2026-10-09T04:33:12.3000362Z ##[group]Run go mod download
+2026-10-09T04:33:12.3000541Z [36;1mgo mod download[0m
+2026-10-09T04:33:12.3052587Z shell: /usr/bin/bash -e {0}
+2026-10-09T04:33:12.3052739Z ##[endgroup]
+2026-10-09T04:33:12.4740339Z ##[group]Run python3 -B - <<'PY'
+2026-10-09T04:33:12.4740544Z [36;1mpython3 -B - <<'PY'[0m
+2026-10-09T04:33:12.4740690Z [36;1mimport json, os, sys[0m
+2026-10-09T04:33:12.4740836Z [36;1mfrom pathlib import Path[0m
+2026-10-09T04:33:12.4740991Z [36;1msys.path.insert(0, 'scripts')[0m
+2026-10-09T04:33:12.4741188Z [36;1mfrom r5_source_runner_prepare import prepare_typescript[0m
+2026-10-09T04:33:12.4741410Z [36;1mreceipt = prepare_typescript(Path.cwd())[0m
+2026-10-09T04:33:12.4741721Z [36;1mpath = Path(os.environ['RUNNER_TEMP']) / 'tabmail-catalog16-inventory' / 'typescript-preparation.json'[0m
+2026-10-09T04:33:12.4742055Z [36;1mpath.write_text(json.dumps(receipt, indent=2) + '\n')[0m
+2026-10-09T04:33:12.4742261Z [36;1mprint(json.dumps(receipt, indent=2))[0m
+2026-10-09T04:33:12.4742420Z [36;1mPY[0m
+2026-10-09T04:33:12.4793969Z shell: /usr/bin/bash -e {0}
+2026-10-09T04:33:12.4794128Z ##[endgroup]
+2026-10-09T04:33:12.9169638Z {
+2026-10-09T04:33:12.9170323Z   "lock_sha256": "c4f70934466c07c0a2589ead49f120d1b2278d9775e13fdbf7386913b1658869",
+2026-10-09T04:33:12.9170938Z   "archive_sha256": "10e108c9cf7d5f2879053dff18515fb405abf2ccef63eaaf017d9c571687a1d3",
+2026-10-09T04:33:12.9171692Z   "integrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==",
+2026-10-09T04:33:12.9172199Z   "files": {
+2026-10-09T04:33:12.9172655Z     "LICENSE.txt": "a7d00bfd54525bc694b6e32f64c7ebcf5e6b7ae3657be5cc12767bce74654a47",
+2026-10-09T04:33:12.9173254Z     "README.md": "73147458477d90cd6236627cdd9b0871df12e6e8a21d2d0fda6d1ad2826bdc0e",
+2026-10-09T04:33:12.9174092Z     "SECURITY.md": "7b6976eec43edfa68b79a459dd089c56b7a395916dbf1a01bd11e6d86e12128f",
+2026-10-09T04:33:12.9174780Z     "ThirdPartyNoticeText.txt": "1af3c68039c57e539422da82a4faada506ce6d0ea6f90e0b699d02dbcdb7a90c",
+2026-10-09T04:33:12.9175418Z     "bin/tsc": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0",
+2026-10-09T04:33:12.9176039Z     "bin/tsserver": "a088f0c3419bcb2f7b860ad42e4c9f25ead067eda70af6a10d0a7d453954aada",
+2026-10-09T04:33:12.9176644Z     "lib/_tsc.js": "e8f349eabd48486bdb2bf9dc1a00c89d58297270c54b745838879e2859194419",
+2026-10-09T04:33:12.9177243Z     "lib/_tsserver.js": "0efcc88cdf0593cc1dcc8b6afd605c7bed9eca6f648c70c8f0df8695114bf6d7",
+2026-10-09T04:33:12.9177888Z     "lib/_typingsInstaller.js": "62a69c574365f1c81633b86b3214f9df860aad08843028dd5244b00aa7f1e190",
+2026-10-09T04:33:12.9178733Z     "lib/cs/diagnosticMessages.generated.json": "5b30e58d35f877521e14c16551c86320b2ed19ddb70fe5f41841b561d27f18c2",
+2026-10-09T04:33:12.9179513Z     "lib/de/diagnosticMessages.generated.json": "a4031a8028febc35f92ba317104878d93f02c1750e6ee16351c2270ab4dff517",
+2026-10-09T04:33:12.9180291Z     "lib/es/diagnosticMessages.generated.json": "3c7844125e1f2a3a2227e16dd1fed75218a3454919706b34cd8a5da9d43cda22",
+2026-10-09T04:33:12.9181062Z     "lib/fr/diagnosticMessages.generated.json": "9fc1836d7575840a8b7a63dacdedd99e90e4144c0bbe29a4b7fa78a86e0e8bf5",
+2026-10-09T04:33:12.9181894Z     "lib/it/diagnosticMessages.generated.json": "a740fe2b2338d72a8d165fb8c7c22ac1393a18b6aa7f1ed6d45b79887867f98a",
+2026-10-09T04:33:12.9182680Z     "lib/ja/diagnosticMessages.generated.json": "ae1a2d439bfb60b9fa32408bde0e9ec39840a33d621014fcb5b2fb4e69a606de",
+2026-10-09T04:33:12.9183466Z     "lib/ko/diagnosticMessages.generated.json": "31b27d2d556fc037eeac1672f771bf940ec70afba342e977faa75a2fa292a8be",
+2026-10-09T04:33:12.9184119Z     "lib/lib.d.ts": "a7297ff837fcdf174a9524925966429eb8e5feecc2cc55cc06574e6b092c1eaa",
+2026-10-09T04:33:12.9184733Z     "lib/lib.decorators.d.ts": "8e7f8264d0fb4c5339605a15daadb037bf238c10b654bb3eee14208f860a32ea",
+2026-10-09T04:33:12.9185418Z     "lib/lib.decorators.legacy.d.ts": "782dec38049b92d4e85c1585fbea5474a219c6984a35b004963b00beb1aab538",
+2026-10-09T04:33:12.9186103Z     "lib/lib.dom.asynciterable.d.ts": "d7a3c8b952931daebdfc7a2897c53c0a1c73624593fa070e46bd537e64dcd20a",
+2026-10-09T04:33:12.9187046Z     "lib/lib.dom.d.ts": "080941d9f9ff9307f7e27a83bcd888b7c8270716c39af943532438932ec1d0b9",
+2026-10-09T04:33:12.9187684Z     "lib/lib.dom.iterable.d.ts": "2e80ee7a49e8ac312cc11b77f1475804bee36b3b2bc896bead8b6e1266befb43",
+2026-10-09T04:33:12.9188367Z     "lib/lib.es2015.collection.d.ts": "dc2df20b1bcdc8c2d34af4926e2c3ab15ffe1160a63e58b7e09833f616efff44",
+2026-10-09T04:33:12.9189169Z     "lib/lib.es2015.core.d.ts": "c57796738e7f83dbc4b8e65132f11a377649c00dd3eee333f672b8f0a6bea671",
+2026-10-09T04:33:12.9189781Z     "lib/lib.es2015.d.ts": "45b7ab580deca34ae9729e97c13cfd999df04416a79116c3bfb483804f85ded4",
+2026-10-09T04:33:12.9190435Z     "lib/lib.es2015.generator.d.ts": "515d0b7b9bea2e31ea4ec968e9edd2c39d3eebf4a2d5cbd04e88639819ae3b71",
+2026-10-09T04:33:12.9191121Z     "lib/lib.es2015.iterable.d.ts": "0559b1f683ac7505ae451f9a96ce4c3c92bdc71411651ca6ddb0e88baaaad6a3",
+2026-10-09T04:33:12.9191799Z     "lib/lib.es2015.promise.d.ts": "0dc1e7ceda9b8b9b455c3a2d67b0412feab00bd2f66656cd8850e8831b08b537",
+2026-10-09T04:33:12.9192460Z     "lib/lib.es2015.proxy.d.ts": "ce691fb9e5c64efb9547083e4a34091bcbe5bdb41027e310ebba8f7d96a98671",
+2026-10-09T04:33:12.9193110Z     "lib/lib.es2015.reflect.d.ts": "8d697a2a929a5fcb38b7a65594020fcef05ec1630804a33748829c5ff53640d0",
+2026-10-09T04:33:12.9193797Z     "lib/lib.es2015.symbol.d.ts": "4ff2a353abf8a80ee399af572debb8faab2d33ad38c4b4474cff7f26e7653b8d",
+2026-10-09T04:33:12.9194527Z     "lib/lib.es2015.symbol.wellknown.d.ts": "fb0f136d372979348d59b3f5020b4cdb81b5504192b1cacff5d1fbba29378aa1",
+2026-10-09T04:33:12.9195259Z     "lib/lib.es2016.array.include.d.ts": "d15bea3d62cbbdb9797079416b8ac375ae99162a7fba5de2c6c505446486ac0a",
+2026-10-09T04:33:12.9195920Z     "lib/lib.es2016.d.ts": "3facaf05f0c5fc569c5649dd359892c98a85557e3e0c847964caeb67076f4d75",
+2026-10-09T04:33:12.9196712Z     "lib/lib.es2016.full.d.ts": "807e0e0bdc67605dd28efe18f20ab5fcd75d944ef95936120702335f9379094b",
+2026-10-09T04:33:12.9197347Z     "lib/lib.es2016.intl.d.ts": "68d18b664c9d32a7336a70235958b8997ebc1c3b8505f4f1ae2b7e7753b87618",
+2026-10-09T04:33:12.9198023Z     "lib/lib.es2017.arraybuffer.d.ts": "eb3d66c8327153d8fa7dd03f9c58d351107fe824c79e9b56b462935176cdf12a",
+2026-10-09T04:33:12.9198834Z     "lib/lib.es2017.d.ts": "e44bb8bbac7f10ecc786703fe0a6a4b952189f908707980ba8f3c8975a760962",
+2026-10-09T04:33:12.9199462Z     "lib/lib.es2017.date.d.ts": "38f0219c9e23c915ef9790ab1d680440d95419ad264816fa15009a8851e79119",
+2026-10-09T04:33:12.9200101Z     "lib/lib.es2017.full.d.ts": "1d242d5c24cf285c88bc4fb93c5ff903de8319064e282986edeb6247ba028d5e",
+2026-10-09T04:33:12.9200741Z     "lib/lib.es2017.intl.d.ts": "4de680d5bb41c17f7f68e0419412ca23c98d5749dcaaea1896172f06435891fc",
+2026-10-09T04:33:12.9201398Z     "lib/lib.es2017.object.d.ts": "69ab18c3b76cd9b1be3d188eaf8bba06112ebbe2f47f6c322b5105a6fbc45a2e",
+2026-10-09T04:33:12.9202098Z     "lib/lib.es2017.sharedmemory.d.ts": "a680117f487a4d2f30ea46f1b4b7f58bef1480456e18ba53ee85c2746eeca012",
+2026-10-09T04:33:12.9202787Z     "lib/lib.es2017.string.d.ts": "2f11ff796926e0832f9ae148008138ad583bd181899ab7dd768a2666700b1893",
+2026-10-09T04:33:12.9203470Z     "lib/lib.es2017.typedarrays.d.ts": "954296b30da6d508a104a3a0b5d96b76495c709785c1d11610908e63481ee667",
+2026-10-09T04:33:12.9204195Z     "lib/lib.es2018.asyncgenerator.d.ts": "ac9538681b19688c8eae65811b329d3744af679e0bdfa5d842d0e32524c73e1c",
+2026-10-09T04:33:12.9204933Z     "lib/lib.es2018.asynciterable.d.ts": "0a969edff4bd52585473d24995c5ef223f6652d6ef46193309b3921d65dd4376",
+2026-10-09T04:33:12.9205591Z     "lib/lib.es2018.d.ts": "5e1c4c362065a6b95ff952c0eab010f04dcd2c3494e813b493ecfd4fcb9fc0d8",
+2026-10-09T04:33:12.9206221Z     "lib/lib.es2018.full.d.ts": "95f1023b824c2c511c48f1201e2d1188bcb0ca1138a309a870b956d2e92e44ab",
+2026-10-09T04:33:12.9206860Z     "lib/lib.es2018.intl.d.ts": "9e9fbd7030c440b33d021da145d3232984c8bb7916f277e8ffd3dc2e3eae2bdb",
+2026-10-09T04:33:12.9207526Z     "lib/lib.es2018.promise.d.ts": "811ec78f7fefcabbda4bfa93b3eb67d9ae166ef95f9bff989d964061cbf81a0c",
+2026-10-09T04:33:12.9208335Z     "lib/lib.es2018.regexp.d.ts": "717937616a17072082152a2ef351cb51f98802fb4b2fdabd32399843875974ca",
+2026-10-09T04:33:12.9209107Z     "lib/lib.es2019.array.d.ts": "d7e7d9b7b50e5f22c915b525acc5a49a7a6584cf8f62d0569e557c5cfc4b2ac2",
+2026-10-09T04:33:12.9209759Z     "lib/lib.es2019.d.ts": "68d73b4a11549f9c0b7d352d10e91e5dca8faa3322bfb77b661839c42b1ddec7",
+2026-10-09T04:33:12.9210406Z     "lib/lib.es2019.full.d.ts": "08f6861df84fba9719c14d5adc3ba40be9f0c687639e6c4df3c05b9301b8ff94",
+2026-10-09T04:33:12.9211059Z     "lib/lib.es2019.intl.d.ts": "74f7fa2d027d5b33eb0471c8e82a6c87216223181ec31247c357a3e8e2fddc5b",
+2026-10-09T04:33:12.9211730Z     "lib/lib.es2019.object.d.ts": "71c37f4c9543f31dfced6c7840e068c5a5aacb7b89111a4364b1d5276b852557",
+2026-10-09T04:33:12.9212364Z     "lib/lib.es2019.string.d.ts": "576711e016cf4f1804676043e6a0a5414252560eb57de9faceee34d79798c850",
+2026-10-09T04:33:12.9213037Z     "lib/lib.es2019.symbol.d.ts": "89c1b1281ba7b8a96efc676b11b264de7a8374c5ea1e6617f11880a13fc56dc6",
+2026-10-09T04:33:12.9213732Z     "lib/lib.es2020.bigint.d.ts": "d6d7ae4d1f1f3772e2a3cde568ed08991a8ae34a080ff1151af28b7f798e22ca",
+2026-10-09T04:33:12.9214422Z     "lib/lib.es2020.d.ts": "5efce4fc3c29ea84e8928f97adec086e3dc876365e0982cc8479a07954a3efd4",
+2026-10-09T04:33:12.9215084Z     "lib/lib.es2020.date.d.ts": "063600664504610fe3e99b717a1223f8b1900087fab0b4cad1496a114744f8df",
+2026-10-09T04:33:12.9215732Z     "lib/lib.es2020.full.d.ts": "1305d1e76ca44e30fb8b2b8075fa522b83f60c0bcf5d4326a9d2cf79b53724f8",
+2026-10-09T04:33:12.9216376Z     "lib/lib.es2020.intl.d.ts": "639e512c0dfc3fad96a84caad71b8834d66329a1f28dc95e3946c9b58176c73a",
+2026-10-09T04:33:12.9217030Z     "lib/lib.es2020.number.d.ts": "368af93f74c9c932edd84c58883e736c9e3d53cec1fe24c0b0ff451f529ceab1",
+2026-10-09T04:33:12.9217840Z     "lib/lib.es2020.promise.d.ts": "934019d7e3c81950f9a8426d093458b65d5aff2c7c1511233c0fd5b941e608ab",
+2026-10-09T04:33:12.9218650Z     "lib/lib.es2020.sharedmemory.d.ts": "52ada8e0b6e0482b728070b7639ee42e83a9b1c22d205992756fe020fd9f4a47",
+2026-10-09T04:33:12.9219351Z     "lib/lib.es2020.string.d.ts": "3bdefe1bfd4d6dee0e26f928f93ccc128f1b64d5d501ff4a8cf3c6371200e5e6",
+2026-10-09T04:33:12.9220084Z     "lib/lib.es2020.symbol.wellknown.d.ts": "59fb2c069260b4ba00b5643b907ef5d5341b167e7d1dbf58dfd895658bda2867",
+2026-10-09T04:33:12.9220762Z     "lib/lib.es2021.d.ts": "feecb1be483ed332fad555aff858affd90a48ab19ba7272ee084704eb7167569",
+2026-10-09T04:33:12.9221426Z     "lib/lib.es2021.full.d.ts": "4a66df3ab5de5cfcda11538cffddd67ff6a174e003788e270914c1e0248483cf",
+2026-10-09T04:33:12.9222096Z     "lib/lib.es2021.intl.d.ts": "965f36eae237dd74e6cca203a43e9ca801ce38824ead814728a2807b1910117d",
+2026-10-09T04:33:12.9222777Z     "lib/lib.es2021.promise.d.ts": "af3dd424cf267428f30ccfc376f47a2c0114546b55c44d8c0f1d57d841e28d74",
+2026-10-09T04:33:12.9223476Z     "lib/lib.es2021.string.d.ts": "995c005ab91a498455ea8dfb63aa9f83fa2ea793c3d8aa344be4a1678d06d399",
+2026-10-09T04:33:12.9224181Z     "lib/lib.es2021.weakref.d.ts": "959d36cddf5e7d572a65045b876f2956c973a586da58e5d26cde519184fd9b8a",
+2026-10-09T04:33:12.9224942Z     "lib/lib.es2022.array.d.ts": "3925a6c820dcb1a06506c90b1577db1fdbf7705d65b62b99dce4be75c637e26b",
+2026-10-09T04:33:12.9225654Z     "lib/lib.es2022.d.ts": "ee7bad0c15b58988daa84371e0b89d313b762ab83cb5b31b8a2d1162e8eb41c2",
+2026-10-09T04:33:12.9226326Z     "lib/lib.es2022.error.d.ts": "0a3d63ef2b853447ec4f749d3f368ce642264246e02911fcb1590d8c161b8005",
+2026-10-09T04:33:12.9227007Z     "lib/lib.es2022.full.d.ts": "3cbad9a1ba4453443026ed38e4b8be018abb26565fa7c944376463ad9df07c41",
+2026-10-09T04:33:12.9227690Z     "lib/lib.es2022.intl.d.ts": "8cdf8847677ac7d20486e54dd3fcf09eda95812ac8ace44b4418da1bbbab6eb8",
+2026-10-09T04:33:12.9228367Z     "lib/lib.es2022.object.d.ts": "8444af78980e3b20b49324f4a16ba35024fef3ee069a0eb67616ea6ca821c47a",
+2026-10-09T04:33:12.9229201Z     "lib/lib.es2022.regexp.d.ts": "b4b67b1a91182421f5df999988c690f14d813b9850b40acd06ed44691f6727ad",
+2026-10-09T04:33:12.9229965Z     "lib/lib.es2022.string.d.ts": "3287d9d085fbd618c3971944b65b4be57859f5415f495b33a6adc994edd2f004",
+2026-10-09T04:33:12.9230786Z     "lib/lib.es2023.array.d.ts": "df83c2a6c73228b625b0beb6669c7ee2a09c914637e2d35170723ad49c0f5cd4",
+2026-10-09T04:33:12.9231512Z     "lib/lib.es2023.collection.d.ts": "436aaf437562f276ec2ddbee2f2cdedac7664c1e4c1d2c36839ddd582eeb3d0a",
+2026-10-09T04:33:12.9232209Z     "lib/lib.es2023.d.ts": "27bdc30a0e32783366a5abeda841bc22757c1797de8681bbe81fbc735eeb1c10",
+2026-10-09T04:33:12.9232882Z     "lib/lib.es2023.full.d.ts": "785921608325fa246b450f05b238f4b3ed659f1099af278ce9ebbc9416a13f1d",
+2026-10-09T04:33:12.9233591Z     "lib/lib.es2023.intl.d.ts": "8e3c06ea092138bf9fa5e874a1fdbc9d54805d074bee1de31b99a11e2fec239d",
+2026-10-09T04:33:12.9234313Z     "lib/lib.es2024.arraybuffer.d.ts": "87dc0f382502f5bbce5129bdc0aea21e19a3abbc19259e0b43ae038a9fc4e326",
+2026-10-09T04:33:12.9235093Z     "lib/lib.es2024.collection.d.ts": "b1cb28af0c891c8c96b2d6b7be76bd394fddcfdb4709a20ba05a7c1605eea0f9",
+2026-10-09T04:33:12.9235803Z     "lib/lib.es2024.d.ts": "8fd575e12870e9944c7e1d62e1f5a73fcf23dd8d3a321f2a2c74c20d022283fe",
+2026-10-09T04:33:12.9236504Z     "lib/lib.es2024.full.d.ts": "b3e9cef4eed59f8a2249ed834ba4aabe9d0d4e9037d4679487fa17dad99004a3",
+2026-10-09T04:33:12.9237201Z     "lib/lib.es2024.object.d.ts": "2fef54945a13095fdb9b84f705f2b5994597640c46afeb2ce78352fab4cb3279",
+2026-10-09T04:33:12.9237916Z     "lib/lib.es2024.promise.d.ts": "ac77cb3e8c6d3565793eb90a8373ee8033146315a3dbead3bde8db5eaf5e5ec6",
+2026-10-09T04:33:12.9238759Z     "lib/lib.es2024.regexp.d.ts": "56e4ed5aab5f5920980066a9409bfaf53e6d21d3f8d020c17e4de584d29600ad",
+2026-10-09T04:33:12.9239496Z     "lib/lib.es2024.sharedmemory.d.ts": "4ece9f17b3866cc077099c73f4983bddbcb1dc7ddb943227f1ec070f529dedd1",
+2026-10-09T04:33:12.9240343Z     "lib/lib.es2024.string.d.ts": "0a6282c8827e4b9a95f4bf4f5c205673ada31b982f50572d27103df8ceb8013c",
+2026-10-09T04:33:12.9241011Z     "lib/lib.es5.d.ts": "c430d44666289dae81f30fa7b2edebf186ecc91a2d4c71266ea6ae76388792e1",
+2026-10-09T04:33:12.9241706Z     "lib/lib.es6.d.ts": "df039a67536fe2acc3affdcbfb645892f842db36fe599e8e652e2f0c640a90d1",
+2026-10-09T04:33:12.9242399Z     "lib/lib.esnext.array.d.ts": "1c9319a09485199c1f7b0498f2988d6d2249793ef67edda49d1e584746be9032",
+2026-10-09T04:33:12.9243143Z     "lib/lib.esnext.collection.d.ts": "e3a2a0cee0f03ffdde24d89660eba2685bfbdeae955a6c67e8c4c9fd28928eeb",
+2026-10-09T04:33:12.9243798Z     "lib/lib.esnext.d.ts": "2ab096661c711e4a81cc464fa1e6feb929a54f5340b46b0a07ac6bbf857471f0",
+2026-10-09T04:33:12.9244479Z     "lib/lib.esnext.decorators.d.ts": "d4b1d2c51d058fc21ec2629fff7a76249dec2e36e12960ea056e3ef89174080f",
+2026-10-09T04:33:12.9245202Z     "lib/lib.esnext.disposable.d.ts": "51ad4c928303041605b4d7ae32e0c1ee387d43a24cd6f1ebf4a2699e1076d4fa",
+2026-10-09T04:33:12.9245889Z     "lib/lib.esnext.error.d.ts": "73f78680d4c08509933daf80947902f6ff41b6230f94dd002ae372620adb0f60",
+2026-10-09T04:33:12.9246564Z     "lib/lib.esnext.float16.d.ts": "196cb558a13d4533a5163286f30b0509ce0210e4b316c56c38d4c0fd2fb38405",
+2026-10-09T04:33:12.9247250Z     "lib/lib.esnext.full.d.ts": "bde31fd423cd93b0eff97197a3f66df7c93e8c0c335cbeb113b7ff1ac35c23f4",
+2026-10-09T04:33:12.9247944Z     "lib/lib.esnext.intl.d.ts": "811c71eee4aa0ac5f7adf713323a5c41b0cf6c4e17367a34fbce379e12bbf0a4",
+2026-10-09T04:33:12.9248761Z     "lib/lib.esnext.iterator.d.ts": "22adec94ef7047a6c9d1af3cb96be87a335908bf9ef386ae9fd50eeb37f44c47",
+2026-10-09T04:33:12.9249475Z     "lib/lib.esnext.promise.d.ts": "60037901da1a425516449b9a20073aa03386cce92f7a1fd902d7602be3a7c2e9",
+2026-10-09T04:33:12.9250210Z     "lib/lib.esnext.sharedmemory.d.ts": "c5239f5c01bcfa9cd32f37c496cf19c61d69d37e48be9de612b541aac915805b",
+2026-10-09T04:33:12.9250956Z     "lib/lib.scripthost.d.ts": "cd034f499c6cdca722b60c04b5b1b78e058487a7085a8e0d6fb50809947ee573",
+2026-10-09T04:33:12.9251753Z     "lib/lib.webworker.asynciterable.d.ts": "ca417afee74054e99d5a8252b35bef26ca6e2942d67d343fce6b42fc9f432993",
+2026-10-09T04:33:12.9252506Z     "lib/lib.webworker.d.ts": "6d08cde2bfb6ff909efbf7cb7d6d55be412cf4b9f48fd0430185986973fa91f5",
+2026-10-09T04:33:12.9253377Z     "lib/lib.webworker.importscripts.d.ts": "80e18897e5884b6723488d4f5652167e7bb5024f946743134ecc4aa4ee731f89",
+2026-10-09T04:33:12.9254197Z     "lib/lib.webworker.iterable.d.ts": "d6c6331ce67c41b2ad5bfb0c8c022403980b479a377a44da8f16b61120418f66",
+2026-10-09T04:33:12.9255028Z     "lib/pl/diagnosticMessages.generated.json": "0645575abe920de1ee4cf3f2f70c7abc7f6691daa01cf1e9ad6b1ce53917c9ff",
+2026-10-09T04:33:12.9255901Z     "lib/pt-br/diagnosticMessages.generated.json": "34a649eb937cd70fe7b15663c2e5479e753d42df0e5c2933636789b60c2c939d",
+2026-10-09T04:33:12.9256763Z     "lib/ru/diagnosticMessages.generated.json": "29bb8ea9d44f55bb7acdedfac0a57865ea40552f004d0d6e3b96746ac76666cc",
+2026-10-09T04:33:12.9257727Z     "lib/tr/diagnosticMessages.generated.json": "9466915f3e0cdb2625495bbe9c02c8b7ef9e3543fffae957ba034655563abf65",
+2026-10-09T04:33:12.9258594Z     "lib/tsc.js": "2cffde0b8c6760dfb0b5b0382bbb7e00ba6a8b2d981b9205b256a700a481d983",
+2026-10-09T04:33:12.9259227Z     "lib/tsserver.js": "e3ccfeec65ec5c470b8ffc5611878a31182650c7e8a062c38a719f83b523edcb",
+2026-10-09T04:33:12.9259928Z     "lib/tsserverlibrary.d.ts": "73b15a0b7cf5c6df9076b9408c5ce682f11813453bf54c54cb284f075b5224cf",
+2026-10-09T04:33:12.9260643Z     "lib/tsserverlibrary.js": "7ca9b464de80a5382d9ccfed2b224323bc0274c8de61bf0464e89ee824677c76",
+2026-10-09T04:33:12.9261535Z     "lib/typesMap.json": "4143fb8b1c5d4421dfa19a4b80ddf2da375fc0835a349c3b18519fda5955e1d9",
+2026-10-09T04:33:12.9262210Z     "lib/typescript.d.ts": "e134052a6b1ded61693b4037f615dc72f14e2881e79c1ddbff6c514c8a516b05",
+2026-10-09T04:33:12.9262872Z     "lib/typescript.js": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675",
+2026-10-09T04:33:12.9263578Z     "lib/typingsInstaller.js": "2d48a038523ea7c626fa2796a30fa5fdc07612ea5fab83544423009d7683a213",
+2026-10-09T04:33:12.9264402Z     "lib/watchGuard.js": "471200d4bc555ef8d8429358bdca2a68ea7c9bfff6c853b5b048d2512fe4092a",
+2026-10-09T04:33:12.9265210Z     "lib/zh-cn/diagnosticMessages.generated.json": "6bd4ae6aea0991f6b73c46ec79ebb643b280a07e4808be363b07d01d2f6d399d",
+2026-10-09T04:33:12.9266101Z     "lib/zh-tw/diagnosticMessages.generated.json": "c35cf732ff01539090a3622b7a07f7bb4cadb28f6f13048b366012c458329be1",
+2026-10-09T04:33:12.9266833Z     "package.json": "822ef7ca6452205657b6288b066481ecf508bfbf43455d715cf7d3ec457561e6"
+2026-10-09T04:33:12.9267198Z   }
+2026-10-09T04:33:12.9267367Z }
+2026-10-09T04:33:12.9331665Z ##[group]Run set -euo pipefail
+2026-10-09T04:33:12.9331857Z [36;1mset -euo pipefail[0m
+2026-10-09T04:33:12.9331986Z [36;1mset +e[0m
+2026-10-09T04:33:12.9332371Z [36;1mpython3 -B scripts/check_r5_transactions.py > "$RUNNER_TEMP/tabmail-catalog16-inventory/transactions.stdout" 2> "$RUNNER_TEMP/tabmail-catalog16-inventory/transactions.stderr"[0m
+2026-10-09T04:33:12.9332791Z [36;1mcatalog_command_exit=$?[0m
+2026-10-09T04:33:12.9332933Z [36;1mset -e[0m
+2026-10-09T04:33:12.9333166Z [36;1mprintf '%s\n' "$catalog_command_exit" > "$RUNNER_TEMP/tabmail-catalog16-inventory/transactions.exit"[0m
+2026-10-09T04:33:12.9333494Z [36;1mcat "$RUNNER_TEMP/tabmail-catalog16-inventory/transactions.stdout"[0m
+2026-10-09T04:33:12.9333768Z [36;1mcat "$RUNNER_TEMP/tabmail-catalog16-inventory/transactions.stderr"[0m
+2026-10-09T04:33:12.9333982Z [36;1mexit "$catalog_command_exit"[0m
+2026-10-09T04:33:12.9385849Z shell: /usr/bin/bash -e {0}
+2026-10-09T04:33:12.9386007Z ##[endgroup]
+2026-10-09T04:33:14.0721178Z {"status": "PASS", "postgres_files": 64, "functions": 405, "sql_execution_calls": 506, "direct_write_functions": 140, "write_closure_functions": 161, "migration_files": 19, "task_complete": false, "runtime_verified": false, "meaning": "syntax inventory current; no concurrency or behavior equivalence claim"}
+2026-10-09T04:33:14.0758732Z ##[group]Run set -euo pipefail
+2026-10-09T04:33:14.0758931Z [36;1mset -euo pipefail[0m
+2026-10-09T04:33:14.0759063Z [36;1mset +e[0m
+2026-10-09T04:33:14.0759457Z [36;1mpython3 -B scripts/check_r5_compatibility.py > "$RUNNER_TEMP/tabmail-catalog16-inventory/compatibility.stdout" 2> "$RUNNER_TEMP/tabmail-catalog16-inventory/compatibility.stderr"[0m
+2026-10-09T04:33:14.0759883Z [36;1mcatalog_command_exit=$?[0m
+2026-10-09T04:33:14.0760032Z [36;1mset -e[0m
+2026-10-09T04:33:14.0760270Z [36;1mprintf '%s\n' "$catalog_command_exit" > "$RUNNER_TEMP/tabmail-catalog16-inventory/compatibility.exit"[0m
+2026-10-09T04:33:14.0760601Z [36;1mcat "$RUNNER_TEMP/tabmail-catalog16-inventory/compatibility.stdout"[0m
+2026-10-09T04:33:14.0760881Z [36;1mcat "$RUNNER_TEMP/tabmail-catalog16-inventory/compatibility.stderr"[0m
+2026-10-09T04:33:14.0761103Z [36;1mexit "$catalog_command_exit"[0m
+2026-10-09T04:33:14.0811543Z shell: /usr/bin/bash -e {0}
+2026-10-09T04:33:14.0811688Z ##[endgroup]
+2026-10-09T04:33:16.3090517Z {
+2026-10-09T04:33:16.3090881Z   "wire_validation_scope": "not_checked_current_wire_required",
+2026-10-09T04:33:16.3091156Z   "historical_wire_reference": {
+2026-10-09T04:33:16.3091551Z     "artifact_ref": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json",
+2026-10-09T04:33:16.3091974Z     "sha256": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+2026-10-09T04:33:16.3092296Z     "qualification": "historical_metadata_only_not_current_wire"
+2026-10-09T04:33:16.3092483Z   },
+2026-10-09T04:33:16.3092661Z   "status": "source_inventory_and_upgrade_plan_checked",
+2026-10-09T04:33:16.3092859Z   "task_complete": false,
+2026-10-09T04:33:16.3093010Z   "product_green": false,
+2026-10-09T04:33:16.3093150Z   "routes": 133,
+2026-10-09T04:33:16.3093281Z   "client_branches": 136,
+2026-10-09T04:33:16.3093425Z   "source_files": 97,
+2026-10-09T04:33:16.3093561Z   "openapi_missing": [
+2026-10-09T04:33:16.3093735Z     "DELETE /api/v1/suppression/{id}",
+2026-10-09T04:33:16.3094120Z     "GET /api/v1/suppression",
+2026-10-09T04:33:16.3094280Z     "GET /docs-assets/*"
+2026-10-09T04:33:16.3094403Z   ],
+2026-10-09T04:33:16.3094526Z   "no_shipped_client": [
+2026-10-09T04:33:16.3094697Z     "DELETE /api/v1/suppression/{id}",
+2026-10-09T04:33:16.3094875Z     "GET /api/v1/admin/status",
+2026-10-09T04:33:16.3095036Z     "GET /api/v1/auth/me",
+2026-10-09T04:33:16.3095233Z     "GET /api/v1/company/outbound/{id}/recipients",
+2026-10-09T04:33:16.3095435Z     "GET /api/v1/suppression",
+2026-10-09T04:33:16.3095581Z     "GET /docs",
+2026-10-09T04:33:16.3095718Z     "GET /docs-assets/*",
+2026-10-09T04:33:16.3095858Z     "GET /metrics",
+2026-10-09T04:33:16.3095995Z     "GET /openapi.yaml",
+2026-10-09T04:33:16.3096134Z     "GET /ready",
+2026-10-09T04:33:16.3096256Z     "GET /redoc"
+2026-10-09T04:33:16.3096364Z   ],
+2026-10-09T04:33:16.3096704Z   "runtime_boundary": "No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required."
+2026-10-09T04:33:16.3097161Z }
+2026-10-09T04:33:16.3144263Z ##[group]Run set -euo pipefail
+2026-10-09T04:33:16.3144460Z [36;1mset -euo pipefail[0m
+2026-10-09T04:33:16.3144597Z [36;1mset +e[0m
+2026-10-09T04:33:16.3144953Z [36;1mnode scripts/collect_api_calls.cjs --check > "$RUNNER_TEMP/tabmail-catalog16-inventory/clients.stdout" 2> "$RUNNER_TEMP/tabmail-catalog16-inventory/clients.stderr"[0m
+2026-10-09T04:33:16.3145345Z [36;1mcatalog_command_exit=$?[0m
+2026-10-09T04:33:16.3145489Z [36;1mset -e[0m
+2026-10-09T04:33:16.3145714Z [36;1mprintf '%s\n' "$catalog_command_exit" > "$RUNNER_TEMP/tabmail-catalog16-inventory/clients.exit"[0m
+2026-10-09T04:33:16.3146021Z [36;1mcat "$RUNNER_TEMP/tabmail-catalog16-inventory/clients.stdout"[0m
+2026-10-09T04:33:16.3146275Z [36;1mcat "$RUNNER_TEMP/tabmail-catalog16-inventory/clients.stderr"[0m
+2026-10-09T04:33:16.3146485Z [36;1mexit "$catalog_command_exit"[0m
+2026-10-09T04:33:16.3197335Z shell: /usr/bin/bash -e {0}
+2026-10-09T04:33:16.3197484Z ##[endgroup]
+2026-10-09T04:33:16.9322142Z API client inventory PASS: 136 branches, 7 explicit transport forwarders
+2026-10-09T04:33:16.9860514Z ##[group]Run set -euo pipefail
+2026-10-09T04:33:16.9860834Z [36;1mset -euo pipefail[0m
+2026-10-09T04:33:16.9861040Z [36;1mset +e[0m
+2026-10-09T04:33:16.9862067Z [36;1mPYTHONPATH=scripts:scripts/tests python3 -B -m unittest test_r5_transactions test_r5_compatibility test_r5_catalog_reconciliation test_r5_current_source_inventory test_r5_reviewed_web_locks -v > "$RUNNER_TEMP/tabmail-catalog16-inventory/five-modules.stdout" 2> "$RUNNER_TEMP/tabmail-catalog16-inventory/five-modules.stderr"[0m
+2026-10-09T04:33:16.9863126Z [36;1mcatalog_command_exit=$?[0m
+2026-10-09T04:33:16.9863353Z [36;1mset -e[0m
+2026-10-09T04:33:16.9863722Z [36;1mprintf '%s\n' "$catalog_command_exit" > "$RUNNER_TEMP/tabmail-catalog16-inventory/five-modules.exit"[0m
+2026-10-09T04:33:16.9864245Z [36;1mcat "$RUNNER_TEMP/tabmail-catalog16-inventory/five-modules.stdout"[0m
+2026-10-09T04:33:16.9864677Z [36;1mcat "$RUNNER_TEMP/tabmail-catalog16-inventory/five-modules.stderr"[0m
+2026-10-09T04:33:16.9865127Z [36;1mexit "$catalog_command_exit"[0m
+2026-10-09T04:33:16.9925055Z shell: /usr/bin/bash -e {0}
+2026-10-09T04:33:16.9925218Z ##[endgroup]
+2026-10-09T04:34:14.2655308Z test_cache_has_specific_message_fence_not_ancestor_lock (test_r5_transactions.TransactionInventoryTests.test_cache_has_specific_message_fence_not_ancestor_lock) ... ok
+2026-10-09T04:34:14.2656361Z test_callback_signature_drift_rejected (test_r5_transactions.TransactionInventoryTests.test_callback_signature_drift_rejected) ... ok
+2026-10-09T04:34:14.2657441Z test_constant_backed_observation_is_write_despite_ast_heuristic (test_r5_transactions.TransactionInventoryTests.test_constant_backed_observation_is_write_despite_ast_heuristic) ... ok
+2026-10-09T04:34:14.2658414Z test_current_inventory_is_only_structure_evidence (test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence) ... ok
+2026-10-09T04:34:14.2659367Z test_current_trigger_and_package_constant_changes_remain_fenced (test_r5_transactions.TransactionInventoryTests.test_current_trigger_and_package_constant_changes_remain_fenced) ... ok
+2026-10-09T04:34:14.2660139Z test_duplicate_entry_rejected (test_r5_transactions.TransactionInventoryTests.test_duplicate_entry_rejected) ... ok
+2026-10-09T04:34:14.2660759Z test_external_caller_change_rejected (test_r5_transactions.TransactionInventoryTests.test_external_caller_change_rejected) ... ok
+2026-10-09T04:34:14.2661599Z test_fk_or_trigger_drift_rejected (test_r5_transactions.TransactionInventoryTests.test_fk_or_trigger_drift_rejected) ... ok
+2026-10-09T04:34:14.2662622Z test_gc_round_and_receipt_projection_are_not_transaction_acceptance (test_r5_transactions.TransactionInventoryTests.test_gc_round_and_receipt_projection_are_not_transaction_acceptance) ... ok
+2026-10-09T04:34:14.2663715Z test_literal_and_concatenated_dynamic_sql_distinguished (test_r5_transactions.TransactionInventoryTests.test_literal_and_concatenated_dynamic_sql_distinguished) ... ok
+2026-10-09T04:34:14.2664637Z test_missing_callback_effect_rejected (test_r5_transactions.TransactionInventoryTests.test_missing_callback_effect_rejected) ... ok
+2026-10-09T04:34:14.2665534Z test_missing_file_type_review_rejected (test_r5_transactions.TransactionInventoryTests.test_missing_file_type_review_rejected) ... ok
+2026-10-09T04:34:14.2666117Z test_missing_function_rejected (test_r5_transactions.TransactionInventoryTests.test_missing_function_rejected) ... ok
+2026-10-09T04:34:14.2666654Z test_missing_specific_assertion_rejected (test_r5_transactions.TransactionInventoryTests.test_missing_specific_assertion_rejected) ... ok
+2026-10-09T04:34:14.2667236Z test_missing_specific_sql_effect_rejected (test_r5_transactions.TransactionInventoryTests.test_missing_specific_sql_effect_rejected) ... ok
+2026-10-09T04:34:14.2667811Z test_new_file_without_functions_rejected (test_r5_transactions.TransactionInventoryTests.test_new_file_without_functions_rejected) ... ok
+2026-10-09T04:34:14.2668625Z test_new_migration_rejected (test_r5_transactions.TransactionInventoryTests.test_new_migration_rejected) ... ok
+2026-10-09T04:34:14.2669292Z test_new_pure_function_is_also_rejected_and_no_inventory_allowlist (test_r5_transactions.TransactionInventoryTests.test_new_pure_function_is_also_rejected_and_no_inventory_allowlist) ... ok
+2026-10-09T04:34:14.2669912Z test_new_write_function_rejected (test_r5_transactions.TransactionInventoryTests.test_new_write_function_rejected) ... ok
+2026-10-09T04:34:14.2670448Z test_new_write_in_old_function_rejected (test_r5_transactions.TransactionInventoryTests.test_new_write_in_old_function_rejected) ... ok
+2026-10-09T04:34:14.2671052Z test_obsolete_function_and_wrong_receiver_rejected (test_r5_transactions.TransactionInventoryTests.test_obsolete_function_and_wrong_receiver_rejected) ... ok
+2026-10-09T04:34:14.2671658Z test_package_sql_constant_drift_rejected (test_r5_transactions.TransactionInventoryTests.test_package_sql_constant_drift_rejected) ... ok
+2026-10-09T04:34:14.2672357Z test_pr23_each_added_and_changed_body_has_independent_source_review (test_r5_transactions.TransactionInventoryTests.test_pr23_each_added_and_changed_body_has_independent_source_review) ... ok
+2026-10-09T04:34:14.2673125Z test_read_preview_and_sse_have_real_lock_and_callback_boundaries (test_r5_transactions.TransactionInventoryTests.test_read_preview_and_sse_have_real_lock_and_callback_boundaries) ... ok
+2026-10-09T04:34:14.2673840Z test_structure_cannot_claim_runtime_or_parent_acceptance (test_r5_transactions.TransactionInventoryTests.test_structure_cannot_claim_runtime_or_parent_acceptance) ... ok
+2026-10-09T04:34:14.2674487Z test_update_detected_but_row_lock_not_mutation (test_r5_transactions.TransactionInventoryTests.test_update_detected_but_row_lock_not_mutation) ... ok
+2026-10-09T04:34:14.2675175Z test_cannot_waive_dependency_runtime_or_legacy_client_unknowns (test_r5_compatibility.CompatibilityGateTests.test_cannot_waive_dependency_runtime_or_legacy_client_unknowns) ... ok
+2026-10-09T04:34:14.2676033Z test_current_source_map_is_not_product_or_dependency_completion (test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion) ... ok
+2026-10-09T04:34:14.2676727Z test_dns_exclusions_match_real_HTTP_methods_not_create (test_r5_compatibility.CompatibilityGateTests.test_dns_exclusions_match_real_HTTP_methods_not_create) ... ok
+2026-10-09T04:34:14.2677337Z test_duplicate_and_nonfinite_json_rejected (test_r5_compatibility.CompatibilityGateTests.test_duplicate_and_nonfinite_json_rejected) ... ok
+2026-10-09T04:34:14.2677982Z test_future_rejection_upgrade_and_task_strategies_mandatory (test_r5_compatibility.CompatibilityGateTests.test_future_rejection_upgrade_and_task_strategies_mandatory) ... ok
+2026-10-09T04:34:14.2678737Z test_malformed_and_untrusted_producer_sources_rejected (test_r5_compatibility.CompatibilityGateTests.test_malformed_and_untrusted_producer_sources_rejected) ... ok
+2026-10-09T04:34:14.2679379Z test_missing_duplicate_and_source_drift_rejected (test_r5_compatibility.CompatibilityGateTests.test_missing_duplicate_and_source_drift_rejected) ... ok
+2026-10-09T04:34:14.2680045Z test_route_schema_client_and_test_fact_mutations_rejected (test_r5_compatibility.CompatibilityGateTests.test_route_schema_client_and_test_fact_mutations_rejected) ... ok
+2026-10-09T04:34:14.2680751Z test_routes_and_successor_tasks_match_original_stage_semantics (test_r5_compatibility.CompatibilityGateTests.test_routes_and_successor_tasks_match_original_stage_semantics) ... ok
+2026-10-09T04:34:14.2681423Z test_current_source_rejects_historical_wire (test_r5_compatibility.CurrentHistoricalBoundaryTests.test_current_source_rejects_historical_wire) ... ok
+2026-10-09T04:34:14.2682099Z test_fabricated_client_producer_not_accepted_as_source (test_r5_compatibility.CurrentHistoricalBoundaryTests.test_fabricated_client_producer_not_accepted_as_source) ... ok
+2026-10-09T04:34:14.2682811Z test_future_and_wrong_handler_producer_routes_rejected (test_r5_compatibility.CurrentHistoricalBoundaryTests.test_future_and_wrong_handler_producer_routes_rejected) ... ok
+2026-10-09T04:34:14.2683556Z test_new_routes_preserve_release_semantics (test_r5_compatibility.CurrentHistoricalBoundaryTests.test_new_routes_preserve_release_semantics) ... ok
+2026-10-09T04:34:14.2684221Z test_old_runtime_cannot_be_re_signed_with_current_spec (test_r5_compatibility.CurrentHistoricalBoundaryTests.test_old_runtime_cannot_be_re_signed_with_current_spec) ... ok
+2026-10-09T04:34:14.2684940Z test_re_signing_history_and_current_artifact_claims_rejected (test_r5_compatibility.CurrentHistoricalBoundaryTests.test_re_signing_history_and_current_artifact_claims_rejected) ... ok
+2026-10-09T04:34:14.2685645Z test_exact_safe_join_remains_metadata_not_product_approval (test_r5_compatibility.SafeWireJoinTests.test_exact_safe_join_remains_metadata_not_product_approval) ... ok
+2026-10-09T04:34:14.2686287Z test_not_observed_cannot_be_laundered_as_runtime_pass (test_r5_compatibility.SafeWireJoinTests.test_not_observed_cannot_be_laundered_as_runtime_pass) ... ok
+2026-10-09T04:34:14.2686948Z test_unknown_private_fields_bad_status_and_aspects_rejected (test_r5_compatibility.SafeWireJoinTests.test_unknown_private_fields_bad_status_and_aspects_rejected) ... ok
+2026-10-09T04:34:14.2687622Z test_wrong_tree_report_spec_case_and_closure_hashes_rejected (test_r5_compatibility.SafeWireJoinTests.test_wrong_tree_report_spec_case_and_closure_hashes_rejected) ... ok
+2026-10-09T04:34:14.2688402Z test_old_pins_reject_and_current_revision_passes_same_actual_facts (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_old_pins_reject_and_current_revision_passes_same_actual_facts) ... ok
+2026-10-09T04:34:14.2689347Z test_only_reviewed_body_and_two_closure_hashes_change (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_only_reviewed_body_and_two_closure_hashes_change) ... ok
+2026-10-09T04:34:14.2690220Z test_revision10_preserves_all_historical_bytes_and_original_rejection_guards (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision10_preserves_all_historical_bytes_and_original_rejection_guards) ... ok
+2026-10-09T04:34:14.2691244Z test_revision10_preserves_manual_reviews_and_binds_fresh_source_facts (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision10_preserves_manual_reviews_and_binds_fresh_source_facts) ... ok
+2026-10-09T04:34:14.2692130Z test_revision11_preserves_history_and_all_unapproved_rejection_guards (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision11_preserves_history_and_all_unapproved_rejection_guards) ... ok
+2026-10-09T04:34:14.2693012Z test_revision11_reconciles_actual_functions_clients_routes_and_source (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision11_reconciles_actual_functions_clients_routes_and_source) ... ok
+2026-10-09T04:34:14.2693902Z test_revision12_binds_actual_source_facts_and_preserves_manual_reviews (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision12_binds_actual_source_facts_and_preserves_manual_reviews) ... ok
+2026-10-09T04:34:14.2694824Z test_revision12_preserves_public_history_collectors_and_original_rejections (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision12_preserves_public_history_collectors_and_original_rejections) ... ok
+2026-10-09T04:34:14.2695739Z test_revision13_binds_actual_source_facts_and_preserves_manual_reviews (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision13_binds_actual_source_facts_and_preserves_manual_reviews) ... ok
+2026-10-09T04:34:14.2696660Z test_revision13_preserves_public_history_collectors_and_original_rejections (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision13_preserves_public_history_collectors_and_original_rejections) ... ok
+2026-10-09T04:34:14.2697567Z test_revision14_binds_actual_source_facts_and_preserves_manual_reviews (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision14_binds_actual_source_facts_and_preserves_manual_reviews) ... ok
+2026-10-09T04:34:14.2698613Z test_revision14_preserves_public_history_collectors_and_original_rejections (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision14_preserves_public_history_collectors_and_original_rejections) ... ok
+2026-10-09T04:34:14.2699513Z test_revision15_binds_actual_source_facts_and_preserves_manual_reviews (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision15_binds_actual_source_facts_and_preserves_manual_reviews) ... ok
+2026-10-09T04:34:14.2700421Z test_revision15_preserves_public_history_collectors_and_original_rejections (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision15_preserves_public_history_collectors_and_original_rejections) ... ok
+2026-10-09T04:34:14.2701321Z test_revision16_binds_actual_source_facts_and_preserves_manual_reviews (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision16_binds_actual_source_facts_and_preserves_manual_reviews) ... ok
+2026-10-09T04:34:14.2702240Z test_revision16_preserves_public_history_collectors_and_original_rejections (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision16_preserves_public_history_collectors_and_original_rejections) ... ok
+2026-10-09T04:34:14.2703109Z test_revision3_client_inventory_preserves_routes_and_forwarders (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision3_client_inventory_preserves_routes_and_forwarders) ... ok
+2026-10-09T04:34:14.2703968Z test_revision3_preserves_unmodified_reviews_and_pins_reviewed_sources (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision3_preserves_unmodified_reviews_and_pins_reviewed_sources) ... ok
+2026-10-09T04:34:14.2704849Z test_revision4_client_locations_and_source_hashes_are_explicitly_bound (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision4_client_locations_and_source_hashes_are_explicitly_bound) ... ok
+2026-10-09T04:34:14.2705717Z test_revision4_preserves_reviews_and_records_exact_caller_changes (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision4_preserves_reviews_and_records_exact_caller_changes) ... ok
+2026-10-09T04:34:14.2706652Z test_revision5_client_moves_and_source_hashes_are_explicitly_bound (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision5_client_moves_and_source_hashes_are_explicitly_bound) ... ok
+2026-10-09T04:34:14.2707508Z test_revision5_preserves_reviews_and_records_exact_caller_changes (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision5_preserves_reviews_and_records_exact_caller_changes) ... ok
+2026-10-09T04:34:14.2708389Z test_revision6_client_facts_source_bytes_and_historical_guards_are_bound (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision6_client_facts_source_bytes_and_historical_guards_are_bound) ... ok
+2026-10-09T04:34:14.2709319Z test_revision6_preserves_reviews_and_records_exact_caller_changes (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision6_preserves_reviews_and_records_exact_caller_changes) ... ok
+2026-10-09T04:34:14.2710204Z test_revision7_client_facts_source_bytes_and_historical_guards_are_bound (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision7_client_facts_source_bytes_and_historical_guards_are_bound) ... ok
+2026-10-09T04:34:14.2711069Z test_revision7_preserves_reviews_and_records_exact_caller_changes (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision7_preserves_reviews_and_records_exact_caller_changes) ... ok
+2026-10-09T04:34:14.2711948Z test_revision8_preserves_client_closure_history_and_all_original_guards (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision8_preserves_client_closure_history_and_all_original_guards) ... ok
+2026-10-09T04:34:14.2712936Z test_revision8_reviews_the_new_revocation_sql_and_complete_transaction_deltas (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision8_reviews_the_new_revocation_sql_and_complete_transaction_deltas) ... ok
+2026-10-09T04:34:14.2713867Z test_revision9_preserves_all_historical_bytes_and_original_rejection_guards (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision9_preserves_all_historical_bytes_and_original_rejection_guards) ... ok
+2026-10-09T04:34:14.2714766Z test_revision9_preserves_manual_reviews_and_binds_fresh_source_facts (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision9_preserves_manual_reviews_and_binds_fresh_source_facts) ... ok
+2026-10-09T04:34:14.2715543Z test_unapproved_actual_closure_bytes_rejected (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_closure_bytes_rejected) ... ok
+2026-10-09T04:34:14.2716334Z test_unapproved_actual_route_source_rejected_by_original_collector (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_route_source_rejected_by_original_collector) ... ok
+2026-10-09T04:34:14.2717146Z test_unapproved_actual_source_and_ast_changes_rejected (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_source_and_ast_changes_rejected) ... ok
+2026-10-09T04:34:14.2717933Z test_unapproved_client_and_caller_locations_are_rejected (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_client_and_caller_locations_are_rejected) ... ok
+2026-10-09T04:34:14.2718754Z test_unapproved_route_and_ast_fact_changes_rejected (test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_route_and_ast_fact_changes_rejected) ... ok
+2026-10-09T04:34:14.2719517Z test_c_map_keys_strings_and_comments_are_not_native_imports (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_c_map_keys_strings_and_comments_are_not_native_imports) ... ok
+2026-10-09T04:34:14.2720260Z test_current_policy_never_enters_frozen_legacy_identity (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_current_policy_never_enters_frozen_legacy_identity) ... ok
+2026-10-09T04:34:14.2721177Z test_current_tool_cli_binds_v2_source_and_rejects_live_fork_drift (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_current_tool_cli_binds_v2_source_and_rejects_live_fork_drift) ... ok
+2026-10-09T04:34:14.2721990Z test_fork_embed_and_build_metadata_drift_are_rejected_before_after (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_fork_embed_and_build_metadata_drift_are_rejected_before_after) ... ok
+2026-10-09T04:34:14.2722804Z test_missing_symlink_and_new_disk_input_are_not_silently_ignored (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_missing_symlink_and_new_disk_input_are_not_silently_ignored) ... ok
+2026-10-09T04:34:14.2723608Z test_omitted_fork_extra_escape_and_unknown_policy_cannot_reseal (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_omitted_fork_extra_escape_and_unknown_policy_cannot_reseal) ... ok
+2026-10-09T04:34:14.2724339Z test_output_exclusions_cannot_hide_embed_inputs (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_output_exclusions_cannot_hide_embed_inputs) ... ok
+2026-10-09T04:34:14.2725075Z test_pinned_v2_protocol_and_benchmark_current_entrypoints (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_pinned_v2_protocol_and_benchmark_current_entrypoints) ... ok
+2026-10-09T04:34:14.2725905Z test_protocol_manifest_revalidation_rejects_after_run_drift_without_git (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_protocol_manifest_revalidation_rejects_after_run_drift_without_git) ... ok
+2026-10-09T04:34:14.2726798Z test_protocol_metadata_preserves_shared_and_reference_runtime_boundaries (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_protocol_metadata_preserves_shared_and_reference_runtime_boundaries) ... ok
+2026-10-09T04:34:14.2727611Z test_real_native_import_and_linker_inputs_still_fail_closed (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_real_native_import_and_linker_inputs_still_fail_closed) ... ok
+2026-10-09T04:34:14.2728642Z test_replacement_path_version_dynamic_workfile_and_extra_directory_fail_closed (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_replacement_path_version_dynamic_workfile_and_extra_directory_fail_closed) ... ok
+2026-10-09T04:34:14.2729548Z test_superset_includes_fork_embed_metadata_helper_and_new_identity_domain (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_superset_includes_fork_embed_metadata_helper_and_new_identity_domain) ... ok
+2026-10-09T04:34:14.2730403Z test_symlinked_root_external_local_import_and_adapter_omission_rejected (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_symlinked_root_external_local_import_and_adapter_omission_rejected) ... ok
+2026-10-09T04:34:14.2731214Z test_unknown_build_conditions_and_environment_are_rejected (test_r5_current_source_inventory.CurrentSourceInventoryTests.test_unknown_build_conditions_and_environment_are_rejected) ... ok
+2026-10-09T04:34:14.2732044Z test_all_existing_preparation_functions_and_original_assertions_are_preserved (test_r5_reviewed_web_locks.NextSecurityPatchLockTests.test_all_existing_preparation_functions_and_original_assertions_are_preserved) ... ok
+2026-10-09T04:34:14.2732869Z test_exact_new_complete_lock_passes_original_preparation_boundary (test_r5_reviewed_web_locks.NextSecurityPatchLockTests.test_exact_new_complete_lock_passes_original_preparation_boundary) ... ok
+2026-10-09T04:34:14.2733663Z test_new_lock_mutations_reject_before_archive_or_filesystem_changes (test_r5_reviewed_web_locks.NextSecurityPatchLockTests.test_new_lock_mutations_reject_before_archive_or_filesystem_changes) ... ok
+2026-10-09T04:34:14.2734465Z test_only_reviewed_direct_pair_and_matching_release_packages_change (test_r5_reviewed_web_locks.NextSecurityPatchLockTests.test_only_reviewed_direct_pair_and_matching_release_packages_change) ... ok
+2026-10-09T04:34:14.2735271Z test_previous_and_updated_complete_locks_report_their_actual_hash (test_r5_reviewed_web_locks.ReviewedWebLockTests.test_previous_and_updated_complete_locks_report_their_actual_hash) ... ok
+2026-10-09T04:34:14.2736116Z test_unreviewed_lock_bytes_reject_before_archive_or_filesystem_changes (test_r5_reviewed_web_locks.ReviewedWebLockTests.test_unreviewed_lock_bytes_reject_before_archive_or_filesystem_changes) ... ok
+2026-10-09T04:34:14.2736884Z test_update_preserves_direct_requirements_and_typescript_identity (test_r5_reviewed_web_locks.ReviewedWebLockTests.test_update_preserves_direct_requirements_and_typescript_identity) ... ok
+2026-10-09T04:34:14.2737240Z 
+2026-10-09T04:34:14.2737382Z ----------------------------------------------------------------------
+2026-10-09T04:34:14.2737617Z Ran 102 tests in 56.701s
+2026-10-09T04:34:14.2737706Z 
+2026-10-09T04:34:14.2737758Z OK
+2026-10-09T04:34:14.2769569Z ##[group]Run python3 -B - <<'PY'
+2026-10-09T04:34:14.2769853Z [36;1mpython3 -B - <<'PY'[0m
+2026-10-09T04:34:14.2770074Z [36;1mimport json, os, subprocess[0m
+2026-10-09T04:34:14.2770313Z [36;1mfrom pathlib import Path[0m
+2026-10-09T04:34:14.2770541Z [36;1mdef git(*args):[0m
+2026-10-09T04:34:14.2770818Z [36;1m    return subprocess.check_output(['git', *args]).decode()[0m
+2026-10-09T04:34:14.2771186Z [36;1msource = dict(commit=git('rev-parse','HEAD').strip(),[0m
+2026-10-09T04:34:14.2771527Z [36;1m              tree=git('rev-parse','HEAD^{tree}').strip(),[0m
+2026-10-09T04:34:14.2771898Z [36;1m              status=git('status','--porcelain','--untracked-files=all'))[0m
+2026-10-09T04:34:14.2772332Z [36;1moutput = Path(os.environ['RUNNER_TEMP']) / 'tabmail-catalog16-inventory'[0m
+2026-10-09T04:34:14.2772799Z [36;1m(output / 'source-after.json').write_text(json.dumps(source, indent=2) + '\n')[0m
+2026-10-09T04:34:14.2773214Z [36;1mprint(json.dumps(source, indent=2))[0m
+2026-10-09T04:34:14.2773549Z [36;1mif source != json.loads((output / 'source-before.json').read_text()):[0m
+2026-10-09T04:34:14.2773936Z [36;1m    raise SystemExit('source changed during validation')[0m
+2026-10-09T04:34:14.2774226Z [36;1mPY[0m
+2026-10-09T04:34:14.2826194Z shell: /usr/bin/bash -e {0}
+2026-10-09T04:34:14.2826345Z ##[endgroup]
+2026-10-09T04:34:14.3152983Z {
+2026-10-09T04:34:14.3153327Z   "commit": "167e38b1541c027107fc81900f3e37fda7289677",
+2026-10-09T04:34:14.3153655Z   "tree": "2e254469358541c8aedb1e98c88d5d2edf6d44f8",
+2026-10-09T04:34:14.3153835Z   "status": ""
+2026-10-09T04:34:14.3153948Z }
+2026-10-09T04:34:14.3225906Z ##[group]Run actions/upload-artifact@v4
+2026-10-09T04:34:14.3226061Z with:
+2026-10-09T04:34:14.3226186Z   name: catalog16-inventory-37884385919-1
+2026-10-09T04:34:14.3226378Z   path: /home/runner/work/_temp/tabmail-catalog16-inventory
+2026-10-09T04:34:14.3226568Z   if-no-files-found: error
+2026-10-09T04:34:14.3226698Z   retention-days: 14
+2026-10-09T04:34:14.3226822Z   compression-level: 6
+2026-10-09T04:34:14.3226940Z   overwrite: false
+2026-10-09T04:34:14.3227062Z   include-hidden-files: false
+2026-10-09T04:34:14.3227194Z ##[endgroup]
+2026-10-09T04:34:14.4213767Z (node:10359) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T04:34:14.4214240Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T04:34:14.4258019Z With the provided path, there will be 15 files uploaded
+2026-10-09T04:34:14.4260846Z Artifact name is valid!
+2026-10-09T04:34:14.4261243Z Root directory input is valid!
+2026-10-09T04:34:14.7108900Z Beginning upload of artifact content to blob storage
+2026-10-09T04:34:14.7326180Z (node:10359) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T04:34:14.8658832Z Uploaded bytes 11562
+2026-10-09T04:34:14.9095326Z Finished uploading artifact content to blob storage!
+2026-10-09T04:34:14.9095957Z SHA256 digest of uploaded artifact zip is 4bd28e540b66619fe93becd27c74cfb22981638c3d62fef097fe19b6db47f38f
+2026-10-09T04:34:14.9096952Z Finalizing artifact upload
+2026-10-09T04:34:15.1610287Z Artifact catalog16-inventory-37884385919-1.zip successfully finalized. Artifact ID 11596061035
+2026-10-09T04:34:15.1611068Z Artifact catalog16-inventory-37884385919-1 has been successfully uploaded! Final size is 11562 bytes. Artifact ID is 11596061035
+2026-10-09T04:34:15.1614050Z Artifact download URL: https://github.com/jyqj/tabmail/actions/runs/37884385919/artifacts/11596061035
+2026-10-09T04:34:15.1758166Z Post job cleanup.
+2026-10-09T04:34:15.2508348Z (node:10371) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T04:34:15.2508947Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T04:34:15.2603912Z Post job cleanup.
+2026-10-09T04:34:15.3334550Z (node:10379) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T04:34:15.3335030Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T04:34:15.3367831Z [command]/opt/hostedtoolcache/go/1.25.7/x64/bin/go env GOMODCACHE
+2026-10-09T04:34:15.3394906Z [command]/opt/hostedtoolcache/go/1.25.7/x64/bin/go env GOCACHE
+2026-10-09T04:34:15.3414128Z /home/runner/go/pkg/mod
+2026-10-09T04:34:15.3456197Z /home/runner/.cache/go-build
+2026-10-09T04:34:15.3459466Z Cache hit occurred on the primary key setup-go-Linux-x64-ubuntu24-go-1.25.7-4513745f7b95ab0bc8e1f9edd24c294514fb4a9ee51f2290b342654582d5d782, not saving cache.
+2026-10-09T04:34:15.3562075Z Post job cleanup.
+2026-10-09T04:34:15.4143274Z [command]/usr/bin/git version
+2026-10-09T04:34:15.4173451Z git version 2.55.0
+2026-10-09T04:34:15.4195927Z Temporarily overriding HOME='/home/runner/work/_temp/5a602edd-23a3-4a00-b6cd-37d9f9d8bb23' before making global git config changes
+2026-10-09T04:34:15.4196961Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T04:34:15.4200093Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/tabmail/tabmail
+2026-10-09T04:34:15.4229721Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T04:34:15.4258018Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T04:34:15.4429799Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T04:34:15.4452372Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T04:34:15.4619118Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T04:34:15.4642025Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T04:34:15.4950989Z Cleaning up orphan processes
+2026-10-09T04:34:15.5135514Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5, actions/setup-node@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

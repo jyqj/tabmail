@@ -1,0 +1,14 @@
+{"Time":"2026-09-28T08:15:25.03493067Z","Action":"start","Package":"tabmail/internal/store/postgres"}
+{"Time":"2026-09-28T08:15:25.055442129Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ComponentA01PreservesOverrides"}
+{"Time":"2026-09-28T08:15:25.055497337Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ComponentA01PreservesOverrides","Output":"=== RUN   TestR5ComponentA01PreservesOverrides\n"}
+{"Time":"2026-09-28T08:15:30.004503173Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ComponentA01PreservesOverrides","Output":"    r5_component_baseline_test.go:182: R5_COMPONENT_BASELINE_A01: original editor target failure corroborated by HTTP writes and PostgreSQL\n"}
+{"Time":"2026-09-28T08:15:30.009571673Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ComponentA01PreservesOverrides","Output":"--- FAIL: TestR5ComponentA01PreservesOverrides (4.95s)\n"}
+{"Time":"2026-09-28T08:15:30.009601589Z","Action":"fail","Package":"tabmail/internal/store/postgres","Test":"TestR5ComponentA01PreservesOverrides","Elapsed":4.95}
+{"Time":"2026-09-28T08:15:30.009620631Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ComponentA02RejectsStaleProfile"}
+{"Time":"2026-09-28T08:15:30.009622839Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ComponentA02RejectsStaleProfile","Output":"=== RUN   TestR5ComponentA02RejectsStaleProfile\n"}
+{"Time":"2026-09-28T08:15:34.123457758Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ComponentA02RejectsStaleProfile","Output":"    r5_component_baseline_test.go:183: R5_COMPONENT_BASELINE_A02: original editor target failure corroborated by HTTP writes and PostgreSQL\n"}
+{"Time":"2026-09-28T08:15:34.126396966Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ComponentA02RejectsStaleProfile","Output":"--- FAIL: TestR5ComponentA02RejectsStaleProfile (4.12s)\n"}
+{"Time":"2026-09-28T08:15:34.1264158Z","Action":"fail","Package":"tabmail/internal/store/postgres","Test":"TestR5ComponentA02RejectsStaleProfile","Elapsed":4.12}
+{"Time":"2026-09-28T08:15:34.126479383Z","Action":"output","Package":"tabmail/internal/store/postgres","Output":"FAIL\n"}
+{"Time":"2026-09-28T08:15:34.128906966Z","Action":"output","Package":"tabmail/internal/store/postgres","Output":"FAIL\ttabmail/internal/store/postgres\t9.094s\n"}
+{"Time":"2026-09-28T08:15:34.128932133Z","Action":"fail","Package":"tabmail/internal/store/postgres","Elapsed":9.094}

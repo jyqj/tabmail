@@ -1,0 +1,70 @@
+{
+  "scope": "reviewed existing source history only; no runtime qualification",
+  "base_commit": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+  "chain": [
+    {
+      "path": "internal/store/postgres/employee_disposition.go",
+      "commit": "23228449254bc0312171640a637e359187169192",
+      "parent_file_sha256": "8e85190234b215c2110b58bca9dc0972e6fe73451275e048d1a73a06867398fc",
+      "file_sha256": "ac722af5f6cc24b25662bdc9098d466417fb701ceddf29373ac26e1b17aca42e",
+      "review_document": "docs/company-mail/OFFBOARDING-SUCCESSOR-AUTHZ-20261004.md",
+      "review_document_sha256_at_pinned_base": "2901cbd58ec37e8cdece95b4f91d65a9de358dce58b6e31c5285a4e3fc2c819f"
+    },
+    {
+      "path": "internal/api/handlers/r5_protocol_component_observations_test.go",
+      "commit": "dc350c3e6c66553cf3a16b9771abb091cd6de1a8",
+      "parent_file_sha256": "b47248460d33055d70867d568f960b6880adff22b4ff4a4e4df273a7ae344770",
+      "file_sha256": "ff5d317c46bc29be5aaee22afcbf6817dc45ec8171f19b7cb1bd6729b5a51492",
+      "review_document": "docs/company-mail/R5-EXTERNAL-DEPENDENCY-RUNTIME-V1.md",
+      "review_document_sha256_at_pinned_base": "1b5029ed888d544a817b9da8de9ddb5118c8f14f28f63e411d85f4e40d0fa391"
+    },
+    {
+      "path": "internal/api/handlers/r5_protocol_component_observations_test.go",
+      "commit": "7beb93faf99fd50323edb4ddd00ed19a3e6ab405",
+      "parent_file_sha256": "ff5d317c46bc29be5aaee22afcbf6817dc45ec8171f19b7cb1bd6729b5a51492",
+      "file_sha256": "73041bbf18e5cc7ae79f72d6c9632f57687a7363ff7fce5b7c939c3aca585ca2",
+      "review_document": "docs/company-mail/R5-EXTERNAL-DEPENDENCY-RUNTIME-V2.md",
+      "review_document_sha256_at_pinned_base": "2b7698df53931ef2ef8cfbfabbbe43df1094eff77e41f3dcf5f2d3dc89b44311"
+    },
+    {
+      "path": "internal/api/handlers/r5_protocol_component_observations_test.go",
+      "commit": "20b51d48c4a849615817ee461699d31fe3e0cb4c",
+      "parent_file_sha256": "73041bbf18e5cc7ae79f72d6c9632f57687a7363ff7fce5b7c939c3aca585ca2",
+      "file_sha256": "209748dee456bbccde88913376dc12b2d6a7f5350198bac72523529c28524670",
+      "review_document": "docs/company-mail/R5-RC-RECEIPT-CONTRACT-20261003.md",
+      "review_document_sha256_at_pinned_base": "1e004875169ad2983a7466fdb1b1006790f437334f9b5127e06e0e7f07816d36"
+    },
+    {
+      "path": "internal/api/handlers/r5_protocol_component_observations_test.go",
+      "commit": "5b2715332d56c113e69a51bab2728f601ec0a82a",
+      "parent_file_sha256": "209748dee456bbccde88913376dc12b2d6a7f5350198bac72523529c28524670",
+      "file_sha256": "d0c4ce103fa231d43972af4a82b90fbdda99afb032c94b41b6c4951d95fbe9fe",
+      "review_document": "docs/company-mail/R5-FIXTURE-OWNER-JOIN-20261004.md",
+      "review_document_sha256_at_pinned_base": "b32f66b4a37bbe5d48dd449c44f3be1e82efb65e199895907540b77757141519"
+    },
+    {
+      "path": "internal/api/handlers/r5_protocol_component_observations_test.go",
+      "commit": "c8df5721bc3411d23d1e3b5ba4be917893d65fc2",
+      "parent_file_sha256": "d0c4ce103fa231d43972af4a82b90fbdda99afb032c94b41b6c4951d95fbe9fe",
+      "file_sha256": "fb83b09960942c3fe333fd90341ec8ac1e977ceb6fe3b0943898dbcbff9612f8",
+      "review_document": "docs/company-mail/R5-PE-SEED-FIX-20261004.md",
+      "review_document_sha256_at_pinned_base": "1252df6bc40ae9a035820c1bc7cc10893e4089d8ff00cf38f1e3f38a86e62961"
+    },
+    {
+      "path": "internal/api/handlers/r5_protocol_component_observations_test.go",
+      "commit": "850f067cf41e082d4134b1b58cccf17a27ce51bd",
+      "parent_file_sha256": "fb83b09960942c3fe333fd90341ec8ac1e977ceb6fe3b0943898dbcbff9612f8",
+      "file_sha256": "42deed5c10a1bcc510ea144e36ecac6af377a8fe8a08cea57bf3190eecb73757",
+      "review_document": "docs/company-mail/evidence/R5-TRANSPORT-DIAGNOSTIC-20261004/report.json",
+      "review_document_sha256_at_pinned_base": "d61eb7e298919497458ecd59bc719c06d17e92f08b0027169299f60983dd1f6b"
+    },
+    {
+      "path": "internal/store/postgres/r5_protocol_shared_test.go",
+      "commit": "6138113c1896cb810db567605154b5023f0340de",
+      "parent_file_sha256": "7974a065199361e7e01f0d4ba7e2b3ec08ab6bf37c40cd86f6a88901cfbd6db9",
+      "file_sha256": "c3a961063e532cdf41957edbc85455dc2a142ad1d664741da43b07afab83e6b8",
+      "review_document": "docs/company-mail/evidence/R5-SHARED-RECEIPT-LEGACY-V2-20261003/README.md",
+      "review_document_sha256_at_pinned_base": "6f7cf3050557b62e9367bd041305bee0633fba4a84a7e12ddc2a2620ef259ce0"
+    }
+  ]
+}

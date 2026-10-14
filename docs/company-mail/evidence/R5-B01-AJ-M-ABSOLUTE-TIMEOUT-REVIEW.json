@@ -1,0 +1,233 @@
+{
+  "L_executed": false,
+  "M_attempted": true,
+  "M_executed": false,
+  "M_result_sha256": null,
+  "absolute_deadline_UTC": "2026-10-02T06:47:53.594719+00:00",
+  "absolute_deadline_wall_time": 1790923673.594719,
+  "actual_captured_ready_checkpoints": [
+    {
+      "actual_claim_joined_seconds": null,
+      "explain_only_not_actual_latency": true,
+      "jobstotal": 40,
+      "pipeline_wall_seconds": 0.741706,
+      "preceding_actual_claim_seconds": 0.0007700000000000001,
+      "ready": 20
+    },
+    {
+      "actual_claim_joined_seconds": null,
+      "explain_only_not_actual_latency": true,
+      "jobstotal": 1020,
+      "pipeline_wall_seconds": 11.08819,
+      "preceding_actual_claim_seconds": 0.0005530000000000014,
+      "ready": 1000
+    },
+    {
+      "actual_claim_joined_seconds": null,
+      "explain_only_not_actual_latency": true,
+      "jobstotal": 10020,
+      "pipeline_wall_seconds": 120.335388,
+      "preceding_actual_claim_seconds": 0.0005939999999999834,
+      "ready": 10000
+    },
+    {
+      "actual_claim_joined_seconds": null,
+      "explain_only_not_actual_latency": true,
+      "jobstotal": 100020,
+      "pipeline_wall_seconds": 1402.483739,
+      "preceding_actual_claim_seconds": 0.0010570000000003077,
+      "ready": 100000
+    },
+    {
+      "actual_claim_joined_seconds": null,
+      "explain_only_not_actual_latency": true,
+      "jobstotal": 250020,
+      "pipeline_wall_seconds": 3741.925034,
+      "preceding_actual_claim_seconds": 0.0016989999999985628,
+      "ready": 250000
+    },
+    {
+      "actual_claim_joined_seconds": null,
+      "explain_only_not_actual_latency": true,
+      "jobstotal": 500020,
+      "pipeline_wall_seconds": 7163.24262,
+      "preceding_actual_claim_seconds": 0.01333200000000545,
+      "ready": 500000
+    },
+    {
+      "actual_claim_joined_seconds": null,
+      "explain_only_not_actual_latency": true,
+      "jobstotal": 750020,
+      "pipeline_wall_seconds": 10701.36871,
+      "preceding_actual_claim_seconds": 0.01602399999998738,
+      "ready": 750000
+    }
+  ],
+  "actual_population_counts_after_original_Go_join_and_before_native_stop": {
+    "actual_documents": 753360,
+    "actual_durable_current_sourcebound_SQL_ready": 753360,
+    "actual_mailboxes": 5000,
+    "actual_processing_jobs": 20,
+    "actual_ready_jobs": 753360,
+    "actual_schema": 16,
+    "actual_stored_messages": 753380,
+    "actual_users_including_admins": 1002,
+    "employees_requested_and_created": 1000
+  },
+  "actual_source_closure_sha256": "49d04f3695101c07dcb092fd6294151a873bb9993f6396ed668877720ac97581",
+  "baseline_complete": false,
+  "budget_and_owned_process_cleanup_receipt": {
+    "absolute_deadline_wall_time": 1790923673.594719,
+    "budget_seconds": 10800,
+    "cleanup_actions": [
+      {
+        "observed_group": 56516,
+        "owned_pid": 56516,
+        "signal": "SIGTERM",
+        "status": "sent"
+      },
+      {
+        "missing_leader_group_observation": {
+          "members": [
+            {
+              "group": 56516,
+              "pid": 56516,
+              "state": "Z"
+            }
+          ],
+          "non_zombie_live_pids": [],
+          "status": "observed"
+        },
+        "owned_pid": 56516,
+        "signal": "SIGKILL",
+        "status": "owned_leader_missing_no_signal"
+      }
+    ],
+    "cleanup_errors": [],
+    "cleanup_group_observation": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "cleanup_live_processes_absent": true,
+    "cleanup_observed_wall_time": 1790923678.699139,
+    "elapsed_wall_seconds": 10800.004051923752,
+    "observed_wall_time": 1790923673.5987709,
+    "owned_process_group": 56516,
+    "owned_process_group_cleanup": "observed_no_non_zombie_members",
+    "process_returncode": -15,
+    "process_returncode_status": "observed_parent_wait",
+    "scope": "absolute wall deadline including host suspension; cleanup is observed after resume, never guaranteed during sleep",
+    "started_wall_time": 1790912873.594719,
+    "timed_out": true
+  },
+  "captured_preparation_incomplete_stats": {
+    "active_budget": 20,
+    "claim_calls": 37669,
+    "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+    "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+    "claim_wall_seconds": 171.7788189999995,
+    "company_wall_seconds": 16.249715000000002,
+    "final_empty_claim": false,
+    "joined_completed_jobs": 753360,
+    "joined_inflight": 0,
+    "joined_ready_before_last_claim": 753360,
+    "joined_stored_messages": 753380,
+    "last_claim_batch": 20,
+    "last_claim_wall_seconds": 0.014456999999993059,
+    "max_active": 20,
+    "max_claim_batch": 20,
+    "max_wall_monotonic_gap_ms": 87.373041,
+    "max_window_messages": 20,
+    "method": "lookahead100_unpersisted_inputs_distinct_mailbox_windows20_ordinal_fifo_v1",
+    "parse_complete_wall_seconds": 1054.8583890000002,
+    "parser_canceled_joined_calls": 0,
+    "parser_join_policy": "uncancelled_document_wait_with_31s_absolute_wall_admission_guard",
+    "parser_join_reserve_seconds": 31,
+    "parser_joined_call_wall_seconds_sum": 9233.909907,
+    "parser_joined_calls": 753360,
+    "parser_joined_inflight": 0,
+    "parser_min_start_remaining_wall_seconds": 31.166936,
+    "parser_original_deadline_unix_seconds": 1790923679.8597639,
+    "parser_quiescent": true,
+    "pending_upper_bound": 20,
+    "phase": "before_claim",
+    "pipeline_wall_seconds": 10752.669983,
+    "producer_done": false,
+    "sql_ready_count": 0,
+    "store_wall_seconds": 9509.146712000005
+  },
+  "checkpoint_logging_boundary": "PG269scheckpoint is periodic background total, notCommit latency; no attribution shortcut",
+  "completed_workload_samples_evidenced": 0,
+  "concurrency": 20,
+  "created_utc": "2026-10-02T06:57:00.254982+00:00",
+  "dataset_contract_sha256": "9e81020680dbd6e990cbb35ab1aac16413885e65306d949a5889c4bafda00b36",
+  "disk_RSS_boundary": "no completed result metric matrix; timed resource du observations are retained, not fabricated final RSS/disk admission",
+  "disk_budget_bytes": 85899345920,
+  "full_population_1M_not_reached": true,
+  "full_six_stream_fingerprint_not_computed": true,
+  "go_exit_semantics": "observed original owned process SIGTERM on absolute deadline, not GoTestPASS/FAIL lifecycle; terminaltest outcome absent, never fabricated0/1",
+  "matrix14by200_completed": false,
+  "max_observed_active20": 20,
+  "max_window20": 20,
+  "meaning_of_M_executed_flag": "fullvalidbaselinenevercompleted; real originalM once actuallyattempted, keepattemptdistinct fromsuccessflag",
+  "method_contract_sha256": "d286ae9f5f4b68033ba9739a1276de22f1e0f7ef88e15642d52633da943b49a7",
+  "native_cleanup": {
+    "L_started": false,
+    "M_retried": false,
+    "budget_never_extended": true,
+    "cleanup_UTC": "2026-10-02T06:54:16.479894+00:00",
+    "external_resources_touched": false,
+    "owned_PG_final_observation": "absent",
+    "owned_assertion_final_observation": "absent",
+    "owned_caffeinate_pid": 56215,
+    "owned_go_group_observation": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "owned_pg_pid": 56228,
+    "owned_postmaster_pid_absent": true,
+    "owned_python_runner_group_observation": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "owned_root": "/tmp/tm-r5M-final.TdhqAxe8/runtime",
+    "owned_socket_absent": true,
+    "pg_stop_exit": 0,
+    "residual_DB": "tm_benchmark_7f0de3284219 partial synthetic DB preserved in stoppedownedcluster, not falselyDBabsent",
+    "residual_object_files": "GoTempDir cleanup interrupted by originalprocessdeadline; private object subtree retained for failure evidence, not published/not falselyremoved",
+    "status": "original_M_budget_timeout_all_owned_live_resources_stopped_residual_synthetic_state_preserved",
+    "terminal_DB_report": "tm_benchmark_7f0de3284219\n0\n"
+  },
+  "no_explicit_analyze_or_planner_or_durability_override": true,
+  "no_scale_shrink_budget_extension_retry_or_L": true,
+  "observed_budget_elapsed_seconds": 10800.004051923752,
+  "observed_outer_Go_process_returncode": -15,
+  "original_requested_population": [
+    1000,
+    5000,
+    1000000
+  ],
+  "outer_budget_seconds": 10800,
+  "parser_actual_min_start_remaining31guard_seconds": 31.166936,
+  "parser_joined_calls": 753360,
+  "parser_quiescent": true,
+  "pending_upper_bound20": 20,
+  "pool_size": 24,
+  "preparation_method": "lookahead100_unpersisted_inputs_distinct_mailbox_windows20_ordinal_fifo_v1",
+  "preparation_stats_named_TERMINAL_not_completion": "actualphasebefore_claim, producer_donefalse/final_emptyfalse/sql_ready_count0(not finalSQLcount), despite all flights and workers joined; actualpartial SQLcount separately captured753360",
+  "product_green": false,
+  "raw_go_sha256": "9a233eb511a3c15ab4b5cf4d76aa4970165936ee69675556af1fadd475c92ef5",
+  "result_JSON_absent": true,
+  "runner_exit": 1,
+  "scale": "M",
+  "source_identity_kind": "canonical_source_closure_sha1",
+  "source_prepost_proof": "source-post-execution-proof.json",
+  "source_sha_semantics": "canonical_source_closure_sha1_not_git_tree_or_commit",
+  "source_tree": "8529007132f1d61a2571e43aaabfe15b8452baa1",
+  "status": "once_original_M_failed_absolute10800_wall_budget_incomplete_not_baseline",
+  "task_complete": false,
+  "timed_out": true
+}

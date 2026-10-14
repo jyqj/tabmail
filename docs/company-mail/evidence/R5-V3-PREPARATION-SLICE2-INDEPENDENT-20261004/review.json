@@ -1,0 +1,55 @@
+{
+  "decision": "ACCEPT",
+  "accepted_scope": "Design slice2 preparation/runner synthetic implementation gate only; no runtime or formal qualification",
+  "delivery_commit": "7262e78e0120c5a203bb588807ca876b82c4d5bc",
+  "tested_source_commit": "cad567ff2bb224b94fbf20c359383edcd0fce59b",
+  "accepted_adapter_base_commit": "632d55de566254c618bca9a54c5dbae7b355fcf9",
+  "design_commit": "42f49538f7bceb6eb8e698d716c1418f85343413",
+  "review_branch": "review/r5-preparation-slice2-independent-20261004",
+  "reviewer_controls": 90,
+  "preserved_pure_controls": 15,
+  "author_controls_replayed": 64,
+  "os_subprocess_events_in_control_programs": [],
+  "findings": [],
+  "verified": [
+    "Omitted preparation and runner selection remain v2; bool/noninteger/unsupported selectors reject; environment selection is explicit and strict.",
+    "Bare/relative producer names reject before source identity, environment resolution, captures, output creation or build.",
+    "Four successful owned capture returns independently produce complete canonical observation digests and receipt-byte pins; exclusive persistence is checked before use.",
+    "Controller-memory bundle byte pin verifies all four slots, receipt bytes, complete seals, source/run/producer/context and canonical per-phase paths before building.",
+    "Same binding with distinct complete diagnostic observations passes; schema-valid HOME/PATH/GOGCCFLAGS binding drift reaches complete-payload equality rejection before build.",
+    "Forged or resealed receipts, substituted persisted returns, replaced bundles and colocated replacement hash files cannot replace controller authority.",
+    "Source/run/producer/context/phase swaps and missing/extra slots reject; pinned retained metadata rechecked after execution before admission.",
+    "Every exclusive receipt/pin/bundle/log/preparation publication boundary fails closed on collision or synthetic ENOSPC; foreign collision bytes preserved and no returned admission.",
+    "Evidence under source/build-cache/module-cache rejected; regular NOFOLLOW descriptor reads used for v3 evidence.",
+    "Current-only opt-in, exact discovery/partitioning, four frozen-v1 IDs and baseline preserved; frozen children lose all three new v3 selector/pin variables and preparation variables.",
+    "Preserved mocked TypeScript archive/lock/files/dependency/lifecycle controls, source/fixture/run identity and Linux held-FD binary controls pass.",
+    "2212 accepted-base paths have identical Git blobs and modes; 24 existing function/constant AST checks unchanged; frozen adapter/helper/schema/inventory/registry/runtime/batch/bridge and all preexisting discovery/cases/budgets unchanged."
+  ],
+  "commands": [
+    "python3 -B docs/company-mail/evidence/R5-V3-PREPARATION-SLICE2-INDEPENDENT-20261004/independent_checks.py",
+    "python3 -B scripts/tests/r5_source_preparation_v3_checks.py",
+    "python3 -B docs/company-mail/evidence/R5-V3-PREPARATION-SLICE2-INDEPENDENT-20261004/preserved_pure_checks.py",
+    "python3 -B docs/company-mail/evidence/R5-V3-PREPARATION-SLICE2-INDEPENDENT-20261004/static_review.py"
+  ],
+  "limitations": [
+    "Synthetic mocks establish consumer/control ordering and filesystem publication rejection, not physical Go metadata/compile/wire/runtime behavior.",
+    "Fixture constructor comes from the accepted frozen adapter checks; independent harness and assertions are new and do not import candidate preparation checks.",
+    "Controller trust and quiescence remain design assumptions; no atomic executable or hostile concurrent ancestor attestation claim.",
+    "Publication failures may leave private partial evidence; they return no admission and foreign collisions are not removed.",
+    "No actual Go capture, compile, wire execution, external runtime, formal suite, PG, services, mail, PR, merge or deploy was performed.",
+    "Closure integration and later physical runtime qualification remain separate authorized gates."
+  ],
+  "central": "10/171 unchanged",
+  "F52": "historical failures unchanged",
+  "remaining_blockers_for_this_slice": [],
+  "evidence_sha256": {
+    "author-replay.json": "747c95cec09aa58a8b4b285a57b0764197b5938e0031e44fc091474c2ad8601c",
+    "independent-results.json": "bf83d51dd008fe1b703f4de2dcb2bbb4240c640cee42b5f732f8ba195094ac75",
+    "independent_checks.py": "5a9e831246f62d637492a44e46106cce436a542f3a2e81f58913897128a4d8fc",
+    "preserved-pure-results.json": "5442098dd9652cc8a894c04c6caf2a8b15eb9fa9293873c779682733aa1d1460",
+    "preserved-tree.json": "3e19278c1a2d851f662b83feabbde5cf53ff91a09a38b2f64b10ed9b39c56123",
+    "preserved_pure_checks.py": "fe25f36fbacb04977b34d425890a4f95c085058c68c01785fce6933d1c7d837a",
+    "static-review.json": "4b526d4d6370cf9504f199b7064dc1686950d2fe2ebc6944d4027899554b4de7",
+    "static_review.py": "fb31d87ffff775fd11f6aae15e3cd6e1d7f4e98f94558bc032690d745bd5e0c5"
+  }
+}

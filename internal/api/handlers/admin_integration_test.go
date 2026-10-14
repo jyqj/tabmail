@@ -273,6 +273,10 @@ func TestAdminHandlerStatsSummarizesStoreCounts(t *testing.T) {
 		AccessMode:     models.AccessPublic,
 		CreatedAt:      time.Now(),
 	})
+	expiresAt, err := models.MessageExpiry(nil, 24, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
 	st.SeedMessage(&models.Message{
 		ID:         uuid.New(),
 		TenantID:   tenantID,
@@ -281,7 +285,7 @@ func TestAdminHandlerStatsSummarizesStoreCounts(t *testing.T) {
 		Subject:    "hello",
 		Recipients: []string{"user@mail.test"},
 		ReceivedAt: time.Now(),
-		ExpiresAt:  models.MessageExpiry(nil, 24, time.Now()),
+		ExpiresAt:  expiresAt,
 	})
 
 	rr := doAdminRequest(t, st, http.MethodGet, "/api/v1/admin/stats", nil, nil, h.Stats)
@@ -367,8 +371,9 @@ func doAdminRequest(
 		Email:        uuid.NewString() + "@example.test",
 		PasswordHash: "hash",
 		DisplayName:  "Admin",
-		Role:         models.RoleAdmin,
-		IsActive:     true,
+		// These /admin routes require a current platform administrator.
+		Role:     models.RoleSuperAdmin,
+		IsActive: true,
 	}
 	if err := st.CreateUser(context.Background(), admin); err != nil {
 		t.Fatalf("seed admin user: %v", err)

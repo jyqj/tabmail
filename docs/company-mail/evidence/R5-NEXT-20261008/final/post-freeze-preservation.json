@@ -1,0 +1,20 @@
+{
+  "scope": "Post-freeze source preservation only; no f3 runtime or catalog acceptance. Independently confirmed by final_delivery_audit and repeated here before publication.",
+  "current_product_commit": "f3ea4e991474cd5f3a82e250903e0f3125f34c02",
+  "local_head": "187e8790eedcc1a85a099db5ed71c938cdcb65bf",
+  "product_workflow_and_other_batch_reports_equal": true,
+  "foreign_markers": [
+    {
+      "marker": "R5-PARALLEL-20261008-929",
+      "bytes": 653,
+      "sha256": "802983ea202cbeefe2e196d0d133f26cb261e081311cd29c75be21fea500730d"
+    },
+    {
+      "marker": "R5-STREAM-20261008",
+      "bytes": 2828,
+      "sha256": "fd97eb221252091795c92be5caffeceba28b681efd26b72ea994ec3c5091eff4"
+    }
+  ],
+  "reviewed_catalog_source": "f413a9138d305cf154ed2cecaddcf9b9a2397666",
+  "current_source_guard_result": "post-freeze-f3ea4e9/result.json"
+}

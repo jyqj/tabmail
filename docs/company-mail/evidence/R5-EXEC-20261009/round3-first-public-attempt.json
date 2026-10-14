@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "batch": "R5-EXEC-20261009",
+  "round": 3,
+  "status": "initial_public_attempt_preserved_not_accepted",
+  "public_candidate": "6c475d30e490ae69e2db512d431617aa4e9301d8",
+  "actual_ci_checkout": {
+    "sha": "bd7bea1a4d400317641ce2c5e160eb31486e88a6",
+    "node_id": "C_kwDORt2amNoAKGJkN2JlYTFhNGQ0MDAzMTc2NDFjZTJjNWUxNjBlYjMxNDg2ZTg4YTY",
+    "url": "https://api.github.com/repos/jyqj/tabmail/git/commits/bd7bea1a4d400317641ce2c5e160eb31486e88a6",
+    "html_url": "https://github.com/jyqj/tabmail/commit/bd7bea1a4d400317641ce2c5e160eb31486e88a6",
+    "author": {
+      "name": "金亦求金",
+      "email": "jyj20040616@gmail.com",
+      "date": "2026-10-09T04:09:44Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-10-09T04:09:44Z"
+    },
+    "tree": {
+      "sha": "55a10b9e87f71bccd0a726cd184abeddeb6e78e1",
+      "url": "https://api.github.com/repos/jyqj/tabmail/git/trees/55a10b9e87f71bccd0a726cd184abeddeb6e78e1"
+    },
+    "message": "Merge 6c475d30e490ae69e2db512d431617aa4e9301d8 into ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+    "parents": [
+      {
+        "sha": "ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+        "url": "https://api.github.com/repos/jyqj/tabmail/git/commits/ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+        "html_url": "https://github.com/jyqj/tabmail/commit/ff43326e81f262daaac7b3dfd8b3047a8f51743b"
+      },
+      {
+        "sha": "6c475d30e490ae69e2db512d431617aa4e9301d8",
+        "url": "https://api.github.com/repos/jyqj/tabmail/git/commits/6c475d30e490ae69e2db512d431617aa4e9301d8",
+        "html_url": "https://github.com/jyqj/tabmail/commit/6c475d30e490ae69e2db512d431617aa4e9301d8"
+      }
+    ],
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJqyGkICRC1aQ7uu5UhlAAAlK0QAGdHsJga4qpB7RDwtxu92iQx\nDSaxpcghgqke5OMfsDstbJQQGWyBfv1MHcO1A5/nuScQV+flavgfdG6QEmfYTWJf\nlEZDOGqfO7gouNv/YteVrCn50sxh81IydYqtx3gZ+5qonXcwuxLHNkoPTiBjW9fE\nrxo7I06Ejf7BoY+oPFbwaxjpibRfFhkWijwT2ysZ08fO111b+utrnauiL6vek6Gl\nmJkCdysxcWOy6ODj9+CJmUx9iR2/+/dwBYT3tAs9zUsYMZRw+Otdby9ZqW6iwQ33\nbtJz/QyJHZyxMdtiMZKAR1Jhf5hpztCI8VrHxIEWWH7VtKlU1ItENJEGOglOqFLa\nYWwMynhI8KVJ0i/uPu1cjV/ZHFgCocGzLcfy0Vi0cTeOcgJxcyC0uE3W9vZ7pLMT\nN87T6IxxZnFer3s/dUdUQ4p+F0eUtdr6fVrTNJTz+LKrRbuFZSJfrDm+1eNfTNLV\n4dO9FW6UjDH0c3dJDz7KG7zHOWSG9fLzGyAIEUF/SE6Ci0oqVzo27/jDdb5nK/wb\nOWdLSDIXXLziigBPgzV7T0tTQ0D+FwmSBMFx4TUmNaC64y03Bw6KlRYaqQ2RTO/H\nCTJQmSWucxdDcFJOQSk8NvcsY4H5oSEnMojMPhyChc+WAA55pcjXI6D/boTU9Ixh\n43fB6hSByMqA8BqaLDl5\n=sDy9\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 55a10b9e87f71bccd0a726cd184abeddeb6e78e1\nparent ff43326e81f262daaac7b3dfd8b3047a8f51743b\nparent 6c475d30e490ae69e2db512d431617aa4e9301d8\nauthor 金亦求金 <jyj20040616@gmail.com> 1791518984 +0800\ncommitter GitHub <noreply@github.com> 1791518984 +0800\n\nMerge 6c475d30e490ae69e2db512d431617aa4e9301d8 into ff43326e81f262daaac7b3dfd8b3047a8f51743b\n",
+      "verified_at": "2026-10-09T04:09:45Z"
+    }
+  },
+  "joint_workflow": 37882581583,
+  "go": {
+    "job_id": 113665373029,
+    "leaf_count": 1668,
+    "counts": {
+      "tabmail/internal/company": {
+        "pass": 194,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/app/templates": {
+        "pass": 107,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/app/admin": {
+        "pass": 28,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/smtp": {
+        "pass": 172,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/outbound": {
+        "pass": 952,
+        "fail": 0,
+        "skip": 0
+      },
+      "github.com/emersion/go-smtp": {
+        "pass": 103,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/settings": {
+        "pass": 11,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/api/handlers": {
+        "pass": 89,
+        "fail": 0,
+        "skip": 0
+      },
+      "tabmail/internal/store/postgres": {
+        "pass": 12,
+        "fail": 0,
+        "skip": 0
+      }
+    },
+    "unfinished": [],
+    "build_failures": [],
+    "debug_no_test_files_package_excluded": true
+  },
+  "web": {
+    "job_id": 113665372808,
+    "full_nonincremental_typescript": "success",
+    "exit_code": 1,
+    "assertions": {
+      "passed": 228,
+      "failed": 1,
+      "pending": 0
+    },
+    "failure": [
+      {
+        "title": "explicit mailbox route recovery R12 does not report permanent unavailability during the initial read",
+        "status": "failed",
+        "observed_dom_error": "Body is unusable: Body has already been read",
+        "source": "R12 delayed mock reused the same consumed Response object"
+      }
+    ]
+  },
+  "raw_original_job_logs": [
+    {
+      "path": "docs/company-mail/evidence/R5-EXEC-20261009/round3-first-ci-go.log",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba6518885ebfcdea3cc6a18c195865eb9d72814f",
+      "sha256": "fe9e084b869f83f67cdd51d7bfcd17c902ccded73766cca78726930c64a4bad6",
+      "bytes": 1894688,
+      "job_id": 113665373029
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-EXEC-20261009/round3-first-ci-web.log",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cb25cfbfdfdad935c9381d7a33e311ba7c13d802",
+      "sha256": "f33ac01a1894dcf0c752285277f17a2aca09aca97759049f501c82eb7f2a7b5b",
+      "bytes": 118385,
+      "job_id": 113665372808
+    }
+  ],
+  "mailbox_workflow_startup": {
+    "run_id": 37882577409,
+    "event": "push",
+    "conclusion": "failure",
+    "test_jobs_executed": 0,
+    "invalid_context": "jobs.identical-route-fixture.env.R5_ROUTE_EVIDENCE = runner.temp",
+    "official_context_reference": "https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability",
+    "replacement_blob": "ec96d1f04539a5d28442e9deecad94c771997540",
+    "replacement": "Resolve RUNNER_TEMP inside the existing run steps."
+  },
+  "fixture_revision": {
+    "path": "web/features/mail/workspace-mailbox-route-recovery.test.tsx",
+    "previous_blob": "e804a36ac4aa9ed824b6fc5b852db05d7862361a",
+    "previous_sha256": "39ba0a348019f730b741ce479b16a1b201ec60efb75fab172b28c0a14691fb0f",
+    "new_blob": "6a07d293ae31d07cdf6bd3b7bfeb35e89f4ff9a9",
+    "new_sha256": "2a72bb78cc5f9e82d037a0358875c2d0c433d8cd956e0e7801795756c88e9c66",
+    "new_bytes": 13638,
+    "new_lines": 251,
+    "change": "R12 only: each intercepted list fetch clones the same delayed Response, preserving all assertions and production bytes.",
+    "new_execution_pending": true
+  },
+  "go_dual_source_first_runs": {
+    "settings_pg": {
+      "run_id": 37882582303,
+      "job_id": 113665375102,
+      "conclusion": "success",
+      "raw_log_blob": "88a48711d5a83639269bdc4884335eed7e12656b",
+      "independent_detailed_parse_pending": true
+    },
+    "smtputf8": {
+      "run_id": 37882581660,
+      "job_id": 113665372994,
+      "conclusion": "success",
+      "raw_log_blob": "b1a368b648e5d9bf8dff562125a8245e200fcedb",
+      "independent_detailed_parse_pending": true
+    }
+  },
+  "complete_bounded_tasks": 7,
+  "remaining_bounded_tasks": 3,
+  "parent_remaining": 161,
+  "merged": false,
+  "release_qualified": false
+}

@@ -1,0 +1,327 @@
+{
+  "status": "shared_scoped_evidence_passed",
+  "product_green": true,
+  "task_complete": false,
+  "layer": "db",
+  "shared_input_verified_cases": 46,
+  "cases_with_shared_input_adapters": 46,
+  "missing_shared_input_adapters": [],
+  "shared_input_verified_layers": {
+    "CT01": [
+      "db",
+      "http"
+    ],
+    "CT02": [
+      "db",
+      "http"
+    ],
+    "CT03": [
+      "db",
+      "http"
+    ],
+    "CT04": [
+      "db",
+      "http"
+    ],
+    "CT05": [
+      "db",
+      "http"
+    ],
+    "CT06": [
+      "db",
+      "http"
+    ],
+    "CT07": [
+      "db",
+      "http"
+    ],
+    "CT08": [
+      "db",
+      "http"
+    ],
+    "CT09": [
+      "db",
+      "http"
+    ],
+    "CT10": [
+      "db",
+      "http"
+    ],
+    "RC01": [
+      "db",
+      "http"
+    ],
+    "RC02": [
+      "db",
+      "http"
+    ],
+    "RC03": [
+      "db",
+      "http"
+    ],
+    "RC04": [
+      "db",
+      "http"
+    ],
+    "RC05": [
+      "db",
+      "http"
+    ],
+    "OP01": [
+      "db",
+      "http"
+    ],
+    "OP02": [
+      "db",
+      "http"
+    ],
+    "OP03": [
+      "db",
+      "http"
+    ],
+    "OP04": [
+      "db",
+      "http"
+    ],
+    "RT01": [
+      "db",
+      "http"
+    ],
+    "RT02": [
+      "db",
+      "http"
+    ],
+    "RT03": [
+      "db",
+      "http"
+    ],
+    "RT04": [
+      "db",
+      "http"
+    ],
+    "RT05": [
+      "db",
+      "http"
+    ],
+    "RT06": [
+      "db",
+      "http"
+    ],
+    "RT07": [
+      "db"
+    ],
+    "BC01": [
+      "db",
+      "http"
+    ],
+    "BC02": [
+      "db",
+      "http"
+    ],
+    "BC03": [
+      "db",
+      "http"
+    ],
+    "BC04": [
+      "db",
+      "http"
+    ],
+    "BC05": [
+      "db",
+      "http"
+    ],
+    "BC06": [
+      "db",
+      "http"
+    ],
+    "GC01": [
+      "db"
+    ],
+    "GC02": [
+      "db"
+    ],
+    "LF01": [
+      "db",
+      "http"
+    ],
+    "LF02": [
+      "db",
+      "http"
+    ],
+    "LF03": [
+      "db",
+      "http"
+    ],
+    "LF04": [
+      "db",
+      "http"
+    ],
+    "LF05": [
+      "db",
+      "http"
+    ],
+    "LF06": [
+      "db",
+      "http"
+    ],
+    "LF07": [
+      "db",
+      "http"
+    ],
+    "PE01": [
+      "db",
+      "http"
+    ],
+    "PE02": [
+      "db",
+      "http"
+    ],
+    "PE03": [
+      "db",
+      "http"
+    ],
+    "PE04": [
+      "db",
+      "http"
+    ],
+    "PE05": [
+      "db",
+      "http"
+    ]
+  },
+  "missing_required_layers": {
+    "CT01": [],
+    "CT02": [],
+    "CT03": [],
+    "CT04": [],
+    "CT05": [],
+    "CT06": [],
+    "CT07": [],
+    "CT08": [],
+    "CT09": [],
+    "CT10": [],
+    "RC01": [
+      "components"
+    ],
+    "RC02": [
+      "components"
+    ],
+    "RC03": [
+      "components"
+    ],
+    "RC04": [
+      "components"
+    ],
+    "RC05": [
+      "components"
+    ],
+    "OP01": [],
+    "OP02": [],
+    "OP03": [],
+    "OP04": [],
+    "RT01": [],
+    "RT02": [],
+    "RT03": [],
+    "RT04": [],
+    "RT05": [],
+    "RT06": [],
+    "RT07": [],
+    "BC01": [],
+    "BC02": [],
+    "BC03": [],
+    "BC04": [],
+    "BC05": [],
+    "BC06": [],
+    "GC01": [],
+    "GC02": [],
+    "LF01": [
+      "components"
+    ],
+    "LF02": [
+      "components"
+    ],
+    "LF03": [
+      "components"
+    ],
+    "LF04": [
+      "components"
+    ],
+    "LF05": [
+      "components"
+    ],
+    "LF06": [
+      "components"
+    ],
+    "LF07": [
+      "components"
+    ],
+    "PE01": [
+      "components"
+    ],
+    "PE02": [
+      "components"
+    ],
+    "PE03": [
+      "components"
+    ],
+    "PE04": [
+      "components"
+    ],
+    "PE05": [
+      "components"
+    ]
+  },
+  "source_sha": "28919f2a356f752e0ec78cca16aac7f3463ca49b",
+  "source_identity_kind": "policy_bound_local_input_superset_archive_boundary_sha1_v4",
+  "source_manifest_sha256": "829fbc76f259c7fbbbab63964e047d14854dd620a4a6d835ac7e1f0543fdae45",
+  "cases_sha256": "f46d58c45dbf66e48eb1e379fd019aa5c02dc153f004548a69752f45dc52b1b7",
+  "policy": "r5_current_local_inputs_archive_boundary_v4",
+  "build_context": {
+    "build_tag_sets": [
+      [
+        "r5protocol"
+      ]
+    ],
+    "cgo_enabled": 1,
+    "go_flags": "",
+    "go_work": "off",
+    "goarch": "amd64",
+    "goos": "linux",
+    "race": true,
+    "selection": "all_local_variants_superset"
+  },
+  "schema_version": 4,
+  "source_closure_sha256": "19bf6d0dd767c37478f55c563e7127f8bb7b78f1e97c44cf49b47a7797c0086f",
+  "reports": [
+    {
+      "status": "reference_tests_passed",
+      "errors": [],
+      "target_red": {},
+      "product_green": true,
+      "command": [
+        "go",
+        "test",
+        "-json",
+        "-race",
+        "-count=1",
+        "-timeout=120s",
+        "-tags=r5protocol",
+        "-run",
+        "^(TestR5LegacyBCCContractCapabilities|TestR5ProtocolBCCAssetSharedCases|TestR5ProtocolBCCSurfacesSharedCases|TestR5ProtocolContentSharedCases|TestR5ProtocolCredentialSharedCases|TestR5ProtocolDomainSharedCases|TestR5ProtocolDraftGrantOrderingSharedCases|TestR5ProtocolGCBoundedSharedCases|TestR5ProtocolLegacyBCCObservationSharedCases|TestR5ProtocolLegacyReplaySharedCases|TestR5ProtocolLogicalExpiryReferenceSharedCases|TestR5ProtocolOffboardingEligibilitySharedCases|TestR5ProtocolOffboardingSharedCases|TestR5ProtocolPermissionIntentSharedCases|TestR5ProtocolPermissionStaleSharedCases|TestR5ProtocolProtectedGCSharedCases|TestR5ProtocolReceiptSharedCases|TestR5ProtocolRecoverySharedCases|TestR5ProtocolRetentionSharedCases)$",
+        "./internal/store/postgres"
+      ],
+      "package": "./internal/store/postgres",
+      "log_sha256": "9a08ff79b642b73aec4d618213c4f694600538309fdca6c043d0323e056fcda4"
+    }
+  ],
+  "original_report_sha256": "048eb2c8bee64b59c5aaf0d606d77c2fab37e2fc853f145bada0e43c4498383a",
+  "raw_files": {
+    "go-0.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "report.json": "048eb2c8bee64b59c5aaf0d606d77c2fab37e2fc853f145bada0e43c4498383a",
+    "go-0.jsonl": "9a08ff79b642b73aec4d618213c4f694600538309fdca6c043d0323e056fcda4"
+  },
+  "independent_post_capture_equal": true,
+  "post_capture_sha256": "829fbc76f259c7fbbbab63964e047d14854dd620a4a6d835ac7e1f0543fdae45",
+  "source_commit": "6138113c1896cb810db567605154b5023f0340de",
+  "baseline_protocol_cases_unchanged": true
+}

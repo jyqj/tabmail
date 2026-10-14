@@ -1,0 +1,31 @@
+{
+  "status": "shared_scoped_evidence_failed",
+  "source_sha": "a2c7dd0c5728067126b5a5ea05218fda0167cda6",
+  "cases_sha256": "f46d58c45dbf66e48eb1e379fd019aa5c02dc153f004548a69752f45dc52b1b7",
+  "product_green": false,
+  "task_complete": false,
+  "shared_input_verified_cases": 0,
+  "errors": [
+    "subtest fail: TestR5LegacyBCCContractCapabilities/BC03/missing_source",
+    "subtest fail: TestR5LegacyBCCContractCapabilities/BC03/same_id_foreign_source",
+    "subtest fail: TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_list",
+    "subtest fail: TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_detail",
+    "subtest fail: TestR5ProtocolLegacyReplaySharedCases/RC02/submit_replay",
+    "subtest fail: TestR5ProtocolLegacyBCCObservationSharedCases/BC03/missing_source",
+    "subtest fail: TestR5ProtocolLegacyBCCObservationSharedCases/BC03/foreign_job",
+    "Go exit 1; target failure is not protocol success",
+    "missing/duplicate/nonpassing package completion",
+    "TestR5ProtocolLegacyReplaySharedCases: expected exact run/pass, got ['run', 'fail']",
+    "TestR5ProtocolLegacyBCCObservationSharedCases: expected exact run/pass, got ['run', 'fail']",
+    "TestR5LegacyBCCContractCapabilities: expected exact run/pass, got ['run', 'fail']",
+    "non-target assertion diagnostics: TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_list",
+    "non-target assertion diagnostics: TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_detail",
+    "non-target assertion diagnostics: TestR5ProtocolLegacyReplaySharedCases/RC02/submit_replay",
+    "non-target failure: TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_detail",
+    "non-target failure: TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_list",
+    "non-target failure: TestR5ProtocolLegacyReplaySharedCases/RC02/submit_replay"
+  ],
+  "target_red": {},
+  "process_exit_code": 1,
+  "raw_private_report_sha256": "8e413c943dc000dec9b527c9a3f1963e41eb7e7df26c54f69caf088080f10dd9"
+}

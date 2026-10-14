@@ -1,0 +1,53 @@
+{
+  "scope": "ADVANCE-09 / issue #205 independent review followup",
+  "additional_todos": 0,
+  "original_candidate": "36455c9f0e8e13842bd3c7f9be93915aaae71edf",
+  "independent_test_commits": [
+    "02b115614e26beca0a774b777b3568dc4cb5100c",
+    "c50259e362e3520b6068c49393f0c75c7c403fc9"
+  ],
+  "author_baseline_commit": "89e165c9705e841a2939da90328cd9c1f77b7498",
+  "baseline_selected_remount": {
+    "pass": 0,
+    "fail": 4,
+    "filtered": 36,
+    "executed_skip": 0,
+    "exit": 1
+  },
+  "final_complete_fixed_file": {
+    "pass": 40,
+    "fail": 0,
+    "skip": 0
+  },
+  "final_related_run": {
+    "pass": 61,
+    "fail": 0,
+    "skip": 0,
+    "exit": 0
+  },
+  "nonincremental_typecheck_exit": 0,
+  "scoped_eslint_exit": 0,
+  "source_sha256": {
+    "web/app/(dashboard)/admin/ingest/page.tsx": "6da635a764aac376d7c3cae77efa15d09c3826a570a7c6311a666f976f55cd6c",
+    "web/app/(dashboard)/admin/webhooks/page.tsx": "190c6e0cb1d81d3b56c0689f5e2e2192be55b1d50b2d974c7c28c0f3bad20e5e",
+    "web/app/(dashboard)/admin/audit/page.tsx": "cd2ad69422bd0e21b7ff679d90275ae6ab62d14ae226005b479b317a8f669201",
+    "web/app/(dashboard)/admin/domains/page.tsx": "0f391971191b8b27ba444d55f014c19f8fd2f4a1741fbbcd040d6648e7497609",
+    "web/components/crud/list-read-state.tsx": "b732d206d6f91e5c167d54cc5e475e2176d9a786346baaa9424fcf166e5f4a6e",
+    "web/app/(dashboard)/admin/readonly-list-state.test.tsx": "f197d8c6cdb3cc883a635a9ca441b2fb15cc42aedb6da9beab407e75dffbcfb0"
+  },
+  "raw_uncompressed_sha256": {
+    "readonly-remount-baseline.json": "aa5a5a205d0348bd4ed7bfafa7ab07b543d010c387afcc89cfc98e3547b80d53",
+    "readonly-remount-baseline.stdout": "4ed797d715b55cd38eab7af88f6793d79bac40b5d71e37d144e1b1b14f3b7b65",
+    "readonly-remount-baseline.stderr": "b4acd4f819050212c4fe3b3ed8416421330f7ff8c72cb9bb667c335f3e24a94e",
+    "readonly-remount-related.json": "d0a300dea03ce410f22cfa20aed6c41f79fd797a07e48ffc65db155e52f3eb57",
+    "readonly-remount-related.stdout": "0b540582add83b555c352bd79b99a7a52bb29b146123eb7d571008951053415c",
+    "readonly-remount-related.stderr": "b4acd4f819050212c4fe3b3ed8416421330f7ff8c72cb9bb667c335f3e24a94e",
+    "readonly-remount-tsc.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "readonly-remount-tsc.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "readonly-remount-eslint.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "readonly-remount-eslint.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "full_frontend_qualification": false,
+  "shipping_browser_qualification": false,
+  "database_qualification": false
+}

@@ -1,0 +1,132 @@
+{
+  "task": "R5-P0-100",
+  "batch": "B01-AJ",
+  "status": "original_S_complete_initial_baseline_not_overall_performance_green",
+  "base_commit": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+  "source_tree": "68cafcc03672edff848b9fd07abd95c34944a35c",
+  "source_sha_semantics": "git_write_tree_label_not_commit",
+  "scale": "S",
+  "population": [
+    100,
+    500,
+    100000
+  ],
+  "seed": 3893945,
+  "budget_seconds": 1800,
+  "go_test_elapsed_seconds": 1270.63,
+  "package_elapsed_seconds": 1271.658,
+  "go_exit": 0,
+  "runner_exit": 0,
+  "actual_test_lifecycle": [
+    "run",
+    "pass"
+  ],
+  "source_closure_files_verified": 425,
+  "source_closure_mismatches": 0,
+  "completed_workload_cache_pairs": 14,
+  "samples_each": 200,
+  "concurrency": 20,
+  "pool": 24,
+  "actual_distribution": {
+    "employees": 100,
+    "index_ready_count": 100000,
+    "lifecycle_counts": {
+      "archived": 10000,
+      "hard_expired": 5000,
+      "inbox": 80000,
+      "trash_expired": 5000
+    },
+    "mailboxes": 500,
+    "max_distinct_shared_grantees": 4,
+    "messages": 100000,
+    "mime_size_counts": {
+      "2097152": 100,
+      "262144": 1900,
+      "32768": 18000,
+      "4096": 80000
+    },
+    "min_distinct_shared_grantees": 4,
+    "personal_mailboxes": 100,
+    "shared_grant_rows": 1600,
+    "shared_mailboxes": 400,
+    "tenant_message_counts": {
+      "bench-0.test": 80000,
+      "bench-1.test": 20000
+    }
+  },
+  "actual_dataset_fingerprint": "4bd741d42fda6d537c563d4698b3429bc0192aef139f2635c36af8451797877c",
+  "parameter_fingerprint": "6882f9b7d6501d729ff69e6a1dbf39294e2c7b9f4d68389bed5c0a60d53c42a1",
+  "sql_tracer_calibration_actual_queries": 20,
+  "safety_assertions_count": 7,
+  "safety_assertions_passed": true,
+  "original_thresholds": {
+    "S_list_candidate_ms": 300,
+    "M_list_candidate_ms": 500,
+    "M_index_ready_query_candidate_ms": 1000,
+    "unexplained_regression_percent": 10
+  },
+  "observed_S_list_p95_ms": {
+    "app_cold": 10.968542,
+    "app_hot": 3.983833
+  },
+  "S_list_candidate_passed": true,
+  "observed_S_indexed_search_p95_ms": {
+    "app_cold": 5602.020292,
+    "app_hot": 5865.429958
+  },
+  "S_search_candidate": "not defined in frozen candidate contract; measured slow search is retained, not called performance green",
+  "performance_gaps": [
+    "R5-P7-040 actual indexed search query",
+    "R5-P10-020 query/index/pool baseline",
+    "R5-P10-030 batch permission/list projection",
+    "R5-P10-120 original S/M and failure mixed-load target acceptance"
+  ],
+  "relative_regression": "no earlier completed baseline, not certified",
+  "baseline_complete": true,
+  "overall_performance_green": false,
+  "M_baseline_complete": false,
+  "task100_complete": false,
+  "G0_accepted": false,
+  "resource_scope": {
+    "cache": "app_reset_and_reused_no_os_db_cold_claim",
+    "disk": "owned_raw_objects_plus_owned_pg_database_bytes",
+    "gc": "raw_reference_read_only_not_sweep_throughput",
+    "memory": "go_alloc_and_process_high_water_rss_not_pg_redis_system",
+    "sql": "application_and_worker_pool_not_server_trigger_sql"
+  },
+  "host_supplementary_observation": {
+    "hw.model": "Mac15,8",
+    "hw.memsize": "68719476736",
+    "hw.physicalcpu": "16",
+    "hw.logicalcpu": "16",
+    "observed_at_utc": "2026-10-01T09:43:45.738954+00:00",
+    "boundary": "supplementary host observation after S2, not rewritten preflight"
+  },
+  "result_sha256": "bf729e549033bce55511c557eb6583408accf6d909b648a893b31396be52accd",
+  "cleanup": "Actual archived owned namespace catalog count0/queryexit0, 3 process PIDs absent and controlled runtime0 independently reviewed; owned PG3344 retained for authorized serial M, not stopped.",
+  "archive": {
+    "path": "docs/company-mail/evidence/R5-B01-AJ-S2-LOGS.tar.gz",
+    "sha256": "8fa75b0782b0f594d32a7e261c1bd38d5b0316192aae4d10053220ea15dfdf4d",
+    "members": {
+      "S2/cleanup-owned-prefix-count.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "S2/cleanup-receipt.json": "de10e954477a58d1814a00b9f171049740d203fd73a33bead4ed9686544aace4",
+      "S2/cleanup-verify.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "S2/command.json": "bf3359a16bfd03286c4a3315f1cb7af352b8a7fb8188ee3037880c8685d11a98",
+      "S2/go.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "S2/go.jsonl": "587939ca18fa5f6d65232f133c7cfd80214ad562fb7409251d5e29c652cf06dd",
+      "S2/go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "S2/preflight.json": "0e576c2a81cba32112cee7aa263cccf12e5edf02bd0337c32be6f8319292d1bf",
+      "S2/resource-watch.jsonl": "a585b19bc3d22d4d44622715051d3a86dfba41baeecbdb03173bae8814cea325",
+      "S2/result.json": "bf729e549033bce55511c557eb6583408accf6d909b648a893b31396be52accd",
+      "S2/source-closure.json": "6f39dd6dded9f98257a549883dd6534044572398c807637e66d3b36fd4bb55e7",
+      "runner/S2-runner.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "runner/S2-runner.json": "c47c26e2963bca3d614e73c8769ae0ccc2d27caa81db9c1bf86d774a7eb95c74",
+      "runner/S2-runner.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "historical_dataset_contract": {
+    "path": "docs/company-mail/evidence/R5-B01-AJ-S2-FROZEN-CONTRACT.json",
+    "sha256": "0b828ec6dda5de423968115ad256746702f81d3011a40ffb2540208943c94fd8",
+    "boundary": "Exact actual immutable parallel-src bytes, equals result and original source closure contract hash; not rewritten current metadata"
+  }
+}

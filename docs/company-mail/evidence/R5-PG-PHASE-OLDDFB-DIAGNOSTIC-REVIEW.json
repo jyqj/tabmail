@@ -1,0 +1,41 @@
+{
+  "actual_Go_exit": 1,
+  "author_derived_file_closure": "6183c130818b10fa82ff758c08a7ba8ecffe0064fce5054badc22a9ca9ba5d83",
+  "cleanup": {
+    "catalog_count_query_exit": 0,
+    "elapsed_through_cleanup": 40.37794804573059,
+    "oldABC_and_stoppeddfb_privateclusters_untouched": true,
+    "original_deadline_wall": 1790943304.279954,
+    "original_origin_wall": 1790943124.279954,
+    "original_stopwork_wall": 1790943274.279954,
+    "outer_budget180_cleanupreserve30": true,
+    "owned_pg_pid": 70675,
+    "owned_pid_observation": "absent",
+    "owned_root": "/private/tmp/tm-r5pgphase-run.c9i8fx_c",
+    "pg_stop_exit": 0,
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "temporary_databases_connections": [],
+    "within_original180": true
+  },
+  "execution_receipt": {
+    "absolute_deadline_wall_time": 1790943274.2815397,
+    "budget_seconds": 149.36006879806519,
+    "elapsed_wall_seconds": 39.5654661655426,
+    "final_owned_group_observation": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "observed_wall_time": 1790943164.486937,
+    "owned_process_group": 70688,
+    "process_returncode": 1,
+    "process_returncode_status": "observed_parent_poll",
+    "scope": "absolute wall deadline including host suspension; cleanup is observed after resume, never guaranteed during sleep",
+    "started_wall_time": 1790943124.9214709,
+    "timed_out": false
+  },
+  "phase_metrics_parser_pending_actual_raw": true,
+  "scope": "exact8diagnostic, not ABC/currentwhole/206tail/uninstrumented performance/causeproof",
+  "source_kind": "diagnostic_derived_oldfailed_dfbonly"
+}

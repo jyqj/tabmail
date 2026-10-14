@@ -1,0 +1,538 @@
+{
+  "FAIL": 0,
+  "HTTP_proof_kind": "shipping handler/router asserts in actual new tests, not independent wire dump",
+  "PASS": 27,
+  "SKIP": 0,
+  "actual_case_actions": [
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteAuthorityAndMailboxGuards"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteAuthorityAndMailboxGuards/foreign-target"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteAuthorityAndMailboxGuards/frozen-actor"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteAuthorityAndMailboxGuards/hierarchy"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteAuthorityAndMailboxGuards/last-admin"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteAuthorityAndMailboxGuards/owned-mailbox"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteAuthorityAndMailboxGuards/self"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteAuthorityAndMailboxGuards/stale-actor-session"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteFKFinalFenceRollback"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteFKFinalFenceRollback/deferred-commit-fence"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteFKFinalFenceRollback/immediate-delete-fence"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteIncomingFKSchema18"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteIndependentAttributionRetained"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteRetainedReferences"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteRetainedReferences/attachment"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteRetainedReferences/deleted-draft-tombstone"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteRetainedReferences/executed-successor"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteRetainedReferences/executed-target"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteRetainedReferences/expired-preview-successor"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteRetainedReferences/expired-preview-target"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteRetainedReferences/legacy-sealed-draft"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteRetainedReferences/outbound-sender-only"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteRetainedReferences/outbound-user-only"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteTransferredSentProvenance"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteTransferredSentProvenance/archive-after-job-cleanup"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteTransferredSentProvenance/retained-explicit-sender"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5MemberHistoricalDeleteUnreferencedSuccess"
+    }
+  ],
+  "actual_child_GOMAXPROCS": "2",
+  "actual_fresh_DB_count_observed": 23,
+  "actual_leaf": 23,
+  "actual_seed_catalogs": {
+    "tm_test_0f32548d86974289ba9c01233ec573fc": {
+      "mailboxes": 0,
+      "schema": 15,
+      "users": 0,
+      "wall": 1790956205.5623071
+    },
+    "tm_test_11493f4b8cee430a8e3835350aa33adb": {
+      "mailboxes": 0,
+      "schema": 9,
+      "users": 0,
+      "wall": 1790956202.882251
+    },
+    "tm_test_1b4101d32f854ec6aa244bc131523f06": {
+      "mailboxes": 2,
+      "schema": 18,
+      "users": 3,
+      "wall": 1790956204.254071
+    },
+    "tm_test_440f99e7e8e446dbb20efbd50aea08a9": {
+      "mailboxes": 0,
+      "schema": 18,
+      "users": 3,
+      "wall": 1790956204.466651
+    },
+    "tm_test_5b24a8448b76447bb9713ff5f5213bd6": {
+      "mailboxes": 0,
+      "schema": 6,
+      "users": 0,
+      "wall": 1790956206.416203
+    },
+    "tm_test_5f1e4154e5d84debaf05b29f9a036880": {
+      "mailboxes": 1,
+      "schema": 18,
+      "users": 3,
+      "wall": 1790956202.20708
+    },
+    "tm_test_5fea28568ae44b0d99fd263d8c4fcdf1": {
+      "mailboxes": 0,
+      "schema": 18,
+      "users": 0,
+      "wall": 1790956201.9476962
+    },
+    "tm_test_71bb6f5a7c194129b53d1ac9738e1cbe": {
+      "mailboxes": 0,
+      "schema": 10,
+      "users": 0,
+      "wall": 1790956206.205256
+    },
+    "tm_test_77189f0bdacf486ebc44034b91d44d2d": {
+      "mailboxes": 0,
+      "schema": 10,
+      "users": 0,
+      "wall": 1790956205.9880042
+    },
+    "tm_test_79ced8d0ea1d49b4a84c678d0afcd4ba": {
+      "mailboxes": 1,
+      "schema": 18,
+      "users": 3,
+      "wall": 1790956203.1453671
+    },
+    "tm_test_94c7823c3ccd410ea9baf3b1be50288a": {
+      "mailboxes": 0,
+      "schema": 11,
+      "users": 0,
+      "wall": 1790956202.4137301
+    },
+    "tm_test_96fec45104374f998b9f8a2bfa2ee16d": {
+      "mailboxes": 0,
+      "schema": 15,
+      "users": 0,
+      "wall": 1790956203.5652852
+    },
+    "tm_test_9c23dcc22ac3404e8c8c7b497c080844": {
+      "mailboxes": 0,
+      "schema": 16,
+      "users": 0,
+      "wall": 1790956204.6743739
+    },
+    "tm_test_a06b8da0063b4b38ba00aa0f0fec24ee": {
+      "mailboxes": 0,
+      "schema": 18,
+      "users": 3,
+      "wall": 1790956206.674191
+    },
+    "tm_test_ad1c0be4b39d4bf4bd9b25076452ba61": {
+      "mailboxes": 0,
+      "schema": 6,
+      "users": 0,
+      "wall": 1790956203.990519
+    },
+    "tm_test_afdd4f83ae0348b5b44f191413b458aa": {
+      "mailboxes": 0,
+      "schema": 9,
+      "users": 0,
+      "wall": 1790956203.777371
+    },
+    "tm_test_bc9bc04f3e1740e9ba653fd992d4273f": {
+      "mailboxes": 0,
+      "schema": 6,
+      "users": 0,
+      "wall": 1790956205.094954
+    },
+    "tm_test_bebd99ac6c43442cbbb9a1d60027e150": {
+      "mailboxes": 0,
+      "schema": 18,
+      "users": 0,
+      "wall": 1790956205.356079
+    },
+    "tm_test_c086c2c7d9c24a0fb8357e470468307e": {
+      "mailboxes": 0,
+      "schema": 12,
+      "users": 0,
+      "wall": 1790956205.778579
+    },
+    "tm_test_c52d3778402047578dbc580187a2e812": {
+      "mailboxes": 1,
+      "schema": 18,
+      "users": 3,
+      "wall": 1790956202.6724942
+    },
+    "tm_test_cdb03cc9bf35478bbb9b79e912f8d0f5": {
+      "mailboxes": 0,
+      "schema": 9,
+      "users": 0,
+      "wall": 1790956201.666933
+    },
+    "tm_test_d40e0d3fe9e84f569bd891a2370e036a": {
+      "mailboxes": 0,
+      "schema": 12,
+      "users": 0,
+      "wall": 1790956204.887618
+    },
+    "tm_test_fc3a8d51da22408ebdda521fb0b7f1d1": {
+      "mailboxes": 0,
+      "schema": 18,
+      "users": 3,
+      "wall": 1790956203.355934
+    }
+  },
+  "actual_source_closure_sha256": "5f37cf9e51cee9d28a51cac15e4ca7c3343ee74a1f27d2291dcd19bbb19306a4",
+  "actual_top": 7,
+  "auto_retry": false,
+  "cleanup": {
+    "native_stop_exit": 0,
+    "observer_joined": true,
+    "old_stopped_roots_untouched": true,
+    "original_outer600_elapsed_seconds": 19.99731683731079,
+    "owned_pg_pid": 13275,
+    "owned_pid_observation": "absent",
+    "owned_pid_ps_exit": 1,
+    "owned_root": "/private/tmp/tm-r5historical-identity-runtime.prv6elcl",
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "test_databases_connections": [],
+    "utc": "2026-10-02T15:50:08.034375+00:00",
+    "within_original600": true
+  },
+  "direct_schema18_catalog_samples": 9,
+  "expected_tops": [
+    "TestR5MemberHistoricalDeleteAuthorityAndMailboxGuards",
+    "TestR5MemberHistoricalDeleteFKFinalFenceRollback",
+    "TestR5MemberHistoricalDeleteHTTPPostgresNoEffects",
+    "TestR5MemberHistoricalDeleteHandlerDispatch",
+    "TestR5MemberHistoricalDeleteIncomingFKSchema18",
+    "TestR5MemberHistoricalDeleteIndependentAttributionRetained",
+    "TestR5MemberHistoricalDeleteRetainedReferences",
+    "TestR5MemberHistoricalDeleteSafeErrorMapping",
+    "TestR5MemberHistoricalDeleteTransferredSentProvenance",
+    "TestR5MemberHistoricalDeleteUnreferencedSuccess"
+  ],
+  "handler_failure_classification": "source_build_ERROR: handlers test imports testpg -> api -> handlers; not runtime product RED",
+  "missing_expected_tops": [
+    "TestR5MemberHistoricalDeleteHTTPPostgresNoEffects",
+    "TestR5MemberHistoricalDeleteHandlerDispatch",
+    "TestR5MemberHistoricalDeleteSafeErrorMapping"
+  ],
+  "no_missing_handler_top_waiver": true,
+  "overall_scope_status": "FAIL: PG27 testnodesPASS but handler import cycle setup blocked3tops/0handlerproducttests",
+  "package_terminals": {
+    "tabmail/internal/api/handlers": {
+      "elapsed": 0,
+      "terminal": "fail"
+    },
+    "tabmail/internal/store/postgres": {
+      "elapsed": 6.911,
+      "terminal": "pass"
+    }
+  },
+  "results": {
+    "actual-schema18": {
+      "elapsed_wall_seconds": 0.10433101654052734,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "base-create": {
+      "elapsed_wall_seconds": 0.10552597045898438,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "historical-1": {
+      "elapsed_wall_seconds": 14.859241962432861,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "historical-2": {
+      "elapsed_wall_seconds": 0.10695338249206543,
+      "exit": 1,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "initdb": {
+      "elapsed_wall_seconds": 0.4161250591278076,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "native-stop": {
+      "elapsed_wall_seconds": 0.20901203155517578,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "official-schema18-bootstrap": {
+      "elapsed_wall_seconds": 3.2269201278686523,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "owned-config": {
+      "elapsed_wall_seconds": 0.10655617713928223,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "pg-start": {
+      "elapsed_wall_seconds": 0.20622515678405762,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "terminal-test-databases": {
+      "elapsed_wall_seconds": 0.10329914093017578,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    }
+  },
+  "schema_sampling_boundary": "base officialNew/Migrate actual18 + directIncomingFKSchema18 test; per-fixture sampler misses short final states, does not claim all23 directschema18",
+  "scope": "only new historical identity 2 anchored packages; no whole backend rerun",
+  "source_sha": "853e4a22e81462d61dce4f8f0496d6f4cd408bb7",
+  "test_count_run": 27,
+  "unexpected_tops": [],
+  "whole_backend_PASS_claimed": false
+}

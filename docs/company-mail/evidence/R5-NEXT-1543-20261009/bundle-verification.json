@@ -1,0 +1,350 @@
+{
+  "schema": "tabmail.next1543.final-bundle-final-review.v1",
+  "reviewed_at_utc": "2026-10-09T09:09:13.807051+00:00",
+  "verdict": "ACCEPT",
+  "scope": "Incremental read-only final snapshot review. Previous 299-check review reused for unchanged companion and history; new archive CRC/member hashes, corrected timestamps, frozen PG byte anchors, exact repository copies, issue snapshot counts and TODO history prefix checked. No test command rerun.",
+  "prior_review": {
+    "path": "/workspace/scratch/472e5abb7d28/frontend-evidence/final-bundle-review.json",
+    "bytes": 54553,
+    "sha256": "d7b5537b45f4cd5378349cad8eba280d4114596017d4b75530cf4e332004c0fe"
+  },
+  "input_snapshot": [
+    {
+      "path": "/workspace/scratch/472e5abb7d28/next1543-delivery-evidence/local-execution.zip",
+      "bytes": 1393337,
+      "sha256": "b7c495a9d7703cd2c8847a539d5f6798ef025bf799cf741b440cd9d8ff19d672"
+    },
+    {
+      "path": "/workspace/scratch/472e5abb7d28/next1543-delivery-evidence/local-evidence-manifest.json",
+      "bytes": 79813,
+      "sha256": "1f08765f6780877278c01431035962a0cb7f041198f1fe6d06b9462f0d028013"
+    },
+    {
+      "path": "/workspace/scratch/472e5abb7d28/next1543-delivery-evidence/local-evidence-summary.json",
+      "bytes": 392592,
+      "sha256": "99fe21a5e0b20562089d42c8f8cfdb3b43429dfd51dc901fe879867f4e575ff5"
+    },
+    {
+      "path": "/workspace/scratch/472e5abb7d28/next1543-delivery-evidence/rounds-and-merges.json",
+      "bytes": 1731,
+      "sha256": "16b557c8b02adbe189d0599e9eee921ab5b30f1a72674b886f22801330e6835a"
+    },
+    {
+      "path": "/workspace/scratch/472e5abb7d28/next1543-delivery-evidence/catalog17-validation-packet-v2.zip",
+      "bytes": 1801735,
+      "sha256": "83142d632ca6616620626a0695ff9b8620941e2140c4bc8a6ddd5a0d06f92b17"
+    },
+    {
+      "path": "/workspace/scratch/472e5abb7d28/next1543-delivery-evidence/pg-execution-summary.json",
+      "bytes": 18000,
+      "sha256": "b0a704e34cb7644a66d8341c3644ffbef3bce4e7f010c7476b1c98eb334e2052"
+    }
+  ],
+  "repository_evidence_directory": "/workspace/scratch/472e5abb7d28/tabmail-completion/docs/company-mail/evidence/R5-NEXT-1543-20261009",
+  "main_archive": {
+    "members": 371,
+    "raw_files": 370,
+    "crc_valid": true,
+    "all_member_hashes_checked": 370
+  },
+  "metadata_findings_resolved": [
+    {
+      "severity": "metadata correction requested",
+      "round": 2,
+      "field": "rounds-and-merges.rounds[].merged_at",
+      "recorded": "2026-10-09T08:54:19Z",
+      "github_merged_at": "2026-10-09T08:54:20Z",
+      "git_committer_time_utc": "2026-10-09T08:54:19Z",
+      "effect": "Merge commit/tree/parents and completion counts are correct. The field currently contains commit time instead of the separately recorded GitHub PR merge time. Preserve it as merge_commit_time and store GitHub merged_at separately."
+    },
+    {
+      "severity": "metadata correction requested",
+      "round": 3,
+      "field": "rounds-and-merges.rounds[].merged_at",
+      "recorded": "2026-10-09T08:56:34Z",
+      "github_merged_at": "2026-10-09T08:56:35Z",
+      "git_committer_time_utc": "2026-10-09T08:56:34Z",
+      "effect": "Merge commit/tree/parents and completion counts are correct. The field currently contains commit time instead of the separately recorded GitHub PR merge time. Preserve it as merge_commit_time and store GitHub merged_at separately."
+    }
+  ],
+  "remaining_findings": [],
+  "checks_passed": 57,
+  "checks_failed": 0,
+  "checks": [
+    {
+      "check": "exact_final_snapshot:local-execution.zip",
+      "pass": true
+    },
+    {
+      "check": "repository_copy:local-execution.zip",
+      "pass": true
+    },
+    {
+      "check": "exact_final_snapshot:local-evidence-manifest.json",
+      "pass": true
+    },
+    {
+      "check": "repository_copy:local-evidence-manifest.json",
+      "pass": true
+    },
+    {
+      "check": "exact_final_snapshot:local-evidence-summary.json",
+      "pass": true
+    },
+    {
+      "check": "repository_copy:local-evidence-summary.json",
+      "pass": true
+    },
+    {
+      "check": "exact_final_snapshot:rounds-and-merges.json",
+      "pass": true
+    },
+    {
+      "check": "repository_copy:rounds-and-merges.json",
+      "pass": true
+    },
+    {
+      "check": "exact_final_snapshot:catalog17-validation-packet-v2.zip",
+      "pass": true
+    },
+    {
+      "check": "repository_copy:catalog17-validation-packet-v2.zip",
+      "pass": true
+    },
+    {
+      "check": "exact_final_snapshot:pg-execution-summary.json",
+      "pass": true
+    },
+    {
+      "check": "repository_copy:pg-execution-summary.json",
+      "pass": true
+    },
+    {
+      "check": "prior_review_identity",
+      "pass": true
+    },
+    {
+      "check": "main_unique_exact_371_members",
+      "pass": true
+    },
+    {
+      "check": "main_all_crc_valid",
+      "pass": true
+    },
+    {
+      "check": "main_all_370_member_hashes",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "check": "external_embedded_manifest_same",
+      "pass": true
+    },
+    {
+      "check": "summary_exact_archive_binding",
+      "pass": true
+    },
+    {
+      "check": "summary_embedded_pg_and_rounds_same",
+      "pass": true
+    },
+    {
+      "check": "unchanged_companion_qualification",
+      "pass": true
+    },
+    {
+      "check": "earlier_review_retained",
+      "pass": true
+    },
+    {
+      "check": "final_review_is_external_sidecar",
+      "pass": true
+    },
+    {
+      "check": "no_source_worktrees_or_dependencies",
+      "pass": true
+    },
+    {
+      "check": "corrected_timestamp_fields_round_1",
+      "pass": true
+    },
+    {
+      "check": "merge_identity_and_counts_unchanged_round_1",
+      "pass": true
+    },
+    {
+      "check": "corrected_timestamp_fields_round_2",
+      "pass": true
+    },
+    {
+      "check": "merge_identity_and_counts_unchanged_round_2",
+      "pass": true
+    },
+    {
+      "check": "corrected_timestamp_fields_round_3",
+      "pass": true
+    },
+    {
+      "check": "merge_identity_and_counts_unchanged_round_3",
+      "pass": true
+    },
+    {
+      "check": "rounds_three_copies_match",
+      "pass": true
+    },
+    {
+      "check": "pg_frozen_handoff_unchanged",
+      "pass": true
+    },
+    {
+      "check": "same_frozen_pg_jsonl:frontend-evidence/pg-local/wave1-v2/baseline/go-test.jsonl",
+      "pass": true
+    },
+    {
+      "check": "same_frozen_pg_jsonl:frontend-evidence/pg-local/wave1-v2/candidate/go-test.jsonl",
+      "pass": true
+    },
+    {
+      "check": "same_frozen_pg_jsonl:frontend-evidence/pg-local/wave2-v2/baseline/go-test.jsonl",
+      "pass": true
+    },
+    {
+      "check": "same_frozen_pg_jsonl:frontend-evidence/pg-local/wave2-v2/candidate/go-test.jsonl",
+      "pass": true
+    },
+    {
+      "check": "same_frozen_pg_jsonl:frontend-evidence/pg-local/wave3-v2/baseline/go-test.jsonl",
+      "pass": true
+    },
+    {
+      "check": "same_frozen_pg_jsonl:frontend-evidence/pg-local/wave3-v2/candidate/go-test.jsonl",
+      "pass": true
+    },
+    {
+      "check": "same_frozen_pg_server_log",
+      "pass": true
+    },
+    {
+      "check": "old_pg_failure_unchanged:pr-audit-artifacts/pg-wave1-113727064900.log",
+      "pass": true
+    },
+    {
+      "check": "old_pg_failure_unchanged:pr-audit-artifacts/pg-wave2-mailbox-113732833358.log",
+      "pass": true
+    },
+    {
+      "check": "old_pg_failure_unchanged:pr-audit-artifacts/pg-wave2-mailbox-result.json",
+      "pass": true
+    },
+    {
+      "check": "prior_failed_catalog_review_unchanged",
+      "pass": true
+    },
+    {
+      "check": "reuse_previous_companion_crc_hash_reference_review",
+      "pass": true
+    },
+    {
+      "check": "raw_issue_snapshot_ten_closed_completed",
+      "pass": true
+    },
+    {
+      "check": "raw_issue_snapshot_40_checks",
+      "pass": true
+    },
+    {
+      "check": "counts_4_7_10_and_6_3_0",
+      "pass": true
+    },
+    {
+      "check": "parent_still_161",
+      "pass": true
+    },
+    {
+      "check": "exactly_one_new_todo_prefix",
+      "pass": true
+    },
+    {
+      "check": "prefix_ends_at_original_history_boundary",
+      "pass": true
+    },
+    {
+      "check": "all_30d_todo_history_bytes_identical",
+      "pass": true
+    },
+    {
+      "check": "all_existing_checkbox_bytes_identical",
+      "pass": true
+    },
+    {
+      "check": "todo_prefix_batch_and_parent_counts",
+      "pass": true
+    },
+    {
+      "check": "report_batch_and_parent_counts",
+      "pass": true
+    },
+    {
+      "check": "report_exact_ten_implementation_rows",
+      "pass": true
+    },
+    {
+      "check": "readme_final_file_integrity_table",
+      "pass": true
+    },
+    {
+      "check": "documentation_finite_gate_qualifications",
+      "pass": true
+    },
+    {
+      "check": "all_final_input_bytes_stable",
+      "pass": true
+    }
+  ],
+  "batch": {
+    "unique_issues": 10,
+    "closed_completed_in_retained_api_snapshot": 10,
+    "checked_acceptance_items": 40,
+    "cumulative_completed": [
+      4,
+      7,
+      10
+    ],
+    "remaining_after_round": [
+      6,
+      3,
+      0
+    ],
+    "parent_accepted": 10,
+    "parent_total": 171,
+    "parent_remaining": 161
+  },
+  "postgresql": {
+    "raw_jsonl_files_same": 6,
+    "candidate_pass_leaves": 41,
+    "candidate_fail_leaves": 0,
+    "all_skip_events": 0,
+    "server_log_and_summary_same": true
+  },
+  "documentation": {
+    "report": {
+      "path": "/workspace/scratch/472e5abb7d28/tabmail-completion/docs/company-mail/R5-NEXT-1543-20261009.md",
+      "bytes": 12681,
+      "sha256": "40bde0f9153e4104854cabc7889264e89c998814dde6d22c483486b752f09a46"
+    },
+    "todo": {
+      "path": "/workspace/scratch/472e5abb7d28/tabmail-completion/docs/company-mail/R5-TODO.md",
+      "bytes": 346409,
+      "sha256": "a7c8dc2e3656ac4d0ff2522b304cd411a1ce1235eba4b9f59026eb8c7022601a"
+    },
+    "evidence_readme": {
+      "path": "/workspace/scratch/472e5abb7d28/tabmail-completion/docs/company-mail/evidence/R5-NEXT-1543-20261009/README.md",
+      "bytes": 3769,
+      "sha256": "9a24cec6a45074249f8adb82532b31c06e0a59d9358557c7d824f1112090acb1"
+    },
+    "baseline_todo_commit": "30d2d05ab6ddcc23f47d9b9786885817aef50a0f",
+    "historical_todo_bytes_sha256": "287a111f52f29a3b7bb762a5951d7abd0f0879e507a981fab651f16a30699bfd",
+    "all_history_bytes_outside_new_prefix_unchanged": true
+  },
+  "qualification": "This accepts the artifact snapshot and its bounded task/evidence accounting; it does not grant full source-version CI, project release or parent TODO acceptance. This review stays outside the ZIP as a separate sidecar."
+}

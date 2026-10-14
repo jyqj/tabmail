@@ -1,0 +1,46 @@
+{"Time":"2026-10-09T04:15:09.372768187Z","Action":"start","Package":"tabmail/internal/settings"}
+{"Time":"2026-10-09T04:15:09.39857341Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites"}
+{"Time":"2026-10-09T04:15:09.398624585Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites","Output":"=== RUN   TestR5SettingsSeedPGConcurrentWrites\n"}
+{"Time":"2026-10-09T04:15:09.398652347Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write"}
+{"Time":"2026-10-09T04:15:09.398656074Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write","Output":"=== RUN   TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write\n"}
+{"Time":"2026-10-09T04:15:10.000928841Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write","Output":"    r5_settings_seed_pg_test.go:147: EXEC07_STALE_SEED_OVERWROTE_COMMITTED_SETTING writer=concurrent_admin_write before_value=\"false\" after_value=\"true\" before_description=\"concurrent_admin_write committed choice\" after_description=\"first startup environment\" before_updated_at=2026-10-09T04:15:09.997526Z after_updated_at=2026-10-09T04:15:09.999462Z\n"}
+{"Time":"2026-10-09T04:15:10.041770686Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write","Output":"--- FAIL: TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write (0.64s)\n"}
+{"Time":"2026-10-09T04:15:10.041831249Z","Action":"fail","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write","Elapsed":0.64}
+{"Time":"2026-10-09T04:15:10.041894718Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed"}
+{"Time":"2026-10-09T04:15:10.041908213Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed","Output":"=== RUN   TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed\n"}
+{"Time":"2026-10-09T04:15:10.598099414Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed","Output":"    r5_settings_seed_pg_test.go:147: EXEC07_STALE_SEED_OVERWROTE_COMMITTED_SETTING writer=concurrent_startup_seed before_value=\"false\" after_value=\"true\" before_description=\"concurrent_startup_seed committed choice\" after_description=\"first startup environment\" before_updated_at=2026-10-09T04:15:10.595264Z after_updated_at=2026-10-09T04:15:10.596795Z\n"}
+{"Time":"2026-10-09T04:15:10.729003056Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed","Output":"--- FAIL: TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed (0.69s)\n"}
+{"Time":"2026-10-09T04:15:10.729040987Z","Action":"fail","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed","Elapsed":0.69}
+{"Time":"2026-10-09T04:15:10.729060583Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites","Output":"--- FAIL: TestR5SettingsSeedPGConcurrentWrites (1.33s)\n"}
+{"Time":"2026-10-09T04:15:10.729070271Z","Action":"fail","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites","Elapsed":1.33}
+{"Time":"2026-10-09T04:15:10.729137126Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues"}
+{"Time":"2026-10-09T04:15:10.729143157Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues\n"}
+{"Time":"2026-10-09T04:15:11.251870023Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/empty"}
+{"Time":"2026-10-09T04:15:11.251933451Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/empty","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues/empty\n"}
+{"Time":"2026-10-09T04:15:11.269524827Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/empty","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues/empty (0.02s)\n"}
+{"Time":"2026-10-09T04:15:11.26956402Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/empty","Elapsed":0.02}
+{"Time":"2026-10-09T04:15:11.269620946Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/false"}
+{"Time":"2026-10-09T04:15:11.269638799Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/false","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues/false\n"}
+{"Time":"2026-10-09T04:15:11.271100005Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/false","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues/false (0.00s)\n"}
+{"Time":"2026-10-09T04:15:11.27111873Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/false","Elapsed":0}
+{"Time":"2026-10-09T04:15:11.271141152Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/zero"}
+{"Time":"2026-10-09T04:15:11.271144859Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/zero","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues/zero\n"}
+{"Time":"2026-10-09T04:15:11.272486652Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/zero","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues/zero (0.00s)\n"}
+{"Time":"2026-10-09T04:15:11.272500538Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/zero","Elapsed":0}
+{"Time":"2026-10-09T04:15:11.272516738Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/text"}
+{"Time":"2026-10-09T04:15:11.272520224Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/text","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues/text\n"}
+{"Time":"2026-10-09T04:15:11.27386252Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/text","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues/text (0.00s)\n"}
+{"Time":"2026-10-09T04:15:11.273903787Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/text","Elapsed":0}
+{"Time":"2026-10-09T04:15:11.402278281Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues (0.67s)\n"}
+{"Time":"2026-10-09T04:15:11.402355896Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues","Elapsed":0.67}
+{"Time":"2026-10-09T04:15:11.402375352Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCreatesAbsentDefaults"}
+{"Time":"2026-10-09T04:15:11.402385631Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCreatesAbsentDefaults","Output":"=== RUN   TestR5SettingsSeedPGCreatesAbsentDefaults\n"}
+{"Time":"2026-10-09T04:15:11.975335287Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCreatesAbsentDefaults","Output":"--- PASS: TestR5SettingsSeedPGCreatesAbsentDefaults (0.57s)\n"}
+{"Time":"2026-10-09T04:15:11.97541224Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCreatesAbsentDefaults","Elapsed":0.57}
+{"Time":"2026-10-09T04:15:11.975452605Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCancelledContext"}
+{"Time":"2026-10-09T04:15:11.975464107Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCancelledContext","Output":"=== RUN   TestR5SettingsSeedPGCancelledContext\n"}
+{"Time":"2026-10-09T04:15:12.548743501Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCancelledContext","Output":"--- PASS: TestR5SettingsSeedPGCancelledContext (0.57s)\n"}
+{"Time":"2026-10-09T04:15:12.548804515Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCancelledContext","Elapsed":0.57}
+{"Time":"2026-10-09T04:15:12.548817589Z","Action":"output","Package":"tabmail/internal/settings","Output":"FAIL\n"}
+{"Time":"2026-10-09T04:15:12.553890724Z","Action":"output","Package":"tabmail/internal/settings","Output":"FAIL\ttabmail/internal/settings\t3.181s\n"}
+{"Time":"2026-10-09T04:15:12.553916432Z","Action":"fail","Package":"tabmail/internal/settings","Elapsed":3.181}

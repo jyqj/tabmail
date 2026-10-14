@@ -1,0 +1,32 @@
+{
+  "CLI_exit": 0,
+  "actual_source_closure_sha256": "595b8d559987598e7e0e40f9e3112185811e8dc3c6594185489e8b5d12aa0dfe",
+  "actual_targets": [
+    {
+      "name": "current-readable sent-content structured BCC accepts safe custom header entries without shadowing the source object",
+      "status": "passed"
+    },
+    {
+      "name": "current-readable sent-content structured BCC rejects absent markers, cross-ID content, queue fallbacks and custom BCC headers",
+      "status": "passed"
+    }
+  ],
+  "cleanup": {
+    "noPG_API_SMTP_NodeServer_browser_build_npmci": true,
+    "owned_group_observation": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "owned_groups_gone": true,
+    "source_selected_pin_equal": true
+  },
+  "expected_exact2_matches": true,
+  "filtered_not_executed_count": 34,
+  "fullCI_or_whole_file_green": false,
+  "original_failed54_CLI1_preserved": "/private/tmp/tm-r5node-new.p36ab721/receipt-ui",
+  "passed_actual": 2,
+  "source_sha": "f00be8daa71b2e865c23e6401c1750e0f27904a4",
+  "timed_out": false,
+  "wall_seconds": 0.7319321632385254
+}

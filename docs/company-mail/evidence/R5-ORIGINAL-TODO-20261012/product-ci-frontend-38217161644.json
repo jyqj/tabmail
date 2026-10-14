@@ -1,0 +1,192 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-10-12T07:30:10.948087+00:00",
+  "repository": "jyqj/tabmail",
+  "pull_request": 260,
+  "head_sha": "7524e650378487e8d32e70252cf1bd77010260b5",
+  "workflow_run_id": 38217161644,
+  "workflow_run_attempt": 1,
+  "frontend_job_id": 114704478524,
+  "frontend_job_conclusion": "failure",
+  "frontend_artifact": {
+    "id": 11733425411,
+    "name": "company-frontend-evidence",
+    "size_in_bytes": 210539,
+    "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11733425411",
+    "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11733425411/zip",
+    "expired": false,
+    "created_at": "2026-10-12T07:24:21Z",
+    "expires_at": "2026-10-26T07:24:20Z",
+    "updated_at": "2026-10-12T07:24:21Z",
+    "digest": "sha256:84e8971cd0c40da3e5071b55d2555e32e2e2c16b432307e98b8b4cac439b305e",
+    "workflow_run": {
+      "id": 38217161644,
+      "repository_id": 1188928152,
+      "head_repository_id": 1188928152,
+      "head_branch": "fix/r5-validation-fixtures-20261012",
+      "head_sha": "7524e650378487e8d32e70252cf1bd77010260b5"
+    }
+  },
+  "audit_artifact": {
+    "id": 11731364503,
+    "name": "dependency-audit",
+    "size_in_bytes": 1064,
+    "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11731364503",
+    "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11731364503/zip",
+    "expired": false,
+    "created_at": "2026-10-12T07:21:15Z",
+    "expires_at": "2026-10-26T07:21:14Z",
+    "updated_at": "2026-10-12T07:21:15Z",
+    "digest": "sha256:69bce4966da86e50d4c5df889871b4f61a337bcc4f35e0b2463a282c86e440cd",
+    "workflow_run": {
+      "id": 38217161644,
+      "repository_id": 1188928152,
+      "head_repository_id": 1188928152,
+      "head_branch": "fix/r5-validation-fixtures-20261012",
+      "head_sha": "7524e650378487e8d32e70252cf1bd77010260b5"
+    }
+  },
+  "tested_source_before": {
+    "head": "edd2fba834f577c8fa050ae32573321a8937294d",
+    "tree": "4eb493c2b1a1b98353229500e2b840f61a297e81",
+    "tracked_clean": true,
+    "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tested_source_after": {
+    "head": "edd2fba834f577c8fa050ae32573321a8937294d",
+    "tree": "4eb493c2b1a1b98353229500e2b840f61a297e81",
+    "tracked_clean": true,
+    "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "source_unchanged": true,
+  "frontend_command": [
+    "npm",
+    "test",
+    "--",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=../frontend-vitest.json"
+  ],
+  "go_execution": {
+    "exit_code": 0,
+    "timeout": false,
+    "tail": false,
+    "processes_joined": true
+  },
+  "vitest_execution": {
+    "exit_code": 0,
+    "timeout": false,
+    "tail": false,
+    "processes_joined": true
+  },
+  "go_evidence": {
+    "status": "pass",
+    "events": 12,
+    "packages": 1,
+    "tests_started": 2,
+    "tests_passed": 2,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "mandatory_tests": 1,
+    "mandatory_missing_or_not_passed": 0,
+    "allowed_skips_observed": [],
+    "errors": [],
+    "source_sha": "edd2fba834f577c8fa050ae32573321a8937294d",
+    "log_sha256": "8d50f53ba06fe36bb61bc44c1f555a4015a4686b39c35cb8d5992ce873b8d40e",
+    "scope": "complete_default_frontend_with_one_owned_fixture",
+    "external_batch_qualified": false,
+    "task_complete": false,
+    "source_unchanged": true
+  },
+  "frontend_evidence": {
+    "status": "pass",
+    "errors": [],
+    "scope": "complete_default_frontend_with_one_owned_fixture",
+    "external_batch_qualified": false,
+    "task_complete": false
+  },
+  "vitest_counts": {
+    "success": true,
+    "numTotalTests": 2196,
+    "numPassedTests": 2196,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTodoTests": 0
+  },
+  "vitest_test_files": 129,
+  "original_probe": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "R5 batch independent realm loopback PostgreSQL",
+          "status": "passed",
+          "title": "R5 batch independent realm loopback PostgreSQL",
+          "duration": 58.59528599999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1791789832691,
+      "endTime": 1791789832749.5952,
+      "status": "passed",
+      "message": "",
+      "name": "/home/runner/work/tabmail/tabmail/web/r5-external-batch-probe.test.tsx"
+    }
+  ],
+  "vitest_report_copies_identical": true,
+  "independent_replay": {
+    "complete_vitest_errors": [],
+    "go_evidence_status": "pass",
+    "performed_against": "e9917f4664c2c43ea6ec8e93f19be1b0806e0e4f unchanged validators"
+  },
+  "remaining_failures": {
+    "source_version_status": "failed",
+    "source_version_preparation_error": "unknown conditional build input: internal/testpg/r5_frontend_fixture_test.go",
+    "source_version_groups_started": 0,
+    "audit_vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 8,
+      "critical": 0,
+      "total": 8
+    }
+  },
+  "artifact_digest_checks": {
+    "frontend_zip_matches_github": true,
+    "audit_zip_matches_github": true
+  },
+  "scope": "complete_default_frontend_with_one_owned_fixture",
+  "external_batch_qualified": false,
+  "original_todo_newly_completed": 0,
+  "task_complete": false,
+  "files_sha256": {
+    "frontend-evidence.zip": "84e8971cd0c40da3e5071b55d2555e32e2e2c16b432307e98b8b4cac439b305e",
+    "dependency-audit.zip": "69bce4966da86e50d4c5df889871b4f61a337bcc4f35e0b2463a282c86e440cd",
+    "frontend-job.log": "8713aeb11dfc1cd2f15170601f5fbdf1148d2474dee52cfd369516d0126434e7",
+    "frontend-job-terminal.json": "68b179244976a964fcfa612098f4d01b576b2378cd7650dd88e02b3067b719eb",
+    "frontend-artifact-metadata.json": "4760aebe10772788a122dfbd4f8457045ecdf2688de492db933a0fb79aa6fe44",
+    "dependency-audit-metadata.json": "596832f75c40ac8d7d7a2d65d3cc1fe4aefded9577f75baa507d9b151611f37a",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/command.json": "a1b3ef2ccad246f5024329fedb70f6b0ce42a5c290f78394cb2fc4b9d04e3da0",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/frontend-result.json": "0fc134c11100b484ca9ef736d104d81119004186bf48d3633fa1211a32ecde45",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/frontend-vitest.json": "7489bba7b8eaf623c20d5fdf8a5239d05f48e3ce03024e292dae1e0181b579bc",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/go-execution.json": "38a162f48d3b57be94a9eeb1cbae0407694110dddf23908673409fcde3d0e83e",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/go-test-evidence.json": "decc3ae98543f97e4da0de4cd24f0685da0d9d97c1a714c69fd2e9ada72bd4ba",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/go.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/go.stdout": "8d50f53ba06fe36bb61bc44c1f555a4015a4686b39c35cb8d5992ce873b8d40e",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/source-after.json": "36e8f9fe3d3f7cb659a649452e22e63ee045ca88ee2af98a9aee8eb334efb274",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/source-before.json": "36e8f9fe3d3f7cb659a649452e22e63ee045ca88ee2af98a9aee8eb334efb274",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/source-sha.txt": "16642144b0c6c92e2a60a39e3a4e5ba13eb5871ae26d34405cf51422119b511d",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/vitest-execution.json": "38a162f48d3b57be94a9eeb1cbae0407694110dddf23908673409fcde3d0e83e",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/vitest.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/vitest.stderr": "0f596599eb84cca8eaadb00b39d16c1ab366632eb1c99c38e60ae1826ba88c05",
+    "frontend-evidence/_temp/tabmail-frontend-fixture/vitest.stdout": "f028e0038ce7c67216d3e5d0e3e80cd7d3cf49b2116cdede934151dd6126d3ee",
+    "frontend-evidence/tabmail/tabmail/frontend-source-sha.txt": "16642144b0c6c92e2a60a39e3a4e5ba13eb5871ae26d34405cf51422119b511d",
+    "frontend-evidence/tabmail/tabmail/frontend-source-version-tests.json": "47bb412556c7842ebe86ca278b7b5fd84a80559247c06311e97e91114b18ae12",
+    "frontend-evidence/tabmail/tabmail/frontend-vitest.json": "7489bba7b8eaf623c20d5fdf8a5239d05f48e3ce03024e292dae1e0181b579bc",
+    "dependency-audit/tabmail-npm-audit.json": "25640721d10de42f8e1e400ed01017ee858e388aa63331388715f2a2adcd395e"
+  }
+}

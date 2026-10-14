@@ -1,0 +1,108 @@
+[
+  {
+    "id": 11487712667,
+    "name": "company-frontend-evidence",
+    "run_id": 37633385810,
+    "zip_file": "pr73-frontend-evidence.zip",
+    "zip_bytes": 339820,
+    "zip_sha256": "ef3fa966c6a746cfae051ba8b8db1f017bb1ecd989cadfb8f88f08c2d944a5c0",
+    "github_api_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11487712667",
+    "github_run_url": "https://github.com/jyqj/tabmail/actions/runs/37633385810",
+    "extracted": [
+      {
+        "path": "frontend-source-sha.txt",
+        "bytes": 41,
+        "sha256": "a57ea1c59ddb60ff41a5aece9650647738cead86b7b79a8678d01900232a2fe5"
+      },
+      {
+        "path": "frontend-source-version-tests.json",
+        "bytes": 2323118,
+        "sha256": "bdb439641e4329b28bc8b5d49482fe1c8ffa98a1d40eb550cb6d21109913a323"
+      },
+      {
+        "path": "frontend-vitest.json",
+        "bytes": 322360,
+        "sha256": "bbedec18c77bf6aeddd26bed4f89a84558f5507fe55f24e2f27c74dca3464d97"
+      }
+    ],
+    "not_extracted": []
+  },
+  {
+    "id": 11486589368,
+    "name": "dependency-audit",
+    "run_id": 37633385810,
+    "zip_file": "pr73-audit-evidence.zip",
+    "zip_bytes": 1064,
+    "zip_sha256": "53a9c8f00d8aadd22500b2eeb7e75ec54ffcb380f098160835795378fe5fe537",
+    "github_api_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11486589368",
+    "github_run_url": "https://github.com/jyqj/tabmail/actions/runs/37633385810",
+    "extracted": [
+      {
+        "path": "tabmail-npm-audit.json",
+        "bytes": 4220,
+        "sha256": "25640721d10de42f8e1e400ed01017ee858e388aa63331388715f2a2adcd395e"
+      }
+    ],
+    "not_extracted": []
+  },
+  {
+    "id": 11486559494,
+    "name": "company-p0-test-evidence",
+    "run_id": 37633385810,
+    "zip_file": "pr73-backend-evidence.zip",
+    "zip_bytes": 424753,
+    "zip_sha256": "ba74caccfd692019c1cbfda76bb37c52c925be3c816857e1e45c044e5a043c02",
+    "github_api_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11486559494",
+    "github_run_url": "https://github.com/jyqj/tabmail/actions/runs/37633385810",
+    "extracted": [
+      {
+        "path": "go-test-source-sha.txt",
+        "bytes": 41,
+        "sha256": "a57ea1c59ddb60ff41a5aece9650647738cead86b7b79a8678d01900232a2fe5"
+      },
+      {
+        "path": "go-test-evidence.json",
+        "bytes": 12187,
+        "sha256": "ba726d0becb7476263eb8883a0eca794092193014cb60fa7ba21ddf6f47a9084"
+      }
+    ],
+    "not_extracted": [
+      {
+        "name": "go-test.jsonl",
+        "bytes": 7230203
+      }
+    ]
+  },
+  {
+    "id": 11486538884,
+    "name": "company-browser-evidence",
+    "run_id": 37633385810,
+    "zip_file": "pr73-browser-evidence.zip",
+    "zip_bytes": 1603,
+    "zip_sha256": "c9590df34cd5fc09713018864f2675bbfb680627e5834e1a6ecaa6e162d3cc42",
+    "github_api_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11486538884",
+    "github_run_url": "https://github.com/jyqj/tabmail/actions/runs/37633385810",
+    "extracted": [
+      {
+        "path": "tabmail-browser-source-sha.txt",
+        "bytes": 41,
+        "sha256": "a57ea1c59ddb60ff41a5aece9650647738cead86b7b79a8678d01900232a2fe5"
+      },
+      {
+        "path": "tabmail-browser-evidence.json",
+        "bytes": 535,
+        "sha256": "d7f30d0d506a78b56979ecd63ac5fe572b2f237d32ae70952c20a8673226751f"
+      }
+    ],
+    "not_extracted": [
+      {
+        "name": "tabmail-next.log",
+        "bytes": 149
+      },
+      {
+        "name": "tabmail-browser.jsonl",
+        "bytes": 2351
+      }
+    ]
+  }
+]

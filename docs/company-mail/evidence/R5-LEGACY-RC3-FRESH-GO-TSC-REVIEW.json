@@ -1,0 +1,79 @@
+{
+  "actual_TS_cases": {
+    "actual_cases": [
+      {
+        "name": "R5 shared receipt RC03",
+        "status": "passed"
+      },
+      {
+        "name": "R5 shared receipt RC04",
+        "status": "passed"
+      },
+      {
+        "name": "R5 shared receipt RC05",
+        "status": "passed"
+      }
+    ],
+    "actual_total": 3,
+    "failed": 0,
+    "passed": 3,
+    "pending": 0
+  },
+  "actual_typecheck_diagnostics": [],
+  "all_three_cases_known_no_unknown_claim": true,
+  "cleanup": {
+    "absolute_deadline": 1790947466.19223,
+    "all_owned_groups_absent": true,
+    "budget600": true,
+    "elapsed_all_capture_Go_typegen_tsc_TS_cleanup": 9.445788145065308,
+    "noPGHTTP_auth_browser_orbuild": true,
+    "origin": 1790946866.19223,
+    "owned_shared_source_pins_equal": true,
+    "within_original600": true
+  },
+  "not_wholeFrontendCI_G0": true,
+  "old82_front_and_oldtypeerrorcuts_not_retested": true,
+  "results": {
+    "current-web-typecheck": {
+      "CLI_exit": 0,
+      "elapsed_wall_seconds": 3.7315282821655273,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "fresh-Go-shippingProject-observation-producer": {
+      "CLI_exit": 0,
+      "elapsed_wall_seconds": 3.431217908859253,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "legacy-exact-RC03-04-05": {
+      "CLI_exit": 0,
+      "elapsed_wall_seconds": 1.3423137664794922,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "official-fresh-private-Next-typegen": {
+      "CLI_exit": 0,
+      "elapsed_wall_seconds": 0.5313467979431152,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    }
+  },
+  "retrybutton_visible_not_retryHTTP_proof": true
+}

@@ -1,0 +1,428 @@
+{
+  "base_commit": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+  "transaction": {
+    "status": "PASS",
+    "postgres_files": 62,
+    "functions": 395,
+    "sql_execution_calls": 498,
+    "direct_write_functions": 134,
+    "write_closure_functions": 154,
+    "migration_files": 19,
+    "task_complete": false,
+    "runtime_verified": false,
+    "meaning": "syntax inventory current; no concurrency or behavior equivalence claim"
+  },
+  "compatibility": {
+    "wire_validation_scope": "not_checked_current_wire_required",
+    "historical_wire_reference": {
+      "artifact_ref": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json",
+      "sha256": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+      "qualification": "historical_metadata_only_not_current_wire"
+    },
+    "status": "source_inventory_and_upgrade_plan_checked",
+    "task_complete": false,
+    "product_green": false,
+    "routes": 132,
+    "client_branches": 134,
+    "source_files": 94,
+    "openapi_missing": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/suppression",
+      "GET /docs-assets/*"
+    ],
+    "no_shipped_client": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/admin/status",
+      "GET /api/v1/auth/me",
+      "GET /api/v1/company/outbound/{id}/recipients",
+      "GET /api/v1/suppression",
+      "GET /docs",
+      "GET /docs-assets/*",
+      "GET /metrics",
+      "GET /openapi.yaml",
+      "GET /ready",
+      "GET /redoc"
+    ],
+    "runtime_boundary": "No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required."
+  },
+  "transaction_entry_deltas": [
+    {
+      "id": "internal/store/postgres/company_members.go:*PgStore:companyTx",
+      "changed_fields": [
+        "callers"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "c23879cc9e2bf0c608300df270e9a8a5ddfe598df9d0b1fb132b073190cb1037",
+      "current_function_sha256": "c23879cc9e2bf0c608300df270e9a8a5ddfe598df9d0b1fb132b073190cb1037",
+      "old_lines": [
+        34,
+        36
+      ],
+      "current_lines": [
+        34,
+        36
+      ]
+    },
+    {
+      "id": "internal/store/postgres/company_members.go::companyAudit",
+      "changed_fields": [
+        "callers"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "d7bc9953b366e2a799979af89786d1b21c0c633a13694c9e3066c02e5d96feeb",
+      "current_function_sha256": "d7bc9953b366e2a799979af89786d1b21c0c633a13694c9e3066c02e5d96feeb",
+      "old_lines": [
+        108,
+        123
+      ],
+      "current_lines": [
+        108,
+        123
+      ]
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding",
+      "changed_fields": [
+        "syntax",
+        "lock_fk_wait_fence",
+        "evidence",
+        "assertions"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "615a8dfc3350368188853a9be4f0a0bcd630ae098089113bc276e51902f9ea4f",
+      "current_function_sha256": "615a8dfc3350368188853a9be4f0a0bcd630ae098089113bc276e51902f9ea4f",
+      "old_lines": [
+        242,
+        309
+      ],
+      "current_lines": [
+        250,
+        317
+      ]
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding",
+      "changed_fields": [
+        "syntax",
+        "lock_fk_wait_fence",
+        "evidence",
+        "assertions"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "d10a4b3f15e33dcfec344d47ca9596c8ef81e174b46b400a5a93dec570a1a7ec",
+      "current_function_sha256": "d10a4b3f15e33dcfec344d47ca9596c8ef81e174b46b400a5a93dec570a1a7ec",
+      "old_lines": [
+        203,
+        241
+      ],
+      "current_lines": [
+        211,
+        249
+      ]
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go:*PgStore:applyOffboarding",
+      "changed_fields": [
+        "syntax",
+        "callers",
+        "evidence",
+        "assertions"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "ee57dd8aa36ef331f04979e42925f2d9f2ba034385b745ff219db062def6d1f2",
+      "current_function_sha256": "ee57dd8aa36ef331f04979e42925f2d9f2ba034385b745ff219db062def6d1f2",
+      "old_lines": [
+        310,
+        345
+      ],
+      "current_lines": [
+        318,
+        353
+      ]
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go:*PgStore:offboardingPlanTarget",
+      "changed_fields": [
+        "syntax",
+        "callers",
+        "evidence"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "c194a1376753bc7d5db6a0f157a0097c05d2d3e1af76fc1a3989bd0ddebe6bec",
+      "current_function_sha256": "c194a1376753bc7d5db6a0f157a0097c05d2d3e1af76fc1a3989bd0ddebe6bec",
+      "old_lines": [
+        62,
+        64
+      ],
+      "current_lines": [
+        70,
+        72
+      ]
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go:*PgStore:offboardingQualifiedTarget",
+      "changed_fields": [
+        "syntax",
+        "callers",
+        "lock_fk_wait_fence",
+        "evidence",
+        "assertions"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "417153c4ad89ee6a1b990e9f70db18caaa92da419a97891577933b214676043c",
+      "current_function_sha256": "417153c4ad89ee6a1b990e9f70db18caaa92da419a97891577933b214676043c",
+      "old_lines": [
+        66,
+        98
+      ],
+      "current_lines": [
+        74,
+        106
+      ]
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go:*PgStore:offboardingTarget",
+      "changed_fields": [
+        "syntax",
+        "evidence"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "db3cdf03ca615ab8a9c8f7c6a6027520e630cd7e0805690b9f0afc201b2d9876",
+      "current_function_sha256": "db3cdf03ca615ab8a9c8f7c6a6027520e630cd7e0805690b9f0afc201b2d9876",
+      "old_lines": [
+        56,
+        60
+      ],
+      "current_lines": [
+        64,
+        68
+      ]
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go::offboardingAuthorityEpochTx",
+      "changed_fields": [
+        "syntax",
+        "callers",
+        "lock_fk_wait_fence",
+        "evidence",
+        "assertions"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "c585fdc2bfe92c58da85fe9ec9d1f798bfca3f958682116779a2d2ade1cec8be",
+      "current_function_sha256": "c585fdc2bfe92c58da85fe9ec9d1f798bfca3f958682116779a2d2ade1cec8be",
+      "old_lines": [
+        124,
+        153
+      ],
+      "current_lines": [
+        132,
+        161
+      ]
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go::offboardingEpochsTx",
+      "changed_fields": [
+        "syntax",
+        "callers",
+        "evidence"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "a991498d83f6136d94e4861d27b7b5999e523bba9de6f58062064e3a11620ce8",
+      "current_function_sha256": "a991498d83f6136d94e4861d27b7b5999e523bba9de6f58062064e3a11620ce8",
+      "old_lines": [
+        108,
+        118
+      ],
+      "current_lines": [
+        116,
+        126
+      ]
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go::offboardingPreviewDeadlineTx",
+      "changed_fields": [
+        "syntax",
+        "callers",
+        "lock_fk_wait_fence",
+        "evidence",
+        "assertions"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "6870bfd4bd5f12382f97fc7deee6fad324738915e3a2341e2dae976d9b7a6199",
+      "current_function_sha256": "6870bfd4bd5f12382f97fc7deee6fad324738915e3a2341e2dae976d9b7a6199",
+      "old_lines": [
+        155,
+        164
+      ],
+      "current_lines": [
+        163,
+        172
+      ]
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go::offboardingSnapshot",
+      "changed_fields": [
+        "syntax",
+        "callers",
+        "lock_fk_wait_fence",
+        "evidence",
+        "assertions"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "15bb18f120372cd4e20c17ff30ee742f1f965946310b73aafe3a0e1d7e1548df",
+      "current_function_sha256": "15bb18f120372cd4e20c17ff30ee742f1f965946310b73aafe3a0e1d7e1548df",
+      "old_lines": [
+        166,
+        202
+      ],
+      "current_lines": [
+        174,
+        210
+      ]
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go::offboardingSubjectsTx",
+      "changed_fields": [
+        "syntax",
+        "callers",
+        "source_review",
+        "lock_fk_wait_fence",
+        "file_family_context",
+        "evidence",
+        "assertions"
+      ],
+      "body_sha256_changed": true,
+      "old_function_sha256": "92bd5d77aeb26607c35c9e8e4efc9116c08b848887160f66b9766cda7c5792f2",
+      "current_function_sha256": "d39292c8e26bc87600aeafb5d59a7dca5790228cf02c6cce973534fcce39fd1f",
+      "old_lines": [
+        23,
+        54
+      ],
+      "current_lines": [
+        24,
+        62
+      ]
+    },
+    {
+      "id": "internal/store/postgres/mailbox_revision.go::transferOwnedMailboxes",
+      "changed_fields": [
+        "callers"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "b8765826abd9a27a820b367b6c25e5f24b4b279fe8fb24014d3c56224db7d659",
+      "current_function_sha256": "b8765826abd9a27a820b367b6c25e5f24b4b279fe8fb24014d3c56224db7d659",
+      "old_lines": [
+        47,
+        81
+      ],
+      "current_lines": [
+        47,
+        81
+      ]
+    },
+    {
+      "id": "internal/store/postgres/member_guard.go::guardMemberRemoval",
+      "changed_fields": [
+        "callers"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "ebce1afa5b74eff7054071d9af4468a9b701ce20674a5ea39b1265065ea7a157",
+      "current_function_sha256": "ebce1afa5b74eff7054071d9af4468a9b701ce20674a5ea39b1265065ea7a157",
+      "old_lines": [
+        54,
+        66
+      ],
+      "current_lines": [
+        54,
+        66
+      ]
+    },
+    {
+      "id": "internal/store/postgres/outbound_receipts.go:outboundReceiptRow:Scan",
+      "changed_fields": [
+        "callers"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "27fa8e5ddeff984e2e64298e4ec20202d10d3838b98ed4634eba6fab7de50e7d",
+      "current_function_sha256": "27fa8e5ddeff984e2e64298e4ec20202d10d3838b98ed4634eba6fab7de50e7d",
+      "old_lines": [
+        137,
+        139
+      ],
+      "current_lines": [
+        137,
+        139
+      ]
+    },
+    {
+      "id": "internal/store/postgres/postgres.go:*PgStore:Close",
+      "changed_fields": [
+        "callers"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "909ed512b67d118b69f21a74c23a234f4d5414470deff900fed0ad1bed781e47",
+      "current_function_sha256": "909ed512b67d118b69f21a74c23a234f4d5414470deff900fed0ad1bed781e47",
+      "old_lines": [
+        45,
+        48
+      ],
+      "current_lines": [
+        45,
+        48
+      ]
+    },
+    {
+      "id": "internal/store/postgres/postgres.go::New",
+      "changed_fields": [
+        "callers"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "f1a0eeb3178f3bcc7cf21dc9345cc3ae9c4cc8235cc01b5060d9f8f8d361037e",
+      "current_function_sha256": "f1a0eeb3178f3bcc7cf21dc9345cc3ae9c4cc8235cc01b5060d9f8f8d361037e",
+      "old_lines": [
+        21,
+        43
+      ],
+      "current_lines": [
+        21,
+        43
+      ]
+    },
+    {
+      "id": "internal/store/postgres/users.go::scanUser",
+      "changed_fields": [
+        "callers"
+      ],
+      "body_sha256_changed": false,
+      "old_function_sha256": "e823e3666d1f6841ac13187b9e27c83607e46d8ba91e760bcce31805c992c541",
+      "current_function_sha256": "e823e3666d1f6841ac13187b9e27c83607e46d8ba91e760bcce31805c992c541",
+      "old_lines": [
+        46,
+        62
+      ],
+      "current_lines": [
+        46,
+        62
+      ]
+    }
+  ],
+  "transaction_file_deltas": [
+    {
+      "path": "internal/store/postgres/employee_disposition.go",
+      "old_sha256": "8e85190234b215c2110b58bca9dc0972e6fe73451275e048d1a73a06867398fc",
+      "current_sha256": "ac722af5f6cc24b25662bdc9098d466417fb701ceddf29373ac26e1b17aca42e"
+    }
+  ],
+  "compatibility_closure_deltas": [
+    {
+      "path": "internal/api/handlers/r5_protocol_component_observations_test.go",
+      "old_sha256": "b47248460d33055d70867d568f960b6880adff22b4ff4a4e4df273a7ae344770",
+      "current_sha256": "42deed5c10a1bcc510ea144e36ecac6af377a8fe8a08cea57bf3190eecb73757"
+    },
+    {
+      "path": "internal/store/postgres/r5_protocol_shared_test.go",
+      "old_sha256": "7974a065199361e7e01f0d4ba7e2b3ec08ab6bf37c40cd86f6a88901cfbd6db9",
+      "current_sha256": "c3a961063e532cdf41957edbc85455dc2a142ad1d664741da43b07afab83e6b8"
+    }
+  ]
+}

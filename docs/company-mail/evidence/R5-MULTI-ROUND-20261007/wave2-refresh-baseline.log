@@ -1,0 +1,108 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 /workspace/scratch/458de7991ac3/tabmail-wave-compose/web
+
+ × lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > allows the new account scope to refresh behind an older queued operation 15ms
+   → expected false to be true // Object.is equality
+ × lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > allows the new tenant scope to refresh behind an older queued operation 2ms
+   → expected false to be true // Object.is equality
+ × lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > allows the new epoch scope to refresh behind an older queued operation 2ms
+   → expected false to be true // Object.is equality
+ × lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > lets an actual current-tenant GET renew after 401 instead of inheriting a stale false result 9ms
+   → expected { Object (error) } to deeply equal { Object (value) }
+ × lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > keeps current-scope callers coalesced after the older scope finishes, including a temporary failure 1019ms
+   → expected "vi.fn()" to be called 1 times, but got 0 times
+ × lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > does not mask a current-scope denied refresh or replay its unsafe write 34ms
+   → expected 'old-access' to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > allows the new account scope to refresh behind an older queued operation
+ FAIL  lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > allows the new tenant scope to refresh behind an older queued operation
+ FAIL  lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > allows the new epoch scope to refresh behind an older queued operation
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ lib/refresh-scope.test.ts:57:27
+     55|     lock.release();
+     56|     expect(await stale).toBe(false);
+     57|     expect(await current).toBe(true);
+       |                           ^
+     58|     expect(fetcher).toHaveBeenCalledTimes(1);
+     59|     expect(fetcher.mock.calls[0][1]).toMatchObject({ method: "POST", c…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > lets an actual current-tenant GET renew after 401 instead of inheriting a stale false result
+AssertionError: expected { Object (error) } to deeply equal { Object (value) }
+
+- Expected
++ Received
+
+  {
+-   "value": {
+-     "data": [
+-       "current-tenant-result",
+-     ],
++   "error": {
++     "error": {
++       "code": "UNAUTHORIZED",
++     },
+    },
+  }
+
+ ❯ lib/refresh-scope.test.ts:84:27
+     82|     lock.release();
+     83|     expect(await stale).toBe(false);
+     84|     expect(await current).toEqual({ value: { data: ["current-tenant-re…
+       |                           ^
+     85|     expect(seen).toEqual([
+     86|       { path: "/api/v1/company/mailboxes", authorization: "Bearer old-…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > keeps current-scope callers coalesced after the older scope finishes, including a temporary failure
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ lib/refresh-scope.test.ts:102:46
+    100|     try {
+    101|       expect(await stale).toBe(false);
+    102|       await vi.waitFor(() => expect(fetcher).toHaveBeenCalledTimes(1));
+       |                                              ^
+    103|       const concurrent = tryRefreshToken("old-access");
+    104|       pending.resolve(json(503, { error: { code: "INTERNAL" } }));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > does not mask a current-scope denied refresh or replay its unsafe write
+AssertionError: expected 'old-access' to be null
+
+- Expected:
+null
+
++ Received:
+"old-access"
+
+ ❯ lib/refresh-scope.test.ts:134:58
+    132|     const result = await current;
+    133|     expect(result).toHaveProperty("error");
+    134|     expect(localStorage.getItem("tabmail_access_token")).toBeNull();
+       |                                                          ^
+    135|     expect(seen).toEqual(["/api/v1/company/mailboxes", "/api/v1/auth/r…
+    136|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed (6)
+   Start at  20:32:55
+   Duration  3.89s (transform 327ms, setup 444ms, import 113ms, tests 1.09s, environment 1.47s)
+

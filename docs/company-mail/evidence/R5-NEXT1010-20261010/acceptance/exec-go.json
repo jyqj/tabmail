@@ -1,0 +1,278 @@
+{
+  "schema": "recovered-final-exec-go-acceptance-v1",
+  "recovery": true,
+  "findings": [],
+  "implementation_todos_completed": 0,
+  "scope": "New independent parsing receipt from freshly fetched GitHub job logs, API records and public source after workspace loss. No repository checkout, Go rerun, fabricated log, or reconstruction of unavailable native bundles.",
+  "retrieved_at": "2026-10-09T21:26:46.562Z",
+  "actual_source": {
+    "check_head_sha": "177ee571b194836678cc9a473f178c655326ba7c",
+    "actual_checkout": "b7834bf4f0a2511467bd86db4dd5971d2305424d",
+    "complete_tree": "2d5d2c44680f6a6cb2b2d1166e2923806beafcc8",
+    "parents": [
+      "ffb22b64698e4ff168a8d622018d3e169b3cdf07",
+      "177ee571b194836678cc9a473f178c655326ba7c"
+    ],
+    "official_go_version": "go version go1.25.7 linux/amd64",
+    "public_files": [
+      {
+        "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-go/source/internal/outbound/r5_next1010_idna_dns_test.go",
+        "bytes": 11606,
+        "sha256": "222ae447585041c224107d2e3ac158e20f0165e78c20ba8113b50019112ddaa6",
+        "repository_path": "internal/outbound/r5_next1010_idna_dns_test.go",
+        "public_ref": "177ee571b194836678cc9a473f178c655326ba7c",
+        "recovered_from": "https://api.github.com/repos/jyqj/tabmail/contents/internal/outbound/r5_next1010_idna_dns_test.go?ref=177ee571b194836678cc9a473f178c655326ba7c"
+      },
+      {
+        "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-go/source/internal/outbound/r5_next1010_idna_tls_test.go",
+        "bytes": 9266,
+        "sha256": "556495447450bff33d79a713e61496b329236596c024f0b101ba8c30af50c3e0",
+        "repository_path": "internal/outbound/r5_next1010_idna_tls_test.go",
+        "public_ref": "177ee571b194836678cc9a473f178c655326ba7c",
+        "recovered_from": "https://api.github.com/repos/jyqj/tabmail/contents/internal/outbound/r5_next1010_idna_tls_test.go?ref=177ee571b194836678cc9a473f178c655326ba7c"
+      },
+      {
+        "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-go/source/.github/workflows/exec-regressions.yml",
+        "bytes": 4650,
+        "sha256": "f12d6d03b5b25d31edd87d392b4b4df5886d5566056466953557969557a11bea",
+        "repository_path": ".github/workflows/exec-regressions.yml",
+        "public_ref": "177ee571b194836678cc9a473f178c655326ba7c",
+        "recovered_from": "https://api.github.com/repos/jyqj/tabmail/contents/.github/workflows/exec-regressions.yml?ref=177ee571b194836678cc9a473f178c655326ba7c"
+      }
+    ]
+  },
+  "steps": {
+    "packages": {
+      "leaf_count": 1745,
+      "pass_count": 1745,
+      "fail": 0,
+      "skip": 0,
+      "missing": 0,
+      "duplicate_events": 0,
+      "test_nodes_with_parents": 1906,
+      "json_events": 7774,
+      "package_events": {
+        "tabmail/internal/company": [
+          "start",
+          "pass"
+        ],
+        "tabmail/internal/app/templates": [
+          "start",
+          "pass"
+        ],
+        "tabmail/internal/app/admin": [
+          "start",
+          "pass"
+        ],
+        "tabmail/internal/smtp": [
+          "start",
+          "pass"
+        ],
+        "tabmail/internal/outbound": [
+          "start",
+          "pass"
+        ],
+        "github.com/emersion/go-smtp": [
+          "start",
+          "pass"
+        ],
+        "github.com/emersion/go-smtp/cmd/smtp-debug-server": [
+          "start",
+          "skip"
+        ]
+      },
+      "stream": {
+        "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-go/packages.jsonl",
+        "bytes": 1703655,
+        "sha256": "7f3b72b489ebf4f75bfd6a7d3a6e0f1dcfb75a4eb7208afa34296388b81a6079"
+      }
+    },
+    "settings": {
+      "leaf_count": 11,
+      "pass_count": 11,
+      "fail": 0,
+      "skip": 0,
+      "missing": 0,
+      "duplicate_events": 0,
+      "test_nodes_with_parents": 13,
+      "json_events": 56,
+      "package_events": {
+        "tabmail/internal/settings": [
+          "start",
+          "pass"
+        ]
+      },
+      "stream": {
+        "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-go/settings.jsonl",
+        "bytes": 11777,
+        "sha256": "518e7771b5ad79f80ecae33e692b9876b3b23a56499b367e63265ec726cb04ac"
+      }
+    },
+    "http": {
+      "leaf_count": 89,
+      "pass_count": 89,
+      "fail": 0,
+      "skip": 0,
+      "missing": 0,
+      "duplicate_events": 0,
+      "test_nodes_with_parents": 97,
+      "json_events": 392,
+      "package_events": {
+        "tabmail/internal/api/handlers": [
+          "start",
+          "pass"
+        ]
+      },
+      "stream": {
+        "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-go/http.jsonl",
+        "bytes": 86871,
+        "sha256": "0d1e4101ba7f27b91a1507b4d6cb4eb8d93a4b7793fe084c7f1a04336d97c19f"
+      }
+    },
+    "pre-sql": {
+      "leaf_count": 12,
+      "pass_count": 12,
+      "fail": 0,
+      "skip": 0,
+      "missing": 0,
+      "duplicate_events": 0,
+      "test_nodes_with_parents": 13,
+      "json_events": 56,
+      "package_events": {
+        "tabmail/internal/store/postgres": [
+          "start",
+          "pass"
+        ]
+      },
+      "stream": {
+        "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-go/pre-sql.jsonl",
+        "bytes": 10678,
+        "sha256": "ed748eb0b9a8f63195ec65b90970a0a54adb194cb076b34885cc92f8c50e73ec"
+      }
+    }
+  },
+  "totals": {
+    "step_sum": 1857,
+    "unique_package_test_leaves": 1857,
+    "duplicate_leaf_executions": 0,
+    "pass_count": 1857,
+    "fail": 0,
+    "test_skip": 0,
+    "missing_or_duplicate_test_events": 0,
+    "race_report": false,
+    "go_json_events": 8278,
+    "test_nodes_with_parents": 2029
+  },
+  "recovered_comparison": {
+    "original_failed_job_id": 113998477785,
+    "original_raw": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-go/original-failed-job113998477785-decoded.log",
+      "bytes": 1968883,
+      "sha256": "ad881cde191e5e120dd7b4afc12f26184e39aa020ea92e936f3e407e150b71a7"
+    },
+    "original_transport_added_final_lf_removed": false,
+    "original_stream": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-go/original-failed-packages.jsonl",
+      "bytes": 1705126,
+      "sha256": "3a7c9104302491eddd64cdbb66e2805134e529bdeb3b3febb4004c5037f09aa2"
+    },
+    "package_leaf_set_exact_match": 1745,
+    "original_pass": 1741,
+    "original_fail": 4,
+    "failures_now_passing": [
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestNext1010IDNARealDNSRouting/unicode-without-root-dot"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestNext1010IDNASubmissionTLSAndRecipientIdentity/implicit-mx/bcc"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestNext1010IDNASubmissionTLSAndRecipientIdentity/implicit-mx/cc"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestNext1010IDNASubmissionTLSAndRecipientIdentity/implicit-mx/to"
+      }
+    ],
+    "original_and_final_idna_leaf_names_exact_match": 26,
+    "final_idna_pass": 26,
+    "final_outbound_pass": 1111
+  },
+  "package_without_tests": {
+    "package": "github.com/emersion/go-smtp/cmd/smtp-debug-server",
+    "actions": [
+      "start",
+      "skip"
+    ],
+    "explicit_no_test_files": true,
+    "test_events": 0,
+    "excluded_from_test_skip_counts": true
+  },
+  "raw_log": {
+    "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-go/job114007320268-decoded.log",
+    "bytes": 2093687,
+    "sha256": "93f69cd8cd4723df749c790200d53f5c84fe66253c61ce31af754a8685e256c4"
+  },
+  "raw_log_matches_pre_loss_bytes_and_sha256": true,
+  "leaf_manifest": {
+    "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-go/leaf-terminals.json",
+    "bytes": 403195,
+    "sha256": "dd3647df1387e9aa1a16b51bf8a0a13f11ada4f02e897b5875afba5b5e3b3a66"
+  },
+  "api_evidence": [
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-go/api.json",
+      "bytes": 41575,
+      "sha256": "483e4ffa241e78bb9ba253a6cdf8917d945013dd0efde85c60668b4b3a74467c"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-go/source-api.json",
+      "bytes": 59564,
+      "sha256": "231115676ec1fe0d95096f62135840ea1242cd1c4f60bf27a5058951163f4a39"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-go/original-log-retrieval.json",
+      "bytes": 214,
+      "sha256": "347095bdd65e1e4ed3202af27e502e7b7090cb803357974343e91f0b45499e91"
+    }
+  ],
+  "artifact": {
+    "api_reported": [
+      {
+        "id": 11645081390,
+        "name": "exec-go-regressions",
+        "size_in_bytes": 118693,
+        "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11645081390",
+        "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11645081390/zip",
+        "expired": false,
+        "created_at": "2026-10-09T20:54:43Z",
+        "expires_at": "2026-10-23T20:54:42Z",
+        "updated_at": "2026-10-09T20:54:43Z",
+        "digest": "sha256:4da0b7473e497a41e0f69b82990022da78e5598c5c4cbd575921d9d554dfef69",
+        "workflow_run": {
+          "id": 37985791844,
+          "repository_id": 1188928152,
+          "head_repository_id": 1188928152,
+          "head_branch": "fix/r5-next1010-round3",
+          "head_sha": "177ee571b194836678cc9a473f178c655326ba7c"
+        }
+      }
+    ],
+    "downloaded": false,
+    "zip_bytes_or_digest_locally_verified": false
+  },
+  "loss_boundary": {
+    "previous_acceptance_file_restored": false,
+    "previous_acceptance_recorded_sha256": "a9225d444dc6e543ad41a756697754d14ae568cd084108172b15cf0f60d6aff2",
+    "native_fixed_baseline_and_candidate_packets_recovered": false,
+    "native_commit_bundle_available": false,
+    "retained_prior_summary_used_only_as_expected_values_not_raw_evidence": true,
+    "rebuilt_receipt_is_new_and_has_new_hash": true,
+    "current_proof": "Current complete source and Go runtime results are freshly retrieved from GitHub. The old CI log is also freshly retrieved for actual 1745/26 leaf-set comparison. No lost native file or bundle is claimed recovered."
+  },
+  "status": "ACCEPT_RECOVERED_ORIGINAL_EXEC_GO_FOUR_STEPS",
+  "reparser_sha256": "500f9663e88aaecb1511c4d17d28b8917fe7439977c9217131c276c0524deeac"
+}

@@ -1,0 +1,6 @@
+{
+  "scope": "Initial copy/setup attempt only; no accepted regression run",
+  "copy_error": "AssertionError: unexpected existing review: docs/company-mail/evidence/R5-CATALOG-REVISION6-20261008/README.md",
+  "wrapper_error": "FileNotFoundError: /workspace/scratch/fabe500b93be/validation/final-catalog-f413-root/stdout.txt",
+  "explanation": "The copy stopped on duplicate ff review after staging only some source files. The next wrapper was mistakenly invoked despite that exit and before its output directory was created. Its child stdout/stderr were not retained; no child result or test count from that attempt is claimed. A fresh complete-copy invocation below is separately recorded."
+}

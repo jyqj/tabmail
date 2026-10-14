@@ -1,0 +1,8 @@
+test_each_validation_runs_after_an_unrelated_gate_failure (continuation_review.FrontendEvidenceContinuationTests.test_each_validation_runs_after_an_unrelated_gate_failure) ... ok
+test_failures_still_fail_the_existing_frontend_job (continuation_review.FrontendEvidenceContinuationTests.test_failures_still_fail_the_existing_frontend_job) ... ok
+test_test_report_and_actual_checkout_identity_are_retained_after_failure (continuation_review.FrontendEvidenceContinuationTests.test_test_report_and_actual_checkout_identity_are_retained_after_failure) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.102s
+
+OK

@@ -1,0 +1,55 @@
+name: SMTPUTF8 fixed wire recovery
+on:
+  pull_request:
+    branches:
+      - main
+      - integration/company-mail-r5-*
+permissions:
+  contents: read
+concurrency:
+  group: smtputf8-recovery-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  smtputf8-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify strict recovery checker controls
+        run: python3 -B -m unittest discover -s scripts/tests -p test_r5_smtputf8_recovery.py -v
+      - name: Run identical SMTPUTF8 fixture on actual baseline and candidate
+        run: |
+          set -euo pipefail
+          git worktree add --detach "$RUNNER_TEMP/tabmail-smtputf8-baseline" ff43326e81f262daaac7b3dfd8b3047a8f51743b
+          python3 -B scripts/run_r5_smtputf8_recovery.py \
+            --baseline "$RUNNER_TEMP/tabmail-smtputf8-baseline" --candidate . \
+            --output "$RUNNER_TEMP/tabmail-smtputf8-evidence"
+      - name: Show complete original execution evidence
+        if: always()
+        run: |
+          python3 -B - <<'PY'
+          import os
+          from pathlib import Path
+          import sys
+          root = Path(os.environ["RUNNER_TEMP"]) / "tabmail-smtputf8-evidence"
+          for path in sorted(root.rglob("*")):
+              if path.is_file():
+                  print("EXEC09_RAW_BEGIN " + str(path.relative_to(root)), flush=True)
+                  sys.stdout.buffer.write(path.read_bytes())
+                  sys.stdout.buffer.flush()
+                  print("\nEXEC09_RAW_END " + str(path.relative_to(root)), flush=True)
+          PY
+      - name: Retain both real SMTPUTF8 wire executions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smtputf8-recovery-evidence
+          path: ${{ runner.temp }}/tabmail-smtputf8-evidence
+          if-no-files-found: error
+          retention-days: 14

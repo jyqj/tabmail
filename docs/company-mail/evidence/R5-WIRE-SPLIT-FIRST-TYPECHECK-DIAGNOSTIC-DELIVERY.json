@@ -1,0 +1,18 @@
+{
+  "archive": "R5-WIRE-SPLIT-FIRST-TYPECHECK-DIAGNOSTIC-LOGS.tar.gz",
+  "archive_sha256_from_executor": "baea3fedb6a0ea72a710b89fbfe0bd217c19b146afe5c769a524ee9592ea5729",
+  "archive_hash_recomputed": false,
+  "regular_payload_count": 9,
+  "payload_bytes_changed": false,
+  "level": "first_version_construction_typecheck_diagnostic_NOT_SOURCE_green",
+  "source_tree": "1c976aafb989ffb84b864c5c29c5f766b192d783",
+  "closure_sha256": "cc079260793ab3b027be4b6fc4e50d278caaea36482a477f26717f257f8aa325",
+  "CLI_exit": 2,
+  "diagnostics": 27,
+  "stale_next_dev_route_module_diagnostics": 10,
+  "actual_TS_consumer_test_shape_diagnostics": 17,
+  "window_actual_seconds": 5.167697,
+  "window_budget_seconds": 180,
+  "task_complete": false,
+  "product_green": false
+}

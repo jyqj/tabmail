@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { DraftWriter, draftKey, draftErrorCode } from "@/features/mail/draft-writer";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { errorCode, isConflict, isDeterministicErrorCode } from "@/lib/error-code";
+import { DraftWriter, draftKey } from "@/features/mail/draft-writer";
 import { sessionScope, assertSession } from "@/lib/session";
 import { RichMessage } from "@/features/mail/components/rich-message";
 import { toast } from "sonner";
@@ -14,6 +15,7 @@ import {
   errorText,
   type MailAttachment,
   type MailDraft,
+  type MailDraftEditor,
   type DraftPayload,
   type DraftTemplateVersionStatus,
   type RenderedTemplate,
@@ -62,7 +64,7 @@ export function Compose({
   onSent,
 }: {
   mailboxes: WorkMailbox[];
-  initial: MailDraft;
+  initial: MailDraftEditor;
   onClose: () => void;
   onSent: () => void;
 }) {
@@ -70,12 +72,16 @@ export function Compose({
   const { busy, run } = useAction();
   const [draft, setDraft] = useState(initial);
   const [payload, setPayload] = useState<DraftPayload>(initial.payload);
+  const [editorReset, setEditorReset] = useState(0);
   const [mailboxId, setMailboxId] = useState(initial.mailbox_id);
   const mounted = useRef(true);
+  const [editorScope] = useState(sessionScope);
+  const sendOwnership = useRef({ mount: 0, permission: 0, allowed: false });
+  const senderOwnership = useRef({ mailboxId, generation: 0, allowed: false });
   const [writer, setWriter] = useState(() => makeWriter(initial));
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<unknown>(null);
-  function makeWriter(value: MailDraft) {
+  function makeWriter(value: MailDraftEditor) {
     const scope = sessionScope();
     return new DraftWriter(value, {
       write: (d, create) => company<MailDraft>(create ? "/drafts" : `/drafts/${d.id}`, {
@@ -84,7 +90,14 @@ export function Compose({
       read: id => company<MailDraft>(`/drafts/${id}`),
     }, () => assertSession(scope));
   }
-  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  useLayoutEffect(() => {
+    const ownership = sendOwnership.current;
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      ownership.mount += 1;
+    };
+  }, []);
   const [names, setNames] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState<RenderedTemplate | null>(null);
   // A pending submission pins the exact key/draft revision so retries are
@@ -95,6 +108,15 @@ export function Compose({
     revision: number;
   } | null>(null);
   const from = mailboxes.find((v) => v.mailbox.id === mailboxId);
+  const senderAllowed = Boolean(from?.can_send);
+  useLayoutEffect(() => {
+    const owner = senderOwnership.current;
+    // Keep the selected identity explicit. A committed removal/revocation
+    // invalidates its pending operations even if permission is later restored.
+    if (owner.mailboxId !== mailboxId || (owner.allowed && !senderAllowed)) owner.generation += 1;
+    owner.mailboxId = mailboxId;
+    owner.allowed = senderAllowed;
+  }, [mailboxId, senderAllowed]);
   const templates = useAPI(["usable-templates", mailboxId], () =>
     company<TemplateVersion[]>(`${workPath(mailboxId)}/templates`),
   );
@@ -126,6 +148,13 @@ export function Compose({
     status !== "missing";
   const invalidVersion = Boolean(payload.template_version_id) &&
     (ineligible || (status === "usable" && !version) || (!eligibility && !version));
+  const sendAllowed = Boolean(from?.can_send) && !invalidVersion && (!from?.template_only || Boolean(version));
+  useLayoutEffect(() => {
+    // Only committed permission changes revoke an in-flight send. Restoring
+    // permission permits a new explicit click, never the old pending intent.
+    if (sendOwnership.current.allowed && !sendAllowed) sendOwnership.current.permission += 1;
+    sendOwnership.current.allowed = sendAllowed;
+  }, [sendAllowed]);
   const notice = status
     ? INELIGIBLE_NOTICES[status as Exclude<DraftTemplateVersionStatus, "usable" | "missing">]
     : undefined;
@@ -144,6 +173,30 @@ export function Compose({
   function change(patch: Partial<DraftPayload>) {
     setPayload((v) => ({ ...v, ...patch }));
     setPreview(null);
+  }
+  async function senderOperation<T>(performRequest: () => Promise<T>, complete: (value: T) => void, preview = false) {
+    const owner = {
+      mount: sendOwnership.current.mount,
+      sender: senderOwnership.current.generation,
+      permission: sendOwnership.current.permission,
+    };
+    function assertOwner() {
+      assertSession(editorScope);
+      if (!mounted.current || owner.mount !== sendOwnership.current.mount ||
+          !senderOwnership.current.allowed || owner.sender !== senderOwnership.current.generation ||
+          (preview && (!sendOwnership.current.allowed || owner.permission !== sendOwnership.current.permission)))
+        throw new DOMException("Sender authorization changed; stale editor result discarded", "AbortError");
+    }
+    assertOwner();
+    try {
+      const value = await performRequest();
+      assertOwner();
+      complete(value);
+    } catch (error) {
+      // An old editor's error must not surface over the current interaction.
+      assertOwner();
+      throw error;
+    }
   }
   async function save(next: DraftPayload = payload, silent = false) {
     setSaving(true);
@@ -172,6 +225,18 @@ export function Compose({
     return () => {active = false; window.clearTimeout(timer);};
   }, [dirty, busy, pending, saveError, from?.can_send, mailboxId, payload, writer]);
   async function send() {
+    const owner = { ...sendOwnership.current };
+    function assertOwner() {
+      assertSession(editorScope);
+      if (!mounted.current || owner.mount !== sendOwnership.current.mount)
+        throw new DOMException("Editor closed; stale send discarded", "AbortError");
+    }
+    function assertSendAllowed() {
+      assertOwner();
+      if (!sendOwnership.current.allowed || owner.permission !== sendOwnership.current.permission)
+        throw new DOMException("Send permission changed; review and send again", "AbortError");
+    }
+    assertOwner();
     if (!from?.can_send) return;
     if (!pending && (invalidVersion || (from.template_only && !version)))
       throw new Error(
@@ -184,7 +249,10 @@ export function Compose({
     if (!snapshot) {
       // The server submits the persisted draft inside the enqueue transaction,
       // so unsaved edits must be flushed first.
-      const saved = await save(undefined, true);
+      let saved: MailDraft;
+      try { saved = await save(undefined, true); }
+      catch (error) { assertOwner(); throw error; }
+      assertSendAllowed();
       if (!saved.id) throw new Error(t("草稿未保存", "Draft not saved"));
       snapshot = {
         key: `${saved.id}.${saved.revision}`,
@@ -193,16 +261,22 @@ export function Compose({
       };
       setPending(snapshot);
     }
+    // This is the irreversible boundary, including retries of a pinned key.
+    assertSendAllowed();
     try {
       const job = await submitDraft(snapshot.draftId, snapshot.revision, snapshot.key);
+      // A dispatched request may already have queued mail. Do not claim it was
+      // canceled, but never let its stale UI completion close a new editor.
+      assertOwner();
       toast.success(
         `${t("已加入发送队列，不代表已送达：", "Queued, not yet delivered: ")}${job.id}`,
       );
       writer.close();
       onSent();
     } catch (e) {
-      const err = e as { error?: { code?: string }; data?: { revision?: number } };
-      if (err?.error?.code === "CONFLICT") {
+      assertOwner();
+      const err = e as { data?: { revision?: number } };
+      if (isConflict(e)) {
         setPending(null);
         if (err.data?.revision) {
           throw new Error(
@@ -219,7 +293,7 @@ export function Compose({
           ),
         );
       }
-      const code = err?.error?.code;
+      const code = errorCode(e);
       if (
         [
           "BAD_REQUEST",
@@ -271,14 +345,18 @@ export function Compose({
         <div className="flex flex-wrap gap-2">
           <ActionButton disabled={busy || saving || Boolean(pending)} onClick={() => run(async () => {
             if (!window.confirm(t("载入服务器版本会替换此窗口的编辑，确认？", "Replace this window's edits with the server version?"))) return;
-            const current = await writer.reload();setDraft(current);setPayload(current.payload);setMailboxId(current.mailbox_id);setSaveError(null);setPreview(null);
+            const current = await writer.reload();
+            setDraft(current);setPayload(current.payload);setMailboxId(current.mailbox_id);setSaveError(null);setPreview(null);
+            // A successful explicit discard also resets raw recipient text
+            // and focused rich DOM. Ordinary saves must preserve typing.
+            setEditorReset(value => value + 1);
           })}>{t("载入服务器版本", "Reload server draft")}</ActionButton>
           <ActionButton disabled={busy || saving || Boolean(pending) || !from?.can_send} onClick={() => {
             if (!window.confirm(t("创建独立草稿，不会自动发送。提交结果不确定时请先核对发送状态。", "Create a separate draft, without sending. Check delivery status first if submission was uncertain."))) return;
-            writer.close();const copy: MailDraft = {mailbox_id: mailboxId, payload, revision: 0};
+            writer.close();const copy: MailDraftEditor = {mailbox_id: mailboxId, payload, revision: 0};
             setDraft(copy);setWriter(makeWriter(copy));setSaveError(null);
           }}>{t("保留编辑为新草稿", "Keep edits as a new draft")}</ActionButton>
-          {!['CONFLICT','FORBIDDEN','NOT_FOUND','UNAUTHORIZED'].includes(draftErrorCode(saveError) ?? '') && <ActionButton disabled={busy || saving || Boolean(pending)} onClick={() => run(async () => { await save(); })}>{t("重试保存", "Retry save")}</ActionButton>}
+          {!isDeterministicErrorCode(errorCode(saveError)) && <ActionButton disabled={busy || saving || Boolean(pending)} onClick={() => run(async () => { await save(); })}>{t("重试保存", "Retry save")}</ActionButton>}
         </div>
       </div>}
       {pending && (
@@ -308,6 +386,13 @@ export function Compose({
               });
             }}
           >
+            {!senderAllowed && (
+              <option value={mailboxId} disabled>
+                {from?.mailbox.full_address
+                  ? `${from.mailbox.full_address} · ${t("当前无发件授权", "Sending unavailable")}`
+                  : t("当前发件邮箱不可用", "Current sender unavailable")}
+              </option>
+            )}
             {mailboxes
               .filter((v) => v.can_send)
               .map((v) => (
@@ -319,6 +404,11 @@ export function Compose({
           </select>
         )}
       </Field>
+      {!senderAllowed && (
+        <p role="status" className="text-sm text-amber-700 dark:text-amber-400">
+          {t("该邮箱当前无发件授权。编辑已保留，请选择可发件的邮箱。", "This mailbox cannot send. Your edits are preserved; select an authorized sender.")}
+        </p>
+      )}
       <div className="grid gap-4 md:grid-cols-3">
         {(["to", "cc", "bcc"] as const).map((field, i) => (
           <Field
@@ -333,6 +423,7 @@ export function Compose({
           >
             {(id) => (
               <RecipientInput
+                key={editorReset}
                 id={id}
                 disabled={locked}
                 value={payload[field] ?? []}
@@ -465,11 +556,11 @@ export function Compose({
             </Field>
           ))}
           <ActionButton
-            disabled={busy || Boolean(pending)}
+            disabled={busy || Boolean(pending) || !sendAllowed}
             onClick={() =>
-              run(async () =>
-                setPreview(
-                  await company<RenderedTemplate>("/templates/preview", {
+              run(() =>
+                senderOperation(
+                  () => company<RenderedTemplate>("/templates/preview", {
                     method: "POST",
                     body: {
                       mailbox_id: mailboxId,
@@ -477,6 +568,13 @@ export function Compose({
                       vars: payload.template_vars ?? {},
                     },
                   }),
+                  value => {
+                    if (!value || typeof value !== "object" || typeof value.subject !== "string" ||
+                        typeof value.text_body !== "string" || typeof value.html_body !== "string")
+                      throw new Error(t("模板预览响应无效，请重试。", "Invalid template preview response; try again."));
+                    setPreview(value);
+                  },
+                  true,
                 ),
               )
             }
@@ -500,7 +598,7 @@ export function Compose({
           </Field>
           <Field label={t("正文", "Message")}>
             {(id) => (
-              <RichMessage id={id} text={payload.text_body} html={payload.html_body}
+              <RichMessage id={id} text={payload.text_body} html={payload.html_body} resetKey={editorReset}
                 disabled={locked || from?.template_only} onChange={change} />
             )}
           </Field>
@@ -537,25 +635,26 @@ export function Compose({
             id={id}
             type="file"
             className={inputClass}
-            disabled={locked || (payload.attachment_ids?.length ?? 0) >= 10}
+            disabled={locked || !senderAllowed || (payload.attachment_ids?.length ?? 0) >= 10}
             onChange={(e) => {
               const f = e.target.files?.[0];
               e.target.value = "";
               if (!f) return;
-              void run(async () => {
+              void run(() => senderOperation(async () => {
                 if (f.size > 20 * 1024 * 1024)
                   throw new Error(t("附件过大", "Attachment too large"));
                 const fd = new FormData();
                 fd.append("file", f);
-                const a = await company<MailAttachment>(
+                return company<MailAttachment>(
                   `${workPath(mailboxId)}/attachments`,
                   { method: "POST", body: fd },
                 );
+              }, a => {
                 setNames((v) => ({ ...v, [a.id]: a.filename }));
                 change({
                   attachment_ids: [...(payload.attachment_ids ?? []), a.id],
                 });
-              });
+              }));
             }}
           />
         )}

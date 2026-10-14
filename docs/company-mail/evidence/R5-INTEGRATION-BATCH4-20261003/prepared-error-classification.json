@@ -1,0 +1,306 @@
+{
+  "groups": [
+    {
+      "kind": "ERROR",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract",
+      "events": 26
+    },
+    {
+      "kind": "ERROR",
+      "reason": "ValueError: observed schema differs from actual migration source",
+      "events": 10
+    },
+    {
+      "kind": "ERROR",
+      "reason": "FileNotFoundError: [Errno 2] No such file or directory: '/Users'",
+      "events": 1
+    },
+    {
+      "kind": "ERROR",
+      "reason": "ValueError: missing/duplicate routes",
+      "events": 1
+    },
+    {
+      "kind": "ERROR",
+      "reason": "ValueError: wire spec/case differs from current source",
+      "events": 1
+    },
+    {
+      "kind": "ERROR",
+      "reason": "file-type review coverage drift",
+      "events": 1
+    },
+    {
+      "kind": "FAIL",
+      "reason": "AssertionError: 0 != 1",
+      "events": 1
+    },
+    {
+      "kind": "FAIL",
+      "reason": "METADATA_OBSERVATION regular 1 4",
+      "events": 4
+    },
+    {
+      "kind": "FAIL",
+      "reason": "AssertionError: 0 != 1 : METADATA_OBSERVATION regular 1 4",
+      "events": 4
+    },
+    {
+      "kind": "FAIL",
+      "reason": "AssertionError: '.env.secret' unexpectedly found in {'opaque.bin', 'output.go', '.env.secret', '.DS_Store'}",
+      "events": 1
+    }
+  ],
+  "observations": [
+    {
+      "kind": "ERROR",
+      "test": "test_M_search_threshold_preserved (test_r5_benchmark.BenchmarkEvidenceTests.test_M_search_threshold_preserved)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_actual_claim_digest_inflight_and_sixstream_evidence_required (test_r5_benchmark.BenchmarkEvidenceTests.test_actual_claim_digest_inflight_and_sixstream_evidence_required)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_actual_distribution_and_fingerprints_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_actual_distribution_and_fingerprints_rejected)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_actual_plan_metadata_and_resource_scope_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_actual_plan_metadata_and_resource_scope_rejected)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_actual_plan_relation_not_quota_or_parameter_substring (test_r5_benchmark.BenchmarkEvidenceTests.test_actual_plan_relation_not_quota_or_parameter_substring)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_complete_tool_pipeline_and_workloads_still_not_S_M (test_r5_benchmark.BenchmarkEvidenceTests.test_complete_tool_pipeline_and_workloads_still_not_S_M)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_current_pipeline_observation_absence_is_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_current_pipeline_observation_absence_is_rejected)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_current_schema_cannot_select_frozen_legacy_exemption (test_r5_benchmark.BenchmarkEvidenceTests.test_current_schema_cannot_select_frozen_legacy_exemption)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_direct_pipeline_shapes_tool_S_M_preserve_population_boundaries (test_r5_benchmark.BenchmarkEvidenceTests.test_direct_pipeline_shapes_tool_S_M_preserve_population_boundaries)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_formal_parser_drain_observations_cannot_be_echo_or_unjoined (test_r5_benchmark.BenchmarkEvidenceTests.test_formal_parser_drain_observations_cannot_be_echo_or_unjoined)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_missing_zero_duplicate_nonfinite_measurements_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_missing_zero_duplicate_nonfinite_measurements_rejected)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_new_execution_requires_actual_wall_and_sample_clock (test_r5_benchmark.BenchmarkEvidenceTests.test_new_execution_requires_actual_wall_and_sample_clock)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_observation_and_safety_scope_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_observation_and_safety_scope_rejected)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_parser_guard_requires_actual_minimum_and_original_deadline (test_r5_benchmark.BenchmarkEvidenceTests.test_parser_guard_requires_actual_minimum_and_original_deadline)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_partial_or_fake_shape_does_not_certify_scale (test_r5_benchmark.BenchmarkEvidenceTests.test_partial_or_fake_shape_does_not_certify_scale)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_pipeline_actual_claim_counts_pairing_and_heap_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_pipeline_actual_claim_counts_pairing_and_heap_rejected)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_pipeline_checkpoint_missing_duplicate_unknown_or_wrong_phase_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_pipeline_checkpoint_missing_duplicate_unknown_or_wrong_phase_rejected)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_pipeline_duplicate_json_and_cli_absence_fail_closed (test_r5_benchmark.BenchmarkEvidenceTests.test_pipeline_duplicate_json_and_cli_absence_fail_closed)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_pipeline_stage_wall_cannot_escape_actual_execution_wall (test_r5_benchmark.BenchmarkEvidenceTests.test_pipeline_stage_wall_cannot_escape_actual_execution_wall)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_pipeline_window_terminal_and_illegal_number_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_pipeline_window_terminal_and_illegal_number_rejected)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_preparation_explain_must_be_actual_mail_index_jobs_plan_tree (test_r5_benchmark.BenchmarkEvidenceTests.test_preparation_explain_must_be_actual_mail_index_jobs_plan_tree)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_strict_types_unknown_sampling_schema_and_tool_mode (test_r5_benchmark.BenchmarkEvidenceTests.test_strict_types_unknown_sampling_schema_and_tool_mode)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_tool_only_shape_never_certifies_original_scale (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_only_shape_never_certifies_original_scale)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_tool_resources_seed_and_sampling_unknown_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_resources_seed_and_sampling_unknown_rejected)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_validated_shape_still_not_task_or_product_approval (test_r5_benchmark.BenchmarkEvidenceTests.test_validated_shape_still_not_task_or_product_approval)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_validator_required_fields_match_actual_Go_preparation_json (test_r5_benchmark.BenchmarkEvidenceTests.test_validator_required_fields_match_actual_Go_preparation_json)",
+      "reason": "ValueError: new preparation evidence requires exact schema16 pipeline contract"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_actual_permutation_fifo_fairness_mailbox_mapping_and_diversity_rejected (test_r5_benchmark.BenchmarkLookaheadTests.test_actual_permutation_fifo_fairness_mailbox_mapping_and_diversity_rejected)",
+      "reason": "ValueError: observed schema differs from actual migration source"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_actual_pg_observation_not_metadata_or_uid_equivalence_claim (test_r5_benchmark.BenchmarkLookaheadTests.test_actual_pg_observation_not_metadata_or_uid_equivalence_claim)",
+      "reason": "ValueError: observed schema differs from actual migration source"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_archived_selection_exact_source_method_contract_argv_environment (test_r5_benchmark.BenchmarkLookaheadTests.test_archived_selection_exact_source_method_contract_argv_environment)",
+      "reason": "ValueError: observed schema differs from actual migration source"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_cli_invalid_or_missing_optin_contract_rejected_without_go (test_r5_benchmark.BenchmarkLookaheadTests.test_cli_invalid_or_missing_optin_contract_rejected_without_go)",
+      "reason": "ValueError: observed schema differs from actual migration source"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_default_v1_and_history_cannot_auto_select_or_accept_new_fields (test_r5_benchmark.BenchmarkLookaheadTests.test_default_v1_and_history_cannot_auto_select_or_accept_new_fields)",
+      "reason": "ValueError: observed schema differs from actual migration source"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_explicit_contract_population_and_non_equivalence_boundary (test_r5_benchmark.BenchmarkLookaheadTests.test_explicit_contract_population_and_non_equivalence_boundary)",
+      "reason": "ValueError: observed schema differs from actual migration source"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_new_original_S_complete_grammar_preserves_all_workloads_and_not_approval (test_r5_benchmark.BenchmarkLookaheadTests.test_new_original_S_complete_grammar_preserves_all_workloads_and_not_approval)",
+      "reason": "ValueError: observed schema differs from actual migration source"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_pseudo_history_and_duplicate_selection_json_rejected (test_r5_benchmark.BenchmarkLookaheadTests.test_pseudo_history_and_duplicate_selection_json_rejected)",
+      "reason": "ValueError: observed schema differs from actual migration source"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_scheduler_complete_joined_counts_and_numeric_aliases_rejected (test_r5_benchmark.BenchmarkLookaheadTests.test_scheduler_complete_joined_counts_and_numeric_aliases_rejected)",
+      "reason": "ValueError: observed schema differs from actual migration source"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_unknown_missing_duplicate_and_type_alias_method_contract_rejected (test_r5_benchmark.BenchmarkLookaheadTests.test_unknown_missing_duplicate_and_type_alias_method_contract_rejected)",
+      "reason": "ValueError: observed schema differs from actual migration source"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_output_refuses_existing_checkout_and_non_temporary_path (test_r5_cold_web.ColdWebTests.test_output_refuses_existing_checkout_and_non_temporary_path)",
+      "reason": "FileNotFoundError: [Errno 2] No such file or directory: '/Users'"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_current_source_map_is_not_product_or_dependency_completion (test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion)",
+      "reason": "ValueError: missing/duplicate routes"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_exact_safe_join_remains_metadata_not_product_approval (test_r5_compatibility.SafeWireJoinTests.test_exact_safe_join_remains_metadata_not_product_approval)",
+      "reason": "ValueError: wire spec/case differs from current source"
+    },
+    {
+      "kind": "ERROR",
+      "test": "test_current_inventory_is_only_structure_evidence (test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence)",
+      "reason": "file-type review coverage drift"
+    },
+    {
+      "kind": "FAIL",
+      "test": "test_runner_default_overrides_ambient_optin_and_selected_source_must_match (test_r5_benchmark.BenchmarkCurrentSourcePolicyTests.test_runner_default_overrides_ambient_optin_and_selected_source_must_match)",
+      "reason": "AssertionError: 0 != 1"
+    },
+    {
+      "kind": "FAIL",
+      "test": "test_bounded_replacements_api_and_cli (test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli) (fork='third_party/enmime-v2.3.0', fault='regular', phase=1, action='capture', entry='cli')",
+      "reason": "METADATA_OBSERVATION regular 1 4"
+    },
+    {
+      "kind": "FAIL",
+      "test": "test_bounded_replacements_api_and_cli (test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli) (fork='third_party/enmime-v2.3.0', fault='regular', phase=1, action='capture', entry='api')",
+      "reason": "AssertionError: 0 != 1 : METADATA_OBSERVATION regular 1 4"
+    },
+    {
+      "kind": "FAIL",
+      "test": "test_bounded_replacements_api_and_cli (test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli) (fork='third_party/enmime-v2.3.0', fault='regular', phase=1, action='validate', entry='cli')",
+      "reason": "METADATA_OBSERVATION regular 1 4"
+    },
+    {
+      "kind": "FAIL",
+      "test": "test_bounded_replacements_api_and_cli (test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli) (fork='third_party/enmime-v2.3.0', fault='regular', phase=1, action='validate', entry='api')",
+      "reason": "AssertionError: 0 != 1 : METADATA_OBSERVATION regular 1 4"
+    },
+    {
+      "kind": "FAIL",
+      "test": "test_bounded_replacements_api_and_cli (test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli) (fork='third_party/go-smtp', fault='regular', phase=1, action='capture', entry='cli')",
+      "reason": "METADATA_OBSERVATION regular 1 4"
+    },
+    {
+      "kind": "FAIL",
+      "test": "test_bounded_replacements_api_and_cli (test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli) (fork='third_party/go-smtp', fault='regular', phase=1, action='capture', entry='api')",
+      "reason": "AssertionError: 0 != 1 : METADATA_OBSERVATION regular 1 4"
+    },
+    {
+      "kind": "FAIL",
+      "test": "test_bounded_replacements_api_and_cli (test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli) (fork='third_party/go-smtp', fault='regular', phase=1, action='validate', entry='cli')",
+      "reason": "METADATA_OBSERVATION regular 1 4"
+    },
+    {
+      "kind": "FAIL",
+      "test": "test_bounded_replacements_api_and_cli (test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli) (fork='third_party/go-smtp', fault='regular', phase=1, action='validate', entry='api')",
+      "reason": "AssertionError: 0 != 1 : METADATA_OBSERVATION regular 1 4"
+    },
+    {
+      "kind": "FAIL",
+      "test": "test_valid_excluded_files_never_read_or_enter_source (test_r5_source_excluded_metadata.ExcludedMetadataTests.test_valid_excluded_files_never_read_or_enter_source)",
+      "reason": "AssertionError: '.env.secret' unexpectedly found in {'opaque.bin', 'output.go', '.env.secret', '.DS_Store'}"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{"Time":"2026-10-03T19:10:04.594529476Z","Action":"start","Package":"tabmail/internal/store/postgres"}
+{"Time":"2026-10-03T19:10:04.599831098Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney"}
+{"Time":"2026-10-03T19:10:04.59988565Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"=== RUN   TestR3BrowserJourney\n"}
+{"Time":"2026-10-03T19:10:12.00203872Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"    company_browser_test.go:92: PASS: employee read -\u003e RFC reply -\u003e draft -\u003e attachment -\u003e atomic submit -\u003e refreshed neutral receipt -\u003e authorized content/download -\u003e same-ID sent asset\n"}
+{"Time":"2026-10-03T19:10:12.002079701Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"        PASS: account switch clears old mailbox, body and draft state\n"}
+{"Time":"2026-10-03T19:10:12.002083096Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"        PASS: concurrent real browser tabs recover an expired token\n"}
+{"Time":"2026-10-03T19:10:12.002119931Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"        PASS: administrator invitation -\u003e isolated employee activation -\u003e template console\n"}
+{"Time":"2026-10-03T19:10:12.002122264Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"        \n"}
+{"Time":"2026-10-03T19:10:12.019371678Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Output":"--- PASS: TestR3BrowserJourney (7.42s)\n"}
+{"Time":"2026-10-03T19:10:12.019405288Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR3BrowserJourney","Elapsed":7.42}
+{"Time":"2026-10-03T19:10:12.01942714Z","Action":"output","Package":"tabmail/internal/store/postgres","Output":"PASS\n"}
+{"Time":"2026-10-03T19:10:12.022041958Z","Action":"output","Package":"tabmail/internal/store/postgres","Output":"ok  \ttabmail/internal/store/postgres\t7.427s\n"}
+{"Time":"2026-10-03T19:10:12.022096039Z","Action":"pass","Package":"tabmail/internal/store/postgres","Elapsed":7.428}

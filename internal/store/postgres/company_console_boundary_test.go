@@ -13,6 +13,7 @@ import (
 )
 
 func TestArchitectureConsoleUsesTenantAndCanonicalAuthority(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	want, e := f.st.GetWorkMailbox(ctx, f.u, f.personal.ID)
@@ -57,6 +58,7 @@ func TestArchitectureConsoleUsesTenantAndCanonicalAuthority(t *testing.T) {
 	}
 }
 func TestArchitectureAdministrativeOutboxFailureRollsBack(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	mb, e := f.st.GetWorkMailbox(ctx, f.a, f.shared.ID)
@@ -84,6 +86,7 @@ func TestArchitectureAdministrativeOutboxFailureRollsBack(t *testing.T) {
 	}
 }
 func TestArchitectureExpiredArchiveCannotBeReopenedViaWorkspace(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	j := archJob(t, f, models.OutboundSent)
@@ -113,6 +116,7 @@ func TestArchitectureExpiredArchiveCannotBeReopenedViaWorkspace(t *testing.T) {
 	}
 }
 func TestArchitectureNewHTTPViewsRespectContentAndAdminBoundaries(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	ctx := context.Background()
 	j := archJob(t, f, models.OutboundSent)

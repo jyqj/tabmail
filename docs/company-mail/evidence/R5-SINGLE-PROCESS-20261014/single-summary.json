@@ -1,0 +1,32 @@
+{
+  "local_execution_commit": "4412097f2406bfb8dd2d25cbe24a7c63cddb629d",
+  "public_source_commit": "da40ce9114920920a1d039b7f4ec3ad9e5373ce3",
+  "source_tree": "c7aa5f16e57f423407a5e73f56898442807cd9f1",
+  "same_complete_tree": true,
+  "go_argv": [
+    "go",
+    "test",
+    "-json",
+    "-race",
+    "-count=1",
+    "-timeout=180s",
+    "./..."
+  ],
+  "go_cli_seconds": 244.51685694500338,
+  "postgres_package_seconds": 155.704,
+  "unique_top_level_started": 1481,
+  "unique_pass_leaves": 11932,
+  "mandatory_passed": 247,
+  "failures": 0,
+  "allowed_skips": [
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR3BrowserJourney",
+      "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job."
+    }
+  ],
+  "raw_log_sha256": "6a9b72f5d603d495a6f3f9b7c7d24c2aa8ecdfab1fa9e5630e297e414f17e9d2",
+  "gzip_sha256": "2856d730ef58a0fbcbe2a389f275da9ae63add02cabbbe296582fe8aec76bba1",
+  "platform": "Linux ARM64, Go1.25.7, GOMAXPROCS=2; PostgreSQL16 disposable tmpfs; fsync/full_page_writes/synchronous_commit=on",
+  "release_qualified": false
+}

@@ -1,0 +1,329 @@
+{
+  "F52": "historical failures unchanged",
+  "actual_changed_consumer_control_paths": {
+    "internal/api/handlers/r5_external_runtime_probe_test.go": {
+      "allowed_new_control_files_listed": false,
+      "containing_source_domain": "base_source.files and archive_boundary.production_go via internal production root",
+      "git_blob": "0f340d48458b4ff55803e466e59ceb2352e9629f",
+      "historical_registry_record": false,
+      "path": "internal/api/handlers/r5_external_runtime_probe_test.go",
+      "selected_v3_source_domain": "not a new v3_source key; full base_source already covers this input",
+      "sha256": "addb72c44b11167810bb888c74d20954086390fa2c9a5a44ccd9332c4988a4b7",
+      "slice4_baseline_sha256": "ca4af3b2b16ef14e56670434f553918b2b5c045aae9669ab6ea977e71c869f8a",
+      "slices23_baseline_sha256": "ca4af3b2b16ef14e56670434f553918b2b5c045aae9669ab6ea977e71c869f8a"
+    },
+    "internal/api/handlers/r5_protocol_component_observations_test.go": {
+      "allowed_new_control_files_listed": false,
+      "containing_source_domain": "base_source.files and archive_boundary.production_go via internal production root",
+      "git_blob": "5cda68abada21a27a109020331c449097089960b",
+      "historical_registry_record": false,
+      "path": "internal/api/handlers/r5_protocol_component_observations_test.go",
+      "selected_v3_source_domain": "not a new v3_source key; full base_source already covers this input",
+      "sha256": "22c7eff281505fef03e4adfd8b6d7fe1724e157446153ede9640d3c0ff588dc7",
+      "slice4_baseline_sha256": "42deed5c10a1bcc510ea144e36ecac6af377a8fe8a08cea57bf3190eecb73757",
+      "slices23_baseline_sha256": "42deed5c10a1bcc510ea144e36ecac6af377a8fe8a08cea57bf3190eecb73757"
+    },
+    "scripts/check_r5_protocol.py": {
+      "allowed_new_control_files_listed": false,
+      "containing_source_domain": "base_source.files via complete scripts walk",
+      "git_blob": "ad5c7f7d41b43f2d064e7543b8ef0fd53e4b31df",
+      "historical_registry_record": false,
+      "path": "scripts/check_r5_protocol.py",
+      "selected_v3_source_domain": "not a new v3_source key; full base_source already covers this input",
+      "sha256": "4c2a066323b9e6871f99c98ef1ea62e770f03bdb4cfaea4911414e36dd1933e8",
+      "slice4_baseline_sha256": "8673f071517ee1d59526f89a38a7df8f29a7da2d63e7cc10789d2df0e7e94dba",
+      "slices23_baseline_sha256": "8673f071517ee1d59526f89a38a7df8f29a7da2d63e7cc10789d2df0e7e94dba"
+    },
+    "scripts/contracts/r5-external-batch-v2.schema.json": {
+      "allowed_new_control_files_listed": false,
+      "containing_source_domain": "base_source.files via complete scripts walk",
+      "git_blob": "efdd6bf2d5e9316147622d73d2310aae7705388c",
+      "historical_registry_record": false,
+      "path": "scripts/contracts/r5-external-batch-v2.schema.json",
+      "selected_v3_source_domain": "not a new v3_source key; full base_source already covers this input",
+      "sha256": "60f3bbf12dbfc28a2cc72e0d5ed38110425514621a11e10eddf1d92007ca9c0a",
+      "slice4_baseline_sha256": null,
+      "slices23_baseline_sha256": null
+    },
+    "scripts/preparation/probe_r5_external_runtime.py": {
+      "allowed_new_control_files_listed": false,
+      "containing_source_domain": "base_source.files via complete scripts walk",
+      "git_blob": "505a6438e09c627ea5798fe82e573a30408bf248",
+      "historical_registry_record": false,
+      "path": "scripts/preparation/probe_r5_external_runtime.py",
+      "selected_v3_source_domain": "not a new v3_source key; full base_source already covers this input",
+      "sha256": "cdc20d08fda7ef88648bbd30872dd6f9e483adffdccfa9b29f726419619ef302",
+      "slices23_baseline_sha256": "d63221637ed1728fafa5424ea9e50cf804af1ec15325d2f1b3f444ab4eb92713"
+    },
+    "scripts/preparation/r5_external_batch.py": {
+      "allowed_new_control_files_listed": false,
+      "containing_source_domain": "base_source.files via complete scripts walk",
+      "git_blob": "41625cd77275e0b9b869ac7d4dab367a42bb0f9b",
+      "historical_registry_record": false,
+      "path": "scripts/preparation/r5_external_batch.py",
+      "selected_v3_source_domain": "not a new v3_source key; full base_source already covers this input",
+      "sha256": "83ff36965120115c6365e40df0eef8da2df20eb33129faba81def89261cd5a12",
+      "slice4_baseline_sha256": "bf839d0542d52c196f27bae40a9e9fb7cc7509a38664d14e209a7e1642a7b1ec",
+      "slices23_baseline_sha256": "bf839d0542d52c196f27bae40a9e9fb7cc7509a38664d14e209a7e1642a7b1ec"
+    },
+    "scripts/preparation/r5_external_runtime.py": {
+      "allowed_new_control_files_listed": false,
+      "containing_source_domain": "base_source.files via complete scripts walk",
+      "git_blob": "4f7803834ea5e4e155426e3bc8a84f6b2255f71c",
+      "historical_registry_record": false,
+      "path": "scripts/preparation/r5_external_runtime.py",
+      "selected_v3_source_domain": "not a new v3_source key; full base_source already covers this input",
+      "sha256": "524245ff11084f170d7cd3c41b51d28f7bcde101db3373d961f5c46f2503eb51",
+      "slices23_baseline_sha256": "c793eab91eef55c5c48ebf0f37606402b7199700d346828180597a6ae70a0cf1"
+    },
+    "scripts/preparation/run_r5_external_scoped.py": {
+      "allowed_new_control_files_listed": false,
+      "containing_source_domain": "base_source.files via complete scripts walk",
+      "git_blob": "8c08344a37a9ca882a401975024ab604de2cb904",
+      "historical_registry_record": false,
+      "path": "scripts/preparation/run_r5_external_scoped.py",
+      "selected_v3_source_domain": "not a new v3_source key; full base_source already covers this input",
+      "sha256": "7b620e1dcb28dcb01e6dfa765789b772b12c6ace2ab4d3e9e7876e8fe35b6397",
+      "slices23_baseline_sha256": "ae238c523fc12ae9a89f6ec30be86216fe13eac0ec10da1c930630a09392c24c"
+    },
+    "scripts/r5_source_runner_prepare.py": {
+      "allowed_new_control_files_listed": false,
+      "containing_source_domain": "base_source.files via complete scripts walk",
+      "git_blob": "abb175c10bd143fc9a7c6ab4d37b81442fd890e6",
+      "historical_registry_record": false,
+      "path": "scripts/r5_source_runner_prepare.py",
+      "selected_v3_source_domain": "not a new v3_source key; full base_source already covers this input",
+      "sha256": "193c830550d88546b4669bdbbfd1a5f94b652f61877e426a533eeb387589ed15",
+      "slices23_baseline_sha256": "a8a7396ca8aca931a4babde47afa6c53e49f6c538c3a119c7fa13e4c6eaa9b83"
+    },
+    "scripts/run_r5_source_version_tests.py": {
+      "allowed_new_control_files_listed": true,
+      "containing_source_domain": "base_source.files via complete scripts walk",
+      "git_blob": "d1af0c59278967fcd0dbfbf44973f405b0bccd02",
+      "historical_registry_record": false,
+      "path": "scripts/run_r5_source_version_tests.py",
+      "selected_v3_source_domain": "not a new v3_source key; full base_source already covers this input",
+      "sha256": "f0c3f43ba9596ab5aa9563325858fbfa4f51944a445042579c7b208e3ba16303",
+      "slices23_baseline_sha256": "2ef49fe8f085d965eeeee9ae4f0cb5d2a2c373db0a4526b7226f41a7adcace5d"
+    },
+    "scripts/tests/r5_external_batch_v2_checks.py": {
+      "allowed_new_control_files_listed": false,
+      "containing_source_domain": "base_source.files via complete scripts walk",
+      "git_blob": "4b151f147144982c5d28479abdb7182f887a54fd",
+      "historical_registry_record": false,
+      "path": "scripts/tests/r5_external_batch_v2_checks.py",
+      "selected_v3_source_domain": "not a new v3_source key; full base_source already covers this input",
+      "sha256": "dca70ff40eeccd11bdcd8f28e4e4d83d7f7bfdf7dcbd9f95b3481fdd12cd2ede",
+      "slice4_baseline_sha256": null,
+      "slices23_baseline_sha256": null
+    },
+    "scripts/tests/r5_external_runtime_v3_checks.py": {
+      "allowed_new_control_files_listed": false,
+      "containing_source_domain": "base_source.files via complete scripts walk",
+      "git_blob": "73fe1a654b1de4f19291f2f394fdd6c34184b1d2",
+      "historical_registry_record": false,
+      "path": "scripts/tests/r5_external_runtime_v3_checks.py",
+      "selected_v3_source_domain": "not a new v3_source key; full base_source already covers this input",
+      "sha256": "3063feb5577133e4d31818f4b2b8edeecbf327b498a9b30de909bbdcf12a7848",
+      "slices23_baseline_sha256": null
+    },
+    "scripts/tests/r5_slice4_bridge_caller_checks.py": {
+      "allowed_new_control_files_listed": false,
+      "containing_source_domain": "base_source.files via complete scripts walk",
+      "git_blob": "aaea8317e8fe1ee2f405c88c65dd8907482d0a48",
+      "historical_registry_record": false,
+      "path": "scripts/tests/r5_slice4_bridge_caller_checks.py",
+      "selected_v3_source_domain": "not a new v3_source key; full base_source already covers this input",
+      "sha256": "02c27ec7f165056e8fb1134fb57c6ee3deae96f9aee166c17a9c103db706b724",
+      "slice4_baseline_sha256": null,
+      "slices23_baseline_sha256": null
+    },
+    "scripts/tests/r5_source_preparation_v3_checks.py": {
+      "allowed_new_control_files_listed": false,
+      "containing_source_domain": "base_source.files via complete scripts walk",
+      "git_blob": "48a9e230e34c77e073ed27625cf2538eeedd1735",
+      "historical_registry_record": false,
+      "path": "scripts/tests/r5_source_preparation_v3_checks.py",
+      "selected_v3_source_domain": "not a new v3_source key; full base_source already covers this input",
+      "sha256": "32297a9180ca28b2ebf370ad4e233d6a2a505e0e15570248d19dcaba426ac6e5",
+      "slices23_baseline_sha256": null
+    }
+  },
+  "authority_locations": [
+    {
+      "line": 463,
+      "meaning": "v3 current scope walks scripts and internal; inherited by v4",
+      "path": "scripts/r5_source_inventory.py"
+    },
+    {
+      "line": 567,
+      "meaning": "v4 keeps complete base.files and adds frozen authority inputs",
+      "path": "scripts/r5_source_inventory.py"
+    },
+    {
+      "line": 610,
+      "meaning": "exact policy/version and full canonical recapture equality",
+      "path": "scripts/r5_source_inventory.py"
+    },
+    {
+      "line": 148,
+      "meaning": "hard-coded immutable registry byte pin; no candidate authority",
+      "path": "scripts/r5_archive_boundary.py"
+    },
+    {
+      "line": 160,
+      "meaning": "historical hashes plus owned production Go; two forks/topology/budgets",
+      "path": "scripts/r5_archive_boundary.py"
+    },
+    {
+      "line": 26,
+      "meaning": "exact separate three-key helper/schema/check identity domain",
+      "path": "scripts/r5_selected_source_binding_v3.py"
+    },
+    {
+      "line": 560,
+      "meaning": "exact v3_source keys and helper/schema checks",
+      "path": "scripts/r5_selected_binding_consumer.py"
+    },
+    {
+      "line": 596,
+      "meaning": "consumer checks frozen registry pin",
+      "path": "scripts/r5_selected_binding_consumer.py"
+    },
+    {
+      "line": 77,
+      "meaning": "contract pin delegates serialized runtime pin and complete admitted bundle",
+      "path": "scripts/preparation/r5_external_batch.py"
+    },
+    {
+      "line": 209,
+      "meaning": "archived v1 explicit membership, never current complete fallback",
+      "path": "scripts/check_r5_protocol.py"
+    }
+  ],
+  "central": "10/171 unchanged",
+  "combined_source": "73777de3f51ff185d02ab2e1193421fa91cde9d4",
+  "combined_tree": "f27e02ce4987488d783a22f7cc1620dfe3795cd4",
+  "historical_registry": {
+    "allowed_new_control_files": [
+      "scripts/contracts/r5-archive-boundary-v1.json",
+      "scripts/r5_archive_boundary.py",
+      "scripts/r5_selected_source_binding_v2.py",
+      "scripts/run_r5_source_version_tests.py",
+      "scripts/tests/test_r5_archive_boundary.py",
+      "scripts/tests/test_r5_selected_source_binding_v2.py",
+      "scripts/tests/test_r5_source_version_runner.py",
+      "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/go.mod",
+      "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/go.mod",
+      "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3/go.mod"
+    ],
+    "baseline": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+    "historical_file_count": 36,
+    "markers": [
+      {
+        "module": "tabmail/archive/r5-mime-preparse-source",
+        "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/go.mod",
+        "sha256": "ee10ef2992b3755bb859a7634f4f09cc0798e5d44ada21ca6dd661bbb0fede1b"
+      },
+      {
+        "module": "tabmail/archive/r5-mime-preparse-source-v2",
+        "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/go.mod",
+        "sha256": "fc1d5e130c96ef15961111deaffcccdccee2665d368241d568ab7c51d3ecbd73"
+      },
+      {
+        "module": "tabmail/archive/r5-mime-preparse-source-v3",
+        "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3/go.mod",
+        "sha256": "2c40c45631beab477fa31b66e05ec302ff51a05ca410ea8d5e1c5cb2a4b69d08"
+      }
+    ],
+    "path": "scripts/contracts/r5-archive-boundary-v1.json",
+    "protected_go_count": 21,
+    "sha256": "8e04081e1f2b9d9b82b854954b56a1ac71047646f8768d1b7a7ff89af223bb15",
+    "usage": "allowed_new_control_files is parsed as a required registry key; no membership enforcement reads it in current scripts"
+  },
+  "minimal_proposed_write_set": [
+    "new docs/company-mail closure coverage report and exact-head evidence only, if unchanged membership is sufficient"
+  ],
+  "new_identity_requirements": [
+    "Fresh exact combined source closure receipt/file pins; changed bytes change source_sha and source_closure_sha256 under existing membership.",
+    "No old runtime/preparation/selection/batch receipt is current evidence. Future authorized controller must publish fresh independently pinned serialized bytes and preserve old receipts.",
+    "No policy/schema version bump merely for changed input hashes with the same admitted domain.",
+    "If a new consumer authority subset, membership, grammar, or trust rule is necessary, create a separately versioned contract/dispatch and reviewed explicit consumer changes; retain historical v1/v2/v3/v4 rules and registry bytes.",
+    "Do not append keys to exact v3._V3_FILES/v3_source or broaden archived v1 membership as a shortcut."
+  ],
+  "ownership": "Parent must confirm specific slice5 integration/authority owner; shared TODO remains unchanged and substeps proposed only",
+  "required_negative_controls": [
+    "Mutate each of the 14 consumer/control inputs: old independently held source/receipt pins reject; missing/extra/renamed inputs reject.",
+    "Mutate registry bytes, hard-coded pin, historical file/hash/size, archive module/marker/sum: reject without refreshing historical hashes.",
+    "Unknown nested module/fork, vendor/workspace, archive import/embed/generate, unclassified Go/native/build file, symlink/special entry, midflight source/topology/registry drift: reject.",
+    "Retain root versus explicit production/variant/file coverage, exact two forks, lock/provenance checks and 100000/depth64/64MiB boundary budgets.",
+    "Mixed v1/v2/v3/v4 policy/schema, selected selector bool/string/float, missing byte pin, forged/resealed receipt or replacement bundle against original controller pin: reject before mocked producer/child.",
+    "Preserve all twelve ordered envelope positions, four preparation slots and two admission slots; full binding equality and raw diagnostics retain distinct meanings.",
+    "Pure controls use an OS guard; no new discovery IDs, lifecycle or physical provenance claim. Physical qualification remains separately authorized."
+  ],
+  "retained_authority_paths": {
+    "docs/company-mail/R5-TODO.md": {
+      "git_blob": "9b6ace40366e1873d21254a222cc80c6deda4334",
+      "sha256": "682f8bdf9f429fc53c63d54176a12171d9cd0b8c0304ad27f9d5224afec8651d"
+    },
+    "go.mod": {
+      "git_blob": "eaa17a81b8513b0d678ea9b7b034e4e0cc098d77",
+      "sha256": "30eb5ba911706a9c88f5cfa77bea60eb61dbd1cb2570232d581847e12902e377"
+    },
+    "go.sum": {
+      "git_blob": "e653828b0e9fe9b2d0aaacf6a7f4bb1fec48d6c8",
+      "sha256": "5b850553522724f8fa71d36a94de2da91da174270ec4d460bb135dd42f53a33f"
+    },
+    "scripts/contracts/r5-archive-boundary-v1.json": {
+      "git_blob": "199ee11b7a73a9b911364490650678b9a39f68bd",
+      "sha256": "8e04081e1f2b9d9b82b854954b56a1ac71047646f8768d1b7a7ff89af223bb15"
+    },
+    "scripts/contracts/r5-selected-binding-v3-producer.json": {
+      "git_blob": "eb9b5926511aad4f1fc3349f3a82eb38c00e64a5",
+      "sha256": "cc80c215f1bf51f2a014ff5e6a37084f29f54a904c69ee58ba52febbd125df66"
+    },
+    "scripts/r5_archive_boundary.py": {
+      "git_blob": "e0941e01f779fdf38bcbe97d928b2fcf90715ea5",
+      "sha256": "c02acc09dd0f49b28113f99b05ffc6ff996287fb015d60fa08d7de56d92b7f15"
+    },
+    "scripts/r5_selected_binding_consumer.py": {
+      "git_blob": "88e3606e80318855503dff579c2d729456f48c30",
+      "sha256": "46a43df58a17ea03966b88fe07275e60344a055960aaabfcf405a7d5eb6caa21"
+    },
+    "scripts/r5_selected_source_binding.py": {
+      "git_blob": "f5c67257615a7c41543ad0e1447983e994bed45a",
+      "sha256": "15f5cdf4b13ee09558cc368e367091d4802804a7c9724065faf5c50605b8a873"
+    },
+    "scripts/r5_selected_source_binding_v2.py": {
+      "git_blob": "9a43bdc161750505fa217ab96987ce60673b2df9",
+      "sha256": "4bafe6a0b146c69aaf76dfaa206a95ac581739e3c0efa4a52bf36613ae817d67"
+    },
+    "scripts/r5_selected_source_binding_v3.py": {
+      "git_blob": "390f72d638a8cb3398492bab26c810802017115d",
+      "sha256": "12799a213c93510bdb449b5f610a493f517395878dd83c4b48a06e574bbf6acb"
+    },
+    "scripts/r5_source_inventory.py": {
+      "git_blob": "4215c11019249e9647cd3c4188d7854d450fccf9",
+      "sha256": "306cfcae043925d656d13b08bd439015e23348df255b363ceb8c10b6890488b2"
+    },
+    "scripts/tests/r5_selected_binding_consumer_checks.py": {
+      "git_blob": "10d33afe9b139155f253e193f97dfb3a44765560",
+      "sha256": "7b6f66b1234e9be986377a222a49d24b6442927797645840d2aee690853b8f08"
+    },
+    "scripts/tests/r5_selected_source_binding_v3_checks.py": {
+      "git_blob": "f4b80363e41b74c783a2226f582e15847eb3bc02",
+      "sha256": "632c5968163725d91c66b489dacd6284b74ac1e9a306c2cc1b817b77c895511f"
+    },
+    "web/package-lock.json": {
+      "git_blob": "28f802c838c37bfb9a0f4ce81aa12256aec8a8af",
+      "sha256": "b839b59e9aa06133819adca60659e0f807ca1e321fbdc35fe55afe1c7b52eba3"
+    },
+    "web/package.json": {
+      "git_blob": "de3983339cede747130b3dbbb22cf8e2d3758a06",
+      "sha256": "6e9773cbcd93725430a305ea0e9284fb753a6970bdf124a4747f16d57565f6e8"
+    }
+  },
+  "scope": "proposed slice5 only; no closure capture, receipt refresh, registry or authority mutation",
+  "slice4_base": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+  "slices23_adapter_base": "632d55de566254c618bca9a54c5dbae7b355fcf9"
+}

@@ -19,6 +19,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jhillyerd/enmime/v2"
 	"github.com/rs/zerolog"
 	"golang.org/x/crypto/bcrypt"
 	"tabmail/internal/authn"
@@ -101,10 +102,30 @@ func TestR3BrowserJourney(t *testing.T) {
 		t.Fatal("UI invitation did not provision an employee")
 	}
 	smtp.mu.Lock()
-	n := len(smtp.messages["client@recipient.test"])
+	messages := smtp.messages["client@recipient.test"]
+	var delivered []byte
+	if len(messages) == 1 {
+		delivered = append([]byte(nil), messages[0]...)
+	}
 	smtp.mu.Unlock()
-	if n != 1 {
-		t.Fatalf("browser send count=%d", n)
+	if len(messages) != 1 {
+		t.Fatalf("browser send count=%d", len(messages))
+	}
+	// The real browser's reply must survive draft persistence, submission and
+	// MIME delivery, not merely appear as a successful HTTP response.
+	envelope, err := enmime.ReadEnvelope(bytes.NewReader(delivered))
+	must(t, err)
+	if envelope.GetHeader("Subject") != "Re: Browser welcome" ||
+		envelope.GetHeader("In-Reply-To") != "<browser-welcome@recipient.test>" ||
+		envelope.GetHeader("References") != "<browser-welcome@recipient.test>" {
+		t.Fatal("browser reply subject or RFC threading headers did not reach SMTP")
+	}
+	if !strings.Contains(envelope.Text, "Private browser journey body.") {
+		t.Fatal("browser reply quote did not reach SMTP")
+	}
+	if len(envelope.Attachments) != 1 || envelope.Attachments[0].FileName != "browser.txt" ||
+		string(envelope.Attachments[0].Content) != "Browser attachment bytes" {
+		t.Fatal("browser attachment filename or bytes changed during SMTP delivery")
 	}
 	cancel()
 }

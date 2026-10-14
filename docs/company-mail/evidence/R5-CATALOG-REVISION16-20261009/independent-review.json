@@ -1,0 +1,25 @@
+{
+  "reviewer": "native pr_audit",
+  "verdict": "ACCEPT",
+  "actual_manifest_blob": "0c98df1ba582d4b70816c7ac7a0bbe37b272ec4e",
+  "actual_module_blob": "ca95b1fdbaef51a80de18996aa98743308178022",
+  "whole_methods_preserved": 30,
+  "historical_bodies_preserved": 2,
+  "current_method_exact_replacements": 5,
+  "new_methods": 2,
+  "old_assignments": 84,
+  "unchanged_assignment_values": 81,
+  "changed_assignments": [
+    "CURRENT_EVIDENCE",
+    "SOURCE_COMMIT",
+    "SOURCE_TREE"
+  ],
+  "protected_original": 184,
+  "protected_maintenance": 2,
+  "historical_files": 142,
+  "missing_paths": 0,
+  "extra_paths": 0,
+  "blob_or_size_differences": 0,
+  "product_changes_in_maintenance": 0,
+  "implementation_todos_completed": 0
+}

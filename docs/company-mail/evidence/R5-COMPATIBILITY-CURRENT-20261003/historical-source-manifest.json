@@ -1,0 +1,10 @@
+{
+  "internal/api/openapi.yaml": {
+    "retrieved_commit": "1304ee05ecba665df3b09726c0084858ca7098cd",
+    "sha256": "2c39ce1a1495af06204cebd12774ecf7fc64aa6bbd5784bb0fb46ac9d451c060"
+  },
+  "docs/company-mail/evidence/R5-PROTOCOL-CASES.json": {
+    "retrieved_commit": "364925dcd9ba9a2c1fcddd2593449538ec57081c",
+    "sha256": "f46d58c45dbf66e48eb1e379fd019aa5c02dc153f004548a69752f45dc52b1b7"
+  }
+}

@@ -1,0 +1,443 @@
+{
+  "schema_version": 1,
+  "reviewed_at_utc": "2026-10-12T07:55:41.213091+00:00",
+  "reviewer": "todo_audit independent intermediate-head backend artifact review",
+  "repository": "jyqj/tabmail",
+  "pr": 260,
+  "head_sha": "311593e6a837287f58d8f10d559dc0b8991be55e",
+  "run_id": 38219001084,
+  "run_attempt": 1,
+  "run_url": "https://github.com/jyqj/tabmail/actions/runs/38219001084",
+  "backend_job_id": 114710434630,
+  "backend_status": "completed",
+  "backend_conclusion": "failure",
+  "whole_workflow_final_status_observed": false,
+  "actual_checkout": {
+    "sha": "55c12ad0c693d3379f1a55b9c442fa88aaa6f48a",
+    "tree": "6ff0a4fca8116e1f4955e443f03007f7bf83c7bc",
+    "parents": [
+      "af1444807e1018c95b963b8c5b74e2b2e5060b9a",
+      "311593e6a837287f58d8f10d559dc0b8991be55e"
+    ],
+    "head_tree_matches_reviewed_tag_fix_tree": true,
+    "source_sha_file": "backend/go-test-source-sha.txt",
+    "git_api_evidence": "merge-commit-api.json"
+  },
+  "artifacts": [
+    {
+      "id": 11734240315,
+      "name": "company-p0-protocol-source-manifest",
+      "size_in_bytes": 116528,
+      "digest": "sha256:1cf43fc2bbd850b13600fd64a97b001827eee939be786d23aab25993b42ceeef",
+      "created_at": "2026-10-12T07:51:12Z",
+      "workflow_run": {
+        "id": 38219001084,
+        "repository_id": 1188928152,
+        "head_repository_id": 1188928152,
+        "head_branch": "fix/r5-validation-fixtures-20261012",
+        "head_sha": "311593e6a837287f58d8f10d559dc0b8991be55e"
+      }
+    },
+    {
+      "id": 11734230391,
+      "name": "company-p0-test-evidence",
+      "size_in_bytes": 1281634,
+      "digest": "sha256:6d66083894b5722ea35b7a6d8f659447501d8de4d2041f15a10901dbcd4b60fd",
+      "created_at": "2026-10-12T07:51:11Z",
+      "workflow_run": {
+        "id": 38219001084,
+        "repository_id": 1188928152,
+        "head_repository_id": 1188928152,
+        "head_branch": "fix/r5-validation-fixtures-20261012",
+        "head_sha": "311593e6a837287f58d8f10d559dc0b8991be55e"
+      }
+    },
+    {
+      "id": 11733865694,
+      "name": "company-template-grant-postgres-evidence",
+      "size_in_bytes": 7676,
+      "digest": "sha256:f6b65a441d627b01a34688cddb86a690bd3b17072c75bf326479021df320266c",
+      "created_at": "2026-10-12T07:51:12Z",
+      "workflow_run": {
+        "id": 38219001084,
+        "repository_id": 1188928152,
+        "head_repository_id": 1188928152,
+        "head_branch": "fix/r5-validation-fixtures-20261012",
+        "head_sha": "311593e6a837287f58d8f10d559dc0b8991be55e"
+      }
+    }
+  ],
+  "all_three_downloaded_archive_sha256_match_github_digest": true,
+  "source_preparation": {
+    "status": "source_prepared",
+    "policy": "r5_current_local_inputs_archive_boundary_v4",
+    "source_identity_kind": "policy_bound_local_input_superset_archive_boundary_sha1_v4",
+    "source_fingerprint": "51a1d5709fc442db4a1f7dbc8f884e5f4d0d4410",
+    "source_fingerprint_is_not_git_commit": true,
+    "source_files": 1505,
+    "source_closure_sha256": "f5a0b44e958a0c609047d8c8a9723ab0c3155fce5bf15e4c09865f78543e67a0",
+    "source_closure_before_equals_after": true,
+    "manifest_sha256": "a22cb7935aa35b3c4a462a61e6d8408deea978b783ab46cbd4bc79127a1f33e0",
+    "manifest_pin_matches": true,
+    "source_fingerprint_matches_author_local_tag_fix": true,
+    "boundary": "Versioned archive static bytes and production variant superset; selected metadata/runtime are separate",
+    "raw_directory": "protocol-source"
+  },
+  "shared_db_protocol": {
+    "workflow_step_conclusion": "success",
+    "status": "shared_scoped_evidence_passed",
+    "execution": {
+      "status": "completed",
+      "returncode": 0,
+      "timeout_seconds": 180,
+      "stdout_sha256": "ec867913c9eefca9bb4df4507fc2aa6db64aa720d3cb6b99f4ba9838d38369df",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 88028,
+      "stderr_bytes": 0
+    },
+    "stdout_digest_matches": true,
+    "stderr_digest_matches": true,
+    "terminal_event_counts": {
+      "pass_test": 109,
+      "pass_package": 1
+    },
+    "test_count_boundary": "109 are passing Go test terminal events including top-level parents; they are not original TODOs or 109 independent protocol cases.",
+    "cases": 46,
+    "shared_input_verified_cases": 46,
+    "layer": "db",
+    "unresolved_codes": [],
+    "missing_shared_input_adapters": [],
+    "retention_events": [
+      {
+        "Time": "2026-10-12T07:50:31.008738353Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolRetentionSharedCases/RT01/default",
+        "Elapsed": 0.55
+      },
+      {
+        "Time": "2026-10-12T07:50:31.403336145Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolRetentionSharedCases/RT02/default",
+        "Elapsed": 0.39
+      },
+      {
+        "Time": "2026-10-12T07:50:31.811201093Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolRetentionSharedCases/RT03/expires_at/before",
+        "Elapsed": 0.41
+      },
+      {
+        "Time": "2026-10-12T07:50:32.213854152Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolRetentionSharedCases/RT03/purge_after/before",
+        "Elapsed": 0.4
+      },
+      {
+        "Time": "2026-10-12T07:50:32.720906796Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolRetentionSharedCases/RT03/expires_at/equal",
+        "Elapsed": 0.51
+      },
+      {
+        "Time": "2026-10-12T07:50:33.133269077Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolRetentionSharedCases/RT03/purge_after/equal",
+        "Elapsed": 0.41
+      },
+      {
+        "Time": "2026-10-12T07:50:33.582204633Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolRetentionSharedCases/RT04/default",
+        "Elapsed": 0.45
+      },
+      {
+        "Time": "2026-10-12T07:50:33.991978552Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolRetentionSharedCases/RT05/default",
+        "Elapsed": 0.41
+      },
+      {
+        "Time": "2026-10-12T07:50:34.505990876Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolRetentionSharedCases/RT06/default",
+        "Elapsed": 0.51
+      },
+      {
+        "Time": "2026-10-12T07:50:34.506127673Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolRetentionSharedCases",
+        "Elapsed": 4.05
+      }
+    ],
+    "pe05_events": [
+      {
+        "Time": "2026-10-12T07:50:54.658014162Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolDraftGrantOrderingSharedCases/PE05",
+        "Elapsed": 0.56
+      },
+      {
+        "Time": "2026-10-12T07:50:54.658034543Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolDraftGrantOrderingSharedCases",
+        "Elapsed": 0.57
+      }
+    ],
+    "remaining_required_layers": {
+      "RC01": [
+        "components"
+      ],
+      "RC02": [
+        "components"
+      ],
+      "RC03": [
+        "components"
+      ],
+      "RC04": [
+        "components"
+      ],
+      "RC05": [
+        "components"
+      ],
+      "LF01": [
+        "components"
+      ],
+      "LF02": [
+        "components"
+      ],
+      "LF03": [
+        "components"
+      ],
+      "LF04": [
+        "components"
+      ],
+      "LF05": [
+        "components"
+      ],
+      "LF06": [
+        "components"
+      ],
+      "LF07": [
+        "components"
+      ],
+      "PE01": [
+        "components"
+      ],
+      "PE02": [
+        "components"
+      ],
+      "PE03": [
+        "components"
+      ],
+      "PE04": [
+        "components"
+      ],
+      "PE05": [
+        "components"
+      ]
+    },
+    "remaining_semantic_or_layer_gaps": {
+      "BC02": [
+        "Formal versioned R5 BCC backfill/unknown migration command does not exist; current capability observation is not execution of future idempotent writes."
+      ],
+      "BC03": [
+        "Formal versioned R5 BCC backfill/unknown migration command does not exist; current capability observation is not execution of future idempotent writes."
+      ]
+    },
+    "raw_product_green_field": true,
+    "raw_task_complete_field": false,
+    "qualification_boundary": "The original DB-layer shared suite genuinely executed and passed on this intermediate head. Its scoped product_green=true is not whole-product, whole-Company-CI, missing-component, BCC-migration or original-parent acceptance. The raw report retains task_complete=false.",
+    "raw_report": "backend/protocol-baseline-evidence/report.json",
+    "raw_report_sha256": "7d2a6abbae456d6440737efe09e9f2c270a7b42743828fcf8193bb676957f9b2",
+    "raw_log": "backend/protocol-baseline-evidence/go-0.jsonl",
+    "raw_log_sha256": "ec867913c9eefca9bb4df4507fc2aa6db64aa720d3cb6b99f4ba9838d38369df"
+  },
+  "source_version_runner": {
+    "status": "failed",
+    "discovered_test_count": 889,
+    "dispatch_no_missing": true,
+    "dispatch_no_overlap": true,
+    "no_missing": true,
+    "no_overlap": true,
+    "groups": [
+      {
+        "group": "current",
+        "source_sha": "55c12ad0c693d3379f1a55b9c442fa88aaa6f48a",
+        "argv": [
+          "/usr/bin/python3",
+          "-B",
+          "/home/runner/work/tabmail/tabmail/scripts/run_r5_source_version_tests.py",
+          "--child-root",
+          "/tmp/r5-version-hinrq4dk/current",
+          "--ids",
+          "/tmp/r5-version-hinrq4dk/current-ids.json",
+          "--output",
+          "/tmp/r5-version-hinrq4dk/current-report.json"
+        ],
+        "exit": 1,
+        "tests_run": 885,
+        "counts": {
+          "failures": 1,
+          "errors": 4,
+          "skips": 0,
+          "missing_test_ids": 0,
+          "expected_failures": 0,
+          "unexpected_successes": 0
+        },
+        "failures": [
+          "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision18_preserves_public_history_collectors_and_original_rejections"
+        ],
+        "errors": [
+          "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_old_pins_reject_and_current_revision_passes_same_actual_facts",
+          "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision18_binds_actual_source_facts_and_preserves_manual_reviews",
+          "test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion",
+          "test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence"
+        ],
+        "passed_derived_from_completed_report": 880
+      },
+      {
+        "group": "frozen-v1",
+        "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+        "argv": [
+          "/usr/bin/python3",
+          "-B",
+          "/home/runner/work/tabmail/tabmail/scripts/run_r5_source_version_tests.py",
+          "--child-root",
+          "/tmp/r5-version-hinrq4dk/frozen-v1",
+          "--ids",
+          "/tmp/r5-version-hinrq4dk/frozen-v1-ids.json",
+          "--output",
+          "/tmp/r5-version-hinrq4dk/frozen-v1-report.json"
+        ],
+        "exit": 0,
+        "tests_run": 4,
+        "counts": {
+          "failures": 0,
+          "errors": 0,
+          "skips": 0,
+          "missing_test_ids": 0,
+          "expected_failures": 0,
+          "unexpected_successes": 0
+        },
+        "failures": [],
+        "errors": [],
+        "passed_derived_from_completed_report": 4
+      }
+    ],
+    "scope": "Current group executed 885 tests and frozen-v1 4. All five current failure/error IDs concern the old current catalogs. No failure is treated as accepted; revision19 and final-head CI have separate source identities.",
+    "raw_json": "backend/source-version-tests.json",
+    "raw_json_sha256": "41963b9998c20be837cc29758f75148e17084691809ed7cace53639cf3ea74f3"
+  },
+  "default_backend_pg_race": {
+    "command": "go test -json -race -count=1 -timeout=180s ./...",
+    "process_exit_code": 1,
+    "status": "fail",
+    "terminal_event_counts": {
+      "skip_package": 7,
+      "pass_test": 11351,
+      "pass_package": 45,
+      "skip_test": 105,
+      "fail_test": 842,
+      "fail_package": 1
+    },
+    "count_boundary": "Test terminal events include parent tests; not independent leaves or original TODOs.",
+    "mandatory_tests": 247,
+    "mandatory_missing_or_not_passed": 180,
+    "failed_parent_events": 118,
+    "failed_leaf_ids": 724,
+    "no_remaining_lifecycle_budget_failed_leaf_ids": 723,
+    "other_failed_leaf_observations": [
+      {
+        "Time": "2026-10-12T07:45:21.976089361Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5FrozenMailboxGrantRevocation/frozen-positive-grant-denied/organize",
+        "Elapsed": 0.28,
+        "output": "=== RUN   TestR5FrozenMailboxGrantRevocation/frozen-positive-grant-denied/organize\n    r5_frozen_mailbox_grant_test.go:157: postgres: apply migrations: partial migration error (type:sql,version:1): timeout: context deadline exceeded; sql: transaction has already been committed or rolled back; failed to execute pg_advisory_unlock: driver: bad connection; sql: connection is already closed\n--- FAIL: TestR5FrozenMailboxGrantRevocation/frozen-positive-grant-denied/organize (0.28s)\n"
+      }
+    ],
+    "targeted_old_grant_tests": [
+      {
+        "Time": "2026-10-12T07:42:53.688055389Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR3CompanyHTTPJourney",
+        "Elapsed": 2.32
+      },
+      {
+        "Time": "2026-10-12T07:43:04.724750537Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestMailboxAdministrationHTTPRequiresObservedVersion",
+        "Elapsed": 0.45
+      }
+    ],
+    "observational_boundary": "The full suite remains failed. Deadline/no-budget observations are not attributed causally to the tag fix, and the original 180s timeout was not expanded.",
+    "raw_gate_json": "backend/go-test-evidence.json",
+    "raw_gate_json_sha256": "16e0c0936bcc736808b1ec8cd64ebd0163d4eb3db56c5bcfc466d41b96005bd3",
+    "raw_log": "backend/go-test.jsonl",
+    "raw_log_sha256": "e910104165a7cd60cb81fc95fbd3531971e01dfa8618238be03422cc0f9eaca0"
+  },
+  "independent_template_grant_step": {
+    "allowed_skips_observed": [],
+    "errors": [],
+    "events": 44,
+    "log_sha256": "b518ffcbdb8f10b1078255d12a3ddfd17ba2434cf38eb424b28c74f0d743784c",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 1,
+    "manifest_sha256": "145aee37b301d24c8f4ae6ba1ba6ac2175ef26a949905816b0a46cfefeaf864c",
+    "packages": 1,
+    "process_exit_code": 0,
+    "source_sha": "55c12ad0c693d3379f1a55b9c442fa88aaa6f48a",
+    "status": "pass",
+    "suite": "template-grant-revocation",
+    "tests_failed": 0,
+    "tests_passed": 10,
+    "tests_skipped": 0,
+    "tests_started": 10
+  },
+  "http_contract_result": {
+    "status": "pass",
+    "source_sha": "55c12ad0c693d3379f1a55b9c442fa88aaa6f48a",
+    "errors": [],
+    "responses": 81,
+    "successful_operations": 66,
+    "required_success_variants": 67,
+    "excluded_operations": [
+      {
+        "method": "GET",
+        "path": "/api/v1/company/domains/{id}/verification",
+        "reason": "Live DNS status lookups are outside this loopback HTTP/PG fixture."
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/company/domains/{id}/verify",
+        "reason": "Live DNS verification is outside this loopback HTTP/PG fixture."
+      }
+    ],
+    "spec_sha256": "48020f150cb4947559f4e613d9b02ab99418de961fdb0e8a1dd04dc091470757",
+    "capture_sha256": "d543abcaf00551c6663ac76a3c4c8d5d95dd90e2d6e6c8b36a8ce3bf2f39bbeb"
+  },
+  "original_todo_progress": {
+    "newly_closed_ids": [],
+    "newly_completed": 0,
+    "cumulative_newly_completed_this_execution": 0,
+    "accepted": 10,
+    "total": 171,
+    "remaining": 161
+  },
+  "overall_runtime_and_parent_acceptance": false,
+  "final_pr_head_acceptance_inherited_from_this_intermediate_head": false
+}

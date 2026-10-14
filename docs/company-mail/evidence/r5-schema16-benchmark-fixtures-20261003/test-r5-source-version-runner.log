@@ -1,0 +1,36 @@
+test_child_failure_and_skip_not_green (test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green) ... test_fail (test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Bad.test_fail) ... FAIL
+
+======================================================================
+FAIL: test_fail (test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Bad.test_fail)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/r5-benchmark/scripts/tests/test_r5_source_version_runner.py", line 27, in test_fail
+    def test_fail(self):self.fail('intentional runner negative')
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: intentional runner negative
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (failures=1)
+test_skip (test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Skip.test_skip) ... skipped 'intentional runner negative'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK (skipped=1)
+test_expected (test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Expected.test_expected) ... expected failure
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK (expected failures=1)
+ok
+test_exact_partition (test_r5_source_version_runner.SourceVersionRunnerTests.test_exact_partition) ... ok
+test_missing_overlap_duplicate_wrong_baseline (test_r5_source_version_runner.SourceVersionRunnerTests.test_missing_overlap_duplicate_wrong_baseline) ... ok
+test_no_fresh_actual_root_class (test_r5_source_version_runner.SourceVersionRunnerTests.test_no_fresh_actual_root_class) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.018s
+
+OK

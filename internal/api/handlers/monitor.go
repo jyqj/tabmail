@@ -28,7 +28,7 @@ func NewMonitorHandler(store monitorStore, hub *realtime.Hub, logger zerolog.Log
 
 // StreamAll GET /api/v1/admin/monitor/events
 func (h *MonitorHandler) StreamAll(w http.ResponseWriter, r *http.Request) {
-	flusher, ok := w.(http.Flusher)
+	_, ok := w.(http.Flusher)
 	if !ok {
 		errInternal(w)
 		return
@@ -62,19 +62,20 @@ func (h *MonitorHandler) StreamAll(w http.ResponseWriter, r *http.Request) {
 			key := v.ID.String()
 			next[key] = true
 			if !initial && !seen[key] {
-				writeSSE(w, v.Type, realtime.Event{Type: realtime.EventType(v.Type), Mailbox: v.Mailbox, MessageID: v.MessageID, Sender: v.Sender, Subject: v.Subject, Size: v.Size, At: v.At})
+				if err := writeSSE(w, v.Type, realtime.Event{Type: realtime.EventType(v.Type), Mailbox: v.Mailbox, MessageID: v.MessageID, Sender: v.Sender, Subject: v.Subject, Size: v.Size, At: v.At}); err != nil {
+					return false
+				}
 			}
 		}
 		seen = next
-		writeSSE(w, "resync", map[string]bool{"history": true})
-		flusher.Flush()
-		return true
+		return writeSSE(w, "resync", map[string]bool{"history": true}) == nil
 	}
 	if !poll(true) {
 		return
 	}
-	writeSSE(w, "ready", map[string]bool{"ready": true})
-	flusher.Flush()
+	if writeSSE(w, "ready", map[string]bool{"ready": true}) != nil {
+		return
+	}
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
 	for {

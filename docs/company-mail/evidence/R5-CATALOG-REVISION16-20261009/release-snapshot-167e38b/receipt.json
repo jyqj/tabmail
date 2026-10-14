@@ -1,0 +1,36 @@
+{
+  "run_id": 37884386030,
+  "head": "167e38b1541c027107fc81900f3e37fda7289677",
+  "backend": {
+    "job_id": 113671069655,
+    "conclusion": "failure",
+    "failed_steps": [
+      "Race tests with PostgreSQL",
+      "Validation tool regressions",
+      "Real protocol baseline with explicit target failures"
+    ],
+    "evidence": "GitHub job/step metadata; full raw endpoint returned Transport closed twice, not claimed read"
+  },
+  "frontend": {
+    "job_id": 113671069779,
+    "conclusion": "failure",
+    "dependency_audit": "8 high severity vulnerabilities reported; strict zero-vulnerability check exit1",
+    "full_vitest_summary": [
+      " Test Files  1 failed | 119 passed (120)",
+      "      Tests  1 failed | 2088 passed (2089)"
+    ],
+    "failure": "r5-external-batch-probe.test.tsx: explicit private fixture required",
+    "source_version_and_catalog_checks": "success"
+  },
+  "production_web": {
+    "job_id": 113671069994,
+    "conclusion": "success"
+  },
+  "browser_journey": {
+    "job_id": 113671069889,
+    "conclusion": "success"
+  },
+  "product_green": false,
+  "main_merged": false,
+  "pr56_draft": true
+}

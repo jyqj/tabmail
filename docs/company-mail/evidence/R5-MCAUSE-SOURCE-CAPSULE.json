@@ -1,0 +1,92 @@
+{
+  "scope": "MCAUSE1000employees5000mailboxes4000messages_not_M_baseline",
+  "write_set": [
+    "internal/store/fileobj/atomic.go",
+    "internal/store/fileobj/diagnostic_disabled.go",
+    "internal/store/fileobj/diagnostic_r5benchmark.go",
+    "internal/store/fileobj/r5_diagnostic_observer_test.go",
+    "internal/store/fileobj/diagnostic_disabled_test.go",
+    "internal/store/postgres/r5_store_diagnostic_test.go",
+    "internal/store/postgres/r5_store_cause_diagnostic_test.go"
+  ],
+  "before": {
+    "internal/store/fileobj/atomic.go": {
+      "exists": true,
+      "sha256": "ace8b56faf44ee84cea34125e9a18d8288f4f645a7d42f80f067aa7e75bbb35a"
+    },
+    "internal/store/fileobj/diagnostic_disabled.go": {
+      "exists": false
+    },
+    "internal/store/fileobj/diagnostic_r5benchmark.go": {
+      "exists": false
+    },
+    "internal/store/fileobj/r5_diagnostic_observer_test.go": {
+      "exists": false
+    },
+    "internal/store/fileobj/diagnostic_disabled_test.go": {
+      "exists": false
+    },
+    "internal/store/postgres/r5_store_diagnostic_test.go": {
+      "exists": true,
+      "sha256": "3aa80363ece0f2b03deaef0821c3dd2e76edd07fa65adb0b1494b1e9c8b7db74"
+    },
+    "internal/store/postgres/r5_store_cause_diagnostic_test.go": {
+      "exists": false
+    }
+  },
+  "after": {
+    "internal/store/fileobj/atomic.go": {
+      "exists": true,
+      "sha256": "b970864896fc80cccb91e959ec96a792f46d5f3b2a6083bb97b398f0e39fb521"
+    },
+    "internal/store/fileobj/diagnostic_disabled.go": {
+      "exists": true,
+      "sha256": "42804f60e5cad36f43a5f97708fb308ee4144be7c4297f5eac077f69f0967aca"
+    },
+    "internal/store/fileobj/diagnostic_r5benchmark.go": {
+      "exists": true,
+      "sha256": "28575fe88890d65815cdee89b144c855b1f0639ecd5441cc25f251be9e30e008"
+    },
+    "internal/store/fileobj/r5_diagnostic_observer_test.go": {
+      "exists": true,
+      "sha256": "77b6c49aa13525a80f40a0dc0f1da789b337974d6064632b18f796cc6da87635"
+    },
+    "internal/store/fileobj/diagnostic_disabled_test.go": {
+      "exists": true,
+      "sha256": "752c1659a07c126ee188982b7c95969258e282f5842a4d0451b4c011b1caf7a0"
+    },
+    "internal/store/postgres/r5_store_diagnostic_test.go": {
+      "exists": true,
+      "sha256": "25f72b7ab88cc5341613a7c63e599bb17e4e296c052905f9ff5bbbb2a80f6a77"
+    },
+    "internal/store/postgres/r5_store_cause_diagnostic_test.go": {
+      "exists": true,
+      "sha256": "5445249171e4baae585e2510bb2ab83cf4bf20f05b9094cf13fcefa96841c966"
+    }
+  },
+  "status": "SOURCE_ONLY_pending_independent_review_no_runtime",
+  "runtime_selector": "^TestR5MStoreCauseDiagnostic$",
+  "execution_budget_seconds": 180,
+  "disk_budget_bytes": 1073741824,
+  "outer_init_to_stop_budget_seconds": 300,
+  "original_native_wall_origin_required": true,
+  "method_parameters_unchanged": [
+    "concurrency20",
+    "pending20",
+    "lookahead100",
+    "Claim20",
+    "Parser4",
+    "pool24",
+    "realStoreFSWALSync",
+    "lease90attempt5"
+  ],
+  "new_pure_evidence": "/tmp/tm-mcause-newtests-final.M5DELgFG",
+  "PG_or_heavy_executed": false,
+  "old_M_raw_or_contracts_modified": false,
+  "files_not_in_write_set_modified_by_author": false,
+  "normal_build_noop": "!r5benchmark constantnil/no clock/no ctx lookup",
+  "privacy": "fixed stage+times+failedbool only; no key/path/raw/credential/error body",
+  "measurement_scope": "FS call wall includes Go rescheduling; concurrent and nested sums are not stagewall; syscall trace and runnable delay separately interpreted",
+  "late_depth_limit": "fresh4000 M-shaped does not certify753k physical depth",
+  "failure_policy": "Go raw/profiles/private cause-failure partial retained; cleanup only ownDB/objectroot; missingmetrics/overrun/failedsteps never admission"
+}

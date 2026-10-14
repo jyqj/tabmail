@@ -1,0 +1,83 @@
+{
+  "observed_head": "53ecef6b382d09b4e29cfbabcebce589da98f13e",
+  "observed_tree": "686a0125f00a273a53171d75d47fe9380fdd4cb4",
+  "dirty_paths_before": [
+    "M docs/company-mail/R5-PARALLEL-20261008-929.md",
+    " M docs/company-mail/R5-TODO.md"
+  ],
+  "reviewed_public_product_source": "9b12c93cb03285298267e27893f74aebe742a8a2",
+  "catalog_author_commit": "0257d9f3f258b046c4cc07e9fa5a26c4d7abc810",
+  "active_inputs_exact_author_commit": true,
+  "protected_files_exact_baseline": "b916bee08399eacd199d3bef8e5e5ebc2265a7d8",
+  "parent_count": {
+    "total": 171,
+    "accepted": 10,
+    "remaining": 161,
+    "states_equal_baseline": true
+  },
+  "file_sha256_before": {
+    "scripts/check_r5_transactions.py": "1f14b5b4e3ef11cd0642e9d7261cde285c17e47384c90e15b56adc68323b9355",
+    "scripts/check_r5_compatibility.py": "d3d0bd96c84a18c224160faaad96f3a928aab5224d93c31b6ec464489f740209",
+    "scripts/collect_api_calls.cjs": "06896de9f18dda8c7fd4f1ef2d520e4bd71fa831a99f0d63863a1fa6a06682e8",
+    "cmd/r5txinventory/main.go": "ad14b919505b23947de335dda6077d4f6745185329d911cc357e60b1001d2361",
+    "internal/architecture/route_inventory_test.go": "609ee5489c3e021f9b1a0238b47e4a01d09c5e5eef1144df780d6456e2ed4f05",
+    "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": "9ad325330fc53f4ded0ea5a20ae25c85bfc2026c6274a3ef78815a36d95859cb",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": "115294363d6c05a88e1bf08c535a7d4411f8e9409fe9b854dd71821760ec44f7",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "e818ee078423dce13e46d5a314dddd1a9d4dd28dbf1c6162a900218f177e9a4d",
+    "docs/company-mail/evidence/R5-CLIENT-CALLS.json": "cf3b5a326bfb9e28f92bab28cfa98145762505465142dc86fe0a4f4703106c3d",
+    "scripts/tests/test_r5_catalog_reconciliation.py": "d0e1f2c7b46b8599bfc57e6417893a5151f03ae99e60b0216ed789806f773b80",
+    "scripts/tests/test_r5_compatibility.py": "2fa45da17bdb16c841e2eb63a103e658790c8bd401887be84330c471fab82fa2"
+  },
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "started_at_utc": "2026-10-07T18:31:36.492353+00:00",
+      "duration_seconds": 1.969,
+      "exit_code": 0,
+      "stdout": "{\"status\": \"PASS\", \"postgres_files\": 62, \"functions\": 395, \"sql_execution_calls\": 498, \"direct_write_functions\": 134, \"write_closure_functions\": 154, \"migration_files\": 19, \"task_complete\": false, \"runtime_verified\": false, \"meaning\": \"syntax inventory current; no concurrency or behavior equivalence claim\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "started_at_utc": "2026-10-07T18:31:38.461515+00:00",
+      "duration_seconds": 3.252,
+      "exit_code": 0,
+      "stdout": "{\n  \"wire_validation_scope\": \"not_checked_current_wire_required\",\n  \"historical_wire_reference\": {\n    \"artifact_ref\": \"docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json\",\n    \"sha256\": \"61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22\",\n    \"qualification\": \"historical_metadata_only_not_current_wire\"\n  },\n  \"status\": \"source_inventory_and_upgrade_plan_checked\",\n  \"task_complete\": false,\n  \"product_green\": false,\n  \"routes\": 132,\n  \"client_branches\": 134,\n  \"source_files\": 94,\n  \"openapi_missing\": [\n    \"DELETE /api/v1/suppression/{id}\",\n    \"GET /api/v1/suppression\",\n    \"GET /docs-assets/*\"\n  ],\n  \"no_shipped_client\": [\n    \"DELETE /api/v1/suppression/{id}\",\n    \"GET /api/v1/admin/status\",\n    \"GET /api/v1/auth/me\",\n    \"GET /api/v1/company/outbound/{id}/recipients\",\n    \"GET /api/v1/suppression\",\n    \"GET /docs\",\n    \"GET /docs-assets/*\",\n    \"GET /metrics\",\n    \"GET /openapi.yaml\",\n    \"GET /ready\",\n    \"GET /redoc\"\n  ],\n  \"runtime_boundary\": \"No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required.\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "started_at_utc": "2026-10-07T18:31:41.713666+00:00",
+      "duration_seconds": 2.143,
+      "exit_code": 0,
+      "stdout": "API client inventory PASS: 134 branches, 7 explicit transport forwarders\n",
+      "stderr": ""
+    }
+  ],
+  "scope": "Three original static catalog CLIs at the integrated candidate; no new product, PostgreSQL, or full CI acceptance.",
+  "file_sha256_after": {
+    "scripts/check_r5_transactions.py": "1f14b5b4e3ef11cd0642e9d7261cde285c17e47384c90e15b56adc68323b9355",
+    "scripts/check_r5_compatibility.py": "d3d0bd96c84a18c224160faaad96f3a928aab5224d93c31b6ec464489f740209",
+    "scripts/collect_api_calls.cjs": "06896de9f18dda8c7fd4f1ef2d520e4bd71fa831a99f0d63863a1fa6a06682e8",
+    "cmd/r5txinventory/main.go": "ad14b919505b23947de335dda6077d4f6745185329d911cc357e60b1001d2361",
+    "internal/architecture/route_inventory_test.go": "609ee5489c3e021f9b1a0238b47e4a01d09c5e5eef1144df780d6456e2ed4f05",
+    "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": "9ad325330fc53f4ded0ea5a20ae25c85bfc2026c6274a3ef78815a36d95859cb",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": "115294363d6c05a88e1bf08c535a7d4411f8e9409fe9b854dd71821760ec44f7",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "e818ee078423dce13e46d5a314dddd1a9d4dd28dbf1c6162a900218f177e9a4d",
+    "docs/company-mail/evidence/R5-CLIENT-CALLS.json": "cf3b5a326bfb9e28f92bab28cfa98145762505465142dc86fe0a4f4703106c3d",
+    "scripts/tests/test_r5_catalog_reconciliation.py": "d0e1f2c7b46b8599bfc57e6417893a5151f03ae99e60b0216ed789806f773b80",
+    "scripts/tests/test_r5_compatibility.py": "2fa45da17bdb16c841e2eb63a103e658790c8bd401887be84330c471fab82fa2"
+  }
+}

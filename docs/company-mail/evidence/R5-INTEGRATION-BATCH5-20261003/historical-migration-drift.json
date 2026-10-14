@@ -1,0 +1,107 @@
+{
+  "prior_report": "R5-INTEGRATION-BATCH4-20261003/prepared-error-classification.json",
+  "original_events": 10,
+  "events": [
+    {
+      "historical_event": {
+        "kind": "ERROR",
+        "test": "test_actual_permutation_fifo_fairness_mailbox_mapping_and_diversity_rejected (test_r5_benchmark.BenchmarkLookaheadTests.test_actual_permutation_fifo_fairness_mailbox_mapping_and_diversity_rejected)",
+        "reason": "ValueError: observed schema differs from actual migration source"
+      },
+      "current_test_id": "test_r5_benchmark.BenchmarkLookaheadTests.test_actual_permutation_fifo_fairness_mailbox_mapping_and_diversity_rejected",
+      "current_synthetic_grammar_status": "PASS",
+      "product_schema19_legacy_pipeline_migration_status": "UNRESOLVED_NOT_RUN"
+    },
+    {
+      "historical_event": {
+        "kind": "ERROR",
+        "test": "test_actual_pg_observation_not_metadata_or_uid_equivalence_claim (test_r5_benchmark.BenchmarkLookaheadTests.test_actual_pg_observation_not_metadata_or_uid_equivalence_claim)",
+        "reason": "ValueError: observed schema differs from actual migration source"
+      },
+      "current_test_id": "test_r5_benchmark.BenchmarkLookaheadTests.test_actual_pg_observation_not_metadata_or_uid_equivalence_claim",
+      "current_synthetic_grammar_status": "PASS",
+      "product_schema19_legacy_pipeline_migration_status": "UNRESOLVED_NOT_RUN"
+    },
+    {
+      "historical_event": {
+        "kind": "ERROR",
+        "test": "test_archived_selection_exact_source_method_contract_argv_environment (test_r5_benchmark.BenchmarkLookaheadTests.test_archived_selection_exact_source_method_contract_argv_environment)",
+        "reason": "ValueError: observed schema differs from actual migration source"
+      },
+      "current_test_id": "test_r5_benchmark.BenchmarkLookaheadTests.test_archived_selection_exact_source_method_contract_argv_environment",
+      "current_synthetic_grammar_status": "PASS",
+      "product_schema19_legacy_pipeline_migration_status": "UNRESOLVED_NOT_RUN"
+    },
+    {
+      "historical_event": {
+        "kind": "ERROR",
+        "test": "test_cli_invalid_or_missing_optin_contract_rejected_without_go (test_r5_benchmark.BenchmarkLookaheadTests.test_cli_invalid_or_missing_optin_contract_rejected_without_go)",
+        "reason": "ValueError: observed schema differs from actual migration source"
+      },
+      "current_test_id": "test_r5_benchmark.BenchmarkLookaheadTests.test_cli_invalid_or_missing_optin_contract_rejected_without_go",
+      "current_synthetic_grammar_status": "PASS",
+      "product_schema19_legacy_pipeline_migration_status": "UNRESOLVED_NOT_RUN"
+    },
+    {
+      "historical_event": {
+        "kind": "ERROR",
+        "test": "test_default_v1_and_history_cannot_auto_select_or_accept_new_fields (test_r5_benchmark.BenchmarkLookaheadTests.test_default_v1_and_history_cannot_auto_select_or_accept_new_fields)",
+        "reason": "ValueError: observed schema differs from actual migration source"
+      },
+      "current_test_id": "test_r5_benchmark.BenchmarkLookaheadTests.test_default_v1_and_history_cannot_auto_select_or_accept_new_fields",
+      "current_synthetic_grammar_status": "PASS",
+      "product_schema19_legacy_pipeline_migration_status": "UNRESOLVED_NOT_RUN"
+    },
+    {
+      "historical_event": {
+        "kind": "ERROR",
+        "test": "test_explicit_contract_population_and_non_equivalence_boundary (test_r5_benchmark.BenchmarkLookaheadTests.test_explicit_contract_population_and_non_equivalence_boundary)",
+        "reason": "ValueError: observed schema differs from actual migration source"
+      },
+      "current_test_id": "test_r5_benchmark.BenchmarkLookaheadTests.test_explicit_contract_population_and_non_equivalence_boundary",
+      "current_synthetic_grammar_status": "PASS",
+      "product_schema19_legacy_pipeline_migration_status": "UNRESOLVED_NOT_RUN"
+    },
+    {
+      "historical_event": {
+        "kind": "ERROR",
+        "test": "test_new_original_S_complete_grammar_preserves_all_workloads_and_not_approval (test_r5_benchmark.BenchmarkLookaheadTests.test_new_original_S_complete_grammar_preserves_all_workloads_and_not_approval)",
+        "reason": "ValueError: observed schema differs from actual migration source"
+      },
+      "current_test_id": "test_r5_benchmark.BenchmarkLookaheadTests.test_new_original_S_complete_grammar_preserves_all_workloads_and_not_approval",
+      "current_synthetic_grammar_status": "PASS",
+      "product_schema19_legacy_pipeline_migration_status": "UNRESOLVED_NOT_RUN"
+    },
+    {
+      "historical_event": {
+        "kind": "ERROR",
+        "test": "test_pseudo_history_and_duplicate_selection_json_rejected (test_r5_benchmark.BenchmarkLookaheadTests.test_pseudo_history_and_duplicate_selection_json_rejected)",
+        "reason": "ValueError: observed schema differs from actual migration source"
+      },
+      "current_test_id": "test_r5_benchmark.BenchmarkLookaheadTests.test_pseudo_history_and_duplicate_selection_json_rejected",
+      "current_synthetic_grammar_status": "PASS",
+      "product_schema19_legacy_pipeline_migration_status": "UNRESOLVED_NOT_RUN"
+    },
+    {
+      "historical_event": {
+        "kind": "ERROR",
+        "test": "test_scheduler_complete_joined_counts_and_numeric_aliases_rejected (test_r5_benchmark.BenchmarkLookaheadTests.test_scheduler_complete_joined_counts_and_numeric_aliases_rejected)",
+        "reason": "ValueError: observed schema differs from actual migration source"
+      },
+      "current_test_id": "test_r5_benchmark.BenchmarkLookaheadTests.test_scheduler_complete_joined_counts_and_numeric_aliases_rejected",
+      "current_synthetic_grammar_status": "PASS",
+      "product_schema19_legacy_pipeline_migration_status": "UNRESOLVED_NOT_RUN"
+    },
+    {
+      "historical_event": {
+        "kind": "ERROR",
+        "test": "test_unknown_missing_duplicate_and_type_alias_method_contract_rejected (test_r5_benchmark.BenchmarkLookaheadTests.test_unknown_missing_duplicate_and_type_alias_method_contract_rejected)",
+        "reason": "ValueError: observed schema differs from actual migration source"
+      },
+      "current_test_id": "test_r5_benchmark.BenchmarkLookaheadTests.test_unknown_missing_duplicate_and_type_alias_method_contract_rejected",
+      "current_synthetic_grammar_status": "PASS",
+      "product_schema19_legacy_pipeline_migration_status": "UNRESOLVED_NOT_RUN"
+    }
+  ],
+  "meaning": "Schema16 scoped source mock corrects synthetic grammar only; production expected_schema_version, validators, METHOD and historical evidence are unchanged. No new schema19 product benchmark or migration runtime qualification."
+}

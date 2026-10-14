@@ -1,0 +1,125 @@
+{
+  "batch": "R5-NEXT-20261008",
+  "round": 2,
+  "tasks": [
+    "05",
+    "06",
+    "07"
+  ],
+  "parent_remote_commit": "6172a69d9b24867369cdd891b5b00703143697ba",
+  "tested_product_commit": "1cc2d50c883a016e5528c365452012ea149245f1",
+  "product_tree": "5b09c9d3329e9ceb64c2a22b844fc37ed1f0d314",
+  "root_results": {
+    "http_race": {
+      "leaf_pass": 32,
+      "fail": 0,
+      "skip": 0
+    },
+    "python": {
+      "methods_pass": 70,
+      "fail": 0,
+      "skip": 0
+    },
+    "web_before_type_correction": {
+      "tests_pass": 49,
+      "fail": 0,
+      "skip": 0
+    },
+    "web_after_type_correction": {
+      "tests_pass": 22,
+      "fail": 0,
+      "skip": 0
+    },
+    "tsc_full_nonincremental_exit": 0
+  },
+  "commands": [
+    "GOMAXPROCS=2 go test -mod=readonly -p=2 -json -race -count=1 -timeout=120s ./internal/api/handlers -run 'Test(DeleteSuppression|SuppressionPagination)'",
+    "PYTHONPATH=scripts:scripts/tests python -B -m unittest test_r5_protocol_source_preparation test_r5_protocol test_r5_backend_evidence_continuation -v",
+    "npm test -- --maxWorkers=1 --reporter=default --reporter=json --outputFile=round2-web.json features/company/admin-invitation-ownership.test.tsx features/company/user-delete-confirmation.test.tsx features/company/permission-editor.consumer.test.tsx",
+    "npm test -- --maxWorkers=1 --reporter=default --reporter=json --outputFile=round2-web-final.json features/company/admin-invitation-ownership.test.tsx",
+    "npx tsc --noEmit --incremental false"
+  ],
+  "environment": {
+    "go": "1.25.7",
+    "node": "24.19.0",
+    "GOMAXPROCS": 2,
+    "go_p": 2,
+    "vitest_maxWorkers": 1,
+    "vitest_timeout_ms": 5000,
+    "timeouts_changed": false
+  },
+  "type_correction": "Initial full tsc found TS2769 in the invitation test: getByRole options do not support exact:true. Commit 1cc2d50 removes that unrecognized option, preserving the string name Close and its default exact role-name matching. Initial frozen author red/green and the 49-test root run predate this compile-only test correction; the final 22-test root run and full tsc use corrected test bytes. These separate runs are not combined into a single run.",
+  "limits": [
+    "No local PostgreSQL execution. Actual protocol preparation and original v4 validator acceptance do not imply real protocol cases passed.",
+    "Suppression handler side effects are checked with the existing FakeStore; original PostgreSQL transactions and audit policy remain separate gates.",
+    "Closing an invitation dialog invalidates client response ownership; a previously issued POST may already have committed and is not replayed.",
+    "Original 171 parent tasks remain 10 accepted and 161 remaining."
+  ],
+  "files": {
+    "root-http.jsonl": {
+      "bytes": 32177,
+      "sha256": "4c603b2929447178b1aa2b966362d6f3406b510619d2866ac9e0d356a1bfeef8"
+    },
+    "root-python.log": {
+      "bytes": 10563,
+      "sha256": "da0b433e4281c70caadfee70e271b28cd8574aaa4a84b1c3b35548745b873e46"
+    },
+    "root-web.json": {
+      "bytes": 19779,
+      "sha256": "7e355671902bb5fc4c2999a19b28827bb3bc36dddbefc20f41a67acdeb915d3a"
+    },
+    "root-web-final.json": {
+      "bytes": 9722,
+      "sha256": "9d50afefd733b7281e04bf55f89397ff17739fe8f4e85cc63029535b509cfa02"
+    },
+    "root-tsc.log": {
+      "bytes": 99,
+      "sha256": "7125f194612fcff2f454c05d848e7cb71facc1967b4d5017e25b34fdee3ba74f"
+    },
+    "05-author-summary.json": {
+      "bytes": 5004,
+      "sha256": "3fa9c4a485cb865323aeb19809c245f95c14531738e8a15ebbd95a98502c1493"
+    },
+    "05-baseline.json": {
+      "bytes": 444,
+      "sha256": "f801443be5d70c5eeba4f3aa50e3fa382257138abf32b7f123159cbf05d8bf2f"
+    },
+    "05-candidate.json": {
+      "bytes": 2733,
+      "sha256": "ff0ab2d4f327d2c64b1ea66578ff77d5206eb3c113dac5910b93ba0ef43cdce0"
+    },
+    "05-preparation.json": {
+      "bytes": 949,
+      "sha256": "0e648dad666587e2c11c2231bf8b845004dba81d4a2ee59acece9b28d30797df"
+    },
+    "05-source-manifest.json": {
+      "bytes": 241009,
+      "sha256": "36699f1694a8c98f099737cb0b4834e618e1648ca453d0e3e03855872b31595a"
+    },
+    "05-source-manifest.sha256": {
+      "bytes": 65,
+      "sha256": "54b19c33877b704b143869eb2a064a559e62ea43a49ee9579d53f4d555f7df7a"
+    },
+    "06-author-summary.json": {
+      "bytes": 3752,
+      "sha256": "e290877568b3c8ec5a438b9319536904ef9fa98efc94ba1351e6ea089389ff3e"
+    },
+    "06-baseline-v2.json": {
+      "bytes": 115862,
+      "sha256": "48bace54ad6f1a800810b637026446d730c3e2de1ad608f5bfadff25f327f579"
+    },
+    "07-author-summary.json": {
+      "bytes": 1624,
+      "sha256": "9db739b5ae723a7961e548377ffa5f4d1088abfd445b52dccc776e17627ca984"
+    },
+    "07-baseline.jsonl": {
+      "bytes": 30552,
+      "sha256": "1aa2fcbfb26aaaf5af9840ca4416b7e779ac091c5fa001f3ae3091e9091e4287"
+    }
+  },
+  "review": {
+    "05": "/root/pr_audit ACCEPT",
+    "06": "/root/pr_audit ACCEPT including 1cc2d50 type correction",
+    "07": "/root source review ACCEPT; preserves original auth, transactional service and audit reason policy"
+  }
+}

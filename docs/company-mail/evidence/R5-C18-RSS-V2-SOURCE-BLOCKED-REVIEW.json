@@ -1,0 +1,112 @@
+{
+  "completion_prerequisites": [
+    "childresult",
+    "postcompletion_liveRSS",
+    "fresh_completion_permission",
+    "allhistorical_resourcechecks",
+    "original90budget",
+    "wholeownedgroup_empty",
+    "leader_join"
+  ],
+  "external_monitor_exception_whitelist": [
+    [
+      "/bin/ps",
+      "-p",
+      "<ownedPID>",
+      "-o",
+      "pid=,uid=,pgid=,sess=,lstart=,rss=,stat="
+    ],
+    [
+      "/bin/ps",
+      "-axo",
+      "pid=,uid=,pgid=,stat="
+    ]
+  ],
+  "fault_mock_coverage": [
+    "missing_or_latefirstRSS",
+    "singlecallslow",
+    "longsamplegap_sticky",
+    "RSSunknown/threshold",
+    "tailcoveragegap",
+    "wallreverse_aboveorigin",
+    "sleepwall_monogap",
+    "auditCPUidentitymissingimportrefusal",
+    "UID/session/start/reapedanchorrefusesignal",
+    "psunits/exactargv",
+    "unknownps_notgone",
+    "sourceimportsequencing_and_noAS"
+  ],
+  "fixture_audit_forbidden": [
+    "subprocess.*",
+    "os.system",
+    "os.fork/forkpty/posix_spawn/exec*",
+    "socket.*",
+    "ctypes.*",
+    "os.kill/killpg",
+    "write/mutation outside ownedfixturetmp"
+  ],
+  "import_prerequisites": [
+    "audit_hook_armed",
+    "CPU60actualgetrlimit",
+    "session_PID_UID_identity",
+    "outermonitor_valid_postreadyRSS",
+    "fresh_import_permission"
+  ],
+  "original_C18_contract_sources_changed": false,
+  "original_C18_scope_closure_sha256": "52c2f082061b4fa8e9c66d8f3a6990d765f0f2481ee0b75d8724ef42be10623e",
+  "original_C18_scope_identity": "6710e89d677d027f3baa0498206e0baf226f3a16",
+  "original_infra_attempt": "/private/tmp/tm-r5C18V2-pure21.r51udhhi",
+  "prospective_argv": [
+    "/usr/bin/env",
+    "-u",
+    "PYTHONOPTIMIZE",
+    "-u",
+    "PYTHONHOME",
+    "-u",
+    "PYTHONPATH",
+    "TABMAIL_C18_RSS_RUNTIME_APPROVED=1",
+    "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+    "-B",
+    "/private/tmp/r5-C18-RSS-resource-V2-prepared/c18_rss_controller_prepared_only.py"
+  ],
+  "pure_mock_evidence": {
+    "exit": 0,
+    "first_attempt": "SyntaxError unmatched parenthesis in newmock source;0tests",
+    "first_exit": 1,
+    "first_raw": "new-mocks-first-syntax.stderr",
+    "first_source": "new-mocks-first-syntax-source.py",
+    "last_additional_audit_socket_ctypes_kill_tightening": "AST checked only after mocks; no reused claim that mocks tested this exact later childbytes",
+    "no_real_subprocess_signals_Go_PG_services": true,
+    "raw": "new-mocks-repaired.stderr",
+    "subsequent_first_test_bodies": "15newmocksPASS0.003s",
+    "syntaxrepair_only_no_assertion_change": true
+  },
+  "remaining_source_review_risks": "mocks are decision/AST only, not actual RSS/nativeprocess handshake runtime proof; no C18 grammarbody executed",
+  "resource_contract": {
+    "CPU_seconds": 60,
+    "RSS_unit": "ps rss KiB multiplied1024 to bytes",
+    "absolute_whole_wall_seconds": 90,
+    "cleanup_reserved_seconds": 15,
+    "inter_sample_peaks_cannot_be_excluded": true,
+    "memory_contract": "owned_PID_RSS_sampling_not_hardquota",
+    "memory_limit_bytes": 1073741824,
+    "monotonic_supplement": "second original90 cutoff only; no restart/replacement of rawwall origin",
+    "ps_call_timeout_seconds": 0.12,
+    "sample_max_gap_seconds": 0.25,
+    "sample_target_interval_seconds": 0.1,
+    "wall_monotonic_gap_seconds": 0.1,
+    "work_seconds": 75
+  },
+  "runtime_approval_marker": "TABMAIL_C18_RSS_RUNTIME_APPROVED=1",
+  "runtime_currently_authorized": false,
+  "runtime_entry": "/private/tmp/r5-C18-RSS-resource-V2-prepared/c18_rss_controller_prepared_only.py",
+  "signal_protocol": "leader never poll/reap before groupabsence or safelyverifiedKILL; TERM then bounded0.5grace heldanchor; reverify UID PID PGID ps-session lstart eachsignal; identityunknown no signal => failclosed; no signal after wait",
+  "source_certification_boundary": "7 scoped purecontract files only, no Go/platform/build/runtime qualification or newmethod migration",
+  "source_pins": {
+    "c18_audited_child.py": "ee748504e160670ea1cb351f7ef43759cc4785a8d8071b2196c7e634fdfebd3c",
+    "c18_rss_controller_prepared_only.py": "bdedc5044863ca8df03d64690240314758092b27eeb5b6ccc6146230678c54df",
+    "c18_rss_protocol.py": "17db87ab01e8c337c88ca8580f9eed24540dc4e44add061ad05c5e3c810652e6",
+    "test_c18_rss_resource_new.py": "e4e7d85e752180a8ee4ba44f2ace95a605a2977c68ea565b0f50e67735367598"
+  },
+  "status": "SOURCE_PREPARED_NO_C18_TEST_RUNTIME_EXECUTED"
+}

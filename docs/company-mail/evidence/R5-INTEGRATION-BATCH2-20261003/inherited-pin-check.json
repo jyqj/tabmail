@@ -1,0 +1,18 @@
+{
+  "checked": 1029,
+  "changed": {
+    "scripts/tests/test_outbound_inspection_contract.py": {
+      "old": "6fdd563ef0b916927d795481d39663cee68a540d6f8c33c415a36a80c194a89a",
+      "new": "5384da140747c776a10239aeeaeadcc7472af964c657983a4eec255e16cac671"
+    },
+    "web/features/company/profile-management.consumer.test.tsx": {
+      "old": "01690387bc1799ee0ec96da5eac74e03eb5bcf8fb2d50cba3eec9959083735f1",
+      "new": "bc58a54bda97289e7d74d41ee8e5eb2c71a30e26b9d28c60e4b90386472d0c1d"
+    },
+    "web/features/company/profile-management.tsx": {
+      "old": "849ffaa1d4d0475a56d331f91d616500e30da17b817a72e58554525af70a55d1",
+      "new": "bf2431332c98ae3d478e6ae4ae1e2f7c23d3e28aeda5c1e6aa9fb3a218997857"
+    }
+  },
+  "missing": []
+}

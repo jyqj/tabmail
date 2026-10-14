@@ -37,11 +37,12 @@ func TestDispatcherPublishSendsSignedWebhook(t *testing.T) {
 	defer srv.Close()
 
 	d := New(Config{
-		URLs:       srv.URL,
-		Secret:     "top-secret",
-		Timeout:    time.Second,
-		MaxRetries: 1,
-		RetryDelay: time.Millisecond,
+		URLs:         srv.URL,
+		AllowedCIDRs: "127.0.0.1/32,::1/128",
+		Secret:       "top-secret",
+		Timeout:      time.Second,
+		MaxRetries:   1,
+		RetryDelay:   time.Millisecond,
 	}, zerolog.Nop())
 
 	d.Publish(Event{
@@ -82,11 +83,12 @@ func TestDispatcherPublishSendsSignedWebhook(t *testing.T) {
 
 func TestDispatcherDispatchRecordsDeadLettersAndTrims(t *testing.T) {
 	d := New(Config{
-		URLs:       "http://127.0.0.1:1",
-		Timeout:    100 * time.Millisecond,
-		MaxRetries: 2,
-		RetryDelay: time.Millisecond,
-		DeadLimit:  2,
+		URLs:         "http://127.0.0.1:1",
+		AllowedCIDRs: "127.0.0.1/32,::1/128",
+		Timeout:      100 * time.Millisecond,
+		MaxRetries:   2,
+		RetryDelay:   time.Millisecond,
+		DeadLimit:    2,
 	}, zerolog.Nop())
 
 	for _, id := range []string{"job-1", "job-2", "job-3"} {

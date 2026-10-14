@@ -1,0 +1,779 @@
+{
+  "version": 1,
+  "batch": "B01-L",
+  "base_commit": "b67041876fc7268903ff7acdae417d4e9336f484",
+  "tested_tree": "89a5e05efd6ddd2e71112d9f377a50b1faeec93b",
+  "branch": "fix/company-source-http-boundary-20260929",
+  "verified_source_files": 613,
+  "post_test_changes": [
+    "docs/company-mail/R5-TODO.md",
+    "docs/company-mail/R5-TRANSACTIONS.md"
+  ],
+  "summary": {
+    "base": "b67041876fc7268903ff7acdae417d4e9336f484",
+    "tree": "89a5e05efd6ddd2e71112d9f377a50b1faeec93b",
+    "files": 613,
+    "results": {
+      "baseline-exact": 1,
+      "focused-1": 0,
+      "focused-1-gate": 0,
+      "focused-2": 0,
+      "focused-2-gate": 0,
+      "focused-3": 0,
+      "focused-3-gate": 0,
+      "build": 0,
+      "vet": 0,
+      "python": 0,
+      "contract": 0,
+      "all-no-dsn": 0,
+      "backend-negative-gate": 1
+    },
+    "database_execution": false,
+    "baseline-exact": {
+      "counts": {
+        "run": 43,
+        "output": 128,
+        "fail": 32,
+        "pass": 11
+      },
+      "failed": [
+        "TestCompanySourceHTTPFirstReadFailureIsNotSuccessfulDownload/revoked",
+        "TestCompanySourceHTTPFirstReadFailureIsNotSuccessfulDownload/removed",
+        "TestCompanySourceHTTPFirstReadFailureIsNotSuccessfulDownload/source-changed",
+        "TestCompanySourceHTTPFirstReadFailureIsNotSuccessfulDownload/database",
+        "TestCompanySourceHTTPFirstReadFailureIsNotSuccessfulDownload",
+        "TestCompanySourceHTTPEarlyIOFailureAndNoProgress/read-error",
+        "TestCompanySourceHTTPEarlyIOFailureAndNoProgress/bytes-and-error",
+        "TestCompanySourceHTTPEarlyIOFailureAndNoProgress/no-progress",
+        "TestCompanySourceHTTPEarlyIOFailureAndNoProgress",
+        "TestCompanySourceHTTPAbortsFailedClientWrite/write-error",
+        "TestCompanySourceHTTPAbortsFailedClientWrite/short-write",
+        "TestCompanySourceHTTPAbortsFailedClientWrite",
+        "TestCompanySourceHTTPNoProgressAfterFirstChunkAborts",
+        "TestCompanySourceHTTPLateReadFailureAbortsTransport/http1",
+        "TestCompanySourceHTTPLateReadFailureAbortsTransport/http2",
+        "TestCompanySourceHTTPLateReadFailureAbortsTransport",
+        "TestCompanyComposeRechecksDestinationAfterParsing/reply/revoked",
+        "TestCompanyComposeRechecksDestinationAfterParsing/reply/database",
+        "TestCompanyComposeRechecksDestinationAfterParsing/reply/address-changed",
+        "TestCompanyComposeRechecksDestinationAfterParsing/reply_all/revoked",
+        "TestCompanyComposeRechecksDestinationAfterParsing/reply_all/database",
+        "TestCompanyComposeRechecksDestinationAfterParsing/reply_all/address-changed",
+        "TestCompanyComposeRechecksDestinationAfterParsing/forward/address-changed",
+        "TestCompanyComposeRechecksDestinationAfterParsing",
+        "TestCompanyForwardRechecksSourceBetweenCopies/revoked/one",
+        "TestCompanyForwardRechecksSourceBetweenCopies/source-changed/one",
+        "TestCompanyForwardRechecksSourceBetweenCopies/destination-revoked/one",
+        "TestCompanyForwardRechecksSourceBetweenCopies/cancelled/one",
+        "TestCompanyForwardRechecksSourceBetweenCopies/revoked/two",
+        "TestCompanyForwardRechecksSourceBetweenCopies/source-changed/two",
+        "TestCompanyForwardRechecksSourceBetweenCopies/cancelled/two",
+        "TestCompanyForwardRechecksSourceBetweenCopies"
+      ],
+      "skipped": []
+    },
+    "focused-1": {
+      "counts": {
+        "run": 43,
+        "output": 86,
+        "pass": 43
+      },
+      "failed": [],
+      "skipped": []
+    },
+    "focused-2": {
+      "counts": {
+        "run": 43,
+        "output": 86,
+        "pass": 43
+      },
+      "failed": [],
+      "skipped": []
+    },
+    "focused-3": {
+      "counts": {
+        "run": 43,
+        "output": 86,
+        "pass": 43
+      },
+      "failed": [],
+      "skipped": []
+    },
+    "all-no-dsn": {
+      "counts": {
+        "run": 845,
+        "output": 1906,
+        "pass": 686,
+        "skip": 159,
+        "pause": 20,
+        "cont": 20
+      },
+      "failed": [],
+      "skipped": [
+        "TestCompanyDomainsEndpoints",
+        "TestCompanySubmissionsEndpoints",
+        "TestCompanySubmissionContentAndAttachmentEndpoints",
+        "TestCompanyHTTPContract",
+        "TestIngressPartialFailureRecoversWithoutDuplicate",
+        "TestIngressHeldBytesSurviveRetentionAndObjectGC",
+        "TestIngressExpiredWorkerCannotCommitOrFinalize",
+        "TestIngressDeliveredTombstoneSurvivesMessageDeletion",
+        "TestIngressDestinationReuseIsNotRerouted",
+        "TestIngressConcurrentClaimsAndQuota",
+        "TestIngressMissingRawRetainedForReview",
+        "TestIngressAuditFailureRollsBackAndCorruptionIsHeld",
+        "TestIngressLegacyQueuesCannotBypassLedger",
+        "TestIngressDuplicateRecipientAndDistinctSubmissionIdentity",
+        "TestMigrateAppliesCleanly",
+        "TestAR09HandoverAndConvertClaimRevisionThroughHelper",
+        "TestAR09OffboardingLocksOwnedMailboxesInIdOrder",
+        "TestArchitectureSentAssetsOutliveQueueAndRemainPrivate",
+        "TestArchitectureSentAssetCreationRollsBackWithJob",
+        "TestArchitectureDraftCreationReplayAndTombstone",
+        "TestArchitectureDraftAuthorizationBeforePagination",
+        "TestArchitectureOffboardingPreviewFencesChangesAndReplay",
+        "TestArchitectureOffboardingDispositionAndQueueEvidence/transfer_owned",
+        "TestArchitectureOffboardingDispositionAndQueueEvidence/discard",
+        "TestArchitectureIndexLeaseSearchAndConversation",
+        "TestArchitectureOffboardingExpiryAndAuditRollback",
+        "TestR3CoordinatedSnapshotRestoresIntoEmptyTargets",
+        "TestR3BrowserJourney",
+        "TestArchitectureConsoleUsesTenantAndCanonicalAuthority",
+        "TestArchitectureAdministrativeOutboxFailureRollsBack",
+        "TestArchitectureExpiredArchiveCannotBeReopenedViaWorkspace",
+        "TestArchitectureNewHTTPViewsRespectContentAndAdminBoundaries",
+        "TestSubmissionAuthorLosesContentButKeepsReceiptAfterReadRevocation",
+        "TestCompanyMessageDetailMatchesPersonalListStateAndImmutableScope",
+        "TestR3RealSMTPRecipientIsolationAndUncertainRecovery",
+        "TestR3BootstrapIsAtomicAcrossRoles",
+        "TestDraftSubmitConsumesDraftAtomically",
+        "TestDraftSubmitConcurrentWindowsProduceOneJob",
+        "TestDraftSubmitRevisionMismatchKeepsDraft",
+        "TestDraftSubmitRevokedSendRightKeepsDraft",
+        "TestCreateOutboundJobConsumeDraftSingleConsumption",
+        "TestR3CompanyHTTPJourney",
+        "TestR3PasswordChangeInvalidatesExistingAccess",
+        "TestArchitectureIndexCrashBudgetAndFailureFence",
+        "TestArchitectureIndexRecoveryIsBoundedTenantScopedAndAtomic",
+        "TestArchitectureIndexRecoveryHTTPRequiresAdministratorAndReason",
+        "TestP0PostgresOwnerGrantAndPermanentRetention",
+        "TestP0PostgresOutboundDomainFencingAndUncertainty",
+        "TestP0GooseRestartAndHistoricalGrantSafety/upgrade_and_restart",
+        "TestP0GooseRestartAndHistoricalGrantSafety/preserve_incompatible_grants",
+        "TestCompanyReadPathDoesNotSerializeOnTenantLock",
+        "TestDomainDeletePreservesFormerPrimaryAssets",
+        "TestDomainDeleteTenantScopeAndAtomicAudit",
+        "TestDomainDeleteProtectsDurableIngressProvenance",
+        "TestDomainDeleteConcurrentMailboxInsertCannotCascade",
+        "TestMailboxGrantStaleSnapshotCannotRestoreRevokedPermission",
+        "TestMailboxGrantAndPolicyShareOneCAS",
+        "TestMailboxAdministrationHTTPRequiresObservedVersion",
+        "TestTemplateUsableListAndSendRequireSameAdminGrant",
+        "TestPinnedTemplateDraftRemainsUsableAfterNewPublication",
+        "TestArchitectureUpgradeBackfillsExistingEmployeeAssets",
+        "TestR3EmployeeActivationSingleUseAndPrivateProvisioning",
+        "TestR3EmployeeInvitationRevocationExpiryAndAuditRollback",
+        "TestR3SharedMailboxRightsAndGrantAuditRollback",
+        "TestAdminVisibilityIsNotContentAccess",
+        "TestR3OffboardingAndOptimisticHandover",
+        "TestMailboxAdministrationFollowsMemberHierarchy",
+        "TestR3SoftDeleteRestoreRetentionAndEvents",
+        "TestR3DraftRevisionAndAttachmentAuthorization",
+        "TestR3TemplateImmutableVersionsAndCurrentGrants",
+        "TestR3TemplateVersionRevocationStopsUndeliveredSends",
+        "TestR3SubmissionIdempotencyTemplateOnlyAndCodec",
+        "TestR3MessageMutationAuditRollback",
+        "TestR3AttachmentCleanupRespectsLiveDraftReferences",
+        "TestP4AttachmentCleanupRespectsSentJobReferences",
+        "TestR3DraftTemplateVersionEligibilityContract",
+        "TestAR02ReadableMailboxQueryParity",
+        "TestSharedMailboxPersonalStateSeparation",
+        "TestPersonalMailboxSeenBehaviorUnchanged",
+        "TestPersonalStateWritesStillEmitMailboxEvents",
+        "TestR5AttachmentFinishRejectsConcurrentRemoval",
+        "TestR5AttachmentFinishRejectsExpiryAfterWait",
+        "TestR5AttachmentFinishUsesTimeAfterLockWait",
+        "TestR5AttachmentFinishOnlyOneChecksumWins",
+        "TestR5AttachmentFinishOrdersMailboxRevocation",
+        "TestR5AttachmentFinishCanonicalChecksumAndReplay",
+        "TestR5AttachmentFinishCancellationRollsBack",
+        "TestR5AttachmentFinishRejectsNonHexChecksum",
+        "TestR5ConcurrencyR01EnqueueOffboardNoAttachmentCycle",
+        "TestR5ConcurrencyR03EnqueueOffboardNoTenantFKCycle",
+        "TestR5ConcurrencyR02DraftCannotCommitAfterCompletedRevoke",
+        "TestR5SentMutationRejectsExpiryAfterItemWait/expires",
+        "TestR5SentMutationRejectsExpiryAfterItemWait/purge",
+        "TestR5SentMutationRollsBackExpiryDuringAuditWait/expires",
+        "TestR5SentMutationRollsBackExpiryDuringAuditWait/purge",
+        "TestR5SentMutationRollsBackExpiryDuringAuditWait/mailbox",
+        "TestR5SentMutationOrdersGrantRevocation",
+        "TestR5SentMutationCancellationAndAuditFailureRollBack/cancel",
+        "TestR5SentMutationCancellationAndAuditFailureRollBack/audit",
+        "TestR5SentReadUsesTimeAfterIdentityWait/content",
+        "TestR5SentReadUsesTimeAfterIdentityWait/attachments",
+        "TestR5SentReadUsesTimeAfterIdentityWait/list",
+        "TestR5ContentReadsFenceMailboxSnapshot/message",
+        "TestR5ContentReadsFenceMailboxSnapshot/parsed",
+        "TestR5ContentReadsFenceMailboxSnapshot/save-parsed",
+        "TestR5ConcurrencyIndependentSubmissionsShareParentLock",
+        "TestR5IndexCompleteRechecksAfterJobWait",
+        "TestR5IndexFailRechecksAfterJobWait",
+        "TestR5IndexCompleteRechecksAfterDocumentWait",
+        "TestR5IndexSourceLockPrecedesJob",
+        "TestR5IndexDocumentFailureRollsBackCompletion",
+        "TestR5IndexCancelledCompletionReleasesLocks",
+        "TestR5IndexRejectsChangedSourceAndStaleToken",
+        "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack",
+        "TestR5IngressAuditFailureRollsBackCheckpointAndQuota",
+        "TestR5IngressAcceptanceRollsBackEarlierTarget",
+        "TestR5LockMapExistingDraftCASAvoidsTenantLock",
+        "TestR5LockMapDraftAuthorizationWaitsForMailboxFence",
+        "TestR5LockMapDraftUserFenceOrdersSuspension",
+        "TestR5LockMapRefreshFamilyThenUserThenToken",
+        "TestR5LockMapEnqueueParentAndUserBeforeAttachments",
+        "TestR5ReadCachedContentRejectsNewRequestsAfterRevoke",
+        "TestR5ReadAdminAndWrongMailboxDoNotOpenObject",
+        "TestR5ReadWaitingIdentityReloadRejectsFrozenActor",
+        "TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal",
+        "TestR5ReferenceGCRollsBackIfOrphanRegistrationFails",
+        "TestR5ReferenceGCKeepsSentPinAfterQueueCleanup",
+        "TestR5ReferenceObjectCallbackCancellationReleasesKey",
+        "TestR5ReferenceObjectGCWaitsForCommittedMessage",
+        "TestR5ReservationOrdersMailboxRevocation",
+        "TestR5ReservationWaitsForMailboxBeforeBudget",
+        "TestR5ReservationConcurrentBudgetIsAtomic",
+        "TestR5ReservationOtherUploaderRemainsIndependent",
+        "TestR5ReservationCancellationReleasesLocksAndBudget",
+        "TestR5SchemaInventoryAndRestart",
+        "TestAR04LegacyRecipientMigrationPreservesEvidence",
+        "TestReleasePostgresLastAdminConcurrent/disable",
+        "TestReleasePostgresLastAdminConcurrent/demote",
+        "TestReleasePostgresLastAdminConcurrent/delete",
+        "TestReleasePostgresMemberPatchAndRoleRecheck",
+        "TestReleasePostgresMemberAuditRollback",
+        "TestReleasePostgresRefreshConcurrentSingleConsumer",
+        "TestReleasePostgresRefreshDescendantAndLogoutRaces",
+        "TestReleasePostgresRefreshRollback",
+        "TestReleasePostgresSharedMailboxAndOutboundScope",
+        "TestReleasePostgresRefreshCleanupPreservesReplayEvidence",
+        "TestReleasePostgresOwnedPrivateMailboxConstraint",
+        "TestSendPolicyDefaultsAndEffectiveResolution",
+        "TestSendPolicyGatesEnqueuedJobAtNextAttempt",
+        "TestSendPolicyBindsAdminGrant",
+        "TestSendPolicyAdminCompanyDefaultLifecycle",
+        "TestSendPolicyMailboxOverrideAdminLifecycle",
+        "TestSendPolicyAdminValidationAndGuards",
+        "TestSendPolicyAdminHTTPJourney",
+        "TestP4SubmissionContentAndAttachmentsScope",
+        "TestSubmissionScopeRejectsCrossTenantRows",
+        "TestSubmissionListRejectsAPIKeyPrincipal",
+        "TestSubmissionProjectionScopeAndDTO",
+        "TestSubmissionUncertaintyMapsToNeedsAttention"
+      ]
+    }
+  },
+  "focused_evidence": [
+    {
+      "allowed_skips_observed": [],
+      "errors": [],
+      "events": 180,
+      "log_sha256": "74cb485d888647cb45582e4d0c968a88d4370e805623d43f1cce7755194ec798",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 10,
+      "manifest_sha256": "84aadb1cb5765920688689c7a7f2af956037e88a5a4a14fda460a3634cfc5a1e",
+      "packages": 2,
+      "process_exit_code": 0,
+      "source_sha": "89a5e05efd6ddd2e71112d9f377a50b1faeec93b",
+      "status": "pass",
+      "suite": "content-http-boundary",
+      "tests_failed": 0,
+      "tests_passed": 43,
+      "tests_skipped": 0,
+      "tests_started": 43
+    },
+    {
+      "allowed_skips_observed": [],
+      "errors": [],
+      "events": 180,
+      "log_sha256": "198876fbb10e8e3fdf2b384bfd49c5ee841da590dbff467ece18312658c6626b",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 10,
+      "manifest_sha256": "84aadb1cb5765920688689c7a7f2af956037e88a5a4a14fda460a3634cfc5a1e",
+      "packages": 2,
+      "process_exit_code": 0,
+      "source_sha": "89a5e05efd6ddd2e71112d9f377a50b1faeec93b",
+      "status": "pass",
+      "suite": "content-http-boundary",
+      "tests_failed": 0,
+      "tests_passed": 43,
+      "tests_skipped": 0,
+      "tests_started": 43
+    },
+    {
+      "allowed_skips_observed": [],
+      "errors": [],
+      "events": 180,
+      "log_sha256": "eae44b55380ac537189eeaa551ca0e161bfcc1f9053baa2953fea3a82ec174a2",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 10,
+      "manifest_sha256": "84aadb1cb5765920688689c7a7f2af956037e88a5a4a14fda460a3634cfc5a1e",
+      "packages": 2,
+      "process_exit_code": 0,
+      "source_sha": "89a5e05efd6ddd2e71112d9f377a50b1faeec93b",
+      "status": "pass",
+      "suite": "content-http-boundary",
+      "tests_failed": 0,
+      "tests_passed": 43,
+      "tests_skipped": 0,
+      "tests_started": 43
+    }
+  ],
+  "backend_evidence": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [
+      "unexpected skipped test: tabmail/internal/api::TestCompanyDomainsEndpoints",
+      "unexpected skipped test: tabmail/internal/api::TestCompanySubmissionsEndpoints",
+      "unexpected skipped test: tabmail/internal/api::TestCompanySubmissionContentAndAttachmentEndpoints",
+      "unexpected skipped test: tabmail/internal/api::TestCompanyHTTPContract",
+      "unexpected skipped test: tabmail/internal/ingest::TestIngressPartialFailureRecoversWithoutDuplicate",
+      "unexpected skipped test: tabmail/internal/ingest::TestIngressHeldBytesSurviveRetentionAndObjectGC",
+      "unexpected skipped test: tabmail/internal/ingest::TestIngressExpiredWorkerCannotCommitOrFinalize",
+      "unexpected skipped test: tabmail/internal/ingest::TestIngressDeliveredTombstoneSurvivesMessageDeletion",
+      "unexpected skipped test: tabmail/internal/ingest::TestIngressDestinationReuseIsNotRerouted",
+      "unexpected skipped test: tabmail/internal/ingest::TestIngressConcurrentClaimsAndQuota",
+      "unexpected skipped test: tabmail/internal/ingest::TestIngressMissingRawRetainedForReview",
+      "unexpected skipped test: tabmail/internal/ingest::TestIngressAuditFailureRollsBackAndCorruptionIsHeld",
+      "unexpected skipped test: tabmail/internal/ingest::TestIngressLegacyQueuesCannotBypassLedger",
+      "unexpected skipped test: tabmail/internal/ingest::TestIngressDuplicateRecipientAndDistinctSubmissionIdentity",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestMigrateAppliesCleanly",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestAR09HandoverAndConvertClaimRevisionThroughHelper",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestAR09OffboardingLocksOwnedMailboxesInIdOrder",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureSentAssetsOutliveQueueAndRemainPrivate",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureSentAssetCreationRollsBackWithJob",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureDraftCreationReplayAndTombstone",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureDraftAuthorizationBeforePagination",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureOffboardingPreviewFencesChangesAndReplay",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureOffboardingDispositionAndQueueEvidence/transfer_owned",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureOffboardingDispositionAndQueueEvidence/discard",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureIndexLeaseSearchAndConversation",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureOffboardingExpiryAndAuditRollback",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3CoordinatedSnapshotRestoresIntoEmptyTargets",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureConsoleUsesTenantAndCanonicalAuthority",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureAdministrativeOutboxFailureRollsBack",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureExpiredArchiveCannotBeReopenedViaWorkspace",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureNewHTTPViewsRespectContentAndAdminBoundaries",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestSubmissionAuthorLosesContentButKeepsReceiptAfterReadRevocation",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestCompanyMessageDetailMatchesPersonalListStateAndImmutableScope",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3RealSMTPRecipientIsolationAndUncertainRecovery",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3BootstrapIsAtomicAcrossRoles",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestDraftSubmitConsumesDraftAtomically",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestDraftSubmitConcurrentWindowsProduceOneJob",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestDraftSubmitRevisionMismatchKeepsDraft",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestDraftSubmitRevokedSendRightKeepsDraft",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestCreateOutboundJobConsumeDraftSingleConsumption",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3CompanyHTTPJourney",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3PasswordChangeInvalidatesExistingAccess",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureIndexCrashBudgetAndFailureFence",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureIndexRecoveryIsBoundedTenantScopedAndAtomic",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureIndexRecoveryHTTPRequiresAdministratorAndReason",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestP0PostgresOwnerGrantAndPermanentRetention",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestP0PostgresOutboundDomainFencingAndUncertainty",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestP0GooseRestartAndHistoricalGrantSafety/upgrade_and_restart",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestP0GooseRestartAndHistoricalGrantSafety/preserve_incompatible_grants",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestCompanyReadPathDoesNotSerializeOnTenantLock",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestDomainDeletePreservesFormerPrimaryAssets",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestDomainDeleteTenantScopeAndAtomicAudit",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestDomainDeleteProtectsDurableIngressProvenance",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestDomainDeleteConcurrentMailboxInsertCannotCascade",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestMailboxGrantStaleSnapshotCannotRestoreRevokedPermission",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestMailboxGrantAndPolicyShareOneCAS",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestMailboxAdministrationHTTPRequiresObservedVersion",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestTemplateUsableListAndSendRequireSameAdminGrant",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestPinnedTemplateDraftRemainsUsableAfterNewPublication",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestArchitectureUpgradeBackfillsExistingEmployeeAssets",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3EmployeeActivationSingleUseAndPrivateProvisioning",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3EmployeeInvitationRevocationExpiryAndAuditRollback",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3SharedMailboxRightsAndGrantAuditRollback",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestAdminVisibilityIsNotContentAccess",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3OffboardingAndOptimisticHandover",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestMailboxAdministrationFollowsMemberHierarchy",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3SoftDeleteRestoreRetentionAndEvents",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3DraftRevisionAndAttachmentAuthorization",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3TemplateImmutableVersionsAndCurrentGrants",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3TemplateVersionRevocationStopsUndeliveredSends",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3SubmissionIdempotencyTemplateOnlyAndCodec",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3MessageMutationAuditRollback",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3AttachmentCleanupRespectsLiveDraftReferences",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestP4AttachmentCleanupRespectsSentJobReferences",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR3DraftTemplateVersionEligibilityContract",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestAR02ReadableMailboxQueryParity",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestSharedMailboxPersonalStateSeparation",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestPersonalMailboxSeenBehaviorUnchanged",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestPersonalStateWritesStillEmitMailboxEvents",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5AttachmentFinishRejectsConcurrentRemoval",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5AttachmentFinishRejectsExpiryAfterWait",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5AttachmentFinishUsesTimeAfterLockWait",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5AttachmentFinishOnlyOneChecksumWins",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5AttachmentFinishOrdersMailboxRevocation",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5AttachmentFinishCanonicalChecksumAndReplay",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5AttachmentFinishCancellationRollsBack",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5AttachmentFinishRejectsNonHexChecksum",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5ConcurrencyR01EnqueueOffboardNoAttachmentCycle",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5ConcurrencyR03EnqueueOffboardNoTenantFKCycle",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5ConcurrencyR02DraftCannotCommitAfterCompletedRevoke",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationRejectsExpiryAfterItemWait/expires",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationRejectsExpiryAfterItemWait/purge",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationRollsBackExpiryDuringAuditWait/expires",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationRollsBackExpiryDuringAuditWait/purge",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationRollsBackExpiryDuringAuditWait/mailbox",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationOrdersGrantRevocation",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationCancellationAndAuditFailureRollBack/cancel",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationCancellationAndAuditFailureRollBack/audit",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentReadUsesTimeAfterIdentityWait/content",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentReadUsesTimeAfterIdentityWait/attachments"
+    ],
+    "events": 3823,
+    "log_sha256": "65efe5f7082db638f941cde2b2582ab0a93fdc25c476632c3b3429286eaa6eba",
+    "mandatory_missing_or_not_passed": 53,
+    "mandatory_tests": 80,
+    "manifest_sha256": "84aadb1cb5765920688689c7a7f2af956037e88a5a4a14fda460a3634cfc5a1e",
+    "packages": 50,
+    "process_exit_code": 0,
+    "source_sha": "89a5e05efd6ddd2e71112d9f377a50b1faeec93b",
+    "status": "fail",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 686,
+    "tests_skipped": 159,
+    "tests_started": 845
+  },
+  "python_tests": 168,
+  "static_contract": {
+    "shared_models": 16,
+    "company_projections": 33,
+    "operations": 67,
+    "json": 61,
+    "non_json": 6
+  },
+  "environment": {
+    "go": "go version go1.25.7 darwin/arm64",
+    "python": "3.12.11",
+    "network": "loopback HTTP test servers only; no SMTP or database",
+    "dependencies": "existing module/build caches, GOPROXY=off, GOTOOLCHAIN=local, readonly modules"
+  },
+  "historical_test_correction": "Initial source test expected INTERNAL_ERROR; actual existing contract is INTERNAL. Corrected test, then reran exact baseline/candidate. Initial failed run retained.",
+  "verification_scope": "Real service/auth/handler and loopback HTTP1/HTTP2 transports with synthetic repository/object adapters, plus app deterministic boundaries. Not PostgreSQL integration.",
+  "not_run": [
+    "B01-K six PostgreSQL groups",
+    "full PostgreSQL backend",
+    "PostgreSQL HTTP contract journey",
+    "shipping browser",
+    "frontend npm suite",
+    "DNS/SSE replay",
+    "performance",
+    "current vulnerability audit"
+  ],
+  "release_actions": {
+    "push": false,
+    "pr": false,
+    "merge": false,
+    "deploy": false
+  },
+  "bundle": {
+    "file": "R5-B01-L-LOGS.tar.gz",
+    "bytes": 114392,
+    "sha256": "330531c97206c54207f00102e2698538260452711ed23e682aa7b9d8d20b3a1e",
+    "members": {
+      "final/all-no-dsn.command.json": {
+        "bytes": 87,
+        "sha256": "8bac106001abe50c61130f51d6d1c66babd282de9e04906ee50773d33121508f"
+      },
+      "final/all-no-dsn.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "final/all-no-dsn.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "final/all-no-dsn.stdout": {
+        "bytes": 759946,
+        "sha256": "65efe5f7082db638f941cde2b2582ab0a93fdc25c476632c3b3429286eaa6eba"
+      },
+      "final/backend-negative-gate.command.json": {
+        "bytes": 321,
+        "sha256": "c567b1f771d9076547cc30ce9cdd0be3914a547ae38af0f9a2cb1e4bf13a3b17"
+      },
+      "final/backend-negative-gate.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "final/backend-negative-gate.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "final/backend-negative-gate.stdout": {
+        "bytes": 12029,
+        "sha256": "9feb11f7d021aa78d35f3a064074c5fa78ce359a6b5e5fd284bb8ca00f29ea29"
+      },
+      "final/baseline-exact.command.json": {
+        "bytes": 219,
+        "sha256": "a1d338e301d47bd319944b5099b7cd2cace13ccf651962a7501893e72a6b9ee0"
+      },
+      "final/baseline-exact.exit": {
+        "bytes": 2,
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+      },
+      "final/baseline-exact.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "final/baseline-exact.stdout": {
+        "bytes": 50119,
+        "sha256": "5fb805e26d3120954c0f24e61efce6cf8457268092759743b69ef64f4e367b13"
+      },
+      "final/build.command.json": {
+        "bytes": 41,
+        "sha256": "33b4fc22c537c75cc9839c8779da3c6d69ba21a470d5699c50de9bfbdc5cf954"
+      },
+      "final/build.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "final/build.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "final/build.stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "final/contract.command.json": {
+        "bytes": 100,
+        "sha256": "06c4f673536f8fd9cf2e0bb7452c2837b6aba961d23de77b3cea5770573af20f"
+      },
+      "final/contract.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "final/contract.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "final/contract.stdout": {
+        "bytes": 475,
+        "sha256": "f8082a21d45518cbef41e0dfb35ecfb453504dc0ee981a1c051775140b13835a"
+      },
+      "final/focused-1-gate.command.json": {
+        "bytes": 334,
+        "sha256": "dcfa4ac44abc9df9787c4b8ac254cb86bfb068dd88f5b2a6f25f92a1e0aee706"
+      },
+      "final/focused-1-gate.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "final/focused-1-gate.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "final/focused-1-gate.stdout": {
+        "bytes": 553,
+        "sha256": "79f37ced4c34007cd145b796bbfe2e15df6f8bb8ba12f4ac64a0716b4c0911f3"
+      },
+      "final/focused-1.command.json": {
+        "bytes": 219,
+        "sha256": "a1d338e301d47bd319944b5099b7cd2cace13ccf651962a7501893e72a6b9ee0"
+      },
+      "final/focused-1.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "final/focused-1.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "final/focused-1.stdout": {
+        "bytes": 38911,
+        "sha256": "74cb485d888647cb45582e4d0c968a88d4370e805623d43f1cce7755194ec798"
+      },
+      "final/focused-2-gate.command.json": {
+        "bytes": 334,
+        "sha256": "bd401441a15b95ac4ed7797b5178981f183796be3b7833c0b043f1d52cbe1c5d"
+      },
+      "final/focused-2-gate.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "final/focused-2-gate.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "final/focused-2-gate.stdout": {
+        "bytes": 553,
+        "sha256": "0632b046289d92fd21ae7aff1a78e47b41d71db02d0b54487cc1cfa20782eb4e"
+      },
+      "final/focused-2.command.json": {
+        "bytes": 219,
+        "sha256": "a1d338e301d47bd319944b5099b7cd2cace13ccf651962a7501893e72a6b9ee0"
+      },
+      "final/focused-2.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "final/focused-2.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "final/focused-2.stdout": {
+        "bytes": 38922,
+        "sha256": "198876fbb10e8e3fdf2b384bfd49c5ee841da590dbff467ece18312658c6626b"
+      },
+      "final/focused-3-gate.command.json": {
+        "bytes": 334,
+        "sha256": "888413cb0671e04e5ac87ea3c3366e204accd3b0dab21361763a9b86631cf1aa"
+      },
+      "final/focused-3-gate.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "final/focused-3-gate.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "final/focused-3-gate.stdout": {
+        "bytes": 553,
+        "sha256": "aa6b6d6d51c8063a323205bfc8502681b5df5eacc898b2d3b41f42c78e59731e"
+      },
+      "final/focused-3.command.json": {
+        "bytes": 219,
+        "sha256": "a1d338e301d47bd319944b5099b7cd2cace13ccf651962a7501893e72a6b9ee0"
+      },
+      "final/focused-3.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "final/focused-3.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "final/focused-3.stdout": {
+        "bytes": 38913,
+        "sha256": "eae44b55380ac537189eeaa551ca0e161bfcc1f9053baa2953fea3a82ec174a2"
+      },
+      "final/python.command.json": {
+        "bytes": 143,
+        "sha256": "0b4b17399c3c84332063abbde4ef8faad631dac7022546dfddc85ed757192f2e"
+      },
+      "final/python.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "final/python.stderr": {
+        "bytes": 22234,
+        "sha256": "74cbbdbee9352f59e03c3c4360c87975fe32a284f436a4174d2c435a4a01c056"
+      },
+      "final/python.stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "final/vet.command.json": {
+        "bytes": 39,
+        "sha256": "acce39a1bf7b579db3cb1b7be174ad9ff5343b628c3fe3dec38815bd592716ee"
+      },
+      "final/vet.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "final/vet.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "final/vet.stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "history/baseline-command.json": {
+        "bytes": 139,
+        "sha256": "0cb3cd0057abd0aa427c6ec9bef2d5069189229c826e3f6fa9f564659cff8c93"
+      },
+      "history/baseline.exit": {
+        "bytes": 1,
+        "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+      },
+      "history/baseline.jsonl": {
+        "bytes": 21657,
+        "sha256": "4f51286d01381f2a7c78a92ef414bcb1834471bb935e71ccfa31478e25932086"
+      },
+      "history/baseline.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "history/both-green-command.json": {
+        "bytes": 218,
+        "sha256": "4477914e735dba49678750421f6c5a458b1964ae96916d3e2b51296d5468f52e"
+      },
+      "history/both-green.exit": {
+        "bytes": 1,
+        "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+      },
+      "history/both-green.jsonl": {
+        "bytes": 90017,
+        "sha256": "40d4c3c8746d8f79773bb1fec44c9eebb66617874dbf8435f71cbac73f4243da"
+      },
+      "history/both-green.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "history/compose-red-command.json": {
+        "bytes": 181,
+        "sha256": "0e8240c3a4d86d52d523630dfb5cb154a5584686b7b58d57d2351dc7739e333d"
+      },
+      "history/compose-red.exit": {
+        "bytes": 1,
+        "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+      },
+      "history/compose-red.jsonl": {
+        "bytes": 23339,
+        "sha256": "3d2f31d64442995913accb9b497b1fab1033e087d834950fa72891785bb76436"
+      },
+      "history/compose-red.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "history/source-green-command.json": {
+        "bytes": 139,
+        "sha256": "0cb3cd0057abd0aa427c6ec9bef2d5069189229c826e3f6fa9f564659cff8c93"
+      },
+      "history/source-green.exit": {
+        "bytes": 1,
+        "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+      },
+      "history/source-green.jsonl": {
+        "bytes": 16442,
+        "sha256": "710647c7d4cc7ba618c48ce1587907b2dd4b19971c1d14390d7d93ad6dcde284"
+      },
+      "history/source-green.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "metadata/final-source.json": {
+        "bytes": 69561,
+        "sha256": "6f37622dced504010f03de9d7db14fb6275f0c3978807b8f27a023e616f81be2"
+      },
+      "metadata/final-summary.json": {
+        "bytes": 12456,
+        "sha256": "fb7268236cc0f7c30331cc4a666213c9ab27e98b52244c278d51ef2227779936"
+      },
+      "metadata/versions.json": {
+        "bytes": 239,
+        "sha256": "b812a4091d67498ff25889f965afd4b2e8f0675a881bac0941e6ed20430629f3"
+      }
+    }
+  }
+}

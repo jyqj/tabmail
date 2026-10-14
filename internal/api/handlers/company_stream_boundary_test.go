@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -19,7 +20,6 @@ type streamBoundaryRepo struct {
 	calls, reads          int
 	allowFirst, allowPoll bool
 	pollErr               error
-	cancel                context.CancelFunc
 }
 
 func (s *streamBoundaryRepo) GetWorkMailbox(_ context.Context, a authz.Actor, id uuid.UUID) (*company.MailboxAccess, error) {
@@ -40,9 +40,6 @@ func (s *streamBoundaryRepo) ListMailboxEvents(_ context.Context, tenant, mailbo
 	s.reads++
 	if tenant != s.mailbox.TenantID || mailbox != s.mailbox.ID {
 		return nil, 0, errors.New("wrong event scope")
-	}
-	if s.cancel != nil {
-		s.cancel()
 	}
 	return []company.MailEvent{{Sequence: 42, Type: "changed"}}, 42, nil
 }
@@ -66,8 +63,11 @@ func TestCompanyEventStreamDoesNotInheritAdministrativeReadBypass(t *testing.T) 
 			response := doOutboundHandlerRequest(t, f.st, func(w http.ResponseWriter, req *http.Request) {
 				ctx, cancel := context.WithCancel(req.Context())
 				defer cancel()
-				r.cancel = cancel
-				h.Events(w, req.WithContext(ctx))
+				// End the allowed control after its final handshake frame. A
+				// cancellation from inside ListMailboxEvents is a separate denial
+				// case, now asserted by the stream release regression tests.
+				writer := &r5SSEWriter{ResponseRecorder: w.(*httptest.ResponseRecorder), cancel: cancel, stopAtResync: true}
+				h.Events(writer, req.WithContext(ctx))
 			}, http.MethodGet, "/events", map[string]string{"id": r.mailbox.ID.String()}, outboundUserHeaders(t, f.tenantAdmin))
 			if mode == "allowed" {
 				if r.reads != 1 || !strings.Contains(response.Body.String(), "id: 42") {

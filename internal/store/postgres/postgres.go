@@ -19,6 +19,9 @@ type PgStore struct {
 const claimLeaseDuration = 5 * time.Minute
 
 func New(ctx context.Context, cfg config.DB) (*PgStore, error) {
+	if err := cfg.Validate(); err != nil {
+		return nil, err
+	}
 	poolCfg, err := pgxpool.ParseConfig(cfg.DSN)
 	if err != nil {
 		return nil, fmt.Errorf("postgres: parse dsn: %w", err)

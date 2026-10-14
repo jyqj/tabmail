@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "reviewer": "frontend independent reviewer",
+  "issue": "https://github.com/jyqj/tabmail/issues/166",
+  "pull_request": "https://github.com/jyqj/tabmail/pull/168",
+  "verdict": "ACCEPT",
+  "scope": "revision12 catalog maintenance only; no additional implementation TODO accepted",
+  "material_issues": [],
+  "checked_at": "2026-10-08T09:56:25.799693+00:00",
+  "source_commit": "b87df7a77656457549d6f2d678c56d321ae0d869",
+  "source_tree": "312dbed6634b7b173e6ec9e180bbf5d0f1809d9d",
+  "parent_product_commit": "ed81ee2fcadc9e8cfcd165947561f8b4b65589e6",
+  "worktree": "/workspace/scratch/4f09dfb9aa92/tabmail-frontend-review-catalog12-public",
+  "public_reproducibility": {
+    "network_clone": true,
+    "clean_before_after": true,
+    "public_anchors_present": [
+      "9bcc542dcaa0bb7c280c380ea278c1a2a52717d3",
+      "f2713367dd949487c632ebee51de3a0cc1d2c6f7",
+      "58d0c9cf274569258319ff4b5dcab7912b0174f4"
+    ],
+    "private_objects_absent": [
+      "f7ba05a2fc602ca2f3b9c7cda882b8146bf75065",
+      "d2a4f21d3cc6742bc2cb7e831eeedd771ddd1c71",
+      "8e4fd58f63f4e111eca8e5482ae91abbec0484b2",
+      "fd87031aa117dc48346bbdc22b663e0385704c20"
+    ],
+    "alternates_or_partial_clone_or_shared_pack_hardlinks": false,
+    "typescript_dependency": "Symlink to existing exact installed TypeScript 5.9.3 only; no node_modules copy, no current application file substitution."
+  },
+  "executed": {
+    "original_cli_exit_codes": {
+      "transactions": 0,
+      "compatibility": 0,
+      "clients": 0
+    },
+    "catalog_tests": {
+      "pass": 27,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "runner_seconds": 41.109,
+      "original_negative_tests_executed": [
+        "test_unapproved_client_and_caller_locations_are_rejected",
+        "test_unapproved_actual_source_and_ast_changes_rejected",
+        "test_unapproved_actual_closure_bytes_rejected",
+        "test_unapproved_route_and_ast_fact_changes_rejected",
+        "test_unapproved_actual_route_source_rejected_by_original_collector"
+      ]
+    },
+    "source_audit_exit": 0,
+    "diff_check_exit": 0
+  },
+  "environment": {
+    "python_executable": "/workspace/scratch/4f09dfb9aa92/backend-catalog-python/bin/python",
+    "python_version": "3.12.14",
+    "node_version": "v24.19.0",
+    "go_version": "go version go1.25.7 linux/amd64",
+    "environment": {
+      "R5_TEST_GO": "/workspace/scratch/9e3fd1ca3a13/toolchains/go/bin/go",
+      "R5_TEST_CACHE": "/workspace/scratch/4f09dfb9aa92/go-build",
+      "R5_TEST_MODULECACHE": "/workspace/scratch/9e3fd1ca3a13/go-cache/mod",
+      "GOPROXY": "off",
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PYTHONPATH": "scripts:scripts/tests",
+      "GOTOOLCHAIN": "local",
+      "GOMODCACHE": "/workspace/scratch/9e3fd1ca3a13/go-cache/mod",
+      "GOCACHE": "/workspace/scratch/4f09dfb9aa92/go-build",
+      "GOMAXPROCS": "4",
+      "GODEBUG": "asynctimerchan=0",
+      "GOFLAGS": "-mod=readonly"
+    },
+    "typescript": {
+      "version": "5.9.3",
+      "symlink": "/workspace/scratch/4f09dfb9aa92/dependencies/node_modules/typescript"
+    },
+    "installed_python_distributions": [
+      {
+        "name": "attrs",
+        "version": "26.1.0"
+      },
+      {
+        "name": "jsonschema",
+        "version": "4.26.0"
+      },
+      {
+        "name": "jsonschema-specifications",
+        "version": "2025.9.1"
+      },
+      {
+        "name": "pip",
+        "version": "25.0.1"
+      },
+      {
+        "name": "PyYAML",
+        "version": "6.0.3"
+      },
+      {
+        "name": "referencing",
+        "version": "0.37.0"
+      },
+      {
+        "name": "rfc3339-validator",
+        "version": "0.1.4"
+      },
+      {
+        "name": "rpds-py",
+        "version": "2026.6.3"
+      },
+      {
+        "name": "six",
+        "version": "1.17.0"
+      },
+      {
+        "name": "typing_extensions",
+        "version": "4.16.0"
+      }
+    ]
+  },
+  "environment_boundary": "Parent process selectors are recorded. Unchanged r5_go_environment.selected normalizes its own Go children as documented in the repository, including GOFLAGS/GODEBUG cleanup. No dependencies installed or lock files altered for this review.",
+  "verified_preservation": {
+    "historical_files": 65,
+    "historical_directories": 10,
+    "historical_manifest_sha256": "3f0fd50e1b86ff3e470b5beca0399cf72791cb88d90e130e63b4f3119d47c53a",
+    "protected_source_files": 167,
+    "protected_source_manifest_sha256": "d9e16753906d1372bbfdfca9f7d1352c9b7c98511e30b970c3c53752d1402f1c",
+    "original_collectors": 5,
+    "old_test_methods_retained": 25,
+    "current_test_methods": 27,
+    "old_methods_byte_and_ast_unchanged": 22,
+    "old_revision11_methods_same_assertion_ast_in_public_frozen_checkout": 2,
+    "old_current_pins_method_advanced_to_include_revision11_rejection": 1,
+    "original_unapproved_guards_same_source_and_ast": 5,
+    "postgres_function_entries_all_noncaller_fields_retained": 401,
+    "postgres_files": 63,
+    "sql_execution_calls": 501,
+    "literal_write_functions": 138,
+    "name_closure_functions": 158,
+    "migrations": 19,
+    "only_caller_arrays_changed": 11,
+    "postgres_new_name_candidates": [
+      179,
+      180
+    ],
+    "new_candidate_qualification": "list.New only; name-match-candidate-not-dispatch-proof",
+    "routes_same_set": 133,
+    "route_rows_with_clients_only_changes": 7,
+    "clients": [
+      135,
+      136
+    ],
+    "old_logical_client_calls_removed": 0,
+    "new_logical_client_call": "DomainSettings explicit GET /api/v1/company/settings",
+    "forwarders_unchanged": 7,
+    "source_closure_same_membership": 95,
+    "source_closure_hash_changes": 10,
+    "original_filter_product_files": 18,
+    "original_filter_product_files_inside_closure": 8,
+    "original_filter_product_files_outside_closure": 10,
+    "additional_schema_file": "internal/api/openapi.yaml, separately exact commit/blob/hash/byte-pinned",
+    "package_or_lock_changes": 0
+  },
+  "qualification": {
+    "implementation_todos_completed": 0,
+    "runtime_verified": false,
+    "product_green": false,
+    "task_complete": false,
+    "original_parent_tasks": {
+      "accepted": 10,
+      "total": 171,
+      "remaining": 161
+    },
+    "full_source_version_runner": "Not executed by this reviewer. Backend owns the separate full-runner result; this verdict does not replace or relabel that evidence.",
+    "prior_author_94_tests": "Reviewed as author uncommitted candidate execution, not relabeled as this public clone execution."
+  },
+  "reviewer_helper_note": {
+    "result": "reviewer helper schema error, not a repository test failure",
+    "detail": "An earlier inline audit read caller['source']; the actual catalog uses caller['file']. It stopped with KeyError before writing its report. Corrected helper compares all caller fields except line, including file/status; no repository source or test was changed.",
+    "preserved_tool_session": 31457
+  },
+  "artifacts": [
+    {
+      "path": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/public-clone.log",
+      "filename": "public-clone.log",
+      "sha256": "35b1eca1136ebd16617e02eac92261b19a0501b2fb07b8a9fbf0dec0035a4760",
+      "bytes": 91
+    },
+    {
+      "path": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/initial-provenance.json",
+      "filename": "initial-provenance.json",
+      "sha256": "515ec0514f3b65d7d3424c3d71a75eee31669679a0413bd53d25f7bbc6242d8d",
+      "bytes": 1090
+    },
+    {
+      "path": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/public-provenance.json",
+      "filename": "public-provenance.json",
+      "sha256": "5cc6c1f01d1b59b980b6f332bcd65a055cff98264871ec7954a878c2d86ea148",
+      "bytes": 3043
+    },
+    {
+      "path": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/transactions.log",
+      "filename": "transactions.log",
+      "sha256": "75ae46d78f95d41f145e505836e8a8e30503140c248f2c561e4730322c409dfd",
+      "bytes": 309
+    },
+    {
+      "path": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/compatibility.log",
+      "filename": "compatibility.log",
+      "sha256": "d0954efef62572f718c0d4a4dc38485d1e60599ce81088ee6a4efb731707ed71",
+      "bytes": 1117
+    },
+    {
+      "path": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/clients.log",
+      "filename": "clients.log",
+      "sha256": "47b96ae470deec0228831298df2ab391d0e25b90aec7aaabbaa7c78ebc5536eb",
+      "bytes": 73
+    },
+    {
+      "path": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/catalog27.log",
+      "filename": "catalog27.log",
+      "sha256": "6161d9fae0ebb973002f6269fd26eb52e80f17eeba9bd2a6eb06d52d3e2ff605",
+      "bytes": 5743
+    },
+    {
+      "path": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/execution.json",
+      "filename": "execution.json",
+      "sha256": "9efd9e06e7a50af93d6504ce8ee2d749727c388303ed685ae2a555d871e13c9c",
+      "bytes": 4499
+    },
+    {
+      "path": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/source-review.json",
+      "filename": "source-review.json",
+      "sha256": "3542cb61e9c8b6a51c3789db4d48920509cd0db4d454808f9c70d828de7b9998",
+      "bytes": 74558
+    },
+    {
+      "path": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/source-audit.log",
+      "filename": "source-audit.log",
+      "sha256": "c5e5a8f5c66c08daf1719962ba767688019590e34c346fe6c09499273760c09c",
+      "bytes": 170
+    },
+    {
+      "path": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/source-audit-execution.json",
+      "filename": "source-audit-execution.json",
+      "sha256": "f9b532c129aa2a3abd68edbb4478881a971f10add119205506c05585155cacdf",
+      "bytes": 899
+    },
+    {
+      "path": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/audit_source.py",
+      "filename": "audit_source.py",
+      "sha256": "3f644efb765b545b253194dd78878c60ebec9900fc801d7e042fc5043823fd32",
+      "bytes": 12871
+    }
+  ]
+}

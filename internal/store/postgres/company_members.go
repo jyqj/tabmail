@@ -12,10 +12,19 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"tabmail/internal/app"
+	"tabmail/internal/app/credentials"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
+)
+
+type companyTenantLock uint8
+
+const (
+	companyNoTenantLock companyTenantLock = iota
+	companyTenantReferenceLock
+	companyTenantWriteLock
 )
 
 // companyTx orders administrative mutations on one company lock. Interactive
@@ -23,11 +32,11 @@ import (
 // never trusted from the HTTP handshake. Normal resource access is separate
 // from management.
 func (s *PgStore) companyTx(ctx context.Context, actor authz.Actor, admin bool, f func(pgx.Tx, authz.Actor) error) error {
-	return s.companyTxScope(ctx, actor, admin, true, f)
+	return s.companyTxScope(ctx, actor, admin, companyTenantWriteLock, true, f)
 }
 
 // companyReadTx is the tenant-lock-free counterpart of companyTx for pure reads and
-// single-row CAS writes: it never takes the tenants row lock, so mailbox
+// single-row CAS writes: it takes no explicit tenants row lock, so mailbox
 // reads, drafts, attachments and the outbound template hot path no longer
 // queue behind company-wide administration or ingress quota serialization.
 // The interactive identity reload and the non-admin effective-permission load
@@ -35,19 +44,44 @@ func (s *PgStore) companyTx(ctx context.Context, actor authz.Actor, admin bool, 
 // concurrent administration (multi-row invariants, grant clearing vs
 // offboarding, MAX(version)+1 publication) stays on companyTx.
 func (s *PgStore) companyReadTx(ctx context.Context, actor authz.Actor, admin bool, f func(pgx.Tx, authz.Actor) error) error {
-	return s.companyTxScope(ctx, actor, admin, false, f)
+	return s.companyTxScope(ctx, actor, admin, companyNoTenantLock, true, f)
 }
 
-func (s *PgStore) companyTxScope(ctx context.Context, actor authz.Actor, admin, lock bool, f func(pgx.Tx, authz.Actor) error) error {
+// companyReferencedTx orders a mutation that inserts tenant-referencing rows
+// (including required audit records) before its user/mailbox/resource locks.
+// Deferring the FK's parent lock until audit can deadlock against tenant-first
+// administration. KEY SHARE is compatible with other ordinary referenced writes;
+// this is not the exclusive company administration lock. Pure reads stay on
+// companyReadTx, and neither helper substitutes for mailbox authorization.
+func (s *PgStore) companyReferencedTx(ctx context.Context, actor authz.Actor, admin bool, f func(pgx.Tx, authz.Actor) error) error {
+	return s.companyTxScope(ctx, actor, admin, companyTenantReferenceLock, true, f)
+}
+
+// uniqueConflicts retains the shared legacy mapping for existing callers.
+// Operations that classify uniqueness at the actual write boundary disable
+// that mapping so unrelated INSERT/audit errors and original causes survive.
+func (s *PgStore) companyTxScope(ctx context.Context, actor authz.Actor, admin bool, lock companyTenantLock, uniqueConflicts bool, f func(pgx.Tx, authz.Actor) error) error {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
-	if lock {
+	switch lock {
+	case companyNoTenantLock:
+	case companyTenantWriteLock:
 		if err = lockMemberTenant(ctx, tx, actor.TenantID); err != nil {
 			return err
 		}
+	case companyTenantReferenceLock:
+		var tenantID uuid.UUID
+		if err = tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, actor.TenantID).Scan(&tenantID); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return app.NotFound("company not found")
+			}
+			return err
+		}
+	default:
+		return app.Internal(errors.New("invalid company transaction lock mode"))
 	}
 	actor, err = currentMemberActor(ctx, tx, actor, actor.TenantID)
 	if err != nil {
@@ -57,7 +91,7 @@ func (s *PgStore) companyTxScope(ctx context.Context, actor authz.Actor, admin, 
 		return app.Forbidden("company administrator required")
 	}
 	if !actor.IsTenantAdmin() {
-		actor.Permission, err = effectivePermission(ctx, tx, actor.ID)
+		actor.Permission, err = effectivePermissionSnapshot(ctx, tx, actor.ID)
 		if err != nil {
 			return err
 		}
@@ -67,7 +101,7 @@ func (s *PgStore) companyTxScope(ctx context.Context, actor authz.Actor, admin, 
 		if errors.As(err, &pg) && pg.Code == "42501" {
 			return app.Forbidden("employee authority changed")
 		}
-		if errors.As(err, &pg) && (pg.Code == "23505" || pg.Code == "40001" || pg.Code == "55P03") {
+		if errors.As(err, &pg) && (uniqueConflicts && pg.Code == "23505" || pg.Code == "40001" || pg.Code == "55P03") {
 			return app.Conflict("resource changed or already exists; reload before retrying")
 		}
 		return err
@@ -90,7 +124,6 @@ func companyAudit(ctx context.Context, tx pgx.Tx, a authz.Actor, action, kind st
 	_, e = tx.Exec(ctx, `INSERT INTO outbox_events(id,event_type,payload) VALUES($1,'company.admin.changed',$2)`, uuid.New(), raw)
 	return e
 }
-func meaningfulReason(s string) bool { n := len(strings.TrimSpace(s)); return n >= 8 && n <= 1000 }
 func (s *PgStore) GetCompanySettings(ctx context.Context, tenant uuid.UUID) (*company.Settings, error) {
 	c := &company.Settings{}
 	e := s.pool.QueryRow(ctx, `SELECT c.tenant_id,c.name,c.primary_zone_id,z.domain,c.revision,t.mail_send_policy FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id JOIN tenants t ON t.id=c.tenant_id WHERE c.tenant_id=$1`, tenant).Scan(&c.TenantID, &c.Name, &c.PrimaryZoneID, &c.Domain, &c.Revision, &c.MailSendPolicy)
@@ -192,13 +225,16 @@ func (s *PgStore) InviteEmployee(ctx context.Context, a authz.Actor, in company.
 			return app.Conflict("employee or address already exists or is invited")
 		}
 		if in.PermissionProfileID != nil {
-			var ok bool
-			if e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM permission_profiles WHERE id=$1 AND (tenant_id=$2 OR tenant_id IS NULL))`, *in.PermissionProfileID, a.TenantID).Scan(&ok); e != nil {
+			// Actor U is already protected. Never wait for a deleting profile
+			// whose SET NULL action may itself be waiting for that same U.
+			var profileID uuid.UUID
+			if e = tx.QueryRow(ctx, `SELECT id FROM permission_profiles WHERE id=$1 AND (tenant_id=$2 OR tenant_id IS NULL) FOR KEY SHARE NOWAIT`, *in.PermissionProfileID, a.TenantID).Scan(&profileID); e != nil {
+				if errors.Is(e, pgx.ErrNoRows) {
+					return app.BadRequest("permission profile is outside company")
+				}
 				return e
 			}
-			if !ok {
-				return app.BadRequest("permission profile is outside company")
-			}
+			in.PermissionProfileID = &profileID
 		}
 		if e = tx.QueryRow(ctx, `INSERT INTO employee_invitations(id,tenant_id,email,display_name,mailbox_address,permission_profile_id,token_hash,invited_by,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING created_at`, out.ID, a.TenantID, out.Email, out.DisplayName, out.Address, in.PermissionProfileID, hash, a.ID, out.ExpiresAt).Scan(&out.CreatedAt); e != nil {
 			return e
@@ -263,11 +299,27 @@ func (s *PgStore) ActivateEmployee(ctx context.Context, hash, passwordHash strin
 	var id, inviter uuid.UUID
 	var email, name, address string
 	var profile *uuid.UUID
-	e = tx.QueryRow(ctx, `SELECT id,email,display_name,mailbox_address,permission_profile_id,invited_by FROM employee_invitations WHERE token_hash=$1 AND expires_at>now() AND consumed_at IS NULL AND revoked_at IS NULL FOR UPDATE`, hash).Scan(&id, &email, &name, &address, &profile, &inviter)
+	var expires time.Time
+	e = tx.QueryRow(ctx, `SELECT id,email,display_name,mailbox_address,permission_profile_id,invited_by,expires_at FROM employee_invitations WHERE token_hash=$1 AND tenant_id=$2 AND expires_at>clock_timestamp() AND consumed_at IS NULL AND revoked_at IS NULL FOR UPDATE`, hash, tenant).Scan(&id, &email, &name, &address, &profile, &inviter, &expires)
 	if errors.Is(e, pgx.ErrNoRows) {
 		return app.BadRequest("invalid or expired invitation")
 	}
 	if e != nil {
+		return e
+	}
+	// A predicate can be evaluated before the invitation row lock waits. Keep
+	// the original deadline and use the database's elapsed clock after waits.
+	checkDeadline := func() error {
+		var now time.Time
+		if err := tx.QueryRow(ctx, `SELECT clock_timestamp()`).Scan(&now); err != nil {
+			return err
+		}
+		if !expires.After(now) {
+			return app.BadRequest("invalid or expired invitation")
+		}
+		return nil
+	}
+	if e = checkDeadline(); e != nil {
 		return e
 	}
 	var sponsor bool
@@ -303,16 +355,52 @@ func (s *PgStore) ActivateEmployee(ctx context.Context, hash, passwordHash strin
 	}
 	uid := uuid.New()
 	if _, e = tx.Exec(ctx, `INSERT INTO users(id,tenant_id,email,password_hash,display_name,role,is_active,permission_profile_id) VALUES($1,$2,$3,$4,$5,'user',true,$6)`, uid, tenant, email, passwordHash, name, profile); e != nil {
-		return app.Conflict("employee email already exists")
+		return classifyActivationInsertError(e, "idx_users_email", "employee email already exists")
 	}
 	if _, e = tx.Exec(ctx, `INSERT INTO mailboxes(id,tenant_id,zone_id,local_part,resolved_domain,full_address,access_mode,owner_user_id,mailbox_kind,retention_hours_override) VALUES($1,$2,$3,$4,$5,$6,'token',$7,'personal',0)`, uuid.New(), tenant, zone, parts[0], domain, address, uid); e != nil {
-		return app.Conflict("employee mailbox already exists")
+		return classifyActivationInsertError(e, "mailboxes_full_address_key", "employee mailbox already exists")
 	}
 	if _, e = tx.Exec(ctx, `UPDATE employee_invitations SET consumed_at=now() WHERE id=$1`, id); e != nil {
 		return e
 	}
 	a := authz.Actor{ID: uid, Type: authz.PrincipalUser, TenantID: tenant}
 	if e = companyAudit(ctx, tx, a, "employee.activate", "user", uid, map[string]any{"invitation_id": id, "mailbox": address}); e != nil {
+		return e
+	}
+	// A super administrator may sponsor an invitation from another home
+	// company. The target tenant lock does not fence that user's own account
+	// administration while required audit/outbox writes wait. Recheck current
+	// sponsorship and hold its user row through commit; a late conflicting
+	// writer must be retried rather than adding a reverse-order lock wait.
+	var currentSponsor uuid.UUID
+	e = tx.QueryRow(ctx, `SELECT id FROM users WHERE id=$1 AND is_active AND (role='super_admin' OR (tenant_id=$2 AND role='admin')) FOR SHARE NOWAIT`, inviter, tenant).Scan(&currentSponsor)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return app.Forbidden("inviting administrator is no longer authorized")
+	}
+	if e != nil {
+		var pg *pgconn.PgError
+		if errors.As(e, &pg) && pg.Code == "55P03" {
+			return &app.Error{Kind: app.KindConflict, Message: "inviting administrator is changing; try again", Err: e}
+		}
+		return e
+	}
+	// Zone verification uses independent non-key updates. Mailbox FK key
+	// protection alone does not fence those updates while mandatory audit waits.
+	// Recheck the original company/domain and protect it through this commit;
+	// NOWAIT avoids adding a late reverse-order dependency wait.
+	var currentZone uuid.UUID
+	e = tx.QueryRow(ctx, `SELECT z.id FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id AND z.tenant_id=c.tenant_id WHERE c.tenant_id=$1 AND z.id=$2 AND z.domain=$3 AND z.is_verified AND z.mx_verified FOR SHARE OF c,z NOWAIT`, tenant, zone, domain).Scan(&currentZone)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return app.BadRequest("configure a verified primary company domain first")
+	}
+	if e != nil {
+		var pg *pgconn.PgError
+		if errors.As(e, &pg) && pg.Code == "55P03" {
+			return app.Conflict("company domain is changing; try again")
+		}
+		return e
+	}
+	if e = checkDeadline(); e != nil {
 		return e
 	}
 	return tx.Commit(ctx)
@@ -323,34 +411,46 @@ func (s *PgStore) ActivateEmployee(ctx context.Context, hash, passwordHash strin
 // single interpretation of admin roles, expiry, zone allowlists and the
 // profile-level send veto. The store must not re-derive those rules inline.
 func (s *PgStore) mailboxAccessTx(ctx context.Context, tx pgx.Tx, a authz.Actor, id uuid.UUID) (*company.MailboxAccess, error) {
+	v, _, err := s.mailboxAccessWithSourceTx(ctx, tx, a, id)
+	return v, err
+}
+
+// Keep explanation provenance bound to the exact owner/grant used by the
+// canonical evaluator. A second EXISTS or a second mailbox decision can observe
+// another generation. Callers still own the actor and mailbox lock boundary.
+func (s *PgStore) mailboxAccessWithSourceTx(ctx context.Context, tx pgx.Tx, a authz.Actor, id uuid.UUID) (*company.MailboxAccess, string, error) {
 	mb, e := s.scanMailbox(tx.QueryRow(ctx, mailboxSelect+` WHERE m.tenant_id=$1 AND m.id=$2`, a.TenantID, id))
 	if e != nil {
-		return nil, e
+		return nil, "", e
 	}
 	if mb == nil {
-		return nil, app.NotFound("mailbox not found")
+		return nil, "", app.NotFound("mailbox not found")
 	}
 	v := &company.MailboxAccess{Mailbox: *mb}
 	if e = tx.QueryRow(ctx, `SELECT lifecycle_revision FROM mailboxes WHERE id=$1`, id).Scan(&v.Revision); e != nil {
-		return nil, e
+		return nil, "", e
 	}
 	uid := a.EffectiveUserID()
 	owner := uid != nil && mb.OwnerUserID != nil && *mb.OwnerUserID == *uid
+	source := "none"
 	var grant *models.MailboxGrant
-	if !owner {
+	if owner {
+		source = "owner"
+	} else {
 		g := &models.MailboxGrant{}
 		e = tx.QueryRow(ctx, `SELECT tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`, a.TenantID, id, a.ID).Scan(&g.TenantID, &g.MailboxID, &g.UserID, &g.CanRead, &g.CanOrganize, &g.CanSend, &g.TemplateOnly)
 		if errors.Is(e, pgx.ErrNoRows) {
 			grant = nil
 		} else if e != nil {
-			return nil, e
+			return nil, "", e
 		} else {
 			grant = g
+			source = "grant"
 		}
 	}
 	d := authz.EvaluateMailboxAccess(a, mb, grant)
 	v.CanRead, v.CanOrganize, v.CanSend, v.TemplateOnly, v.CanManage = d.CanRead, d.CanOrganize, d.CanSend, d.TemplateOnly, d.CanManage
-	return v, nil
+	return v, source, nil
 }
 
 // mailboxAccessBatch resolves access decisions for a batch of mailboxes with
@@ -490,7 +590,7 @@ func (s *PgStore) CreateWorkMailbox(ctx context.Context, a authz.Actor, in compa
 		return nil, app.BadRequest("shared mailbox belongs to company; use grants")
 	}
 	var out *models.Mailbox
-	e := s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyTxScope(ctx, a, true, companyTenantWriteLock, false, func(tx pgx.Tx, a authz.Actor) error {
 		zone, domain, e := companyDomain(ctx, tx, a.TenantID)
 		if e != nil {
 			return e
@@ -506,7 +606,7 @@ func (s *PgStore) CreateWorkMailbox(ctx context.Context, a authz.Actor, in compa
 		}
 		id := uuid.New()
 		if _, e = tx.Exec(ctx, `INSERT INTO mailboxes(id,tenant_id,zone_id,local_part,resolved_domain,full_address,access_mode,owner_user_id,mailbox_kind,retention_hours_override) VALUES($1,$2,$3,$4,$5,$6,'token',$7,$8,$9)`, id, a.TenantID, zone, in.LocalPart, domain, in.LocalPart+"@"+domain, in.OwnerUserID, in.Kind, hours); e != nil {
-			return e
+			return classifyWorkMailboxCreateError(e)
 		}
 		if e = companyAudit(ctx, tx, a, "mailbox.provision", "mailbox", id, in); e != nil {
 			return e
@@ -536,7 +636,8 @@ func guardMailboxOwner(ctx context.Context, tx pgx.Tx, a authz.Actor, owner *uui
 }
 
 func (s *PgStore) TransferWorkMailbox(ctx context.Context, a authz.Actor, id, owner uuid.UUID, revision int64, reason string) error {
-	if !meaningfulReason(reason) {
+	reason, reasonErr := credentials.AuditReason(reason)
+	if reasonErr != nil {
 		return app.BadRequest("handover reason must be 8-1000 bytes")
 	}
 	return s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
@@ -559,7 +660,13 @@ func (s *PgStore) TransferWorkMailbox(ctx context.Context, a authz.Actor, id, ow
 		if e = guardMailboxOwner(ctx, tx, a, old); e != nil {
 			return e
 		}
-		if _, e = tx.Exec(ctx, `UPDATE mailboxes SET owner_user_id=$3,lifecycle_revision=lifecycle_revision+1 WHERE tenant_id=$1 AND id=$2`, a.TenantID, id, owner); e != nil {
+		// The row is already FOR UPDATE-locked and matched above, so the claim
+		// CAS cannot fail here; it exists to keep every revision increment on
+		// the single helper shared with grants, policy and offboarding.
+		if e = claimMailboxRevision(ctx, tx, a.TenantID, id, revision); e != nil {
+			return e
+		}
+		if _, e = tx.Exec(ctx, `UPDATE mailboxes SET owner_user_id=$3 WHERE tenant_id=$1 AND id=$2`, a.TenantID, id, owner); e != nil {
 			return e
 		}
 		if old != nil {
@@ -575,7 +682,8 @@ func (s *PgStore) TransferWorkMailbox(ctx context.Context, a authz.Actor, id, ow
 // persisted preview plan. Both commands share the same transaction and default
 // disposition: seal private drafts, cancel only known-not-in-flight sends.
 func (s *PgStore) OffboardEmployee(ctx context.Context, a authz.Actor, target, successor uuid.UUID, reason string) error {
-	if !meaningfulReason(reason) {
+	reason, reasonErr := credentials.AuditReason(reason)
+	if reasonErr != nil {
 		return app.BadRequest("documented handover reason required")
 	}
 	return s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
@@ -614,6 +722,7 @@ func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.Mail
 	if g.CanOrganize && !g.CanRead || g.TemplateOnly && !g.CanSend {
 		return app.BadRequest("organize requires read; template-only requires send")
 	}
+	granting := g.CanRead || g.CanSend || g.CanOrganize
 	return s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
 		v, e := s.mailboxAccessTx(ctx, tx, a, g.MailboxID)
 		if e != nil {
@@ -625,13 +734,26 @@ func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.Mail
 		if e = guardMailboxOwner(ctx, tx, a, v.Mailbox.OwnerUserID); e != nil {
 			return e
 		}
-		if e = activeCompanyUser(ctx, tx, a.TenantID, g.UserID); e != nil {
-			return e
+		if granting {
+			if e = activeCompanyUser(ctx, tx, a.TenantID, g.UserID); e != nil {
+				return e
+			}
+		} else {
+			// Freezing suspends use, but administrators must still be able to
+			// remove the grant before a later reactivation. Retain the same
+			// tenant boundary, mailbox CAS and required audit for this revoke.
+			var exists bool
+			if e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`, a.TenantID, g.UserID).Scan(&exists); e != nil {
+				return e
+			}
+			if !exists {
+				return app.BadRequest("same-company employee required")
+			}
 		}
 		if e = claimMailboxRevision(ctx, tx, a.TenantID, g.MailboxID, revision); e != nil {
 			return e
 		}
-		if !g.CanRead && !g.CanSend && !g.CanOrganize {
+		if !granting {
 			_, e = tx.Exec(ctx, `DELETE FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`, a.TenantID, g.MailboxID, g.UserID)
 		} else {
 			_, e = tx.Exec(ctx, `INSERT INTO mailbox_grants(tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(mailbox_id,user_id) DO UPDATE SET can_read=EXCLUDED.can_read,can_organize=EXCLUDED.can_organize,can_send=EXCLUDED.can_send,template_only=EXCLUDED.template_only,granted_by=EXCLUDED.granted_by,updated_at=now()`, a.TenantID, g.MailboxID, g.UserID, g.CanRead, g.CanOrganize, g.CanSend, g.TemplateOnly, a.ID)
@@ -701,7 +823,8 @@ func (s *PgStore) GetWorkMailbox(ctx context.Context, a authz.Actor, id uuid.UUI
 // Existing messages become permanent; historical personal ownership is never
 // discarded as a side effect of reclassification.
 func (s *PgStore) ConvertSharedMailbox(ctx context.Context, actor authz.Actor, id uuid.UUID, revision int64, reason string) error {
-	if !meaningfulReason(reason) {
+	reason, reasonErr := credentials.AuditReason(reason)
+	if reasonErr != nil {
 		return app.BadRequest("reason must be 8-1000 bytes")
 	}
 	return s.companyTx(ctx, actor, true, func(tx pgx.Tx, a authz.Actor) error {
@@ -714,10 +837,21 @@ func (s *PgStore) ConvertSharedMailbox(ctx context.Context, actor authz.Actor, i
 		if owner != nil || kind != "legacy" || current != revision {
 			return app.Conflict("only an unchanged ownerless legacy mailbox may be converted")
 		}
-		if _, err := tx.Exec(ctx, `UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL,lifecycle_revision=lifecycle_revision+1 WHERE id=$1`, id); err != nil {
+		// Same single revision helper as every other mailbox write; the
+		// FOR UPDATE read above guarantees the CAS matches.
+		if err := claimMailboxRevision(ctx, tx, a.TenantID, id, revision); err != nil {
 			return err
 		}
-		if _, err := tx.Exec(ctx, `UPDATE messages SET expires_at=NULL WHERE mailbox_id=$1 AND deleted_at IS NULL`, id); err != nil {
+		if _, err := tx.Exec(ctx, `UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1`, id); err != nil {
+			return err
+		}
+		// Physical retention may already own a source and later need this
+		// mailbox/tenant. Only clear expiry on our locked active subset; never
+		// wait in that opposite order while the conversion holds T/M.
+		if _, err := tx.Exec(ctx, `WITH locked AS MATERIALIZED (
+ SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT
+) UPDATE messages m SET expires_at=NULL FROM locked l
+ WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL`, a.TenantID, id); err != nil {
 			return err
 		}
 		return companyAudit(ctx, tx, a, "mailbox.convert_shared", "mailbox", id, map[string]any{"reason": reason, "revision": revision})

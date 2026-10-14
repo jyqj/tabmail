@@ -1,0 +1,342 @@
+{
+  "source": "66eb5e819170d3508edb07db8ab1e0014555ff8c",
+  "go": "go1.25.7 linux/amd64",
+  "GODEBUG": "asynctimerchan=0",
+  "postgres": "17, newly initdb-owned cluster on loopback port 55439; each subtest creates/drops its own database",
+  "root_replacements": [
+    "third_party/enmime-v2.3.0",
+    "third_party/go-smtp"
+  ],
+  "schema": 19,
+  "gate_timeout": "180s",
+  "scenario_context": "12s unchanged",
+  "stderr_bytes": {
+    "original": 0,
+    "diagnostic": 0,
+    "diagnostic-corrected": 0,
+    "fixed-repeat5": 0,
+    "fixed-file": 0
+  },
+  "commands": {
+    "original": "go test -mod=readonly -json -race -count=1 -timeout=180s -run ^TestR5KeyUsageAuthorityAdmissionIsolation$ ./internal/store/postgres",
+    "diagnostic": "same command, diagnostic.patch applied to fixed source; original aggregate assertion retained",
+    "fixed_repeat5": "go test -mod=readonly -json -race -count=5 -timeout=180s -run ^TestR5KeyUsageAuthorityAdmissionIsolation$ ./internal/store/postgres",
+    "fixed_file": "go test -mod=readonly -json -race -count=1 -timeout=180s -run ^(TestR5KeyUsageAuthorityAdmissionIsolation|TestR5APIKeyUsageLifecycleCascade|TestR5APIKeyUsageMetadataStoreAndWire)$ ./internal/store/postgres"
+  },
+  "not_run": [
+    "whole-suite ./... gate; central CI remains integration-owner work",
+    "merge",
+    "deploy"
+  ],
+  "runs": {
+    "original.json": [
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+        "elapsed": 2.11
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/telemetry_committed_then_zone_revoked",
+        "elapsed": 0.66
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/permission_change_held_conflicts",
+        "elapsed": 2.06
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/unrevoked_retry_and_telemetry_commit",
+        "elapsed": 0.66
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation",
+        "elapsed": 5.49
+      },
+      {
+        "action": "pass",
+        "test": "package",
+        "elapsed": 6.529
+      }
+    ],
+    "diagnostic-original-assertion.json": [
+      {
+        "action": "fail",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+        "elapsed": 2.24
+      },
+      {
+        "action": "fail",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/telemetry_committed_then_zone_revoked",
+        "elapsed": 0.69
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/permission_change_held_conflicts",
+        "elapsed": 2.24
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/unrevoked_retry_and_telemetry_commit",
+        "elapsed": 0.8
+      },
+      {
+        "action": "fail",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation",
+        "elapsed": 5.97
+      },
+      {
+        "action": "fail",
+        "test": "package",
+        "elapsed": 6.005
+      }
+    ],
+    "diagnostic-original-assertion-corrected.json": [
+      {
+        "action": "fail",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+        "elapsed": 2.26
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/telemetry_committed_then_zone_revoked",
+        "elapsed": 0.71
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/permission_change_held_conflicts",
+        "elapsed": 2.21
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/unrevoked_retry_and_telemetry_commit",
+        "elapsed": 0.83
+      },
+      {
+        "action": "fail",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation",
+        "elapsed": 6.01
+      },
+      {
+        "action": "fail",
+        "test": "package",
+        "elapsed": 6.052
+      }
+    ],
+    "fixed-repeat5.json": [
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+        "elapsed": 2.2
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/telemetry_committed_then_zone_revoked",
+        "elapsed": 0.67
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/permission_change_held_conflicts",
+        "elapsed": 2.19
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/unrevoked_retry_and_telemetry_commit",
+        "elapsed": 0.73
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation",
+        "elapsed": 5.79
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+        "elapsed": 2.18
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/telemetry_committed_then_zone_revoked",
+        "elapsed": 0.78
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/permission_change_held_conflicts",
+        "elapsed": 2.14
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/unrevoked_retry_and_telemetry_commit",
+        "elapsed": 0.79
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation",
+        "elapsed": 5.89
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+        "elapsed": 2.66
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/telemetry_committed_then_zone_revoked",
+        "elapsed": 0.93
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/permission_change_held_conflicts",
+        "elapsed": 2.23
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/unrevoked_retry_and_telemetry_commit",
+        "elapsed": 0.65
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation",
+        "elapsed": 6.48
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+        "elapsed": 2.34
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/telemetry_committed_then_zone_revoked",
+        "elapsed": 0.96
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/permission_change_held_conflicts",
+        "elapsed": 2.29
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/unrevoked_retry_and_telemetry_commit",
+        "elapsed": 0.63
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation",
+        "elapsed": 6.22
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+        "elapsed": 2.26
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/telemetry_committed_then_zone_revoked",
+        "elapsed": 0.71
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/permission_change_held_conflicts",
+        "elapsed": 2.08
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/unrevoked_retry_and_telemetry_commit",
+        "elapsed": 0.81
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation",
+        "elapsed": 5.87
+      },
+      {
+        "action": "pass",
+        "test": "package",
+        "elapsed": 31.29
+      }
+    ],
+    "fixed-file.json": [
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry",
+        "elapsed": 2.16
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/telemetry_committed_then_zone_revoked",
+        "elapsed": 0.79
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/permission_change_held_conflicts",
+        "elapsed": 2.16
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation/unrevoked_retry_and_telemetry_commit",
+        "elapsed": 0.64
+      },
+      {
+        "action": "pass",
+        "test": "TestR5KeyUsageAuthorityAdmissionIsolation",
+        "elapsed": 5.76
+      },
+      {
+        "action": "pass",
+        "test": "TestR5APIKeyUsageLifecycleCascade/key_delete",
+        "elapsed": 0.54
+      },
+      {
+        "action": "pass",
+        "test": "TestR5APIKeyUsageLifecycleCascade/user_freeze",
+        "elapsed": 0.54
+      },
+      {
+        "action": "pass",
+        "test": "TestR5APIKeyUsageLifecycleCascade/guarded_user_delete",
+        "elapsed": 0.5
+      },
+      {
+        "action": "pass",
+        "test": "TestR5APIKeyUsageLifecycleCascade/raw_user_delete",
+        "elapsed": 0.52
+      },
+      {
+        "action": "pass",
+        "test": "TestR5APIKeyUsageLifecycleCascade/offboard",
+        "elapsed": 0.66
+      },
+      {
+        "action": "pass",
+        "test": "TestR5APIKeyUsageLifecycleCascade/minimal_tenant_delete",
+        "elapsed": 0.62
+      },
+      {
+        "action": "pass",
+        "test": "TestR5APIKeyUsageLifecycleCascade",
+        "elapsed": 3.39
+      },
+      {
+        "action": "pass",
+        "test": "TestR5APIKeyUsageMetadataStoreAndWire",
+        "elapsed": 0.61
+      },
+      {
+        "action": "pass",
+        "test": "package",
+        "elapsed": 10.8
+      }
+    ]
+  },
+  "sha256": {
+    "original.json": "5208f880720c09833d4c8cb124dec10990c0037250353c645668ac2feb6b2f6a",
+    "validated-test.go.txt": "0c32318074d2d1b59f70c4293be32bb32e7a6457641c9b312503126234485a08",
+    "diagnostic.patch": "6221d1bf9a45fd50800f7b613c2f370400f8de738450769946c53dee33af9c88",
+    "fixed-repeat5.json": "5c8db9dc149aafcf06d8c186a9229c565acd5b269d77a69114f4cdeff10bae67",
+    "diagnostic-original-assertion.json": "2d269c2bdbd845eb66738dcf30d4f87b58c54a6580114ded2e2c363dd4210c52",
+    "diagnostic-original-assertion-corrected.json": "33f10fbda307067d948ee0659d51341a99ae5970bf50a2da067261e42bd0a996",
+    "fixed-file.json": "1c0071424c0fdfe610779c7a7028df0adb3676f3223c69757a4f042fa5869277"
+  }
+}

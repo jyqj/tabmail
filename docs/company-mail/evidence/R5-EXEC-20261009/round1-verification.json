@@ -1,0 +1,36 @@
+{
+  "phase": "first-round pre-merge",
+  "baseline": "eae219951c6f9cbf17eb4062b69464c731807be7",
+  "product_commit": "43c4e2bac58b4df2e44f20b94f70a30aa1ea1b2a",
+  "product_tree": "f689ba433a930c82fd1ac3cb54e013868c844bba",
+  "joint_go_passed": {
+    "internal/company": 194,
+    "internal/app/templates": 107,
+    "internal/api/handlers_selected": 44,
+    "internal/smtp": 118,
+    "github.com/emersion/go-smtp": 86
+  },
+  "joint_go_passed_total": 549,
+  "joint_go_failed_tests": 0,
+  "joint_go_skipped_tests": 0,
+  "joint_name_execution": {
+    "state": "build failure, compiler killed; zero executed tests",
+    "independent_fixed_head": "19675518f02e68334ab5e1c350c023285cb57290",
+    "independent_pass": 12
+  },
+  "joint_ui": {
+    "pass": 103,
+    "fail": 0,
+    "skip": 0
+  },
+  "pending_before_merge": [
+    "exact public candidate full TypeScript check",
+    "exact public candidate Name pre-SQL 12 tests",
+    "public tree identity and merge verification"
+  ],
+  "parent_tasks": {
+    "completed": 10,
+    "total": 171,
+    "remaining": 161
+  }
+}

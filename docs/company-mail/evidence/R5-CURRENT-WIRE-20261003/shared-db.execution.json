@@ -1,0 +1,23 @@
+{
+  "name": "shared-db",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/check_r5_protocol.py",
+    "--run",
+    "shared-db",
+    "--output-dir",
+    "/workspace/r5-wire-private/shared-db",
+    "--source-policy",
+    "r5_current_local_inputs_archive_boundary_v4",
+    "--source-manifest",
+    "/workspace/r5-wire-private/manifest-db-clean.json",
+    "--source-manifest-sha256",
+    "064ea6672351b7f1536c40fec17c709da7f15ebcfd502f405a7267eb24dc2ce5"
+  ],
+  "invocation_started": true,
+  "started_at": "2026-10-03T21:45:38.281334+00:00",
+  "ended_at": "2026-10-03T21:47:05.221666+00:00",
+  "exit_code": 1,
+  "source_commit": "ee3308fd3217246c9bdd43b07ae0609ebae6aeb6"
+}

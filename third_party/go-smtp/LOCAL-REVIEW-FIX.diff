@@ -1,0 +1,524 @@
+--- a/conn.go
++++ b/conn.go
+@@ -182,6 +182,12 @@
+ 	return conn.Close()
+ }
+ 
++func (c *Conn) isClosed() bool {
++	c.locker.Lock()
++	defer c.locker.Unlock()
++	return c.closed
++}
++
+ func (c *Conn) logout() {
+ 	c.locker.Lock()
+ 	session := c.session
+--- a/server.go
++++ b/server.go
+@@ -199,8 +199,13 @@
+ 
+ 	c.greet()
+ 
+-	for {
++	for !c.isClosed() {
+ 		line, err := c.readLine()
++		// A transport close does not discard textproto buffered input.
++		// Apply the same gate to every dispatch, including parse errors.
++		if c.isClosed() {
++			return nil
++		}
+ 		if err == nil {
+ 			cmd, arg, err := parseCmd(line)
+ 			if err != nil {
+@@ -209,12 +214,6 @@
+ 			}
+ 
+ 			c.handle(cmd, arg)
+-			c.locker.Lock()
+-			closed := c.closed
+-			c.locker.Unlock()
+-			if closed {
+-				return nil
+-			}
+ 		} else {
+ 			if err == io.EOF || errors.Is(err, net.ErrClosed) {
+ 				return nil
+@@ -233,6 +232,7 @@
+ 			return err
+ 		}
+ 	}
++	return nil
+ }
+ 
+ func (s *Server) network() string {
+--- a/owner_lifecycle_test.go
++++ b/owner_lifecycle_test.go
+@@ -9,6 +9,7 @@
+ 	"strings"
+ 	"sync"
+ 	"testing"
++	"testing/synctest"
+ 	"time"
+ )
+ 
+@@ -106,6 +107,9 @@
+ }
+ func ownerAbsent(t *testing.T, ch <-chan struct{}, label string) {
+ 	t.Helper()
++	// All owners are in this bubble. A runnable cleanup/Shutdown cannot be
++	// mistaken for a waiter blocked on a still-owned DATA gate.
++	synctest.Wait()
+ 	select {
+ 	case <-ch:
+ 		t.Fatalf("%s occurred before DATA owner exited", label)
+@@ -161,78 +165,82 @@
+ }
+ 
+ func TestOwnerBDATDelayedEntryShutdown(t *testing.T) {
+-	entry, releaseEntry := ownerRelease(t)
+-	dispatched := make(chan struct{})
+-	entered := make(chan struct{})
+-	loggedOut := make(chan struct{})
+-	readErr := make(chan error, 1)
+-	session := &ownerSession{data: func(r io.Reader) error {
+-		close(dispatched)
+-		<-entry // Delay all backend work, including any backend-local registration.
+-		close(entered)
+-		_, err := io.Copy(io.Discard, r)
+-		readErr <- err
+-		return err
+-	}, logout: func() { close(loggedOut) }}
+-	s, c, serveDone := ownerStart(t, session)
+-	ownerCommand(t, c, "BDAT 0", "250")
+-	ownerAwait(t, dispatched)
+-	c.Close()
+-	stopped := make(chan error, 1)
+-	go func() { stopped <- s.Shutdown(context.Background()) }()
+-	if err := ownerError(t, serveDone); err != nil {
+-		t.Fatal(err)
+-	}
+-	ownerAbsent(t, entered, "backend entry")
+-	ownerAbsent(t, loggedOut, "Logout")
+-	select {
+-	case err := <-stopped:
+-		t.Fatalf("Shutdown prematurely returned %v", err)
+-	default:
+-	}
+-	releaseEntry()
+-	ownerAwait(t, entered)
+-	if err := ownerError(t, readErr); !errors.Is(err, ErrDataReset) {
+-		t.Fatalf("read error %v", err)
+-	}
+-	if err := ownerError(t, stopped); err != nil {
+-		t.Fatal(err)
+-	}
+-	ownerAwait(t, loggedOut)
++	synctest.Test(t, func(t *testing.T) {
++		entry, releaseEntry := ownerRelease(t)
++		dispatched := make(chan struct{})
++		entered := make(chan struct{})
++		loggedOut := make(chan struct{})
++		readErr := make(chan error, 1)
++		session := &ownerSession{data: func(r io.Reader) error {
++			close(dispatched)
++			<-entry // Delay all backend work, including any backend-local registration.
++			close(entered)
++			_, err := io.Copy(io.Discard, r)
++			readErr <- err
++			return err
++		}, logout: func() { close(loggedOut) }}
++		s, c, serveDone := ownerStart(t, session)
++		ownerCommand(t, c, "BDAT 0", "250")
++		ownerAwait(t, dispatched)
++		c.Close()
++		stopped := make(chan error, 1)
++		go func() { stopped <- s.Shutdown(context.Background()) }()
++		if err := ownerError(t, serveDone); err != nil {
++			t.Fatal(err)
++		}
++		ownerAbsent(t, entered, "backend entry")
++		ownerAbsent(t, loggedOut, "Logout")
++		select {
++		case err := <-stopped:
++			t.Fatalf("Shutdown prematurely returned %v", err)
++		default:
++		}
++		releaseEntry()
++		ownerAwait(t, entered)
++		if err := ownerError(t, readErr); !errors.Is(err, ErrDataReset) {
++			t.Fatalf("read error %v", err)
++		}
++		if err := ownerError(t, stopped); err != nil {
++			t.Fatal(err)
++		}
++		ownerAwait(t, loggedOut)
++	})
+ }
+ 
+ func TestOwnerBDATResetJoinsBeforeSessionReuse(t *testing.T) {
+-	returned, release := ownerRelease(t)
+-	readReset := make(chan struct{})
+-	reset := make(chan struct{}, 1)
+-	session := &ownerSession{data: func(r io.Reader) error {
+-		_, err := io.Copy(io.Discard, r)
+-		if !errors.Is(err, ErrDataReset) {
+-			return errors.New("missing reset error")
+-		}
+-		close(readReset)
+-		<-returned
+-		return err
+-	}, reset: func() { reset <- struct{}{} }}
+-	s, c, serveDone := ownerStart(t, session)
+-	ownerCommand(t, c, "BDAT 0", "250")
+-	if _, err := io.WriteString(c.w, "RSET\r\n"); err != nil {
+-		t.Fatal(err)
+-	}
+-	ownerAwait(t, readReset)
+-	ownerAbsent(t, reset, "Session.Reset")
+-	release()
+-	ownerResponse(t, c, "250")
+-	ownerAwait(t, reset)
+-	ownerCommand(t, c, "MAIL FROM:<second@example.org>", "250")
+-	ownerCommand(t, c, "RCPT TO:<second@example.org>", "250")
+-	c.Close()
+-	if err := s.Shutdown(context.Background()); err != nil {
+-		t.Fatal(err)
+-	}
+-	if err := ownerError(t, serveDone); err != nil {
+-		t.Fatal(err)
+-	}
++	synctest.Test(t, func(t *testing.T) {
++		returned, release := ownerRelease(t)
++		readReset := make(chan struct{})
++		reset := make(chan struct{}, 1)
++		session := &ownerSession{data: func(r io.Reader) error {
++			_, err := io.Copy(io.Discard, r)
++			if !errors.Is(err, ErrDataReset) {
++				return errors.New("missing reset error")
++			}
++			close(readReset)
++			<-returned
++			return err
++		}, reset: func() { reset <- struct{}{} }}
++		s, c, serveDone := ownerStart(t, session)
++		ownerCommand(t, c, "BDAT 0", "250")
++		if _, err := io.WriteString(c.w, "RSET\r\n"); err != nil {
++			t.Fatal(err)
++		}
++		ownerAwait(t, readReset)
++		ownerAbsent(t, reset, "Session.Reset")
++		release()
++		ownerResponse(t, c, "250")
++		ownerAwait(t, reset)
++		ownerCommand(t, c, "MAIL FROM:<second@example.org>", "250")
++		ownerCommand(t, c, "RCPT TO:<second@example.org>", "250")
++		c.Close()
++		if err := s.Shutdown(context.Background()); err != nil {
++			t.Fatal(err)
++		}
++		if err := ownerError(t, serveDone); err != nil {
++			t.Fatal(err)
++		}
++	})
+ }
+ 
+ // A changed/full Conn.dataResult must never redirect an old worker's send.
+@@ -277,42 +285,44 @@
+ func (*ownerTailLogger) Println(...interface{})          {}
+ 
+ func TestOwnerBDATPanicTailIncludedInShutdown(t *testing.T) {
+-	gate, release := ownerRelease(t)
+-	tail := make(chan struct{})
+-	loggedOut := make(chan struct{})
+-	session := &ownerSession{data: func(io.Reader) error { panic("tail barrier") }, logout: func() { close(loggedOut) }}
+-	// Install the logger before Serve: no mutable server configuration races.
+-	c := newOwnerConn()
+-	l := &ownerListener{conn: make(chan net.Conn, 1), closed: make(chan struct{})}
+-	l.conn <- c
+-	s := NewServer(BackendFunc(func(*Conn) (Session, error) { return session, nil }))
+-	s.ErrorLog = &ownerTailLogger{entered: tail, release: gate}
+-	serveDone := make(chan error, 1)
+-	go func() { serveDone <- s.Serve(l) }()
+-	t.Cleanup(func() { c.Close(); s.Close() })
+-	ownerResponse(t, c, "220")
+-	ownerCommand(t, c, "EHLO example.org", "250")
+-	ownerCommand(t, c, "MAIL FROM:<a@example.org>", "250")
+-	ownerCommand(t, c, "RCPT TO:<b@example.org>", "250")
+-	ownerCommand(t, c, "BDAT 0", "250")
+-	ownerAwait(t, tail) // Data already panicked; its recovery/result/pipe tail is live.
+-	c.Close()
+-	stopped := make(chan error, 1)
+-	go func() { stopped <- s.Shutdown(context.Background()) }()
+-	if err := ownerError(t, serveDone); err != nil {
+-		t.Fatal(err)
+-	}
+-	ownerAbsent(t, loggedOut, "Logout")
+-	select {
+-	case err := <-stopped:
+-		t.Fatalf("tail escaped join: %v", err)
+-	default:
+-	}
+-	release()
+-	if err := ownerError(t, stopped); err != nil {
+-		t.Fatal(err)
+-	}
+-	ownerAwait(t, loggedOut)
++	synctest.Test(t, func(t *testing.T) {
++		gate, release := ownerRelease(t)
++		tail := make(chan struct{})
++		loggedOut := make(chan struct{})
++		session := &ownerSession{data: func(io.Reader) error { panic("tail barrier") }, logout: func() { close(loggedOut) }}
++		// Install the logger before Serve: no mutable server configuration races.
++		c := newOwnerConn()
++		l := &ownerListener{conn: make(chan net.Conn, 1), closed: make(chan struct{})}
++		l.conn <- c
++		s := NewServer(BackendFunc(func(*Conn) (Session, error) { return session, nil }))
++		s.ErrorLog = &ownerTailLogger{entered: tail, release: gate}
++		serveDone := make(chan error, 1)
++		go func() { serveDone <- s.Serve(l) }()
++		t.Cleanup(func() { c.Close(); s.Close() })
++		ownerResponse(t, c, "220")
++		ownerCommand(t, c, "EHLO example.org", "250")
++		ownerCommand(t, c, "MAIL FROM:<a@example.org>", "250")
++		ownerCommand(t, c, "RCPT TO:<b@example.org>", "250")
++		ownerCommand(t, c, "BDAT 0", "250")
++		ownerAwait(t, tail) // Data already panicked; its recovery/result/pipe tail is live.
++		c.Close()
++		stopped := make(chan error, 1)
++		go func() { stopped <- s.Shutdown(context.Background()) }()
++		if err := ownerError(t, serveDone); err != nil {
++			t.Fatal(err)
++		}
++		ownerAbsent(t, loggedOut, "Logout")
++		select {
++		case err := <-stopped:
++			t.Fatalf("tail escaped join: %v", err)
++		default:
++		}
++		release()
++		if err := ownerError(t, stopped); err != nil {
++			t.Fatal(err)
++		}
++		ownerAwait(t, loggedOut)
++	})
+ }
+ 
+ func TestOwnerBDATRepeatedTransactions(t *testing.T) {
+@@ -444,29 +454,32 @@
+ func (l *ownerLateListener) Close() error { l.once.Do(func() { close(l.closed) }); return nil }
+ func (*ownerLateListener) Addr() net.Addr { return ownerAddr("late") }
+ func TestOwnerShutdownWaitsForLateAcceptDisposal(t *testing.T) {
+-	gate, release := ownerRelease(t)
+-	c := newOwnerConn()
+-	l := &ownerLateListener{acceptEntered: make(chan struct{}), closed: make(chan struct{}), release: gate, conn: c}
+-	s := NewServer(BackendFunc(func(*Conn) (Session, error) { t.Error("late connection admitted"); return nil, errors.New("late") }))
+-	serveDone := make(chan error, 1)
+-	go func() { serveDone <- s.Serve(l) }()
+-	ownerAwait(t, l.acceptEntered)
+-	stopped := make(chan error, 1)
+-	go func() { stopped <- s.Shutdown(context.Background()) }()
+-	ownerAwait(t, l.closed)
+-	select {
+-	case err := <-stopped:
+-		t.Fatalf("late Accept escaped join: %v", err)
+-	default:
+-	}
+-	release()
+-	if err := ownerError(t, stopped); err != nil {
+-		t.Fatal(err)
+-	}
+-	ownerAwait(t, c.closed)
+-	if err := ownerError(t, serveDone); err != nil {
+-		t.Fatal(err)
+-	}
++	synctest.Test(t, func(t *testing.T) {
++		gate, release := ownerRelease(t)
++		c := newOwnerConn()
++		l := &ownerLateListener{acceptEntered: make(chan struct{}), closed: make(chan struct{}), release: gate, conn: c}
++		s := NewServer(BackendFunc(func(*Conn) (Session, error) { t.Error("late connection admitted"); return nil, errors.New("late") }))
++		serveDone := make(chan error, 1)
++		go func() { serveDone <- s.Serve(l) }()
++		ownerAwait(t, l.acceptEntered)
++		stopped := make(chan error, 1)
++		go func() { stopped <- s.Shutdown(context.Background()) }()
++		ownerAwait(t, l.closed)
++		synctest.Wait() // Shutdown has reached its join, not merely closed l.
++		select {
++		case err := <-stopped:
++			t.Fatalf("late Accept escaped join: %v", err)
++		default:
++		}
++		release()
++		if err := ownerError(t, stopped); err != nil {
++			t.Fatal(err)
++		}
++		ownerAwait(t, c.closed)
++		if err := ownerError(t, serveDone); err != nil {
++			t.Fatal(err)
++		}
++	})
+ }
+ 
+ func TestOwnerShutdownRejectsLaterServe(t *testing.T) {
+@@ -567,41 +580,123 @@
+ }
+ 
+ func TestOwnerBDATCloseResetRace(t *testing.T) {
+-	// Public Close races the command owner's RSET, never a second command loop.
+-	// A race-detector run of this selector exercises field ownership as well as
+-	// completion; callback barriers avoid timing-based ordering assumptions.
+-	gate, release := ownerRelease(t)
+-	readReset := make(chan struct{})
+-	loggedOut := make(chan struct{})
+-	var conn *Conn
+-	session := &ownerSession{data: func(r io.Reader) error { _, err := io.Copy(io.Discard, r); close(readReset); <-gate; return err }, logout: func() { close(loggedOut) }}
+-	c := newOwnerConn()
+-	l := &ownerListener{conn: make(chan net.Conn, 1), closed: make(chan struct{})}
+-	l.conn <- c
+-	s := NewServer(BackendFunc(func(c *Conn) (Session, error) { conn = c; return session, nil }))
+-	s.ErrorLog = log.New(io.Discard, "", 0)
+-	serveDone := make(chan error, 1)
+-	go func() { serveDone <- s.Serve(l) }()
+-	t.Cleanup(func() { c.Close(); s.Close() })
+-	ownerResponse(t, c, "220")
+-	ownerCommand(t, c, "EHLO example.org", "250")
+-	ownerCommand(t, c, "MAIL FROM:<a@example.org>", "250")
+-	ownerCommand(t, c, "RCPT TO:<b@example.org>", "250")
+-	ownerCommand(t, c, "BDAT 0", "250")
+-	if _, err := io.WriteString(c.w, "RSET\r\n"); err != nil {
+-		t.Fatal(err)
+-	}
+-	ownerAwait(t, readReset)
+-	closeDone := make(chan struct{})
+-	go func() { conn.Close(); close(closeDone) }()
+-	ownerAwait(t, closeDone)
+-	ownerAbsent(t, loggedOut, "Logout")
+-	release()
+-	if err := s.Shutdown(context.Background()); err != nil {
+-		t.Fatal(err)
+-	}
+-	ownerAwait(t, loggedOut)
+-	if err := ownerError(t, serveDone); err != nil {
+-		t.Fatal(err)
+-	}
+-}
++	synctest.Test(t, func(t *testing.T) {
++		// Public Close races the command owner's RSET, never a second command loop.
++		// A race-detector run of this selector exercises field ownership as well as
++		// completion; callback barriers avoid timing-based ordering assumptions.
++		gate, release := ownerRelease(t)
++		readReset := make(chan struct{})
++		loggedOut := make(chan struct{})
++		var conn *Conn
++		session := &ownerSession{data: func(r io.Reader) error { _, err := io.Copy(io.Discard, r); close(readReset); <-gate; return err }, logout: func() { close(loggedOut) }}
++		c := newOwnerConn()
++		l := &ownerListener{conn: make(chan net.Conn, 1), closed: make(chan struct{})}
++		l.conn <- c
++		s := NewServer(BackendFunc(func(c *Conn) (Session, error) { conn = c; return session, nil }))
++		s.ErrorLog = log.New(io.Discard, "", 0)
++		serveDone := make(chan error, 1)
++		go func() { serveDone <- s.Serve(l) }()
++		t.Cleanup(func() { c.Close(); s.Close() })
++		ownerResponse(t, c, "220")
++		ownerCommand(t, c, "EHLO example.org", "250")
++		ownerCommand(t, c, "MAIL FROM:<a@example.org>", "250")
++		ownerCommand(t, c, "RCPT TO:<b@example.org>", "250")
++		ownerCommand(t, c, "BDAT 0", "250")
++		if _, err := io.WriteString(c.w, "RSET\r\n"); err != nil {
++			t.Fatal(err)
++		}
++		ownerAwait(t, readReset)
++		closeDone := make(chan struct{})
++		go func() { conn.Close(); close(closeDone) }()
++		ownerAwait(t, closeDone)
++		ownerAbsent(t, loggedOut, "Logout")
++		release()
++		if err := s.Shutdown(context.Background()); err != nil {
++			t.Fatal(err)
++		}
++		ownerAwait(t, loggedOut)
++		if err := ownerError(t, serveDone); err != nil {
++			t.Fatal(err)
++		}
++	})
++}
++
++// Read supplies the entire script in one call, reproducing textproto's buffered
++// input surviving a transport close. No producer goroutine can mask the bug by
++// failing a second transport write after Close.
++type ownerPrebufferConn struct {
++	*ownerConn
++	payload []byte
++	reads   int
++}
++
++func (c *ownerPrebufferConn) Read(p []byte) (int, error) {
++	c.reads++
++	if c.reads != 1 {
++		return 0, io.EOF
++	}
++	if len(p) < len(c.payload) {
++		panic("regression script must fit one transport Read")
++	}
++	return copy(p, c.payload), nil
++}
++
++type ownerCountSession struct {
++	reset, mail, rcpt, logout, data int
++}
++
++func (s *ownerCountSession) Reset()                          { s.reset++ }
++func (s *ownerCountSession) Logout() error                   { s.logout++; return nil }
++func (s *ownerCountSession) Mail(string, *MailOptions) error { s.mail++; return nil }
++func (s *ownerCountSession) Rcpt(string, *RcptOptions) error { s.rcpt++; return nil }
++func (s *ownerCountSession) Data(io.Reader) error            { s.data++; return nil }
++
++func TestOwnerClosedParseErrorsDoNotDispatchBufferedCommands(t *testing.T) {
++	for _, existing := range []bool{false, true} {
++		t.Run(map[bool]string{false: "new_session", true: "existing_session"}[existing], func(t *testing.T) {
++			initial := ""
++			if existing {
++				initial = "EHLO initial.example.org\r\n"
++			}
++			payload := initial + strings.Repeat("x\r\n", 4) + "EHLO example.org\r\nMAIL FROM:<a@example.org>\r\nRCPT TO:<b@example.org>\r\nRSET\r\nBDAT 0 LAST\r\n"
++			wire := &ownerPrebufferConn{ownerConn: newOwnerConn(), payload: []byte(payload)}
++			session := &ownerCountSession{}
++			newSessions := 0
++			s := NewServer(BackendFunc(func(*Conn) (Session, error) { newSessions++; return session, nil }))
++			s.ErrorLog = log.New(io.Discard, "", 0)
++			if err := s.handleConn(newConn(wire, s)); err != nil {
++				t.Fatal(err)
++			}
++			wantSessions := 0
++			if existing {
++				wantSessions = 1
++			}
++			if newSessions != wantSessions {
++				t.Fatalf("closed buffered EHLO dispatched: NewSession=%d, want %d", newSessions, wantSessions)
++			}
++			if session.reset != 0 || session.mail != 0 || session.rcpt != 0 || session.data != 0 {
++				t.Fatalf("closed buffered business command dispatched: %+v", session)
++			}
++			if session.logout != wantSessions {
++				t.Fatalf("Logout=%d, want %d", session.logout, wantSessions)
++			}
++			if wire.reads != 1 {
++				t.Fatalf("transport reads=%d, want exactly one prebuffered read", wire.reads)
++			}
++			ownerAwait(t, wire.closed)
++			// Keep the existing protocol responses: four syntax errors, then the
++			// established threshold close, and no ACK for the buffered commands.
++			ownerResponse(t, wire.ownerConn, "220")
++			if existing {
++				ownerResponse(t, wire.ownerConn, "250")
++			}
++			for i := 0; i < 4; i++ {
++				ownerResponse(t, wire.ownerConn, "501")
++			}
++			ownerResponse(t, wire.ownerConn, "500")
++			if len(wire.responses) != 0 {
++				t.Fatalf("unexpected post-close responses: %d", len(wire.responses))
++			}
++		})
++	}
++}

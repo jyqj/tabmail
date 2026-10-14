@@ -44,15 +44,14 @@ func (s *PgStore) RotateRefreshToken(ctx context.Context, oldHash string, next *
 		return false, false, err
 	}
 	// Lock the user before token rows, matching user deletion's FK lock order.
-	var userID uuid.UUID
-	var active bool
-	err = tx.QueryRow(ctx, `SELECT u.id,u.is_active FROM users u JOIN refresh_tokens r ON r.user_id=u.id WHERE r.token_hash=$1 FOR SHARE OF u`, oldHash).Scan(&userID, &active)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return false, false, nil
-	}
+	user, err := scanUser(tx.QueryRow(ctx, userSelect+` WHERE id=(SELECT user_id FROM refresh_tokens WHERE token_hash=$1) FOR SHARE`, oldHash))
 	if err != nil {
 		return false, false, err
 	}
+	if user == nil {
+		return false, false, nil
+	}
+	userID := user.ID
 	var id uuid.UUID
 	var revoked *time.Time
 	var expired bool
@@ -72,7 +71,7 @@ func (s *PgStore) RotateRefreshToken(ctx context.Context, oldHash string, next *
 		}
 		return false, true, nil
 	}
-	if expired || !active {
+	if expired || !user.IsActive {
 		return false, false, nil
 	}
 	tag, err := tx.Exec(ctx, `UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE id=$1 AND revoked_at IS NULL AND expires_at>clock_timestamp()`, id)
@@ -100,6 +99,10 @@ func (s *PgStore) RotateRefreshToken(ctx context.Context, oldHash string, next *
 	if err = tx.Commit(ctx); err != nil {
 		return false, false, err
 	}
+	// The HTTP read follows this commit. Returning the locked authentication
+	// snapshot prevents it from upgrading the old refresh credential into a
+	// new session after a password change or freeze/reactivation in that gap.
+	next.Issuance = &models.RefreshTokenIssuance{UserID: user.ID, TenantID: user.TenantID, PasswordHash: user.PasswordHash, SessionVersion: user.SessionVersion}
 	return true, false, nil
 }
 

@@ -1,0 +1,159 @@
+{
+  "created_utc": "2026-10-02T02:05:57.569223+00:00",
+  "status": "new_transport_required_targets_composed_actual_green_after_HTTP_oracle_only_repair",
+  "original_source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678",
+  "original_HTTP_failure_preserved": true,
+  "original_combined_PG_HTTP_go_exit": 1,
+  "new_HTTP_only_source_sha": "bc82341749cd54a0a97dcfb595d5b8dd75c0001e",
+  "new_HTTP_go_exit": 0,
+  "new_HTTP_top_seconds": 2.35,
+  "new_HTTP_package_seconds": 4.457,
+  "actual_composed_top_count": 4,
+  "actual_composed_leaf_count": 23,
+  "actual_passed_tests_subtests": [
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/allowed",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/duplicate",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/cursor",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/invalid-cursor",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/foreign",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/unknown-action",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/mismatched-resource",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/personal-state",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/invalid-id",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/nil-revalidation",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/reader",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/key",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/frozen",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/revoked-before-read",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/read-to-write-revoked",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/flush-timeout",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract/cancel-after-read",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamUnitContract",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5CompanyAdminEventsOriginalOutboxCurrentScope",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5CompanyAdminEventsReleaseFence/role",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5CompanyAdminEventsReleaseFence/session",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5CompanyAdminEventsReleaseFence/write-error",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5CompanyAdminEventsReleaseFence/cancel",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5CompanyAdminEventsReleaseFence",
+      "source_sha": "a9e8a47238201fde4b903e47574b3ff3b0a6f678"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "test": "TestR5CompanyAdminStreamHTTPDurableScopeReconnectAndRevocation",
+      "source_sha": "bc82341749cd54a0a97dcfb595d5b8dd75c0001e"
+    }
+  ],
+  "production_unmodified": true,
+  "old_pure17_PGscope_fence_not_reexecuted": true,
+  "strict_oracle": "consume all known initial release frames through last syntheticbarrier; formal demotion commit; qualifiedsuper formal ConfigureCompany originalmarker; oldstream EOF/no any newframe; freshcurrent stream exactmarker positive",
+  "packaging_correction": "source-receipt inherited oldvisibility tops corrected onlymetadata, originalreceipt copy retained",
+  "owned_new_HTTP_group_absence": {
+    "status": "observed",
+    "members": [],
+    "non_zombie_live_pids": []
+  },
+  "named_residuals": [
+    "UI/browser fullchain",
+    "multiinstance claim/ackloss",
+    "commit inversion/retention/25s periodic actual runtime",
+    "outbox index/capacity",
+    "full171/G0/P7/G7"
+  ],
+  "task_complete": false,
+  "product_green": false,
+  "M_L_started": false
+}

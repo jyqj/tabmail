@@ -1,0 +1,217 @@
+{
+  "version": 1,
+  "batch": "B01-S",
+  "date": "2026-09-29",
+  "base_commit": "8bd5dae8413f2390a318b1d4aebf5d0f39baaf34",
+  "source_tree": "c33fda56bac580421ea600072b7cc023a1ad86ad",
+  "source_files": 651,
+  "session": "wc_sess_8moUlhrA72yv_vls",
+  "initial_runtime_failure": {
+    "command": "backend-full",
+    "test": "TestR3CoordinatedSnapshotRestoresIntoEmptyTargets",
+    "cause": "child PATH selected Python 3.9.6; safe tar extraction filter unavailable",
+    "original_job": "wc_job_adx9RnxJkh0LcRkJ",
+    "original_job_exit": 1
+  },
+  "environment_only_correction": "prepend existing Python 3.12 virtualenv bin to child PATH; no code/assertion/budget changes",
+  "final_job": "wc_job_bs-SoYa8PdoHFBO-",
+  "final_job_exit": 0,
+  "cleanup": [
+    {
+      "pid": 58360,
+      "stop_exit": 0,
+      "pidfile_removed": true
+    },
+    {
+      "pid": 62525,
+      "stop_exit": 0,
+      "pidfile_removed": true
+    }
+  ],
+  "source_hashes_verified": true,
+  "responses_json_published": false,
+  "tested_source_tree": "c33fda56bac580421ea600072b7cc023a1ad86ad",
+  "baseline": {
+    "counts": {
+      "run": 27,
+      "output": 86,
+      "pass": 6,
+      "fail": 21
+    },
+    "failed": [
+      "TestR5LegacyContentLifecycleMatchesArchive/expires",
+      "TestR5LegacyContentLifecycleMatchesArchive/purge",
+      "TestR5LegacyContentLifecycleMatchesArchive/missing-item",
+      "TestR5LegacyContentLifecycleMatchesArchive/missing-asset",
+      "TestR5LegacyContentLifecycleMatchesArchive",
+      "TestR5LegacyContentRechecksKeyAndOwner/expired-key",
+      "TestR5LegacyContentRechecksKeyAndOwner/deleted-key",
+      "TestR5LegacyContentRechecksKeyAndOwner/changed-owner",
+      "TestR5LegacyContentRechecksKeyAndOwner/scope-revoked",
+      "TestR5LegacyContentRechecksKeyAndOwner/key-zone",
+      "TestR5LegacyContentRechecksKeyAndOwner/owner-zone",
+      "TestR5LegacyContentRechecksKeyAndOwner",
+      "TestR5LegacyContentReloadsPermissionAfterIdentityWait/user",
+      "TestR5LegacyContentReloadsPermissionAfterIdentityWait/key",
+      "TestR5LegacyContentReloadsPermissionAfterIdentityWait",
+      "TestR5LegacyOutboundHTTPDoesNotResurrectExpiredContent",
+      "TestR5LegacyContentKeyHTTPPreservesSafeReceipt",
+      "TestR5LegacyContentRejectsBusyKeyWithoutDeadlock",
+      "TestR5LegacyContentKeyExpiryAfterMailboxWait",
+      "TestR5LegacyRecipientProjectionRechecksAfterLedgerWait",
+      "TestR5LegacyContentPropagatesStorageFailure"
+    ]
+  },
+  "focused_runs": [
+    {
+      "tests_passed": 142,
+      "mandatory_tests": 39,
+      "status": "pass"
+    },
+    {
+      "tests_passed": 142,
+      "mandatory_tests": 39,
+      "status": "pass"
+    },
+    {
+      "tests_passed": 142,
+      "mandatory_tests": 39,
+      "status": "pass"
+    }
+  ],
+  "backend": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 4651,
+    "log_sha256": "fd96c29548d3a961e5a8a3b7b54d37a65d918dac1a0ac3939da2e3bd6fcb9f17",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 139,
+    "manifest_sha256": "2ead7f558f8b7c0106679d13a5055a5ff5b53b90fb5f47b5a3f5185cf78ae899",
+    "packages": 50,
+    "process_exit_code": 0,
+    "source_sha": "c33fda56bac580421ea600072b7cc023a1ad86ad",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 1084,
+    "tests_skipped": 1,
+    "tests_started": 1085
+  },
+  "http": {
+    "status": "pass",
+    "source_sha": "c33fda56bac580421ea600072b7cc023a1ad86ad",
+    "errors": [],
+    "responses": 80,
+    "successful_operations": 65,
+    "required_success_variants": 66,
+    "excluded_operations": [
+      {
+        "method": "GET",
+        "path": "/api/v1/company/domains/{id}/verification",
+        "reason": "Live DNS status lookups are outside this loopback HTTP/PG fixture."
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/company/domains/{id}/verify",
+        "reason": "Live DNS verification is outside this loopback HTTP/PG fixture."
+      }
+    ],
+    "spec_sha256": "2c39ce1a1495af06204cebd12774ecf7fc64aa6bbd5784bb0fb46ac9d451c060",
+    "capture_sha256": "e7d2b90989a82cf0ae765463d9af80f330c58ae5b581ad1bbd55f52993ca5106"
+  },
+  "missing_dsn": {
+    "allowed_skips_observed": [],
+    "errors": [
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5LegacyContentLifecycleMatchesArchive/live",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5LegacyContentLifecycleMatchesArchive/trash-live",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5LegacyContentLifecycleMatchesArchive/expires",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5LegacyContentLifecycleMatchesArchive/purge",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5LegacyContentLifecycleMatchesArchive/missing-item",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5LegacyContentLifecycleMatchesArchive/missing-asset",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationCancellationReleasesSnapshot",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationFailureReturnsNoProjection",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationNeverCombinesTargetGenerations",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationOrdersPermissionChanges",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationPreservesCanonicalDecisions",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationRejectsBusyTargetProfile",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationWaitsForTargetWrites",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AuditedIndependentWritesShareParent",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AuditedWritesAuditFailureRollsBack",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AuditedWritesOrderMemberFreeze",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AuditedWritesParentPrecedesActor",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AuditedWritesReloadActorAfterParentWait",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5ContentReadsFenceMailboxSnapshot",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5LegacyContentKeyExpiryAfterMailboxWait",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5LegacyContentKeyHTTPPreservesSafeReceipt",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5LegacyContentPropagatesStorageFailure",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5LegacyContentRechecksKeyAndOwner",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5LegacyContentRejectsBusyKeyWithoutDeadlock",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5LegacyContentReloadsPermissionAfterIdentityWait",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5LegacyOutboundHTTPDoesNotResurrectExpiredContent",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5LegacyRecipientProjectionRechecksAfterLedgerWait",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5MessageMutationReloadsGrantAfterMailboxWait",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5PermissionSnapshotBusyProfileFailsClosed",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5PermissionSnapshotFailureReleasesLocks",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5PermissionSnapshotIndependentUsersShareProfile",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5PermissionSnapshotOrdersChanges",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5PermissionSnapshotOrdersContentScope",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5PermissionSnapshotOverrideFailureAndMissingUser",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5PermissionSnapshotPreservesEffectiveSemantics",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5PermissionSnapshotWriterFirstReloads",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5SentIndependentMutationsShareParent",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5SentMutationCancellationAndAuditFailureRollBack",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5SentMutationOrdersGrantRevocation",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5SentMutationParentLockPrecedesActor",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5SentMutationRejectsExpiryAfterItemWait",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5SentMutationReloadsActorAfterParentWait",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5SentMutationRollsBackExpiryDuringAuditWait",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5SentReadUsesTimeAfterIdentityWait"
+    ],
+    "events": 38,
+    "log_sha256": "a4a3bb63569a05fdefc795258ed8a158b4ad83d0c57d51a2a225fa02a3f996b4",
+    "mandatory_missing_or_not_passed": 38,
+    "mandatory_tests": 39,
+    "manifest_sha256": "2ead7f558f8b7c0106679d13a5055a5ff5b53b90fb5f47b5a3f5185cf78ae899",
+    "packages": 1,
+    "process_exit_code": 0,
+    "source_sha": "c33fda56bac580421ea600072b7cc023a1ad86ad",
+    "status": "fail",
+    "suite": "content-postgres-boundary",
+    "tests_failed": 0,
+    "tests_passed": 1,
+    "tests_skipped": 6,
+    "tests_started": 7
+  },
+  "python_tests_passed": 168,
+  "static_contract_output": "Contract check passed: 16 shared models verified across Go and TypeScript; 33 explicit company DTOs additionally verified against OpenAPI component schemas for fields, required/optional wire semantics, nullability, scalar/array/map projection, nested references and string enums.\nOpenAPI routing: 67 company operations; 61 JSON bindings, 6 non-JSON bindings, including both submit success statuses. Runtime response coverage is reported separately by check_http_contract.py.",
+  "versions": {
+    "go": "go version go1.25.7 darwin/arm64",
+    "postgres": "postgres (PostgreSQL) 16.13",
+    "psql": "psql (PostgreSQL) 16.13",
+    "pg_dump": "pg_dump (PostgreSQL) 16.13",
+    "python3": "Python 3.12.11"
+  },
+  "bundle": {
+    "path": "docs/company-mail/evidence/R5-B01-S-LOGS.tar.gz",
+    "members": 113,
+    "bytes": 225791,
+    "sha256": "abb00e775d49aeeef72e526f7a77092357773e33283dd42f9182ec9497826739"
+  },
+  "remaining": [
+    "receipt metadata/whole-page snapshot",
+    "retry/queue final authorization",
+    "inbound retention compatibility",
+    "P1 edit revision/CAS",
+    "other FK/GC order",
+    "P0-080 protocol",
+    "browser/DNS/SSE/performance/real S3/durability"
+  ],
+  "parent_todo_completion": "6/171",
+  "remote_operations": false
+}

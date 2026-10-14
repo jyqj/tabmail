@@ -1,0 +1,287 @@
+{
+  "FAIL": 0,
+  "HTTP_proof_kind": "shipping handler/router asserts in actual new tests, not independent wire dump",
+  "PASS": 10,
+  "SKIP": 0,
+  "UTC_derived": "2026-10-02T17:39:07.576208+00:00",
+  "actual_PID_after_cleanup_ps_exit": 1,
+  "actual_base_bootstrap_schema": 18,
+  "actual_case_actions": [
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/api/handlers",
+      "test": "TestR5MemberHistoricalDeleteHTTPPostgresNoEffects"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/api/handlers",
+      "test": "TestR5MemberHistoricalDeleteHTTPPostgresNoEffects/creation-tombstone"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/api/handlers",
+      "test": "TestR5MemberHistoricalDeleteHTTPPostgresNoEffects/successor-plan"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/api/handlers",
+      "test": "TestR5MemberHistoricalDeleteHTTPPostgresNoEffects/target-plan"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/api/handlers",
+      "test": "TestR5MemberHistoricalDeleteHTTPPostgresNoEffects/unreferenced-success"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/api/handlers",
+      "test": "TestR5MemberHistoricalDeleteHandlerDispatch"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/api/handlers",
+      "test": "TestR5MemberHistoricalDeleteSafeErrorMapping"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/api/handlers",
+      "test": "TestR5MemberHistoricalDeleteSafeErrorMapping/domain"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/api/handlers",
+      "test": "TestR5MemberHistoricalDeleteSafeErrorMapping/raw-driver-stays-internal"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/api/handlers",
+      "test": "TestR5MemberHistoricalDeleteSafeErrorMapping/wrapped-domain"
+    }
+  ],
+  "actual_child_GOMAXPROCS": "2",
+  "actual_current_root_go_mod_sha256": "a2e87e7f71509440e83df143c1875bb778ac1d2aabaa3fc66f109dcb2f32acc4",
+  "actual_current_root_go_sum_sha256": "5b850553522724f8fa71d36a94de2da91da174270ec4d460bb135dd42f53a33f",
+  "actual_fresh_DB_count_observed": 4,
+  "actual_leaf": 8,
+  "actual_localfork_captured_files": 218,
+  "actual_localfork_go_mod_sha256": "976135226793cb303993bce4659b3883783db3225d9e5617d1e3a1540e5c5862",
+  "actual_localfork_go_sum_sha256": "0c19f867af32840597157de144e8ff9bd39dc3178522df145fd288cc4422aac4",
+  "actual_localfork_selected_compile_files": 34,
+  "actual_race_buildcontext_metadata": {
+    "GoList_exit": 0,
+    "actual_EmbedFiles": 22,
+    "external_layer": "actual toolchain/cache paths versions/checksums, not freshly byte-rehashed within private713",
+    "generated_testmain_actualhash": "0656d95d3658280228c35441d8cd3d9361cc4e6f3c4de75d1a7ff4a73a95770d",
+    "localfork_actual_compile_inputs": 34,
+    "missing_or_unknown": [],
+    "own_actual_compile_files": 281,
+    "package_rows": 398,
+    "postcapture_supplementary_race_metadata_only": {
+      "bounded30": true,
+      "elapsed": 0.24296808242797852,
+      "groupgone": true,
+      "no_new_test_build_nativePG": true,
+      "tool_GoList_exit": 0
+    },
+    "preRuntime_default_nonrace_GoList_preserved_separate": true
+  },
+  "actual_root_replace": "github.com/jhillyerd/enmime/v2 v2.3.0 => ./third_party/enmime-v2.3.0",
+  "actual_scoped_released_pin": {
+    "internal/api/handlers/member_errors.go": "4c9254b984a8b234ca5a7ea33ee2886e54ff532799231b0bf83788b5bc317659",
+    "internal/api/handlers/r5_member_historical_delete_test.go": "725a5340c0b91b076b04b150019a71c3459cb35c0cde0650be19c85fb10e57e9",
+    "internal/store/member_guard.go": "2a9697fce86e4ba7d0d741d3407442404f202cfbcf0787aeb2d7d02a8475034b",
+    "internal/store/postgres/member_guard.go": "5a9609d5b591495cbde3110767c61d5329135c66865ae5119a42836f87d8cbfd",
+    "internal/store/postgres/r5_member_historical_delete_test.go": "772c43465979cb4e5eb6cdbc028983cff0d18224b6e5e9ef925cb3071c60b205"
+  },
+  "actual_seed_catalogs": {
+    "tm_test_806f6adb7f2847178debe53aaf207d95": {
+      "mailboxes": 0,
+      "schema": 9,
+      "users": 0,
+      "wall": 1790962312.589652
+    },
+    "tm_test_9f9a0c693d3d401c9db5c23f7cb764d2": {
+      "mailboxes": 0,
+      "schema": 9,
+      "users": 0,
+      "wall": 1790962312.3831549
+    },
+    "tm_test_dcab06109b474293b095a468afad4304": {
+      "mailboxes": 0,
+      "schema": 16,
+      "users": 0,
+      "wall": 1790962312.175806
+    },
+    "tm_test_e75751c4655c4c8d8302e9e4369da963": {
+      "mailboxes": 0,
+      "schema": 7,
+      "users": 0,
+      "wall": 1790962311.885812
+    }
+  },
+  "actual_source_closure_sha256": "fb07538eb089f69a16c0d8cac896a0cc6f0b1899f978d84c2fb3912802ba8c3f",
+  "actual_source_files": 713,
+  "actual_top": 3,
+  "auto_retry": false,
+  "bootstrap_separate_namespace_rebases_same_localfork_relative_path_to_immutable_absolute": true,
+  "cleanup": {
+    "native_stop_exit": 0,
+    "observer_joined": true,
+    "old_stopped_roots_untouched": true,
+    "original_outer300_elapsed_seconds": 15.865170955657959,
+    "owned_pg_pid": 71735,
+    "owned_pid_observation": "absent",
+    "owned_pid_ps_exit": 1,
+    "owned_root": "/private/tmp/tm-r5historical-handler-V3-runtime.xj7v5wlx",
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "test_databases_connections": [],
+    "utc": "2026-10-02T17:31:53.729462+00:00",
+    "within_original300": true
+  },
+  "expected_tops": [
+    "TestR5MemberHistoricalDeleteHTTPPostgresNoEffects",
+    "TestR5MemberHistoricalDeleteHandlerDispatch",
+    "TestR5MemberHistoricalDeleteSafeErrorMapping"
+  ],
+  "fixture_schema_sampling_boundary": {
+    "all_fixture_NewPostgres_Migrate_success_backed_by_actual4HTTPleafPASS": "freshcurrent18 source Migrate completes before test body; no claim4direct SQLversion samples",
+    "direct_intermediate_migrations_sampled": [
+      9,
+      9,
+      16,
+      7
+    ],
+    "direct_latest_schema18_sampled_DBs": 0,
+    "fresh_DB_names_observed": 4
+  },
+  "missing_expected_tops": [],
+  "not_a_singlefresh37_or_wholePASS": true,
+  "old_PG27_same_product_pins_but_different_source_preserved": "oldPG7top23leaf27 actualPASS in /private/tmp/tm-r5historical-identity-runtime.prv6elcl; never rerun or relabelled",
+  "package_terminals": {
+    "tabmail/internal/api/handlers": {
+      "elapsed": 2.499,
+      "terminal": "pass"
+    }
+  },
+  "readonly_no_tidy_updatesum_or_remove_replace": true,
+  "results": {
+    "actual-schema18": {
+      "elapsed_wall_seconds": 0.1058199405670166,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "base-create": {
+      "elapsed_wall_seconds": 0.10507392883300781,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "current-handler-compile-input-GoList": {
+      "elapsed_wall_seconds": 0.9427788257598877,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "historical-1": {
+      "elapsed_wall_seconds": 9.930330038070679,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "initdb": {
+      "elapsed_wall_seconds": 0.5154139995574951,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "native-stop": {
+      "elapsed_wall_seconds": 0.2027571201324463,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "official-schema18-bootstrap": {
+      "elapsed_wall_seconds": 3.0013580322265625,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "owned-config": {
+      "elapsed_wall_seconds": 0.10410690307617188,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "pg-start": {
+      "elapsed_wall_seconds": 0.2068500518798828,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    },
+    "terminal-test-databases": {
+      "elapsed_wall_seconds": 0.10202288627624512,
+      "exit": 0,
+      "group_gone": true,
+      "timed_out": false
+    }
+  },
+  "scope": "onlynew historical handler3top; oldPG27 not rerun; sourcecurrent localfork included not qualifiedMIME",
+  "source_layer_not_B3_collector_or_MIME_contract_or_fullCI_qualified": true,
+  "source_sha": "512ff19c935769e4f00c82ead5bc08a8c84d0d8c",
+  "test_count_run": 10,
+  "unexpected_tops": [],
+  "verdict": "BOUNDED_HANDLER_V3_ACTUAL_PASS_pending_independent_review",
+  "whole_backend_PASS_claimed": false
+}

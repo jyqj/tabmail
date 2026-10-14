@@ -1,0 +1,99 @@
+{
+  "CPU_seconds": 60,
+  "RSS_hardquota": false,
+  "RSS_maxgap_seconds": 0.25,
+  "RSS_sampling_bytes": 1073741824,
+  "RSS_target_seconds": 0.1,
+  "containment_protocol": "actual contain_owned_child independent monotonic remaining; inside originalmono90 => original remaining only; alreadyexpired and qualification_failed => at most5-second observation/termination/join/failedreceipt-attempt cutoff starting actual containment start, never additional tests/work/admission. Qualification stickyclock not called by identity/TERM/KILL/grace/join/finalgroup/failurewriter. Per-signal UID/session/start/unreapedanchor verified, unknownnosignal; errors isolated and failure-receipt still attempted; receiptphase labels attempt not finalcutoffproof; afterwrite5overrun => unknown failure. Only qualification90 clocks can publish admission",
+  "controller_main_C18_21_Go_PG_real_signal_native_runtime_executed": false,
+  "delta_patch_sha256": "6a199c064e0bc49bc9f59412f456852f0561656391a55cf501d1dc77a65b78e2",
+  "extra_failure_containment_authorized_by_root": true,
+  "extra_window_does_not_relax_C18_21_CPU_RSS_or_original_qualification90": true,
+  "failureonly_extra_mono_seconds_max": 5,
+  "mocks": [
+    {
+      "PASS": 2,
+      "argv": [
+        "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+        "-B",
+        "-m",
+        "unittest",
+        "test_c18_rss_resource_new.C18RSSV5FailedContainmentWiringTests",
+        "-v"
+      ],
+      "coverage": [
+        "actual cleanuphelper stickyclockfault/liveownedchild => identities twice/TERM/KILL-beforejoin/groupempty/failedreceipt noPASS",
+        "withinoriginaltime => noextra/wrongUIDnosignal/unknown/failedreceiptattempt"
+      ],
+      "exit": 0,
+      "newcases": 2,
+      "raw": "V5-new2-cleanup-mocks.stderr",
+      "tested_byte_boundary": "before final additive failure-receipt postcutoff check; not exactfinal all3mockPASSclaim"
+    },
+    {
+      "PASS": 1,
+      "argv": [
+        "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+        "-B",
+        "-m",
+        "unittest",
+        "test_c18_rss_resource_new.C18RSSV5FailedContainmentWiringTests.test_failed_receipt_IO_exceeding5_is_unknown_never_success",
+        "-v"
+      ],
+      "coverage": [
+        "actual cleanuphelper failureIO beyond5 => unknown/no qualification publication"
+      ],
+      "exit": 0,
+      "final_testedbyte_pins": {
+        "c18_audited_child.py": "3809276f44346a516febd75e9039242e98503cdd70110b1a018b66f57ce9a713",
+        "c18_rss_controller_prepared_only.py": "174da8fbd2d729ee1fea85b880d0546439dd5b0b239c27b3ec80bad49682aa89",
+        "c18_rss_protocol.py": "626421068e52d7bdb51c70313fd06f8f8453930b9c409042553478869ce512fa",
+        "test_c18_rss_resource_new.py": "77fad549db50c7cf3cf59e5b510ba49ec5813dc0b92f782a243512d274b09b33"
+      },
+      "newcases": 1,
+      "raw": "V5-new1-receipt-cutoff-mock.stderr"
+    }
+  ],
+  "oldmocks15_8_V4layers2_not_repeated": true,
+  "original7C18_closure_sha256": "52c2f082061b4fa8e9c66d8f3a6990d765f0f2481ee0b75d8724ef42be10623e",
+  "original7C18_source_sha": "6710e89d677d027f3baa0498206e0baf226f3a16",
+  "prospective_argv": [
+    "/usr/bin/env",
+    "-u",
+    "PYTHONOPTIMIZE",
+    "-u",
+    "PYTHONHOME",
+    "-u",
+    "PYTHONPATH",
+    "TABMAIL_C18_RSS_RUNTIME_APPROVED=1",
+    "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+    "-B",
+    "/private/tmp/r5-C18-RSS-resource-V5-prepared/c18_rss_controller_prepared_only.py"
+  ],
+  "qualification_origin": "original before capture; sharedWholeClock sticky forever; no extra PASS time",
+  "qualification_seconds": 90,
+  "root_newruntime_authorization_pending_after_source_review": true,
+  "source4_before_after": {
+    "c18_audited_child.py": {
+      "after_sha256": "3809276f44346a516febd75e9039242e98503cdd70110b1a018b66f57ce9a713",
+      "before_sha256": "3809276f44346a516febd75e9039242e98503cdd70110b1a018b66f57ce9a713",
+      "changed": false
+    },
+    "c18_rss_controller_prepared_only.py": {
+      "after_sha256": "174da8fbd2d729ee1fea85b880d0546439dd5b0b239c27b3ec80bad49682aa89",
+      "before_sha256": "8ad568e1a54af8cdf1c82ca6ca5a2377f618f5f7d2b89d354a18ecb264bbaaf5",
+      "changed": true
+    },
+    "c18_rss_protocol.py": {
+      "after_sha256": "626421068e52d7bdb51c70313fd06f8f8453930b9c409042553478869ce512fa",
+      "before_sha256": "626421068e52d7bdb51c70313fd06f8f8453930b9c409042553478869ce512fa",
+      "changed": false
+    },
+    "test_c18_rss_resource_new.py": {
+      "after_sha256": "77fad549db50c7cf3cf59e5b510ba49ec5813dc0b92f782a243512d274b09b33",
+      "before_sha256": "b93c2844efe216e87319f2e6e537d4b1c212a282b2bb29399ed3ec5ff9db5b9a",
+      "changed": true
+    }
+  },
+  "status": "SOURCE_PREPARED_RUNTIME_NOT_AUTHORIZED"
+}

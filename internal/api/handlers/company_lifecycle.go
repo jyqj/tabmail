@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"tabmail/internal/app"
 	"tabmail/internal/app/employees"
-	"tabmail/internal/authz"
 	"tabmail/internal/company"
 )
 
@@ -20,10 +19,7 @@ func NewEmployeeLifecycleHandler(repo company.OffboardingPlanner, l zerolog.Logg
 }
 func companyResponse(w http.ResponseWriter, l zerolog.Logger, v any, e error) {
 	if e != nil {
-		if authz.IsAuthzError(e) {
-			e = app.Forbidden(e.Error())
-		}
-		respondAppError(w, l, e)
+		respondAppError(w, l, app.FromAuthz(e))
 		return
 	}
 	w.Header().Set("Cache-Control", "private, no-store")

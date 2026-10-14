@@ -1,0 +1,513 @@
+{
+  "generated_at": "2026-10-09T21:39:21.342848+00:00",
+  "verifier_path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/verify_r2_replay_v3.py",
+  "verifier_sha256": "d9e646d7f1abc6b4f3e900eb671a107a05e03a8e78734cc68a5899be912c0314",
+  "evidence_provenance": "New independent review of exact decoded public CI logs after a workspace reset; no product test or CI runner changes, no fabricated restoration of old native logs.",
+  "workflow_run": 37994091262,
+  "workflow_job": 114035525252,
+  "workflow_public_head": "4cc223a901d39e74cf885f2e6ce848fa5dd09acc",
+  "workflow_actual_merge_commit": "75580e060952e8e879c5b0813fb27a9d8680ff2f",
+  "workflow_tree": "47955583e2c043134d9a91aac587e4f5cc5d8ef0",
+  "product_actual_checkout_commit": "13a2a07979b2939fe30330e81cc5e12bec253be2",
+  "product_tree": "184992fa8a7c8cf3975f2ffb77f91629f4371b2b",
+  "raw_job_log": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/v3-success-job114035525252-api-exact.log",
+  "raw_job_log_sha256": "adc245c573becd29ede10dcb82f82c31d734ae40c3402f76675a6da59b78906a",
+  "restored_frames": {
+    "postgres-service.log": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/restored-ci/postgres-service.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "printer_separator_lf_removed": true
+    },
+    "postgres-create-role.log": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/restored-ci/postgres-create-role.log",
+      "bytes": 12,
+      "sha256": "19fe28eff61cdf76665a6150a5ac36e4df175fef2e4679f03b08878f6d8c93d5",
+      "printer_separator_lf_removed": false
+    },
+    "postgres-create-database.log": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/restored-ci/postgres-create-database.log",
+      "bytes": 16,
+      "sha256": "691e4b64d448c6cffd680247056c2f445e4fbf2dcbc9be821934064e906d1ce7",
+      "printer_separator_lf_removed": false
+    },
+    "postgres-cleanup.log": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/restored-ci/postgres-cleanup.log",
+      "bytes": 24,
+      "sha256": "af7e1218d198772b442a5e3e2078ea040f1a2bff7540138bcb376b25e1ad6c06",
+      "printer_separator_lf_removed": false
+    },
+    "runner.exit": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/restored-ci/runner.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "printer_separator_lf_removed": false
+    },
+    "runner.stdout": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/restored-ci/runner.stdout",
+      "bytes": 6256,
+      "sha256": "51b46749e952c038e2298c8f59115c7c58b87ea146d33635415fac27dcf65f4f",
+      "printer_separator_lf_removed": false
+    },
+    "runner.stderr": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/restored-ci/runner.stderr",
+      "bytes": 43,
+      "sha256": "8574e3c3aeec5f18e3150927f2acca13a88446624a61ca7c6adfb22133a35392",
+      "printer_separator_lf_removed": false
+    },
+    "original-run/baseline/go-test.jsonl": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/restored-ci/original-run/baseline/go-test.jsonl",
+      "bytes": 13475,
+      "sha256": "719f094a6bf5ca408f20abefc83bd3d7bb98058ed4438a2e9c6ccbe0df53d856",
+      "printer_separator_lf_removed": false
+    },
+    "original-run/baseline/go-test.stderr": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/restored-ci/original-run/baseline/go-test.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "printer_separator_lf_removed": true
+    },
+    "original-run/candidate/go-test.jsonl": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/restored-ci/original-run/candidate/go-test.jsonl",
+      "bytes": 10468,
+      "sha256": "2a412f4d9f534c4471f26e83b5ac61a76e0a53da7babc193dc9642e2f0641cf8",
+      "printer_separator_lf_removed": false
+    },
+    "original-run/candidate/go-test.stderr": {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/restored-ci/original-run/candidate/go-test.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "printer_separator_lf_removed": true
+    }
+  },
+  "source_before": {
+    "phase": "before",
+    "runner_image": {
+      "ImageOS": "ubuntu24",
+      "ImageVersion": "20261004.327.1",
+      "RUNNER_ARCH": "X64",
+      "RUNNER_OS": "Linux"
+    },
+    "source": {
+      "commit": "13a2a07979b2939fe30330e81cc5e12bec253be2",
+      "protected_sha256": {
+        "internal/api/handlers/r5_refresh_issuance_pg_test.go": "6404b853662b8d9dfec0f86aa4154674b5d63ea0f0f714af11cee54958e2297e",
+        "internal/api/handlers/r5_refresh_issuance_test.go": "b6877aa181da130982c0538ff4f8d56d6c78da3bd578c6f84e550528da09d53f",
+        "scripts/run_r5_next1010_pg.py": "703e9c81bde85662caa2c59bceeb7b2f242aad11db63dacc7e3190b024ec3389"
+      },
+      "status": "",
+      "tree": "184992fa8a7c8cf3975f2ffb77f91629f4371b2b"
+    },
+    "workflow": {
+      "GITHUB_RUN_ATTEMPT": "1",
+      "GITHUB_RUN_ID": "37994091262",
+      "GITHUB_SHA": "75580e060952e8e879c5b0813fb27a9d8680ff2f",
+      "GITHUB_WORKFLOW_REF": "jyqj/tabmail/.github/workflows/next1010-r2-host-postgres.yml@refs/pull/258/merge",
+      "GITHUB_WORKFLOW_SHA": "75580e060952e8e879c5b0813fb27a9d8680ff2f"
+    }
+  },
+  "source_after": {
+    "phase": "after",
+    "runner_image": {
+      "ImageOS": "ubuntu24",
+      "ImageVersion": "20261004.327.1",
+      "RUNNER_ARCH": "X64",
+      "RUNNER_OS": "Linux"
+    },
+    "source": {
+      "commit": "13a2a07979b2939fe30330e81cc5e12bec253be2",
+      "protected_sha256": {
+        "internal/api/handlers/r5_refresh_issuance_pg_test.go": "6404b853662b8d9dfec0f86aa4154674b5d63ea0f0f714af11cee54958e2297e",
+        "internal/api/handlers/r5_refresh_issuance_test.go": "b6877aa181da130982c0538ff4f8d56d6c78da3bd578c6f84e550528da09d53f",
+        "scripts/run_r5_next1010_pg.py": "703e9c81bde85662caa2c59bceeb7b2f242aad11db63dacc7e3190b024ec3389"
+      },
+      "status": "",
+      "tree": "184992fa8a7c8cf3975f2ffb77f91629f4371b2b"
+    },
+    "workflow": {
+      "GITHUB_RUN_ATTEMPT": "1",
+      "GITHUB_RUN_ID": "37994091262",
+      "GITHUB_SHA": "75580e060952e8e879c5b0813fb27a9d8680ff2f",
+      "GITHUB_WORKFLOW_REF": "jyqj/tabmail/.github/workflows/next1010-r2-host-postgres.yml@refs/pull/258/merge",
+      "GITHUB_WORKFLOW_SHA": "75580e060952e8e879c5b0813fb27a9d8680ff2f"
+    }
+  },
+  "phases": {
+    "baseline": {
+      "counts": {
+        "fail": 3,
+        "pass": 6
+      },
+      "leaf_states": {
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/password": "fail",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/freeze": "pass",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/freeze_unfreeze": "fail",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/role_change": "fail",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/deleted_user": "pass",
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/unchanged": "pass",
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/display_name": "pass",
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/read_failure": "pass",
+        "TestR5RefreshIssuancePostgresRotationFailurePreservesAncestor": "pass"
+      },
+      "test_start_count": 11,
+      "test_terminal_count": 11,
+      "package_events": [
+        "start",
+        "fail"
+      ],
+      "jsonl_sha256": "719f094a6bf5ca408f20abefc83bd3d7bb98058ed4438a2e9c6ccbe0df53d856",
+      "source": {
+        "commit": "74d5fc72f7ad2e086bd3060b78c548dc302d0408",
+        "tree": "5cbe43bbdda6601a8bfca79e5ae9d1f83db7b95c",
+        "status": "?? internal/api/handlers/r5_refresh_issuance_pg_test.go\n?? internal/api/handlers/r5_refresh_issuance_test.go",
+        "regression_sha256": {
+          "internal/api/handlers/r5_refresh_issuance_pg_test.go": "6404b853662b8d9dfec0f86aa4154674b5d63ea0f0f714af11cee54958e2297e",
+          "internal/api/handlers/r5_refresh_issuance_test.go": "b6877aa181da130982c0538ff4f8d56d6c78da3bd578c6f84e550528da09d53f"
+        }
+      },
+      "baseline_is_clean": false
+    },
+    "candidate": {
+      "counts": {
+        "pass": 9
+      },
+      "leaf_states": {
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/password": "pass",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/freeze": "pass",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/freeze_unfreeze": "pass",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/role_change": "pass",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/deleted_user": "pass",
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/unchanged": "pass",
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/display_name": "pass",
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/read_failure": "pass",
+        "TestR5RefreshIssuancePostgresRotationFailurePreservesAncestor": "pass"
+      },
+      "test_start_count": 11,
+      "test_terminal_count": 11,
+      "package_events": [
+        "start",
+        "pass"
+      ],
+      "jsonl_sha256": "2a412f4d9f534c4471f26e83b5ac61a76e0a53da7babc193dc9642e2f0641cf8",
+      "source": {
+        "commit": "13a2a07979b2939fe30330e81cc5e12bec253be2",
+        "tree": "184992fa8a7c8cf3975f2ffb77f91629f4371b2b",
+        "status": "",
+        "regression_sha256": {
+          "internal/api/handlers/r5_refresh_issuance_pg_test.go": "6404b853662b8d9dfec0f86aa4154674b5d63ea0f0f714af11cee54958e2297e",
+          "internal/api/handlers/r5_refresh_issuance_test.go": "b6877aa181da130982c0538ff4f8d56d6c78da3bd578c6f84e550528da09d53f"
+        }
+      },
+      "baseline_is_clean": null
+    }
+  },
+  "postgres_service": {
+    "server_version": "16.15 (Ubuntu 16.15-1.pgdg24.04+2)",
+    "server_version_num": 160015,
+    "version": "PostgreSQL 16.15 (Ubuntu 16.15-1.pgdg24.04+2) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit"
+  },
+  "postgres_authenticated_session": {
+    "createdb": true,
+    "database": "tm_r2_refresh_37994091262_1",
+    "lc_collate": "C.UTF-8",
+    "role": "tm_r2_refresh_37994091262_1",
+    "server_encoding": "UTF8",
+    "server_version_num": 160015,
+    "superuser": true,
+    "transaction_isolation": "read committed",
+    "version": "PostgreSQL 16.15 (Ubuntu 16.15-1.pgdg24.04+2) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit"
+  },
+  "artifact_api_report": {
+    "id": 11646835844,
+    "node_id": "MDg6QXJ0aWZhY3QxMTY0NjgzNTg0NA==",
+    "name": "next1010-r2-refresh-preinstalled-37994091262-1",
+    "size_in_bytes": 12022,
+    "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11646835844",
+    "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11646835844/zip",
+    "expired": false,
+    "digest": "sha256:6f9f49d5fbe4caef5f3b0c0f6e0725cdd9e3c8c3492f9f8663ad46d5c14344e4",
+    "created_at": "2026-10-09T21:35:08Z",
+    "updated_at": "2026-10-09T21:35:08Z",
+    "expires_at": "2026-10-23T21:35:08Z",
+    "workflow_run": {
+      "id": 37994091262,
+      "repository_id": 1188928152,
+      "head_repository_id": 1188928152,
+      "head_branch": "verification/r5-next1010-r2-replay",
+      "head_sha": "4cc223a901d39e74cf885f2e6ce848fa5dd09acc"
+    }
+  },
+  "artifact_zip_locally_downloaded": false,
+  "artifact_zip_digest_locally_verified": false,
+  "prior_same_tree_audit10_sponsor11": {
+    "report": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/recovered-round2-history-review.json",
+    "sha256": "7c16d9502bb7b2731b29998d94af9c21cdebfb000be2e4138afb5db795818bb1",
+    "cases": [
+      {
+        "case": "permission-audit",
+        "run_id": 37983167534,
+        "original_attempt": 1,
+        "original_job_id": 113998482065,
+        "attempt2_carried_job_id": 114021322601,
+        "carried_log_is_byte_identical": true,
+        "executions_counted": 1,
+        "actual_checkout_commit": "b93001f102b87b0e6e5541847091730bd72da8e6",
+        "actual_tree": "184992fa8a7c8cf3975f2ffb77f91629f4371b2b",
+        "public_head_same_tree": "13a2a07979b2939fe30330e81cc5e12bec253be2",
+        "baseline_counts": {
+          "fail": 6,
+          "pass": 4
+        },
+        "candidate_pass": 10,
+        "frozen_leaf_ids": [
+          "TestR5PermissionAuditActualCommandsVisible/permission.override.patch",
+          "TestR5PermissionAuditActualCommandsVisible/permission.profile.assign",
+          "TestR5PermissionAuditActualCommandsVisible/permission.profile.create",
+          "TestR5PermissionAuditActualCommandsVisible/permission.profile.delete",
+          "TestR5PermissionAuditActualCommandsVisible/permission.profile.update",
+          "TestR5PermissionAuditHTTPProjectionPaginationAndBoundaries/admin_paginated_safe_projection",
+          "TestR5PermissionAuditHTTPProjectionPaginationAndBoundaries/api_key_cannot_read",
+          "TestR5PermissionAuditHTTPProjectionPaginationAndBoundaries/current_role_rechecked",
+          "TestR5PermissionAuditHTTPProjectionPaginationAndBoundaries/employee_cannot_read",
+          "TestR5PermissionAuditHTTPProjectionPaginationAndBoundaries/foreign_actor_cannot_read"
+        ],
+        "raw_log": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-current-rounds/round2-audit-job113998482065-api-exact.log",
+        "raw_log_sha256": "b1d5c5ab1b4e7a83356cb29c05fefdfdc4d143e96e66c9abc2a936215b961a69",
+        "comparison": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/recovered-permission-audit-comparison.json",
+        "comparison_sha256": "2df7865823e754495afc8b32028fe1989593bcca5ba22e3e3a26a7c1fee463e9",
+        "artifact_api": {
+          "id": 11643694771,
+          "node_id": "MDg6QXJ0aWZhY3QxMTY0MzY5NDc3MQ==",
+          "name": "next1010-permission-audit",
+          "size_in_bytes": 6853,
+          "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11643694771",
+          "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11643694771/zip",
+          "expired": false,
+          "digest": "sha256:ec45fe5d0e7cf9faff57ea2487f5f1d7494751f96411afce40812e3d4fe81697",
+          "created_at": "2026-10-09T20:45:08Z",
+          "updated_at": "2026-10-09T20:45:08Z",
+          "expires_at": "2026-10-23T20:45:07Z",
+          "workflow_run": {
+            "id": 37983167534,
+            "repository_id": 1188928152,
+            "head_repository_id": 1188928152,
+            "head_branch": "fix/r5-next1010-round2",
+            "head_sha": "13a2a07979b2939fe30330e81cc5e12bec253be2"
+          }
+        },
+        "artifact_zip_locally_downloaded": false,
+        "artifact_zip_digest_locally_verified": false,
+        "original_go_jsonl_bytes_locally_restored": false,
+        "evidence_limit": "Original runner receipt and process exits establish fixed terminal leaves/no reported missing or skips; raw Go JSONL was an artifact, not printed, and cannot be locally checked for duplicate events after reset."
+      },
+      {
+        "case": "activation-sponsor",
+        "run_id": 37983167534,
+        "original_attempt": 1,
+        "original_job_id": 113998482254,
+        "attempt2_carried_job_id": 114021367889,
+        "carried_log_is_byte_identical": true,
+        "executions_counted": 1,
+        "actual_checkout_commit": "b93001f102b87b0e6e5541847091730bd72da8e6",
+        "actual_tree": "184992fa8a7c8cf3975f2ffb77f91629f4371b2b",
+        "public_head_same_tree": "13a2a07979b2939fe30330e81cc5e12bec253be2",
+        "baseline_counts": {
+          "fail": 5,
+          "pass": 6
+        },
+        "candidate_pass": 11,
+        "frozen_leaf_ids": [
+          "TestR5ActivationSponsorPostgresBusyWriterRejectsWithoutWaiting",
+          "TestR5ActivationSponsorPostgresCancellationDuringOutboxWait",
+          "TestR5ActivationSponsorPostgresCurrentSponsor/foreign_demoted",
+          "TestR5ActivationSponsorPostgresCurrentSponsor/foreign_frozen",
+          "TestR5ActivationSponsorPostgresCurrentSponsor/foreign_reenabled",
+          "TestR5ActivationSponsorPostgresCurrentSponsor/foreign_super",
+          "TestR5ActivationSponsorPostgresCurrentSponsor/local_admin",
+          "TestR5ActivationSponsorPostgresRevokedDuringOutboxWait/delete",
+          "TestR5ActivationSponsorPostgresRevokedDuringOutboxWait/demote_admin",
+          "TestR5ActivationSponsorPostgresRevokedDuringOutboxWait/demote_user",
+          "TestR5ActivationSponsorPostgresRevokedDuringOutboxWait/freeze"
+        ],
+        "raw_log": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-current-rounds/round2-sponsor-job113998482254.log",
+        "raw_log_sha256": "74ae2934441e4cf1e1fa88619a921f2c599ca93c957ffd8e1e6e2750c1268a26",
+        "comparison": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-r2-replay/recovered-activation-sponsor-comparison.json",
+        "comparison_sha256": "1b64e230668506840a502f306c71bd1c53c25572975f7244cea7e3144ddcd864",
+        "artifact_api": {
+          "id": 11644158720,
+          "node_id": "MDg6QXJ0aWZhY3QxMTY0NDE1ODcyMA==",
+          "name": "next1010-activation-sponsor",
+          "size_in_bytes": 6146,
+          "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11644158720",
+          "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11644158720/zip",
+          "expired": false,
+          "digest": "sha256:7b1b80a7a59a5be171cd4bc9ec6441537e16f40683896f447f4ab2fccb7e1e87",
+          "created_at": "2026-10-09T20:48:45Z",
+          "updated_at": "2026-10-09T20:48:45Z",
+          "expires_at": "2026-10-23T20:48:44Z",
+          "workflow_run": {
+            "id": 37983167534,
+            "repository_id": 1188928152,
+            "head_repository_id": 1188928152,
+            "head_branch": "fix/r5-next1010-round2",
+            "head_sha": "13a2a07979b2939fe30330e81cc5e12bec253be2"
+          }
+        },
+        "artifact_zip_locally_downloaded": false,
+        "artifact_zip_digest_locally_verified": false,
+        "original_go_jsonl_bytes_locally_restored": false,
+        "evidence_limit": "Original runner receipt and process exits establish fixed terminal leaves/no reported missing or skips; raw Go JSONL was an artifact, not printed, and cannot be locally checked for duplicate events after reset."
+      }
+    ],
+    "attempt2_reused_not_reexecuted": true
+  },
+  "prior_zero_test_executions_preserved": [
+    {
+      "job_id": 113998482277,
+      "attempt": 1,
+      "run_id": 37983167534,
+      "raw_log": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-current-rounds/round2-refresh-job113998482277.log",
+      "sha256": "b514221b639bd8b9cd20882961cd48826c32f6b32602002df656a6a22ecca383",
+      "failure": "Docker Hub postgres:16 pull limit before checkout",
+      "original_runner_executed": false,
+      "comparison_count": 0,
+      "regression_tests_executed": 0
+    },
+    {
+      "job_id": 114021320289,
+      "attempt": 2,
+      "run_id": 37983167534,
+      "raw_log": "/workspace/scratch/831fbd171897/tabmail-run-evidence/backend/ci-current-rounds/round2-refresh-job114021320289.log",
+      "sha256": "d8d856bea086d932efed82ec8624859660336fa94b5a785c15344e4c993a6a09",
+      "failure": "Docker Hub postgres:16 pull limit before checkout",
+      "original_runner_executed": false,
+      "comparison_count": 0,
+      "regression_tests_executed": 0
+    },
+    {
+      "run_id": 37992850872,
+      "reason": "Workflow v1 invalid runner context at job env; no jobs"
+    },
+    {
+      "run_id": 37993638392,
+      "job_id": 114033941462,
+      "reason": "Workflow v2 PostgreSQL session diagnostic lc_collate lookup failed; runner step skipped; cleanup succeeded"
+    }
+  ],
+  "checks": {
+    "exact-public-job-log-bytes": true,
+    "postgres-service.log-unique-end": true,
+    "postgres-service.log-exact-length": true,
+    "postgres-service.log-exact-hash": true,
+    "postgres-create-role.log-unique-end": true,
+    "postgres-create-role.log-exact-length": true,
+    "postgres-create-role.log-exact-hash": true,
+    "postgres-create-database.log-unique-end": true,
+    "postgres-create-database.log-exact-length": true,
+    "postgres-create-database.log-exact-hash": true,
+    "postgres-cleanup.log-unique-end": true,
+    "postgres-cleanup.log-exact-length": true,
+    "postgres-cleanup.log-exact-hash": true,
+    "runner.exit-unique-end": true,
+    "runner.exit-exact-length": true,
+    "runner.exit-exact-hash": true,
+    "runner.stdout-unique-end": true,
+    "runner.stdout-exact-length": true,
+    "runner.stdout-exact-hash": true,
+    "runner.stderr-unique-end": true,
+    "runner.stderr-exact-length": true,
+    "runner.stderr-exact-hash": true,
+    "original-run/baseline/go-test.jsonl-unique-end": true,
+    "original-run/baseline/go-test.jsonl-exact-length": true,
+    "original-run/baseline/go-test.jsonl-exact-hash": true,
+    "original-run/baseline/go-test.stderr-unique-end": true,
+    "original-run/baseline/go-test.stderr-exact-length": true,
+    "original-run/baseline/go-test.stderr-exact-hash": true,
+    "original-run/candidate/go-test.jsonl-unique-end": true,
+    "original-run/candidate/go-test.jsonl-exact-length": true,
+    "original-run/candidate/go-test.jsonl-exact-hash": true,
+    "original-run/candidate/go-test.stderr-unique-end": true,
+    "original-run/candidate/go-test.stderr-exact-length": true,
+    "original-run/candidate/go-test.stderr-exact-hash": true,
+    "all-eleven-frames-present": true,
+    "original-runner-exit-zero": true,
+    "unique-comparison-in-original-runner-stdout": true,
+    "receipt-correct-case": true,
+    "unique-full-comparison-in-public-log": true,
+    "exact-before-and-after-snapshots": true,
+    "before-exact-product-source-clean": true,
+    "before-workflow-execution-identity": true,
+    "after-exact-product-source-clean": true,
+    "after-workflow-execution-identity": true,
+    "wrapper-source-stable": true,
+    "public-source-bytes-scripts/run_r5_next1010_pg.py": true,
+    "public-source-bytes-internal/api/handlers/r5_refresh_issuance_pg_test.go": true,
+    "public-source-bytes-internal/api/handlers/r5_refresh_issuance_test.go": true,
+    "baseline-jsonl-hash-equals-original-receipt": true,
+    "baseline-jsonl-final-lf": true,
+    "baseline-single-expected-package": true,
+    "baseline-all-eleven-test-starts-exactly-once": true,
+    "baseline-all-eleven-test-terminals-exactly-once": true,
+    "baseline-exact-leaf-and-parent-states": true,
+    "baseline-no-unstarted-test-output": true,
+    "baseline-test-start-before-terminal": true,
+    "baseline-strict-package-start-terminal": true,
+    "baseline-package-terminates-last": true,
+    "baseline-no-any-skip": true,
+    "baseline-no-race-diagnostic": true,
+    "baseline-same-nine-fixed-terminal-leaves": true,
+    "baseline-original-command": true,
+    "baseline-original-exit": true,
+    "baseline-original-no-skip-missing": true,
+    "baseline-receipt-counts": true,
+    "baseline-source-exact-and-stable": true,
+    "baseline-stderr-empty": true,
+    "baseline-failure-output-matches-original-events": true,
+    "candidate-jsonl-hash-equals-original-receipt": true,
+    "candidate-jsonl-final-lf": true,
+    "candidate-single-expected-package": true,
+    "candidate-all-eleven-test-starts-exactly-once": true,
+    "candidate-all-eleven-test-terminals-exactly-once": true,
+    "candidate-exact-leaf-and-parent-states": true,
+    "candidate-no-unstarted-test-output": true,
+    "candidate-test-start-before-terminal": true,
+    "candidate-strict-package-start-terminal": true,
+    "candidate-package-terminates-last": true,
+    "candidate-no-any-skip": true,
+    "candidate-no-race-diagnostic": true,
+    "candidate-same-nine-fixed-terminal-leaves": true,
+    "candidate-original-command": true,
+    "candidate-original-exit": true,
+    "candidate-original-no-skip-missing": true,
+    "candidate-receipt-counts": true,
+    "candidate-source-exact-and-stable": true,
+    "candidate-stderr-empty": true,
+    "candidate-failure-output-matches-original-events": true,
+    "unique-pg-service-and-authenticated-session-reports": true,
+    "actual-postgres16-major": true,
+    "run-owned-disposable-authenticated-session": true,
+    "cleanup-original-db-and-role-observed": true,
+    "actual-go1257": true,
+    "ci-run-final-success-identity": true,
+    "single-successful-required-job": true,
+    "all-job-steps-completed-success": true,
+    "all-required-steps-present-once": true,
+    "public-workflow-exact-frozen-bytes": true,
+    "workflow-public-tree": true,
+    "actual-workflow-merge-tree-parents": true,
+    "one-original-artifact": true,
+    "artifact-identity-digest-not-expired": true,
+    "artifact-api-and-upload-reported-digest-agree": true,
+    "historical-review-identity": true,
+    "historical-audit-sponsor-accepted-same-tree": true,
+    "permission-audit-old-raw-still-matches": true,
+    "activation-sponsor-old-raw-still-matches": true,
+    "failed-workflow-v1-zero-jobs-retained": true,
+    "failed-workflow-v2-diagnostic-zero-tests-retained": true
+  },
+  "all_checks_pass": true,
+  "accepted_candidate_fixed_leaves": 30,
+  "round2_postgres_complete": true,
+  "todo_count_for_this_verification_work": 0,
+  "verdict": "ACCEPT_ROUND2_POSTGRES_30_LEAVES_SAME_PRODUCT_TREE"
+}

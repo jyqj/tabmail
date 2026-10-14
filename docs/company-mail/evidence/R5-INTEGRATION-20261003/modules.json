@@ -1,0 +1,26 @@
+{
+	"Path": "github.com/emersion/go-smtp",
+	"Version": "v0.24.0",
+	"Replace": {
+		"Path": "./third_party/go-smtp",
+		"Dir": "/workspace/tabmail/third_party/go-smtp",
+		"GoMod": "/workspace/tabmail/third_party/go-smtp/go.mod",
+		"GoVersion": "1.13"
+	},
+	"Dir": "/workspace/tabmail/third_party/go-smtp",
+	"GoMod": "/workspace/tabmail/third_party/go-smtp/go.mod",
+	"GoVersion": "1.13"
+}
+{
+	"Path": "github.com/jhillyerd/enmime/v2",
+	"Version": "v2.3.0",
+	"Replace": {
+		"Path": "./third_party/enmime-v2.3.0",
+		"Dir": "/workspace/tabmail/third_party/enmime-v2.3.0",
+		"GoMod": "/workspace/tabmail/third_party/enmime-v2.3.0/go.mod",
+		"GoVersion": "1.24.3"
+	},
+	"Dir": "/workspace/tabmail/third_party/enmime-v2.3.0",
+	"GoMod": "/workspace/tabmail/third_party/enmime-v2.3.0/go.mod",
+	"GoVersion": "1.24.3"
+}

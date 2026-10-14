@@ -1,0 +1,61 @@
+{
+  "batch": "B01-AJ",
+  "reviewer": "contract_owner",
+  "base_commit": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+  "source_tree": "fc992677a32b3e3f4f8e050c55d98653ceaa6fee",
+  "source_sha_semantics": "git_write_tree_label_not_commit",
+  "tool6": {
+    "go_exit": 0,
+    "cli_exit": 0,
+    "tests_pass": 5,
+    "tests_fail": 0,
+    "tests_skip": 0,
+    "closure_files_verified": 425,
+    "closure_mismatches": 0,
+    "workload_cache_pairs": 14,
+    "samples_each": 200,
+    "concurrency": 20,
+    "pool_size": 24,
+    "foreign_active_positive_then_current_denied": [
+      200,
+      404
+    ],
+    "revoked_active_controls": [
+      200,
+      403,
+      200
+    ],
+    "sampling_tool_accepted": true,
+    "source_sha256": "c2e4c19eac22011bafb5d012dc655f46fbf920a41e3f7e3eed12a646f39f8a02"
+  },
+  "previous_attempts": "tool3 actual sample missing; tool4 grant/source selection corrected; tool5 wrong revoked inbound404 expectation corrected to exact existing403; original failure logs retained",
+  "S_executed": false,
+  "M_executed": false,
+  "task100_complete": false,
+  "G0_accepted": false,
+  "archive": {
+    "path": "docs/company-mail/evidence/R5-B01-AJ-WORKLOAD-CALIBRATION-LOGS.tar.gz",
+    "sha256": "2db544d33794c595799dae28cee1ba20fa5dcf67b232f47d28fd4dc602b9169d",
+    "members": {
+      "tool3/run.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "tool3/run.jsonl": "5d4fca1bc566214f89c18a2dfeb8af254632580f2e35de6378dca216e341f293",
+      "tool3/run.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tool4/run.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "tool4/run.jsonl": "8df7a8f595d39bf50027d57372cf91d69e5f5ba78b2c18a5a4c56b9dafac13d1",
+      "tool4/run.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tool5/run.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "tool5/run.jsonl": "77d1c56d35f778a8ce95b91d6dddbeab63e5b96fd6a9d869cd93cb606b38665f",
+      "tool5/run.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tool5/source-closure.json": "d77605ab96c265f69a2278a71b964b0f34d93e3c3335f8167379b9ebd0f06404",
+      "tool6/result.json": "c2e4c19eac22011bafb5d012dc655f46fbf920a41e3f7e3eed12a646f39f8a02",
+      "tool6/run.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "tool6/run.jsonl": "aca8ff66c0c1d63f2686944f1df400a31a5f7cab5ceb474320d767c607aa878d",
+      "tool6/run.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tool6/source-closure.json": "1f73dee210fd78fef1422a5fa0f9ec99419887ffe5c3959a9b4a47c91745a392",
+      "tool6/validation.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "tool6/validation.json": "c7038b4ec8e5b3527b4ee87f586e98835cfff2900929f34abc2dd58bd1891d74",
+      "tool6/validation.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "excluded": "DSN/JWT/raw HTTP responses/private fixtures/database/raw objects/source tar"
+}

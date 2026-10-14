@@ -1,0 +1,198 @@
+{
+  "tabmail/tabmail/source-version-tests.json": {
+    "bytes": 2372107,
+    "sha256": "175a1f4d86d2e2ddd5a0bedc8289c0dfce171344031f5e70f4112ce1da07bc19"
+  },
+  "tabmail/tabmail/go-test.jsonl": {
+    "bytes": 8285339,
+    "sha256": "0f61907e86b05d15f316f92b75507fcb1ca7d29a0ae769ac923e1483bcc640bb"
+  },
+  "tabmail/tabmail/go-test-source-sha.txt": {
+    "bytes": 41,
+    "sha256": "c678d8227521c08879234e8b9e23e1bd198d894a743123a66f9cb377b02f835a"
+  },
+  "tabmail/tabmail/go-test-evidence.json": {
+    "bytes": 12189,
+    "sha256": "460f424c009459e915ba9e5a61bdcd219ff1a32bf892c86d354a4282cf4386a9"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/browser-disabled-evidence.json": {
+    "bytes": 736,
+    "sha256": "248670ec0820d0680e782ab08ad64ca7843e1cabe870e68bfef11b41d29c0f3a"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/browser-disabled-negative-validation.json": {
+    "bytes": 494,
+    "sha256": "0584e9b9375de8a976c5bed17a9c91aafdd964f92b26876e0a2fd85a78ff0f9b"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/browser-disabled.gate.exit": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/browser-disabled.gate.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/browser-disabled.gate.stdout": {
+    "bytes": 736,
+    "sha256": "248670ec0820d0680e782ab08ad64ca7843e1cabe870e68bfef11b41d29c0f3a"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/browser-disabled.go.exit": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/browser-disabled.jsonl": {
+    "bytes": 1357,
+    "sha256": "a5c56eb36dd9966184ba78386df139b8fd3cb5dad1ee753173181f6d79806b4d"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/browser-disabled.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/current-missing-dsn-hardfail-evidence.json": {
+    "bytes": 14198,
+    "sha256": "83a5a5d723789aa9165617b9d7bb9dcf3defedf0d57d8b6ab1f11c3f269812ca"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/current-missing-dsn-hardfail-negative-validation.json": {
+    "bytes": 516,
+    "sha256": "3de41bd42d63d2a5d2e63dc118d99c4092bfcc642e5093b9cfcf4bb6dbeaab62"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/current-missing-dsn-hardfail.gate.exit": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/current-missing-dsn-hardfail.gate.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/current-missing-dsn-hardfail.gate.stdout": {
+    "bytes": 14198,
+    "sha256": "83a5a5d723789aa9165617b9d7bb9dcf3defedf0d57d8b6ab1f11c3f269812ca"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/current-missing-dsn-hardfail.go.exit": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/current-missing-dsn-hardfail.jsonl": {
+    "bytes": 1576,
+    "sha256": "8ef229316f287d069ee7e425ca98a79bbc1a1ee47f3cf189aba2bb03f2f1e590"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/current-missing-dsn-hardfail.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/missing-dsn-evidence.json": {
+    "bytes": 14377,
+    "sha256": "c0085a4b6203bb030b01db17e4514b8cc4b148291a515f4e9b52804a6601cc5a"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/missing-dsn-negative-validation.json": {
+    "bytes": 506,
+    "sha256": "1c7c24f023876cb5af58765b7573ed6f9c5b214f3e33572ea7c1590695be1ecb"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/missing-dsn.gate.exit": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/missing-dsn.gate.stdout": {
+    "bytes": 14377,
+    "sha256": "c0085a4b6203bb030b01db17e4514b8cc4b148291a515f4e9b52804a6601cc5a"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/missing-dsn.go.exit": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/missing-dsn.jsonl": {
+    "bytes": 1475,
+    "sha256": "380aa47dbbeb492943e04166976d8d4152f900097d0947a450483ad6b7ac57d5"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/missing-dsn.gate.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/missing-dsn.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/zero-tests-evidence.json": {
+    "bytes": 14309,
+    "sha256": "6fd4a9626f9c438fd7c2a5d08c7759a7c6fea1c32a31f4181b0bc513f3bd487f"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/zero-tests-negative-validation.json": {
+    "bytes": 482,
+    "sha256": "3512764b9e48ee6d73d6f6ad81f4b0bd852be9240b727e63acac1ed95f11587d"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/zero-tests.gate.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/zero-tests.gate.exit": {
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/zero-tests.gate.stdout": {
+    "bytes": 14309,
+    "sha256": "6fd4a9626f9c438fd7c2a5d08c7759a7c6fea1c32a31f4181b0bc513f3bd487f"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/zero-tests.go.exit": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/zero-tests.jsonl": {
+    "bytes": 674,
+    "sha256": "90e6ec05bbffb1c7bc36f2e1e68653032e1899097469e08d3f7cbac7b21daa25"
+  },
+  "tabmail/tabmail/go-test-negative-evidence/zero-tests.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tabmail/tabmail/http-contract-evidence/command.json": {
+    "bytes": 134,
+    "sha256": "99c679f8a21f896a838d461b74f505af98b132f9bba1b25e487a3e667e4db947"
+  },
+  "tabmail/tabmail/http-contract-evidence/go-evidence.json": {
+    "bytes": 540,
+    "sha256": "a4e080fb15feb004766406989ca66da1145d0d4e5e12a0e7be83302131253c54"
+  },
+  "tabmail/tabmail/http-contract-evidence/go-test.exit": {
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "tabmail/tabmail/http-contract-evidence/go-test.jsonl": {
+    "bytes": 1331,
+    "sha256": "6bf6db0427c3fe0d58b9e76cc45b80ec0e84d97b26d933ed6480cfe9ec9535ab"
+  },
+  "tabmail/tabmail/http-contract-evidence/go-test.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tabmail/tabmail/http-contract-evidence/result.json": {
+    "bytes": 740,
+    "sha256": "9febc07017d29b9295d51530e4892f74e9f85a2adc397bfe5e1fb5661ac398e4"
+  },
+  "tabmail/tabmail/protocol-baseline-evidence/go-0.jsonl": {
+    "bytes": 88005,
+    "sha256": "d4214125d263c859c38518716d2385172fadc1b62cb9983879496a7cab084fbf"
+  },
+  "tabmail/tabmail/protocol-baseline-evidence/go-0.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tabmail/tabmail/protocol-baseline-evidence/report.json": {
+    "bytes": 421310,
+    "sha256": "2a586c7e19f16855ba4acfe4d39e5ebe7f107cbdbe954adb81218994d8efcbf7"
+  },
+  "tabmail/tabmail/backend-typescript-preparation.json": {
+    "bytes": 13800,
+    "sha256": "d7e01161db0a37b8e579d9e152992433c575dbc3349be5869bbf88e3e79fa9fa"
+  },
+  "_temp/tabmail-protocol-source/source-manifest.json": {
+    "bytes": 242363,
+    "sha256": "965a15e2a955402d97f07c4e82056b93b7920a21f3b1ff5a3a90876a8f72981c"
+  },
+  "_temp/tabmail-protocol-source/source-manifest.sha256": {
+    "bytes": 65,
+    "sha256": "94af788966d3e52a09858500e9f2c1dce825c95f060a608346a1bc01ae5a4750"
+  },
+  "_temp/tabmail-protocol-source/preparation.json": {
+    "bytes": 949,
+    "sha256": "55faafb6c94fe4b41c72da4c1372ced5737ed0c95ac43affc4854a8b816021ed"
+  }
+}

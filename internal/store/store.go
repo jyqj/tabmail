@@ -12,8 +12,17 @@ import (
 )
 
 var (
+	// ErrAuthenticationChanged means the credentials verified by an issuer no
+	// longer describe a current active user. No refresh token was created.
+	ErrAuthenticationChanged = errors.New("credentials or account changed during authentication")
+	// ErrDomainAlreadyExists identifies the domain-name uniqueness conflict.
+	// Adapters preserve their original cause for errors.Is/errors.As callers.
+	ErrDomainAlreadyExists        = errors.New("domain already exists")
 	ErrOutboundDailyQuotaExceeded = errors.New("outbound daily quota exceeded")
 	ErrSendAsDailyQuotaExceeded   = errors.New("send-as daily quota exceeded")
+	// ErrClaimLeaseLost means the claimed queue generation no longer owns a
+	// processing row. Workers must not report completion for this observation.
+	ErrClaimLeaseLost = errors.New("queue claim lease lost")
 	// ErrDraftAlreadyConsumed is returned when the draft deletion inside the
 	// enqueue transaction affects no row: the draft revision was consumed by a
 	// concurrent submission or changed underneath the caller. The whole
@@ -36,6 +45,9 @@ type DraftConsumption struct {
 type OutboundQuotaReservation struct {
 	UserDaily   *OutboundUserDailyQuota
 	SendAsDaily *OutboundSendAsDailyQuota
+	// CurrentUserPolicy marks the transaction-refreshed HTTP quota. Explicit
+	// internal reservations retain their documented custom counting window.
+	CurrentUserPolicy bool
 }
 
 func (q OutboundQuotaReservation) HasLimits() bool {
@@ -70,6 +82,9 @@ type UserStore interface {
 	TouchUserLogin(ctx context.Context, id uuid.UUID) error
 
 	// --- Refresh tokens --------------------------------------------------
+	// Production authentication supplies rt.Issuance. The adapter must validate
+	// it and insert under the same user lock; nil preserves direct internal
+	// token-loading compatibility and is not an interactive issuance protocol.
 	CreateRefreshToken(ctx context.Context, rt *models.RefreshToken) error
 	GetRefreshToken(ctx context.Context, tokenHash string) (*models.RefreshToken, error)
 	RevokeRefreshToken(ctx context.Context, id uuid.UUID) error
@@ -108,6 +123,9 @@ type TenantStore interface {
 
 	// --- Tenant API keys -------------------------------------------------
 	CreateAPIKey(ctx context.Context, k *models.TenantAPIKey) error
+	// HTTP issuers must use this command: current JWT identity, permissions,
+	// key, usage row and required audit share one transaction.
+	CreateAPIKeyAuthorized(ctx context.Context, issuer authz.APIKeyIssuer, k *models.TenantAPIKey) error
 	GetAPIKey(ctx context.Context, id uuid.UUID) (*models.TenantAPIKey, error)
 	ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*models.TenantAPIKey, error)
 	ListAPIKeysByOwner(ctx context.Context, tenantID uuid.UUID, ownerUserID uuid.UUID) ([]*models.TenantAPIKey, error)
@@ -183,10 +201,6 @@ type MessageStore interface {
 	CountTenantMessagesSince(ctx context.Context, tenantID uuid.UUID, since time.Time) (int, error)
 	CountAllMessages(ctx context.Context) (int, error)
 
-	// Batch-delete expired messages, returns the number deleted.
-	DeleteExpiredMessages(ctx context.Context, before time.Time, limit int) (int, error)
-	// Returns raw_object_key values for messages deleted by retention.
-	ListExpiredObjectKeys(ctx context.Context, before time.Time, limit int) ([]string, error)
 	// Atomically deletes expired messages and returns affected object keys.
 	DeleteExpiredMessagesReturningKeys(ctx context.Context, before time.Time, limit int) (int, []string, error)
 }
@@ -233,10 +247,14 @@ type OutboxStore interface {
 	ClaimOutboxEvents(ctx context.Context, now time.Time, limit int) ([]*models.OutboxEvent, error)
 	MarkOutboxEventDone(ctx context.Context, id uuid.UUID) error
 	MarkOutboxEventRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time) error
+	MarkOutboxEventDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error
+	MarkOutboxEventRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time) error
 	CreateWebhookDeliveries(ctx context.Context, event *models.OutboxEvent, urls []string) error
 	ClaimWebhookDeliveries(ctx context.Context, now time.Time, limit int) ([]*models.WebhookDelivery, error)
 	MarkWebhookDeliveryDone(ctx context.Context, id uuid.UUID) error
 	MarkWebhookDeliveryRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
+	MarkWebhookDeliveryDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error
+	MarkWebhookDeliveryRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time, dead bool) error
 	ListDeadWebhookDeliveries(ctx context.Context, limit int) ([]models.DeadLetter, error)
 	CountDeadWebhookDeliveries(ctx context.Context) (int, error)
 	ListWebhookDeliveries(ctx context.Context, pg models.Page, state, eventType, url string) ([]*models.WebhookDelivery, int, error)
@@ -259,6 +277,8 @@ type SuppressionStore interface {
 	// DeleteSuppressionAudited removes the entry and writes the audit row in
 	// one transaction; a failed audit rolls the delete back.
 	DeleteSuppressionAudited(ctx context.Context, tenantID uuid.UUID, id uuid.UUID, entry models.AuditEntry) error
+	// DeleteSuppressionAuthorized fences the current JWT/key and the effect in one transaction.
+	DeleteSuppressionAuthorized(ctx context.Context, actor authz.Actor, id uuid.UUID, entry models.AuditEntry) error
 }
 
 // IngestStore persists ingest jobs.
@@ -291,8 +311,36 @@ type PermissionStore interface {
 	EffectivePermission(ctx context.Context, userID uuid.UUID) (*models.EffectivePermission, error)
 }
 
+// OutboundContentAuthority resolves legacy content visibility from current
+// identity, mailbox rights and a live sent item, never from delivery-job life.
+// It only reads identity fields from observed; errors must not trigger fallback.
+type OutboundContentAuthority interface {
+	CanReadOutboundContent(context.Context, authz.Actor, *models.OutboundJob) (bool, error)
+}
+
+// OutboundReceipt is an internal authorization result, not a public DTO.
+// Only the submissions projection may expose Job; the raw record is never safe
+// merely because the caller is entitled to an operation receipt.
+type OutboundReceipt struct {
+	Job            *models.OutboundJob
+	ContentAllowed bool
+	// RecipientStates belongs to the same authorized snapshot as Job; it is
+	// the complete ledger, not a public address-filtered view.
+	RecipientStates []string
+	LedgerKnown     bool
+}
+
+type OutboundReceiptReader interface {
+	GetOutboundReceipt(context.Context, authz.Actor, uuid.UUID, string) (*OutboundReceipt, error)
+	ListOutboundReceipts(context.Context, authz.Actor, models.Page) ([]OutboundReceipt, int, error)
+}
+
 // OutboundStore persists outbound jobs, outbound attempts, and send identities.
 type OutboundStore interface {
+	AtomicOutboundRetry
+	AtomicOutboundEnqueue
+	OutboundContentAuthority
+	OutboundReceiptReader
 	// --- Outbound jobs -----------------------------------------------------
 	CreateOutboundJob(ctx context.Context, job *models.OutboundJob) error
 	CreateOutboundJobWithQuota(ctx context.Context, job *models.OutboundJob, quota OutboundQuotaReservation) error
@@ -309,6 +357,7 @@ type OutboundStore interface {
 	MarkOutboundJobFailed(ctx context.Context, id uuid.UUID, deliveryToken *uuid.UUID, lastError string, dead bool) error
 	CountOutboundSince(ctx context.Context, tenantID uuid.UUID, userID *uuid.UUID, since time.Time) (int, error)
 	CountOutboundByIdentitySince(ctx context.Context, tenantID uuid.UUID, principalType string, principalID uuid.UUID, identityID uuid.UUID, since time.Time) (int, error)
+	// Trusted low-level state primitive; HTTP retries MUST use AtomicOutboundRetry.
 	RequeueOutboundJob(ctx context.Context, id uuid.UUID) error
 
 	// --- Outbound attempts ------------------------------------------------
@@ -331,6 +380,7 @@ type OutboundStore interface {
 // SettingsStore persists system settings.
 type SettingsStore interface {
 	GetSetting(ctx context.Context, key string) (*models.SystemSetting, error)
+	SeedSetting(ctx context.Context, key, value, description string) (bool, error)
 	UpsertSetting(ctx context.Context, key, value, description string) error
 	ListSettings(ctx context.Context) ([]*models.SystemSetting, error)
 }
@@ -344,7 +394,7 @@ type LifecycleStore interface {
 type Store interface {
 	MemberGuardStore
 	RefreshRotationStore
-	OutboundProgress
+	OutboundRecipientLedger
 	authz.MailboxGrantReader
 	SetMailboxGrant(context.Context, *models.MailboxGrant) error
 

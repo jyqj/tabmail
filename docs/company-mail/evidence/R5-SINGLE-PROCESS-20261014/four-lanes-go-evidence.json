@@ -1,0 +1,37 @@
+{
+  "status": "pass",
+  "events": 53085,
+  "packages": 53,
+  "tests_started": 12689,
+  "tests_passed": 12688,
+  "tests_failed": 0,
+  "tests_skipped": 1,
+  "mandatory_tests": 247,
+  "mandatory_missing_or_not_passed": 0,
+  "allowed_skips_observed": [
+    {
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR3BrowserJourney",
+      "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job."
+    }
+  ],
+  "errors": [],
+  "source_sha": "01b2fea75017bd3c6a94d4730232e52b4b6c525e",
+  "process": {
+    "argv": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-timeout=180s",
+      "-parallel=4",
+      "./..."
+    ],
+    "exit_code": 0,
+    "timeout": false,
+    "elapsed_seconds": 270.2792434139992
+  },
+  "mode": "single_whole_repository_go_invocation",
+  "log_sha256": "367b645a7677250fac9ecc0f1341d856a5457258aac6f830d3b7ebabb0f8e466"
+}

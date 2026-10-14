@@ -1,0 +1,10 @@
+test_cli_receipt_pin_and_loaded_helper_hash_binding (test_r5_source_excluded_metadata.ExcludedMetadataTests.test_cli_receipt_pin_and_loaded_helper_hash_binding) ... ok
+test_entry_budget_shared_between_excluded_roots_and_depth_limit (test_r5_source_excluded_metadata.ExcludedMetadataTests.test_entry_budget_shared_between_excluded_roots_and_depth_limit) ... ok
+test_multilevel_modules_links_and_special_files_rejected_by_cli (test_r5_source_excluded_metadata.ExcludedMetadataTests.test_multilevel_modules_links_and_special_files_rejected_by_cli) ... ok
+test_unavailable_unknown_and_directory_swap_metadata_fail_closed (test_r5_source_excluded_metadata.ExcludedMetadataTests.test_unavailable_unknown_and_directory_swap_metadata_fail_closed) ... ok
+test_valid_excluded_files_never_read_or_enter_source (test_r5_source_excluded_metadata.ExcludedMetadataTests.test_valid_excluded_files_never_read_or_enter_source) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 2.906s
+
+OK

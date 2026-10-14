@@ -1,0 +1,48 @@
+{
+  "base": "6d7a3979ccea031f28f12e94f058731339044f19",
+  "central_status": "10/171 unchanged",
+  "changed_preexisting_paths": [
+    "scripts/preparation/probe_r5_external_runtime.py",
+    "scripts/preparation/r5_external_runtime.py",
+    "scripts/preparation/run_r5_external_scoped.py"
+  ],
+  "design_commit": "42f49538f7bceb6eb8e698d716c1418f85343413",
+  "frozen_adapter_commit": "632d55de566254c618bca9a54c5dbae7b355fcf9",
+  "historical_F52": "unchanged failed",
+  "new_paths": [
+    "scripts/tests/r5_external_runtime_v3_checks.py"
+  ],
+  "no_formal_suites": true,
+  "no_real_producer_capture": true,
+  "no_runtime_launch": true,
+  "path_sha256": {
+    "scripts/contracts/r5-selected-binding-v3-producer.json": "cc80c215f1bf51f2a014ff5e6a37084f29f54a904c69ee58ba52febbd125df66",
+    "scripts/preparation/probe_r5_external_runtime.py": "cdc20d08fda7ef88648bbd30872dd6f9e483adffdccfa9b29f726419619ef302",
+    "scripts/preparation/r5_external_runtime.py": "524245ff11084f170d7cd3c41b51d28f7bcde101db3373d961f5c46f2503eb51",
+    "scripts/preparation/run_r5_external_scoped.py": "7b620e1dcb28dcb01e6dfa765789b772b12c6ace2ab4d3e9e7876e8fe35b6397",
+    "scripts/r5_selected_binding_consumer.py": "46a43df58a17ea03966b88fe07275e60344a055960aaabfcf405a7d5eb6caa21",
+    "scripts/r5_selected_source_binding_v2.py": "4bafe6a0b146c69aaf76dfaa206a95ac581739e3c0efa4a52bf36613ae817d67",
+    "scripts/r5_selected_source_binding_v3.py": "12799a213c93510bdb449b5f610a493f517395878dd83c4b48a06e574bbf6acb",
+    "scripts/tests/r5_external_runtime_v3_checks.py": "3063feb5577133e4d31818f4b2b8edeecbf327b498a9b30de909bbdcf12a7848"
+  },
+  "preserved_runtime_symbol_sha256": {
+    "Descriptors": "ddf83518190dc772b91b7336fc404d6a2ca4182b581e56cc8266508940e6aaf2",
+    "canonical": "a4a718e0aa636c291cce9cf20e262365120696fdc2906b54a015b86ce87cbeb9",
+    "clean_environment": "f321c5cf9774868c0e1d32b3f3fdfec0984c7f7998d38cf98e0f56fd303878ea",
+    "dependency_records": "fc59bf6a31a75552ecf309979bef8be768ae14b8115cf56d41b5c5ba71732338",
+    "descriptors": "766f5b245ce981cb3d1c0d82947f212b760d458f463e2283b30d2753da69ae19",
+    "digest": "aa0210ace4fdb541410909814713738e8261645d1f9f4e166eecc1083c4c42ed",
+    "owner": "b8549b87b1d6844404c6387a8f4013da35e9294d36ae43166e82fe276fac7b4c"
+  },
+  "pure-result.json_sha256": "dd4c6bf0ba128d290dbac417ebb0f3504e5321846a5dcb66e775bd573b371c03",
+  "pure.log_sha256": "0b8aa09db038af30e964dca5f077622cbeec695c5a1e39322c9809673c83029f",
+  "syntax_parsed": [
+    "scripts/preparation/probe_r5_external_runtime.py",
+    "scripts/preparation/r5_external_runtime.py",
+    "scripts/preparation/run_r5_external_scoped.py",
+    "scripts/tests/r5_external_runtime_v3_checks.py"
+  ],
+  "tested_implementation_commit": "dcaf2bf91355d4c0524f34f0c767b7997a994833",
+  "unchanged_preexisting_paths": 2219,
+  "v2_manifest_constructor_ast_equal_after_selecting_v2": true
+}

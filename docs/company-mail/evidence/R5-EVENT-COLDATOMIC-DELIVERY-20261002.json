@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-02T02:09:09.089256+00:00",
+  "scope": "new consumer composed, backend transport composed and cold atomic fixtures author evidence only; no tests repeated",
+  "task_complete": false,
+  "product_green": false,
+  "parent_completed": 10,
+  "parent_total": 171,
+  "M_runtime_executed": false,
+  "M_preflight_status": "prepared; new independent reviewer thread-limit blocked; no newM admitted",
+  "historical_S87_method_changed": false,
+  "old_archives_changed": false,
+  "deliveries": [
+    {
+      "id": "CONSUMER29_COMPOSED",
+      "review": "R5-COMPANY-EVENT-CONSUMER-REVIEW.json",
+      "archive": "R5-COMPANY-EVENT-CONSUMER-LOGS.tar.gz",
+      "payload_file_count": 18,
+      "payload_members": [
+        "source-receipt.json",
+        "command.json",
+        "execution-receipt.json",
+        "tests.stdout",
+        "tests.stderr",
+        "tests.exit",
+        "vitest.json",
+        "consumer-attempt-review.json",
+        "cleanup-receipt.json",
+        "fixture-fix-prepared.json",
+        "repair13/command.json",
+        "repair13/execution-receipt.json",
+        "repair13/source-delta.json",
+        "repair13/tests.exit",
+        "repair13/tests.stderr",
+        "repair13/tests.stdout",
+        "repair13/vitest.json",
+        "consumer-runtime-review.json"
+      ],
+      "payload_bytes_changed": false,
+      "excluded_members": [
+        "repair13/original-failed-test.tsx"
+      ],
+      "source_archive": "/tmp/tm-r5consumer.l_3l5fz7/COMPANY-EVENT-CONSUMER-evidence.tar.gz",
+      "source_archive_sha256_from_author_receipt": "a790903659eabf6df97290ff400698f251859dc9d06c65cc8ee732d1b83838ea",
+      "source_archive_hash_recomputed": false,
+      "archive_bytes": 8240,
+      "safety_scope": "selected original UTF8 payload; no AppleDouble/private DSN/JWT/rawmail/objects/DB/profiling binary/server postgres log; original failed and necessary repair receipts retained",
+      "archive_sha256": "b3e2732719216c66f744f97e20442a2f180b949e1e1ea509b26f616a34a485cf",
+      "packaging_changed": true
+    },
+    {
+      "id": "TRANSPORT_COMPOSED",
+      "review": "R5-COMPANY-EVENT-TRANSPORT-REVIEW.json",
+      "archive": "R5-COMPANY-EVENT-TRANSPORT-LOGS.tar.gz",
+      "payload_file_count": 34,
+      "payload_members": [
+        "source-receipt.json",
+        "source-receipt-inherited-fields-original.json",
+        "packaging-fields-correction.json",
+        "source-label",
+        "author-final-packet.json",
+        "transport-attempt-review.json",
+        "transport-runtime-review.json",
+        "pure/command.json",
+        "pure/execution-budget.json",
+        "pure/go.exit",
+        "pure/go.jsonl",
+        "pure/go.stderr",
+        "pg-http/command.json",
+        "pg-http/execution-budget.json",
+        "pg-http/go.exit",
+        "pg-http/go.jsonl",
+        "pg-http/go.stderr",
+        "cleanup-receipt.json",
+        "http-oracle-repair/base-create.log",
+        "http-oracle-repair/cleanup-receipt.json",
+        "http-oracle-repair/command.json",
+        "http-oracle-repair/execution-budget.json",
+        "http-oracle-repair/go.exit",
+        "http-oracle-repair/go.jsonl",
+        "http-oracle-repair/go.stderr",
+        "http-oracle-repair/initdb.log",
+        "http-oracle-repair/owned-pg-pid.txt",
+        "http-oracle-repair/owned-pg-verification.txt",
+        "http-oracle-repair/pg-final-stop.exit",
+        "http-oracle-repair/pg-final-stop.log",
+        "http-oracle-repair/pg-start.log",
+        "http-oracle-repair/source-label",
+        "http-oracle-repair/source-receipt.json",
+        "http-oracle-repair/terminal-owned-test-databases.txt"
+      ],
+      "payload_bytes_changed": false,
+      "excluded_members": [
+        "http-oracle-repair/postgres.log"
+      ],
+      "source_archive": "/tmp/tm-r5transport.GeneArts/COMPANY-EVENT-TRANSPORT-evidence.tar.gz",
+      "source_archive_sha256_from_author_receipt": "8ea7316fd06cd52461963ada5778a5a31e737fad72508cdaea6713eb5a3996dd",
+      "source_archive_hash_recomputed": false,
+      "archive_bytes": 83739,
+      "safety_scope": "selected original UTF8 payload; no AppleDouble/private DSN/JWT/rawmail/objects/DB/profiling binary/server postgres log; original failed and necessary repair receipts retained",
+      "archive_sha256": "6532b07259dacbde965f8afc53558004651a0491c1a6d7c1ba49146faf15638c",
+      "packaging_changed": true
+    },
+    {
+      "id": "COLD_ATOMIC8_FIXTURES",
+      "review": "R5-COLD-ATOMIC8-REVIEW.json",
+      "archive": "R5-COLD-ATOMIC8-LOGS.tar.gz",
+      "payload_file_count": 7,
+      "payload_members": [
+        "source-receipt.json",
+        "command.json",
+        "execution-receipt.json",
+        "tests.stdout",
+        "tests.stderr",
+        "tests.exit",
+        "coldatomic-runtime-review.json"
+      ],
+      "payload_bytes_changed": false,
+      "excluded_members": [],
+      "source_archive": "/tmp/tm-r5cold-atomic._78yi7jm/COLD-ATOMIC-8TARGET-evidence.tar.gz",
+      "source_archive_sha256_from_author_receipt": "6189019a73d4683b6a2d7d55aa411e79e64b6213ad3d57d3027d9b8c8d663432",
+      "source_archive_hash_recomputed": false,
+      "archive_bytes": 1962,
+      "safety_scope": "selected original UTF8 payload; no AppleDouble/private DSN/JWT/rawmail/objects/DB/profiling binary/server postgres log; original failed and necessary repair receipts retained",
+      "archive_sha256": "6189019a73d4683b6a2d7d55aa411e79e64b6213ad3d57d3027d9b8c8d663432",
+      "packaging_changed": false,
+      "archive_hash_recomputed": false
+    }
+  ],
+  "cold_final_delivery": "R5-COLD-ATOMIC8-FINAL-DELIVERY.json",
+  "prior_cold_counterexample": "R5-COLD-TERMINAL-COUNTEREXAMPLE-REVIEW.json",
+  "independent_delivered_reviews": [
+    {
+      "kind": "consumer_delivered_readonly_review",
+      "accepted": "29 unique actual passes composed across firstwhole CLI1 and exact13repair CLI0",
+      "latest_whole29_exit_zero": false,
+      "persistent_review_file": null
+    },
+    {
+      "kind": "transport_delivered_readonly_review",
+      "accepted": "4top/23leaf bounded composed, initiala9/onlyHTTPbc oracle-onlytestdelta",
+      "latest_whole4_exit_zero": false,
+      "persistent_review_file": null
+    },
+    {
+      "kind": "coldatomic_delivered_readonly_review",
+      "accepted": "only8newfixtures runnerb4db8/tests02185, no actualnewnativecold/npm",
+      "persistent_review_file": null
+    }
+  ],
+  "consumer_source_boundary": "cold532a+7capturedfiledelta; onlytest dd8515->18fd provider fixture changes12render sites/13leaves; other6capturedfiles incl production bytes unchanged. 16 oldpass not repeated.",
+  "consumer_repair_skip": "Vitest14registered:13selectedpassed plus1explicit priorpassed case excluded; not a required-target skip or newest whole29 execution.",
+  "transport_source_boundary": "a9e8a47238201fde4b903e47574b3ff3b0a6f678/closure15b4 -> bc82341749cd54a0a97dcfb595d5b8dd75c0001e/closurecceb onlyAPItest strictoracle bf38; metadataonly oldvisibilitytops fixed preserving originalreceipt/files/raw.",
+  "excluded_original_payload_reasons": {
+    "repair13/original-failed-test.tsx": "original fixture source contains credential-shaped Bearer test literals; precautionary source exclusion, not classified real credentials; original private artifact retained; before/after source delta and failed raw remain",
+    "http-oracle-repair/postgres.log": "private owned server log excluded to avoid query/parameter leakage; command/rawJSONL/exit/cleanup/source receipts remain"
+  },
+  "documentation_validation": {
+    "parent_total": 171,
+    "completed": 10,
+    "P0_G0_G7_parent_complete": false,
+    "all_three_prior_S_dicts_unchanged": true,
+    "all_failed_attempt_dicts_unchanged": true,
+    "M_runtime_executed": false,
+    "consumer_actual_pass_provenance_unique": 29,
+    "consumer_latest_whole29_exit_zero": false,
+    "transport_latest_whole4_exit_zero": false,
+    "safe_regular_payload_counts": [
+      18,
+      34,
+      7
+    ],
+    "preserved_exit_sequence": [
+      1,
+      0,
+      1,
+      0,
+      0
+    ],
+    "local_refs": "resolve",
+    "product_tests_reexecuted": false,
+    "per_file_hashes_recomputed": false
+  }
+}

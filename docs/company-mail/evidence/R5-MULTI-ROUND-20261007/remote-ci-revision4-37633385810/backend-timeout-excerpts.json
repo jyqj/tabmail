@@ -1,0 +1,28 @@
+[
+  {
+    "Time": "2026-10-07T14:08:09.151567714Z",
+    "Action": "output",
+    "Package": "tabmail/internal/store/postgres",
+    "Test": "TestR5EnqueueProtectsAuthorityThroughInsert/override-insert",
+    "Output": "panic: test timed out after 3m0s\n"
+  },
+  {
+    "Time": "2026-10-07T14:08:09.151595757Z",
+    "Action": "output",
+    "Package": "tabmail/internal/store/postgres",
+    "Test": "TestR5EnqueueProtectsAuthorityThroughInsert/override-insert",
+    "Output": "\trunning tests:\n"
+  },
+  {
+    "Time": "2026-10-07T14:08:09.165767508Z",
+    "Action": "output",
+    "Package": "tabmail/internal/store/postgres",
+    "Output": "FAIL\ttabmail/internal/store/postgres\t180.060s\n"
+  },
+  {
+    "Time": "2026-10-07T14:08:09.166720994Z",
+    "Action": "fail",
+    "Package": "tabmail/internal/store/postgres",
+    "Elapsed": 180.061
+  }
+]

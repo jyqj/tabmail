@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "decision": "bounded_accept_for_publication_only",
+  "base_commit": "52c2d4a996ff6e6bc7f7f8f36a3e161c5f6f3e73",
+  "frozen_archive_sha256": "bd876e37adea85ecb33ceab47a3b159dc6a6dc7c6fe65cceffc6e437cf232158",
+  "reviewed_helper_sha256": "12799a213c93510bdb449b5f610a493f517395878dd83c4b48a06e574bbf6acb",
+  "delivery_paths": [
+    {
+      "path": "scripts/r5_selected_source_binding_v3.py",
+      "sha256": "12799a213c93510bdb449b5f610a493f517395878dd83c4b48a06e574bbf6acb",
+      "git_blob": "390f72d638a8cb3398492bab26c810802017115d",
+      "bytes": 18917
+    },
+    {
+      "path": "scripts/tests/r5_selected_binding_v3_producer_path_checks.py",
+      "sha256": "363a14ed36c917753fb81038fcca2cc00b23ce80b1a5a72227c8d66cc6c08b7a",
+      "git_blob": "46e701f8d3d5e56090640add3139c35cd5539ebc",
+      "bytes": 4194
+    },
+    {
+      "path": "docs/company-mail/R5-SELECTED-BINDING-V3-PRODUCER-PATH-20261004.md",
+      "sha256": "247c15ed0b6ef558dd7c709f60c2a51f9300fe8345685083dfb8d5af435babf4",
+      "git_blob": "c215356256d29096b21853b595b8bc010077ac3d",
+      "bytes": 7948
+    }
+  ],
+  "partial_extract": true,
+  "base_files_reverified_after_tests": 56,
+  "changed_base_paths": [
+    "scripts/r5_selected_source_binding_v3.py"
+  ],
+  "tests": {
+    "reviewed_helper_sha256": "12799a213c93510bdb449b5f610a493f517395878dd83c4b48a06e574bbf6acb",
+    "outer_tests": 82,
+    "passed": 82,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "expected_failures": 0,
+    "unexpected_successes": 0,
+    "os_subprocess_attempts": 0,
+    "go_executed": false,
+    "groups": {
+      "author_and_unchanged_pure": 56,
+      "unchanged_independent_nonpath": 16,
+      "unchanged_absolute_contract": 3,
+      "fresh_delta_boundaries": 7
+    }
+  },
+  "historical_failures_preserved": true,
+  "production_edits_by_reviewer": false,
+  "github_writes": false,
+  "actual_go_metadata": false,
+  "formal_qualification": false,
+  "central_completion": "10/171 unchanged",
+  "artifacts": {
+    "R5-V3-INDEPENDENT-ROOT-20261004-delta-review.md": {
+      "bytes": 6488,
+      "sha256": "0dee7c586f55c3a79b319b020886abdd3fd57dab8848c6924c3b1a9689de2043"
+    },
+    "R5-V3-INDEPENDENT-ROOT-20261004-delta-test-summary.json": {
+      "bytes": 13024,
+      "sha256": "39523234b852c00061e4385c878a18ca6df9ce8b9dee0f6c58ce82a372bc810f"
+    },
+    "R5-V3-INDEPENDENT-ROOT-20261004-delta-tests.log": {
+      "bytes": 13351,
+      "sha256": "a3f293182e5467cc0ad6273886521bd97cd1633ad21df3073d271777d3010a6d"
+    },
+    "R5-V3-INDEPENDENT-ROOT-20261004_absolute_contract_checks.py": {
+      "bytes": 3094,
+      "sha256": "635d3a2ae433acde5831d2e90a6044ce33da43b0499133010191da33c218ccdb"
+    },
+    "R5-V3-INDEPENDENT-ROOT-20261004_checks_frozen_red18.py": {
+      "bytes": 19344,
+      "sha256": "f885d97b6bda46c957b31f42421123b81fe587823a2d97b41c7fc7d99e479a52"
+    },
+    "R5-V3-INDEPENDENT-ROOT-20261004_delta_checks.py": {
+      "bytes": 3923,
+      "sha256": "1d2a3f8c705a7b63a11dbc8b4e5fa1a61be74547a22f3e5141ee17ab7267d75d"
+    },
+    "R5-V3-INDEPENDENT-ROOT-20261004_delta_runner.py": {
+      "bytes": 3211,
+      "sha256": "cd090f9e6abeba31ce7c70f3e2e2daaf43bf6c4904dc705ccc11ac3d63800b70"
+    }
+  }
+}

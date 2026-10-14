@@ -1,0 +1,26 @@
+{
+  "tested_implementation": "7fea1edeee6bcad3e77edab767997b8757873db1",
+  "base": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+  "commands": [
+    "python3 -B scripts/tests/r5_external_batch_v2_checks.py",
+    "python3 -B docs/company-mail/evidence/R5-BATCH-V2-SLICE4-20261004/static_checks.py",
+    "git diff --check"
+  ],
+  "result": {
+    "tests": 14,
+    "failures": 0,
+    "errors": 0,
+    "os_process_events": []
+  },
+  "sha256": {
+    "scripts/preparation/r5_external_batch.py": "83ff36965120115c6365e40df0eef8da2df20eb33129faba81def89261cd5a12",
+    "scripts/contracts/r5-external-batch-v2.schema.json": "60f3bbf12dbfc28a2cc72e0d5ed38110425514621a11e10eddf1d92007ca9c0a",
+    "scripts/tests/r5_external_batch_v2_checks.py": "dca70ff40eeccd11bdcd8f28e4e4d83d7f7bfdf7dcbd9f95b3481fdd12cd2ede",
+    "docs/company-mail/R5-BATCH-V2-SLICE4-20261004.md": "7e7f35430dd06bef44383fde9bff02667d8abb03891d594c9e4b521123ae6522",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-20261004/preserved-tree.json": "805d9b0360e1bff28f6278861cc409c75b264c9db38304fb99184424f78feccb",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-20261004/pure.stderr": "a576ccb79def0f91a1b4bc8b06971aa948c4383d24bdb813a41a9f64a8f021ad",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-20261004/pure.stdout": "ef8dca9c70c879258c771b13293a1b16b034556480eddb3e3064aed29a76b613",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-20261004/static-results.json": "257d02f154a4e99385c3b597374110a3a578243b58c77bc006cc147c0d62c230",
+    "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-20261004/static_checks.py": "878b8fcb5615a3535992de088cbbc59b85c6adcfa20d0d4008b8510798923db9"
+  }
+}

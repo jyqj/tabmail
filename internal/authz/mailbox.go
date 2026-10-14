@@ -103,7 +103,7 @@ func EvaluateMailboxAccess(actor Actor, mb *models.Mailbox, grant *models.Mailbo
 	if mb.ExpiresAt != nil && !mb.ExpiresAt.After(time.Now()) {
 		return d
 	}
-	if actor.Permission != nil && !models.ZoneAllowed(actor.Permission.AllowedZoneIDs, mb.ZoneID) {
+	if actor.Permission != nil && !actor.Permission.AllowsZone(mb.ZoneID) {
 		return d
 	}
 	policy := MailboxSendPolicy(mb)

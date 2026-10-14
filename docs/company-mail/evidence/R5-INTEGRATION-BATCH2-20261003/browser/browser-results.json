@@ -1,0 +1,114 @@
+{
+  "scope": "real Chromium, candidate component on Vite; synthetic API and auth; real locale, Base UI, SWR, API/session/event transport. NOT shipping Next runtime, PG authz or durable acceptance.",
+  "candidate": "41fc0f3c24568fa1a8a8b23550859060f0b2d255",
+  "baseline": "eb366eecb6413f5aa025afb4ee63bd1eea7fdf7d",
+  "chromium": "151.0.7922.173",
+  "passed": 26,
+  "failed": 0,
+  "results": [
+    {
+      "name": "description-only conflict preserves all remote revocations/quotas and raw NULL",
+      "status": "passed"
+    },
+    {
+      "name": "explicit false / zero / empty list survive conflict confirmation",
+      "status": "passed"
+    },
+    {
+      "name": "NULL profile zones remain omitted on ordinary description save; no override inherit field",
+      "status": "passed"
+    },
+    {
+      "name": "unchanged form cannot submit",
+      "status": "passed"
+    },
+    {
+      "name": "same-field remote conflict is visible and deliberate preserved edit wins only after confirmation",
+      "status": "passed"
+    },
+    {
+      "name": "explicit same-field choice of ORIGINAL quota after seeing remote change is transmitted",
+      "status": "passed"
+    },
+    {
+      "name": "refresh GET 500 freezes draft and successful retry recovers",
+      "status": "passed"
+    },
+    {
+      "name": "refresh GET 409 freezes draft and successful retry recovers",
+      "status": "passed"
+    },
+    {
+      "name": "read 401 locks current session and SAME account re-login recovers",
+      "status": "passed"
+    },
+    {
+      "name": "write 401 locks current session and SAME account re-login recovers",
+      "status": "passed"
+    },
+    {
+      "name": "read 403 locks current session and SAME account re-login recovers",
+      "status": "passed"
+    },
+    {
+      "name": "write 403 locks current session and SAME account re-login recovers",
+      "status": "passed"
+    },
+    {
+      "name": "cancel close/reopen discards edits and binds fresh baseline; A to B has no leaked intent",
+      "status": "passed"
+    },
+    {
+      "name": "delayed old refresh cannot contaminate new account draft",
+      "status": "passed"
+    },
+    {
+      "name": "delayed old refresh cannot contaminate new tenant draft",
+      "status": "passed"
+    },
+    {
+      "name": "delayed old refresh cannot contaminate new relogin draft",
+      "status": "passed"
+    },
+    {
+      "name": "delayed old PATCH cannot close or unlock a new session PATCH",
+      "status": "passed"
+    },
+    {
+      "name": "repeated 409 never blindly replays and can recover after new refresh",
+      "status": "passed"
+    },
+    {
+      "name": "SSE invalidation drops prior confirmation and requires fresh manual review",
+      "status": "passed"
+    },
+    {
+      "name": "missing target during refresh freezes; close and select valid B recovers",
+      "status": "passed"
+    },
+    {
+      "name": "unchecking confirmation and refreshing again remove write eligibility",
+      "status": "passed"
+    },
+    {
+      "name": "refresh 500 then page reload restores editing without frozen old draft",
+      "status": "passed"
+    },
+    {
+      "name": "refresh rejects incomplete snapshot then recovers after valid authoritative read",
+      "status": "passed"
+    },
+    {
+      "name": "refresh rejects foreign-tenant snapshot then recovers after valid authoritative read",
+      "status": "passed"
+    },
+    {
+      "name": "refresh rejects system snapshot then recovers after valid authoritative read",
+      "status": "passed"
+    },
+    {
+      "name": "batch2 independent: successful rebase then interrupted refresh retains baseline and manual fence",
+      "status": "passed"
+    }
+  ]
+}

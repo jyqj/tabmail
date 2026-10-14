@@ -58,6 +58,11 @@ func NormalizeAddressParts(address string, stripPlus bool) (string, string, erro
 	}
 	local := address[:at]
 	domain := address[at+1:]
+	// Plus aliases are derived from a valid local part. Validate the original
+	// first so stripping cannot hide malformed bytes or an extra address.
+	if err := ValidateLocalPart(local); err != nil {
+		return "", "", err
+	}
 	if stripPlus {
 		if idx := strings.Index(local, "+"); idx > 0 {
 			local = local[:idx]
@@ -125,7 +130,9 @@ func ValidateDomainPart(domain string) bool {
 			hasAlphaNum = true
 			labelLen++
 		case c == '-':
-			if prev == '.' || prev == '-' {
+			// RFC 5321's Ldh-str permits repeated interior hyphens, including
+			// the xn-- prefix of an ASCII IDNA label. Edges stay invalid.
+			if prev == '.' {
 				return false
 			}
 			labelLen++

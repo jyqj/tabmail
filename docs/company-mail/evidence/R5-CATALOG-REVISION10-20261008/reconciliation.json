@@ -1,0 +1,1567 @@
+{
+  "schema_version": 1,
+  "inventory_revision": 10,
+  "source_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+  "source_tree": "40e1d2d16258e0e2bc3afea29553dbb148920e4e",
+  "revision9_snapshot_commit": "f2215611158d33ff9caed468bf6314e32dcf5046",
+  "revision9_source_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+  "revision9_snapshots": {
+    "transaction": {
+      "commit": "f2215611158d33ff9caed468bf6314e32dcf5046",
+      "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+      "blob": "0a2c62c81cf88214d31d98e41543750cd5b4f470",
+      "sha256": "32b35746b6b2ef170ae423fa0d460fb7375a229b0e402cb206f39bd1a63d8907"
+    },
+    "compatibility": {
+      "commit": "f2215611158d33ff9caed468bf6314e32dcf5046",
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+      "blob": "739574b45bcb1715e7a10c478c8fa3c85e095d2f",
+      "sha256": "1af19406cb5bad0df43b1b36fc95310dfa28566ceb5b4ce8cbb9e7577f1bb314"
+    },
+    "clients": {
+      "commit": "f2215611158d33ff9caed468bf6314e32dcf5046",
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+      "blob": "f6eb4c08f02e313d230ef97f8f02f1b2f3bf2b55",
+      "sha256": "c62f46e2b95aeea514050a1f4a09308f7d9be5815a1640bded077605abae9057"
+    },
+    "client_routes": {
+      "commit": "f2215611158d33ff9caed468bf6314e32dcf5046",
+      "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+      "blob": "d8dcb3a29190e689612eeac383e4f5b8f3482e8c",
+      "sha256": "11196f0fce4773d317d53b12ecf107ae21f5fbeb0fefe2c27c84e37571ca625d"
+    }
+  },
+  "boundary": "Fresh static syntax and source-inventory reconciliation only; no runtime, wire, dependency, release, M/G0 or parent-task acceptance.",
+  "transaction": {
+    "status": "PASS",
+    "postgres_files": 62,
+    "functions": 395,
+    "sql_execution_calls": 499,
+    "direct_write_functions": 134,
+    "write_closure_functions": 154,
+    "migration_files": 19,
+    "task_complete": false,
+    "runtime_verified": false,
+    "meaning": "syntax inventory current; no concurrency or behavior equivalence claim"
+  },
+  "compatibility": {
+    "wire_validation_scope": "not_checked_current_wire_required",
+    "historical_wire_reference": {
+      "artifact_ref": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json",
+      "sha256": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+      "qualification": "historical_metadata_only_not_current_wire"
+    },
+    "status": "source_inventory_and_upgrade_plan_checked",
+    "task_complete": false,
+    "product_green": false,
+    "routes": 132,
+    "client_branches": 134,
+    "source_files": 94,
+    "openapi_missing": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/suppression",
+      "GET /docs-assets/*"
+    ],
+    "no_shipped_client": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/admin/status",
+      "GET /api/v1/auth/me",
+      "GET /api/v1/company/outbound/{id}/recipients",
+      "GET /api/v1/suppression",
+      "GET /docs",
+      "GET /docs-assets/*",
+      "GET /metrics",
+      "GET /openapi.yaml",
+      "GET /ready",
+      "GET /redoc"
+    ],
+    "runtime_boundary": "No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required."
+  },
+  "old_catalog_rejection": {
+    "transactions": {
+      "category": "caller drift",
+      "affected_functions": 40
+    },
+    "compatibility": {
+      "category": "source hash drift"
+    },
+    "clients": {
+      "category": "unchanged inventory positive control",
+      "status": "PASS",
+      "client_branches": 134,
+      "transport_forwarders": 7
+    }
+  },
+  "compatibility_rejections": {
+    "revision1": "route/schema/client/test source drift: GET /api/v1/admin/runtime-config",
+    "revision2": "route/schema/client/test source drift: GET /api/v1/admin/runtime-config",
+    "revision3": "route/schema/client/test source drift: GET /api/v1/admin/runtime-config",
+    "revision4": "route/schema/client/test source drift: GET /api/v1/company/mailboxes/{id}/grants",
+    "revision5": "route/schema/client/test source drift: GET /api/v1/company/mailboxes/{id}/grants",
+    "revision6": "route/schema/client/test source drift: GET /api/v1/company/mailboxes/{id}/grants",
+    "revision7": "route/schema/client/test source drift: POST /api/v1/company/mailboxes",
+    "revision8": "route/schema/client/test source drift: POST /api/v1/company/mailboxes",
+    "revision9": "source hash drift"
+  },
+  "transaction_revision9_rejection": "caller drift: internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey\ncaller drift: internal/store/postgres/apikeys.go:*PgStore:DeleteAPIKey\ncaller drift: internal/store/postgres/apikeys.go:*PgStore:GetAPIKey\ncaller drift: internal/store/postgres/apikeys.go:*PgStore:ListAPIKeys\ncaller drift: internal/store/postgres/apikeys.go:*PgStore:ListAPIKeysByOwner\ncaller drift: internal/store/postgres/audit.go:*PgStore:InsertAudit\ncaller drift: internal/store/postgres/audit.go:*PgStore:ListAuditEntries\ncaller drift: internal/store/postgres/audit.go:*PgStore:ListAuditEntriesPaged\ncaller drift: internal/store/postgres/audit.go:*PgStore:ListMonitorEvents\ncaller drift: internal/store/postgres/company_mail.go:*PgStore:ListMailboxEvents\ncaller drift: internal/store/postgres/company_members.go:*PgStore:GetCompanySettings\ncaller drift: internal/store/postgres/company_members.go:*PgStore:GetWorkMailbox\ncaller drift: internal/store/postgres/company_templates.go:*PgStore:TemplateForSend\ncaller drift: internal/store/postgres/ingress.go:*PgStore:DeliverIngress\ncaller drift: internal/store/postgres/mailboxes.go:*PgStore:CountAllMailboxes\ncaller drift: internal/store/postgres/messages.go:*PgStore:CountAllMessages\ncaller drift: internal/store/postgres/messages.go:*PgStore:CountTenantMessagesSince\ncaller drift: internal/store/postgres/messages.go:*PgStore:EnqueueOrphanRetry\ncaller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetAPIKey\ncaller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetZone\ncaller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:TemplateForSend\ncaller drift: internal/store/postgres/plans.go:*PgStore:CreatePlan\ncaller drift: internal/store/postgres/plans.go:*PgStore:DeletePlan\ncaller drift: internal/store/postgres/plans.go:*PgStore:GetPlan\ncaller drift: internal/store/postgres/plans.go:*PgStore:ListPlans\ncaller drift: internal/store/postgres/plans.go:*PgStore:UpdatePlan\ncaller drift: internal/store/postgres/postgres.go:*PgStore:Close\ncaller drift: internal/store/postgres/postgres.go::New\ncaller drift: internal/store/postgres/queue.go:*PgStore:ListIngestJobs\ncaller drift: internal/store/postgres/queue.go:*PgStore:ListWebhookDeliveries\ncaller drift: internal/store/postgres/settings.go:*PgStore:ListSettings\ncaller drift: internal/store/postgres/smtp_policy.go:*PgStore:GetSMTPPolicy\ncaller drift: internal/store/postgres/smtp_policy.go:*PgStore:UpsertSMTPPolicy\ncaller drift: internal/store/postgres/tenants.go:*PgStore:CreateTenant\ncaller drift: internal/store/postgres/tenants.go:*PgStore:DeleteTenant\ncaller drift: internal/store/postgres/tenants.go:*PgStore:GetTenant\ncaller drift: internal/store/postgres/tenants.go:*PgStore:ListTenants\ncaller drift: internal/store/postgres/tenants.go:*PgStore:UpsertOverride\ncaller drift: internal/store/postgres/zones.go:*PgStore:CountAllZones\ncaller drift: internal/store/postgres/zones.go:*PgStore:GetZone",
+  "transaction_revision8_rejection": "caller drift: internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey\ncaller drift: internal/store/postgres/apikeys.go:*PgStore:DeleteAPIKey\ncaller drift: internal/store/postgres/apikeys.go:*PgStore:GetAPIKey\ncaller drift: internal/store/postgres/apikeys.go:*PgStore:ListAPIKeys\ncaller drift: internal/store/postgres/apikeys.go:*PgStore:ListAPIKeysByOwner\ncaller drift: internal/store/postgres/audit.go:*PgStore:InsertAudit\ncaller drift: internal/store/postgres/audit.go:*PgStore:ListAuditEntries\ncaller drift: internal/store/postgres/audit.go:*PgStore:ListAuditEntriesPaged\ncaller drift: internal/store/postgres/audit.go:*PgStore:ListMonitorEvents\ncaller drift: internal/store/postgres/company_mail.go:*PgStore:ListMailboxEvents\ncaller drift: internal/store/postgres/company_members.go:*PgStore:GetCompanySettings\ncaller drift: internal/store/postgres/company_members.go:*PgStore:GetWorkMailbox\ncaller drift: internal/store/postgres/company_templates.go:*PgStore:TemplateForSend\ncaller drift: internal/store/postgres/ingress.go:*PgStore:DeliverIngress\ncaller drift: internal/store/postgres/mailboxes.go:*PgStore:CountAllMailboxes\ncaller drift: internal/store/postgres/messages.go:*PgStore:CountAllMessages\ncaller drift: internal/store/postgres/messages.go:*PgStore:CountTenantMessagesSince\ncaller drift: internal/store/postgres/messages.go:*PgStore:EnqueueOrphanRetry\ncaller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetAPIKey\ncaller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetUser\ncaller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetZone\ncaller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:TemplateForSend\ncaller drift: internal/store/postgres/permission_assignment.go:*PgStore:AssignPermissionEditor\ncaller drift: internal/store/postgres/plans.go:*PgStore:CreatePlan\ncaller drift: internal/store/postgres/plans.go:*PgStore:DeletePlan\ncaller drift: internal/store/postgres/plans.go:*PgStore:GetPlan\ncaller drift: internal/store/postgres/plans.go:*PgStore:ListPlans\ncaller drift: internal/store/postgres/plans.go:*PgStore:UpdatePlan\ncaller drift: internal/store/postgres/postgres.go:*PgStore:Close\ncaller drift: internal/store/postgres/postgres.go::New\ncaller drift: internal/store/postgres/queue.go:*PgStore:CountDeadWebhookDeliveries\ncaller drift: internal/store/postgres/queue.go:*PgStore:CreateOutboxEvent\ncaller drift: internal/store/postgres/queue.go:*PgStore:CreateWebhookDeliveries\ncaller drift: internal/store/postgres/queue.go:*PgStore:ListDeadWebhookDeliveries\ncaller drift: internal/store/postgres/queue.go:*PgStore:ListIngestJobs\ncaller drift: internal/store/postgres/queue.go:*PgStore:ListWebhookDeliveries\ncaller drift: internal/store/postgres/refresh_rotation.go:*PgStore:RevokeRefreshTokenByHash\ncaller drift: internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken\ncaller drift: internal/store/postgres/settings.go:*PgStore:ListSettings\ncaller drift: internal/store/postgres/smtp_policy.go:*PgStore:GetSMTPPolicy\ncaller drift: internal/store/postgres/smtp_policy.go:*PgStore:UpsertSMTPPolicy\ncaller drift: internal/store/postgres/tenants.go:*PgStore:CreateTenant\ncaller drift: internal/store/postgres/tenants.go:*PgStore:DeleteTenant\ncaller drift: internal/store/postgres/tenants.go:*PgStore:EffectiveConfig\ncaller drift: internal/store/postgres/tenants.go:*PgStore:GetTenant\ncaller drift: internal/store/postgres/tenants.go:*PgStore:ListTenants\ncaller drift: internal/store/postgres/tenants.go:*PgStore:UpsertOverride\ncaller drift: internal/store/postgres/users.go:*PgStore:ChangePasswordAtomic\ncaller drift: internal/store/postgres/users.go:*PgStore:CreateRefreshToken\ncaller drift: internal/store/postgres/users.go:*PgStore:CreateUser\ncaller drift: internal/store/postgres/users.go:*PgStore:GetUser\ncaller drift: internal/store/postgres/users.go:*PgStore:GetUserByEmail\ncaller drift: internal/store/postgres/users.go:*PgStore:RevokeUserRefreshTokens\ncaller drift: internal/store/postgres/users.go:*PgStore:TouchUserLogin\ncaller drift: internal/store/postgres/users.go:*PgStore:UpdateUserPassword\ncaller drift: internal/store/postgres/webhook_endpoints.go:*PgStore:ListWebhookEndpoints\ncaller drift: internal/store/postgres/zones.go:*PgStore:CountAllZones\ncaller drift: internal/store/postgres/zones.go:*PgStore:GetZone",
+  "transaction_callers": [
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey",
+      "before_count": 3,
+      "after_count": 3,
+      "before_sha256": "525cf40daed8ed3e0b0cec2b0ac4380214768696df9924ec3da13170eb44aac3",
+      "after_sha256": "f73912551e8a595af034837c0d1e63262ecc57387a1514d42944e019c65dbc09",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.CreateAPIKey",
+          "before_line": 416,
+          "after_line": 434
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:DeleteAPIKey",
+      "before_count": 3,
+      "after_count": 3,
+      "before_sha256": "748091f934132042c3905215f4114648f0d9c64cb76d407e702f6a6595b0c9dd",
+      "after_sha256": "ee041e98ba63a4bc3c5f1e9f2c3f950ccbacc2e0df29c0c51b2cf890d044a37c",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKey",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.DeleteAPIKey",
+          "before_line": 474,
+          "after_line": 492
+        },
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.DeleteAPIKey",
+          "before_line": 470,
+          "after_line": 488
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:GetAPIKey",
+      "before_count": 4,
+      "after_count": 4,
+      "before_sha256": "ef3f323894276ca33c06c62db0d76aebb37e8c9b1df796eeee577eabc350cf56",
+      "after_sha256": "63625103fd68bb4ed6a3f72ca462bad89ea785637ac6ff90af280a84f44eb747",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.GetAPIKey",
+          "before_line": 454,
+          "after_line": 472
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:ListAPIKeys",
+      "before_count": 3,
+      "after_count": 3,
+      "before_sha256": "2e9666913bc3a81cb88e56fcfdbcde8be262cd443521b69ba064c0e9ec3495cc",
+      "after_sha256": "811dcebb2c597e15e21cc36c4c80bcab25639d334b14ddb3e35354ac9d9e30e8",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:ListAPIKeys",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.ListAPIKeys",
+          "before_line": 438,
+          "after_line": 456
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:ListAPIKeysByOwner",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "999c061146936ebf68e17ea60e66d0853b8190104d401ea2df945ee8456d0376",
+      "after_sha256": "72b9ae7903e45c1f4d88ebbe21023b60afe5f831c930f1438e40cdcca694333b",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:ListAPIKeysByOwner",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.ListAPIKeysByOwner",
+          "before_line": 446,
+          "after_line": 464
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/audit.go:*PgStore:InsertAudit",
+      "before_count": 21,
+      "after_count": 21,
+      "before_sha256": "e5b00d77c5e2b4297febd6835f5317c81b48266b683d4484cac8823cea492b29",
+      "after_sha256": "40c975030ad738a88d43b8969583ec63056cec25c4d26449fbe1fd56545b0766",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
+          "source": "internal/app/admin/service.go",
+          "expression": "app.InsertAudit",
+          "before_line": 419,
+          "after_line": 437
+        },
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:CreatePlan",
+          "source": "internal/app/admin/service.go",
+          "expression": "app.InsertAudit",
+          "before_line": 278,
+          "after_line": 293
+        },
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
+          "source": "internal/app/admin/service.go",
+          "expression": "app.InsertAudit",
+          "before_line": 227,
+          "after_line": 234
+        },
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKey",
+          "source": "internal/app/admin/service.go",
+          "expression": "app.InsertAudit",
+          "before_line": 477,
+          "after_line": 495
+        },
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:DeletePlan",
+          "source": "internal/app/admin/service.go",
+          "expression": "app.InsertAudit",
+          "before_line": 306,
+          "after_line": 324
+        },
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:DeleteTenant",
+          "source": "internal/app/admin/service.go",
+          "expression": "app.InsertAudit",
+          "before_line": 264,
+          "after_line": 276
+        },
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:UpdatePlan",
+          "source": "internal/app/admin/service.go",
+          "expression": "app.InsertAudit",
+          "before_line": 292,
+          "after_line": 310
+        },
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:UpdateSMTPPolicy",
+          "source": "internal/app/admin/service.go",
+          "expression": "app.InsertAudit",
+          "before_line": 590,
+          "after_line": 608
+        },
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:UpdateSetting",
+          "source": "internal/app/admin/service.go",
+          "expression": "app.InsertAudit",
+          "before_line": 196,
+          "after_line": 203
+        },
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
+          "source": "internal/app/admin/service.go",
+          "expression": "app.InsertAudit",
+          "before_line": 249,
+          "after_line": 261
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/audit.go:*PgStore:ListAuditEntries",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "c816ba4eedc40e3a1026de1e3d1721fe5ab4a572eab5ac871116af2ddbf9e50c",
+      "after_sha256": "03283d5c07ab83abab349465aa9c13c211df1fa2135a5d7ee1ccc00546b6bd77",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:Stats",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.ListAuditEntries",
+          "before_line": 507,
+          "after_line": 525
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/audit.go:*PgStore:ListAuditEntriesPaged",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "0ecac66d7458e843362f20cc2f7491df52a71c3784cb64870562cb7bae5958ec",
+      "after_sha256": "6414ffc7c044be40b8b6645304b51900a07fc674a51c4585870b920463535b3a",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:ListAudit",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.ListAuditEntriesPaged",
+          "before_line": 543,
+          "after_line": 561
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/audit.go:*PgStore:ListMonitorEvents",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "aaf5c4d33c40a9a409dc3b22f0b1b6ddb19e44f84904a7c96753d29d880eb6d1",
+      "after_sha256": "2a658f0e1201b68af357dd9e166f4f50a113c824c62afc62d7900825145aa0a3",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/monitor.go:*MonitorHandler:History",
+          "source": "internal/api/handlers/monitor.go",
+          "expression": "h.store.ListMonitorEvents",
+          "before_line": 98,
+          "after_line": 99
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/company_mail.go:*PgStore:ListMailboxEvents",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "f68fe1e993af31245b311d2146a636e22626291d514485e75d4a71115a2d14f5",
+      "after_sha256": "7d56eb78ea70f2599095302f6c2b6a7edb391ff7cbd4c4990187fe6a6c6f88c9",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/company_stream.go:*MailboxEventHandler:streamDurable",
+          "source": "internal/api/handlers/company_stream.go",
+          "expression": "h.eventReader.ListMailboxEvents",
+          "before_line": 92,
+          "after_line": 91
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/company_members.go:*PgStore:GetCompanySettings",
+      "before_count": 4,
+      "after_count": 4,
+      "before_sha256": "a70c68715055be2095094643d5a526a802bfb2d0a8c0f45e0fe35b1df6888da3",
+      "after_sha256": "4efa1391e3e458b215b263e528cb85f0255932004870ec07ad8a11d3ddd0233a",
+      "locations": [
+        {
+          "caller_id": "internal/app/templates/service.go:*Service:previewSource",
+          "source": "internal/app/templates/service.go",
+          "expression": "s.GetCompanySettings",
+          "before_line": 131,
+          "after_line": 134
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/company_members.go:*PgStore:GetWorkMailbox",
+      "before_count": 5,
+      "after_count": 5,
+      "before_sha256": "29e852b4a65d00ebe4ee66ad4dbd965267708a6a0ca7840bdc87dd257fe99537",
+      "after_sha256": "aa1e6737508583e78e3aa00c3161584a408b252665a91ab791d2c0501c35f0bb",
+      "locations": [
+        {
+          "caller_id": "internal/api/handlers/company_stream.go:*MailboxEventHandler:streamDurable",
+          "source": "internal/api/handlers/company_stream.go",
+          "expression": "h.eventReader.GetWorkMailbox",
+          "before_line": 88,
+          "after_line": 87
+        },
+        {
+          "caller_id": "internal/app/templates/service.go:*Service:previewMailbox",
+          "source": "internal/app/templates/service.go",
+          "expression": "s.GetWorkMailbox",
+          "before_line": 177,
+          "after_line": 180
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/company_templates.go:*PgStore:TemplateForSend",
+      "before_count": 4,
+      "after_count": 4,
+      "before_sha256": "11a5bfa1e4cb4ea785dd8f080013e3de5bc5c8a11223ddde6f81cae9acd63b41",
+      "after_sha256": "c997dba1db7ebd9c2d35e1e4bdd969776ce7fe519f0f066436036c56dc183e17",
+      "locations": [
+        {
+          "caller_id": "internal/app/templates/service.go:*Service:previewSource",
+          "source": "internal/app/templates/service.go",
+          "expression": "s.TemplateForSend",
+          "before_line": 149,
+          "after_line": 152
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/ingress.go:*PgStore:DeliverIngress",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "75768468b1a0dffb91a523d1dcd42210b917b9e9ba9eb7526a4c2ce39ff3138b",
+      "after_sha256": "1a11979f4a57809b741a8a4650015a14542443446e991ece047012a823c00345",
+      "locations": [
+        {
+          "caller_id": "internal/ingest/recovery.go:*Service:deliverTarget",
+          "source": "internal/ingest/recovery.go",
+          "expression": "ledger.DeliverIngress",
+          "before_line": 180,
+          "after_line": 183
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/mailboxes.go:*PgStore:CountAllMailboxes",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "efc12247709fa3209d5ae9fabe7a0f1005d1e7c9b565fe3eeb4461a6d2162ef9",
+      "after_sha256": "f3d1e5b20e200d7b09961a7d898ab50cf7d556893f9061bc74c061abedd00ebe",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:Stats",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.CountAllMailboxes",
+          "before_line": 499,
+          "after_line": 517
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/messages.go:*PgStore:CountAllMessages",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "9f60a4762a592ed90fe54c25c77431a86323b2a42995416dc7b49e4ea74cfecc",
+      "after_sha256": "9b554ee43cec8e5aa8d6b85c52ae73fe6b67bf41e9ee6bcae784852b2f0e3ad4",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:Stats",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.CountAllMessages",
+          "before_line": 503,
+          "after_line": 521
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/messages.go:*PgStore:CountTenantMessagesSince",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "1ca0a2c4936be836ed43a7c1c96ce92e692af9951ea465f895307c300008aa91",
+      "after_sha256": "b84505d04f180c4e2893e5473d510fe4e89f438874bc1d8cdbfed07f18a1e6e3",
+      "locations": [
+        {
+          "caller_id": "internal/ingest/service.go:*Service:reserveTenantDaily",
+          "source": "internal/ingest/service.go",
+          "expression": "s.store.CountTenantMessagesSince",
+          "before_line": 498,
+          "after_line": 536
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/messages.go:*PgStore:EnqueueOrphanRetry",
+      "before_count": 2,
+      "after_count": 3,
+      "before_sha256": "b9790609ce82ec5ec27bb0864c395e80b2dd87e26c8b018fe5cc3322897242d1",
+      "after_sha256": "8e48bce8e2ed159410aab2c3f046b71710d80790584325c30e4b37e3131c858a",
+      "locations": [],
+      "removed": [],
+      "added": [
+        {
+          "caller_id": "internal/ingest/service.go:*Service:deleteRawObjectIfOrphaned",
+          "file": "internal/ingest/service.go",
+          "function": "deleteRawObjectIfOrphaned",
+          "line": 516,
+          "expression": "s.store.EnqueueOrphanRetry",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ]
+    },
+    {
+      "id": "internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetAPIKey",
+      "before_count": 4,
+      "after_count": 4,
+      "before_sha256": "ef3f323894276ca33c06c62db0d76aebb37e8c9b1df796eeee577eabc350cf56",
+      "after_sha256": "63625103fd68bb4ed6a3f72ca462bad89ea785637ac6ff90af280a84f44eb747",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.GetAPIKey",
+          "before_line": 454,
+          "after_line": 472
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetZone",
+      "before_count": 9,
+      "after_count": 9,
+      "before_sha256": "07d0570fc2d3b9565bf75c33781d59a845680d985f7f83202df842ffff482606",
+      "after_sha256": "cd89b4f1edd7f224f96fe614673d41299328043e91eb068439ec122073824b58",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.GetZone",
+          "before_line": 375,
+          "after_line": 393
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:TemplateForSend",
+      "before_count": 4,
+      "after_count": 4,
+      "before_sha256": "11a5bfa1e4cb4ea785dd8f080013e3de5bc5c8a11223ddde6f81cae9acd63b41",
+      "after_sha256": "c997dba1db7ebd9c2d35e1e4bdd969776ce7fe519f0f066436036c56dc183e17",
+      "locations": [
+        {
+          "caller_id": "internal/app/templates/service.go:*Service:previewSource",
+          "source": "internal/app/templates/service.go",
+          "expression": "s.TemplateForSend",
+          "before_line": 149,
+          "after_line": 152
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/plans.go:*PgStore:CreatePlan",
+      "before_count": 3,
+      "after_count": 3,
+      "before_sha256": "9628d4445b02fa4729f1d1985fd7339df5e4350cb34bdbc102f59cc7c9ec23c6",
+      "after_sha256": "a9c8730b6b7dfcd5292edac186ffd0be2b5bf3c6ca9ba62744f052333e97de83",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:CreatePlan",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.CreatePlan",
+          "before_line": 275,
+          "after_line": 290
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/plans.go:*PgStore:DeletePlan",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "6e55f1ace93934fe096550a7bd562aa36b5a7ee05604a9fb6229b09c4a1839c3",
+      "after_sha256": "d916760a4056dcb3dcbf56e04b83a3bc23efb5cf19d3e8191a76731fb8c811f6",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:DeletePlan",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.DeletePlan",
+          "before_line": 303,
+          "after_line": 321
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/plans.go:*PgStore:GetPlan",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "93bc8a51240a34d44ea08a518fd2f7cd0540da018c20fe1aa3ddf9441fdd8c88",
+      "after_sha256": "cc466556d3f1ca4e9c78373755c825c53128265539f699a66dbfcb3854203bf7",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.GetPlan",
+          "before_line": 216,
+          "after_line": 223
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/plans.go:*PgStore:ListPlans",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "2c316fe1a63218a00eec0f889c79b76157ee139821399122eb2142ceccf1fdc1",
+      "after_sha256": "f0fb7141b39db1cf7872f26af620a2c39939fdfe426349feae9fe918688d7ad7",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:Stats",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.ListPlans",
+          "before_line": 491,
+          "after_line": 509
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/plans.go:*PgStore:UpdatePlan",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "222962bfc500251e6f2bd94c02aa6acdbc1f02ffdf61b88a436216152346fffb",
+      "after_sha256": "ef116891d5cf5e3c4ecb53699a1812d5c44b11396f9d750526c62fffa3b98e4f",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:UpdatePlan",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.UpdatePlan",
+          "before_line": 289,
+          "after_line": 307
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/postgres.go:*PgStore:Close",
+      "before_count": 154,
+      "after_count": 154,
+      "before_sha256": "76311435d94adc513e333e42eaa63690760a32eb2decbd5ea66bdd1fb73d27e3",
+      "after_sha256": "84c5a61ea7fa3a5bb5484bce7b97d712ed12f0a0c193d9175968d8a1adfd5e0d",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/attachment_read.go::readOwnedAttachment",
+          "source": "internal/app/companymail/attachment_read.go",
+          "expression": "input.Close",
+          "before_line": 19,
+          "after_line": 21
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/postgres.go::New",
+      "before_count": 177,
+      "after_count": 177,
+      "before_sha256": "b2808db94695a3a883ff7d8e2d4a002c1259dc39f221f7125b13c9729b63b468",
+      "after_sha256": "7b19b3d826503ab35e9d6c2c43af78e662962293c23e250b90cf0c5273ff8b5d",
+      "locations": [
+        {
+          "caller_id": "internal/ingest/service.go::NewService",
+          "source": "internal/ingest/service.go",
+          "expression": "configcache.New",
+          "before_line": 201,
+          "after_line": 202
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:ListIngestJobs",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "8b6516655e11d0f181e22420096d37dbd6dcbe529c7b6031ba30b3c486dc646c",
+      "after_sha256": "b2ff5f60da9ab5466c9fd263c6bca46ee4bf26aa3bc54ea38f58c3babac8d143",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:ListIngestJobs",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.ListIngestJobs",
+          "before_line": 554,
+          "after_line": 572
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:ListWebhookDeliveries",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "d77fdbd2eb640c22b191680740cf5e41f0e017c0d4e82f7192623c8f8a682d6a",
+      "after_sha256": "135cb51ad74ca0df5679aa93e711f081fdc24eeb010c2fea2c46a3e31031b6d4",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:ListWebhookDeliveries",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.ListWebhookDeliveries",
+          "before_line": 565,
+          "after_line": 583
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/settings.go:*PgStore:ListSettings",
+      "before_count": 4,
+      "after_count": 4,
+      "before_sha256": "84fc237586c3822b2d753a6b9c30117f73ed08a5eeb6a6d4ebb29d31346cfc2b",
+      "after_sha256": "35173be07336f7c796f1facc53689dd5793cdd6dc7cf5eab0445aafc83504522",
+      "locations": [
+        {
+          "caller_id": "internal/settings/settings.go:*Manager:All",
+          "source": "internal/settings/settings.go",
+          "expression": "m.store.ListSettings",
+          "before_line": 122,
+          "after_line": 123
+        },
+        {
+          "caller_id": "internal/settings/settings.go:*Manager:refresh",
+          "source": "internal/settings/settings.go",
+          "expression": "m.store.ListSettings",
+          "before_line": 139,
+          "after_line": 140
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/smtp_policy.go:*PgStore:GetSMTPPolicy",
+      "before_count": 4,
+      "after_count": 4,
+      "before_sha256": "2be28bf5a730b48b80c57728ea89d552c073f80ea6e8e2ce779683c3a83fb7d1",
+      "after_sha256": "d5cb2cd44ea28b0caced67b2b1c713015138fc232fbc93959e114394aef6b79a",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:GetSMTPPolicy",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.GetSMTPPolicy",
+          "before_line": 576,
+          "after_line": 594
+        },
+        {
+          "caller_id": "internal/ingest/service.go::NewService",
+          "source": "internal/ingest/service.go",
+          "expression": "st.GetSMTPPolicy",
+          "before_line": 202,
+          "after_line": 203
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/smtp_policy.go:*PgStore:UpsertSMTPPolicy",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "bfc6b88924914cc590647560cb33260ad41dcdf56dd8cb4ba95501d6a268ac25",
+      "after_sha256": "726e025cb408d8d847b90dd9a9ddac8786e53cf1c23d8eecfe11d39ab3a826d2",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:UpdateSMTPPolicy",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.UpsertSMTPPolicy",
+          "before_line": 587,
+          "after_line": 605
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/tenants.go:*PgStore:CreateTenant",
+      "before_count": 5,
+      "after_count": 5,
+      "before_sha256": "b234174d805b723c28b33c72be5810667ed9a2abe56268edc1e919a567986c24",
+      "after_sha256": "7811f7878df13ba182f25267e3e534eabf54109d4056119301ef41614a0e43c9",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.CreateTenant",
+          "before_line": 224,
+          "after_line": 231
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/tenants.go:*PgStore:DeleteTenant",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "388d5b91a22d8a60fc7912f94e304a262033764fcd0f498dd54b0c36d0ead6cd",
+      "after_sha256": "0e5cc9f2b1a3193e0b8c901d99eac49add9c268d62d659c3a2539a5054beba60",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:DeleteTenant",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.DeleteTenant",
+          "before_line": 261,
+          "after_line": 273
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/tenants.go:*PgStore:GetTenant",
+      "before_count": 6,
+      "after_count": 6,
+      "before_sha256": "f831ecb2ac47d8dfd1d07e9763ba4bae2b6b3325e2a7815e0da216de4861f497",
+      "after_sha256": "58665154417c57b3af8fb2925941b44ddf6810d4eb901cb673d28731fe854dbd",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.GetTenant",
+          "before_line": 316,
+          "after_line": 334
+        },
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.GetTenant",
+          "before_line": 238,
+          "after_line": 245
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/tenants.go:*PgStore:ListTenants",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "b153d1d4a6173cbfc0e60290f0d89ac916c602425a8280cc6c1c0e1756cc6820",
+      "after_sha256": "bd3963116fa42977e4002e2d47c8c1cfd9a9011c6136fd1235f6e11a964c14e7",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:Stats",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.ListTenants",
+          "before_line": 487,
+          "after_line": 505
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/tenants.go:*PgStore:UpsertOverride",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "9f67756e46de71a104b6f7e8645dc52e1828d770783c32a1f54e742fc94d757e",
+      "after_sha256": "0d0a31e8ca9da0afe8c17cbf5cd8b114fcf0a83dc0d137488dfef5bcb76c7aee",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.UpsertOverride",
+          "before_line": 246,
+          "after_line": 258
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/zones.go:*PgStore:CountAllZones",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "f1105b24d5448c0202e01fdae4b91d7290b9f858b3eadd362a58e7a7a8c57d8f",
+      "after_sha256": "8e7db160c679b121985caf4eef8d2729c1882b7d395c04c883d1dc4ffb6ffec7",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:Stats",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.CountAllZones",
+          "before_line": 495,
+          "after_line": 513
+        }
+      ],
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "internal/store/postgres/zones.go:*PgStore:GetZone",
+      "before_count": 9,
+      "after_count": 9,
+      "before_sha256": "07d0570fc2d3b9565bf75c33781d59a845680d985f7f83202df842ffff482606",
+      "after_sha256": "cd89b4f1edd7f224f96fe614673d41299328043e91eb068439ec122073824b58",
+      "locations": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
+          "source": "internal/app/admin/service.go",
+          "expression": "s.store.GetZone",
+          "before_line": 375,
+          "after_line": 393
+        }
+      ],
+      "removed": [],
+      "added": []
+    }
+  ],
+  "client_changes": [],
+  "compatibility_routes": [],
+  "closure_changes": [
+    {
+      "path": "internal/api/handlers/company_stream.go",
+      "before_sha256": "ee6eeaf74def324e73fbd79781f2eb7530c85aa3b3d699aed4bac148fa349d8f",
+      "after_sha256": "fc32cc77cbd2f2caed062c35dd4fe287b72aa49b38d7885d907ca360867fbdc7"
+    },
+    {
+      "path": "internal/api/handlers/monitor.go",
+      "before_sha256": "0fc4ea33da6f8a37541982689ddc1d4c43b72f425105a658e4ca26ba08cbe1fc",
+      "after_sha256": "1bd0140bd04f33ebb6f84840a7d34ecbad3ef0ab099c10a9ad47d8308137fc10"
+    },
+    {
+      "path": "internal/models/mailbox_grants.go",
+      "before_sha256": "ce208909d625521c000934f18240ca0d8a1e7f805161d939096c94d890ae6e83",
+      "after_sha256": "2f4db91be99435b19b9b491028f459e8f614a8d44a7edeb68d4cd29ba02dd353"
+    }
+  ],
+  "source_changes": [
+    {
+      "path": "internal/api/handlers/company_stream.go",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "44cc10c2c2adf1fb25245c57cf3a4441a266c526",
+      "after_blob": "2ee1165063df599bf89d09fb5dc7797dce33665f",
+      "before_sha256": "ee6eeaf74def324e73fbd79781f2eb7530c85aa3b3d699aed4bac148fa349d8f",
+      "after_sha256": "fc32cc77cbd2f2caed062c35dd4fe287b72aa49b38d7885d907ca360867fbdc7"
+    },
+    {
+      "path": "internal/api/handlers/monitor.go",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "fcf0cc9d9511b028a3c8f8222b76421c072881f1",
+      "after_blob": "35cf69e902d32684f0183cd6431742263b649006",
+      "before_sha256": "0fc4ea33da6f8a37541982689ddc1d4c43b72f425105a658e4ca26ba08cbe1fc",
+      "after_sha256": "1bd0140bd04f33ebb6f84840a7d34ecbad3ef0ab099c10a9ad47d8308137fc10"
+    },
+    {
+      "path": "internal/app/admin/service.go",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "c945105378eae90c9d77f9014280ecbcfd521427",
+      "after_blob": "6b26a62503401e30befa643020777592c0f6bfdd",
+      "before_sha256": "f2f3bcf3a02d566705b3a0025b6678378617e2684cf415c98c5f568796fb1988",
+      "after_sha256": "109bf69b89c7fe9f7171f4ce4338ed0f69014a3f4e29b97abbaa020999fdafb4"
+    },
+    {
+      "path": "internal/app/companymail/attachment_read.go",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "0890230490dac9510c02b526e2f61e61ad19c1e2",
+      "after_blob": "b70ea23be984db7445ca85d721bdd255daddd9b9",
+      "before_sha256": "35e638c072f858e2ec323b956f9a5e63b5122fee826514868864e4686648af7b",
+      "after_sha256": "1fe073743dadd03e5f199408c31fa837187f414b3c476e974d813560fc70e4b5"
+    },
+    {
+      "path": "internal/app/templates/service.go",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "f5eeec0634e9049a7d57cdbccc005c8027ea3022",
+      "after_blob": "6a06f34219915656b946bda5a83cfa549dc10a6a",
+      "before_sha256": "3f51056e403e31aedad5fba332560e7b8b660f43dada75a1408091751f272fc7",
+      "after_sha256": "a93853b156500418203e59a4702650bc6956af5ab47b8b5487a042ab2936c162"
+    },
+    {
+      "path": "internal/config/config.go",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "82b9ee6e7be1b9df71eb41f2a9bc52c944ffbac0",
+      "after_blob": "6715272bf6a91e3df5f1ddfc2726b588ca21b9ca",
+      "before_sha256": "25d1a9ee74d341d8ef955d1a5e8e0ec1ecbca152b7be4d97c12d903a1c32f6c7",
+      "after_sha256": "d7b47cae55dd8ed8f9299fc2bc03e1a7285a82702fb02b7e25f37cd7bcd540be"
+    },
+    {
+      "path": "internal/ingest/content.go",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "1a659747ebfeaccd1cb5a594851e24c6792274de",
+      "after_blob": "335e443ba2cf126669b78d83c1355a68a576937e",
+      "before_sha256": "b1e2cc3f00f706e540286db471b0207dba60cf0ad16c9d99328c95198abe3799",
+      "after_sha256": "35b37e2603727fb041df39afdd95b8bde516ee75fc4869394ae2f9737383f60d"
+    },
+    {
+      "path": "internal/ingest/recovery.go",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "7b51b8247e853c7101fd0fe9e2e4e3088a010c85",
+      "after_blob": "7c6ebd38b9422bf11b97d700c867d55a78023c4a",
+      "before_sha256": "9439f77f4557710eb79b963ac3182585c5466d3143a0549ff827d1377e9f75e0",
+      "after_sha256": "1dde3efa46b33ddcff25ef5128daba6861e8a2eee988adb27e95075a976de99a"
+    },
+    {
+      "path": "internal/ingest/service.go",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "509619ac8d95c5b9ccd6971f4116fb6a0b2ab8ae",
+      "after_blob": "87161f601d740696d47b4c29b962922d95247a4a",
+      "before_sha256": "82e30a8797768a5e0c59936ddb561646087fa59ec3658c1358f4a7c4f397b4bb",
+      "after_sha256": "32899b1aa4d135d8eb77a968f1e5d65e391ef96b03606ce568236873a596fcb2"
+    },
+    {
+      "path": "internal/models/mailbox_grants.go",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "fdb7dcf65d79a452e1e2225bd4a356a807e01d3d",
+      "after_blob": "9401e9726161ff48908da4ad6fc76bd8260b789a",
+      "before_sha256": "ce208909d625521c000934f18240ca0d8a1e7f805161d939096c94d890ae6e83",
+      "after_sha256": "2f4db91be99435b19b9b491028f459e8f614a8d44a7edeb68d4cd29ba02dd353"
+    },
+    {
+      "path": "internal/settings/settings.go",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "adb7c05fde192c06ed6f08f8d43ab2037b0e484f",
+      "after_blob": "f422f945c82f3d9e39653bfaa6bd5de769a3043c",
+      "before_sha256": "5b3d4465e49b22d7efbec7303c2efdc148c775c86f4f77261fdba37fa3e4e888",
+      "after_sha256": "725c176eddf73e3ea8109357b0784d871df61c85e17ecb0a9b5dec8ba6276c08"
+    },
+    {
+      "path": "web/app/(dashboard)/admin/plans/page.tsx",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "7a3f879d086f93cccd36386d22604fd431552b3a",
+      "after_blob": "d3fd944198a08b4833f6dccfbaad0254e962c782",
+      "before_sha256": "e092251c47352b976c7d83aef830a8d6f3cdbafa5d0b1875b918699e1de09c38",
+      "after_sha256": "489973dd75f227c391e633b0724f54af1188ce954f7eb375f35f71d952962378"
+    },
+    {
+      "path": "web/app/(dashboard)/admin/policy/page.tsx",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "5f99fe4654a6bc316ee6b471c30f24408155ff13",
+      "after_blob": "8604af60b61111e40bacd0f09776ff054811b333",
+      "before_sha256": "ca901fe651c7c4aefc55d2ba247e528f491e77a7334df75c9839ad0651a2262b",
+      "after_sha256": "b938329438265911d0f4ce239d1758809ce906e0a560c4361ce3fc33e511f11b"
+    },
+    {
+      "path": "web/features/mail/components/rich-message.tsx",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "f18c5b9fdfc00e667131c0eb3db20d217c90ad60",
+      "after_blob": "5d80c9d44b18eee9a67646724484fcbf206bf4e0",
+      "before_sha256": "c5ec7515cc7ae6a132a80f196a19eb73eac4d63996221ecc7747bc3ba035135d",
+      "after_sha256": "8116e972e4f7a336813fcdeda136991a65cf76df8a3881595e2f125a65dea0c7"
+    },
+    {
+      "path": "web/locales/en.json",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "03e8d89f9547ae8fc256909dd555173ec9196a60",
+      "after_blob": "143cc86617559efb91ef7e9c0b172d8be7a25e8d",
+      "before_sha256": "59c94a4d70ad7a63f08720d7b21ec3c5c59fdaf992c78db1b6140d857e25784b",
+      "after_sha256": "4e300637f6d0bcdd0cbfe2ac40e82bbd66fb0335c047dbd5432839ebdce66ccc"
+    },
+    {
+      "path": "web/locales/zh.json",
+      "before_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+      "after_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "before_blob": "5016a1fd2cbb31d58fab3eea8f21fdba50ad8766",
+      "after_blob": "2870ac8e0e55d644c7bff7d13393a708f2caf3db",
+      "before_sha256": "6acf14d12492587fb400f19d4d7787066907e16fd24ae3339fcb17c9ba0229ab",
+      "after_sha256": "13c136be3a92c32b24d024ec585c43f336c455073dd17ef83c4bef0ebafcc3c6"
+    }
+  ],
+  "generated_catalogs": {
+    "transaction": {
+      "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+      "sha256": "270efaae609d5cd16b43272806428e4306353762df40c2a63d4f52487d78f438",
+      "bytes": 2801187
+    },
+    "compatibility": {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+      "sha256": "125d40cfdc3f0abc500e5286cbf27abb44f5443868fc32447dce5eeea8839137",
+      "bytes": 406948
+    },
+    "clients": {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+      "sha256": "c62f46e2b95aeea514050a1f4a09308f7d9be5815a1640bded077605abae9057",
+      "bytes": 40832
+    },
+    "client_routes": {
+      "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+      "sha256": "11196f0fce4773d317d53b12ecf107ae21f5fbeb0fefe2c27c84e37571ca625d",
+      "bytes": 49631
+    }
+  },
+  "excluded_closure_product_paths": [
+    "internal/app/admin/service.go",
+    "internal/app/companymail/attachment_read.go",
+    "internal/app/templates/service.go",
+    "internal/config/config.go",
+    "internal/ingest/content.go",
+    "internal/ingest/recovery.go",
+    "internal/ingest/service.go",
+    "internal/settings/settings.go",
+    "web/app/(dashboard)/admin/plans/page.tsx",
+    "web/app/(dashboard)/admin/policy/page.tsx",
+    "web/features/mail/components/rich-message.tsx",
+    "web/locales/en.json",
+    "web/locales/zh.json"
+  ],
+  "transaction_syntax_changes": [],
+  "transaction_manual_review_changes": [],
+  "manual_review": {
+    "postgres": "Original collectors independently confirm identical PostgreSQL functions, file bytes, migrations and classifications. Every stored transaction field except caller candidates is preserved byte-for-value, including the earlier SetTemplateGrant SQL review and all unverified risks.",
+    "callers": "The refreshed rows remain source name-match candidates, not resolved dispatch or evidence that every caller is live. Exact location/addition/removal deltas and complete before/after hashes are bound in tests.",
+    "clients": "All 134 independently collected client branches, 7 explicit transport forwarders and both client catalogs remain byte-identical. Their original pre-reconciliation CLI already passed; this is an unchanged positive control, not a fabricated drift rejection.",
+    "routes_and_closure": "All 132 route facts and embedded client bindings remain unchanged. The original producer freshly hashes its limited 94-path compatibility closure, with exactly 3 changed files. This is not the complete runtime dependency closure and does not establish HTTP or runtime acceptance."
+  },
+  "historical_files": 45,
+  "historical_manifest_sha256": "082ae071dd5a8967c8cd114ca1eb7d5fe1defda9b77c3895b7073a88f407933f",
+  "protected_sources": 164,
+  "protected_source_manifest_sha256": "346002800422bdf202a816d1f780467cad2761351d4cda5a387dc7f5572a4777",
+  "historical_test_migration": {
+    "revision9_methods": "Two revision-9 positive methods now read immutable four-catalog snapshots and the complete hash-bound published review at f221561; 25b0b294 Git bytes and the complete revision8-to-9 deltas remain checked.",
+    "validator_boundary": "The old current-source validator calls were removed from the historical methods. No catalog is converted into a synthetic AST to validate itself. Original collectors and validators execute on the current source in the current-revision tests, including actual rejection of revision-9 catalogs.",
+    "method_count_check": "The historical 21-method after_raw reads Git at REVISION9_COMMIT. The current check independently requires all 21 IDs plus two new methods (23 total).",
+    "mutation_methods": {
+      "test_unapproved_client_and_caller_locations_are_rejected": {
+        "source_sha256": "fe9a8bace1fbb19033747834275c0b26063a7bb455b42201e17c883af748d892",
+        "ast_sha256": "4d40e7297e2fc8a6aa3a9f8e10044ecd69c718f5b6a434318286625ad3c91fdb"
+      },
+      "test_unapproved_actual_source_and_ast_changes_rejected": {
+        "source_sha256": "73b550956287a1fc7ea30c4f3f5fc6c3d045e3b4454cae7589fdf84e7f95c5e5",
+        "ast_sha256": "11b567de8a18ac5c0274f994373fdef7c325dd21c24715f1f97fa61037c3ff3c"
+      },
+      "test_unapproved_actual_closure_bytes_rejected": {
+        "source_sha256": "b09fdeefe1c9f319999ee0de9ffafa2007b6d5a562f6ba0de38718ea964f1311",
+        "ast_sha256": "38ed0072e573290ea26a45a10de70e239da020803f8fc4b88406cbf08786b2a2"
+      },
+      "test_unapproved_route_and_ast_fact_changes_rejected": {
+        "source_sha256": "149c44f95fa4a98140715df389e38ac918e21c87858d872818eac85049d6b28d",
+        "ast_sha256": "8bff5925981614fbb104231891b3bbdae4e9a78bac499f4be670d238bf2ed82b"
+      },
+      "test_unapproved_actual_route_source_rejected_by_original_collector": {
+        "source_sha256": "2c2c906305f5acc849250147eb0f154d52a85a829a48b80ebad6c86b11f132df",
+        "ast_sha256": "b01f06f6d97650c466c23e7e1d572fdf8794e9f8ddb40a0aa513a1f6f9857c86"
+      }
+    }
+  },
+  "commands": [
+    {
+      "name": "old-transactions",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "source_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "seconds": 1.209,
+      "exit_code": 1,
+      "stdout_sha256": "9175edb67c131eb4ba81ec1f7de13fef7ce115f8bb01a3dab2d8ade3e8f640d2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 3064,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "old-compatibility",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "source_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "seconds": 2.79,
+      "exit_code": 1,
+      "stdout_sha256": "684baf3a69605d6a5394037bff5e85bcc9775d1d6b115bc69a3f3f20b2bec375",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 101,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "old-clients",
+      "argv": [
+        "node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "source_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "seconds": 1.323,
+      "exit_code": 0,
+      "stdout_sha256": "b5e92b0af9e25b23eb3f0ba9fd2ded8ff3a1fca31020a69cb91e0ab94000c5db",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 73,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "current-transactions",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "source_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "seconds": 0.865,
+      "exit_code": 0,
+      "stdout_sha256": "34e6a8fa0313a2089edc5e453807a7f2fbbb3173031cea894e40d054daccc542",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 309,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "current-compatibility",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "source_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "seconds": 1.804,
+      "exit_code": 0,
+      "stdout_sha256": "677f536dea0eccc18aba48fb1134bf11abab8c980e362691fb8a01a9bd29d4db",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 1117,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "current-clients",
+      "argv": [
+        "node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "source_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "seconds": 1.034,
+      "exit_code": 0,
+      "stdout_sha256": "b5e92b0af9e25b23eb3f0ba9fd2ded8ff3a1fca31020a69cb91e0ab94000c5db",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 73,
+      "stderr_bytes": 0
+    }
+  ],
+  "validation": {
+    "status": "original_three_CLIs_and_selected_regressions_pass",
+    "qualification": "Selected 83 Python and 27 Node tests do not establish complete source-version runner qualification.",
+    "selected": {
+      "phase": "selected",
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "test_r5_transactions",
+        "test_r5_compatibility",
+        "test_r5_catalog_reconciliation",
+        "test_r5_current_source_inventory",
+        "-v"
+      ],
+      "invocation_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "invocation_tree": "40e1d2d16258e0e2bc3afea29553dbb148920e4e",
+      "input_manifest": {
+        "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": {
+          "sha256": "270efaae609d5cd16b43272806428e4306353762df40c2a63d4f52487d78f438",
+          "bytes": 2801187
+        },
+        "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": {
+          "sha256": "125d40cfdc3f0abc500e5286cbf27abb44f5443868fc32447dce5eeea8839137",
+          "bytes": 406948
+        },
+        "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": {
+          "sha256": "c62f46e2b95aeea514050a1f4a09308f7d9be5815a1640bded077605abae9057",
+          "bytes": 40832
+        },
+        "docs/company-mail/evidence/R5-CLIENT-CALLS.json": {
+          "sha256": "11196f0fce4773d317d53b12ecf107ae21f5fbeb0fefe2c27c84e37571ca625d",
+          "bytes": 49631
+        },
+        "scripts/tests/test_r5_catalog_reconciliation.py": {
+          "sha256": "377797afd37b7d8e20f5cee0da2d5debb7bafcee909fab8007748c012f6c45af",
+          "bytes": 212984
+        },
+        "scripts/tests/test_r5_compatibility.py": {
+          "sha256": "2fa45da17bdb16c841e2eb63a103e658790c8bd401887be84330c471fab82fa2",
+          "bytes": 13605
+        }
+      },
+      "GOTOOLCHAIN_present": false,
+      "selectors": {
+        "R5_TEST_GO": "/workspace/scratch/458de7991ac3/toolchains/go/bin/go",
+        "R5_TEST_CACHE": "/workspace/scratch/458de7991ac3/go-cache/build",
+        "R5_TEST_MODULECACHE": "/workspace/scratch/458de7991ac3/go-cache/mod",
+        "GOMAXPROCS": "2",
+        "TMPDIR": "/workspace/scratch/9e3fd1ca3a13/advance-catalog10-private/tmp"
+      },
+      "exit_code": 0,
+      "seconds": 75.519,
+      "input_manifest_after": {
+        "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": {
+          "sha256": "270efaae609d5cd16b43272806428e4306353762df40c2a63d4f52487d78f438",
+          "bytes": 2801187
+        },
+        "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": {
+          "sha256": "125d40cfdc3f0abc500e5286cbf27abb44f5443868fc32447dce5eeea8839137",
+          "bytes": 406948
+        },
+        "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": {
+          "sha256": "c62f46e2b95aeea514050a1f4a09308f7d9be5815a1640bded077605abae9057",
+          "bytes": 40832
+        },
+        "docs/company-mail/evidence/R5-CLIENT-CALLS.json": {
+          "sha256": "11196f0fce4773d317d53b12ecf107ae21f5fbeb0fefe2c27c84e37571ca625d",
+          "bytes": 49631
+        },
+        "scripts/tests/test_r5_catalog_reconciliation.py": {
+          "sha256": "377797afd37b7d8e20f5cee0da2d5debb7bafcee909fab8007748c012f6c45af",
+          "bytes": 212984
+        },
+        "scripts/tests/test_r5_compatibility.py": {
+          "sha256": "2fa45da17bdb16c841e2eb63a103e658790c8bd401887be84330c471fab82fa2",
+          "bytes": 13605
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stderr_sha256": "f41f8899bf4a6bbfb4e69944459b7de28e45c8796eb5e4a3e4feae2210a1f38f",
+      "stderr_bytes": 14943,
+      "reported_methods": [
+        83
+      ],
+      "success_terminal": true
+    },
+    "node": {
+      "phase": "node",
+      "argv": [
+        "node",
+        "--test",
+        "scripts/tests/api_calls.test.cjs"
+      ],
+      "invocation_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+      "invocation_tree": "40e1d2d16258e0e2bc3afea29553dbb148920e4e",
+      "input_manifest": {
+        "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": {
+          "sha256": "270efaae609d5cd16b43272806428e4306353762df40c2a63d4f52487d78f438",
+          "bytes": 2801187
+        },
+        "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": {
+          "sha256": "125d40cfdc3f0abc500e5286cbf27abb44f5443868fc32447dce5eeea8839137",
+          "bytes": 406948
+        },
+        "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": {
+          "sha256": "c62f46e2b95aeea514050a1f4a09308f7d9be5815a1640bded077605abae9057",
+          "bytes": 40832
+        },
+        "docs/company-mail/evidence/R5-CLIENT-CALLS.json": {
+          "sha256": "11196f0fce4773d317d53b12ecf107ae21f5fbeb0fefe2c27c84e37571ca625d",
+          "bytes": 49631
+        },
+        "scripts/tests/test_r5_catalog_reconciliation.py": {
+          "sha256": "377797afd37b7d8e20f5cee0da2d5debb7bafcee909fab8007748c012f6c45af",
+          "bytes": 212984
+        },
+        "scripts/tests/test_r5_compatibility.py": {
+          "sha256": "2fa45da17bdb16c841e2eb63a103e658790c8bd401887be84330c471fab82fa2",
+          "bytes": 13605
+        }
+      },
+      "GOTOOLCHAIN_present": false,
+      "selectors": {
+        "R5_TEST_GO": "/workspace/scratch/458de7991ac3/toolchains/go/bin/go",
+        "R5_TEST_CACHE": "/workspace/scratch/458de7991ac3/go-cache/build",
+        "R5_TEST_MODULECACHE": "/workspace/scratch/458de7991ac3/go-cache/mod",
+        "GOMAXPROCS": "2",
+        "TMPDIR": "/workspace/scratch/9e3fd1ca3a13/advance-catalog10-private/tmp"
+      },
+      "exit_code": 0,
+      "seconds": 0.939,
+      "input_manifest_after": {
+        "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": {
+          "sha256": "270efaae609d5cd16b43272806428e4306353762df40c2a63d4f52487d78f438",
+          "bytes": 2801187
+        },
+        "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": {
+          "sha256": "125d40cfdc3f0abc500e5286cbf27abb44f5443868fc32447dce5eeea8839137",
+          "bytes": 406948
+        },
+        "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": {
+          "sha256": "c62f46e2b95aeea514050a1f4a09308f7d9be5815a1640bded077605abae9057",
+          "bytes": 40832
+        },
+        "docs/company-mail/evidence/R5-CLIENT-CALLS.json": {
+          "sha256": "11196f0fce4773d317d53b12ecf107ae21f5fbeb0fefe2c27c84e37571ca625d",
+          "bytes": 49631
+        },
+        "scripts/tests/test_r5_catalog_reconciliation.py": {
+          "sha256": "377797afd37b7d8e20f5cee0da2d5debb7bafcee909fab8007748c012f6c45af",
+          "bytes": 212984
+        },
+        "scripts/tests/test_r5_compatibility.py": {
+          "sha256": "2fa45da17bdb16c841e2eb63a103e658790c8bd401887be84330c471fab82fa2",
+          "bytes": 13605
+        }
+      },
+      "stdout_sha256": "a44e3ea1dec9e077aac02402949b6847a03734a79412cdbe44a2ccc3855970b3",
+      "stdout_bytes": 2089,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "reported_counts": {
+        "tests": 27,
+        "pass": 27,
+        "fail": 0,
+        "skipped": 0
+      }
+    }
+  },
+  "complete_source_runner": {
+    "executed_in_this_revision": true,
+    "source_test_dispatch_count": 0,
+    "qualification": "The original complete runner was attempted once. Its unchanged Linux pinned executable FD guard rejected preparation before any source-version group was dispatched. No complete-runner pass is claimed.",
+    "result": {
+      "phase": "full-source",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/run_r5_source_version_tests.py",
+        "--root",
+        ".",
+        "--output",
+        "/workspace/scratch/9e3fd1ca3a13/advance-catalog10-private/source-version-tests.json"
+      ],
+      "invocation_commit": "3d1f9b05d216a556cd93b2abb68373b3d5843483",
+      "invocation_tree": "73943abbb0c5d3cad39254aa2c7616d69c5378b3",
+      "input_manifest": {
+        "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": {
+          "sha256": "270efaae609d5cd16b43272806428e4306353762df40c2a63d4f52487d78f438",
+          "bytes": 2801187
+        },
+        "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": {
+          "sha256": "125d40cfdc3f0abc500e5286cbf27abb44f5443868fc32447dce5eeea8839137",
+          "bytes": 406948
+        },
+        "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": {
+          "sha256": "c62f46e2b95aeea514050a1f4a09308f7d9be5815a1640bded077605abae9057",
+          "bytes": 40832
+        },
+        "docs/company-mail/evidence/R5-CLIENT-CALLS.json": {
+          "sha256": "11196f0fce4773d317d53b12ecf107ae21f5fbeb0fefe2c27c84e37571ca625d",
+          "bytes": 49631
+        },
+        "scripts/tests/test_r5_catalog_reconciliation.py": {
+          "sha256": "377797afd37b7d8e20f5cee0da2d5debb7bafcee909fab8007748c012f6c45af",
+          "bytes": 212984
+        },
+        "scripts/tests/test_r5_compatibility.py": {
+          "sha256": "2fa45da17bdb16c841e2eb63a103e658790c8bd401887be84330c471fab82fa2",
+          "bytes": 13605
+        }
+      },
+      "GOTOOLCHAIN_present": false,
+      "selectors": {
+        "R5_TEST_GO": "/workspace/scratch/458de7991ac3/toolchains/go/bin/go",
+        "R5_TEST_CACHE": "/workspace/scratch/458de7991ac3/go-cache/build",
+        "R5_TEST_MODULECACHE": "/workspace/scratch/458de7991ac3/go-cache/mod",
+        "GOMAXPROCS": "2",
+        "TMPDIR": "/workspace/scratch/9e3fd1ca3a13/advance-catalog10-private/tmp"
+      },
+      "exit_code": 1,
+      "seconds": 88.9,
+      "input_manifest_after": {
+        "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": {
+          "sha256": "270efaae609d5cd16b43272806428e4306353762df40c2a63d4f52487d78f438",
+          "bytes": 2801187
+        },
+        "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": {
+          "sha256": "125d40cfdc3f0abc500e5286cbf27abb44f5443868fc32447dce5eeea8839137",
+          "bytes": 406948
+        },
+        "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": {
+          "sha256": "c62f46e2b95aeea514050a1f4a09308f7d9be5815a1640bded077605abae9057",
+          "bytes": 40832
+        },
+        "docs/company-mail/evidence/R5-CLIENT-CALLS.json": {
+          "sha256": "11196f0fce4773d317d53b12ecf107ae21f5fbeb0fefe2c27c84e37571ca625d",
+          "bytes": 49631
+        },
+        "scripts/tests/test_r5_catalog_reconciliation.py": {
+          "sha256": "377797afd37b7d8e20f5cee0da2d5debb7bafcee909fab8007748c012f6c45af",
+          "bytes": 212984
+        },
+        "scripts/tests/test_r5_compatibility.py": {
+          "sha256": "2fa45da17bdb16c841e2eb63a103e658790c8bd401887be84330c471fab82fa2",
+          "bytes": 13605
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "raw_report_present": true,
+      "raw_report": {
+        "sha256": "638b88a55a1ab0fd90e4368da5ce7526134e29f571c1aa28b4f52bb30efb7b4b",
+        "bytes": 168019
+      },
+      "status": "failed",
+      "preparation_error": "Linux pinned executable FD unavailable",
+      "discovered_tests": 774,
+      "missing_tests": 774,
+      "no_missing": false,
+      "no_overlap": true,
+      "groups": [],
+      "retained_preparation_files": [
+        {
+          "name": "current/after-default-selection.json",
+          "bytes": 1901300,
+          "sha256": "d50777a4422348083fe4a877f24900babaf1235ce8b9066932457ca049a19729"
+        },
+        {
+          "name": "current/after-race-r5protocol-selection.json",
+          "bytes": 1911253,
+          "sha256": "a396b0c6029f97e9a46623daee1b07267274b3c17a1668a0915bea8c12108d8e"
+        },
+        {
+          "name": "current/before-default-selection.json",
+          "bytes": 1901300,
+          "sha256": "d50777a4422348083fe4a877f24900babaf1235ce8b9066932457ca049a19729"
+        },
+        {
+          "name": "current/before-race-r5protocol-selection.json",
+          "bytes": 1911253,
+          "sha256": "a396b0c6029f97e9a46623daee1b07267274b3c17a1668a0915bea8c12108d8e"
+        },
+        {
+          "name": "current/ordinary-receipt.test",
+          "bytes": 30869688,
+          "sha256": "8cd1b88c8d9dcecefea81c6728a14d2b1260e4ecd160536628cdfc110b883d54"
+        }
+      ]
+    }
+  },
+  "implementation_todos_completed": 0,
+  "runtime_verified": false,
+  "product_green": false,
+  "task_complete": false,
+  "parent_tasks": {
+    "accepted": 10,
+    "total": 171,
+    "remaining": 161
+  }
+}

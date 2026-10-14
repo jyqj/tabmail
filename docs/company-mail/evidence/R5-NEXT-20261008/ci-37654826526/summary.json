@@ -1,0 +1,193 @@
+{
+  "run_id": 37654826526,
+  "run_url": "https://github.com/jyqj/tabmail/actions/runs/37654826526",
+  "head_sha": "b916bee08399eacd199d3bef8e5e5ebc2265a7d8",
+  "tested_git_sha": "93889b26ca0e0cafbe0f58326804c7c44552cbee",
+  "tested_commit": {
+    "sha": "93889b26ca0e0cafbe0f58326804c7c44552cbee",
+    "message": "Merge b916bee08399eacd199d3bef8e5e5ebc2265a7d8 into d6d512172fb6b874c3283d9df3f4d56758684a13",
+    "url": "https://github.com/jyqj/tabmail/commit/93889b26ca0e0cafbe0f58326804c7c44552cbee",
+    "created_at": "2026-10-07T16:47:37Z"
+  },
+  "artifact_id": 11498123972,
+  "artifact_zip_sha256": "5fb054961534f15243505d276f88c9895d7441515e15adc5c5ef88b93ee5cb35",
+  "backend_job_log": {
+    "attempts": 1,
+    "outcome": "Transport closed; no retry; downloaded original artifact instead"
+  },
+  "preparation": {
+    "status": "source_prepared",
+    "run": "shared-db",
+    "source_policy": "r5_current_local_inputs_archive_boundary_v4",
+    "source_sha": "304e6b9529c94ba10dae2e69e6944b3299f5ce7e",
+    "source_manifest_sha256": "965a15e2a955402d97f07c4e82056b93b7920a21f3b1ff5a3a90876a8f72981c",
+    "build_context": {
+      "goos": "linux",
+      "goarch": "amd64",
+      "cgo_enabled": 1,
+      "build_tag_sets": [
+        [
+          "r5protocol"
+        ]
+      ],
+      "race": true,
+      "go_work": "off",
+      "go_flags": "",
+      "selection": "all_local_variants_superset"
+    },
+    "go_environment": {
+      "CGO_ENABLED": "1",
+      "GOARCH": "amd64",
+      "GOENV": "",
+      "GOFLAGS": "",
+      "GOHOSTARCH": "amd64",
+      "GOHOSTOS": "linux",
+      "GOOS": "linux",
+      "GOVERSION": "go1.25.7",
+      "GOWORK": "off"
+    },
+    "task_complete": false,
+    "product_green": false,
+    "boundary": "Versioned archive static bytes and production variant superset; selected metadata/runtime are separate"
+  },
+  "source_pin": {
+    "manifest_sha256": "965a15e2a955402d97f07c4e82056b93b7920a21f3b1ff5a3a90876a8f72981c",
+    "files": 1229,
+    "before_equals_after_equals_manifest": true,
+    "original_runner_bytes_match_manifest": true,
+    "unchanged_classifier_replay_passed": true
+  },
+  "protocol": {
+    "status": "shared_scoped_evidence_passed",
+    "product_green": true,
+    "task_complete": false,
+    "shared_input_verified_cases": 46,
+    "process_exit_code": 0,
+    "target_red": {},
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-timeout=120s",
+      "-tags=r5protocol",
+      "-run",
+      "^(TestR5LegacyBCCContractCapabilities|TestR5ProtocolBCCAssetSharedCases|TestR5ProtocolBCCSurfacesSharedCases|TestR5ProtocolContentSharedCases|TestR5ProtocolCredentialSharedCases|TestR5ProtocolDomainSharedCases|TestR5ProtocolDraftGrantOrderingSharedCases|TestR5ProtocolGCBoundedSharedCases|TestR5ProtocolLegacyBCCObservationSharedCases|TestR5ProtocolLegacyReplaySharedCases|TestR5ProtocolLogicalExpiryReferenceSharedCases|TestR5ProtocolOffboardingEligibilitySharedCases|TestR5ProtocolOffboardingSharedCases|TestR5ProtocolPermissionIntentSharedCases|TestR5ProtocolPermissionStaleSharedCases|TestR5ProtocolProtectedGCSharedCases|TestR5ProtocolReceiptSharedCases|TestR5ProtocolRecoverySharedCases|TestR5ProtocolRetentionSharedCases)$",
+      "./internal/store/postgres"
+    ],
+    "raw_jsonl_sha256": "d4214125d263c859c38518716d2385172fadc1b62cb9983879496a7cab084fbf",
+    "top_tests": 19,
+    "leaf_tests": 88,
+    "leaf_events": {
+      "run": 88,
+      "output": 176,
+      "pass": 88
+    },
+    "package_terminal": [
+      {
+        "Time": "2026-10-07T16:56:22.956391664Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Elapsed": 32.31
+      }
+    ],
+    "stderr_bytes": 0
+  },
+  "whole_backend": {
+    "status": "fail",
+    "source_sha": "93889b26ca0e0cafbe0f58326804c7c44552cbee",
+    "process_exit_code": 1,
+    "events": 37806,
+    "packages": 52,
+    "tests_failed": 737,
+    "tests_passed": 8271,
+    "tests_skipped": 105,
+    "tests_started": 9113,
+    "mandatory_missing_or_not_passed": 180,
+    "mandatory_tests": 247,
+    "log_sha256": "0f61907e86b05d15f316f92b75507fcb1ca7d29a0ae769ac923e1483bcc640bb"
+  },
+  "postgres": {
+    "package_terminal": [
+      {
+        "Time": "2026-10-07T16:52:31.64039864Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Elapsed": 171.1
+      }
+    ],
+    "test_name_terminal_counts": {
+      "pass": 380,
+      "skip": 105,
+      "fail": 737
+    },
+    "top_level_terminal_counts": {
+      "pass": 189,
+      "skip": 8,
+      "fail": 226
+    },
+    "paused": 19,
+    "continued": 19,
+    "lifecycle_budget_diagnostics": 629,
+    "timeout_panic_diagnostics": 0,
+    "first_failing_test": "TestR5LegacyContentKeyHTTPPreservesSafeReceipt/expired-key"
+  },
+  "testpg": [
+    {
+      "Time": "2026-10-07T16:49:43.635428623Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/testpg",
+      "Elapsed": 3.094
+    }
+  ],
+  "source_version": [
+    {
+      "group": "current",
+      "source_sha": "93889b26ca0e0cafbe0f58326804c7c44552cbee",
+      "exit": 1,
+      "tests_run": 733,
+      "failures": [],
+      "errors": [
+        "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_old_pins_reject_and_current_revision_passes_same_actual_facts",
+        "test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion",
+        "test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence"
+      ],
+      "skips": [],
+      "missing": []
+    },
+    {
+      "group": "frozen-v1",
+      "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+      "exit": 0,
+      "tests_run": 4,
+      "failures": [],
+      "errors": [],
+      "skips": [],
+      "missing": []
+    }
+  ],
+  "http_contract": {
+    "status": "pass",
+    "source_sha": "93889b26ca0e0cafbe0f58326804c7c44552cbee",
+    "errors": [],
+    "responses": 81,
+    "successful_operations": 66,
+    "required_success_variants": 67,
+    "excluded_operations": [
+      {
+        "method": "GET",
+        "path": "/api/v1/company/domains/{id}/verification",
+        "reason": "Live DNS status lookups are outside this loopback HTTP/PG fixture."
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/company/domains/{id}/verify",
+        "reason": "Live DNS verification is outside this loopback HTTP/PG fixture."
+      }
+    ],
+    "spec_sha256": "2cd1caeb0bbff4fa11d028860b6f514611e18f57de1f28a9a392525f9a8a4dda",
+    "capture_sha256": "a91f2e642163ade5de7989440e6ee6b9ae7fb115ef69a151d749ad761f6daf0b"
+  },
+  "boundary": "This is the PR56 synthetic merge checkout of #80 round2, not final #82/revision6. Shared-db scoped product_green and original exact classifier replay do not qualify whole backend, opt-in/private fixtures, M/G0 or release. This run predates task08 and does not prove its timeout/start-error report path in CI. All durations/counts were freshly read and checked against this archive only."
+}

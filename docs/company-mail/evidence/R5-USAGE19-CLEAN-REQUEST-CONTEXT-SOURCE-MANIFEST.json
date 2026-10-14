@@ -1,0 +1,46 @@
+{
+  "status": "SOURCE_ONLY_NOT_COMPILED_NOT_RUN",
+  "write_set": [
+    "internal/store/postgres/r5_key_touch_admission_test.go"
+  ],
+  "before_sha256": "150ad1b2300295e32a27f913362b697a670097918fa4646c491821f0c253ace7",
+  "after_sha256": "8158445c6bb9969b49c9f7d00da19b475e320bda781a0dba3882399bcd6a212f",
+  "change_scope": "one captured clean parent context plus independent GET callsite; comments only otherwise",
+  "prior_source_manifest": "/private/tmp/tm-r5usage19-source-triage.6mg4x_ce/manifest.json",
+  "prior_source_manifest_sha256": "fb73373cb42652c7f14f676bd8357da632435e38afe27244b2e55f84ec4d4541",
+  "unchanged_other_signed_files": {
+    "internal/store/postgres/apikeys.go": "f7e333f6a2036c4f389fcfa9f74346ceb035446bf3f427a96c95e6eac2d3d801",
+    "internal/store/postgres/migrations/00019_api_key_usage.sql": "a7d8325f90d93964ccbc7cc727c1ead23be9f0ddcc4c61f8ee8d5ffffb8337f1",
+    "internal/store/postgres/r5_schema_inventory_test.go": "e84c6243da1b809a26e0aaf0e8379575fd87442ce3ed07723079bce50094c817",
+    "internal/store/postgres/company_integration_test.go": "cb045c77f41aa60c0a32e73e333e7d79b294016c1a71d4c8b3bc7eb39981ceb9",
+    "internal/store/postgres/company_upgrade_test.go": "1e7b45cefce05e39a73443f7e323da609e4df8f528e92189b4abad5d92cc1fd9",
+    "internal/store/postgres/r5_member_historical_delete_test.go": "7d9848672f1610ade6b715126c55eac4727d95bb6aed16a0d844f16fb190d92c",
+    "internal/store/postgres/r5_sent_recipient_snapshot_upgrade_test.go": "3901f666772b7dab307200ef89e395b098c744ea273268bbabb8b3f09d769485",
+    "internal/store/postgres/r5_suppression_scope_migration_test.go": "cdcd20367b54e3e27e4cf9482a32442d7d3fdc43cd07c3a6cb32819ffe6be143",
+    "internal/store/postgres/r5_permission_stage_matrix_test.go": "75a484f5a8e43b11909972deb4bb265bf1f44290f84c44453d509411a0323c43",
+    "internal/store/postgres/r5_api_key_usage_test.go": "611426e0bc99573dc79818b9e5e1e3c61a85baf860709a9eda3f12d32f4d849e"
+  },
+  "raw_chain": {
+    "D1": {
+      "path": "/private/tmp/tm-r5usage19-triage-diagnostic.el6i0vxj/D1/phases/exact-Go-D1/stdout",
+      "sha256": "6d8f6d0c8869a998cac5ca13b4ffc504d879977231de0137b317d9acf3260521",
+      "status": "parent-reviewed bounded PASS, not rerun"
+    },
+    "D2": {
+      "path": "/private/tmp/tm-r5usage19-triage-diagnostic.el6i0vxj/D2/phases/exact-Go-D2/stdout",
+      "sha256": "7c75b451ad246e903d367478ecd61ba39a95057c05c470a5397977ec6adf23f8",
+      "status": "FAILED, preserved unchanged"
+    }
+  },
+  "only_proposed_runtime_selector": "^TestR5KeyUsageAuthorityAdmissionIsolation$/^usage_held_allows_retry$",
+  "D1_rerun_authorized": false,
+  "D3_B_S_C": "NOT_RUN; no authorization inferred",
+  "checks": {
+    "gofmt": "PASS",
+    "diff_check": "PASS, no diagnostics",
+    "go_compile": "NOT_RUN",
+    "go_test": "NOT_RUN",
+    "postgres": "NOT_RUN"
+  },
+  "current19_full_ready": false
+}

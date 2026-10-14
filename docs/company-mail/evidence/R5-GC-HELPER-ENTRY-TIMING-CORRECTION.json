@@ -1,0 +1,20 @@
+{
+  "artifact_kind": "source_bound_readonly_timing_correction_not_raw_rewrite",
+  "source_tree": "9f58e14c09e3dcf5ea334db93b0cde13bb5db3eb",
+  "source_closure_sha256": "4be2c8b152b1e20a90c518016cb581df418ddc276a1a3ebe1465d90bf88786b4",
+  "archive_sha256_from_executor": "ce5b9ca44e70db31f50d7472868ea122e5d6fe01724d33d8d42738fc358f97d0",
+  "original_aggregate_member": "original-window-aggregate-budget-receipt.json",
+  "original_reported_cleanup_clock_elapsed": 137.10643696784973,
+  "original_cleanup_receipt_utc_not_final_postcleanup": true,
+  "postgres_log_shutdown_stopped_utc_from_independent_review": "2026-10-02T09:40:52.387Z",
+  "postcheck_member": "main/source-postcheck.json",
+  "postcheck_utc": "2026-10-02T09:40:52.527052+00:00",
+  "original_window_origin_wall": 1790933915.264246,
+  "postcheck_after_original_origin_seconds": 137.2628059387207,
+  "outer_origin_plus_outer_elapsed_after_original_origin_seconds": 137.26335787773132,
+  "original_budget_seconds": 600,
+  "both_corrected_observations_within_original_budget": true,
+  "separate_prestop_connection_count0_query_observed": false,
+  "raw_review_archive_modified": false,
+  "tests_repeated": false
+}

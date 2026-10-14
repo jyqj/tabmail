@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "inventory_revision": 15,
+  "product_source_commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
+  "product_source_tree": "437de0716fc9247e188f0409654f4f178905dc33",
+  "author_final_test_commit": "0e329e872685209486e966fe7d5cf031e3020034",
+  "author_final_test_tree": "0135d90c89bedef6bf9a44c4738944a485feea3f",
+  "runs": [
+    {
+      "kind": "historical-pr23-assertion-failure",
+      "source": {
+        "commit": "d79c5ba04ce43f420ea95d28f2367a6aa27228c2",
+        "tree": "01bd88c23bb18a494e6727a5418b140e44037ad7",
+        "status": ""
+      },
+      "exit_code": 1,
+      "counts": {
+        "methods": 100,
+        "passed": 99,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "reported_elapsed_seconds": 120.297,
+      "elapsed_seconds": 121.03784881599859,
+      "exact_source_unchanged": true,
+      "module_inputs_unchanged": true,
+      "artifacts": {
+        "receipt": {
+          "path": "author-d79c5ba-five-modules.json",
+          "original_path": "/workspace/scratch/02f0b8733500/catalog15-prep/evidence/final-modules/result.json",
+          "bytes": 2695,
+          "sha256": "90083e01fa358e9fb52dcc8b8cd5a17101f40ec1c010ce2cd1feff241f30557b"
+        },
+        "stdout": {
+          "path": "author-d79c5ba-five-modules.stdout.txt",
+          "original_path": "/workspace/scratch/02f0b8733500/catalog15-prep/evidence/final-modules/stdout.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "author-d79c5ba-five-modules.stderr.txt",
+          "original_path": "/workspace/scratch/02f0b8733500/catalog15-prep/evidence/final-modules/stderr.txt",
+          "bytes": 19707,
+          "sha256": "a76127043c30846abd0d4294fd5544174b47912d6c05a9a41e3a69d2c2a9806b"
+        }
+      }
+    },
+    {
+      "kind": "environment-capacity-interruption",
+      "source": {
+        "commit": "0e329e872685209486e966fe7d5cf031e3020034",
+        "tree": "0135d90c89bedef6bf9a44c4738944a485feea3f",
+        "status": ""
+      },
+      "exit_code": 1,
+      "counts": null,
+      "reported_elapsed_seconds": null,
+      "elapsed_seconds": 115.11604606000037,
+      "exact_source_unchanged": true,
+      "module_inputs_unchanged": true,
+      "artifacts": {
+        "receipt": {
+          "path": "author-0e329e8-enospc-five-modules.json",
+          "original_path": "/workspace/scratch/02f0b8733500/catalog15-prep/evidence/final-modules-corrected/result.json",
+          "bytes": 2713,
+          "sha256": "2d7c24c2fcc7f9c441e2da5d24a58a40d6f47d243de0fa156fc4191e01a8c537"
+        },
+        "stdout": {
+          "path": "author-0e329e8-enospc-five-modules.stdout.txt",
+          "original_path": "/workspace/scratch/02f0b8733500/catalog15-prep/evidence/final-modules-corrected/stdout.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "author-0e329e8-enospc-five-modules.stderr.txt",
+          "original_path": "/workspace/scratch/02f0b8733500/catalog15-prep/evidence/final-modules-corrected/stderr.txt",
+          "bytes": 12512,
+          "sha256": "dda9a7d89af52202418c4c756999863ac0e3bbcad64a8c8ba69d7d1ea7769cc2"
+        }
+      }
+    },
+    {
+      "kind": "final-serial-pass",
+      "source": {
+        "commit": "0e329e872685209486e966fe7d5cf031e3020034",
+        "tree": "0135d90c89bedef6bf9a44c4738944a485feea3f",
+        "status": ""
+      },
+      "exit_code": 0,
+      "counts": {
+        "methods": 100,
+        "passed": 100,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "reported_elapsed_seconds": 165.013,
+      "elapsed_seconds": 166.08056204699824,
+      "exact_source_unchanged": true,
+      "module_inputs_unchanged": true,
+      "artifacts": {
+        "receipt": {
+          "path": "author-0e329e8-five-modules.json",
+          "original_path": "/workspace/scratch/02f0b8733500/catalog15-prep/evidence/final-modules-serial/result.json",
+          "bytes": 2708,
+          "sha256": "fe822edbe6a72b9ecbe184b84807b98153c6a0d5d961d6ac96759b79b8ad67aa"
+        },
+        "stdout": {
+          "path": "author-0e329e8-five-modules.stdout.txt",
+          "original_path": "/workspace/scratch/02f0b8733500/catalog15-prep/evidence/final-modules-serial/stdout.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "author-0e329e8-five-modules.stderr.txt",
+          "original_path": "/workspace/scratch/02f0b8733500/catalog15-prep/evidence/final-modules-serial/stderr.txt",
+          "bytes": 18540,
+          "sha256": "774ad64339dc13b41ae6287718604e92a4bcd284fcbbbd8fd349e33bf7614f7e"
+        }
+      }
+    }
+  ],
+  "output_bytes_preserved": true,
+  "environment_recovery": "After concurrent historical ordinary clones exhausted the 32GB working filesystem, inactive clean committed worktrees were removed. All source commits, raw evidence, the active ordinary clones, historical artifacts, module cache, compiler, collectors and gates were retained. The final complete run used the identical 0e329e8 commit and test module bytes in serial.",
+  "qualification": "Only the final serial run is the complete successful 100-method execution. The first complete 99P/1F result and the capacity interruption remain separate original evidence. The directory and receipt additions after execution are not claimed to have run at their future commit.",
+  "implementation_todos_completed": 0,
+  "runtime_verified": false,
+  "product_green": false,
+  "task_complete": false
+}

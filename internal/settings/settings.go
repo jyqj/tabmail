@@ -13,7 +13,7 @@ import (
 )
 
 type settingsStore interface {
-	GetSetting(ctx context.Context, key string) (*models.SystemSetting, error)
+	SeedSetting(ctx context.Context, key, value, description string) (bool, error)
 	UpsertSetting(ctx context.Context, key, value, description string) error
 	ListSettings(ctx context.Context) ([]*models.SystemSetting, error)
 }
@@ -42,17 +42,12 @@ func NewManager(st settingsStore, logger zerolog.Logger) *Manager {
 // Called once at startup. Existing DB values are never overwritten.
 func (m *Manager) Seed(ctx context.Context, defaults map[string]SeedValue) {
 	for key, sv := range defaults {
-		existing, err := m.store.GetSetting(ctx, key)
+		inserted, err := m.store.SeedSetting(ctx, key, sv.Value, sv.Description)
 		if err != nil {
-			m.logger.Warn().Err(err).Str("key", key).Msg("seed: check existing")
+			m.logger.Warn().Err(err).Str("key", key).Msg("seed: insert default")
 			continue
 		}
-		if existing != nil {
-			continue // DB already has this key → don't overwrite
-		}
-		if err := m.store.UpsertSetting(ctx, key, sv.Value, sv.Description); err != nil {
-			m.logger.Warn().Err(err).Str("key", key).Msg("seed: upsert")
-		} else {
+		if inserted {
 			m.logger.Info().Str("key", key).Str("value", sv.Value).Msg("seeded setting from env")
 		}
 	}
@@ -111,9 +106,10 @@ func (m *Manager) Set(ctx context.Context, key, value, description string) error
 	if err := m.store.UpsertSetting(ctx, key, value, description); err != nil {
 		return err
 	}
-	m.mu.Lock()
-	m.cache[key] = value
-	m.mu.Unlock()
+	// Successful replies can arrive out of commit order. Without a database
+	// revision, this reply's value cannot safely replace an observed snapshot.
+	// Reload the current persisted values through the existing refresh lock.
+	m.Invalidate()
 	return nil
 }
 

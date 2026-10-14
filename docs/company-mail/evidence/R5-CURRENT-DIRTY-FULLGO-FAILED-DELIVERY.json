@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "task_complete": false,
+  "product_green": false,
+  "fullGo_pass": false,
+  "source_sha": "2aa9a91a5c80d3d926861bc5e90cf25e13ded5fd",
+  "source_archive": "/tmp/tm-r5fullgo.aeyasm7F/CURRENT-DIRTY-FULLGO-FAILED-evidence.tar.gz",
+  "original_archive_sha256_from_author": "a4d9f124350b0e01637ed9b1d04b1838224b4de7a7679881bbb200df603ef8dc",
+  "original_archive_hash_recomputed": false,
+  "archive": "R5-CURRENT-DIRTY-FULLGO-FAILED-LOGS.tar.gz",
+  "safe_archive_sha256": "537948707d70165d10941326081b66a3790b57be6d516f9046d29709a03a0148",
+  "archive_bytes": 461334,
+  "payload_file_count": 133,
+  "excluded_members": [
+    {
+      "member": "packet/company-p0.yml",
+      "reason": "credential_or_raw_content_shaped_text_unpublished",
+      "patterns": [
+        "private_uri"
+      ]
+    },
+    {
+      "member": "packet/source-changes.diff",
+      "reason": "credential_or_raw_content_shaped_text_unpublished",
+      "patterns": [
+        "raw_mime_or_private_key"
+      ]
+    }
+  ],
+  "selected_payload_bytes_changed": false,
+  "all_original_raw_retained_privately": true,
+  "review": "R5-CURRENT-DIRTY-FULLGO-FAILED-REVIEW.json",
+  "Go_reexecuted": false,
+  "per_file_hashes_recomputed": false,
+  "cleanup_boundary": "native cluster stopped; tm_test_94902cbe retained with0connections beforestop, do not claimDB0"
+}

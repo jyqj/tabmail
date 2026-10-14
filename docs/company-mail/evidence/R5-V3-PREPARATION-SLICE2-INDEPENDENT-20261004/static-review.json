@@ -1,0 +1,153 @@
+{
+  "delivery_commit": "7262e78e0120c5a203bb588807ca876b82c4d5bc",
+  "tested_source_commit": "cad567ff2bb224b94fbf20c359383edcd0fce59b",
+  "base_commit": "632d55de566254c618bca9a54c5dbae7b355fcf9",
+  "design_commit": "42f49538f7bceb6eb8e698d716c1418f85343413",
+  "candidate_changed_paths": [
+    "docs/company-mail/evidence/R5-V3-PREPARATION-SLICE2-20261004-cad567f.json",
+    "scripts/r5_source_runner_prepare.py",
+    "scripts/run_r5_source_version_tests.py",
+    "scripts/tests/r5_source_preparation_v3_checks.py"
+  ],
+  "delivery_vs_tested_source": "author JSON only; executable source identical",
+  "preserved_path_count": 2212,
+  "preserved_tree_byte_sha256": "3e19278c1a2d851f662b83feabbde5cf53ff91a09a38b2f64b10ed9b39c56123",
+  "unchanged_AST_checks": [
+    {
+      "path": "scripts/r5_source_runner_prepare.py",
+      "function": "digest",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/r5_source_runner_prepare.py",
+      "function": "exclusive",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/r5_source_runner_prepare.py",
+      "function": "source_identity",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/r5_source_runner_prepare.py",
+      "function": "typescript_members",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/r5_source_runner_prepare.py",
+      "function": "prepare_typescript",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/r5_source_runner_prepare.py",
+      "function": "verify_typescript",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/r5_source_runner_prepare.py",
+      "function": "go_selection",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/r5_source_runner_prepare.py",
+      "function": "execute_binary",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/run_r5_source_version_tests.py",
+      "function": "flatten",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/run_r5_source_version_tests.py",
+      "function": "discover",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/run_r5_source_version_tests.py",
+      "function": "partition",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/run_r5_source_version_tests.py",
+      "function": "verify",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/run_r5_source_version_tests.py",
+      "function": "git",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/run_r5_source_version_tests.py",
+      "function": "checkout",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/run_r5_source_version_tests.py",
+      "function": "git_go_env",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/run_r5_source_version_tests.py",
+      "function": "child",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/run_r5_source_version_tests.py",
+      "constant": "BASELINE",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/run_r5_source_version_tests.py",
+      "constant": "HISTORICAL_IDS",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/run_r5_source_version_tests.py",
+      "constant": "FRESH_CLASS",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/r5_source_runner_prepare.py",
+      "constant": "LOCK_SHA256",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/r5_source_runner_prepare.py",
+      "constant": "TS_URL",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/r5_source_runner_prepare.py",
+      "constant": "TS_SHA256",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/r5_source_runner_prepare.py",
+      "constant": "TS_INTEGRITY",
+      "ast_unchanged": true
+    },
+    {
+      "path": "scripts/r5_source_runner_prepare.py",
+      "constant": "TEST_NAME",
+      "ast_unchanged": true
+    }
+  ],
+  "critical_path_sha256": {
+    "scripts/contracts/r5-benchmark-current18-evidence.schema.json": "f5c8ca84a38c1ec2d269669449422e000537c37d5667347625fe443c3d271b34",
+    "scripts/contracts/r5-external-batch-v1.schema.json": "88137363c74f35f979acd035a7774ddb3fafbcc631da55e1ffbb6c90766b1ab9",
+    "scripts/r5_archive_boundary.py": "c02acc09dd0f49b28113f99b05ffc6ff996287fb015d60fa08d7de56d92b7f15",
+    "scripts/r5_go_environment.py": "04999b9238c748a0abdd33d6e357b3f29b0e412472140c85d74ee9234940e2f5",
+    "scripts/r5_selected_binding_consumer.py": "46a43df58a17ea03966b88fe07275e60344a055960aaabfcf405a7d5eb6caa21",
+    "scripts/r5_selected_source_binding_v2.py": "4bafe6a0b146c69aaf76dfaa206a95ac581739e3c0efa4a52bf36613ae817d67",
+    "scripts/r5_selected_source_binding_v3.py": "12799a213c93510bdb449b5f610a493f517395878dd83c4b48a06e574bbf6acb",
+    "scripts/r5_source_inventory.py": "306cfcae043925d656d13b08bd439015e23348df255b363ceb8c10b6890488b2",
+    "scripts/r5_source_runner_prepare.py": "193c830550d88546b4669bdbbfd1a5f94b652f61877e426a533eeb387589ed15",
+    "scripts/run_r5_source_version_tests.py": "f0c3f43ba9596ab5aa9563325858fbfa4f51944a445042579c7b208e3ba16303",
+    "scripts/tests/r5_source_preparation_v3_checks.py": "32297a9180ca28b2ebf370ad4e233d6a2a505e0e15570248d19dcaba426ac6e5",
+    "scripts/tests/test_r5_source_version_runner.py": "959fa5f5cb575587b16f9451e15167e35657dd98750a12d19a03b75af5d5ffa4"
+  },
+  "author_report_replayed_exact_controls_and_source_hashes": true,
+  "scope": "Git object and AST metadata review only; not process-boundary control results"
+}

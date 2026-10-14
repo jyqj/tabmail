@@ -1,0 +1,20 @@
+{
+  "original_archive": "/private/tmp/tm-r5mcause490-v4-launch.a4iuikjr/MCAUSE-490-BOUNDED-DIAGNOSTIC-evidence.tar.gz",
+  "original_archive_sha256_from_executor": "4ec6efa0bae4f884fcf8b540faf6c0cacd715999763f4694826134eb79264fdc",
+  "original_regular_members": 114,
+  "safe_archive": "R5-MCAUSE-490-DIAGNOSTIC-SAFE-LOGS.tar.gz",
+  "safe_archive_sha256_new_wrapper_only": "98925091bcd54b0b10e5758d1ff3c2ba5a913a8b45938e4c57b9257f792c4b7f",
+  "safe_regular_members": 109,
+  "excluded_private_binary_profiles": [
+    "runtime/diagnostic/cpu.pprof",
+    "runtime/diagnostic/runtime.trace",
+    "runtime/postcapture-profile-analysis/trace-sched/stdout",
+    "runtime/postcapture-profile-analysis/trace-sync/stdout",
+    "runtime/postcapture-profile-analysis/trace-syscall/stdout"
+  ],
+  "included_original_payload_bytes_changed": false,
+  "original_archive_or_raw_modified": false,
+  "tests_repeated": false,
+  "per_member_or_treehash_recomputed": false,
+  "reason": "Do not upload CPU/runtime trace or binary derivative profiles potentially carrying private runtime detail; original114 bundle retained at private origin"
+}

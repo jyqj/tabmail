@@ -1,8 +1,11 @@
 "use client";
 
+import { useId } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { useCRUDPage } from "@/hooks/use-crud-page";
+import { ListReadFeedback, listPending, listReady, refreshList } from "@/components/crud/list-read-state";
 import { listAdminDomains } from "@/lib/api";
+import { useSessionScope } from "@/lib/session";
 import type { DomainZone, ResourceVisibility } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,12 +23,23 @@ import { Globe, RefreshCw } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 export default function AdminDomainsPage() {
+  const scope = useSessionScope();
+  return <AdminDomainsSession key={scope} />;
+}
+
+function AdminDomainsSession() {
   const { t } = useI18n();
-  const { data: response, isLoading, mutate } = useCRUDPage(
-    "admin-domains",
+  // The shared cache may outlive this route. Each visit must acquire its own
+  // observation before it can display rows or allow a refresh of those rows.
+  const reader = useId();
+  const list = useCRUDPage(
+    ["admin-domains", reader],
     () => listAdminDomains(),
     "adminDomains.loadFailed",
   );
+  const loading = listPending(list);
+  const ready = listReady(list);
+  const response = ready ? list.data : undefined;
   const zones = response?.data ?? [];
   const visibilityLabels: Record<ResourceVisibility, string> = {
     private: t("adminDomains.visibilityPrivate"),
@@ -39,7 +53,7 @@ export default function AdminDomainsPage() {
         title={t("adminDomains.title")}
         description={t("adminDomains.description")}
         actions={
-          <Button variant="outline" size="sm" onClick={() => mutate()} className="gap-1.5">
+          <Button variant="outline" size="sm" disabled={!ready} onClick={() => refreshList(list)} className="gap-1.5">
             <RefreshCw className="h-3.5 w-3.5" />
             {t("adminDomains.refresh")}
           </Button>
@@ -58,13 +72,14 @@ export default function AdminDomainsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
+            <ListReadFeedback list={list} />
+            {loading ? (
               <div className="space-y-3">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <Skeleton key={i} className="h-12 w-full" />
                 ))}
               </div>
-            ) : zones.length === 0 ? (
+            ) : !ready ? null : zones.length === 0 ? (
               <div className="py-12 text-center text-sm text-muted-foreground">{t("adminDomains.empty")}</div>
             ) : (
               <Table>

@@ -1,0 +1,327 @@
+{
+  "S_M_L_executed": false,
+  "actual_source_closure_sha256": "32fc6c04d7f780079296e2ee12c52ed0b04346aed3b10825ad570f334ee89182",
+  "actual_total_leaf_count": 45,
+  "actual_total_top_count": 10,
+  "author_ordered_six_closure_sha256": "3bf58877802bc2ab3fda2196a11ccb78574d373160b722e7f535b71f9e750a94",
+  "base_frozen_source_sha": "abea755a5d9707d94a7ddc7c37fe0c492dd5e30b",
+  "boundary": "only3necessaryservicepure+4newPG+3newHTTP; no separate compile rerun or old32PG/outbox/stage/A/B/S/received/cold repeated",
+  "coverage": [
+    "new service dedicated profile-reader port and failclosed; necessary modified ListProfiles contract only",
+    "current actor scoped global/platform/selected-tenant versus tenant-local visibility, no blanket global leak to referenced normal admin",
+    "fresh role/super demotion, freeze, token epoch and API key/noninteractive current credential boundaries",
+    "shipping GET router through service and PgStore; missing/foreign/zero selected company authority",
+    "actual UpdateUserGuarded authority mutation pauses on required audit, reader user FOR SHARE blocked by exact writer PID; rechecks changed role/epoch/frozen after wait"
+  ],
+  "created_utc": "2026-10-02T00:31:51.237299+00:00",
+  "named_residuals": [
+    "profile visibility list does not close platform no-audience event notification/SSE real consumer gate",
+    "full171/G7/P1-130/P0/M not certified by this narrow leaf suite"
+  ],
+  "phases": {
+    "pg-http": {
+      "actual_leaf_cases": [
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityScope/super-default"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityScope/super-selected-a"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityScope/super-selected-b"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityScope/tenant-admin-a"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityScope/tenant-admin-b"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityScope/cross-tenant-admin"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityScope/admin-no-selection"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityScope/reader-global-reference"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityScope/missing-selected-company"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityScope/zero-selected-company"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityScope/api-key"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityScope/api-key#01"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityScope/api-key#02"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityCurrentRole"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityCredentialChanges/freeze-reactivate"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityCredentialChanges/password-epoch"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityCredentialChanges/deleted"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityLockWait/demote"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityLockWait/freeze"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/super-default"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/super-selected-a"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/super-selected-b"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/super-switch-back-a"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/tenant-admin-a"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/tenant-admin-b"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/tenant-admin-foreign-header"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/reader"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/global-reference-reader"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/frozen"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/no-principal"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/missing-selected"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/owned-admin-key"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/owned-super-key"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope/ownerless-key"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPAuthorityChanges/super-to-admin"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPAuthorityChanges/admin-to-reader"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPAuthorityChanges/freeze-reactivate"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPAuthorityChanges/password-epoch"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPLockWait/demote"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPLockWait/freeze"
+        }
+      ],
+      "actual_tops": [
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityScope"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityCurrentRole"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityCredentialChanges"
+        },
+        {
+          "package": "tabmail/internal/store/postgres",
+          "test": "TestR5PermissionProfileVisibilityLockWait"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPScope"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPAuthorityChanges"
+        },
+        {
+          "package": "tabmail/internal/api",
+          "test": "TestR5PermissionProfileVisibilityHTTPLockWait"
+        }
+      ],
+      "go_exit": 0,
+      "leaf_count": 40,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "package_elapsed_seconds": {
+        "tabmail/internal/api": 3.528,
+        "tabmail/internal/store/postgres": 3.309
+      },
+      "raw_sha256": "5d8006cf3103d014c8c2dff451b050bb3857e76ccd0e797572c115d045b79bab",
+      "top_count": 7,
+      "total_test_subtest_pass_events": 46
+    },
+    "pure": {
+      "actual_leaf_cases": [
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestR5PermissionProfileVisibilityServicePort"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestR5PermissionProfileVisibilityServiceFailClosed"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestListProfiles/super_admin_lists_all_profiles"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestListProfiles/tenant_admin_lists_own_tenant"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestListProfiles/tenant_admin_without_tenant_context_is_forbidden"
+        }
+      ],
+      "actual_tops": [
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestR5PermissionProfileVisibilityServicePort"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestR5PermissionProfileVisibilityServiceFailClosed"
+        },
+        {
+          "package": "tabmail/internal/app/permissions",
+          "test": "TestListProfiles"
+        }
+      ],
+      "go_exit": 0,
+      "leaf_count": 5,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "package_elapsed_seconds": {
+        "tabmail/internal/app/permissions": 2.005
+      },
+      "raw_sha256": "b5c816184f470d81a754743a9319cfadfebd7c99b477a3a32f7a156c5262a86e",
+      "top_count": 3,
+      "total_test_subtest_pass_events": 6
+    }
+  },
+  "product_green": false,
+  "race_enabled": true,
+  "source_delta": [
+    {
+      "actual_released_sha256": "988f743f60211deebee6795997b88289d32b029024c3063a830765396cc7f65c",
+      "base_sha256": "0567f6dc4fbfdf1216cb71cdf2ee717a6b3184e5590698dff1f97cb6f91d75d2",
+      "bytes": 13659,
+      "path": "internal/app/permissions/service.go"
+    },
+    {
+      "actual_released_sha256": "7daa90b0e58f258990c99458628393cb8d77927e9b08a790f9aa46709eac13a9",
+      "base_sha256": "f46fca33921fed8fc70e5f684fe01f0398b900ad27bccfa5bd7224f20514bcbb",
+      "bytes": 19947,
+      "path": "internal/app/permissions/service_test.go"
+    },
+    {
+      "actual_released_sha256": "897424227592ae2c884e0efb9d95642d31b96914bd65843f49db428547a734a2",
+      "base_sha256": null,
+      "bytes": 2850,
+      "path": "internal/app/permissions/r5_permission_profile_visibility_test.go"
+    },
+    {
+      "actual_released_sha256": "fe83ee39025f619eb5b1baa9b0d6cf60bd47429d32f902012b4c183eabd7555f",
+      "base_sha256": null,
+      "bytes": 2284,
+      "path": "internal/store/postgres/permission_profile_visibility.go"
+    },
+    {
+      "actual_released_sha256": "a0d2faeb3c5e9f5c7cbb8cdc4f677d632d2d63586732ff690fe58cbc8be70906",
+      "base_sha256": null,
+      "bytes": 12419,
+      "path": "internal/store/postgres/r5_permission_profile_visibility_test.go"
+    },
+    {
+      "actual_released_sha256": "509f834e813e6165db457c5cf56f674a0a80b2506c917bdf6aecba28d6fe77d4",
+      "base_sha256": null,
+      "bytes": 13282,
+      "path": "internal/api/r5_permission_profile_visibility_http_test.go"
+    }
+  ],
+  "source_identity_kind": "canonical_source_closure_sha1",
+  "source_receipt": "source-receipt.json",
+  "source_sha": "5c879876f2713fd754d9e6bcd5627beb145f2ea4",
+  "status": "RES-P1-EVENT-02_new_service_PG_HTTP_visibility_runtime_passed",
+  "task_complete": false
+}

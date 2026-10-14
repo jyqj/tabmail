@@ -28,25 +28,36 @@ export function cleanEditorHTML(raw: string): string {
 function escaped(text: string) {
     return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\n", "<br>");
 }
-export function RichMessage({ id, text, html, disabled, onChange }: {
+export function RichMessage({ id, text, html, disabled, resetKey = 0, onChange }: {
     id: string;
     text: string;
     html?: string;
     disabled?: boolean;
+    resetKey?: number;
     onChange: (value: {
         text_body: string;
         html_body?: string;
     }) => void;
 }) {
     const t = useText();
-    // Plain text remains first-class and backwards compatible, including RFC quotes.
-    const [rich, setRich] = useState(false);
+    // Stored formatting must be visible before the first edit. An explicit
+    // server reload can introduce HTML; existing rich mode stays selected when
+    // that reload contains plain text, so its DOM/caret reset rules still apply.
+    const [mode, setMode] = useState({ rich: Boolean(html), resetKey });
+    const rich = mode.rich || (mode.resetKey !== resetKey && Boolean(html));
+    if (mode.resetKey !== resetKey)
+        setMode({ rich, resetKey });
     const editor = useRef<HTMLDivElement>(null);
+    const lastReset = useRef(resetKey);
     useEffect(() => {
+        const reset = lastReset.current !== resetKey;
+        lastReset.current = resetKey;
         const el = editor.current;
-        if (rich && el && document.activeElement !== el)
+        // Explicit server reload owns focused DOM, including an unchanged
+        // body. Normal input/save updates preserve the browser's selection.
+        if (rich && el && (reset || document.activeElement !== el))
             el.innerHTML = cleanEditorHTML(html || escaped(text));
-    }, [rich, html, text]);
+    }, [rich, html, text, resetKey]);
     const emit = () => {
         const el = editor.current;
         if (el)
@@ -74,7 +85,7 @@ export function RichMessage({ id, text, html, disabled, onChange }: {
                 return;
             if (rich)
                 onChange({ text_body: text, html_body: undefined });
-            setRich(!rich);
+            setMode({ rich: !rich, resetKey });
         }}>{rich ? t("切换纯文本", "Use plain text") : t("格式化编辑", "Formatting editor")}</ActionButton>
       {rich && (["strong", "em", "u"] as const).map((tag, i) => <ActionButton key={tag} disabled={disabled} onMouseDown={e => e.preventDefault()} onClick={() => format(tag)}>{[t("粗体", "Bold"), t("斜体", "Italic"), t("下划线", "Underline")][i]}</ActionButton>)}
     </div>
@@ -82,11 +93,18 @@ export function RichMessage({ id, text, html, disabled, onChange }: {
                 // Paste text only; clipboard HTML cannot introduce images, trackers,
                 // executable attributes or remote content into the editor DOM.
                 event.preventDefault();
-                const value = event.clipboardData.getData("text/plain");
+                const el = editor.current;
+                if (disabled || !el)
+                    return;
                 const sel = window.getSelection();
-                if (!sel?.rangeCount || !editor.current?.contains(sel.anchorNode))
+                if (!sel || sel.rangeCount !== 1)
                     return;
                 const range = sel.getRangeAt(0);
+                // The anchor alone does not own a forward or backward range.
+                // Never delete or insert outside this enabled editor.
+                if (!el.contains(range.startContainer) || !el.contains(range.endContainer) || !el.contains(range.commonAncestorContainer))
+                    return;
+                const value = event.clipboardData.getData("text/plain");
                 range.deleteContents();
                 const node = document.createTextNode(value);
                 range.insertNode(node);

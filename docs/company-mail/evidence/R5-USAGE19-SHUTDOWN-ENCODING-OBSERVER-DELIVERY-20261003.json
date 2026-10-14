@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "runtime_deliveries": [
+    {
+      "archive": "R5-USAGE19-D2-CLEAN-ACTUAL-LOGS.tar.gz",
+      "review": "R5-USAGE19-D2-CLEAN-ACTUAL-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5usage19-D2clean-only.dl3qxwwk/USAGE19-D2clean-only-BOUNDED-PASS-publicsafe-evidence.tar.gz",
+      "sha256_from_executor": "fe9809c8b41a77d22c316f33cceca40ac4b31b56cb62f83e20e858cc16d4fe6d",
+      "hash_recomputed": false,
+      "regular_members": 57,
+      "payload_bytes_changed_by_docs": false,
+      "executor_public_safe_transformation": true,
+      "review_from_sanitized_member_not_private_file": true
+    },
+    {
+      "archive": "R5-USAGE19-D3BS-P-C0-UNKNOWN-LOGS.tar.gz",
+      "review": "R5-USAGE19-D3BS-P-C0-UNKNOWN-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5usage19-remaining-D3BSC.xqbw3iky/USAGE19-D3BS-PASS-C0INFRA-boundary-publicsafe-evidence.tar.gz",
+      "sha256_from_executor": "7428c5ad0ba044ab5cc5f1160adf14686c5cadb1e3ac6b970d7d5e961c938a42",
+      "hash_recomputed": false,
+      "regular_members": 220,
+      "payload_bytes_changed_by_docs": false,
+      "executor_public_safe_transformation": true,
+      "review_from_sanitized_member_not_private_file": true
+    },
+    {
+      "archive": "R5-USAGE19-C-V8-INFRA-UNKNOWN-LOGS.tar.gz",
+      "review": "R5-USAGE19-C-V8-INFRA-UNKNOWN-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5usage19-Crejectdiag-only.mv37al27/USAGE19-C-V8-0tests-INFRAUNKNOWN-publicsafe-evidence.tar.gz",
+      "sha256_from_executor": "818605232776ebdd3bbe812a076f78ecd8a0d4fd409f936d0cd917009e43f174",
+      "hash_recomputed": false,
+      "regular_members": 57,
+      "payload_bytes_changed_by_docs": false,
+      "executor_public_safe_transformation": true,
+      "review_from_sanitized_member_not_private_file": true
+    },
+    {
+      "archive": "R5-TEMPLATE-ENCODING-8-BOUNDARY-LOGS.tar.gz",
+      "review": "R5-TEMPLATE-ENCODING-8-BOUNDARY-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5template-encoding.buqb472o/TEMPLATE-ENCODING-pure8-boundary-evidence.tar.gz",
+      "sha256_from_executor": "746c8e9ddb9d13c783c840800e5baacdc99a2261d14ab89f5786a701e8635a33",
+      "hash_recomputed": false,
+      "regular_members": 19,
+      "payload_bytes_changed_by_docs": false,
+      "executor_public_safe_transformation": false,
+      "review_from_sanitized_member_not_private_file": false
+    },
+    {
+      "archive": "R5-WORKER-BOUNDED-SHUTDOWN-24-LOGS.tar.gz",
+      "review": "R5-WORKER-BOUNDED-SHUTDOWN-24-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5worker-shutdown.04xp8szc/WORKER-SHUTDOWN-wholepackage-race-BOUNDED-PASS-evidence.tar.gz",
+      "sha256_from_executor": "1096750d9af02efae27c05e545ddd1884c84117bf78a5e9fbe56d43f04fad77e",
+      "hash_recomputed": false,
+      "regular_members": 20,
+      "payload_bytes_changed_by_docs": false,
+      "executor_public_safe_transformation": false,
+      "review_from_sanitized_member_not_private_file": false
+    }
+  ],
+  "V9_SOURCE_safe_packaging": {
+    "original_archive": "/private/tmp/tm-r5usage19-driver-v9-Csnapshotname-SOURCE/USAGE19-Conly-V9-SOURCE-snapshotname-newmocks.tar.gz",
+    "original_sha256_from_executor": "cf5ab2baf5e8585baacde7c816c1f38d356909cdccabc22c977a2a28bdd2262d",
+    "safe_archive": "R5-USAGE19-C-V9-SOURCE-SAFE8-LOGS.tar.gz",
+    "safe_sha256_wrapper_once": "0273aa5c37034a752198cacdf5ce70ce12c25bb1112d6d60fe6b4c7933a68b82",
+    "safe_members": 8,
+    "excluded_connection_URI_member": [
+      "usage19_driver_prepared_only.py"
+    ],
+    "remaining_original_bytes_changed": false,
+    "original_archive_or_source_modified": false,
+    "runtime": false
+  },
+  "original_raw_archives_and_source_unchanged": true,
+  "tests_repeated": false,
+  "fulltreehash_repeated": false,
+  "wholeCI_shipping_Method_M_baseline_qualified": false,
+  "task_complete": false,
+  "product_green": false
+}

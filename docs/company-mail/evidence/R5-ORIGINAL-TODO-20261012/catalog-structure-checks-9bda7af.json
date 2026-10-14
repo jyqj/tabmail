@@ -1,0 +1,237 @@
+{
+  "head": "9bda7afd5e19416ce6ba0cbd69bdb5b7b7934653",
+  "tree": "e47fd6b593d93dec23bfa36d7733e5095df03c89",
+  "source_report_commit": "311593e6a837287f58d8f10d559dc0b8991be55e",
+  "source_report_tree": "6ff0a4fca8116e1f4955e443f03007f7bf83c7bc",
+  "source_report_tree_matches_git": true,
+  "worktree_status": "",
+  "source_boundary": {
+    "actual_file_count": 11,
+    "declared_file_count": 11,
+    "paths_equal": true,
+    "paths": [
+      ".github/workflows/company-p0.yml",
+      "internal/api/handlers/r5_external_batch_test.go",
+      "internal/store/postgres/company_http_test.go",
+      "internal/store/postgres/company_safety_contracts_test.go",
+      "internal/store/postgres/r5_protocol_shared_test.go",
+      "internal/testpg/r5_frontend_fixture_test.go",
+      "internal/testpg/r5_loopback_probe.go",
+      "scripts/required_frontend_fixture_tests.json",
+      "scripts/run_r5_frontend_fixture.py",
+      "scripts/tests/test_r5_frontend_fixture.py",
+      "scripts/tests/test_r5_frontend_fixture_source_inputs.py"
+    ]
+  },
+  "manifests": {
+    "historical_manifest": {
+      "files": 160,
+      "duplicate_paths": 0,
+      "identity_mismatches": [],
+      "manifest_hash_matches": true
+    },
+    "protected_source_manifest": {
+      "files": 199,
+      "duplicate_paths": 0,
+      "identity_mismatches": [],
+      "manifest_hash_matches": true
+    }
+  },
+  "historical_directories": [
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004",
+      "declared_files": 6,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007",
+      "declared_files": 14,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007",
+      "declared_files": 11,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION5-20261007",
+      "declared_files": 2,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION6-20261008",
+      "declared_files": 2,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION7-20261008",
+      "declared_files": 5,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION8-20261008",
+      "declared_files": 3,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION9-20261008",
+      "declared_files": 2,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION10-20261008",
+      "declared_files": 2,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008",
+      "declared_files": 18,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION12-20261008",
+      "declared_files": 51,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION13-20261008",
+      "declared_files": 2,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008",
+      "declared_files": 2,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION15-20261009",
+      "declared_files": 22,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009",
+      "declared_files": 14,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION17-20261009",
+      "declared_files": 2,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION18-20261010",
+      "declared_files": 2,
+      "matches_original_tree_membership": true,
+      "matches_current_disk_membership": true
+    }
+  ],
+  "hash_field_mismatches": [],
+  "original_collectors": {
+    "scripts/check_r5_transactions.py": {
+      "matches_declared_sha256": true,
+      "unchanged_from_original": true
+    },
+    "scripts/check_r5_compatibility.py": {
+      "matches_declared_sha256": true,
+      "unchanged_from_original": true
+    },
+    "scripts/collect_api_calls.cjs": {
+      "matches_declared_sha256": true,
+      "unchanged_from_original": true
+    },
+    "cmd/r5txinventory/main.go": {
+      "matches_declared_sha256": true,
+      "unchanged_from_original": true
+    },
+    "internal/architecture/route_inventory_test.go": {
+      "matches_declared_sha256": true,
+      "unchanged_from_original": true
+    }
+  },
+  "transaction": {
+    "entry_set_unchanged": true,
+    "entries": 407,
+    "entry_changes": [
+      {
+        "id": "internal/store/postgres/outbound_receipts.go:outboundReceiptRow:Scan",
+        "fields": [
+          "callers"
+        ],
+        "added_callers": [
+          {
+            "caller_id": "internal/testpg/r5_loopback_probe.go::NewR5LoopbackProbe",
+            "file": "internal/testpg/r5_loopback_probe.go",
+            "function": "NewR5LoopbackProbe",
+            "line": 42,
+            "expression": "pool.QueryRow(r.Context(), \"SELECT identity FROM r5_batch_probe\").Scan",
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ],
+        "removed_callers": []
+      }
+    ],
+    "postgres_files_unchanged": true,
+    "migrations_unchanged": true,
+    "reviewed_file_types_unchanged": true,
+    "top_keys_changed": [
+      "inventory_revision",
+      "entries",
+      "baseline_commit",
+      "current_review_boundary",
+      "last_review_base_commit"
+    ]
+  },
+  "compatibility": {
+    "routes_unchanged": true,
+    "closure_membership_unchanged": true,
+    "closure_changes": {
+      "internal/store/postgres/r5_protocol_shared_test.go": {
+        "before": "c3a961063e532cdf41957edbc85455dc2a142ad1d664741da43b07afab83e6b8",
+        "after": "7d17a2055b5282ce113a489615a804ba790e7abc0392336bc0d408afd0df0289"
+      }
+    },
+    "top_keys_changed": [
+      "inventory_revision",
+      "acquisition",
+      "source_closure"
+    ]
+  },
+  "client_files": {
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": {
+      "unchanged_from_original": true,
+      "sha256": "d1308904b464dd1a2dcb04039f47a82c0d3526e8fa3f0b0413f0b0d6d5eac47a"
+    },
+    "docs/company-mail/evidence/R5-CLIENT-CALLS.json": {
+      "unchanged_from_original": true,
+      "sha256": "3a3519aa7a59dcff9febde16bb770c784013eaaee614b4ab01825d266ca3fa94"
+    }
+  },
+  "false_flags": {
+    "runtime_verified": false,
+    "product_green": false,
+    "task_complete": false
+  },
+  "original_todo_count": {
+    "newly_completed": 0,
+    "accepted": 10,
+    "total": 171,
+    "remaining": 161
+  },
+  "errors": []
+}

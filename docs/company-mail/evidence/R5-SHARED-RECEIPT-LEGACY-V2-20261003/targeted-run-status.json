@@ -1,0 +1,604 @@
+[
+  {
+    "name": "baseline",
+    "terminal": "fail",
+    "package_elapsed_seconds": 4.846,
+    "first_event_at": "2026-10-03T21:59:20.304772168Z",
+    "last_event_at": "2026-10-03T21:59:25.15111286Z",
+    "raw_log_sha256": "08d14435d18bd52252e584bd004ffdec6b562be489f7c99b6984fb42356d861e",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test_terminals": [
+      {
+        "Time": "2026-10-03T21:59:21.207677276Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities/BC02/trusted_structured_source",
+        "Elapsed": 0.86
+      },
+      {
+        "Time": "2026-10-03T21:59:21.964861337Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities/BC03/missing_source",
+        "Elapsed": 0.76
+      },
+      {
+        "Time": "2026-10-03T21:59:22.562108804Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities/BC03/same_id_foreign_source",
+        "Elapsed": 0.6
+      },
+      {
+        "Time": "2026-10-03T21:59:22.56212806Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities",
+        "Elapsed": 2.23
+      },
+      {
+        "Time": "2026-10-03T21:59:23.188713993Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_list",
+        "Elapsed": 0.01
+      },
+      {
+        "Time": "2026-10-03T21:59:23.194352165Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_detail",
+        "Elapsed": 0.01
+      },
+      {
+        "Time": "2026-10-03T21:59:23.20216907Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/submit_replay",
+        "Elapsed": 0.01
+      },
+      {
+        "Time": "2026-10-03T21:59:23.220159617Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases",
+        "Elapsed": 0.66
+      },
+      {
+        "Time": "2026-10-03T21:59:23.947219886Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC02/reliable_source",
+        "Elapsed": 0.71
+      },
+      {
+        "Time": "2026-10-03T21:59:24.491683829Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/missing_source",
+        "Elapsed": 0.54
+      },
+      {
+        "Time": "2026-10-03T21:59:25.144840381Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/foreign_job",
+        "Elapsed": 0.65
+      },
+      {
+        "Time": "2026-10-03T21:59:25.144851534Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases",
+        "Elapsed": 1.92
+      }
+    ],
+    "command_contract": {
+      "race": true,
+      "count": 1,
+      "go_timeout": "120s",
+      "process_timeout_seconds": 180,
+      "tags": "r5protocol",
+      "package": "./internal/store/postgres"
+    },
+    "source_state": "unmodified ac5db2e"
+  },
+  {
+    "name": "repaired-targets",
+    "terminal": "fail",
+    "package_elapsed_seconds": 6.747,
+    "first_event_at": "2026-10-03T22:01:41.993309406Z",
+    "last_event_at": "2026-10-03T22:01:48.74068192Z",
+    "raw_log_sha256": "21a282a9ac86ed573be0e5a083f70ec1785523c8414576ebbffdb0f3850c4a7f",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test_terminals": [
+      {
+        "Time": "2026-10-03T22:01:42.736945813Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities/BC02/trusted_structured_source",
+        "Elapsed": 0.69
+      },
+      {
+        "Time": "2026-10-03T22:01:43.614250851Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities/BC03/missing_source",
+        "Elapsed": 0.88
+      },
+      {
+        "Time": "2026-10-03T22:01:44.215764711Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities/BC03/same_id_foreign_source",
+        "Elapsed": 0.6
+      },
+      {
+        "Time": "2026-10-03T22:01:44.215828933Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities",
+        "Elapsed": 2.18
+      },
+      {
+        "Time": "2026-10-03T22:01:44.857508354Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolDurableBCCSnapshotV2/missing_source",
+        "Elapsed": 0.64
+      },
+      {
+        "Time": "2026-10-03T22:01:45.675559904Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolDurableBCCSnapshotV2/same_id_foreign_source",
+        "Elapsed": 0.82
+      },
+      {
+        "Time": "2026-10-03T22:01:45.675575939Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolDurableBCCSnapshotV2",
+        "Elapsed": 1.46
+      },
+      {
+        "Time": "2026-10-03T22:01:46.754600269Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_list",
+        "Elapsed": 0.01
+      },
+      {
+        "Time": "2026-10-03T22:01:46.765463725Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_detail",
+        "Elapsed": 0.01
+      },
+      {
+        "Time": "2026-10-03T22:01:46.77622979Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/submit_replay",
+        "Elapsed": 0.01
+      },
+      {
+        "Time": "2026-10-03T22:01:46.796010526Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases",
+        "Elapsed": 1.12
+      },
+      {
+        "Time": "2026-10-03T22:01:47.662592394Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC02/reliable_source",
+        "Elapsed": 0.85
+      },
+      {
+        "Time": "2026-10-03T22:01:48.184364152Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/missing_source",
+        "Elapsed": 0.52
+      },
+      {
+        "Time": "2026-10-03T22:01:48.735610233Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/foreign_job",
+        "Elapsed": 0.55
+      },
+      {
+        "Time": "2026-10-03T22:01:48.735622508Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases",
+        "Elapsed": 1.94
+      }
+    ],
+    "command_contract": {
+      "race": true,
+      "count": 1,
+      "go_timeout": "120s",
+      "process_timeout_seconds": 180,
+      "tags": "r5protocol",
+      "package": "./internal/store/postgres"
+    },
+    "source_state": "work in progress (not final)"
+  },
+  {
+    "name": "repaired-targets-2",
+    "terminal": "fail",
+    "package_elapsed_seconds": 7.659,
+    "first_event_at": "2026-10-03T22:02:38.95105177Z",
+    "last_event_at": "2026-10-03T22:02:46.609872149Z",
+    "raw_log_sha256": "0b731643ba669d30f90f6697480569b7fc685164ff67737dadd72e45963ff3bf",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test_terminals": [
+      {
+        "Time": "2026-10-03T22:02:39.668156644Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities/BC02/trusted_structured_source",
+        "Elapsed": 0.66
+      },
+      {
+        "Time": "2026-10-03T22:02:40.263122953Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities/BC03/missing_source",
+        "Elapsed": 0.59
+      },
+      {
+        "Time": "2026-10-03T22:02:40.878234307Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities/BC03/same_id_foreign_source",
+        "Elapsed": 0.62
+      },
+      {
+        "Time": "2026-10-03T22:02:40.878252235Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities",
+        "Elapsed": 1.88
+      },
+      {
+        "Time": "2026-10-03T22:02:41.469728106Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolDurableBCCSnapshotV2/missing_source",
+        "Elapsed": 0.59
+      },
+      {
+        "Time": "2026-10-03T22:02:42.04860345Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolDurableBCCSnapshotV2/same_id_foreign_source",
+        "Elapsed": 0.58
+      },
+      {
+        "Time": "2026-10-03T22:02:42.048615238Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolDurableBCCSnapshotV2",
+        "Elapsed": 1.17
+      },
+      {
+        "Time": "2026-10-03T22:02:42.683573978Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCIdentityV2/tenant",
+        "Elapsed": 0.63
+      },
+      {
+        "Time": "2026-10-03T22:02:43.295999677Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCIdentityV2/zone",
+        "Elapsed": 0.61
+      },
+      {
+        "Time": "2026-10-03T22:02:43.933194072Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCIdentityV2/mailbox",
+        "Elapsed": 0.64
+      },
+      {
+        "Time": "2026-10-03T22:02:43.933207178Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCIdentityV2",
+        "Elapsed": 1.88
+      },
+      {
+        "Time": "2026-10-03T22:02:44.779906378Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_list",
+        "Elapsed": 0.01
+      },
+      {
+        "Time": "2026-10-03T22:02:44.786804739Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_detail",
+        "Elapsed": 0.01
+      },
+      {
+        "Time": "2026-10-03T22:02:44.794427207Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/submit_replay",
+        "Elapsed": 0.01
+      },
+      {
+        "Time": "2026-10-03T22:02:44.808927717Z",
+        "Action": "fail",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases",
+        "Elapsed": 0.88
+      },
+      {
+        "Time": "2026-10-03T22:02:45.437679207Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC02/reliable_source",
+        "Elapsed": 0.61
+      },
+      {
+        "Time": "2026-10-03T22:02:46.019916846Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/missing_source",
+        "Elapsed": 0.58
+      },
+      {
+        "Time": "2026-10-03T22:02:46.60424721Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/foreign_job",
+        "Elapsed": 0.59
+      },
+      {
+        "Time": "2026-10-03T22:02:46.604423808Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases",
+        "Elapsed": 1.8
+      }
+    ],
+    "command_contract": {
+      "race": true,
+      "count": 1,
+      "go_timeout": "120s",
+      "process_timeout_seconds": 180,
+      "tags": "r5protocol",
+      "package": "./internal/store/postgres"
+    },
+    "source_state": "work in progress (not final)"
+  },
+  {
+    "name": "rc02-final",
+    "terminal": "pass",
+    "package_elapsed_seconds": 1.7770000000000001,
+    "first_event_at": "2026-10-03T22:03:10.398652952Z",
+    "last_event_at": "2026-10-03T22:03:12.175258467Z",
+    "raw_log_sha256": "fc91da4df3cc638976470913d5a1f961d02e16b8700fcc9569348024e0baccc0",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test_terminals": [
+      {
+        "Time": "2026-10-03T22:03:11.132005911Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_list",
+        "Elapsed": 0.01
+      },
+      {
+        "Time": "2026-10-03T22:03:11.13980135Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_detail",
+        "Elapsed": 0.01
+      },
+      {
+        "Time": "2026-10-03T22:03:11.148578197Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/submit_replay",
+        "Elapsed": 0.01
+      },
+      {
+        "Time": "2026-10-03T22:03:11.170938012Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyReplaySharedCases",
+        "Elapsed": 0.72
+      }
+    ],
+    "command_contract": {
+      "race": true,
+      "count": 1,
+      "go_timeout": "120s",
+      "process_timeout_seconds": 180,
+      "tags": "r5protocol",
+      "package": "./internal/store/postgres"
+    },
+    "source_state": "final test source 6138113c1896cb810db567605154b5023f0340de"
+  },
+  {
+    "name": "bcc-observation-final",
+    "terminal": "pass",
+    "package_elapsed_seconds": 4.882,
+    "first_event_at": "2026-10-03T22:03:25.646002892Z",
+    "last_event_at": "2026-10-03T22:03:30.527850065Z",
+    "raw_log_sha256": "6c94361ac6821821059fbf26968e6d667e0ed1ca12e9c723e1cb02b0bbb1909a",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test_terminals": [
+      {
+        "Time": "2026-10-03T22:03:26.587022863Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC02/reliable_source",
+        "Elapsed": 0.88
+      },
+      {
+        "Time": "2026-10-03T22:03:27.993089525Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/missing_source",
+        "Elapsed": 1.41
+      },
+      {
+        "Time": "2026-10-03T22:03:29.512596698Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/foreign_job",
+        "Elapsed": 1.52
+      },
+      {
+        "Time": "2026-10-03T22:03:29.512799967Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCObservationSharedCases",
+        "Elapsed": 3.82
+      }
+    ],
+    "command_contract": {
+      "race": true,
+      "count": 1,
+      "go_timeout": "120s",
+      "process_timeout_seconds": 180,
+      "tags": "r5protocol",
+      "package": "./internal/store/postgres"
+    },
+    "source_state": "final test source 6138113c1896cb810db567605154b5023f0340de"
+  },
+  {
+    "name": "bcc-capability-final",
+    "terminal": "pass",
+    "package_elapsed_seconds": 4.245,
+    "first_event_at": "2026-10-03T22:03:27.159548838Z",
+    "last_event_at": "2026-10-03T22:03:31.40408096Z",
+    "raw_log_sha256": "4662a4cb2f2fbfe1fb23d69ed03dfb343bff598f1f2fb44b1792a1f818e8aba2",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test_terminals": [
+      {
+        "Time": "2026-10-03T22:03:28.585740728Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities/BC02/trusted_structured_source",
+        "Elapsed": 1.37
+      },
+      {
+        "Time": "2026-10-03T22:03:29.530364269Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities/BC03/missing_source",
+        "Elapsed": 0.94
+      },
+      {
+        "Time": "2026-10-03T22:03:30.399088502Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities/BC03/same_id_foreign_source",
+        "Elapsed": 0.87
+      },
+      {
+        "Time": "2026-10-03T22:03:30.399107045Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5LegacyBCCContractCapabilities",
+        "Elapsed": 3.19
+      }
+    ],
+    "command_contract": {
+      "race": true,
+      "count": 1,
+      "go_timeout": "120s",
+      "process_timeout_seconds": 180,
+      "tags": "r5protocol",
+      "package": "./internal/store/postgres"
+    },
+    "source_state": "final test source 6138113c1896cb810db567605154b5023f0340de"
+  },
+  {
+    "name": "new-domains-final",
+    "terminal": "pass",
+    "package_elapsed_seconds": 6.097,
+    "first_event_at": "2026-10-03T22:03:28.634481199Z",
+    "last_event_at": "2026-10-03T22:03:34.73190103Z",
+    "raw_log_sha256": "7a4bc0799a759a4d4e1f9746feb52ea574b52e4b53135f14855568b84e92b765",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test_terminals": [
+      {
+        "Time": "2026-10-03T22:03:29.541277203Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolDurableBCCSnapshotV2/missing_source",
+        "Elapsed": 0.86
+      },
+      {
+        "Time": "2026-10-03T22:03:30.407174195Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolDurableBCCSnapshotV2/same_id_foreign_source",
+        "Elapsed": 0.87
+      },
+      {
+        "Time": "2026-10-03T22:03:30.407192196Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolDurableBCCSnapshotV2",
+        "Elapsed": 1.73
+      },
+      {
+        "Time": "2026-10-03T22:03:31.029924315Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCIdentityV2/tenant",
+        "Elapsed": 0.62
+      },
+      {
+        "Time": "2026-10-03T22:03:31.662268564Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCIdentityV2/zone",
+        "Elapsed": 0.63
+      },
+      {
+        "Time": "2026-10-03T22:03:32.322020401Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCIdentityV2/mailbox",
+        "Elapsed": 0.66
+      },
+      {
+        "Time": "2026-10-03T22:03:32.3220385Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5ProtocolLegacyBCCIdentityV2",
+        "Elapsed": 1.92
+      },
+      {
+        "Time": "2026-10-03T22:03:33.727220662Z",
+        "Action": "pass",
+        "Package": "tabmail/internal/store/postgres",
+        "Test": "TestR5SentRecipientSnapshotUpgradeV16BoundedTrustedBackfill",
+        "Elapsed": 1.4
+      }
+    ],
+    "command_contract": {
+      "race": true,
+      "count": 1,
+      "go_timeout": "120s",
+      "process_timeout_seconds": 180,
+      "tags": "r5protocol",
+      "package": "./internal/store/postgres"
+    },
+    "source_state": "final test source 6138113c1896cb810db567605154b5023f0340de"
+  }
+]

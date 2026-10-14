@@ -1,0 +1,19 @@
+{
+  "actual_status": 200,
+  "body_bytes": 73,
+  "body_sha256": "a4eedd4c3da7e0d742474b24260968414f7041130a10e079801714942bf31a9b",
+  "capture_id": "company.events.ready",
+  "complete_ready_frame": true,
+  "headers": {
+    "Cache-Control": "private, no-store, no-transform",
+    "Content-Type": "text/event-stream",
+    "X-Accel-Buffering": "no"
+  },
+  "method": "GET",
+  "parsed_field_names": [
+    "tenant_id"
+  ],
+  "route": "/api/v1/company/events",
+  "tenant_value_private_not_published": true,
+  "wire_auth_current_scope_not_public_payload_dump": true
+}

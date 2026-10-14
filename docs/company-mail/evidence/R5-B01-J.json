@@ -1,0 +1,469 @@
+{
+  "batch": "B01-J",
+  "status": "validation_complete",
+  "start_head": "ee9a1cdbcbc27c5557c1f220ae2adb00a94fa315",
+  "tested_baseline": "5e4b9df22041ac0bfda570901d114166101067b6",
+  "tested_candidate": "01937522ebaa299d1c816085ef1678d5c2e62a03",
+  "branch": "test/company-mail-r5-b01j-index-validation",
+  "comparison": {
+    "baseline": {
+      "process_exit": 1,
+      "pass": 6,
+      "fail": 4,
+      "skip": 0,
+      "source_files": 546,
+      "log_sha256": "7bdf34557fa1e69e3eb9094fd98c192923591e69857527de8976bddcfc93d3ac",
+      "test_lifecycles": {
+        "TestR5ReadCachedContentRejectsNewRequestsAfterRevoke": [
+          "run",
+          "pass"
+        ],
+        "TestR5IndexSourceLockPrecedesJob": [
+          "run",
+          "fail"
+        ],
+        "TestR5ReadWaitingIdentityReloadRejectsFrozenActor": [
+          "run",
+          "pass"
+        ],
+        "TestR5IndexCompleteRechecksAfterDocumentWait": [
+          "run",
+          "fail"
+        ],
+        "TestR5ReadAdminAndWrongMailboxDoNotOpenObject": [
+          "run",
+          "pass"
+        ],
+        "TestR5IndexRejectsChangedSourceAndStaleToken": [
+          "run",
+          "pass"
+        ],
+        "TestR5IndexCancelledCompletionReleasesLocks": [
+          "run",
+          "pass"
+        ],
+        "TestR5IndexFailRechecksAfterJobWait": [
+          "run",
+          "fail"
+        ],
+        "TestR5IndexDocumentFailureRollsBackCompletion": [
+          "run",
+          "pass"
+        ],
+        "TestR5IndexCompleteRechecksAfterJobWait": [
+          "run",
+          "fail"
+        ]
+      }
+    },
+    "candidate": {
+      "process_exit": 0,
+      "pass": 10,
+      "fail": 0,
+      "skip": 0,
+      "source_files": 546,
+      "log_sha256": "43baca99669f00389e8f358b503006092a30003550323f2512948a5bfd4a32fc",
+      "test_lifecycles": {
+        "TestR5ReadCachedContentRejectsNewRequestsAfterRevoke": [
+          "run",
+          "pass"
+        ],
+        "TestR5IndexSourceLockPrecedesJob": [
+          "run",
+          "pass"
+        ],
+        "TestR5ReadWaitingIdentityReloadRejectsFrozenActor": [
+          "run",
+          "pass"
+        ],
+        "TestR5IndexCompleteRechecksAfterDocumentWait": [
+          "run",
+          "pass"
+        ],
+        "TestR5ReadAdminAndWrongMailboxDoNotOpenObject": [
+          "run",
+          "pass"
+        ],
+        "TestR5IndexRejectsChangedSourceAndStaleToken": [
+          "run",
+          "pass"
+        ],
+        "TestR5IndexCancelledCompletionReleasesLocks": [
+          "run",
+          "pass"
+        ],
+        "TestR5IndexFailRechecksAfterJobWait": [
+          "run",
+          "pass"
+        ],
+        "TestR5IndexDocumentFailureRollsBackCompletion": [
+          "run",
+          "pass"
+        ],
+        "TestR5IndexCompleteRechecksAfterJobWait": [
+          "run",
+          "pass"
+        ]
+      }
+    }
+  },
+  "artifacts": {
+    "R5-B01-J-BASELINE.jsonl": {
+      "sha256": "7bdf34557fa1e69e3eb9094fd98c192923591e69857527de8976bddcfc93d3ac",
+      "bytes": 9651,
+      "raw_sha256": "7bdf34557fa1e69e3eb9094fd98c192923591e69857527de8976bddcfc93d3ac",
+      "complete_invocation": true,
+      "successful": false
+    },
+    "R5-B01-J-CANDIDATE.jsonl": {
+      "sha256": "43baca99669f00389e8f358b503006092a30003550323f2512948a5bfd4a32fc",
+      "bytes": 9754,
+      "raw_sha256": "43baca99669f00389e8f358b503006092a30003550323f2512948a5bfd4a32fc",
+      "complete_invocation": true,
+      "successful": true
+    },
+    "R5-B01-J-FIRST-BACKEND.jsonl.gz": {
+      "sha256": "9a6647f48a3a66919900e6d472b086f82aa7e2c798795792abd463882d4ebb84",
+      "bytes": 39808,
+      "raw_sha256": "e2c65686410e3f7243f46ba42f91e3668b1f69796e4ae90f3b786bd4abd3ccfd",
+      "complete_invocation": true,
+      "successful": false
+    },
+    "R5-B01-J-RETRY-TIMEOUT.jsonl.gz": {
+      "bytes": 40213,
+      "sha256": "757a5f7b468abd581c1fc74297db6829789f646ae1b235c5403812ca088bf07a",
+      "raw_sha256": "e949ddfbc22c31db473bbd525ec69c165c533ff900436cf3f12a24d35ef04a59",
+      "complete_invocation": true,
+      "successful": false
+    },
+    "R5-B01-J-BACKEND-600.jsonl.gz": {
+      "bytes": 43960,
+      "sha256": "702335dc345d38c57f413ae2b31bbbac0a6ee1b75a6ca18c3996b7f39b72cf14",
+      "raw_sha256": "193ba6ed6dfb79ecef8c8a7cc1ec60c1029fb8301109eb56cba6a4ac4044169e",
+      "complete_invocation": true,
+      "successful": true
+    },
+    "R5-B01-J-FOCUSED-INTERRUPTED.jsonl.gz": {
+      "bytes": 4676,
+      "sha256": "aa833694d5b8b19c91f71b3363f3b3bacf61e56d59fcc1eaf9dd59b3ea1c0eb4",
+      "raw_sha256": "7427d32983b6a55a38cdf8cea175e24b66a47ece36b7868b7cd7d6139805cc77",
+      "complete_invocation": false,
+      "successful": false
+    },
+    "R5-B01-J-FOCUSED.jsonl.gz": {
+      "bytes": 12788,
+      "sha256": "763965ccc310a3649ccddd08fc32b2077272aeb644cae1a287634a34ba04d4c0",
+      "raw_sha256": "5b0c484395d0358be7f5c1f8a9fd19c89692c149bc950a5d9d192a16cf95ad20",
+      "complete_invocation": true,
+      "successful": true
+    },
+    "R5-B01-J-AUDIT.jsonl": {
+      "bytes": 8053,
+      "sha256": "691ac5932f94a4275c88353ce61263b7271a2c5af330bb8809112d3bda8ded94",
+      "raw_sha256": "691ac5932f94a4275c88353ce61263b7271a2c5af330bb8809112d3bda8ded94",
+      "complete_invocation": true,
+      "successful": false
+    },
+    "R5-B01-J-BACKEND.jsonl.gz": {
+      "bytes": 44038,
+      "sha256": "554f9ad266dbac7063e703ad0ac871ed303b7ed68a357f4d833c85bc29c57671",
+      "raw_sha256": "76eaff493b0ca90e72cd2a3904d278b6a68678e5fd37353269348f9e54d145ac",
+      "complete_invocation": true,
+      "successful": true
+    }
+  },
+  "production_changes_this_round": false,
+  "first_full_attempt": {
+    "go_exit": 1,
+    "binary_timeout_seconds": 180,
+    "started": 515,
+    "passed": 513,
+    "skipped": 1,
+    "unfinished": 1,
+    "assertion_failures": 0,
+    "completed_backend_gate": false
+  },
+  "full_retry": {
+    "binary_timeout_seconds": 600,
+    "status": "failed_binary_timeout",
+    "business_deadlines_changed": false,
+    "test_source_changed": false,
+    "process_exit_code": 1,
+    "passed": 508,
+    "skipped": 1,
+    "unfinished": 1,
+    "assertion_failures": 0
+  },
+  "environment": {
+    "go": "1.25.7",
+    "postgres": "16.15",
+    "internal_network": true,
+    "host_ports": false,
+    "read_only_module_cache": true,
+    "downloaded_dependencies": false
+  },
+  "resources": {
+    "session": "wc_sess_Ce0Msimzw3lJRkd8",
+    "network": {
+      "name": "tabmail-r5-b01j-ce0msimz",
+      "id": "d74523a06dfe6f93c43d64390e664c14470e5d2288c578374ece592485da4c65"
+    },
+    "pg": {
+      "name": "tabmail-r5-b01j-ce0msimz-pg",
+      "id": "2e0975d4dffaef1fe9b67186082e91876229c47f596218525b9301f13309bdf6"
+    },
+    "runner": {
+      "name": "tabmail-r5-b01j-ce0msimz-runner",
+      "id": "b37c86eb6f811db41cb5d26b5626f6e9975c96671ccfb28dc983ecf8bc17e19a"
+    }
+  },
+  "cleanup": {
+    "runner": {
+      "id": "b37c86eb6f811db41cb5d26b5626f6e9975c96671ccfb28dc983ecf8bc17e19a",
+      "name": "tabmail-r5-b01j-ce0msimz-runner",
+      "ownership_verified": true,
+      "removed": true
+    },
+    "pg": {
+      "id": "2e0975d4dffaef1fe9b67186082e91876229c47f596218525b9301f13309bdf6",
+      "name": "tabmail-r5-b01j-ce0msimz-pg",
+      "ownership_verified": true,
+      "removed": true
+    },
+    "network": {
+      "id": "d74523a06dfe6f93c43d64390e664c14470e5d2288c578374ece592485da4c65",
+      "removed": true
+    },
+    "anonymous_postgres_volumes_removed": [
+      "b01e00d06c61be1957a988403b0bc1ea4aef89dd63c47b6a511bffc0a7248318"
+    ],
+    "all_batch_resources_removed": true,
+    "global_restart": false,
+    "other_projects_untouched": true,
+    "initial_probe_correction": "docker top required a PID column; initial probe failed before removal; corrected to pid,comm"
+  },
+  "limitations": [
+    "No frontend, shipping browser, GitHub Actions, current dependency audit or S/M performance in this round.",
+    "P0-070/P0-080 and original A01-A07 remain unclosed."
+  ],
+  "resumed_from_head": "ee9a1cdbcbc27c5557c1f220ae2adb00a94fa315",
+  "resume_session": "wc_sess_yZg-InuhRAV8aEep",
+  "full_backend": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 2660,
+    "log_sha256": "76eaff493b0ca90e72cd2a3904d278b6a68678e5fd37353269348f9e54d145ac",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 54,
+    "manifest_sha256": "2bb7316420a53c954222ec182dcdf2e87b3f42e2fb00d37ccec8a477247e6673",
+    "packages": 48,
+    "process_exit_code": 0,
+    "source_sha": "01937522ebaa299d1c816085ef1678d5c2e62a03",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 589,
+    "tests_skipped": 1,
+    "tests_started": 590,
+    "package_timeout_seconds": 180
+  },
+  "full_backend_600": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 2660,
+    "log_sha256": "193ba6ed6dfb79ecef8c8a7cc1ec60c1029fb8301109eb56cba6a4ac4044169e",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 54,
+    "manifest_sha256": "2bb7316420a53c954222ec182dcdf2e87b3f42e2fb00d37ccec8a477247e6673",
+    "packages": 48,
+    "process_exit_code": 0,
+    "source_sha": "01937522ebaa299d1c816085ef1678d5c2e62a03",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 589,
+    "tests_skipped": 1,
+    "tests_started": 590
+  },
+  "focused": {
+    "unique_tests": 40,
+    "runs_per_test": 3,
+    "passes": 120,
+    "failures_or_skips": 0,
+    "test_counts": {
+      "TestR5AttachmentFinishRejectsConcurrentRemoval": 3,
+      "TestR5AttachmentFinishRejectsExpiryAfterWait": 3,
+      "TestR5AttachmentFinishUsesTimeAfterLockWait": 3,
+      "TestR5AttachmentFinishOnlyOneChecksumWins": 3,
+      "TestR5AttachmentFinishOrdersMailboxRevocation": 3,
+      "TestR5AttachmentFinishCanonicalChecksumAndReplay": 3,
+      "TestR5AttachmentFinishCancellationRollsBack": 3,
+      "TestR5AttachmentFinishRejectsNonHexChecksum": 3,
+      "TestR5ConcurrencyR01EnqueueOffboardNoAttachmentCycle": 3,
+      "TestR5ConcurrencyR03EnqueueOffboardNoTenantFKCycle": 3,
+      "TestR5ConcurrencyR02DraftCannotCommitAfterCompletedRevoke": 3,
+      "TestR5ConcurrencyIndependentSubmissionsShareParentLock": 3,
+      "TestR5IndexCompleteRechecksAfterJobWait": 3,
+      "TestR5IndexFailRechecksAfterJobWait": 3,
+      "TestR5IndexCompleteRechecksAfterDocumentWait": 3,
+      "TestR5IndexSourceLockPrecedesJob": 3,
+      "TestR5IndexDocumentFailureRollsBackCompletion": 3,
+      "TestR5IndexCancelledCompletionReleasesLocks": 3,
+      "TestR5IndexRejectsChangedSourceAndStaleToken": 3,
+      "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack": 3,
+      "TestR5IngressAuditFailureRollsBackCheckpointAndQuota": 3,
+      "TestR5IngressAcceptanceRollsBackEarlierTarget": 3,
+      "TestR5LockMapExistingDraftCASAvoidsTenantLock": 3,
+      "TestR5LockMapDraftAuthorizationWaitsForMailboxFence": 3,
+      "TestR5LockMapDraftUserFenceOrdersSuspension": 3,
+      "TestR5LockMapRefreshFamilyThenUserThenToken": 3,
+      "TestR5LockMapEnqueueParentAndUserBeforeAttachments": 3,
+      "TestR5ReadCachedContentRejectsNewRequestsAfterRevoke": 3,
+      "TestR5ReadAdminAndWrongMailboxDoNotOpenObject": 3,
+      "TestR5ReadWaitingIdentityReloadRejectsFrozenActor": 3,
+      "TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal": 3,
+      "TestR5ReferenceGCRollsBackIfOrphanRegistrationFails": 3,
+      "TestR5ReferenceGCKeepsSentPinAfterQueueCleanup": 3,
+      "TestR5ReferenceObjectCallbackCancellationReleasesKey": 3,
+      "TestR5ReferenceObjectGCWaitsForCommittedMessage": 3,
+      "TestR5ReservationOrdersMailboxRevocation": 3,
+      "TestR5ReservationWaitsForMailboxBeforeBudget": 3,
+      "TestR5ReservationConcurrentBudgetIsAtomic": 3,
+      "TestR5ReservationOtherUploaderRemainsIndependent": 3,
+      "TestR5ReservationCancellationReleasesLocksAndBudget": 3
+    }
+  },
+  "original_audit": {
+    "status": "baseline_reproduced",
+    "product_fixed": false,
+    "reproduced": [
+      "A01",
+      "A02",
+      "A03",
+      "A04",
+      "A05",
+      "A06",
+      "A07"
+    ],
+    "errors": [],
+    "process_exit_code": 1,
+    "log_sha256": "691ac5932f94a4275c88353ce61263b7271a2c5af330bb8809112d3bda8ded94",
+    "tests_expected": 7,
+    "layer": "db",
+    "source_sha": "01937522ebaa299d1c816085ef1678d5c2e62a03",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-timeout=180s",
+      "-tags=r5audit",
+      "-run",
+      "^TestR5AuditA0[1-7]",
+      "./internal/store/postgres"
+    ],
+    "test_source_sha256": "d935efbf1e9007928fc50e92fb152f2c1de161359c9fedffd97883a257add099",
+    "evidence_boundary": "Real PostgreSQL and loopback HTTP; no rendered components in this layer."
+  },
+  "checks": {
+    "resume-final/build": {
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "resume-final/vet": {
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "resume-final/backend": {
+      "exit": 0,
+      "stdout_sha256": "193ba6ed6dfb79ecef8c8a7cc1ec60c1029fb8301109eb56cba6a4ac4044169e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "resume-tail/focused": {
+      "exit": 0,
+      "stdout_sha256": "5b0c484395d0358be7f5c1f8a9fd19c89692c149bc950a5d9d192a16cf95ad20",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "resume-tail/python": {
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "651558fb5f99cb7d044eb29d1d5a7c5cfcd17347c954af76be52bdc0948ce93d"
+    },
+    "resume-tail/dto": {
+      "exit": 0,
+      "stdout_sha256": "27ceb6348fd81e2ad07112c0a09cfaa0a60f5a41b17671072e34786c9ee9f37b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "python_pass": 57,
+  "dto": "Contract check passed for 16 shared models and 32 company DTOs.",
+  "runner_lifetime_interruption": {
+    "configured_command": [
+      "sleep",
+      "3600"
+    ],
+    "started_at": "2026-09-28T13:31:01.732624254Z",
+    "finished_at": "2026-09-28T14:31:08.296607001Z",
+    "container_exit": 0,
+    "exec_exit": 137,
+    "completed_backend_before_exit": true,
+    "partial_focused_counted": false,
+    "restarted_only_owned_test_runner": true
+  },
+  "source_integrity": {
+    "candidate_files_verified_before_and_after": 546,
+    "candidate_manifest_sha256": "7d845349e88077edb37bea9832ef57f587fc9a50296f9fba155f392390bab1ab",
+    "baseline_plus_same_tests_verified": 546,
+    "post_candidate_commits_documentation_only": [
+      "README.md",
+      "docs/company-mail/R5-B01-H-VALIDATION.md",
+      "docs/company-mail/R5-B01-I-VALIDATION.md",
+      "docs/company-mail/R5-TODO.md",
+      "docs/company-mail/R5-TRANSACTIONS.md",
+      "docs/company-mail/evidence/R5-B01-H-STATIC.json"
+    ],
+    "runtime_worktree_matches_candidate": true,
+    "historical_migrations_unchanged": 13,
+    "candidate_test_source_unchanged": true
+  },
+  "not_run": [
+    "frontend Vitest/TypeScript/lint/build",
+    "shipping-image browser",
+    "GitHub Actions",
+    "current dependency audit",
+    "S/M performance",
+    "A01/A02 original React editor integration"
+  ],
+  "retained_host_evidence": "/var/folders/g6/80ckk0w918xcr2c7j17wc0jc0000gn/T/tabmail-r5-b01j-i9r6yto1/resumed-complete",
+  "observed_at": "2026-09-28T14:37:03.924083+00:00",
+  "runtime_file_sha256": {
+    "internal/store/postgres/mail_content.go": "f8c1718069a434b93fd320e72b3796238d38957fd698744ad1205b0cf839e198",
+    "internal/store/postgres/r5_index_boundary_test.go": "f7d4f40fa338a3cd0e30dfed3839e67a20bd59c94625119414fc229166a326a9",
+    "internal/store/postgres/r5_read_boundary_test.go": "852c2c627574392d4e9cf0209a75aa991949a27d9d2442d782dd427d03c91c59",
+    "scripts/required_go_tests.json": "2bb7316420a53c954222ec182dcdf2e87b3f42e2fb00d37ccec8a477247e6673"
+  },
+  "tested_candidate_tree": "3cf3d7ac738b14161961d2057d7aa1d5c6e2817e",
+  "task_integrity": {
+    "tasks": 171,
+    "completed": 6,
+    "edges": 395,
+    "local_links": 60,
+    "dag": "pass"
+  },
+  "delivery_scope": "local documentation and retained validation evidence only; no new production/test/manifest changes"
+}

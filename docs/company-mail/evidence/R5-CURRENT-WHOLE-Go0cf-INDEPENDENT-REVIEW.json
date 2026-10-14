@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "verdict": "ACCEPT_AUTHENTIC_BOUNDED_WHOLE_GO_FAILED_ATTEMPT_NOT_PRODUCT_OR_FULL_CI_PASS",
+  "scope": "独立只读审计 raw、冻结源码与安全归档；未运行 Go/test/build/PG，未实现修复，未改主 checkout、冻结源或原 raw。",
+  "source": {
+    "source_sha": "0cf5eaa15575ea3b1cb8ef72c18777a07b6e37ca",
+    "closure_sha256": "53201fc24ef67211ffd4e8b1ec4c30d4305ab6d403a9a251b87bf7022499896c",
+    "identity": "canonical sorted compact manifest SHA1，不是 Git HEAD",
+    "files": 1229,
+    "snapshot": "/private/tmp/tm-r5wholebackend-current-prepare.q9k55v42/src",
+    "independent_verification": "canonical manifest SHA1/SHA256 重算一致；runtime receipt 与 preparation receipt 完全相等；13 个此次实际审计正文 SHA256 均匹配 manifest。",
+    "not_repeated": "未重新 hash 全部 1229 文件或外部 cache；all1229 unchanged 依原执行后 source-postcheck-after-runtime 回执。",
+    "local_compile_inputs": 510,
+    "local_fork_inputs": 34,
+    "embed_inputs": 22,
+    "selected510_manifest_pins_independently_all_match": true
+  },
+  "actual": {
+    "command": "go test -json -race -count=1 -timeout=180s ./...",
+    "GOMAXPROCS": 2,
+    "GOFLAGS": "-mod=readonly -p=1",
+    "CGO_ENABLED": 1,
+    "GOTOOLCHAIN": "local",
+    "GOWORK": "off",
+    "Go": "1.25.7",
+    "raw_sha256": "205a3d91c9dec9f6f87d2db9a5efdb0dd889be503affce540fd4ba0c80c36e2c",
+    "events": 32829,
+    "exit": 1,
+    "started": 8021,
+    "pass": 7993,
+    "fail_events": 6,
+    "failed_leaves": 4,
+    "failure_parents": 2,
+    "legal_skip": 1,
+    "unfinished": 21,
+    "terminal_packages": 51,
+    "package_pass": 38,
+    "package_no_tests_skip": 12,
+    "package_fail": 1,
+    "PG_elapsed": 180.693,
+    "declared": 908,
+    "required": 907,
+    "declared_tops_not_started": 128,
+    "PG_whitelist_pause": 19,
+    "PG_whitelist_cont": 0,
+    "original247_missing_or_not_passed": 180,
+    "fresh907_missing_or_not_passed": 395,
+    "notrun_distinction": "395 包含 failed PG package 中已 PASS 的 mandatory；不是395未跑。独立 raw/declaration 差集128未启动。",
+    "tail": "ProfileCreate/admin-stale-super-hint 开始约0秒被 package 整体180秒 alarm 截断；stack 在 seed/migrate，不是该case独跑180秒死锁。",
+    "Go_wall": 330.95961689949036,
+    "original1200_with_cleanup": 336.79238080978394,
+    "outer_timeout": false
+  },
+  "cleanup": {
+    "native_stop_exit": 0,
+    "owned_PID": 53862,
+    "original_groups_gone": true,
+    "observer_joined": true,
+    "pidfile_socket_currently_absent": true,
+    "known_connections": "base0 + tm_test_39f80e35c8c84ecea01b7db0eaf28aec0，不声称 allDB0",
+    "private_cluster_retained": true,
+    "root_db_mode": "0700",
+    "samples": 1500,
+    "known_samples": 1500,
+    "query_exit0": 1500,
+    "observed_peak_lowerbound": 17,
+    "distinct_temp_DBs": 531,
+    "no_hard_max_admission_or_lane2_benefit_claim": true
+  },
+  "archive": {
+    "path": "/private/tmp/tm-r5wholeGo0cf-current.y6d2weuq/CURRENT-WHOLE-Go0cf-FIRST-FAIL-evidence.tar.gz",
+    "sha256": "2963d327d4180c421b9b4852ed4fa985d05c7a5f668dcfb9b8cb3623a54d9acc",
+    "bytes": 617021,
+    "members": 83,
+    "unpackedbytes": 9838685,
+    "all_regular": true,
+    "all_payload_equal_original": true,
+    "unsafe_path_link_AppleDouble_DSStore": 0,
+    "DSN_URI_JWT": 0,
+    "kv_scan_false_positive": "initdb --auth-host=reject 并非 DSN",
+    "private_postgres_log_db_socket_not_archived": true
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "leaf": "TestR5LegacyRecipientProjectionRechecksAfterLedgerWait",
+      "raw": "r5_legacy_content_test.go:495 expected lock waiter was not observed (12.29s)",
+      "classification": "barrier query marker 过时，非已证实生产回归；高置信静态推断，原 raw 无实际 waiter PID 快照。",
+      "path": [
+        "internal/store/postgres/r5_legacy_content_test.go:468-502",
+        "internal/api/handlers/company_recovery.go:88-106",
+        "internal/app/submissions/receipts.go:90-96,148-190",
+        "internal/store/postgres/outbound_receipts.go:18-34,54-137",
+        "internal/store/postgres/r5_lock_order_test.go:19-40"
+      ],
+      "cause": "Recipients 已用安全 receipt 单 SQL 聚合，仍引用 outbound_recipients。观察器同时要求 exact blocker PID 与 query LIKE %outbound_recipients%。员工无 zone 限制冻结 SQL 拼装该表名零基 byte1751，WITH visible AS MATERIALIZED 在byte0；native config 默认 track_activity_query_size1024，启动 argv/auto.conf 未覆盖。表名在 query 观察前缀之外。",
+      "candidate": "仅该测试保留 outbound_recipients ACCESS EXCLUSIVE 和 exact blocker；marker 换可见前缀 WITH visible AS MATERIALIZED，或 test-local relation OID probe。不得扩大query_size、删等待或延长deadline。",
+      "gap": "末尾无BCC断言在新DTO下恒满足，不能只改marker。",
+      "acceptance": [
+        "真实路由先验 exact ID/tenant、安全metadata、完整3 recipient aggregate、view_content=true；即使可读也无subject/address/body/diagnostic。",
+        "持原表锁后观测真实 reader wait、操作未提前完成，再更新 sent item expiry 并 release。",
+        "完成后相同receipt和完整aggregate保留、view_content=false；独立canonical content拒绝；strict DTO隐私负断言。"
+      ],
+      "product_source_fix_indicated": false
+    },
+    {
+      "id": "F2",
+      "leaf": "TestR5OutboundReceiptKeyExpiryAfterQueryWait/attempts",
+      "raw": "r5_outbound_receipt_test.go:135 expected lock waiter was not observed (12.29s)",
+      "classification": "夹具锁了不再读取的表；不是已证实expiry漏检。",
+      "path": [
+        "internal/store/postgres/r5_outbound_receipt_test.go:106-149",
+        "internal/api/router.go:213",
+        "internal/api/handlers/outbound.go:148-169",
+        "internal/app/submissions/receipts.go:122-128",
+        "internal/store/postgres/outbound_receipts.go:54-137",
+        "internal/store/postgres/outbound_principal.go:71-88"
+      ],
+      "cause": "OutboundAttemptViews -> OutboundReceiptView，仅job attempt_count和全ledger aggregate，不再读 outbound_attempts。fixture独有attempts分支锁该旧表，不会阻塞实际reader；post-read clock_timestamp/key expiry仍由outboundPrincipalTx负责。",
+      "candidate": "attempts与detail/list一样锁真实outbound_jobs，用实际query可见marker，保 exact blocker -> DB deadline -> release ->403/404；不改生产读取去迎合旧锁。",
+      "acceptance": [
+        "三真实HTTP入口各有未过期key正对照，barrier要求reader真实等待未提前完成。",
+        "等待跨DB expires_at后release，三入口一律403/404，空200亦拒绝。",
+        "新鲜key attempts只返回safe receipt attempt_count和完整aggregate，无逐attempt协议/remote/SMTP字段。"
+      ],
+      "product_source_fix_indicated": false
+    },
+    {
+      "id": "F3",
+      "leaf": "TestR5OutboundReceiptListMatchesDetailScope",
+      "raw": "r5_outbound_receipt_test.go:207 owner receipt lifetime/content split regressed (0.28s)",
+      "classification": "旧 Subject wire 期待与安全DTO契约冲突。",
+      "path": [
+        "internal/store/postgres/r5_outbound_receipt_test.go:188-209",
+        "internal/api/handlers/outbound.go:GetJob/ListJobs",
+        "internal/app/submissions/receipts.go:90-119,148-190",
+        "internal/company/outbound_receipt.go:11-27,47-97",
+        "internal/store/postgres/outbound_receipts.go:54-97"
+      ],
+      "cause": "safe receipt 是fixture Subject；新OutboundReceipt不含subject，ProjectOutboundReceipt白名单投影。此前shared detail404/list不含ID及owner detail200均已过，实际失败只是要求被禁止的subject重新出现。",
+      "candidate": "只换该断言为严格schema和 exact ID/tenant/state/timestamps/attempt_count/全ledger正断言；保shared scope、隐私拒绝、expired content边界，不恢复subject/body。",
+      "acceptance": [
+        "owner内容过期后detail/list receipt保留，view_content=false，canonical content拒绝。",
+        "shared非owner在同样expiry后detail404且list无该ID。",
+        "live view_content=true也不得将body/subject/addresses塞回receipt。"
+      ],
+      "product_source_fix_indicated": false
+    },
+    {
+      "id": "F4",
+      "leaf": "TestR5OutboundReceiptOwnerlessKeyAndRetryScope/ownerless",
+      "raw": "r5_outbound_receipt_test.go:244 ownerless key content/receipt distinction changed (0.32s)",
+      "classification": "旧ownerless receipt Subject期待；保留fixture值作禁止泄露哨兵。",
+      "path": [
+        "internal/store/postgres/r5_outbound_receipt_test.go:211-271",
+        "internal/store/postgres/outbound_principal.go:16-88",
+        "internal/store/postgres/outbound_receipts.go:55-61,84-86",
+        "internal/store/postgres/submissions.go:59-95",
+        "internal/company/outbound_receipt.go:11-27"
+      ],
+      "cause": "Get已是200，失败是要求Subject integration receipt出现在JSON。key的j.api_key_id允许其own receipt；无effective user的content predicate为FALSE。ContentAllowed仅映射capabilities，不恢复job字段。",
+      "candidate": "ownerless子用例验证exact ID/tenant/dead、安全metadata、全ledger、view_content=false/retry=false，subject/body/address/diagnostic均禁止；保 sibling write-only retry真queue转移。",
+      "acceptance": [
+        "ownerless read key detail/list为同一safe receipt，canonical content拒绝、cross-tenant/key拒绝。",
+        "read-only retry403，write-only read403，合法retry200且持久化pending；committed receipt也不含content。",
+        "receipt/content/send三类authority继续独立。"
+      ],
+      "product_source_fix_indicated": false
+    }
+  ],
+  "adjacent_gap": {
+    "test": "TestR5OutboundReceiptListOrdersMemberFreeze",
+    "file": "internal/store/postgres/r5_outbound_receipt_test.go:179",
+    "actual": "PASS0.29s，不代表!waits分支已验证",
+    "issue": "!waits&&200&&contains Subject 在不含Subject DTO下无法发现先freeze后仍返回metadata。",
+    "candidate": "同一owner将Subject检查改基于状态/返回ID集合的拒绝断言；保reader-before-freeze200和next request401对照。此为测试false-green风险，不是新产品漏洞证明。"
+  },
+  "exclusive_write_sets": {
+    "A": [
+      "internal/store/postgres/r5_legacy_content_test.go — F1/test-local helper"
+    ],
+    "B": [
+      "internal/store/postgres/r5_outbound_receipt_test.go — F2/F3/F4及179相邻断言；须一个owner，禁止三人并改同文件"
+    ],
+    "product": "当前证据不要求生产代码/共享helper改动；修正测试若揭出真正产品回归再分配owner。"
+  },
+  "acceptance_boundary": "候选尚未实现/补跑；未来先授权新bounded真PG四target+正负隐私/expiry/能力控制，再决策freshwhole，重新冻结source。不得删断言、恢复body/subject、延180；不得改写本次FAILED、21unfinished、128unstarted。",
+  "nonclaims": [
+    "旧wrong GOMAX1 whole / dfb / 2aa9 / 27633及201historicalgaps原样保留",
+    "M-million历史fail/timeout保留",
+    "不是fullCI/P7/wholePython/npm/vet/build/Docker/benchmark171/G0green",
+    "19PGPAUSE0CONT不证明deadlock或lane2收益",
+    "本次privacy6surfaces子用例PASS仅组件证据，PGpackage仍FAIL"
+  ],
+  "evidence_root": "/private/tmp/tm-r5wholeGo0cf-current.y6d2weuq",
+  "official_source": "https://www.postgresql.org/docs/16/monitoring-stats.html",
+  "memory": "未找到相关记忆；未依赖memory事实。"
+}

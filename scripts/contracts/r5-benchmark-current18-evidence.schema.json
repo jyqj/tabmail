@@ -1,0 +1,3201 @@
+{
+  "$comment": "No runtime, benchmark, registry or original-scale authorization follows from JSON Schema conformance or a synthetic complete-shaped reference.",
+  "$defs": {
+    "admission": {
+      "additionalProperties": false,
+      "properties": {
+        "admission_schema_version": {
+          "const": 1
+        },
+        "approvals": {
+          "additionalProperties": false,
+          "properties": {
+            "evi": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "owner": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "root": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "owner",
+            "evi",
+            "root"
+          ],
+          "type": "object"
+        },
+        "approved_deadlines": {
+          "$ref": "#/$defs/approvedDeadlines"
+        },
+        "artifact_kind": {
+          "const": "r5_current18_external_admission_v1"
+        },
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "catalog_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "evidence_generation": {
+          "const": "r5_current18_fork_source_v2_parentclock_v1"
+        },
+        "method_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "method_id": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "not_after_unix_ns": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "not_before_unix_ns": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "parent_clock_descriptor_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "previous_current_S_review": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/currentSReview"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "previous_current_S_review_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "qualification_receipts": {
+          "additionalProperties": false,
+          "properties": {
+            "C18-02": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "C18-03": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "C18-05": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "C18-06": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "C18-07": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "C18-09": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "C18-02",
+            "C18-03",
+            "C18-05",
+            "C18-06",
+            "C18-07",
+            "C18-09"
+          ],
+          "type": "object"
+        },
+        "scale": {
+          "enum": [
+            "tool_only",
+            "S",
+            "M"
+          ]
+        },
+        "source_identity_kind": {
+          "const": "policy_bound_local_input_superset_sha1_v2"
+        },
+        "source_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_policy": {
+          "const": "r5_current_local_inputs_v2"
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "workload_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_generation",
+        "attempt_id",
+        "scale",
+        "source_sha",
+        "source_policy",
+        "source_identity_kind",
+        "source_manifest_sha256",
+        "method_id",
+        "method_contract_sha256",
+        "workload_contract_sha256",
+        "catalog_contract_sha256",
+        "artifact_kind",
+        "admission_schema_version",
+        "not_before_unix_ns",
+        "not_after_unix_ns",
+        "approved_deadlines",
+        "approvals",
+        "qualification_receipts",
+        "previous_current_S_review_sha256",
+        "previous_current_S_review",
+        "parent_clock_descriptor_sha256"
+      ],
+      "type": "object"
+    },
+    "approvedDeadlines": {
+      "additionalProperties": false,
+      "properties": {
+        "controller": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "go_test": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "outer_owner": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "outer_owner"
+      ],
+      "type": "object"
+    },
+    "archive": {
+      "additionalProperties": false,
+      "properties": {
+        "admission_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "archive_schema_version": {
+          "const": 1
+        },
+        "artifact_kind": {
+          "const": "r5_current18_benchmark_archive_v1"
+        },
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "catalog_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "evidence_generation": {
+          "const": "r5_current18_fork_source_v2_parentclock_v1"
+        },
+        "members": {
+          "$ref": "#/$defs/pathHashes"
+        },
+        "method_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "method_id": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "success",
+            "failed"
+          ]
+        },
+        "product_green": {
+          "const": false
+        },
+        "scale": {
+          "enum": [
+            "tool_only",
+            "S",
+            "M"
+          ]
+        },
+        "source_identity_kind": {
+          "const": "policy_bound_local_input_superset_sha1_v2"
+        },
+        "source_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_policy": {
+          "const": "r5_current_local_inputs_v2"
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "task_complete": {
+          "const": false
+        },
+        "workload_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_generation",
+        "attempt_id",
+        "scale",
+        "source_sha",
+        "source_policy",
+        "source_identity_kind",
+        "source_manifest_sha256",
+        "method_id",
+        "method_contract_sha256",
+        "workload_contract_sha256",
+        "catalog_contract_sha256",
+        "artifact_kind",
+        "archive_schema_version",
+        "outcome",
+        "members",
+        "admission_sha256",
+        "task_complete",
+        "product_green"
+      ],
+      "type": "object"
+    },
+    "build": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_kind": {
+          "const": "r5_current18_build_attestation_v1"
+        },
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "build_context": {
+          "$ref": "#/$defs/buildContext"
+        },
+        "catalog_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "compiled_binary_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "evidence_generation": {
+          "const": "r5_current18_fork_source_v2_parentclock_v1"
+        },
+        "external_inputs_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "local_inventory_is_not_external_input_attestation": {
+          "const": true
+        },
+        "method_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "method_id": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "qualification_receipt_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "root_go_mod_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "root_module": {
+          "const": "tabmail"
+        },
+        "scale": {
+          "enum": [
+            "tool_only",
+            "S",
+            "M"
+          ]
+        },
+        "selected_local_inputs": {
+          "$ref": "#/$defs/pathHashes"
+        },
+        "source_identity_kind": {
+          "const": "policy_bound_local_input_superset_sha1_v2"
+        },
+        "source_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_policy": {
+          "const": "r5_current_local_inputs_v2"
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "toolchain_binary_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "toolchain_version": {
+          "pattern": "^go1\\.\\d+\\.\\d+$",
+          "type": "string"
+        },
+        "workload_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_generation",
+        "attempt_id",
+        "scale",
+        "source_sha",
+        "source_policy",
+        "source_identity_kind",
+        "source_manifest_sha256",
+        "method_id",
+        "method_contract_sha256",
+        "workload_contract_sha256",
+        "catalog_contract_sha256",
+        "artifact_kind",
+        "qualification_receipt_sha256",
+        "root_module",
+        "root_go_mod_sha256",
+        "build_context",
+        "selected_local_inputs",
+        "external_inputs_manifest_sha256",
+        "toolchain_binary_sha256",
+        "toolchain_version",
+        "compiled_binary_sha256",
+        "local_inventory_is_not_external_input_attestation"
+      ],
+      "type": "object"
+    },
+    "buildContext": {
+      "additionalProperties": false,
+      "properties": {
+        "build_tag_sets": {
+          "const": [
+            [
+              "r5benchmark"
+            ]
+          ]
+        },
+        "cgo_enabled": {
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "go_flags": {
+          "const": ""
+        },
+        "go_work": {
+          "const": "off"
+        },
+        "goarch": {
+          "enum": [
+            "amd64",
+            "arm64"
+          ]
+        },
+        "goos": {
+          "enum": [
+            "darwin",
+            "linux",
+            "windows"
+          ]
+        },
+        "race": {
+          "const": false
+        },
+        "selection": {
+          "const": "all_local_variants_superset"
+        }
+      },
+      "required": [
+        "goos",
+        "goarch",
+        "cgo_enabled",
+        "build_tag_sets",
+        "race",
+        "go_work",
+        "go_flags",
+        "selection"
+      ],
+      "type": "object"
+    },
+    "catalog": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_kind": {
+          "const": "r5_current18_catalog_attestation_v1"
+        },
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "catalog": {
+          "$ref": "#/$defs/catalogCollections"
+        },
+        "catalog_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "database_schema_version": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "evidence_generation": {
+          "const": "r5_current18_fork_source_v2_parentclock_v1"
+        },
+        "method_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "method_id": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "migration_sha256": {
+          "$ref": "#/$defs/pathHashes"
+        },
+        "origin": {
+          "const": "actual_owned_database_after_official_New_Migrate"
+        },
+        "qualification_receipt_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "restart_catalog_unchanged": {
+          "const": true
+        },
+        "scale": {
+          "enum": [
+            "tool_only",
+            "S",
+            "M"
+          ]
+        },
+        "server_version_num": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "source_identity_kind": {
+          "const": "policy_bound_local_input_superset_sha1_v2"
+        },
+        "source_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_policy": {
+          "const": "r5_current_local_inputs_v2"
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "workload_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_generation",
+        "attempt_id",
+        "scale",
+        "source_sha",
+        "source_policy",
+        "source_identity_kind",
+        "source_manifest_sha256",
+        "method_id",
+        "method_contract_sha256",
+        "workload_contract_sha256",
+        "catalog_contract_sha256",
+        "artifact_kind",
+        "database_schema_version",
+        "origin",
+        "catalog",
+        "migration_sha256",
+        "restart_catalog_unchanged",
+        "qualification_receipt_sha256",
+        "server_version_num"
+      ],
+      "type": "object"
+    },
+    "catalogCollections": {
+      "additionalProperties": false,
+      "description": "Target C18-07 declared-full dimensions, including typmod, index readiness/validity, trigger enabled state, sequence cache/ownership and all ordinary/trigger functions. Existing historical seven-collection reference is partial and NOT runtime-ready.",
+      "properties": {
+        "columns": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "collation": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "default": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "formatted_type": {
+                "type": "string"
+              },
+              "generated": {
+                "type": "string"
+              },
+              "identity": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "nullable": {
+                "type": "string"
+              },
+              "position": {
+                "type": "integer"
+              },
+              "table": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "typmod": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "table",
+              "name",
+              "type",
+              "default",
+              "nullable",
+              "position",
+              "typmod",
+              "formatted_type",
+              "collation",
+              "identity",
+              "generated"
+            ],
+            "type": "object"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "constraints": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "columns": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "deferrable": {
+                "type": "boolean"
+              },
+              "definition": {
+                "type": "string"
+              },
+              "fk_delete_action": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "fk_match_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "fk_update_action": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "initially_deferred": {
+                "type": "boolean"
+              },
+              "name": {
+                "type": "string"
+              },
+              "referenced_columns": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "referenced_table": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "table": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "validated": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "table",
+              "name",
+              "type",
+              "definition",
+              "validated",
+              "deferrable",
+              "initially_deferred",
+              "columns",
+              "referenced_table",
+              "referenced_columns",
+              "fk_update_action",
+              "fk_delete_action",
+              "fk_match_type"
+            ],
+            "type": "object"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "functions": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "configuration": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "definition": {
+                "type": "string"
+              },
+              "identity_arguments": {
+                "type": "string"
+              },
+              "language": {
+                "type": "string"
+              },
+              "leakproof": {
+                "type": "boolean"
+              },
+              "name": {
+                "type": "string"
+              },
+              "parallel": {
+                "type": "string"
+              },
+              "return_type": {
+                "type": "string"
+              },
+              "schema": {
+                "type": "string"
+              },
+              "security_definer": {
+                "type": "boolean"
+              },
+              "strict": {
+                "type": "boolean"
+              },
+              "volatility": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "schema",
+              "name",
+              "identity_arguments",
+              "return_type",
+              "language",
+              "definition",
+              "security_definer",
+              "volatility",
+              "strict",
+              "parallel",
+              "leakproof",
+              "configuration"
+            ],
+            "type": "object"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "indexes": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "definition": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "ready": {
+                "type": "boolean"
+              },
+              "table": {
+                "type": "string"
+              },
+              "valid": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "table",
+              "name",
+              "definition",
+              "valid",
+              "ready"
+            ],
+            "type": "object"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "sequences": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "cache": {
+                "type": "integer"
+              },
+              "cycle": {
+                "type": "boolean"
+              },
+              "increment": {
+                "type": "integer"
+              },
+              "max": {
+                "type": "integer"
+              },
+              "min": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "owner_column": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "owner_table": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "ownership_dependency_kind": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "start": {
+                "type": "integer"
+              },
+              "type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "type",
+              "start",
+              "min",
+              "max",
+              "increment",
+              "cycle",
+              "cache",
+              "owner_table",
+              "owner_column",
+              "ownership_dependency_kind"
+            ],
+            "type": "object"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "tables": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "forced_rls": {
+                "type": "boolean"
+              },
+              "rls": {
+                "type": "boolean"
+              },
+              "table": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "table",
+              "rls",
+              "forced_rls"
+            ],
+            "type": "object"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "trigger_functions": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "definition": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "definition"
+            ],
+            "type": "object"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "triggers": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "deferrable": {
+                "type": "boolean"
+              },
+              "definition": {
+                "type": "string"
+              },
+              "enabled": {
+                "type": "string"
+              },
+              "function": {
+                "type": "string"
+              },
+              "initially_deferred": {
+                "type": "boolean"
+              },
+              "name": {
+                "type": "string"
+              },
+              "table": {
+                "type": "string"
+              },
+              "type_bits": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "table",
+              "name",
+              "function",
+              "definition",
+              "enabled",
+              "deferrable",
+              "initially_deferred",
+              "type_bits"
+            ],
+            "type": "object"
+          },
+          "minItems": 0,
+          "type": "array"
+        }
+      },
+      "required": [
+        "columns",
+        "constraints",
+        "functions",
+        "indexes",
+        "sequences",
+        "tables",
+        "trigger_functions",
+        "triggers"
+      ],
+      "type": "object"
+    },
+    "checkpoint": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_claim_joined": {
+          "$ref": "#/$defs/preparation"
+        },
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "claim_requested_limit": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "database_schema_version": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "explain_only_not_actual_claim_latency": {
+          "const": true
+        },
+        "maintenance": {
+          "const": "no_explicit_analyze_or_planner_or_durability_override"
+        },
+        "method_id": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "observed_attempts_gt1": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "observed_durable_source_bound_ready": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "observed_failed": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "observed_jobs_total": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "observed_pending": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "observed_processing": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "observed_ready_jobs": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "origin": {
+          "const": "captured_preparation_claim_same_parameters_observed_heap"
+        },
+        "parameters_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "parent_clock_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "phase": {
+          "enum": [
+            "terminal",
+            "before_claim"
+          ]
+        },
+        "plan": {
+          "$ref": "#/$defs/pgPlan"
+        },
+        "preparation": {
+          "$ref": "#/$defs/preparation"
+        },
+        "query_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "database_schema_version",
+        "claim_requested_limit",
+        "observed_jobs_total",
+        "observed_pending",
+        "observed_processing",
+        "observed_ready_jobs",
+        "observed_durable_source_bound_ready",
+        "observed_failed",
+        "observed_attempts_gt1",
+        "attempt_id",
+        "method_id",
+        "parent_clock_sha256",
+        "origin",
+        "phase",
+        "source_sha",
+        "maintenance",
+        "query_sha256",
+        "parameters_sha256",
+        "explain_only_not_actual_claim_latency",
+        "plan",
+        "preparation"
+      ],
+      "type": "object"
+    },
+    "cleanup": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_kind": {
+          "const": "r5_current18_cleanup_receipt_v1"
+        },
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "catalog_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "completed_ns": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "containment_only": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "evidence_generation": {
+          "const": "r5_current18_fork_source_v2_parentclock_v1"
+        },
+        "method_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "method_id": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "owned_connections": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "owned_db_absent": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "owned_objects_absent": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "owned_pg_stopped": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "owned_processes_absent": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "parent_clock_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "parser_joined_inflight": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "readers_open": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "scale": {
+          "enum": [
+            "tool_only",
+            "S",
+            "M"
+          ]
+        },
+        "source_identity_kind": {
+          "const": "policy_bound_local_input_superset_sha1_v2"
+        },
+        "source_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_policy": {
+          "const": "r5_current_local_inputs_v2"
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "worker_joined_inflight": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "workload_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_generation",
+        "attempt_id",
+        "scale",
+        "source_sha",
+        "source_policy",
+        "source_identity_kind",
+        "source_manifest_sha256",
+        "method_id",
+        "method_contract_sha256",
+        "workload_contract_sha256",
+        "catalog_contract_sha256",
+        "artifact_kind",
+        "parent_clock_sha256",
+        "completed_ns",
+        "parser_joined_inflight",
+        "worker_joined_inflight",
+        "readers_open",
+        "owned_connections",
+        "owned_db_absent",
+        "owned_pg_stopped",
+        "owned_processes_absent",
+        "owned_objects_absent",
+        "containment_only"
+      ],
+      "type": "object"
+    },
+    "clock": {
+      "additionalProperties": false,
+      "properties": {
+        "approved_deadlines": {
+          "$ref": "#/$defs/approvedDeadlines"
+        },
+        "artifact_kind": {
+          "const": "r5_current18_parent_clock_v1"
+        },
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "catalog_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "clock_schema_version": {
+          "const": 1
+        },
+        "effective_deadline_unix_ns": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "evidence_generation": {
+          "const": "r5_current18_fork_source_v2_parentclock_v1"
+        },
+        "go_new_budget_origin_allowed": {
+          "const": false
+        },
+        "method_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "method_id": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "origin_before_native_init_and_compile": {
+          "const": true
+        },
+        "origin_unix_ns": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "original_budget_seconds": {
+          "enum": [
+            300,
+            1800,
+            10800
+          ]
+        },
+        "scale": {
+          "enum": [
+            "tool_only",
+            "S",
+            "M"
+          ]
+        },
+        "source_identity_kind": {
+          "const": "policy_bound_local_input_superset_sha1_v2"
+        },
+        "source_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_policy": {
+          "const": "r5_current_local_inputs_v2"
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "workload_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_generation",
+        "attempt_id",
+        "scale",
+        "source_sha",
+        "source_policy",
+        "source_identity_kind",
+        "source_manifest_sha256",
+        "method_id",
+        "method_contract_sha256",
+        "workload_contract_sha256",
+        "catalog_contract_sha256",
+        "artifact_kind",
+        "clock_schema_version",
+        "origin_unix_ns",
+        "original_budget_seconds",
+        "approved_deadlines",
+        "effective_deadline_unix_ns",
+        "origin_before_native_init_and_compile",
+        "go_new_budget_origin_allowed"
+      ],
+      "type": "object"
+    },
+    "command": {
+      "additionalProperties": false,
+      "properties": {
+        "argv": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "minItems": 10,
+          "type": "array"
+        },
+        "artifact_kind": {
+          "const": "r5_current18_command_v1"
+        },
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "catalog_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "environment": {
+          "additionalProperties": false,
+          "properties": {
+            "GOFLAGS": {
+              "type": "string"
+            },
+            "GOWORK": {
+              "type": "string"
+            },
+            "TABMAIL_R5_CURRENT_ATTEMPT_ID": {
+              "type": "string"
+            },
+            "TABMAIL_R5_CURRENT_GENERATION": {
+              "type": "string"
+            },
+            "TABMAIL_R5_CURRENT_METHOD_ID": {
+              "type": "string"
+            },
+            "TABMAIL_R5_CURRENT_METHOD_SHA256": {
+              "type": "string"
+            },
+            "TABMAIL_R5_CURRENT_PARENT_CLOCK_SHA256": {
+              "type": "string"
+            },
+            "TABMAIL_R5_CURRENT_SOURCE_SHA": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "TABMAIL_R5_CURRENT_GENERATION",
+            "TABMAIL_R5_CURRENT_ATTEMPT_ID",
+            "TABMAIL_R5_CURRENT_METHOD_ID",
+            "TABMAIL_R5_CURRENT_METHOD_SHA256",
+            "TABMAIL_R5_CURRENT_SOURCE_SHA",
+            "TABMAIL_R5_CURRENT_PARENT_CLOCK_SHA256",
+            "GOWORK",
+            "GOFLAGS"
+          ],
+          "type": "object"
+        },
+        "evidence_generation": {
+          "const": "r5_current18_fork_source_v2_parentclock_v1"
+        },
+        "method_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "method_id": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "parent_clock_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "scale": {
+          "enum": [
+            "tool_only",
+            "S",
+            "M"
+          ]
+        },
+        "source_identity_kind": {
+          "const": "policy_bound_local_input_superset_sha1_v2"
+        },
+        "source_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_policy": {
+          "const": "r5_current_local_inputs_v2"
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "workload_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_generation",
+        "attempt_id",
+        "scale",
+        "source_sha",
+        "source_policy",
+        "source_identity_kind",
+        "source_manifest_sha256",
+        "method_id",
+        "method_contract_sha256",
+        "workload_contract_sha256",
+        "catalog_contract_sha256",
+        "artifact_kind",
+        "parent_clock_sha256",
+        "argv",
+        "environment"
+      ],
+      "type": "object"
+    },
+    "currentSReview": {
+      "additionalProperties": false,
+      "properties": {
+        "archive_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "artifact_kind": {
+          "const": "r5_current18_original_S_review_v1"
+        },
+        "catalog_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "database_schema_version": {
+          "const": 18
+        },
+        "evidence_generation": {
+          "const": "r5_current18_fork_source_v2_parentclock_v1"
+        },
+        "method_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "method_id": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "product_green": {
+          "const": false
+        },
+        "result_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "review_status": {
+          "const": "independent_source_bound_completed_S"
+        },
+        "scale": {
+          "const": "S"
+        },
+        "source_identity_kind": {
+          "const": "policy_bound_local_input_superset_sha1_v2"
+        },
+        "source_policy": {
+          "const": "r5_current_local_inputs_v2"
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "task_complete": {
+          "const": false
+        },
+        "workload_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_generation",
+        "method_id",
+        "source_policy",
+        "source_identity_kind",
+        "source_sha",
+        "method_contract_sha256",
+        "workload_contract_sha256",
+        "catalog_contract_sha256",
+        "artifact_kind",
+        "scale",
+        "database_schema_version",
+        "archive_sha256",
+        "result_sha256",
+        "review_status",
+        "task_complete",
+        "product_green"
+      ],
+      "type": "object"
+    },
+    "distribution": {
+      "additionalProperties": false,
+      "properties": {
+        "employees": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "index_ready_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "lifecycle_counts": {
+          "additionalProperties": false,
+          "properties": {
+            "archived": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "hard_expired": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "inbox": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "trash_expired": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "inbox",
+            "archived",
+            "trash_expired",
+            "hard_expired"
+          ],
+          "type": "object"
+        },
+        "mailboxes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_distinct_shared_grantees": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "messages": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "mime_size_counts": {
+          "additionalProperties": false,
+          "properties": {
+            "2097152": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "262144": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "32768": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "4096": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "4096",
+            "32768",
+            "262144",
+            "2097152"
+          ],
+          "type": "object"
+        },
+        "min_distinct_shared_grantees": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "personal_mailboxes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "shared_grant_rows": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "shared_mailboxes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "tenant_message_counts": {
+          "additionalProperties": false,
+          "properties": {
+            "bench-0.test": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "bench-1.test": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "bench-0.test",
+            "bench-1.test"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "employees",
+        "mailboxes",
+        "messages",
+        "index_ready_count",
+        "personal_mailboxes",
+        "shared_mailboxes",
+        "shared_grant_rows",
+        "min_distinct_shared_grantees",
+        "max_distinct_shared_grantees",
+        "lifecycle_counts",
+        "mime_size_counts",
+        "tenant_message_counts"
+      ],
+      "type": "object"
+    },
+    "failure": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_kind": {
+          "const": "r5_current18_attempt_failure_v1"
+        },
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "catalog_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "evidence_generation": {
+          "const": "r5_current18_fork_source_v2_parentclock_v1"
+        },
+        "failure_schema_version": {
+          "const": 1
+        },
+        "method_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "method_id": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "observed_at_ns": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "parent_clock_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "product_green": {
+          "const": false
+        },
+        "reason": {
+          "enum": [
+            "compile_failure",
+            "catalog_mismatch",
+            "source_drift",
+            "absolute_deadline_exceeded",
+            "runtime_assertion_failure",
+            "unknown_exit_observation",
+            "cleanup_unverified"
+          ]
+        },
+        "result_present": {
+          "type": "boolean"
+        },
+        "scale": {
+          "enum": [
+            "tool_only",
+            "S",
+            "M"
+          ]
+        },
+        "source_identity_kind": {
+          "const": "policy_bound_local_input_superset_sha1_v2"
+        },
+        "source_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_policy": {
+          "const": "r5_current_local_inputs_v2"
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "task_complete": {
+          "const": false
+        },
+        "workload_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_generation",
+        "attempt_id",
+        "scale",
+        "source_sha",
+        "source_policy",
+        "source_identity_kind",
+        "source_manifest_sha256",
+        "method_id",
+        "method_contract_sha256",
+        "workload_contract_sha256",
+        "catalog_contract_sha256",
+        "artifact_kind",
+        "failure_schema_version",
+        "parent_clock_sha256",
+        "reason",
+        "observed_at_ns",
+        "result_present",
+        "task_complete",
+        "product_green"
+      ],
+      "type": "object"
+    },
+    "goEvent": {
+      "additionalProperties": false,
+      "description": "test2json recorded Time; success events must remain inside declared go_started_ns..go_exit_observed_ns, before cleanup, not merely before parent wait. The semantic validator enforces exact lifecycle order and elapsed compatibility.",
+      "properties": {
+        "Action": {
+          "enum": [
+            "start",
+            "run",
+            "pass",
+            "fail",
+            "skip",
+            "output"
+          ]
+        },
+        "Elapsed": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "FailedBuild": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "Output": {
+          "type": "string"
+        },
+        "Package": {
+          "const": "tabmail/internal/store/postgres"
+        },
+        "Test": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "Time": {
+          "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.[0-9]{1,9})?(?:Z|[+-]\\d\\d:\\d\\d)$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "Time",
+        "Action",
+        "Package"
+      ],
+      "type": "object"
+    },
+    "measurement": {
+      "additionalProperties": false,
+      "properties": {
+        "alloc_bytes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "cache_mode": {
+          "enum": [
+            "app_cold_db_os_unspecified",
+            "app_hot_db_os_unspecified"
+          ]
+        },
+        "disk_bytes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_wall_monotonic_gap_ms": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "p50_ms": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "p95_ms": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "p99_ms": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "rss_bytes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "safety_assertion": {
+          "type": "string"
+        },
+        "samples": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "sql_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "workload": {
+          "enum": [
+            "inbox_list",
+            "indexed_search",
+            "indexed_message",
+            "permission_mailboxes",
+            "draft_save",
+            "submit_and_loopback_worker",
+            "gc_reference_safety"
+          ]
+        }
+      },
+      "required": [
+        "samples",
+        "sql_count",
+        "alloc_bytes",
+        "rss_bytes",
+        "disk_bytes",
+        "p50_ms",
+        "p95_ms",
+        "p99_ms",
+        "max_wall_monotonic_gap_ms",
+        "workload",
+        "cache_mode",
+        "safety_assertion"
+      ],
+      "type": "object"
+    },
+    "pathHashes": {
+      "additionalProperties": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+      },
+      "type": "object"
+    },
+    "persistent": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "database_schema_version": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "index_ready_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "method_id": {
+          "const": "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+        },
+        "ordinal_fifo_violations": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "origin": {
+          "const": "actual_owned_pg_catalog_and_received_at_projection"
+        },
+        "parent_clock_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "projected_mailboxes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "projected_messages": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "received_at_projection_query_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_identity_bindings_valid": {
+          "const": true
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "uid_catalog_query_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "uid_column_count": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "database_schema_version",
+        "uid_column_count",
+        "projected_messages",
+        "projected_mailboxes",
+        "ordinal_fifo_violations",
+        "index_ready_count",
+        "attempt_id",
+        "method_id",
+        "parent_clock_sha256",
+        "source_sha",
+        "origin",
+        "source_identity_bindings_valid",
+        "uid_catalog_query_sha256",
+        "received_at_projection_query_sha256"
+      ],
+      "type": "object"
+    },
+    "pgPlan": {
+      "description": "Opaque server EXPLAIN JSON; validate_explain_plan enforces estimate-only relation tree; arbitrary metadata never supplies evidence bindings.",
+      "items": {
+        "properties": {
+          "Plan": {
+            "properties": {
+              "Node Type": {
+                "type": "string"
+              },
+              "Plans": {
+                "items": {
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "Relation Name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "Node Type"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "Plan"
+        ],
+        "type": "object"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+    },
+    "preparation": {
+      "additionalProperties": false,
+      "properties": {
+        "active_budget": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "claim_calls": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "claim_parameters_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "claim_query_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "claim_wall_seconds": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "company_wall_seconds": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "final_empty_claim": {
+          "type": "boolean"
+        },
+        "joined_completed_jobs": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "joined_inflight": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "joined_ready_before_last_claim": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "joined_stored_messages": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "last_claim_batch": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "last_claim_wall_seconds": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "max_active": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_claim_batch": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_wall_monotonic_gap_ms": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "max_window_messages": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "method": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "parse_complete_wall_seconds": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "parser_canceled_joined_calls": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "parser_deadline_unix_ns": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "parser_join_policy": {
+          "const": "uncancelled_document_wait_with_31s_earliest_parent_wall_admission_guard_v1"
+        },
+        "parser_join_reserve_seconds": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "parser_joined_call_wall_seconds_sum": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "parser_joined_calls": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "parser_joined_inflight": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "parser_min_start_remaining_ns": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "parser_quiescent": {
+          "type": "boolean"
+        },
+        "pending_upper_bound": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "phase": {
+          "enum": [
+            "terminal",
+            "before_claim",
+            "batch_joined"
+          ]
+        },
+        "pipeline_wall_seconds": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "producer_done": {
+          "type": "boolean"
+        },
+        "sql_ready_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "store_wall_seconds": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "joined_inflight",
+        "parser_join_reserve_seconds",
+        "parser_joined_inflight",
+        "parser_joined_calls",
+        "parser_canceled_joined_calls",
+        "active_budget",
+        "pending_upper_bound",
+        "max_active",
+        "max_window_messages",
+        "joined_stored_messages",
+        "joined_completed_jobs",
+        "claim_calls",
+        "max_claim_batch",
+        "last_claim_batch",
+        "joined_ready_before_last_claim",
+        "sql_ready_count",
+        "parser_joined_call_wall_seconds_sum",
+        "company_wall_seconds",
+        "store_wall_seconds",
+        "claim_wall_seconds",
+        "last_claim_wall_seconds",
+        "parse_complete_wall_seconds",
+        "pipeline_wall_seconds",
+        "max_wall_monotonic_gap_ms",
+        "parser_min_start_remaining_ns",
+        "parser_deadline_unix_ns",
+        "method",
+        "phase",
+        "producer_done",
+        "final_empty_claim",
+        "claim_query_sha256",
+        "claim_parameters_sha256",
+        "parser_join_policy",
+        "parser_quiescent"
+      ],
+      "type": "object"
+    },
+    "process": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_kind": {
+          "const": "r5_current18_process_receipt_v1"
+        },
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "catalog_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "child_deadline_unix_ns": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "clock_reversed": {
+          "type": "boolean"
+        },
+        "effective_deadline_unix_ns": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "evidence_generation": {
+          "const": "r5_current18_fork_source_v2_parentclock_v1"
+        },
+        "exit_observation": {
+          "enum": [
+            "observed_parent_wait",
+            "unknown_not_observed"
+          ]
+        },
+        "go_exit": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "method_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "method_id": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "origin_unix_ns": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "parent_clock_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "phase_times": {
+          "additionalProperties": false,
+          "properties": {
+            "cleanup_completed_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "compile_started_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "drain_completed_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "go_exit_observed_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "go_init_completed_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "go_started_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "measurements_completed_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "measurements_started_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "native_init_completed_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "native_init_started_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "observations_completed_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "parent_wait_completed_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "population_completed_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "population_started_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "result_sealed_ns": {
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "native_init_started_ns",
+            "native_init_completed_ns",
+            "compile_started_ns",
+            "go_started_ns",
+            "go_init_completed_ns",
+            "population_started_ns",
+            "population_completed_ns",
+            "measurements_started_ns",
+            "measurements_completed_ns",
+            "observations_completed_ns",
+            "drain_completed_ns",
+            "result_sealed_ns",
+            "go_exit_observed_ns",
+            "cleanup_completed_ns",
+            "parent_wait_completed_ns"
+          ],
+          "type": "object"
+        },
+        "runner_exit": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "scale": {
+          "enum": [
+            "tool_only",
+            "S",
+            "M"
+          ]
+        },
+        "source_identity_kind": {
+          "const": "policy_bound_local_input_superset_sha1_v2"
+        },
+        "source_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_policy": {
+          "const": "r5_current_local_inputs_v2"
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "timed_out": {
+          "type": "boolean"
+        },
+        "workload_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_generation",
+        "attempt_id",
+        "scale",
+        "source_sha",
+        "source_policy",
+        "source_identity_kind",
+        "source_manifest_sha256",
+        "method_id",
+        "method_contract_sha256",
+        "workload_contract_sha256",
+        "catalog_contract_sha256",
+        "artifact_kind",
+        "parent_clock_sha256",
+        "origin_unix_ns",
+        "effective_deadline_unix_ns",
+        "phase_times",
+        "go_exit",
+        "runner_exit",
+        "exit_observation",
+        "timed_out",
+        "clock_reversed",
+        "child_deadline_unix_ns"
+      ],
+      "type": "object"
+    },
+    "result": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_distribution": {
+          "$ref": "#/$defs/distribution"
+        },
+        "artifact_kind": {
+          "const": "r5_current18_result_v1"
+        },
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "build_attestation_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "catalog_attestation_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "catalog_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "concurrency": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "database_schema_version": {
+          "const": 18
+        },
+        "dataset_fingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "employees": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "evidence_generation": {
+          "const": "r5_current18_fork_source_v2_parentclock_v1"
+        },
+        "execution": {
+          "additionalProperties": false,
+          "properties": {
+            "go_started_ns": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "max_wall_monotonic_gap_ms": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "observations_completed_ns": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "go_started_ns",
+            "observations_completed_ns",
+            "max_wall_monotonic_gap_ms"
+          ],
+          "type": "object"
+        },
+        "fingerprint_method": {
+          "const": "six_actual_canonical_sql_streams_v1"
+        },
+        "fingerprint_streams": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "row_count": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "sha256": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "stream_id": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "stream_id",
+              "row_count",
+              "sha256"
+            ],
+            "type": "object"
+          },
+          "maxItems": 6,
+          "minItems": 6,
+          "type": "array"
+        },
+        "hardware": {
+          "additionalProperties": false,
+          "properties": {
+            "arch": {
+              "type": "string"
+            },
+            "cpu": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "os": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "os",
+            "arch",
+            "cpu"
+          ],
+          "type": "object"
+        },
+        "identity_boundary": {
+          "enum": [
+            {
+              "all_persistent_equivalent": false,
+              "protocol_UID_certified": false,
+              "uncovered_fields": "received_at/received-order, lifecycle clock timestamps, indexed_at, next_attempt_at, lease tokens, random actor/mailbox row UUIDs; protocol UID not certified"
+            },
+            {
+              "A_random_commit_order_not_preserved_or_claimed": true,
+              "all_persistent_equivalent": false,
+              "all_physical_uuid_time_protocol_uid_fields_not_covered_by_six_streams": true,
+              "canonical_streams_unchanged_no_added_normalization": true,
+              "generator_ordinal_mailbox_fifo_preserved": true,
+              "protocol_UID_certified": false,
+              "received_at_and_received_order_may_change_with_B_scheduling": true,
+              "uncovered_fields": "received_at/received-order, lifecycle clock timestamps, indexed_at, next_attempt_at, lease tokens, random actor/mailbox row UUIDs; protocol UID not certified"
+            }
+          ]
+        },
+        "mailboxes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "measurements": {
+          "items": {
+            "$ref": "#/$defs/measurement"
+          },
+          "maxItems": 14,
+          "minItems": 14,
+          "type": "array"
+        },
+        "messages": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "method_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "method_id": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "outcome": {
+          "const": "completed"
+        },
+        "parameter_fingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "parent_clock_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "pool_size": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "preparation": {
+          "$ref": "#/$defs/preparation"
+        },
+        "preparation_checkpoints": {
+          "items": {
+            "$ref": "#/$defs/checkpoint"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "preparation_input_scheduler": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/scheduler"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "preparation_persistent_observations": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/persistent"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "product_green": {
+          "const": false
+        },
+        "resource_scope": {
+          "const": {
+            "cache": "app_reset_and_reused_no_os_db_cold_claim",
+            "disk": "owned_raw_objects_plus_owned_pg_database_bytes",
+            "gc": "raw_reference_read_only_not_sweep_throughput",
+            "memory": "go_alloc_and_process_high_water_rss_not_pg_redis_system",
+            "sql": "application_and_worker_pool_not_server_trigger_sql"
+          }
+        },
+        "result_schema_version": {
+          "const": 1
+        },
+        "safety_observations": {
+          "items": {
+            "$ref": "#/$defs/safety"
+          },
+          "maxItems": 7,
+          "minItems": 7,
+          "type": "array"
+        },
+        "scale": {
+          "enum": [
+            "tool_only",
+            "S",
+            "M"
+          ]
+        },
+        "seed": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "source_identity_kind": {
+          "const": "policy_bound_local_input_superset_sha1_v2"
+        },
+        "source_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_policy": {
+          "const": "r5_current_local_inputs_v2"
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "sql_plans": {
+          "items": {
+            "$ref": "#/$defs/shippingPlan"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "sql_tracer_calibration_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "sql_tracer_calibration_expected": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "system_memory_observation": {
+          "const": "not_measured"
+        },
+        "task_complete": {
+          "const": false
+        },
+        "workload_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_generation",
+        "attempt_id",
+        "scale",
+        "source_sha",
+        "source_policy",
+        "source_identity_kind",
+        "source_manifest_sha256",
+        "method_id",
+        "method_contract_sha256",
+        "workload_contract_sha256",
+        "catalog_contract_sha256",
+        "artifact_kind",
+        "parent_clock_sha256",
+        "catalog_attestation_sha256",
+        "build_attestation_sha256",
+        "dataset_fingerprint",
+        "parameter_fingerprint",
+        "employees",
+        "mailboxes",
+        "messages",
+        "seed",
+        "concurrency",
+        "pool_size",
+        "sql_tracer_calibration_count",
+        "sql_tracer_calibration_expected",
+        "result_schema_version",
+        "outcome",
+        "database_schema_version",
+        "fingerprint_method",
+        "fingerprint_streams",
+        "actual_distribution",
+        "preparation",
+        "preparation_checkpoints",
+        "preparation_input_scheduler",
+        "preparation_persistent_observations",
+        "identity_boundary",
+        "sql_plans",
+        "hardware",
+        "resource_scope",
+        "system_memory_observation",
+        "safety_observations",
+        "measurements",
+        "execution",
+        "task_complete",
+        "product_green"
+      ],
+      "type": "object"
+    },
+    "safety": {
+      "additionalProperties": false,
+      "properties": {
+        "foreign_denied_http": {
+          "const": 404
+        },
+        "foreign_positive_http": {
+          "const": 200
+        },
+        "origin": {
+          "const": "actual_shipping_HTTP_and_JWT"
+        },
+        "restored_http": {
+          "const": 200
+        },
+        "revoked_after_http": {
+          "const": 403
+        },
+        "revoked_before_http": {
+          "const": 200
+        },
+        "workload": {
+          "enum": [
+            "inbox_list",
+            "indexed_search",
+            "indexed_message",
+            "permission_mailboxes",
+            "draft_save",
+            "submit_and_loopback_worker",
+            "gc_reference_safety"
+          ]
+        }
+      },
+      "required": [
+        "workload",
+        "origin",
+        "foreign_positive_http",
+        "foreign_denied_http",
+        "revoked_before_http",
+        "revoked_after_http",
+        "restored_http"
+      ],
+      "type": "object"
+    },
+    "scheduler": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_emitted_mailbox_ordinals": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "actual_emitted_ordinal_order": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "actual_emitted_window_unique_mailboxes": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "emitted_inputs": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "fifo_gate_call_elapsed_seconds_sum": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "generated_inputs": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "joined_fifo_inflight": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "lookahead_limit": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_unpersisted_buffered_inputs": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "method": {
+          "const": "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+        },
+        "ordinal_fifo_completed_jobs": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "lookahead_limit",
+        "generated_inputs",
+        "emitted_inputs",
+        "ordinal_fifo_completed_jobs",
+        "max_unpersisted_buffered_inputs",
+        "joined_fifo_inflight",
+        "method",
+        "fifo_gate_call_elapsed_seconds_sum",
+        "actual_emitted_ordinal_order",
+        "actual_emitted_mailbox_ordinals",
+        "actual_emitted_window_unique_mailboxes"
+      ],
+      "type": "object"
+    },
+    "shippingPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "database_schema_version": {
+          "const": 18
+        },
+        "index_ready_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "method_id": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "origin": {
+          "const": "captured_shipping_query_same_parameters"
+        },
+        "parameters_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "parent_clock_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "plan": {
+          "$ref": "#/$defs/pgPlan"
+        },
+        "query_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "scale": {
+          "enum": [
+            "tool_only",
+            "S",
+            "M"
+          ]
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "workload": {
+          "enum": [
+            "inbox_list",
+            "indexed_search",
+            "indexed_message",
+            "permission_mailboxes",
+            "draft_save",
+            "submit_and_loopback_worker",
+            "gc_reference_safety"
+          ]
+        }
+      },
+      "required": [
+        "attempt_id",
+        "method_id",
+        "parent_clock_sha256",
+        "origin",
+        "workload",
+        "scale",
+        "source_sha",
+        "database_schema_version",
+        "index_ready_count",
+        "query_sha256",
+        "parameters_sha256",
+        "plan"
+      ],
+      "type": "object"
+    },
+    "source": {
+      "additionalProperties": false,
+      "properties": {
+        "boundary": {
+          "type": "string"
+        },
+        "build_context": {
+          "$ref": "#/$defs/buildContext"
+        },
+        "embed_inputs": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "minProperties": 1,
+          "type": "object"
+        },
+        "excluded_directories": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "files": {
+          "$ref": "#/$defs/pathHashes"
+        },
+        "policy": {
+          "const": "r5_current_local_inputs_v2"
+        },
+        "purpose": {
+          "const": "benchmark"
+        },
+        "replacement": {
+          "const": {
+            "module": "github.com/jhillyerd/enmime/v2",
+            "path": "third_party/enmime-v2.3.0",
+            "version": "v2.3.0"
+          }
+        },
+        "schema_version": {
+          "const": 2
+        },
+        "snapshot_root": {
+          "pattern": "^/",
+          "type": "string"
+        },
+        "source_closure_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_identity_kind": {
+          "const": "policy_bound_local_input_superset_sha1_v2"
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "snapshot_root",
+        "source_identity_kind",
+        "source_sha",
+        "source_closure_sha256",
+        "policy",
+        "purpose",
+        "build_context",
+        "replacement",
+        "boundary",
+        "excluded_directories",
+        "embed_inputs",
+        "files"
+      ],
+      "type": "object"
+    },
+    "unavailable": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_kind": {
+          "const": "r5_current18_unavailable_observation_v1"
+        },
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        "catalog_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "evidence_generation": {
+          "const": "r5_current18_fork_source_v2_parentclock_v1"
+        },
+        "method_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "method_id": {
+          "enum": [
+            "r5_current18_fork_v2_bounded20_parentclock_v1",
+            "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1"
+          ]
+        },
+        "observation": {
+          "enum": [
+            "build",
+            "catalog"
+          ]
+        },
+        "parent_clock_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "compile_failure",
+            "runtime_assertion_failure",
+            "unknown_exit_observation",
+            "absolute_deadline_exceeded"
+          ]
+        },
+        "scale": {
+          "enum": [
+            "tool_only",
+            "S",
+            "M"
+          ]
+        },
+        "source_identity_kind": {
+          "const": "policy_bound_local_input_superset_sha1_v2"
+        },
+        "source_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_policy": {
+          "const": "r5_current_local_inputs_v2"
+        },
+        "source_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "status": {
+          "const": "not_observed"
+        },
+        "workload_contract_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_generation",
+        "attempt_id",
+        "scale",
+        "source_sha",
+        "source_policy",
+        "source_identity_kind",
+        "source_manifest_sha256",
+        "method_id",
+        "method_contract_sha256",
+        "workload_contract_sha256",
+        "catalog_contract_sha256",
+        "artifact_kind",
+        "observation",
+        "status",
+        "reason",
+        "parent_clock_sha256"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "urn:tabmail:r5:current18:evidence:v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "SOURCE-stage grammar only. Actual validate_archive is fail-closed while the installed historical catalog reference is partial; C18-07 declared-full reference and coverage must be supplied in a separately approved future source revision. Qualification hashes cannot upgrade partial readiness. Admission binds an exact parent_clock_descriptor_sha256; the caller must also provide independently trusted canonical descriptor bytes/pin, never derive trust from archive clock hashes. validate_synthetic_archive is a separate fixture-only API that cannot return runtime qualification. Strict Python checks remain mandatory for duplicate/nonfinite/numeric aliases, exact contracts and raw Go phase/clock/source/catalog relationships.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/admission"
+    },
+    {
+      "$ref": "#/$defs/clock"
+    },
+    {
+      "$ref": "#/$defs/source"
+    },
+    {
+      "$ref": "#/$defs/catalog"
+    },
+    {
+      "$ref": "#/$defs/build"
+    },
+    {
+      "$ref": "#/$defs/process"
+    },
+    {
+      "$ref": "#/$defs/cleanup"
+    },
+    {
+      "$ref": "#/$defs/command"
+    },
+    {
+      "$ref": "#/$defs/failure"
+    },
+    {
+      "$ref": "#/$defs/unavailable"
+    },
+    {
+      "$ref": "#/$defs/result"
+    },
+    {
+      "$ref": "#/$defs/archive"
+    },
+    {
+      "$ref": "#/$defs/currentSReview"
+    }
+  ],
+  "title": "Current18 source-policy V2 parent-clock evidence grammar"
+}

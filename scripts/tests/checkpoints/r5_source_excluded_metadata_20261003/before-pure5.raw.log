@@ -1,0 +1,50 @@
+test_excluded_artifact_directory_alias_is_rejected (test_r5_source_v3_boundary_negatives.SourceV3BoundaryNegativeTests.test_excluded_artifact_directory_alias_is_rejected) ... ok
+test_nested_module_in_excluded_artifact_directory_is_rejected (test_r5_source_v3_boundary_negatives.SourceV3BoundaryNegativeTests.test_nested_module_in_excluded_artifact_directory_is_rejected) ... 
+  test_nested_module_in_excluded_artifact_directory_is_rejected (test_r5_source_v3_boundary_negatives.SourceV3BoundaryNegativeTests.test_nested_module_in_excluded_artifact_directory_is_rejected) (module='github.com/jhillyerd/enmime/v2') ... FAIL
+  test_nested_module_in_excluded_artifact_directory_is_rejected (test_r5_source_v3_boundary_negatives.SourceV3BoundaryNegativeTests.test_nested_module_in_excluded_artifact_directory_is_rejected) (module='github.com/emersion/go-smtp') ... FAIL
+test_symlink_descendant_in_excluded_artifact_directory_is_rejected (test_r5_source_v3_boundary_negatives.SourceV3BoundaryNegativeTests.test_symlink_descendant_in_excluded_artifact_directory_is_rejected) ... 
+  test_symlink_descendant_in_excluded_artifact_directory_is_rejected (test_r5_source_v3_boundary_negatives.SourceV3BoundaryNegativeTests.test_symlink_descendant_in_excluded_artifact_directory_is_rejected) (module='github.com/jhillyerd/enmime/v2') ... FAIL
+  test_symlink_descendant_in_excluded_artifact_directory_is_rejected (test_r5_source_v3_boundary_negatives.SourceV3BoundaryNegativeTests.test_symlink_descendant_in_excluded_artifact_directory_is_rejected) (module='github.com/emersion/go-smtp') ... FAIL
+test_upstream_manifest_traversal_and_duplicate_keys_are_rejected (test_r5_source_v3_boundary_negatives.SourceV3BoundaryNegativeTests.test_upstream_manifest_traversal_and_duplicate_keys_are_rejected) ... ok
+test_workspace_alias_and_overlay_environment_are_rejected (test_r5_source_v3_boundary_negatives.SourceV3BoundaryNegativeTests.test_workspace_alias_and_overlay_environment_are_rejected) ... ok
+
+======================================================================
+FAIL: test_nested_module_in_excluded_artifact_directory_is_rejected (test_r5_source_v3_boundary_negatives.SourceV3BoundaryNegativeTests.test_nested_module_in_excluded_artifact_directory_is_rejected) (module='github.com/jhillyerd/enmime/v2')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_source_v3_boundary_negatives.py", line 37, in test_nested_module_in_excluded_artifact_directory_is_rejected
+    with self.assertRaisesRegex(ValueError, 'nested module'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_nested_module_in_excluded_artifact_directory_is_rejected (test_r5_source_v3_boundary_negatives.SourceV3BoundaryNegativeTests.test_nested_module_in_excluded_artifact_directory_is_rejected) (module='github.com/emersion/go-smtp')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_source_v3_boundary_negatives.py", line 37, in test_nested_module_in_excluded_artifact_directory_is_rejected
+    with self.assertRaisesRegex(ValueError, 'nested module'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_symlink_descendant_in_excluded_artifact_directory_is_rejected (test_r5_source_v3_boundary_negatives.SourceV3BoundaryNegativeTests.test_symlink_descendant_in_excluded_artifact_directory_is_rejected) (module='github.com/jhillyerd/enmime/v2')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_source_v3_boundary_negatives.py", line 51, in test_symlink_descendant_in_excluded_artifact_directory_is_rejected
+    with self.assertRaisesRegex(ValueError, 'symlink'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_symlink_descendant_in_excluded_artifact_directory_is_rejected (test_r5_source_v3_boundary_negatives.SourceV3BoundaryNegativeTests.test_symlink_descendant_in_excluded_artifact_directory_is_rejected) (module='github.com/emersion/go-smtp')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_source_v3_boundary_negatives.py", line 51, in test_symlink_descendant_in_excluded_artifact_directory_is_rejected
+    with self.assertRaisesRegex(ValueError, 'symlink'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.226s
+
+FAILED (failures=4)

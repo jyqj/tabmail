@@ -1,0 +1,11 @@
+{
+  "NoTests_Capture_orTreehash": true,
+  "new_archive": "/private/tmp/tm-r5currentSource-policyV2.9q7pqk7b/CURRENT-SOURCE-V2-with-map-C-appendonly-correction-evidence.tar.gz",
+  "new_archive_bytes": 56693,
+  "new_archive_sha256": "e1c540ec0bb9faf46bcd6261f82c563546376397f3fc74db862a732b032037e0",
+  "new_members": 16,
+  "old_archive_retained": true,
+  "old_archive_sha256": "3a8967dad99ebeb5fe41d4040dfa58fcbfac813b5152349db495441495995c6a",
+  "old_original15_members_byteidentical": true,
+  "only_new_member": "FORK-READER-C-map-evidence-correction.json"
+}

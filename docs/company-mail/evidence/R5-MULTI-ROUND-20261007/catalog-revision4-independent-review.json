@@ -1,0 +1,959 @@
+{
+  "reviewer": "smtp_reliability",
+  "review_scope": "independent read-only Git/AST/JSON/source-line/log review; no producer or test rerun",
+  "source_commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+  "reviewed_commit": "7254f12e833051ce4a6bb6d4cb145db4795f3adc",
+  "checks": {
+    "exact_16_file_scope": true,
+    "report_source_identity": true,
+    "revision2_literal_pins_unchanged": true,
+    "literal_source_commits": true,
+    "revision2_pin_transaction": true,
+    "revision2_pin_compatibility": true,
+    "revision2_pin_clients": true,
+    "revision2_pin_client_routes": true,
+    "revision3_pin_transaction": true,
+    "revision3_pin_compatibility": true,
+    "revision3_pin_clients": true,
+    "revision3_pin_client_routes": true,
+    "revision3_report_pins_equal_independent_test_literals": true,
+    "required_history_ancestral": true,
+    "parent_catalogs_are_exact_revision3_bytes": true,
+    "transaction_revision4_predecessor_tuple": true,
+    "transaction_revision1_bytes_and_revision2_chain": true,
+    "compatibility_revision4_predecessor_tuple": true,
+    "compatibility_revision1_bytes_and_revision2_chain": true,
+    "five_original_validators_byte_identical": true,
+    "validator_report_hashes_match_actual": true,
+    "20_historical_files_byte_identical": true,
+    "historical_file_report_hashes_match_actual": true,
+    "six_old_methods_ast_identical": true,
+    "all_nine_old_ids_retained_two_new": true,
+    "test_revision3_preserves_unmodified_reviews_and_pins_reviewed_sources_only_historical_binding_changes": true,
+    "test_revision3_client_inventory_preserves_routes_and_forwarders_only_historical_binding_changes": true,
+    "client_branch_count_forwarders_routes_preserved": true,
+    "client_semantics_and_route_bindings_unchanged": true,
+    "client_locations_point_to_actual_callee": true,
+    "exact_nine_client_locations": true,
+    "transaction_entries_and_all_noncaller_fields_preserved": true,
+    "transaction_delta_report_exact": true,
+    "transaction_delta_counts": true,
+    "all_caller_lines_match_source": true,
+    "transaction_other_top_level_facts_unchanged": true,
+    "compatibility_all_nonclient_facts_unchanged": true,
+    "seven_compatibility_client_rows_only": true,
+    "94_path_closure_three_hash_changes_only": true,
+    "all_94_closure_hashes_match_actual_git_bytes": true,
+    "compatibility_other_top_level_facts_unchanged": true,
+    "all_qualification_flags_remain_false": true,
+    "seven_source_before_after_blobs_hashes_and_commits_match": true,
+    "catalog_report_hashes_match_actual": true,
+    "python_log_and_71_unique_ids_match": true,
+    "raw_cli_log_hashes_and_outcomes_match": true,
+    "test_module_hashes_match_actual": true,
+    "fixed_commit_parent_tree_matches": true,
+    "tracked_worktree_matches_reviewed_commit": true,
+    "source_runner_scripts_unchanged_since_revision3": true,
+    "ci_unchanged_by_catalog_patch": true,
+    "existing_source_job_has_full_history_checkout": true,
+    "71_raw_python_test_ids_match_declared_unique_execution": true,
+    "python_per_module_counts_match": true,
+    "scanner_raw_terminal_counts_match": true,
+    "old_transaction_cli_rejects_exact_15_changed_entries": true,
+    "fixed_diff_has_no_whitespace_errors": true
+  },
+  "reviewed_files": [
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/README.md",
+      "blob": "fedd1db570b0faa584bdda040a1811602c2cf90a",
+      "sha256": "c1311118acf9031d19bbd26aed741519a2233158da69c0cd8bc2be5ef35d060f"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/clients-baseline.log",
+      "blob": "27eda36018b571a5a3f653117fe7b4175e64dcb9",
+      "sha256": "cb6689d856439375bbae4ab9d8c8715328ba9dd4203489bbde6b8b34d1ea83c0"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/clients-current.log",
+      "blob": "d5f47c994a74c664ef71eec25e768e897b3643bb",
+      "sha256": "b5e92b0af9e25b23eb3f0ba9fd2ded8ff3a1fca31020a69cb91e0ab94000c5db"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/compatibility-baseline.log",
+      "blob": "121e29b464f784c254c476361e412308246da846",
+      "sha256": "a954d20d64d0e992b5e1fb6ce6fc0867a1871be7f54fd7426290df24c454da55"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/compatibility-current.log",
+      "blob": "684fe699e8e9109cb8c06b70491cf7a5b303054f",
+      "sha256": "677f536dea0eccc18aba48fb1134bf11abab8c980e362691fb8a01a9bd29d4db"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/python-tests.log",
+      "blob": "c1353ac688784beba1efdad0cb229cf693f35942",
+      "sha256": "3ada16a17c47094eeed8a46cea098dca81a3c7fe426cd2613469aab05b09cf0f"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/reconciliation.json",
+      "blob": "554bfb3639a7e830470df4033d65c96939f33f42",
+      "sha256": "515da75267d8b900f2e0b8c967ff68a651a510a01b11c2e89bb0519708f20517"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/scanner-current.log",
+      "blob": "908a5472e7273bc2872302fbbc79000625400e2d",
+      "sha256": "de60b47c422ed3ad96abad4280595b749fe5947fe3cdd6640859c2a9af176fa6"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/transactions-baseline.log",
+      "blob": "3d6619bc610696bcb66064fa7d8f31384ca363bf",
+      "sha256": "4a3d33b6adcc3664381889862e42427288c7b6f043e0cd09925bb72e58c05b16"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/transactions-current.log",
+      "blob": "3f7a6c70bcb4d08877465402d431e4189ffc19da",
+      "sha256": "517448bd669e67d3c12da0b4e94ef95e34bf2c94d156a3aadabc4b2a464c80fe"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/verification.json",
+      "blob": "f1ed00c3f6c84b6edd3d87178992d0043207bc7d",
+      "sha256": "5a3ba198225485c8bc46273a23f8f64ed3e05386e835442572ac09b6ff28aae4"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+      "blob": "6a9cac1e365ce2664c6cddb170009d52fec2184c",
+      "sha256": "0877601e0a825ba28f2e912bc057cf92e7d607ca568f5d1b29621e2798dc5139"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+      "blob": "9989cd7fe881f23eb2fe5b08e1a390e3128033e3",
+      "sha256": "83eeb4a43fa3a6c762353c1597c00e998ca64bf68138a7eb165984095b110e3d"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+      "blob": "23a227e3eae3aacc44d2c2be97c35bfa55bcc8a6",
+      "sha256": "56452854110d0c33b5d2ae9eaf1abe43a7f77681a59307fc2470796dbdc18f56"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+      "blob": "bd50c385e9c6c385a650f68ce5c5857ee69986ea",
+      "sha256": "5fc5fb70255b5e6986b9aab38157fbb915b6012377d76d5b2a1956fc2907de2c"
+    },
+    {
+      "path": "scripts/tests/test_r5_catalog_reconciliation.py",
+      "blob": "59e9f0af9c82d443dd7414cff4b666054b7d8268",
+      "sha256": "d132966eba0f50c7a52eff38afc85884b82c50d902a890194a7ab97470b6eceb"
+    }
+  ],
+  "binary_diff_sha256": "593de1b227db8b07c0d870fc724a52ca1d27a7a6e3c058b2887403a6679d5dc2",
+  "verified_historical_pins": {
+    "revision2": {
+      "transaction": {
+        "commit": "4540fb91ba742443dcf0a872b80261e58af7b3ab",
+        "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+        "blob": "3e78588a301512e02d718666c54f9ea4d13640e0",
+        "sha256": "9fe6a4d73935b8e51e064c9afe16279187d0516f2959189dabf58bf39e9a6bef"
+      },
+      "compatibility": {
+        "commit": "4540fb91ba742443dcf0a872b80261e58af7b3ab",
+        "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+        "blob": "4bddcd23e6d799c05a7fade19a3ceb6456576b3d",
+        "sha256": "3c03f670576ecae4d260b6995c7230dde8a598288157940cd08c2921b78a5f06"
+      },
+      "clients": {
+        "commit": "4540fb91ba742443dcf0a872b80261e58af7b3ab",
+        "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+        "blob": "2d2990ca3f1672af09fedb50f6f826aa15bcea0b",
+        "sha256": "f4a06b6911bfa888d4720235759b0bd59ee1314eddfdc9fe85524eca7e9c2c4f"
+      },
+      "client_routes": {
+        "commit": "4540fb91ba742443dcf0a872b80261e58af7b3ab",
+        "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+        "blob": "1dead7eb284dc8b2de7d56b58db40636785b4ddb",
+        "sha256": "3fdaa56861ba4e524ddcdbf1d69b2b8513e89f2567500d0410effdf73ab1a617"
+      }
+    },
+    "revision3": {
+      "transaction": {
+        "commit": "4065c4909c8f21a401a9a1af6370fa3f72670b99",
+        "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+        "blob": "2dbd71b6b9f2ccd6eb1bf141f439b6ff83a1f26e",
+        "sha256": "3a49928f35308951340025741ba0c308e8fecf20fc7792bc5b45115175f3f009"
+      },
+      "compatibility": {
+        "commit": "4065c4909c8f21a401a9a1af6370fa3f72670b99",
+        "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+        "blob": "6b14b9ec4e8aac5caac5d74f47847b16e25e9e5e",
+        "sha256": "0817aa5c77142849401dafe8e5acf3194feedc489539442a3cdcf9686cfd7f0d"
+      },
+      "clients": {
+        "commit": "4065c4909c8f21a401a9a1af6370fa3f72670b99",
+        "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+        "blob": "f9f82391f73b3e8a5680c015a860bf880a429d2d",
+        "sha256": "842ade963ab45a9215123929ed1db529da5d94c4a8c2462f612df9c615e3399c"
+      },
+      "client_routes": {
+        "commit": "4065c4909c8f21a401a9a1af6370fa3f72670b99",
+        "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+        "blob": "1d375226040c4edb3b4571eaddf1396f875643b1",
+        "sha256": "8e00ecf63e11b46062add84f062ad7f7d780949ae842127e5aed055db05fb6de"
+      }
+    }
+  },
+  "unchanged_validators": {
+    "scripts/check_r5_transactions.py": "1f14b5b4e3ef11cd0642e9d7261cde285c17e47384c90e15b56adc68323b9355",
+    "scripts/check_r5_compatibility.py": "d3d0bd96c84a18c224160faaad96f3a928aab5224d93c31b6ec464489f740209",
+    "scripts/collect_api_calls.cjs": "06896de9f18dda8c7fd4f1ef2d520e4bd71fa831a99f0d63863a1fa6a06682e8",
+    "cmd/r5txinventory/main.go": "ad14b919505b23947de335dda6077d4f6745185329d911cc357e60b1001d2361",
+    "internal/architecture/route_inventory_test.go": "609ee5489c3e021f9b1a0238b47e4a01d09c5e5eef1144df780d6456e2ed4f05"
+  },
+  "source_runner_and_ci_sha256": {
+    "scripts/run_r5_source_version_tests.py": "f0c3f43ba9596ab5aa9563325858fbfa4f51944a445042579c7b208e3ba16303",
+    "scripts/r5_source_runner_prepare.py": "2ef5ab433849d8dbee5241476fe03575a605d57239a09bfa92936b84b806aa35",
+    ".github/workflows/company-p0.yml": "0e0ef80e11d744c35d68d469417405f33e97284423cf33d5b055bb9228164971"
+  },
+  "historical_file_sha256": {
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/README.md": "46fb6aefb2bb866d3999789c49ae6df6f901f7ee1795d98e00467fe1f760bab6",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/historical-compatibility-inventory-revision1.json": "cfd20e67cdec8b1c03b4e2f882c5f791f53e28d910af13411e81d777fd621820",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/historical-transaction-inventory-revision1.json": "3ebb5fe8499f663cfe6af906e550787011d17c439db238c22cbe4256c9e59988",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/reconciliation.json": "97c63e9e8e571bbb045efbb3ff102eb0854c625d1cff54767b110762d47e43cc",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/source-change-chain.json": "242d51a0cffeec67f195192ebdbcf401c63874230d149831530ac16205f65a95",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/verification.json": "0b4d141f79ca59bf25b64cf41ba776823b70e742d9de6cc8452cf2c88db2b7f3",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/README.md": "c85e5d3564a1c1ce4c94e72575c5ffa6b09e633a58d4e3c33aa3b18b378dd5b0",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision2-original-tests.json": "7e4c605274a00d79e550231c3935bc84ae6b913ede3bd8e17328c062cc090b87",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision2-original-tests.log": "7a9c54e078277ca865f4caf61b0f25ebf30957d21e7d0789f7411250c42c04e0",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-client-scanner-tests.log": "d1892002a620d0b9ae0307e9ad2b326e80f922c1dfbbf6c15e7c03f0928ef157",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-final-baseline-clients.log": "69082a479e0d75b3aa9cb6db6a1964f31b062d2d928d2e3cbabbf740be2896a9",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-final-baseline-compatibility.log": "a954d20d64d0e992b5e1fb6ce6fc0867a1871be7f54fd7426290df24c454da55",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-final-baseline-transactions.log": "ca2b362f470ad89732fa2222860b5c9a8afcf8accc3c29ad59db5082d4804a1a",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-final-clients.log": "b5e92b0af9e25b23eb3f0ba9fd2ded8ff3a1fca31020a69cb91e0ab94000c5db",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-final-compatibility.log": "677f536dea0eccc18aba48fb1134bf11abab8c980e362691fb8a01a9bd29d4db",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-final-transactions.log": "517448bd669e67d3c12da0b4e94ef95e34bf2c94d156a3aadabc4b2a464c80fe",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-focused-tests.log": "d8edea9bb4874ca027c3fd9ce9b8ba53ef8b5e2f263115f0c2a4d3957569e1a5",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/independent-review.md": "2790eeb8114165c7d5389f01e86e684efef39fc8ca9f6c2cac1471e58d4287e2",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/reconciliation.json": "70138d94bc6ac0e9e845ae1bca6d02d3d985282f804065e8a56bea6f30f259c5",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/verification.json": "7200eae3eee38eed7afbca1fba09990934628c372b5b78e2b512fa120486ac6f"
+  },
+  "identical_test_method_ast_sha256": {
+    "test_only_reviewed_body_and_two_closure_hashes_change": "59140b53c17f6f780baece958d0da1edbcfb87f4499a7c22dde302821ce49f39",
+    "test_unapproved_actual_closure_bytes_rejected": "38ed0072e573290ea26a45a10de70e239da020803f8fc4b88406cbf08786b2a2",
+    "test_unapproved_actual_route_source_rejected_by_original_collector": "b01f06f6d97650c466c23e7e1d572fdf8794e9f8ddb40a0aa513a1f6f9857c86",
+    "test_unapproved_actual_source_and_ast_changes_rejected": "11b567de8a18ac5c0274f994373fdef7c325dd21c24715f1f97fa61037c3ff3c",
+    "test_unapproved_client_and_caller_locations_are_rejected": "4d40e7297e2fc8a6aa3a9f8e10044ecd69c718f5b6a434318286625ad3c91fdb",
+    "test_unapproved_route_and_ast_fact_changes_rejected": "8bff5925981614fbb104231891b3bbdae4e9a78bac499f4be670d238bf2ed82b"
+  },
+  "historical_method_normalization_scope": "Only self.tx/self.compat and actual clients/doc -> pinned revision3 snapshots; SOURCE/CURRENT_EVIDENCE -> original revision3 source/evidence; current source-byte equality -> fixed revision3 commit vs original source commit. No assertion removal or value change.",
+  "client_locations": [
+    {
+      "index": 0,
+      "source": "web/app/(dashboard)/company/recovery/page.tsx",
+      "owner": "receipts",
+      "path": "/api/v1/company/recovery",
+      "branch": 0,
+      "methods": [
+        "GET"
+      ],
+      "before_line": 31,
+      "after_line": 32
+    },
+    {
+      "index": 1,
+      "source": "web/app/(dashboard)/company/recovery/page.tsx",
+      "owner": "runtime",
+      "path": "/api/v1/admin/runtime-config",
+      "branch": 0,
+      "methods": [
+        "GET"
+      ],
+      "before_line": 36,
+      "after_line": 40
+    },
+    {
+      "index": 2,
+      "source": "web/app/(dashboard)/company/recovery/page.tsx",
+      "owner": "next",
+      "path": "/api/v1/company/recovery/{dynamic}/inspect",
+      "branch": 0,
+      "methods": [
+        "POST"
+      ],
+      "before_line": 123,
+      "after_line": 136
+    },
+    {
+      "index": 3,
+      "source": "web/app/(dashboard)/company/recovery/page.tsx",
+      "owner": "RecoveryPage",
+      "path": "/api/v1/company/recovery/{dynamic}/retry",
+      "branch": 0,
+      "methods": [
+        "POST"
+      ],
+      "before_line": 212,
+      "after_line": 235
+    },
+    {
+      "index": 4,
+      "source": "web/app/(dashboard)/company/recovery/page.tsx",
+      "owner": "value",
+      "path": "/api/v1/company/outbound/{id}/inspect",
+      "branch": 0,
+      "methods": [
+        "POST"
+      ],
+      "before_line": 277,
+      "after_line": 309
+    },
+    {
+      "index": 5,
+      "source": "web/app/(dashboard)/company/recovery/page.tsx",
+      "owner": "RecoveryPage",
+      "path": "/api/v1/company/outbound/{dynamic}/reconcile",
+      "branch": 0,
+      "methods": [
+        "POST"
+      ],
+      "before_line": 371,
+      "after_line": 414
+    },
+    {
+      "index": 93,
+      "source": "web/lib/api/base.ts",
+      "owner": "res",
+      "path": "/api/v1/auth/refresh",
+      "branch": 0,
+      "methods": [
+        "POST"
+      ],
+      "before_line": 291,
+      "after_line": 294
+    },
+    {
+      "index": 94,
+      "source": "web/lib/api/base.ts",
+      "owner": "res",
+      "path": "{dynamic}",
+      "branch": 0,
+      "methods": [
+        "GET"
+      ],
+      "before_line": 364,
+      "after_line": 367
+    },
+    {
+      "index": 95,
+      "source": "web/lib/api/base.ts",
+      "owner": "streamEvents",
+      "path": "{dynamic}",
+      "branch": 0,
+      "methods": [
+        "GET"
+      ],
+      "before_line": 381,
+      "after_line": 384
+    }
+  ],
+  "derived_transaction_callers": [
+    {
+      "id": "internal/store/postgres/company_mail.go:*PgStore:FinishMailAttachment",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "a4f3638d09f1b5196833fd4dedcfaa2c7ab7d447be77785aab313c72a5ee6bf5",
+      "after_sha256": "3a8dca6599bdca7a285a9c6700002d43c917cd1d55124181e6bf2fe30fc355ca",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.FinishMailAttachment",
+          "before_line": 281,
+          "after_line": 287
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/company_mail.go:*PgStore:GetWorkAttachment",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "4df73a3a716fa7b49e96911b23c68ec15daa865111b9e51cfc93c1dcc91c87de",
+      "after_sha256": "2c4488fd20bf06a14ae7547934d5b9abcf7117dd49e3e62859301cabbd4a7523",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:Attachment",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.GetWorkAttachment",
+          "before_line": 309,
+          "after_line": 317
+        },
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:Attachment",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.GetWorkAttachment",
+          "before_line": 324,
+          "after_line": 332
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/company_mail.go:*PgStore:ReserveMailAttachment",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "2d435e5bdc0c2c3a4713aa064e65f2835269fac3256fb9057469f3ab202c03e7",
+      "after_sha256": "87e8520b67b5a478029f41781b433c2f4a37cdcdeb92ec5a7a5e52869150f612",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.ReserveMailAttachment",
+          "before_line": 274,
+          "after_line": 280
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/company_members.go:*PgStore:GetWorkMailbox",
+      "before_count": 5,
+      "after_count": 5,
+      "before_sha256": "6a93c3676e6ad0742ac0d08d515c0ed65c97f787b554470d7d9ecbee966d633d",
+      "after_sha256": "7d935aa2c677bd78c75e21373fee7be2db1447d887519925a363a376427b3a51",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:sender",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.GetWorkMailbox",
+          "before_line": 237,
+          "after_line": 240
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/outbound.go:*PgStore:CreateOutboundAttempt",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "7145a597a9e70e19fdf373e1e031370c5e6afdb616b72ca8f147441fbec02a53",
+      "after_sha256": "23c1033fb023992062d4440e24d50443600bd1e44a9f676f33860d2db83e1ebb",
+      "locations": [
+        {
+          "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
+          "source": "internal/outbound/recipient_delivery.go",
+          "expression": "s.store.CreateOutboundAttempt",
+          "before_line": 71,
+          "after_line": 75
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/outbound.go:*PgStore:IsSuppressed",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "7d063984e9da11e3cca9ab983f5c977accb1fc42b60f8ba31e7b044d7329bfcc",
+      "after_sha256": "8bd1f0dcfb0c9ac7d9500247cc56b5825db17c6f4d770a9daba66b843caf5b62",
+      "locations": [
+        {
+          "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
+          "source": "internal/outbound/recipient_delivery.go",
+          "expression": "s.store.IsSuppressed",
+          "before_line": 59,
+          "after_line": 63
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/outbound.go:*PgStore:MarkOutboundJobFailed",
+      "before_count": 6,
+      "after_count": 6,
+      "before_sha256": "3de3e60735078525aa6f6f7ac097574311ae6e49a4b54e90514d8ea1c8367fe7",
+      "after_sha256": "52b632e4b5e3a26e1e19dec46df620bd868e689b2a9326bcc870d8f2e4dd03f9",
+      "locations": [
+        {
+          "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
+          "source": "internal/outbound/recipient_delivery.go",
+          "expression": "s.store.MarkOutboundJobFailed",
+          "before_line": 37,
+          "after_line": 38
+        },
+        {
+          "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
+          "source": "internal/outbound/recipient_delivery.go",
+          "expression": "s.store.MarkOutboundJobFailed",
+          "before_line": 41,
+          "after_line": 45
+        },
+        {
+          "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
+          "source": "internal/outbound/recipient_delivery.go",
+          "expression": "s.store.MarkOutboundJobFailed",
+          "before_line": 77,
+          "after_line": 81
+        },
+        {
+          "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
+          "source": "internal/outbound/recipient_delivery.go",
+          "expression": "s.store.MarkOutboundJobFailed",
+          "before_line": 111,
+          "after_line": 116
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/outbound.go:*PgStore:MarkOutboundJobSent",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "0f75ea4a9af9d92c0551e249a12968ac21d721a40f6f00f06e8e4bbd204e1337",
+      "after_sha256": "4e3469c0d0363350a844d06ffac7b832369a30b4c3e32e5f83f693acb40f9b98",
+      "locations": [
+        {
+          "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
+          "source": "internal/outbound/recipient_delivery.go",
+          "expression": "s.store.MarkOutboundJobSent",
+          "before_line": 113,
+          "after_line": 118
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/outbound_recipients.go:*PgStore:BeginOutboundRecipient",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "07d0e6ecf565f161cf90757e660b3c8d3411f2e873e4ebe2d53044fa5b8fe2cf",
+      "after_sha256": "bd91bf245d4f1b2234d62ac96a2ddcd63779e43dd4a4333ae0f7f7f633676fc9",
+      "locations": [
+        {
+          "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
+          "source": "internal/outbound/recipient_delivery.go",
+          "expression": "st.BeginOutboundRecipient",
+          "before_line": 48,
+          "after_line": 52
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/outbound_recipients.go:*PgStore:CompleteOutboundRecipient",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "28ba8ae41dbca605b734fbbd7422d57f7d1a97d75b2ea743a677ce63d71ef8e8",
+      "after_sha256": "bfe2c0f8f763cab170fba0f2206fef89a31a6e867ce55396a6e5e892465c1847",
+      "locations": [
+        {
+          "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
+          "source": "internal/outbound/recipient_delivery.go",
+          "expression": "st.CompleteOutboundRecipient",
+          "before_line": 96,
+          "after_line": 100
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/postgres.go:*PgStore:Close",
+      "before_count": 152,
+      "after_count": 152,
+      "before_sha256": "9f146823762cbe01144040967b4a8fdc03090d349ca69c90619153c255f9b570",
+      "after_sha256": "4c799de9aaee7a5a34858a1f8116ccc068177728ee016caa04a4122bcb47466f",
+      "locations": [
+        {
+          "caller_id": "internal/outbound/delivery.go::deliverDirectMXTLS",
+          "source": "internal/outbound/delivery.go",
+          "expression": "client.Close",
+          "before_line": 137,
+          "after_line": 138
+        },
+        {
+          "caller_id": "internal/outbound/delivery.go::deliverDirectMXTLS",
+          "source": "internal/outbound/delivery.go",
+          "expression": "client.Close",
+          "before_line": 142,
+          "after_line": 149
+        },
+        {
+          "caller_id": "internal/outbound/delivery.go::deliverRelayTLS",
+          "source": "internal/outbound/delivery.go",
+          "expression": "client.Close",
+          "before_line": 46,
+          "after_line": 47
+        },
+        {
+          "caller_id": "internal/outbound/delivery.go::deliverRelayTLS",
+          "source": "internal/outbound/delivery.go",
+          "expression": "conn.Close",
+          "before_line": 43,
+          "after_line": 44
+        },
+        {
+          "caller_id": "internal/outbound/delivery.go::sendSMTP",
+          "source": "internal/outbound/delivery.go",
+          "expression": "w.Close",
+          "before_line": 184,
+          "after_line": 191
+        }
+      ],
+      "added": [
+        {
+          "caller_id": "internal/app/companymail/attachment_read.go::readOwnedAttachment",
+          "file": "internal/app/companymail/attachment_read.go",
+          "function": "readOwnedAttachment",
+          "line": 19,
+          "expression": "input.Close",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ],
+      "removed": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:verifiedFile",
+          "file": "internal/app/companymail/service.go",
+          "function": "verifiedFile",
+          "line": 300,
+          "expression": "r.Close",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ]
+    },
+    {
+      "id": "internal/store/postgres/postgres.go::New",
+      "before_count": 174,
+      "after_count": 173,
+      "before_sha256": "d41e7f1928ac97f59d32e6273b082466fb77964740d3c22b0082cd0e67ec70a0",
+      "after_sha256": "6ff253f321c0da014e2e3106b62724fdae06e65dbc392b0936f5f8d6441bf8a3",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
+          "source": "internal/app/companymail/service.go",
+          "expression": "errors.New",
+          "before_line": 265,
+          "after_line": 268
+        },
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:verifiedFile",
+          "source": "internal/app/companymail/service.go",
+          "expression": "errors.New",
+          "before_line": 294,
+          "after_line": 300
+        },
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:verifiedFile",
+          "source": "internal/app/companymail/service.go",
+          "expression": "errors.New",
+          "before_line": 303,
+          "after_line": 311
+        },
+        {
+          "caller_id": "internal/mailcontent/parser.go:*Parser:load",
+          "source": "internal/mailcontent/parser.go",
+          "expression": "errors.New",
+          "before_line": 86,
+          "after_line": 90
+        },
+        {
+          "caller_id": "internal/mailcontent/parser.go::New",
+          "source": "internal/mailcontent/parser.go",
+          "expression": "list.New",
+          "before_line": 55,
+          "after_line": 59
+        },
+        {
+          "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
+          "source": "internal/outbound/recipient_delivery.go",
+          "expression": "uuid.New",
+          "before_line": 71,
+          "after_line": 75
+        }
+      ],
+      "added": [],
+      "removed": [
+        {
+          "caller_id": "internal/mailcontent/parser.go:*Parser:Attachment",
+          "file": "internal/mailcontent/parser.go",
+          "function": "Attachment",
+          "line": 221,
+          "expression": "errors.New",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ]
+    },
+    {
+      "id": "internal/store/postgres/submissions.go:*PgStore:GetSubmissionAttachment",
+      "before_count": 2,
+      "after_count": 2,
+      "before_sha256": "0e7a5737c1dcf2b0afdad51bd1111fcb4ce4db65c0592df3e168025ec9184ba1",
+      "after_sha256": "6e1a6fd5d65d85013462095eb3e99ea04b6f833f82d5543ea8a50949f6bbcee7",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachment",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.GetSubmissionAttachment",
+          "before_line": 343,
+          "after_line": 351
+        },
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachment",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.GetSubmissionAttachment",
+          "before_line": 359,
+          "after_line": 367
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/submissions.go:*PgStore:GetSubmissionContent",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "ac8728c5f2fcd2780884dead8eead7a96cc140c1760f52f236813e315f60c1ab",
+      "after_sha256": "821d3fa371354fe8dbe6ae402bc74615d5303b10db2a35997b974df97b275164",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:SubmissionContent",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.GetSubmissionContent",
+          "before_line": 335,
+          "after_line": 343
+        }
+      ],
+      "added": [],
+      "removed": []
+    },
+    {
+      "id": "internal/store/postgres/submissions.go:*PgStore:ListSubmissionAttachments",
+      "before_count": 1,
+      "after_count": 1,
+      "before_sha256": "9ca24a288e3fa7f25a93c9d8f728711297058b747c9d6569723981d30645b246",
+      "after_sha256": "6d79ebfc32a55a7607680e74e26e7fad37a04987e7bb2e4a3adab721d3d51413",
+      "locations": [
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachments",
+          "source": "internal/app/companymail/service.go",
+          "expression": "s.repo.ListSubmissionAttachments",
+          "before_line": 339,
+          "after_line": 347
+        }
+      ],
+      "added": [],
+      "removed": []
+    }
+  ],
+  "changed_closure_paths": [
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+    "web/app/(dashboard)/company/recovery/page.tsx",
+    "web/lib/api/base.ts"
+  ],
+  "source_provenance_checks": [
+    {
+      "path": "internal/app/companymail/attachment_read.go",
+      "valid": true,
+      "commits": [
+        {
+          "commit": "ec1e2b5c5536f0513a6d7a757012c9befb05f75c",
+          "ancestor_of_source": true,
+          "changes_claimed_path": true,
+          "subject_matches": true
+        }
+      ]
+    },
+    {
+      "path": "internal/app/companymail/service.go",
+      "valid": true,
+      "commits": [
+        {
+          "commit": "49facad80dabf5ef4754d37e964bdfbb3876e0a5",
+          "ancestor_of_source": true,
+          "changes_claimed_path": true,
+          "subject_matches": true
+        },
+        {
+          "commit": "ec1e2b5c5536f0513a6d7a757012c9befb05f75c",
+          "ancestor_of_source": true,
+          "changes_claimed_path": true,
+          "subject_matches": true
+        }
+      ]
+    },
+    {
+      "path": "internal/mailcontent/parser.go",
+      "valid": true,
+      "commits": [
+        {
+          "commit": "49facad80dabf5ef4754d37e964bdfbb3876e0a5",
+          "ancestor_of_source": true,
+          "changes_claimed_path": true,
+          "subject_matches": true
+        }
+      ]
+    },
+    {
+      "path": "internal/outbound/delivery.go",
+      "valid": true,
+      "commits": [
+        {
+          "commit": "54dd44534e8f49155c2682827b87da6f376bdca9",
+          "ancestor_of_source": true,
+          "changes_claimed_path": true,
+          "subject_matches": true
+        },
+        {
+          "commit": "43e48bdd7bf2b8fad408b89a696634b4832ee2ad",
+          "ancestor_of_source": true,
+          "changes_claimed_path": true,
+          "subject_matches": true
+        }
+      ]
+    },
+    {
+      "path": "internal/outbound/recipient_delivery.go",
+      "valid": true,
+      "commits": [
+        {
+          "commit": "ae35c883f235060508ef25f54cf34554a90356de",
+          "ancestor_of_source": true,
+          "changes_claimed_path": true,
+          "subject_matches": true
+        }
+      ]
+    },
+    {
+      "path": "web/app/(dashboard)/company/recovery/page.tsx",
+      "valid": true,
+      "commits": [
+        {
+          "commit": "8181f13905cc8edd9d7478a62173422368b25fe2",
+          "ancestor_of_source": true,
+          "changes_claimed_path": true,
+          "subject_matches": true
+        },
+        {
+          "commit": "63931188530214708e05e74497f59ddb28285e14",
+          "ancestor_of_source": true,
+          "changes_claimed_path": true,
+          "subject_matches": true
+        }
+      ]
+    },
+    {
+      "path": "web/lib/api/base.ts",
+      "valid": true,
+      "commits": [
+        {
+          "commit": "cd39089e983c7da10a9f4a90c1a4cc91e163cbb8",
+          "ancestor_of_source": true,
+          "changes_claimed_path": true,
+          "subject_matches": true
+        }
+      ]
+    }
+  ],
+  "raw_log_checks": [
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/transactions-baseline.log",
+      "reported_exit_code": 1,
+      "sha256": "4a3d33b6adcc3664381889862e42427288c7b6f043e0cd09925bb72e58c05b16",
+      "sha256_matches": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/compatibility-baseline.log",
+      "reported_exit_code": 1,
+      "sha256": "a954d20d64d0e992b5e1fb6ce6fc0867a1871be7f54fd7426290df24c454da55",
+      "sha256_matches": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/clients-baseline.log",
+      "reported_exit_code": 1,
+      "sha256": "cb6689d856439375bbae4ab9d8c8715328ba9dd4203489bbde6b8b34d1ea83c0",
+      "sha256_matches": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/transactions-current.log",
+      "reported_exit_code": 0,
+      "sha256": "517448bd669e67d3c12da0b4e94ef95e34bf2c94d156a3aadabc4b2a464c80fe",
+      "sha256_matches": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/compatibility-current.log",
+      "reported_exit_code": 0,
+      "sha256": "677f536dea0eccc18aba48fb1134bf11abab8c980e362691fb8a01a9bd29d4db",
+      "sha256_matches": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/clients-current.log",
+      "reported_exit_code": 0,
+      "sha256": "b5e92b0af9e25b23eb3f0ba9fd2ded8ff3a1fca31020a69cb91e0ab94000c5db",
+      "sha256_matches": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/scanner-current.log",
+      "reported_exit_code": 0,
+      "sha256": "de60b47c422ed3ad96abad4280595b749fe5947fe3cdd6640859c2a9af176fa6",
+      "sha256_matches": true
+    }
+  ],
+  "all_readonly_checks_passed": true,
+  "failed_checks": [],
+  "review_environment_observations": {
+    "git_status_during_readonly_review": "?? scripts/__pycache__/check_r5_compatibility.cpython-312.pyc\n?? scripts/__pycache__/check_r5_transactions.cpython-312.pyc\n?? scripts/__pycache__/r5_go_environment.cpython-312.pyc\n?? scripts/__pycache__/r5_private_diagnostics.cpython-312.pyc\n?? scripts/tests/__pycache__/test_r5_catalog_reconciliation.cpython-312.pyc\n",
+    "untracked_files_only": "Observed Python bytecode cache directories; no repository module was imported by this reviewer and no tracked source/catalog/test bytes differ. Their creator was not attributed.",
+    "fixed_commit_is_review_authority": true,
+    "ci_preexisting_difference": "company-p0.yml already changed during 4065 -> e325 for frontend evidence capture and post-failure validation scheduling; that earlier change is outside this catalog patch. This review does not claim CI remained identical across the whole implementation wave.",
+    "source_runner_policy": "Both source-runner scripts remain byte-identical to revision3 and the current product parent; the catalog patch does not edit CI."
+  },
+  "initial_overbroad_observations": {
+    "fixed_head_parent_tree_clean": false,
+    "source_runner_and_ci_unchanged_since_revision3": false,
+    "resolution": "Separated fixed Git-object identity from unrelated untracked bytecode, and compared catalog CI changes to its actual e325 parent while separately checking source-runner history. No repository file or check was changed."
+  },
+  "author_execution_evidence_observed": {
+    "python_module_counts": {
+      "test_r5_transactions": 26,
+      "test_r5_compatibility": 19,
+      "test_r5_catalog_reconciliation": 11,
+      "test_r5_current_source_inventory": 15
+    },
+    "python_runtime_seconds": 68.166,
+    "python_reexecuted_by_reviewer": false,
+    "scanner_reexecuted_by_reviewer": false,
+    "original_clis_reexecuted_by_reviewer": false,
+    "scanner_passed": 27,
+    "scanner_failed": 0,
+    "scanner_skipped": 0,
+    "old_cli_exit_codes": [
+      1,
+      1,
+      1
+    ],
+    "current_cli_and_scanner_exit_codes": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "git_diff_check": {
+    "argv": [
+      "git",
+      "diff",
+      "--check",
+      "e32564304c0c84aa80b1184e72129fb0316d989d",
+      "7254f12e833051ce4a6bb6d4cb145db4795f3adc"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "decision": "ACCEPT",
+  "qualification_boundary": "Catalog/source inventory review only. Does not grant new runtime/current-wire/dependency/release or parent-task acceptance, and is not an eleventh implementation item."
+}

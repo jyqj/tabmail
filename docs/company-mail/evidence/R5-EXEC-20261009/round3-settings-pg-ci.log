@@ -1,0 +1,1036 @@
+﻿2026-10-09T04:14:24.1128057Z Current runner version: '2.337.0'
+2026-10-09T04:14:24.1153981Z ##[group]Runner Image Provisioner
+2026-10-09T04:14:24.1154975Z Hosted Compute Agent
+2026-10-09T04:14:24.1155793Z Version: 20261002.596
+2026-10-09T04:14:24.1156546Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-09T04:14:24.1157306Z Build Date: 2026-10-02T22:28:27Z
+2026-10-09T04:14:24.1158000Z Worker ID: {8c92cc12-669f-41ff-a9d0-3f520272d963}
+2026-10-09T04:14:24.1158764Z Region: westus3
+2026-10-09T04:14:24.1159311Z Cloud: Azure
+2026-10-09T04:14:24.1159859Z ##[endgroup]
+2026-10-09T04:14:24.1161425Z ##[group]Operating System
+2026-10-09T04:14:24.1162095Z Ubuntu
+2026-10-09T04:14:24.1162701Z 24.04.5
+2026-10-09T04:14:24.1163219Z LTS
+2026-10-09T04:14:24.1163807Z ##[endgroup]
+2026-10-09T04:14:24.1164423Z ##[group]Runner Image
+2026-10-09T04:14:24.1165028Z Image: ubuntu-24.04
+2026-10-09T04:14:24.1165864Z Version: 20261004.327.1
+2026-10-09T04:14:24.1167172Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-09T04:14:24.1168858Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+2026-10-09T04:14:24.1169853Z ##[endgroup]
+2026-10-09T04:14:24.1171023Z ##[group]GITHUB_TOKEN Permissions
+2026-10-09T04:14:24.1173022Z Contents: read
+2026-10-09T04:14:24.1173708Z Metadata: read
+2026-10-09T04:14:24.1174302Z ##[endgroup]
+2026-10-09T04:14:24.1177114Z Secret source: Actions
+2026-10-09T04:14:24.1178188Z Cache mode: write
+2026-10-09T04:14:24.1178927Z Prepare workflow directory
+2026-10-09T04:14:24.1647752Z Prepare all required actions
+2026-10-09T04:14:24.1696801Z Getting action download info
+2026-10-09T04:14:24.4741306Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-09T04:14:24.6301582Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+2026-10-09T04:14:25.4184050Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-09T04:14:25.6324205Z Complete job name: settings-seed
+2026-10-09T04:14:25.6865109Z ##[group]Checking docker version
+2026-10-09T04:14:25.6878621Z ##[command]/usr/bin/docker version --format '{{.Server.APIVersion}}'
+2026-10-09T04:14:25.7953068Z '1.48'
+2026-10-09T04:14:25.7965477Z Docker daemon API version: '1.48'
+2026-10-09T04:14:25.7966784Z ##[command]/usr/bin/docker version --format '{{.Client.APIVersion}}'
+2026-10-09T04:14:25.8132115Z '1.48'
+2026-10-09T04:14:25.8145516Z Docker client API version: '1.48'
+2026-10-09T04:14:25.8152394Z ##[endgroup]
+2026-10-09T04:14:25.8155528Z ##[group]Clean up resources from previous jobs
+2026-10-09T04:14:25.8161919Z ##[command]/usr/bin/docker ps --all --quiet --no-trunc --filter "label=1bd6db"
+2026-10-09T04:14:25.8307424Z ##[command]/usr/bin/docker network prune --force --filter "label=1bd6db"
+2026-10-09T04:14:25.8431531Z ##[endgroup]
+2026-10-09T04:14:25.8432128Z ##[group]Create local container network
+2026-10-09T04:14:25.8442685Z ##[command]/usr/bin/docker network create --label 1bd6db github_network_b0ca814053064bf5902dc6be0fc80dde
+2026-10-09T04:14:25.8960586Z e91e7ac23be0768e587bd39c2d5b6b9f8ef94f26597ce94cf70e2afffbf0f38f
+2026-10-09T04:14:25.8977942Z ##[endgroup]
+2026-10-09T04:14:25.9004043Z ##[group]Starting postgres service container
+2026-10-09T04:14:25.9025995Z ##[command]/usr/bin/docker pull postgres:16
+2026-10-09T04:14:26.6945106Z 16: Pulling from library/postgres
+2026-10-09T04:14:26.9181563Z ecc510c1e359: Pulling fs layer
+2026-10-09T04:14:26.9183837Z 79faf13a8736: Pulling fs layer
+2026-10-09T04:14:26.9185263Z 6456bfbf35e7: Pulling fs layer
+2026-10-09T04:14:26.9194076Z b353db459ed1: Pulling fs layer
+2026-10-09T04:14:26.9195478Z 99f49de4fe2b: Pulling fs layer
+2026-10-09T04:14:26.9197037Z 83d1a2a3917c: Pulling fs layer
+2026-10-09T04:14:26.9198292Z 715ea0948cb1: Pulling fs layer
+2026-10-09T04:14:26.9199382Z 486e8305f56f: Pulling fs layer
+2026-10-09T04:14:26.9200464Z e7d675f11ded: Pulling fs layer
+2026-10-09T04:14:26.9201535Z c49864c27f35: Pulling fs layer
+2026-10-09T04:14:26.9203195Z 770ef8b308ea: Pulling fs layer
+2026-10-09T04:14:26.9204268Z 50c25daa0302: Pulling fs layer
+2026-10-09T04:14:26.9205405Z 8309db3ae5b6: Pulling fs layer
+2026-10-09T04:14:26.9206691Z 9731e27f2541: Pulling fs layer
+2026-10-09T04:14:26.9207705Z b353db459ed1: Waiting
+2026-10-09T04:14:26.9208687Z 99f49de4fe2b: Waiting
+2026-10-09T04:14:26.9209594Z e7d675f11ded: Waiting
+2026-10-09T04:14:26.9210497Z c49864c27f35: Waiting
+2026-10-09T04:14:26.9211383Z 770ef8b308ea: Waiting
+2026-10-09T04:14:26.9212276Z 50c25daa0302: Waiting
+2026-10-09T04:14:26.9213183Z 83d1a2a3917c: Waiting
+2026-10-09T04:14:26.9214215Z 715ea0948cb1: Waiting
+2026-10-09T04:14:26.9215922Z 486e8305f56f: Waiting
+2026-10-09T04:14:26.9217333Z 8309db3ae5b6: Waiting
+2026-10-09T04:14:26.9218679Z 9731e27f2541: Waiting
+2026-10-09T04:14:27.1002989Z 79faf13a8736: Verifying Checksum
+2026-10-09T04:14:27.1007423Z 79faf13a8736: Download complete
+2026-10-09T04:14:27.1295284Z 6456bfbf35e7: Verifying Checksum
+2026-10-09T04:14:27.1297795Z 6456bfbf35e7: Download complete
+2026-10-09T04:14:27.1952652Z ecc510c1e359: Verifying Checksum
+2026-10-09T04:14:27.1954344Z ecc510c1e359: Download complete
+2026-10-09T04:14:27.2828116Z b353db459ed1: Verifying Checksum
+2026-10-09T04:14:27.2830301Z b353db459ed1: Download complete
+2026-10-09T04:14:27.3451839Z 99f49de4fe2b: Download complete
+2026-10-09T04:14:27.3925997Z 83d1a2a3917c: Verifying Checksum
+2026-10-09T04:14:27.3930380Z 83d1a2a3917c: Download complete
+2026-10-09T04:14:27.4514547Z 715ea0948cb1: Verifying Checksum
+2026-10-09T04:14:27.4519796Z 715ea0948cb1: Download complete
+2026-10-09T04:14:27.5235084Z 486e8305f56f: Download complete
+2026-10-09T04:14:27.6333017Z c49864c27f35: Verifying Checksum
+2026-10-09T04:14:27.6341516Z c49864c27f35: Download complete
+2026-10-09T04:14:27.7055451Z 770ef8b308ea: Verifying Checksum
+2026-10-09T04:14:27.7058239Z 770ef8b308ea: Download complete
+2026-10-09T04:14:27.8104679Z 50c25daa0302: Verifying Checksum
+2026-10-09T04:14:27.8117114Z 50c25daa0302: Download complete
+2026-10-09T04:14:27.8896191Z 8309db3ae5b6: Verifying Checksum
+2026-10-09T04:14:27.8897221Z 8309db3ae5b6: Download complete
+2026-10-09T04:14:27.9872259Z e7d675f11ded: Verifying Checksum
+2026-10-09T04:14:27.9873804Z e7d675f11ded: Download complete
+2026-10-09T04:14:27.9908586Z 9731e27f2541: Verifying Checksum
+2026-10-09T04:14:27.9909437Z 9731e27f2541: Download complete
+2026-10-09T04:14:28.3877153Z ecc510c1e359: Pull complete
+2026-10-09T04:14:28.6785470Z 79faf13a8736: Pull complete
+2026-10-09T04:14:28.8561182Z 6456bfbf35e7: Pull complete
+2026-10-09T04:14:28.8951085Z b353db459ed1: Pull complete
+2026-10-09T04:14:29.1935113Z 99f49de4fe2b: Pull complete
+2026-10-09T04:14:29.2707098Z 83d1a2a3917c: Pull complete
+2026-10-09T04:14:29.2779820Z 715ea0948cb1: Pull complete
+2026-10-09T04:14:29.2886662Z 486e8305f56f: Pull complete
+2026-10-09T04:14:32.2830335Z e7d675f11ded: Pull complete
+2026-10-09T04:14:32.2986714Z c49864c27f35: Pull complete
+2026-10-09T04:14:32.3096002Z 770ef8b308ea: Pull complete
+2026-10-09T04:14:32.3178633Z 50c25daa0302: Pull complete
+2026-10-09T04:14:32.3266007Z 8309db3ae5b6: Pull complete
+2026-10-09T04:14:32.3362871Z 9731e27f2541: Pull complete
+2026-10-09T04:14:32.3402521Z Digest: sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d
+2026-10-09T04:14:32.3419129Z Status: Downloaded newer image for postgres:16
+2026-10-09T04:14:32.3427912Z docker.io/library/postgres:16
+2026-10-09T04:14:32.3488291Z ##[command]/usr/bin/docker create --name c63eb9ea37e2453298679fcfc1e81e1b_postgres16_41b54d --label 1bd6db --network github_network_b0ca814053064bf5902dc6be0fc80dde --network-alias postgres -p 5432:5432 --health-cmd "pg_isready -U tabmail_test -d tabmail_test" --health-interval 5s --health-timeout 5s --health-retries 12 -e "POSTGRES_USER=tabmail_test" -e "POSTGRES_PASSWORD=disposable-test-password" -e "POSTGRES_DB=tabmail_test" -e GITHUB_ACTIONS=true -e CI=true postgres:16
+2026-10-09T04:14:32.3735394Z 4491e3ae6d6b7ba655368be68645a59fb01d640aaea89c843dc6bf2f62405f4d
+2026-10-09T04:14:32.3758719Z ##[command]/usr/bin/docker start 4491e3ae6d6b7ba655368be68645a59fb01d640aaea89c843dc6bf2f62405f4d
+2026-10-09T04:14:32.5904175Z 4491e3ae6d6b7ba655368be68645a59fb01d640aaea89c843dc6bf2f62405f4d
+2026-10-09T04:14:32.5923049Z ##[command]/usr/bin/docker ps --all --filter id=4491e3ae6d6b7ba655368be68645a59fb01d640aaea89c843dc6bf2f62405f4d --filter status=running --no-trunc --format "{{.ID}} {{.Status}}"
+2026-10-09T04:14:32.6060983Z 4491e3ae6d6b7ba655368be68645a59fb01d640aaea89c843dc6bf2f62405f4d Up Less than a second (health: starting)
+2026-10-09T04:14:32.6086124Z ##[command]/usr/bin/docker port 4491e3ae6d6b7ba655368be68645a59fb01d640aaea89c843dc6bf2f62405f4d
+2026-10-09T04:14:32.6223048Z 5432/tcp -> 0.0.0.0:5432
+2026-10-09T04:14:32.6223371Z 5432/tcp -> [::]:5432
+2026-10-09T04:14:32.6278622Z ##[endgroup]
+2026-10-09T04:14:32.6287726Z ##[group]Waiting for all services to be ready
+2026-10-09T04:14:32.6301558Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" 4491e3ae6d6b7ba655368be68645a59fb01d640aaea89c843dc6bf2f62405f4d
+2026-10-09T04:14:32.6440078Z starting
+2026-10-09T04:14:32.6460984Z postgres service is starting, waiting 2 seconds before checking again.
+2026-10-09T04:14:34.6464732Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" 4491e3ae6d6b7ba655368be68645a59fb01d640aaea89c843dc6bf2f62405f4d
+2026-10-09T04:14:34.6587648Z starting
+2026-10-09T04:14:34.6600050Z postgres service is starting, waiting 4 seconds before checking again.
+2026-10-09T04:14:38.8013903Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" 4491e3ae6d6b7ba655368be68645a59fb01d640aaea89c843dc6bf2f62405f4d
+2026-10-09T04:14:38.8134969Z healthy
+2026-10-09T04:14:38.8149608Z postgres service is healthy.
+2026-10-09T04:14:38.8150297Z ##[endgroup]
+2026-10-09T04:14:38.8534170Z ##[group]Run actions/checkout@v4
+2026-10-09T04:14:38.8534738Z with:
+2026-10-09T04:14:38.8534958Z   persist-credentials: false
+2026-10-09T04:14:38.8535231Z   fetch-depth: 0
+2026-10-09T04:14:38.8535436Z   repository: jyqj/tabmail
+2026-10-09T04:14:38.8538199Z   token: ***
+2026-10-09T04:14:38.8538403Z   ssh-strict: true
+2026-10-09T04:14:38.8538604Z   ssh-user: git
+2026-10-09T04:14:38.8538789Z   clean: true
+2026-10-09T04:14:38.8538992Z   sparse-checkout-cone-mode: true
+2026-10-09T04:14:38.8539243Z   fetch-tags: false
+2026-10-09T04:14:38.8539448Z   show-progress: true
+2026-10-09T04:14:38.8539647Z   lfs: false
+2026-10-09T04:14:38.8539825Z   submodules: false
+2026-10-09T04:14:38.8540030Z   set-safe-directory: true
+2026-10-09T04:14:38.8540263Z   allow-unsafe-pr-checkout: false
+2026-10-09T04:14:38.8540746Z env:
+2026-10-09T04:14:38.8540934Z   GOSUMDB: sum.golang.org
+2026-10-09T04:14:38.8541157Z   GODEBUG: asynctimerchan=0
+2026-10-09T04:14:38.8541792Z   TABMAIL_TEST_DB_DSN: ***localhost:5432/tabmail_test?sslmode=disable
+2026-10-09T04:14:38.8542133Z ##[endgroup]
+2026-10-09T04:14:38.9573271Z Syncing repository: jyqj/tabmail
+2026-10-09T04:14:38.9574816Z ##[group]Getting Git version info
+2026-10-09T04:14:38.9575291Z Working directory is '/home/runner/work/tabmail/tabmail'
+2026-10-09T04:14:38.9576259Z [command]/usr/bin/git version
+2026-10-09T04:14:38.9666475Z git version 2.55.0
+2026-10-09T04:14:38.9688333Z ##[endgroup]
+2026-10-09T04:14:38.9702694Z Temporarily overriding HOME='/home/runner/work/_temp/a8462b44-d0b8-44e8-9db1-63a6d98779f0' before making global git config changes
+2026-10-09T04:14:38.9704009Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T04:14:38.9708077Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/tabmail/tabmail
+2026-10-09T04:14:38.9762101Z Deleting the contents of '/home/runner/work/tabmail/tabmail'
+2026-10-09T04:14:38.9766250Z ##[group]Initializing the repository
+2026-10-09T04:14:38.9770447Z [command]/usr/bin/git init /home/runner/work/tabmail/tabmail
+2026-10-09T04:14:38.9890217Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-09T04:14:38.9891227Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-09T04:14:38.9891778Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-09T04:14:38.9892186Z hint: call:
+2026-10-09T04:14:38.9892437Z hint:
+2026-10-09T04:14:38.9892921Z hint: 	git config --global init.defaultBranch <name>
+2026-10-09T04:14:38.9893528Z hint:
+2026-10-09T04:14:38.9893911Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-09T04:14:38.9894606Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-09T04:14:38.9895334Z hint:
+2026-10-09T04:14:38.9896009Z hint: 	git branch -m <name>
+2026-10-09T04:14:38.9896455Z hint:
+2026-10-09T04:14:38.9897081Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-09T04:14:38.9898321Z Initialized empty Git repository in /home/runner/work/tabmail/tabmail/.git/
+2026-10-09T04:14:38.9907278Z [command]/usr/bin/git remote add origin https://github.com/jyqj/tabmail
+2026-10-09T04:14:38.9957295Z ##[endgroup]
+2026-10-09T04:14:38.9957959Z ##[group]Disabling automatic garbage collection
+2026-10-09T04:14:38.9962240Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-09T04:14:38.9990888Z ##[endgroup]
+2026-10-09T04:14:38.9991411Z ##[group]Setting up auth
+2026-10-09T04:14:38.9997746Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T04:14:39.0027755Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T04:14:39.0403070Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T04:14:39.0436737Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T04:14:39.0655378Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T04:14:39.0690495Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T04:14:39.0917316Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-09T04:14:39.0952866Z ##[endgroup]
+2026-10-09T04:14:39.0953447Z ##[group]Fetching the repository
+2026-10-09T04:14:39.0963081Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +e7f80316b25dba2cf0a35996bd45c00c62443668:refs/remotes/pull/224/merge
+2026-10-09T04:14:43.9883805Z From https://github.com/jyqj/tabmail
+2026-10-09T04:14:43.9884733Z  * [new branch]      audit-pr21-41b015c                       -> origin/audit-pr21-41b015c
+2026-10-09T04:14:43.9886568Z  * [new branch]      candidate/r5-consumer-adapter-20261004   -> origin/candidate/r5-consumer-adapter-20261004
+2026-10-09T04:14:43.9888036Z  * [new branch]      candidate/r5-consumer-adapter-corrected-20261004 -> origin/candidate/r5-consumer-adapter-corrected-20261004
+2026-10-09T04:14:43.9889444Z  * [new branch]      candidate/r5-consumer-classifier-contract-20261004 -> origin/candidate/r5-consumer-classifier-contract-20261004
+2026-10-09T04:14:43.9890394Z  * [new branch]      candidate/r5-consumer-generated-provenance-20261004 -> origin/candidate/r5-consumer-generated-provenance-20261004
+2026-10-09T04:14:43.9891173Z  * [new branch]      candidate/r5-runtime-v3-20261004         -> origin/candidate/r5-runtime-v3-20261004
+2026-10-09T04:14:43.9891818Z  * [new branch]      candidate/r5-slice4-batch-20261004       -> origin/candidate/r5-slice4-batch-20261004
+2026-10-09T04:14:43.9892538Z  * [new branch]      candidate/slice4-bridge-caller-20261004  -> origin/candidate/slice4-bridge-caller-20261004
+2026-10-09T04:14:43.9893313Z  * [new branch]      chore/company-mail-r5-checkpoint-20260930 -> origin/chore/company-mail-r5-checkpoint-20260930
+2026-10-09T04:14:43.9894403Z  * [new branch]      chore/selected-v3-metadata-gate-20261004-pnkZA9ce -> origin/chore/selected-v3-metadata-gate-20261004-pnkZA9ce
+2026-10-09T04:14:43.9895176Z  * [new branch]      ci/company-mail-r5-wiring-20261003       -> origin/ci/company-mail-r5-wiring-20261003
+2026-10-09T04:14:43.9896341Z  * [new branch]      cloud/r5-source-integration-20261004     -> origin/cloud/r5-source-integration-20261004
+2026-10-09T04:14:43.9897752Z  * [new branch]      cloud/r5-union-components-f52-20261004-prestart-c741 -> origin/cloud/r5-union-components-f52-20261004-prestart-c741
+2026-10-09T04:14:43.9899163Z  * [new branch]      cloud/r5-union-dbhttp-f52-20261004-0449  -> origin/cloud/r5-union-dbhttp-f52-20261004-0449
+2026-10-09T04:14:43.9900454Z  * [new branch]      cloud/r5-union-default-f52-20261004-0441 -> origin/cloud/r5-union-default-f52-20261004-0441
+2026-10-09T04:14:43.9901600Z  * [new branch]      codex/pe-independent-review              -> origin/codex/pe-independent-review
+2026-10-09T04:14:43.9902629Z  * [new branch]      codex/pe-shared-adapter                  -> origin/codex/pe-shared-adapter
+2026-10-09T04:14:43.9903801Z  * [new branch]      codex/r5-approved-catalog-reconciliation-20261004 -> origin/codex/r5-approved-catalog-reconciliation-20261004
+2026-10-09T04:14:43.9904631Z  * [new branch]      codex/r5-compatibility-source-boundary   -> origin/codex/r5-compatibility-source-boundary
+2026-10-09T04:14:43.9905336Z  * [new branch]      codex/r5-compile-stability-20261004      -> origin/codex/r5-compile-stability-20261004
+2026-10-09T04:14:43.9906575Z  * [new branch]      codex/r5-current-wire-20261003           -> origin/codex/r5-current-wire-20261003
+2026-10-09T04:14:43.9907551Z  * [new branch]      codex/r5-env-evidence-20261004           -> origin/codex/r5-env-evidence-20261004
+2026-10-09T04:14:43.9908522Z  * [new branch]      codex/r5-external-runtime-20261003       -> origin/codex/r5-external-runtime-20261003
+2026-10-09T04:14:43.9909177Z  * [new branch]      codex/r5-v3-preparation-slice2           -> origin/codex/r5-v3-preparation-slice2
+2026-10-09T04:14:43.9909833Z  * [new branch]      design/r5-v3-consumer-opt-in-20261004    -> origin/design/r5-v3-consumer-opt-in-20261004
+2026-10-09T04:14:43.9910468Z  * [new branch]      docs/r5-archive-boundary-v1              -> origin/docs/r5-archive-boundary-v1
+2026-10-09T04:14:43.9911155Z  * [new branch]      evidence/r5-catalog-rev11-3a-20261008-b8f95a -> origin/evidence/r5-catalog-rev11-3a-20261008-b8f95a
+2026-10-09T04:14:43.9912145Z  * [new branch]      experiment/goose-buffer-64k              -> origin/experiment/goose-buffer-64k
+2026-10-09T04:14:43.9913292Z  * [new branch]      feat/r5-archive-boundary-v1              -> origin/feat/r5-archive-boundary-v1
+2026-10-09T04:14:43.9914619Z  * [new branch]      feat/runtime-batch-validation            -> origin/feat/runtime-batch-validation
+2026-10-09T04:14:43.9915980Z  * [new branch]      fix/auth-body-limit-20261005             -> origin/fix/auth-body-limit-20261005
+2026-10-09T04:14:43.9917200Z  * [new branch]      fix/batch-supervisor-lifecycle-20261004  -> origin/fix/batch-supervisor-lifecycle-20261004
+2026-10-09T04:14:43.9918483Z  * [new branch]      fix/browser-reply-journey-20261003       -> origin/fix/browser-reply-journey-20261003
+2026-10-09T04:14:43.9919761Z  * [new branch]      fix/compose-query-completion-20261005    -> origin/fix/compose-query-completion-20261005
+2026-10-09T04:14:43.9921055Z  * [new branch]      fix/compose-send-lifecycle-20261005      -> origin/fix/compose-send-lifecycle-20261005
+2026-10-09T04:14:43.9922218Z  * [new branch]      fix/direct-null-mx-20261006              -> origin/fix/direct-null-mx-20261006
+2026-10-09T04:14:43.9923420Z  * [new branch]      fix/draft-reload-serialization-20261005  -> origin/fix/draft-reload-serialization-20261005
+2026-10-09T04:14:43.9924733Z  * [new branch]      fix/editor-opening-ownership-20261005    -> origin/fix/editor-opening-ownership-20261005
+2026-10-09T04:14:43.9934130Z  * [new branch]      fix/lf01-frozen-offboarding              -> origin/fix/lf01-frozen-offboarding
+2026-10-09T04:14:43.9935350Z  * [new branch]      fix/live-content-refresh-20261005        -> origin/fix/live-content-refresh-20261005
+2026-10-09T04:14:43.9936855Z  * [new branch]      fix/mail-reader-invalidation-20261004    -> origin/fix/mail-reader-invalidation-20261004
+2026-10-09T04:14:43.9938273Z  * [new branch]      fix/message-action-reconciliation-20261005 -> origin/fix/message-action-reconciliation-20261005
+2026-10-09T04:14:43.9939704Z  * [new branch]      fix/offboarding-successor-authz          -> origin/fix/offboarding-successor-authz
+2026-10-09T04:14:43.9940851Z  * [new branch]      fix/pr21-client-inventory                -> origin/fix/pr21-client-inventory
+2026-10-09T04:14:43.9941964Z  * [new branch]      fix/pr21-harness-lint-41b015c            -> origin/fix/pr21-harness-lint-41b015c
+2026-10-09T04:14:43.9943219Z  * [new branch]      fix/profile-refresh-three-way-20261003   -> origin/fix/profile-refresh-three-way-20261003
+2026-10-09T04:14:43.9944637Z  * [new branch]      fix/r5-benchmark-strict-evidence-20261001 -> origin/fix/r5-benchmark-strict-evidence-20261001
+2026-10-09T04:14:43.9946270Z  * [new branch]      fix/r5-descriptor-tests                  -> origin/fix/r5-descriptor-tests
+2026-10-09T04:14:43.9947376Z  * [new branch]      fix/r5-excluded-metadata                 -> origin/fix/r5-excluded-metadata
+2026-10-09T04:14:43.9948269Z  * [new branch]      fix/r5-fixture-owner-join                -> origin/fix/r5-fixture-owner-join
+2026-10-09T04:14:43.9948968Z  * [new branch]      fix/r5-legacy-recipients-alias-20261003  -> origin/fix/r5-legacy-recipients-alias-20261003
+2026-10-09T04:14:43.9949628Z  * [new branch]      fix/r5-pe-seed-f875                      -> origin/fix/r5-pe-seed-f875
+2026-10-09T04:14:43.9950473Z  * [new branch]      fix/r5-rc-receipt-contract-20261003      -> origin/fix/r5-rc-receipt-contract-20261003
+2026-10-09T04:14:43.9951166Z  * [new branch]      fix/r5-receipt-inspection-test-gate      -> origin/fix/r5-receipt-inspection-test-gate
+2026-10-09T04:14:43.9951889Z  * [new branch]      fix/r5-receipt-surface-contract-20261003 -> origin/fix/r5-receipt-surface-contract-20261003
+2026-10-09T04:14:43.9952557Z  * [new branch]      fix/r5-router-touch-oracle               -> origin/fix/r5-router-touch-oracle
+2026-10-09T04:14:43.9953192Z  * [new branch]      fix/r5-schema16-benchmark-fixtures       -> origin/fix/r5-schema16-benchmark-fixtures
+2026-10-09T04:14:43.9953898Z  * [new branch]      fix/r5-selected-source-binding-20261003  -> origin/fix/r5-selected-source-binding-20261003
+2026-10-09T04:14:43.9954613Z  * [new branch]      fix/r5-shared-receipt-legacy-20261003    -> origin/fix/r5-shared-receipt-legacy-20261003
+2026-10-09T04:14:43.9955327Z  * [new branch]      fix/r5-source-excluded-metadata-20261003 -> origin/fix/r5-source-excluded-metadata-20261003
+2026-10-09T04:14:43.9956369Z  * [new branch]      fix/r5-source-runner-preparation         -> origin/fix/r5-source-runner-preparation
+2026-10-09T04:14:43.9957009Z  * [new branch]      fix/r5-stream-transport                  -> origin/fix/r5-stream-transport
+2026-10-09T04:14:43.9957599Z  * [new branch]      fix/r5-transaction-inventory             -> origin/fix/r5-transaction-inventory
+2026-10-09T04:14:43.9958225Z  * [new branch]      fix/r5-v3-producer-path-20261004         -> origin/fix/r5-v3-producer-path-20261004
+2026-10-09T04:14:43.9958917Z  * [new branch]      fix/r5-v3-rejection-evidence-20261004    -> origin/fix/r5-v3-rejection-evidence-20261004
+2026-10-09T04:14:43.9959629Z  * [new branch]      fix/receipt-aggregate-refresh-20261005   -> origin/fix/receipt-aggregate-refresh-20261005
+2026-10-09T04:14:43.9960340Z  * [new branch]      fix/recipient-reload-display-20261005    -> origin/fix/recipient-reload-display-20261005
+2026-10-09T04:14:43.9961065Z  * [new branch]      fix/selected-attestation-stable-capture  -> origin/fix/selected-attestation-stable-capture
+2026-10-09T04:14:43.9961771Z  * [new branch]      fix/sent-action-lifecycle-20261005       -> origin/fix/sent-action-lifecycle-20261005
+2026-10-09T04:14:43.9962568Z  * [new branch]      fix/smtp-data-cause-20261006             -> origin/fix/smtp-data-cause-20261006
+2026-10-09T04:14:43.9963159Z  * [new branch]      fix/smtp-owner-logger-gate               -> origin/fix/smtp-owner-logger-gate
+2026-10-09T04:14:43.9964076Z  * [new branch]      fix/sse-framing-20261004                 -> origin/fix/sse-framing-20261004
+2026-10-09T04:14:43.9965203Z  * [new branch]      fix/subject-wire-encoding-20261006       -> origin/fix/subject-wire-encoding-20261006
+2026-10-09T04:14:43.9966659Z  * [new branch]      fix/tabmail-exec-round3-20261009         -> origin/fix/tabmail-exec-round3-20261009
+2026-10-09T04:14:43.9967966Z  * [new branch]      fix/tabmail-followup-recovery-20261008   -> origin/fix/tabmail-followup-recovery-20261008
+2026-10-09T04:14:43.9969267Z  * [new branch]      integration/catalog-v3-frozen-20261004   -> origin/integration/catalog-v3-frozen-20261004
+2026-10-09T04:14:43.9970563Z  * [new branch]      integration/company-mail-r5-20261003     -> origin/integration/company-mail-r5-20261003
+2026-10-09T04:14:43.9971935Z  * [new branch]      integration/company-mail-r5-batch2-20261003 -> origin/integration/company-mail-r5-batch2-20261003
+2026-10-09T04:14:43.9973407Z  * [new branch]      integration/company-mail-r5-batch3-20261003 -> origin/integration/company-mail-r5-batch3-20261003
+2026-10-09T04:14:43.9975244Z  * [new branch]      integration/company-mail-r5-batch4-20261003 -> origin/integration/company-mail-r5-batch4-20261003
+2026-10-09T04:14:43.9976950Z  * [new branch]      integration/company-mail-r5-batch5-20261003 -> origin/integration/company-mail-r5-batch5-20261003
+2026-10-09T04:14:43.9978723Z  * [new branch]      integration/company-mail-r5-pr-management-20261007 -> origin/integration/company-mail-r5-pr-management-20261007
+2026-10-09T04:14:43.9980226Z  * [new branch]      integration/pe-lf-components-20261004    -> origin/integration/pe-lf-components-20261004
+2026-10-09T04:14:43.9981871Z  * [new branch]      integration/r5-consumer-slices23-20261004 -> origin/integration/r5-consumer-slices23-20261004
+2026-10-09T04:14:43.9983208Z  * [new branch]      integration/r5-slice4-combined-20261004  -> origin/integration/r5-slice4-combined-20261004
+2026-10-09T04:14:43.9984532Z  * [new branch]      integration/r5-source-combined-20261003  -> origin/integration/r5-source-combined-20261003
+2026-10-09T04:14:43.9986057Z  * [new branch]      investigate/pe03-profile-editor          -> origin/investigate/pe03-profile-editor
+2026-10-09T04:14:43.9987006Z  * [new branch]      main                                     -> origin/main
+2026-10-09T04:14:43.9987928Z  * [new branch]      prep/source-policy-20261003              -> origin/prep/source-policy-20261003
+2026-10-09T04:14:43.9989041Z  * [new branch]      r5-cloud-background-20261003             -> origin/r5-cloud-background-20261003
+2026-10-09T04:14:43.9990140Z  * [new branch]      r5-cloud-smtp-owner-20261003             -> origin/r5-cloud-smtp-owner-20261003
+2026-10-09T04:14:43.9991247Z  * [new branch]      r5-permission-audit-20261003             -> origin/r5-permission-audit-20261003
+2026-10-09T04:14:43.9992432Z  * [new branch]      r5-source-v3-pure-isolated-20261003      -> origin/r5-source-v3-pure-isolated-20261003
+2026-10-09T04:14:43.9993711Z  * [new branch]      r5/formal-components-f875-20261004       -> origin/r5/formal-components-f875-20261004
+2026-10-09T04:14:43.9995008Z  * [new branch]      review/external-batch-independent-20261004 -> origin/review/external-batch-independent-20261004
+2026-10-09T04:14:43.9996709Z  * [new branch]      review/independent-frontend-7a43654      -> origin/review/independent-frontend-7a43654
+2026-10-09T04:14:43.9998130Z  * [new branch]      review/offboarding-pair-independent-20261004 -> origin/review/offboarding-pair-independent-20261004
+2026-10-09T04:14:43.9999557Z  * [new branch]      review/r5-archive-fixed-0c1f4f6          -> origin/review/r5-archive-fixed-0c1f4f6
+2026-10-09T04:14:44.0000892Z  * [new branch]      review/r5-catalog-independent-cloud-20261004 -> origin/review/r5-catalog-independent-cloud-20261004
+2026-10-09T04:14:44.0002578Z  * [new branch]      review/r5-classifier-independent-20261004 -> origin/review/r5-classifier-independent-20261004
+2026-10-09T04:14:44.0003946Z  * [new branch]      review/r5-corrected-independent-20261004 -> origin/review/r5-corrected-independent-20261004
+2026-10-09T04:14:44.0005228Z  * [new branch]      review/r5-env-independent-20261004       -> origin/review/r5-env-independent-20261004
+2026-10-09T04:14:44.0006833Z  * [new branch]      review/r5-env-p2-delta-independent-20261004 -> origin/review/r5-env-p2-delta-independent-20261004
+2026-10-09T04:14:44.0008230Z  * [new branch]      review/r5-generated-independent-20261004 -> origin/review/r5-generated-independent-20261004
+2026-10-09T04:14:44.0009498Z  * [new branch]      review/r5-independent-20261004           -> origin/review/r5-independent-20261004
+2026-10-09T04:14:44.0010948Z  * [new branch]      review/r5-preparation-slice2-independent-20261004 -> origin/review/r5-preparation-slice2-independent-20261004
+2026-10-09T04:14:44.0012272Z  * [new branch]      review/r5-runtime-v3-slice3-independent-20261004 -> origin/review/r5-runtime-v3-slice3-independent-20261004
+2026-10-09T04:14:44.0013692Z  * [new branch]      review/r5-slice4-batch-independent-20261004 -> origin/review/r5-slice4-batch-independent-20261004
+2026-10-09T04:14:44.0015032Z  * [new branch]      review/r5-slice5-independent-20261004    -> origin/review/r5-slice5-independent-20261004
+2026-10-09T04:14:44.0016699Z  * [new branch]      review/selected-attestation-v1-independent-20261003 -> origin/review/selected-attestation-v1-independent-20261003
+2026-10-09T04:14:44.0018174Z  * [new branch]      review/slice4-bridge-independent-20261004 -> origin/review/slice4-bridge-independent-20261004
+2026-10-09T04:14:44.0019947Z  * [new branch]      review/source-excluded-independent-20261003 -> origin/review/source-excluded-independent-20261003
+2026-10-09T04:14:44.0021043Z  * [new branch]      tooling/selected-binding-v3-20261004     -> origin/tooling/selected-binding-v3-20261004
+2026-10-09T04:14:44.0021759Z  * [new branch]      verification/r5-slice5-closure-20261004  -> origin/verification/r5-slice5-closure-20261004
+2026-10-09T04:14:44.0022549Z  * [new branch]      verification/r5-slice5-physical-plan-v2-20261004 -> origin/verification/r5-slice5-physical-plan-v2-20261004
+2026-10-09T04:14:44.0023315Z  * [new branch]      work/company-mail-r5-goal-20260930       -> origin/work/company-mail-r5-goal-20260930
+2026-10-09T04:14:44.0024009Z  * [new branch]      work/r5-followup-round3-source-20261007  -> origin/work/r5-followup-round3-source-20261007
+2026-10-09T04:14:44.0024642Z  * [new tag]         archive/codex-deep-authz                 -> archive/codex-deep-authz
+2026-10-09T04:14:44.0025222Z  * [new tag]         archive/ingress-operations-console       -> archive/ingress-operations-console
+2026-10-09T04:14:44.0026359Z  * [new tag]         baseline/company-mail-r4-20260928        -> baseline/company-mail-r4-20260928
+2026-10-09T04:14:44.0027450Z  * [new tag]         baseline/company-mail-r5-b01u-20260930   -> baseline/company-mail-r5-b01u-20260930
+2026-10-09T04:14:44.0028346Z  * [new tag]         v1.0.0                                   -> v1.0.0
+2026-10-09T04:14:44.0028778Z  * [new ref]         e7f80316b25dba2cf0a35996bd45c00c62443668 -> pull/224/merge
+2026-10-09T04:14:44.0029843Z ##[endgroup]
+2026-10-09T04:14:44.0030192Z ##[group]Determining the checkout info
+2026-10-09T04:14:44.0030605Z ##[endgroup]
+2026-10-09T04:14:44.0030831Z [command]/usr/bin/git sparse-checkout disable
+2026-10-09T04:14:44.0031494Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-09T04:14:44.0032244Z ##[group]Checking out the ref
+2026-10-09T04:14:44.0032607Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/224/merge
+2026-10-09T04:14:44.4058107Z Note: switching to 'refs/remotes/pull/224/merge'.
+2026-10-09T04:14:44.4058565Z 
+2026-10-09T04:14:44.4058928Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-09T04:14:44.4060105Z changes and commit them, and you can discard any commits you make in this
+2026-10-09T04:14:44.4060903Z state without impacting any branches by switching back to a branch.
+2026-10-09T04:14:44.4061357Z 
+2026-10-09T04:14:44.4061640Z If you want to create a new branch to retain commits you create, you may
+2026-10-09T04:14:44.4062324Z do so (now or later) by using -c with the switch command. Example:
+2026-10-09T04:14:44.4062742Z 
+2026-10-09T04:14:44.4062912Z   git switch -c <new-branch-name>
+2026-10-09T04:14:44.4063187Z 
+2026-10-09T04:14:44.4063351Z Or undo this operation with:
+2026-10-09T04:14:44.4063614Z 
+2026-10-09T04:14:44.4063746Z   git switch -
+2026-10-09T04:14:44.4063945Z 
+2026-10-09T04:14:44.4064308Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-09T04:14:44.4064827Z 
+2026-10-09T04:14:44.4065401Z HEAD is now at e7f8031 Merge a0c61d24b17030577566b120a7ddd810506b25e7 into ff43326e81f262daaac7b3dfd8b3047a8f51743b
+2026-10-09T04:14:44.4099841Z ##[endgroup]
+2026-10-09T04:14:44.4149197Z [command]/usr/bin/git log -1 --format=%H
+2026-10-09T04:14:44.4173616Z e7f80316b25dba2cf0a35996bd45c00c62443668
+2026-10-09T04:14:44.4184014Z ##[group]Removing auth
+2026-10-09T04:14:44.4188492Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T04:14:44.4219853Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T04:14:44.4441602Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T04:14:44.4466286Z http.https://github.com/.extraheader
+2026-10-09T04:14:44.4475478Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-09T04:14:44.4507100Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T04:14:44.4733259Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T04:14:44.4762977Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T04:14:44.4985362Z ##[endgroup]
+2026-10-09T04:14:44.5211239Z ##[group]Run actions/setup-go@v5
+2026-10-09T04:14:44.5211529Z with:
+2026-10-09T04:14:44.5211737Z   go-version-file: go.mod
+2026-10-09T04:14:44.5211975Z   check-latest: false
+2026-10-09T04:14:44.5214443Z   token: ***
+2026-10-09T04:14:44.5214643Z   cache: true
+2026-10-09T04:14:44.5214827Z env:
+2026-10-09T04:14:44.5215014Z   GOSUMDB: sum.golang.org
+2026-10-09T04:14:44.5215256Z   GODEBUG: asynctimerchan=0
+2026-10-09T04:14:44.5216147Z   TABMAIL_TEST_DB_DSN: ***localhost:5432/tabmail_test?sslmode=disable
+2026-10-09T04:14:44.5216515Z ##[endgroup]
+2026-10-09T04:14:44.6500386Z Setup go version spec 1.25.7
+2026-10-09T04:14:44.6512544Z Attempting to download 1.25.7...
+2026-10-09T04:14:44.6655274Z (node:2819) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T04:14:44.6656633Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T04:14:45.6311485Z matching 1.25.7...
+2026-10-09T04:14:45.6385032Z Acquiring 1.25.7 from https://github.com/actions/go-versions/releases/download/1.25.7-21696103256/go-1.25.7-linux-x64.tar.gz
+2026-10-09T04:14:46.3160173Z Extracting Go...
+2026-10-09T04:14:46.3286754Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/046870d2-f1a7-45d4-b511-bdc313d2b55c -f /home/runner/work/_temp/77b163ee-f4ee-4410-a8ca-8d847306e11d
+2026-10-09T04:14:47.7877165Z Successfully extracted go to /home/runner/work/_temp/046870d2-f1a7-45d4-b511-bdc313d2b55c
+2026-10-09T04:14:47.7878024Z Adding to the cache ...
+2026-10-09T04:14:53.2279014Z Successfully cached go to /opt/hostedtoolcache/go/1.25.7/x64
+2026-10-09T04:14:53.2282227Z Added go to the path
+2026-10-09T04:14:53.2285207Z Successfully set up Go version 1.25.7
+2026-10-09T04:14:53.2486236Z [command]/opt/hostedtoolcache/go/1.25.7/x64/bin/go env GOMODCACHE
+2026-10-09T04:14:53.2535948Z [command]/opt/hostedtoolcache/go/1.25.7/x64/bin/go env GOCACHE
+2026-10-09T04:14:53.2574335Z /home/runner/go/pkg/mod
+2026-10-09T04:14:53.2591564Z /home/runner/.cache/go-build
+2026-10-09T04:14:53.4695208Z Cache hit for: setup-go-Linux-x64-ubuntu24-go-1.25.7-4513745f7b95ab0bc8e1f9edd24c294514fb4a9ee51f2290b342654582d5d782
+2026-10-09T04:14:53.4797284Z (node:2819) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T04:14:54.6817193Z Received 33554432 of 266857975 (12.6%), 32.0 MBs/sec
+2026-10-09T04:14:55.6823184Z Received 192937984 of 266857975 (72.3%), 91.9 MBs/sec
+2026-10-09T04:14:56.1226164Z Received 266857975 of 266857975 (100.0%), 104.2 MBs/sec
+2026-10-09T04:14:56.1227224Z Cache Size: ~254 MB (266857975 B)
+2026-10-09T04:14:56.1386467Z [command]/usr/bin/tar -xf /home/runner/work/_temp/bcb21034-8b60-4486-afd6-3127a1dea38a/cache.tzst -P -C /home/runner/work/tabmail/tabmail --use-compress-program unzstd
+2026-10-09T04:14:57.9587212Z Cache restored successfully
+2026-10-09T04:14:57.9754407Z Cache restored from key: setup-go-Linux-x64-ubuntu24-go-1.25.7-4513745f7b95ab0bc8e1f9edd24c294514fb4a9ee51f2290b342654582d5d782
+2026-10-09T04:14:57.9796240Z go version go1.25.7 linux/amd64
+2026-10-09T04:14:57.9811085Z 
+2026-10-09T04:14:57.9811775Z ##[group]go env
+2026-10-09T04:14:57.9974980Z AR='ar'
+2026-10-09T04:14:57.9975377Z CC='gcc'
+2026-10-09T04:14:57.9976166Z CGO_CFLAGS='-O2 -g'
+2026-10-09T04:14:57.9976516Z CGO_CPPFLAGS=''
+2026-10-09T04:14:57.9976751Z CGO_CXXFLAGS='-O2 -g'
+2026-10-09T04:14:57.9977046Z CGO_ENABLED='1'
+2026-10-09T04:14:57.9977264Z CGO_FFLAGS='-O2 -g'
+2026-10-09T04:14:57.9977507Z CGO_LDFLAGS='-O2 -g'
+2026-10-09T04:14:57.9977937Z CXX='g++'
+2026-10-09T04:14:57.9978511Z GCCGO='gccgo'
+2026-10-09T04:14:57.9978919Z GO111MODULE=''
+2026-10-09T04:14:57.9979276Z GOAMD64='v1'
+2026-10-09T04:14:57.9979622Z GOARCH='amd64'
+2026-10-09T04:14:57.9979981Z GOAUTH='netrc'
+2026-10-09T04:14:57.9980336Z GOBIN=''
+2026-10-09T04:14:57.9980706Z GOCACHE='/home/runner/.cache/go-build'
+2026-10-09T04:14:57.9981487Z GOCACHEPROG=''
+2026-10-09T04:14:57.9981886Z GODEBUG='asynctimerchan=0'
+2026-10-09T04:14:57.9982334Z GOENV='/home/runner/.config/go/env'
+2026-10-09T04:14:57.9982768Z GOEXE=''
+2026-10-09T04:14:57.9983088Z GOEXPERIMENT=''
+2026-10-09T04:14:57.9983432Z GOFIPS140='off'
+2026-10-09T04:14:57.9983770Z GOFLAGS=''
+2026-10-09T04:14:57.9984748Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build4215620919=/tmp/go-build -gno-record-gcc-switches'
+2026-10-09T04:14:57.9985434Z GOHOSTARCH='amd64'
+2026-10-09T04:14:57.9985991Z GOHOSTOS='linux'
+2026-10-09T04:14:57.9986356Z GOINSECURE=''
+2026-10-09T04:14:57.9986772Z GOMOD='/home/runner/work/tabmail/tabmail/go.mod'
+2026-10-09T04:14:57.9987129Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-10-09T04:14:57.9987399Z GONOPROXY=''
+2026-10-09T04:14:57.9987608Z GONOSUMDB=''
+2026-10-09T04:14:57.9987794Z GOOS='linux'
+2026-10-09T04:14:57.9987995Z GOPATH='/home/runner/go'
+2026-10-09T04:14:57.9988222Z GOPRIVATE=''
+2026-10-09T04:14:57.9988488Z GOPROXY='https://proxy.golang.org,direct'
+2026-10-09T04:14:57.9988822Z GOROOT='/opt/hostedtoolcache/go/1.25.7/x64'
+2026-10-09T04:14:57.9989116Z GOSUMDB='sum.golang.org'
+2026-10-09T04:14:57.9989358Z GOTELEMETRY='local'
+2026-10-09T04:14:57.9989620Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-10-09T04:14:57.9989927Z GOTMPDIR=''
+2026-10-09T04:14:57.9990122Z GOTOOLCHAIN='auto'
+2026-10-09T04:14:57.9990445Z GOTOOLDIR='/opt/hostedtoolcache/go/1.25.7/x64/pkg/tool/linux_amd64'
+2026-10-09T04:14:57.9990800Z GOVCS=''
+2026-10-09T04:14:57.9991002Z GOVERSION='go1.25.7'
+2026-10-09T04:14:57.9991412Z GOWORK=''
+2026-10-09T04:14:57.9991617Z PKG_CONFIG='pkg-config'
+2026-10-09T04:14:57.9991763Z 
+2026-10-09T04:14:57.9992038Z ##[endgroup]
+2026-10-09T04:14:58.0198626Z ##[group]Run python3 -B -m unittest discover -s scripts/tests -p test_r5_settings_seed.py -v
+2026-10-09T04:14:58.0199355Z [36;1mpython3 -B -m unittest discover -s scripts/tests -p test_r5_settings_seed.py -v[0m
+2026-10-09T04:14:58.0415044Z shell: /usr/bin/bash -e {0}
+2026-10-09T04:14:58.0415344Z env:
+2026-10-09T04:14:58.0415852Z   GOSUMDB: sum.golang.org
+2026-10-09T04:14:58.0416147Z   GODEBUG: asynctimerchan=0
+2026-10-09T04:14:58.0416933Z   TABMAIL_TEST_DB_DSN: ***localhost:5432/tabmail_test?sslmode=disable
+2026-10-09T04:14:58.0417352Z ##[endgroup]
+2026-10-09T04:14:58.1547583Z test_accepts_exact_baseline_six_pass_two_fail_and_candidate_eight_pass (test_r5_settings_seed.SettingsSeedVerifierTest.test_accepts_exact_baseline_six_pass_two_fail_and_candidate_eight_pass) ... ok
+2026-10-09T04:14:58.1592352Z test_rejects_connection_metadata_or_cleanup_failure_as_overwrite_evidence (test_r5_settings_seed.SettingsSeedVerifierTest.test_rejects_connection_metadata_or_cleanup_failure_as_overwrite_evidence) ... ok
+2026-10-09T04:14:58.1632127Z test_rejects_missing_duplicate_unfinished_and_skipped_results (test_r5_settings_seed.SettingsSeedVerifierTest.test_rejects_missing_duplicate_unfinished_and_skipped_results) ... ok
+2026-10-09T04:14:58.1658245Z test_rejects_source_assertions_outside_the_two_negative_leaves (test_r5_settings_seed.SettingsSeedVerifierTest.test_rejects_source_assertions_outside_the_two_negative_leaves) ... ok
+2026-10-09T04:14:58.1686160Z test_rejects_unrelated_package_build_race_and_panic_events (test_r5_settings_seed.SettingsSeedVerifierTest.test_rejects_unrelated_package_build_race_and_panic_events) ... ok
+2026-10-09T04:14:58.1727389Z test_rejects_wrong_failure_set_and_exit_status (test_r5_settings_seed.SettingsSeedVerifierTest.test_rejects_wrong_failure_set_and_exit_status) ... ok
+2026-10-09T04:14:58.1728436Z 
+2026-10-09T04:14:58.1728758Z ----------------------------------------------------------------------
+2026-10-09T04:14:58.1729303Z Ran 6 tests in 0.020s
+2026-10-09T04:14:58.1729540Z 
+2026-10-09T04:14:58.1729668Z OK
+2026-10-09T04:14:58.1857112Z ##[group]Run set -euo pipefail
+2026-10-09T04:14:58.1857469Z [36;1mset -euo pipefail[0m
+2026-10-09T04:14:58.1858035Z [36;1mgit worktree add --detach "$RUNNER_TEMP/tabmail-settings-seed-baseline" eae219951c6f9cbf17eb4062b69464c731807be7[0m
+2026-10-09T04:14:58.1858668Z [36;1mpython3 -B scripts/run_r5_settings_seed.py \[0m
+2026-10-09T04:14:58.1859145Z [36;1m  --baseline "$RUNNER_TEMP/tabmail-settings-seed-baseline" --candidate . \[0m
+2026-10-09T04:14:58.1859672Z [36;1m  --output "$RUNNER_TEMP/tabmail-settings-seed-evidence"[0m
+2026-10-09T04:14:58.1924311Z shell: /usr/bin/bash -e {0}
+2026-10-09T04:14:58.1924578Z env:
+2026-10-09T04:14:58.1924775Z   GOSUMDB: sum.golang.org
+2026-10-09T04:14:58.1925033Z   GODEBUG: asynctimerchan=0
+2026-10-09T04:14:58.1925900Z   TABMAIL_TEST_DB_DSN: ***localhost:5432/tabmail_test?sslmode=disable
+2026-10-09T04:14:58.1926283Z ##[endgroup]
+2026-10-09T04:14:58.2031984Z Preparing worktree (detached HEAD eae2199)
+2026-10-09T04:14:58.6528590Z HEAD is now at eae2199 Merge PR #211: fix verifier discovery and preserve exact source guards
+2026-10-09T04:15:26.8851018Z {"passed": true, "results": {"baseline": {"started_ids": ["TestR5SettingsSeedPGCancelledContext", "TestR5SettingsSeedPGConcurrentWrites", "TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write", "TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed", "TestR5SettingsSeedPGCreatesAbsentDefaults", "TestR5SettingsSeedPGPreservesExistingValues", "TestR5SettingsSeedPGPreservesExistingValues/empty", "TestR5SettingsSeedPGPreservesExistingValues/false", "TestR5SettingsSeedPGPreservesExistingValues/text", "TestR5SettingsSeedPGPreservesExistingValues/zero"], "leaf_count": 8, "passed": 6, "failed": 2, "skipped": 0, "exit_code": 1, "actual_overwrite_observations": ["r5_settings_seed_pg_test.go:147: EXEC07_STALE_SEED_OVERWROTE_COMMITTED_SETTING writer=concurrent_admin_write before_value=\"false\" after_value=\"true\" before_description=\"concurrent_admin_write committed choice\" after_description=\"first startup environment\" before_updated_at=2026-10-09T04:15:09.997526Z after_updated_at=2026-10-09T04:15:09.999462Z", "r5_settings_seed_pg_test.go:147: EXEC07_STALE_SEED_OVERWROTE_COMMITTED_SETTING writer=concurrent_startup_seed before_value=\"false\" after_value=\"true\" before_description=\"concurrent_startup_seed committed choice\" after_description=\"first startup environment\" before_updated_at=2026-10-09T04:15:10.595264Z after_updated_at=2026-10-09T04:15:10.596795Z"]}, "candidate": {"started_ids": ["TestR5SettingsSeedPGCancelledContext", "TestR5SettingsSeedPGConcurrentWrites", "TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write", "TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed", "TestR5SettingsSeedPGCreatesAbsentDefaults", "TestR5SettingsSeedPGPreservesExistingValues", "TestR5SettingsSeedPGPreservesExistingValues/empty", "TestR5SettingsSeedPGPreservesExistingValues/false", "TestR5SettingsSeedPGPreservesExistingValues/text", "TestR5SettingsSeedPGPreservesExistingValues/zero"], "leaf_count": 8, "passed": 8, "failed": 0, "skipped": 0, "exit_code": 0, "actual_overwrite_observations": []}}, "errors": {}}
+2026-10-09T04:15:26.8941531Z ##[group]Run python3 -B - <<'PY'
+2026-10-09T04:15:26.8941881Z [36;1mpython3 -B - <<'PY'[0m
+2026-10-09T04:15:26.8942135Z [36;1mimport os[0m
+2026-10-09T04:15:26.8942366Z [36;1mfrom pathlib import Path[0m
+2026-10-09T04:15:26.8942627Z [36;1mimport sys[0m
+2026-10-09T04:15:26.8942976Z [36;1mroot = Path(os.environ["RUNNER_TEMP"]) / "tabmail-settings-seed-evidence"[0m
+2026-10-09T04:15:26.8943423Z [36;1mfor path in sorted(root.rglob("*")):[0m
+2026-10-09T04:15:26.8943725Z [36;1m    if path.is_file():[0m
+2026-10-09T04:15:26.8944092Z [36;1m        print("EXEC07_RAW_BEGIN " + str(path.relative_to(root)), flush=True)[0m
+2026-10-09T04:15:26.8944545Z [36;1m        sys.stdout.buffer.write(path.read_bytes())[0m
+2026-10-09T04:15:26.8944894Z [36;1m        sys.stdout.buffer.flush()[0m
+2026-10-09T04:15:26.8945276Z [36;1m        print("\nEXEC07_RAW_END " + str(path.relative_to(root)), flush=True)[0m
+2026-10-09T04:15:26.8945919Z [36;1mPY[0m
+2026-10-09T04:15:26.9005917Z shell: /usr/bin/bash -e {0}
+2026-10-09T04:15:26.9006289Z env:
+2026-10-09T04:15:26.9006491Z   GOSUMDB: sum.golang.org
+2026-10-09T04:15:26.9006745Z   GODEBUG: asynctimerchan=0
+2026-10-09T04:15:26.9007542Z   TABMAIL_TEST_DB_DSN: ***localhost:5432/tabmail_test?sslmode=disable
+2026-10-09T04:15:26.9007916Z ##[endgroup]
+2026-10-09T04:15:26.9304996Z EXEC07_RAW_BEGIN baseline/execution.json
+2026-10-09T04:15:26.9305738Z {
+2026-10-09T04:15:26.9306154Z   "before": {
+2026-10-09T04:15:26.9306913Z     "commit": "af296a9bc415f19301c4bc211144960dcf0497b4",
+2026-10-09T04:15:26.9307864Z     "tree": "1386e731a4b6ed6c552e58bac427de3db2f78e15",
+2026-10-09T04:15:26.9309028Z     "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+2026-10-09T04:15:26.9309907Z   },
+2026-10-09T04:15:26.9310313Z   "after": {
+2026-10-09T04:15:26.9311031Z     "commit": "af296a9bc415f19301c4bc211144960dcf0497b4",
+2026-10-09T04:15:26.9311853Z     "tree": "1386e731a4b6ed6c552e58bac427de3db2f78e15",
+2026-10-09T04:15:26.9312888Z     "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+2026-10-09T04:15:26.9313404Z   },
+2026-10-09T04:15:26.9313655Z   "command": [
+2026-10-09T04:15:26.9313923Z     "go",
+2026-10-09T04:15:26.9314168Z     "test",
+2026-10-09T04:15:26.9314437Z     "-mod=readonly",
+2026-10-09T04:15:26.9314721Z     "-json",
+2026-10-09T04:15:26.9314978Z     "-race",
+2026-10-09T04:15:26.9315233Z     "-p",
+2026-10-09T04:15:26.9315479Z     "1",
+2026-10-09T04:15:26.9315985Z     "-count=1",
+2026-10-09T04:15:26.9316428Z     "-timeout=120s",
+2026-10-09T04:15:26.9316873Z     "-run",
+2026-10-09T04:15:26.9317373Z     "^TestR5SettingsSeedPG",
+2026-10-09T04:15:26.9317928Z     "./internal/settings"
+2026-10-09T04:15:26.9318711Z   ],
+2026-10-09T04:15:26.9319101Z   "exit_code": 1,
+2026-10-09T04:15:26.9319581Z   "timed_out": false,
+2026-10-09T04:15:26.9320447Z   "stdout_sha256": "057f43b31d7067d8a466510df1f14353dab2a74d5126381deaed880b52a32b9a",
+2026-10-09T04:15:26.9321751Z   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+2026-10-09T04:15:26.9322472Z }
+2026-10-09T04:15:26.9322632Z 
+2026-10-09T04:15:26.9322837Z EXEC07_RAW_END baseline/execution.json
+2026-10-09T04:15:26.9323418Z EXEC07_RAW_BEGIN baseline/go-test.jsonl
+2026-10-09T04:15:26.9324200Z {"Time":"2026-10-09T04:15:09.372768187Z","Action":"start","Package":"tabmail/internal/settings"}
+2026-10-09T04:15:26.9325883Z {"Time":"2026-10-09T04:15:09.39857341Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites"}
+2026-10-09T04:15:26.9327915Z {"Time":"2026-10-09T04:15:09.398624585Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites","Output":"=== RUN   TestR5SettingsSeedPGConcurrentWrites\n"}
+2026-10-09T04:15:26.9329789Z {"Time":"2026-10-09T04:15:09.398652347Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write"}
+2026-10-09T04:15:26.9331499Z {"Time":"2026-10-09T04:15:09.398656074Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write","Output":"=== RUN   TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write\n"}
+2026-10-09T04:15:26.9334344Z {"Time":"2026-10-09T04:15:10.000928841Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write","Output":"    r5_settings_seed_pg_test.go:147: EXEC07_STALE_SEED_OVERWROTE_COMMITTED_SETTING writer=concurrent_admin_write before_value=\"false\" after_value=\"true\" before_description=\"concurrent_admin_write committed choice\" after_description=\"first startup environment\" before_updated_at=2026-10-09T04:15:09.997526Z after_updated_at=2026-10-09T04:15:09.999462Z\n"}
+2026-10-09T04:15:26.9337570Z {"Time":"2026-10-09T04:15:10.041770686Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write","Output":"--- FAIL: TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write (0.64s)\n"}
+2026-10-09T04:15:26.9339063Z {"Time":"2026-10-09T04:15:10.041831249Z","Action":"fail","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write","Elapsed":0.64}
+2026-10-09T04:15:26.9340209Z {"Time":"2026-10-09T04:15:10.041894718Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed"}
+2026-10-09T04:15:26.9341625Z {"Time":"2026-10-09T04:15:10.041908213Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed","Output":"=== RUN   TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed\n"}
+2026-10-09T04:15:26.9344344Z {"Time":"2026-10-09T04:15:10.598099414Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed","Output":"    r5_settings_seed_pg_test.go:147: EXEC07_STALE_SEED_OVERWROTE_COMMITTED_SETTING writer=concurrent_startup_seed before_value=\"false\" after_value=\"true\" before_description=\"concurrent_startup_seed committed choice\" after_description=\"first startup environment\" before_updated_at=2026-10-09T04:15:10.595264Z after_updated_at=2026-10-09T04:15:10.596795Z\n"}
+2026-10-09T04:15:26.9347425Z {"Time":"2026-10-09T04:15:10.729003056Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed","Output":"--- FAIL: TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed (0.69s)\n"}
+2026-10-09T04:15:26.9348922Z {"Time":"2026-10-09T04:15:10.729040987Z","Action":"fail","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed","Elapsed":0.69}
+2026-10-09T04:15:26.9350417Z {"Time":"2026-10-09T04:15:10.729060583Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites","Output":"--- FAIL: TestR5SettingsSeedPGConcurrentWrites (1.33s)\n"}
+2026-10-09T04:15:26.9351630Z {"Time":"2026-10-09T04:15:10.729070271Z","Action":"fail","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites","Elapsed":1.33}
+2026-10-09T04:15:26.9352633Z {"Time":"2026-10-09T04:15:10.729137126Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues"}
+2026-10-09T04:15:26.9353870Z {"Time":"2026-10-09T04:15:10.729143157Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues\n"}
+2026-10-09T04:15:26.9355133Z {"Time":"2026-10-09T04:15:11.251870023Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/empty"}
+2026-10-09T04:15:26.9356990Z {"Time":"2026-10-09T04:15:11.251933451Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/empty","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues/empty\n"}
+2026-10-09T04:15:26.9358608Z {"Time":"2026-10-09T04:15:11.269524827Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/empty","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues/empty (0.02s)\n"}
+2026-10-09T04:15:26.9359985Z {"Time":"2026-10-09T04:15:11.26956402Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/empty","Elapsed":0.02}
+2026-10-09T04:15:26.9361051Z {"Time":"2026-10-09T04:15:11.269620946Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/false"}
+2026-10-09T04:15:26.9362338Z {"Time":"2026-10-09T04:15:11.269638799Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/false","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues/false\n"}
+2026-10-09T04:15:26.9363946Z {"Time":"2026-10-09T04:15:11.271100005Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/false","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues/false (0.00s)\n"}
+2026-10-09T04:15:26.9365301Z {"Time":"2026-10-09T04:15:11.27111873Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/false","Elapsed":0}
+2026-10-09T04:15:26.9367140Z {"Time":"2026-10-09T04:15:11.271141152Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/zero"}
+2026-10-09T04:15:26.9369756Z {"Time":"2026-10-09T04:15:11.271144859Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/zero","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues/zero\n"}
+2026-10-09T04:15:26.9371836Z {"Time":"2026-10-09T04:15:11.272486652Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/zero","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues/zero (0.00s)\n"}
+2026-10-09T04:15:26.9373219Z {"Time":"2026-10-09T04:15:11.272500538Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/zero","Elapsed":0}
+2026-10-09T04:15:26.9374292Z {"Time":"2026-10-09T04:15:11.272516738Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/text"}
+2026-10-09T04:15:26.9375882Z {"Time":"2026-10-09T04:15:11.272520224Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/text","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues/text\n"}
+2026-10-09T04:15:26.9377701Z {"Time":"2026-10-09T04:15:11.27386252Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/text","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues/text (0.00s)\n"}
+2026-10-09T04:15:26.9379070Z {"Time":"2026-10-09T04:15:11.273903787Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/text","Elapsed":0}
+2026-10-09T04:15:26.9380434Z {"Time":"2026-10-09T04:15:11.402278281Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues (0.67s)\n"}
+2026-10-09T04:15:26.9381744Z {"Time":"2026-10-09T04:15:11.402355896Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues","Elapsed":0.67}
+2026-10-09T04:15:26.9382772Z {"Time":"2026-10-09T04:15:11.402375352Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCreatesAbsentDefaults"}
+2026-10-09T04:15:26.9383991Z {"Time":"2026-10-09T04:15:11.402385631Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCreatesAbsentDefaults","Output":"=== RUN   TestR5SettingsSeedPGCreatesAbsentDefaults\n"}
+2026-10-09T04:15:26.9385874Z {"Time":"2026-10-09T04:15:11.975335287Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCreatesAbsentDefaults","Output":"--- PASS: TestR5SettingsSeedPGCreatesAbsentDefaults (0.57s)\n"}
+2026-10-09T04:15:26.9387283Z {"Time":"2026-10-09T04:15:11.97541224Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCreatesAbsentDefaults","Elapsed":0.57}
+2026-10-09T04:15:26.9388282Z {"Time":"2026-10-09T04:15:11.975452605Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCancelledContext"}
+2026-10-09T04:15:26.9389450Z {"Time":"2026-10-09T04:15:11.975464107Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCancelledContext","Output":"=== RUN   TestR5SettingsSeedPGCancelledContext\n"}
+2026-10-09T04:15:26.9390861Z {"Time":"2026-10-09T04:15:12.548743501Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCancelledContext","Output":"--- PASS: TestR5SettingsSeedPGCancelledContext (0.57s)\n"}
+2026-10-09T04:15:26.9392082Z {"Time":"2026-10-09T04:15:12.548804515Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCancelledContext","Elapsed":0.57}
+2026-10-09T04:15:26.9392954Z {"Time":"2026-10-09T04:15:12.548817589Z","Action":"output","Package":"tabmail/internal/settings","Output":"FAIL\n"}
+2026-10-09T04:15:26.9393791Z {"Time":"2026-10-09T04:15:12.553890724Z","Action":"output","Package":"tabmail/internal/settings","Output":"FAIL\ttabmail/internal/settings\t3.181s\n"}
+2026-10-09T04:15:26.9394603Z {"Time":"2026-10-09T04:15:12.553916432Z","Action":"fail","Package":"tabmail/internal/settings","Elapsed":3.181}
+2026-10-09T04:15:26.9394995Z 
+2026-10-09T04:15:26.9395135Z EXEC07_RAW_END baseline/go-test.jsonl
+2026-10-09T04:15:26.9395434Z EXEC07_RAW_BEGIN baseline/go-test.stderr
+2026-10-09T04:15:26.9395853Z 
+2026-10-09T04:15:26.9395973Z EXEC07_RAW_END baseline/go-test.stderr
+2026-10-09T04:15:26.9396264Z EXEC07_RAW_BEGIN baseline/verified.json
+2026-10-09T04:15:26.9396524Z {
+2026-10-09T04:15:26.9396707Z   "before": {
+2026-10-09T04:15:26.9397015Z     "commit": "af296a9bc415f19301c4bc211144960dcf0497b4",
+2026-10-09T04:15:26.9397414Z     "tree": "1386e731a4b6ed6c552e58bac427de3db2f78e15",
+2026-10-09T04:15:26.9397914Z     "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+2026-10-09T04:15:26.9398301Z   },
+2026-10-09T04:15:26.9398486Z   "after": {
+2026-10-09T04:15:26.9398772Z     "commit": "af296a9bc415f19301c4bc211144960dcf0497b4",
+2026-10-09T04:15:26.9399155Z     "tree": "1386e731a4b6ed6c552e58bac427de3db2f78e15",
+2026-10-09T04:15:26.9399645Z     "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+2026-10-09T04:15:26.9400168Z   },
+2026-10-09T04:15:26.9400355Z   "command": [
+2026-10-09T04:15:26.9400562Z     "go",
+2026-10-09T04:15:26.9400746Z     "test",
+2026-10-09T04:15:26.9400950Z     "-mod=readonly",
+2026-10-09T04:15:26.9401172Z     "-json",
+2026-10-09T04:15:26.9401361Z     "-race",
+2026-10-09T04:15:26.9401553Z     "-p",
+2026-10-09T04:15:26.9401738Z     "1",
+2026-10-09T04:15:26.9401932Z     "-count=1",
+2026-10-09T04:15:26.9402145Z     "-timeout=120s",
+2026-10-09T04:15:26.9402351Z     "-run",
+2026-10-09T04:15:26.9402576Z     "^TestR5SettingsSeedPG",
+2026-10-09T04:15:26.9402840Z     "./internal/settings"
+2026-10-09T04:15:26.9403051Z   ],
+2026-10-09T04:15:26.9403235Z   "exit_code": 1,
+2026-10-09T04:15:26.9403493Z   "timed_out": false,
+2026-10-09T04:15:26.9403907Z   "stdout_sha256": "057f43b31d7067d8a466510df1f14353dab2a74d5126381deaed880b52a32b9a",
+2026-10-09T04:15:26.9404510Z   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+2026-10-09T04:15:26.9404919Z   "results": {
+2026-10-09T04:15:26.9405144Z     "started_ids": [
+2026-10-09T04:15:26.9405449Z       "TestR5SettingsSeedPGCancelledContext",
+2026-10-09T04:15:26.9406050Z       "TestR5SettingsSeedPGConcurrentWrites",
+2026-10-09T04:15:26.9406533Z       "TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write",
+2026-10-09T04:15:26.9407226Z       "TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed",
+2026-10-09T04:15:26.9407716Z       "TestR5SettingsSeedPGCreatesAbsentDefaults",
+2026-10-09T04:15:26.9408143Z       "TestR5SettingsSeedPGPreservesExistingValues",
+2026-10-09T04:15:26.9408602Z       "TestR5SettingsSeedPGPreservesExistingValues/empty",
+2026-10-09T04:15:26.9409080Z       "TestR5SettingsSeedPGPreservesExistingValues/false",
+2026-10-09T04:15:26.9409540Z       "TestR5SettingsSeedPGPreservesExistingValues/text",
+2026-10-09T04:15:26.9410001Z       "TestR5SettingsSeedPGPreservesExistingValues/zero"
+2026-10-09T04:15:26.9410323Z     ],
+2026-10-09T04:15:26.9410540Z     "leaf_count": 8,
+2026-10-09T04:15:26.9410771Z     "passed": 6,
+2026-10-09T04:15:26.9410986Z     "failed": 2,
+2026-10-09T04:15:26.9411194Z     "skipped": 0,
+2026-10-09T04:15:26.9411413Z     "exit_code": 1,
+2026-10-09T04:15:26.9411672Z     "actual_overwrite_observations": [
+2026-10-09T04:15:26.9413542Z       "r5_settings_seed_pg_test.go:147: EXEC07_STALE_SEED_OVERWROTE_COMMITTED_SETTING writer=concurrent_admin_write before_value=\"false\" after_value=\"true\" before_description=\"concurrent_admin_write committed choice\" after_description=\"first startup environment\" before_updated_at=2026-10-09T04:15:09.997526Z after_updated_at=2026-10-09T04:15:09.999462Z",
+2026-10-09T04:15:26.9416667Z       "r5_settings_seed_pg_test.go:147: EXEC07_STALE_SEED_OVERWROTE_COMMITTED_SETTING writer=concurrent_startup_seed before_value=\"false\" after_value=\"true\" before_description=\"concurrent_startup_seed committed choice\" after_description=\"first startup environment\" before_updated_at=2026-10-09T04:15:10.595264Z after_updated_at=2026-10-09T04:15:10.596795Z"
+2026-10-09T04:15:26.9417952Z     ]
+2026-10-09T04:15:26.9418123Z   }
+2026-10-09T04:15:26.9418285Z }
+2026-10-09T04:15:26.9418384Z 
+2026-10-09T04:15:26.9418501Z EXEC07_RAW_END baseline/verified.json
+2026-10-09T04:15:26.9418791Z EXEC07_RAW_BEGIN candidate/execution.json
+2026-10-09T04:15:26.9419048Z {
+2026-10-09T04:15:26.9419231Z   "before": {
+2026-10-09T04:15:26.9419534Z     "commit": "e7f80316b25dba2cf0a35996bd45c00c62443668",
+2026-10-09T04:15:26.9419930Z     "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+2026-10-09T04:15:26.9420433Z     "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+2026-10-09T04:15:26.9420831Z   },
+2026-10-09T04:15:26.9421018Z   "after": {
+2026-10-09T04:15:26.9421306Z     "commit": "e7f80316b25dba2cf0a35996bd45c00c62443668",
+2026-10-09T04:15:26.9421691Z     "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+2026-10-09T04:15:26.9422185Z     "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+2026-10-09T04:15:26.9422571Z   },
+2026-10-09T04:15:26.9422896Z   "command": [
+2026-10-09T04:15:26.9423095Z     "go",
+2026-10-09T04:15:26.9423279Z     "test",
+2026-10-09T04:15:26.9423486Z     "-mod=readonly",
+2026-10-09T04:15:26.9423707Z     "-json",
+2026-10-09T04:15:26.9423897Z     "-race",
+2026-10-09T04:15:26.9424085Z     "-p",
+2026-10-09T04:15:26.9424266Z     "1",
+2026-10-09T04:15:26.9424468Z     "-count=1",
+2026-10-09T04:15:26.9424683Z     "-timeout=120s",
+2026-10-09T04:15:26.9424931Z     "-run",
+2026-10-09T04:15:26.9425160Z     "^TestR5SettingsSeedPG",
+2026-10-09T04:15:26.9425433Z     "./internal/settings"
+2026-10-09T04:15:26.9425891Z   ],
+2026-10-09T04:15:26.9426083Z   "exit_code": 0,
+2026-10-09T04:15:26.9426302Z   "timed_out": false,
+2026-10-09T04:15:26.9426715Z   "stdout_sha256": "bdb31032aa2de01f1a1e53dd2deb20745f48ecaff6ab7f5301b87f267267692b",
+2026-10-09T04:15:26.9427328Z   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+2026-10-09T04:15:26.9427719Z }
+2026-10-09T04:15:26.9427815Z 
+2026-10-09T04:15:26.9427935Z EXEC07_RAW_END candidate/execution.json
+2026-10-09T04:15:26.9428226Z EXEC07_RAW_BEGIN candidate/go-test.jsonl
+2026-10-09T04:15:26.9428680Z {"Time":"2026-10-09T04:15:22.681790872Z","Action":"start","Package":"tabmail/internal/settings"}
+2026-10-09T04:15:26.9429573Z {"Time":"2026-10-09T04:15:22.706419762Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites"}
+2026-10-09T04:15:26.9430731Z {"Time":"2026-10-09T04:15:22.70645628Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites","Output":"=== RUN   TestR5SettingsSeedPGConcurrentWrites\n"}
+2026-10-09T04:15:26.9431943Z {"Time":"2026-10-09T04:15:22.706503158Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write"}
+2026-10-09T04:15:26.9433334Z {"Time":"2026-10-09T04:15:22.706513106Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write","Output":"=== RUN   TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write\n"}
+2026-10-09T04:15:26.9435072Z {"Time":"2026-10-09T04:15:23.324861005Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write","Output":"--- PASS: TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write (0.62s)\n"}
+2026-10-09T04:15:26.9436846Z {"Time":"2026-10-09T04:15:23.324898715Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write","Elapsed":0.62}
+2026-10-09T04:15:26.9438056Z {"Time":"2026-10-09T04:15:23.32499791Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed"}
+2026-10-09T04:15:26.9439466Z {"Time":"2026-10-09T04:15:23.32501407Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed","Output":"=== RUN   TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed\n"}
+2026-10-09T04:15:26.9441226Z {"Time":"2026-10-09T04:15:24.030533275Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed","Output":"--- PASS: TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed (0.71s)\n"}
+2026-10-09T04:15:26.9442711Z {"Time":"2026-10-09T04:15:24.030573199Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed","Elapsed":0.71}
+2026-10-09T04:15:26.9444033Z {"Time":"2026-10-09T04:15:24.030613044Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites","Output":"--- PASS: TestR5SettingsSeedPGConcurrentWrites (1.32s)\n"}
+2026-10-09T04:15:26.9445253Z {"Time":"2026-10-09T04:15:24.03063261Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGConcurrentWrites","Elapsed":1.32}
+2026-10-09T04:15:26.9446511Z {"Time":"2026-10-09T04:15:24.030698343Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues"}
+2026-10-09T04:15:26.9447970Z {"Time":"2026-10-09T04:15:24.030708351Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues\n"}
+2026-10-09T04:15:26.9449207Z {"Time":"2026-10-09T04:15:24.521245536Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/empty"}
+2026-10-09T04:15:26.9450497Z {"Time":"2026-10-09T04:15:24.521285791Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/empty","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues/empty\n"}
+2026-10-09T04:15:26.9452108Z {"Time":"2026-10-09T04:15:24.537376019Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/empty","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues/empty (0.02s)\n"}
+2026-10-09T04:15:26.9453483Z {"Time":"2026-10-09T04:15:24.537416384Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/empty","Elapsed":0.02}
+2026-10-09T04:15:26.9454653Z {"Time":"2026-10-09T04:15:24.537426263Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/false"}
+2026-10-09T04:15:26.9456211Z {"Time":"2026-10-09T04:15:24.537432124Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/false","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues/false\n"}
+2026-10-09T04:15:26.9457818Z {"Time":"2026-10-09T04:15:24.5387548Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/false","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues/false (0.00s)\n"}
+2026-10-09T04:15:26.9459184Z {"Time":"2026-10-09T04:15:24.538780728Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/false","Elapsed":0}
+2026-10-09T04:15:26.9460245Z {"Time":"2026-10-09T04:15:24.538786389Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/zero"}
+2026-10-09T04:15:26.9461540Z {"Time":"2026-10-09T04:15:24.538789675Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/zero","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues/zero\n"}
+2026-10-09T04:15:26.9463131Z {"Time":"2026-10-09T04:15:24.540011945Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/zero","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues/zero (0.00s)\n"}
+2026-10-09T04:15:26.9464482Z {"Time":"2026-10-09T04:15:24.540027223Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/zero","Elapsed":0}
+2026-10-09T04:15:26.9465733Z {"Time":"2026-10-09T04:15:24.540035198Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/text"}
+2026-10-09T04:15:26.9467038Z {"Time":"2026-10-09T04:15:24.540039125Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/text","Output":"=== RUN   TestR5SettingsSeedPGPreservesExistingValues/text\n"}
+2026-10-09T04:15:26.9468630Z {"Time":"2026-10-09T04:15:24.541158964Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/text","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues/text (0.00s)\n"}
+2026-10-09T04:15:26.9469973Z {"Time":"2026-10-09T04:15:24.541175434Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues/text","Elapsed":0}
+2026-10-09T04:15:26.9471301Z {"Time":"2026-10-09T04:15:24.570029194Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues","Output":"--- PASS: TestR5SettingsSeedPGPreservesExistingValues (0.54s)\n"}
+2026-10-09T04:15:26.9472741Z {"Time":"2026-10-09T04:15:24.570062385Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGPreservesExistingValues","Elapsed":0.54}
+2026-10-09T04:15:26.9473759Z {"Time":"2026-10-09T04:15:24.570072635Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCreatesAbsentDefaults"}
+2026-10-09T04:15:26.9474981Z {"Time":"2026-10-09T04:15:24.570078005Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCreatesAbsentDefaults","Output":"=== RUN   TestR5SettingsSeedPGCreatesAbsentDefaults\n"}
+2026-10-09T04:15:26.9476660Z {"Time":"2026-10-09T04:15:25.147530177Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCreatesAbsentDefaults","Output":"--- PASS: TestR5SettingsSeedPGCreatesAbsentDefaults (0.58s)\n"}
+2026-10-09T04:15:26.9477948Z {"Time":"2026-10-09T04:15:25.147597453Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCreatesAbsentDefaults","Elapsed":0.58}
+2026-10-09T04:15:26.9478931Z {"Time":"2026-10-09T04:15:25.147657895Z","Action":"run","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCancelledContext"}
+2026-10-09T04:15:26.9480188Z {"Time":"2026-10-09T04:15:25.147668956Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCancelledContext","Output":"=== RUN   TestR5SettingsSeedPGCancelledContext\n"}
+2026-10-09T04:15:26.9481591Z {"Time":"2026-10-09T04:15:25.799806466Z","Action":"output","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCancelledContext","Output":"--- PASS: TestR5SettingsSeedPGCancelledContext (0.65s)\n"}
+2026-10-09T04:15:26.9482798Z {"Time":"2026-10-09T04:15:25.799838175Z","Action":"pass","Package":"tabmail/internal/settings","Test":"TestR5SettingsSeedPGCancelledContext","Elapsed":0.65}
+2026-10-09T04:15:26.9483658Z {"Time":"2026-10-09T04:15:25.799847152Z","Action":"output","Package":"tabmail/internal/settings","Output":"PASS\n"}
+2026-10-09T04:15:26.9484505Z {"Time":"2026-10-09T04:15:26.803746409Z","Action":"output","Package":"tabmail/internal/settings","Output":"ok  \ttabmail/internal/settings\t4.122s\n"}
+2026-10-09T04:15:26.9485327Z {"Time":"2026-10-09T04:15:26.803781013Z","Action":"pass","Package":"tabmail/internal/settings","Elapsed":4.122}
+2026-10-09T04:15:26.9485947Z 
+2026-10-09T04:15:26.9486067Z EXEC07_RAW_END candidate/go-test.jsonl
+2026-10-09T04:15:26.9486364Z EXEC07_RAW_BEGIN candidate/go-test.stderr
+2026-10-09T04:15:26.9486555Z 
+2026-10-09T04:15:26.9486667Z EXEC07_RAW_END candidate/go-test.stderr
+2026-10-09T04:15:26.9486958Z EXEC07_RAW_BEGIN candidate/verified.json
+2026-10-09T04:15:26.9487211Z {
+2026-10-09T04:15:26.9487392Z   "before": {
+2026-10-09T04:15:26.9487697Z     "commit": "e7f80316b25dba2cf0a35996bd45c00c62443668",
+2026-10-09T04:15:26.9488093Z     "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+2026-10-09T04:15:26.9488601Z     "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+2026-10-09T04:15:26.9488991Z   },
+2026-10-09T04:15:26.9489177Z   "after": {
+2026-10-09T04:15:26.9489471Z     "commit": "e7f80316b25dba2cf0a35996bd45c00c62443668",
+2026-10-09T04:15:26.9489862Z     "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+2026-10-09T04:15:26.9490358Z     "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+2026-10-09T04:15:26.9490745Z   },
+2026-10-09T04:15:26.9490928Z   "command": [
+2026-10-09T04:15:26.9491129Z     "go",
+2026-10-09T04:15:26.9491318Z     "test",
+2026-10-09T04:15:26.9491521Z     "-mod=readonly",
+2026-10-09T04:15:26.9491746Z     "-json",
+2026-10-09T04:15:26.9491935Z     "-race",
+2026-10-09T04:15:26.9492133Z     "-p",
+2026-10-09T04:15:26.9492447Z     "1",
+2026-10-09T04:15:26.9492734Z     "-count=1",
+2026-10-09T04:15:26.9493229Z     "-timeout=120s",
+2026-10-09T04:15:26.9493598Z     "-run",
+2026-10-09T04:15:26.9493970Z     "^TestR5SettingsSeedPG",
+2026-10-09T04:15:26.9494491Z     "./internal/settings"
+2026-10-09T04:15:26.9494778Z   ],
+2026-10-09T04:15:26.9495164Z   "exit_code": 0,
+2026-10-09T04:15:26.9495761Z   "timed_out": false,
+2026-10-09T04:15:26.9496463Z   "stdout_sha256": "bdb31032aa2de01f1a1e53dd2deb20745f48ecaff6ab7f5301b87f267267692b",
+2026-10-09T04:15:26.9510277Z   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+2026-10-09T04:15:26.9510807Z   "results": {
+2026-10-09T04:15:26.9511066Z     "started_ids": [
+2026-10-09T04:15:26.9511396Z       "TestR5SettingsSeedPGCancelledContext",
+2026-10-09T04:15:26.9511801Z       "TestR5SettingsSeedPGConcurrentWrites",
+2026-10-09T04:15:26.9512287Z       "TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write",
+2026-10-09T04:15:26.9512867Z       "TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed",
+2026-10-09T04:15:26.9513350Z       "TestR5SettingsSeedPGCreatesAbsentDefaults",
+2026-10-09T04:15:26.9513788Z       "TestR5SettingsSeedPGPreservesExistingValues",
+2026-10-09T04:15:26.9514255Z       "TestR5SettingsSeedPGPreservesExistingValues/empty",
+2026-10-09T04:15:26.9514730Z       "TestR5SettingsSeedPGPreservesExistingValues/false",
+2026-10-09T04:15:26.9515195Z       "TestR5SettingsSeedPGPreservesExistingValues/text",
+2026-10-09T04:15:26.9516152Z       "TestR5SettingsSeedPGPreservesExistingValues/zero"
+2026-10-09T04:15:26.9516502Z     ],
+2026-10-09T04:15:26.9516711Z     "leaf_count": 8,
+2026-10-09T04:15:26.9516940Z     "passed": 8,
+2026-10-09T04:15:26.9517160Z     "failed": 0,
+2026-10-09T04:15:26.9517370Z     "skipped": 0,
+2026-10-09T04:15:26.9517588Z     "exit_code": 0,
+2026-10-09T04:15:26.9517849Z     "actual_overwrite_observations": []
+2026-10-09T04:15:26.9518106Z   }
+2026-10-09T04:15:26.9518281Z }
+2026-10-09T04:15:26.9518377Z 
+2026-10-09T04:15:26.9518495Z EXEC07_RAW_END candidate/verified.json
+2026-10-09T04:15:26.9518779Z EXEC07_RAW_BEGIN summary.json
+2026-10-09T04:15:26.9519007Z {
+2026-10-09T04:15:26.9519277Z   "baseline": "eae219951c6f9cbf17eb4062b69464c731807be7",
+2026-10-09T04:15:26.9519780Z   "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a",
+2026-10-09T04:15:26.9520189Z   "results": {
+2026-10-09T04:15:26.9520403Z     "baseline": {
+2026-10-09T04:15:26.9520631Z       "before": {
+2026-10-09T04:15:26.9520987Z         "commit": "af296a9bc415f19301c4bc211144960dcf0497b4",
+2026-10-09T04:15:26.9521444Z         "tree": "1386e731a4b6ed6c552e58bac427de3db2f78e15",
+2026-10-09T04:15:26.9522029Z         "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+2026-10-09T04:15:26.9522451Z       },
+2026-10-09T04:15:26.9522654Z       "after": {
+2026-10-09T04:15:26.9523006Z         "commit": "af296a9bc415f19301c4bc211144960dcf0497b4",
+2026-10-09T04:15:26.9523459Z         "tree": "1386e731a4b6ed6c552e58bac427de3db2f78e15",
+2026-10-09T04:15:26.9524038Z         "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+2026-10-09T04:15:26.9524439Z       },
+2026-10-09T04:15:26.9524640Z       "command": [
+2026-10-09T04:15:26.9524894Z         "go",
+2026-10-09T04:15:26.9525108Z         "test",
+2026-10-09T04:15:26.9525345Z         "-mod=readonly",
+2026-10-09T04:15:26.9525839Z         "-json",
+2026-10-09T04:15:26.9526118Z         "-race",
+2026-10-09T04:15:26.9526328Z         "-p",
+2026-10-09T04:15:26.9526533Z         "1",
+2026-10-09T04:15:26.9526753Z         "-count=1",
+2026-10-09T04:15:26.9526995Z         "-timeout=120s",
+2026-10-09T04:15:26.9527229Z         "-run",
+2026-10-09T04:15:26.9527497Z         "^TestR5SettingsSeedPG",
+2026-10-09T04:15:26.9527797Z         "./internal/settings"
+2026-10-09T04:15:26.9528027Z       ],
+2026-10-09T04:15:26.9528235Z       "exit_code": 1,
+2026-10-09T04:15:26.9528479Z       "timed_out": false,
+2026-10-09T04:15:26.9528976Z       "stdout_sha256": "057f43b31d7067d8a466510df1f14353dab2a74d5126381deaed880b52a32b9a",
+2026-10-09T04:15:26.9529666Z       "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+2026-10-09T04:15:26.9530111Z       "results": {
+2026-10-09T04:15:26.9530497Z         "started_ids": [
+2026-10-09T04:15:26.9530864Z           "TestR5SettingsSeedPGCancelledContext",
+2026-10-09T04:15:26.9531303Z           "TestR5SettingsSeedPGConcurrentWrites",
+2026-10-09T04:15:26.9531848Z           "TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write",
+2026-10-09T04:15:26.9532478Z           "TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed",
+2026-10-09T04:15:26.9533020Z           "TestR5SettingsSeedPGCreatesAbsentDefaults",
+2026-10-09T04:15:26.9533496Z           "TestR5SettingsSeedPGPreservesExistingValues",
+2026-10-09T04:15:26.9534010Z           "TestR5SettingsSeedPGPreservesExistingValues/empty",
+2026-10-09T04:15:26.9534538Z           "TestR5SettingsSeedPGPreservesExistingValues/false",
+2026-10-09T04:15:26.9535056Z           "TestR5SettingsSeedPGPreservesExistingValues/text",
+2026-10-09T04:15:26.9535813Z           "TestR5SettingsSeedPGPreservesExistingValues/zero"
+2026-10-09T04:15:26.9536168Z         ],
+2026-10-09T04:15:26.9536415Z         "leaf_count": 8,
+2026-10-09T04:15:26.9536672Z         "passed": 6,
+2026-10-09T04:15:26.9536908Z         "failed": 2,
+2026-10-09T04:15:26.9537146Z         "skipped": 0,
+2026-10-09T04:15:26.9537390Z         "exit_code": 1,
+2026-10-09T04:15:26.9537701Z         "actual_overwrite_observations": [
+2026-10-09T04:15:26.9540007Z           "r5_settings_seed_pg_test.go:147: EXEC07_STALE_SEED_OVERWROTE_COMMITTED_SETTING writer=concurrent_admin_write before_value=\"false\" after_value=\"true\" before_description=\"concurrent_admin_write committed choice\" after_description=\"first startup environment\" before_updated_at=2026-10-09T04:15:09.997526Z after_updated_at=2026-10-09T04:15:09.999462Z",
+2026-10-09T04:15:26.9543204Z           "r5_settings_seed_pg_test.go:147: EXEC07_STALE_SEED_OVERWROTE_COMMITTED_SETTING writer=concurrent_startup_seed before_value=\"false\" after_value=\"true\" before_description=\"concurrent_startup_seed committed choice\" after_description=\"first startup environment\" before_updated_at=2026-10-09T04:15:10.595264Z after_updated_at=2026-10-09T04:15:10.596795Z"
+2026-10-09T04:15:26.9544522Z         ]
+2026-10-09T04:15:26.9544710Z       }
+2026-10-09T04:15:26.9544891Z     },
+2026-10-09T04:15:26.9545092Z     "candidate": {
+2026-10-09T04:15:26.9545318Z       "before": {
+2026-10-09T04:15:26.9546013Z         "commit": "e7f80316b25dba2cf0a35996bd45c00c62443668",
+2026-10-09T04:15:26.9546497Z         "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+2026-10-09T04:15:26.9547090Z         "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+2026-10-09T04:15:26.9547509Z       },
+2026-10-09T04:15:26.9547713Z       "after": {
+2026-10-09T04:15:26.9548064Z         "commit": "e7f80316b25dba2cf0a35996bd45c00c62443668",
+2026-10-09T04:15:26.9548511Z         "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+2026-10-09T04:15:26.9549089Z         "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+2026-10-09T04:15:26.9549495Z       },
+2026-10-09T04:15:26.9549702Z       "command": [
+2026-10-09T04:15:26.9549916Z         "go",
+2026-10-09T04:15:26.9550125Z         "test",
+2026-10-09T04:15:26.9550363Z         "-mod=readonly",
+2026-10-09T04:15:26.9550602Z         "-json",
+2026-10-09T04:15:26.9550812Z         "-race",
+2026-10-09T04:15:26.9551025Z         "-p",
+2026-10-09T04:15:26.9551238Z         "1",
+2026-10-09T04:15:26.9551454Z         "-count=1",
+2026-10-09T04:15:26.9551694Z         "-timeout=120s",
+2026-10-09T04:15:26.9551927Z         "-run",
+2026-10-09T04:15:26.9552189Z         "^TestR5SettingsSeedPG",
+2026-10-09T04:15:26.9552485Z         "./internal/settings"
+2026-10-09T04:15:26.9552717Z       ],
+2026-10-09T04:15:26.9552925Z       "exit_code": 0,
+2026-10-09T04:15:26.9553177Z       "timed_out": false,
+2026-10-09T04:15:26.9553672Z       "stdout_sha256": "bdb31032aa2de01f1a1e53dd2deb20745f48ecaff6ab7f5301b87f267267692b",
+2026-10-09T04:15:26.9554355Z       "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+2026-10-09T04:15:26.9554942Z       "results": {
+2026-10-09T04:15:26.9555189Z         "started_ids": [
+2026-10-09T04:15:26.9555781Z           "TestR5SettingsSeedPGCancelledContext",
+2026-10-09T04:15:26.9556267Z           "TestR5SettingsSeedPGConcurrentWrites",
+2026-10-09T04:15:26.9556824Z           "TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write",
+2026-10-09T04:15:26.9557458Z           "TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed",
+2026-10-09T04:15:26.9557984Z           "TestR5SettingsSeedPGCreatesAbsentDefaults",
+2026-10-09T04:15:26.9558456Z           "TestR5SettingsSeedPGPreservesExistingValues",
+2026-10-09T04:15:26.9558965Z           "TestR5SettingsSeedPGPreservesExistingValues/empty",
+2026-10-09T04:15:26.9559534Z           "TestR5SettingsSeedPGPreservesExistingValues/false",
+2026-10-09T04:15:26.9560053Z           "TestR5SettingsSeedPGPreservesExistingValues/text",
+2026-10-09T04:15:26.9560564Z           "TestR5SettingsSeedPGPreservesExistingValues/zero"
+2026-10-09T04:15:26.9560894Z         ],
+2026-10-09T04:15:26.9561131Z         "leaf_count": 8,
+2026-10-09T04:15:26.9561389Z         "passed": 8,
+2026-10-09T04:15:26.9561622Z         "failed": 0,
+2026-10-09T04:15:26.9561851Z         "skipped": 0,
+2026-10-09T04:15:26.9562099Z         "exit_code": 0,
+2026-10-09T04:15:26.9562402Z         "actual_overwrite_observations": []
+2026-10-09T04:15:26.9562821Z       }
+2026-10-09T04:15:26.9562999Z     }
+2026-10-09T04:15:26.9563175Z   },
+2026-10-09T04:15:26.9563361Z   "errors": {}
+2026-10-09T04:15:26.9563550Z }
+2026-10-09T04:15:26.9563650Z 
+2026-10-09T04:15:26.9563747Z EXEC07_RAW_END summary.json
+2026-10-09T04:15:26.9632026Z ##[group]Run actions/upload-artifact@v4
+2026-10-09T04:15:26.9632338Z with:
+2026-10-09T04:15:26.9632546Z   name: settings-seed-evidence
+2026-10-09T04:15:26.9632876Z   path: /home/runner/work/_temp/tabmail-settings-seed-evidence
+2026-10-09T04:15:26.9633237Z   if-no-files-found: error
+2026-10-09T04:15:26.9633466Z   retention-days: 14
+2026-10-09T04:15:26.9633679Z   compression-level: 6
+2026-10-09T04:15:26.9633899Z   overwrite: false
+2026-10-09T04:15:26.9634120Z   include-hidden-files: false
+2026-10-09T04:15:26.9634349Z env:
+2026-10-09T04:15:26.9634536Z   GOSUMDB: sum.golang.org
+2026-10-09T04:15:26.9634765Z   GODEBUG: asynctimerchan=0
+2026-10-09T04:15:26.9635405Z   TABMAIL_TEST_DB_DSN: ***localhost:5432/tabmail_test?sslmode=disable
+2026-10-09T04:15:26.9636219Z ##[endgroup]
+2026-10-09T04:15:27.1401382Z (node:4300) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T04:15:27.1402257Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T04:15:27.1477297Z With the provided path, there will be 9 files uploaded
+2026-10-09T04:15:27.1483270Z Artifact name is valid!
+2026-10-09T04:15:27.1483807Z Root directory input is valid!
+2026-10-09T04:15:27.4904519Z Beginning upload of artifact content to blob storage
+2026-10-09T04:15:27.5211275Z (node:4300) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T04:15:27.7390548Z Uploaded bytes 6495
+2026-10-09T04:15:27.8038553Z Finished uploading artifact content to blob storage!
+2026-10-09T04:15:27.8039893Z SHA256 digest of uploaded artifact zip is 7269b7e0a5c4749c4781e8fe4fa46d5b09308012f1f339d7b98ec20a73384339
+2026-10-09T04:15:27.8041255Z Finalizing artifact upload
+2026-10-09T04:15:28.1285505Z Artifact settings-seed-evidence.zip successfully finalized. Artifact ID 11594573178
+2026-10-09T04:15:28.1287035Z Artifact settings-seed-evidence has been successfully uploaded! Final size is 6495 bytes. Artifact ID is 11594573178
+2026-10-09T04:15:28.1293850Z Artifact download URL: https://github.com/jyqj/tabmail/actions/runs/37882924574/artifacts/11594573178
+2026-10-09T04:15:28.1469693Z Post job cleanup.
+2026-10-09T04:15:28.2708156Z (node:4312) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T04:15:28.2709881Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T04:15:28.2772531Z [command]/opt/hostedtoolcache/go/1.25.7/x64/bin/go env GOMODCACHE
+2026-10-09T04:15:28.2811965Z [command]/opt/hostedtoolcache/go/1.25.7/x64/bin/go env GOCACHE
+2026-10-09T04:15:28.2839537Z /home/runner/go/pkg/mod
+2026-10-09T04:15:28.2862575Z /home/runner/.cache/go-build
+2026-10-09T04:15:28.2869917Z Cache hit occurred on the primary key setup-go-Linux-x64-ubuntu24-go-1.25.7-4513745f7b95ab0bc8e1f9edd24c294514fb4a9ee51f2290b342654582d5d782, not saving cache.
+2026-10-09T04:15:28.2999809Z Post job cleanup.
+2026-10-09T04:15:28.3987033Z [command]/usr/bin/git version
+2026-10-09T04:15:28.4032733Z git version 2.55.0
+2026-10-09T04:15:28.4075107Z Temporarily overriding HOME='/home/runner/work/_temp/55827aee-328e-4ebc-950b-6d13abde6300' before making global git config changes
+2026-10-09T04:15:28.4076899Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T04:15:28.4084297Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/tabmail/tabmail
+2026-10-09T04:15:28.4125504Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T04:15:28.4166148Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T04:15:28.4412530Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T04:15:28.4447211Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T04:15:28.4677659Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T04:15:28.4713904Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T04:15:28.5078954Z Print service container logs: c63eb9ea37e2453298679fcfc1e81e1b_postgres16_41b54d
+2026-10-09T04:15:28.5083572Z ##[command]/usr/bin/docker logs --details 4491e3ae6d6b7ba655368be68645a59fb01d640aaea89c843dc6bf2f62405f4d
+2026-10-09T04:15:28.5225702Z  The files belonging to this database system will be owned by user "postgres".
+2026-10-09T04:15:28.5226840Z  This user must also own the server process.
+2026-10-09T04:15:28.5227361Z  
+2026-10-09T04:15:28.5227897Z  The database cluster will be initialized with locale "en_US.utf8".
+2026-10-09T04:15:28.5228848Z  The default database encoding has accordingly been set to "UTF8".
+2026-10-09T04:15:28.5230625Z  initdb: warning: enabling "trust" authentication for local connections
+2026-10-09T04:15:28.5231543Z  initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+2026-10-09T04:15:28.5232783Z  2026-10-09 04:14:33.509 UTC [1] LOG:  starting PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-10-09T04:15:28.5233725Z  2026-10-09 04:14:33.509 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-10-09T04:15:28.5234224Z  2026-10-09 04:14:33.509 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-10-09T04:15:28.5234933Z  2026-10-09 04:14:33.510 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-10-09T04:15:28.5235883Z  2026-10-09 04:14:33.512 UTC [64] LOG:  database system was shut down at 2026-10-09 04:14:33 UTC
+2026-10-09T04:15:28.5236474Z  2026-10-09 04:14:33.516 UTC [1] LOG:  database system is ready to accept connections
+2026-10-09T04:15:28.5237154Z  2026-10-09 04:15:10.004 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-10-09T04:15:28.5238290Z  2026-10-09 04:15:10.017 UTC [62] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 1 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.013 s; sync files=5, longest=0.001 s, average=0.001 s; distance=6232 kB, estimate=6232 kB; lsn=0/1F353F0, redo lsn=0/1F353B8
+2026-10-09T04:15:28.5239724Z  2026-10-09 04:15:10.599 UTC [134] FATAL:  terminating connection due to administrator command
+2026-10-09T04:15:28.5240248Z  2026-10-09 04:15:10.699 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-10-09T04:15:28.5241326Z  2026-10-09 04:15:10.702 UTC [62] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=4, longest=0.001 s, average=0.001 s; distance=6233 kB, estimate=6233 kB; lsn=0/254B808, redo lsn=0/254B7D0
+2026-10-09T04:15:28.5242451Z  2026-10-09 04:15:11.274 UTC [141] FATAL:  terminating connection due to administrator command
+2026-10-09T04:15:28.5242976Z  2026-10-09 04:15:11.375 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-10-09T04:15:28.5244049Z  2026-10-09 04:15:11.377 UTC [62] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=4, longest=0.001 s, average=0.001 s; distance=6233 kB, estimate=6233 kB; lsn=0/2B61FB0, redo lsn=0/2B61F78
+2026-10-09T04:15:28.5245124Z  2026-10-09 04:15:11.947 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-10-09T04:15:28.5247176Z  2026-10-09 04:15:11.950 UTC [62] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=4, longest=0.001 s, average=0.001 s; distance=6233 kB, estimate=6233 kB; lsn=0/3178720, redo lsn=0/31786E8
+2026-10-09T04:15:28.5248333Z  2026-10-09 04:15:12.520 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-10-09T04:15:28.5249672Z  2026-10-09 04:15:12.524 UTC [62] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.004 s; sync files=4, longest=0.001 s, average=0.001 s; distance=6233 kB, estimate=6233 kB; lsn=0/378ED50, redo lsn=0/378ED18
+2026-10-09T04:15:28.5250772Z  2026-10-09 04:15:23.289 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-10-09T04:15:28.5251843Z  2026-10-09 04:15:23.292 UTC [62] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=4, longest=0.001 s, average=0.001 s; distance=6233 kB, estimate=6233 kB; lsn=0/3DA5448, redo lsn=0/3DA5410
+2026-10-09T04:15:28.5252945Z  2026-10-09 04:15:23.901 UTC [187] FATAL:  terminating connection due to administrator command
+2026-10-09T04:15:28.5253469Z  2026-10-09 04:15:24.002 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-10-09T04:15:28.5254536Z  2026-10-09 04:15:24.005 UTC [62] LOG:  checkpoint complete: wrote 45 buffers (0.3%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.004 s; sync files=13, longest=0.001 s, average=0.001 s; distance=6481 kB, estimate=6481 kB; lsn=0/43F9A38, redo lsn=0/43F9A00
+2026-10-09T04:15:28.5256105Z  2026-10-09 04:15:24.542 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-10-09T04:15:28.5258021Z  2026-10-09 04:15:24.545 UTC [62] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=4, longest=0.001 s, average=0.001 s; distance=6306 kB, estimate=6464 kB; lsn=0/4A22550, redo lsn=0/4A22518
+2026-10-09T04:15:28.5259904Z  2026-10-09 04:15:25.118 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-10-09T04:15:28.5261695Z  2026-10-09 04:15:25.121 UTC [62] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=4, longest=0.001 s, average=0.001 s; distance=6306 kB, estimate=6448 kB; lsn=0/504B050, redo lsn=0/504B018
+2026-10-09T04:15:28.5263599Z  2026-10-09 04:15:25.671 UTC [204] FATAL:  terminating connection due to administrator command
+2026-10-09T04:15:28.5264667Z  2026-10-09 04:15:25.772 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-10-09T04:15:28.5266782Z  2026-10-09 04:15:25.775 UTC [62] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=4, longest=0.001 s, average=0.001 s; distance=6306 kB, estimate=6434 kB; lsn=0/56739E0, redo lsn=0/56739A8
+2026-10-09T04:15:28.5268653Z  The default text search configuration will be set to "english".
+2026-10-09T04:15:28.5269623Z  
+2026-10-09T04:15:28.5269972Z  Data page checksums are disabled.
+2026-10-09T04:15:28.5270541Z  
+2026-10-09T04:15:28.5270868Z  fixing permissions on existing directory /var/lib/postgresql/data ... ok
+2026-10-09T04:15:28.5271288Z  creating subdirectories ... ok
+2026-10-09T04:15:28.5271609Z  selecting dynamic shared memory implementation ... posix
+2026-10-09T04:15:28.5271971Z  selecting default max_connections ... 100
+2026-10-09T04:15:28.5272279Z  selecting default shared_buffers ... 128MB
+2026-10-09T04:15:28.5272579Z  selecting default time zone ... Etc/UTC
+2026-10-09T04:15:28.5272862Z  creating configuration files ... ok
+2026-10-09T04:15:28.5273139Z  running bootstrap script ... ok
+2026-10-09T04:15:28.5273438Z  performing post-bootstrap initialization ... ok
+2026-10-09T04:15:28.5273745Z  syncing data to disk ... ok
+2026-10-09T04:15:28.5273978Z  
+2026-10-09T04:15:28.5274145Z  
+2026-10-09T04:15:28.5274380Z  Success. You can now start the database server using:
+2026-10-09T04:15:28.5274676Z  
+2026-10-09T04:15:28.5274920Z      pg_ctl -D /var/lib/postgresql/data -l logfile start
+2026-10-09T04:15:28.5275217Z  
+2026-10-09T04:15:28.5276128Z  waiting for server to start....2026-10-09 04:14:33.205 UTC [48] LOG:  starting PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-10-09T04:15:28.5277042Z  2026-10-09 04:14:33.206 UTC [48] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-10-09T04:15:28.5277832Z  2026-10-09 04:14:33.208 UTC [51] LOG:  database system was shut down at 2026-10-09 04:14:33 UTC
+2026-10-09T04:15:28.5278369Z  2026-10-09 04:14:33.212 UTC [48] LOG:  database system is ready to accept connections
+2026-10-09T04:15:28.5278754Z   done
+2026-10-09T04:15:28.5278942Z  server started
+2026-10-09T04:15:28.5279138Z  CREATE DATABASE
+2026-10-09T04:15:28.5279334Z  
+2026-10-09T04:15:28.5279501Z  
+2026-10-09T04:15:28.5279822Z  /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+2026-10-09T04:15:28.5280217Z  
+2026-10-09T04:15:28.5280474Z  2026-10-09 04:14:33.391 UTC [48] LOG:  received fast shutdown request
+2026-10-09T04:15:28.5281011Z  waiting for server to shut down....2026-10-09 04:14:33.391 UTC [48] LOG:  aborting any active transactions
+2026-10-09T04:15:28.5281708Z  2026-10-09 04:14:33.393 UTC [48] LOG:  background worker "logical replication launcher" (PID 54) exited with exit code 1
+2026-10-09T04:15:28.5282254Z  2026-10-09 04:14:33.394 UTC [49] LOG:  shutting down
+2026-10-09T04:15:28.5282653Z  2026-10-09 04:14:33.394 UTC [49] LOG:  checkpoint starting: shutdown immediate
+2026-10-09T04:15:28.5283757Z  2026-10-09 04:14:33.409 UTC [49] LOG:  checkpoint complete: wrote 926 buffers (5.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.013 s, sync=0.002 s, total=0.016 s; sync files=301, longest=0.001 s, average=0.001 s; distance=4273 kB, estimate=4273 kB; lsn=0/191F0F0, redo lsn=0/191F0F0
+2026-10-09T04:15:28.5284810Z  2026-10-09 04:14:33.416 UTC [48] LOG:  database system is shut down
+2026-10-09T04:15:28.5285141Z   done
+2026-10-09T04:15:28.5285322Z  server stopped
+2026-10-09T04:15:28.5285733Z  
+2026-10-09T04:15:28.5286034Z  PostgreSQL init process complete; ready for start up.
+2026-10-09T04:15:28.5286349Z  
+2026-10-09T04:15:28.5292032Z Stop and remove container: c63eb9ea37e2453298679fcfc1e81e1b_postgres16_41b54d
+2026-10-09T04:15:28.5297156Z ##[command]/usr/bin/docker rm --force 4491e3ae6d6b7ba655368be68645a59fb01d640aaea89c843dc6bf2f62405f4d
+2026-10-09T04:15:28.7004784Z 4491e3ae6d6b7ba655368be68645a59fb01d640aaea89c843dc6bf2f62405f4d
+2026-10-09T04:15:28.7032859Z Remove container network: github_network_b0ca814053064bf5902dc6be0fc80dde
+2026-10-09T04:15:28.7037830Z ##[command]/usr/bin/docker network rm github_network_b0ca814053064bf5902dc6be0fc80dde
+2026-10-09T04:15:28.7984473Z github_network_b0ca814053064bf5902dc6be0fc80dde
+2026-10-09T04:15:28.8054625Z Cleaning up orphan processes
+2026-10-09T04:15:28.8356354Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -1,0 +1,111 @@
+{
+  "N1": "Maximum 8 outstanding requests, each retained until own valid reply or explicit cancellation; legitimate superseded/stale reply does not refresh proof or force protocol failure; unknown/duplicate/forged still fail. Exit issuance floor prevents pre-exit request reuse even identical clock tick. Scanner exit/reap/EOF cannot create new request.",
+  "after_pins": {
+    "test_watchdog_n1_serial_new_mock.py": "7b2c1978a002d33a94d41b3f86e03e030f3fd4091b34b01e76b0d2f4a213c7f8",
+    "watchdog_macos_backend.py": "1d47fd7718ced7772af2d8293192b6191b9239853e8ebe45bba16fe724520f2d",
+    "watchdog_trusted_launcher.py": "db5686e38392017425f0f4199c8905c1382ac4006bee9ed17ef81c0333bdac5c"
+  },
+  "backend_protocol_sha256": "8dcea5fc6f2e7ea806a154a657f129bc0945b5fe2d55921817a134ec04125466",
+  "backend_protocol_version": 4,
+  "before_pins": {
+    "watchdog_macos_backend.py": "72df041fe1b84318e4171b2202fe85229ecb4825500dbedef917536988559181",
+    "watchdog_trusted_launcher.py": "f554f257e600780c91fddb486102836c151f88330eb0c7f0661832ea54de4dba"
+  },
+  "blocking_reason": "scope_drained cannot be established by current macOS adapter for arbitrary descendants. Strict fixed-order request_command therefore blocks following resource stage rather than weakening serial no-overlap.",
+  "changed_source": [
+    "watchdog_macos_backend.py",
+    "watchdog_trusted_launcher.py (fixed backend pin only)"
+  ],
+  "controller_contract": {
+    "attempts": 1,
+    "client": "ControllerClient(origin, write_fd=write_fd, read_fd=read_fd)",
+    "entry": "watchdog_controller_entry(origin_wire, read_fd, write_fd)",
+    "event": "command-exit-observed has observed_exit=True/reaped=False/anchor_retained=True/drained=False/cleanup_complete=False/global_descendant_quiescence=UNKNOWN/phase_advance_allowed=False",
+    "fixed_order": [
+      "initdb",
+      "native-pg",
+      "base-create",
+      "observer",
+      "go-exact8"
+    ],
+    "origin": "Origin.from_wire(origin_wire), no recaptured budget",
+    "reap_event": "command-exit separately has reaped=True but drained and cleanup_complete are not implied",
+    "return": "exact int 0..255; return1 exits1; exception including SystemExit or invalid return exits70",
+    "terminal": "receipt owner=controller, matching nonce, elapsed within inherited origin, status PASS/FAIL and explicit matching exit_code. Zero process exit alone is not PASS; buffered terminal drained before exit verdict."
+  },
+  "development_failure": {
+    "cause": "test fixture supplied exception class with required code argument as Mock.side_effect; mock instantiated it without argument",
+    "errors": 1,
+    "exact_error": "TypeError: N1SerialNewMock.test_real_child_bootstrap_propagates_controller_return_one.<locals>.ChildExit.__init__() missing 1 required positional argument: code",
+    "failures": 0,
+    "fixed_by": "lambda explicitly raises ChildExit(code); old suites not rerun",
+    "tests_run": 19,
+    "tool_chunk": "127e8e"
+  },
+  "evidence": {
+    "watchdog-n1-serial-new-mock.raw": {
+      "bytes": 3799,
+      "sha256": "62a1d0f27dbde4e89d86cd983dd26c2adbd90896a035e97b43191b8c80ace501"
+    },
+    "watchdog-n1-serial-source.patch": {
+      "bytes": 40659,
+      "sha256": "828b6d6ca5e1aa60335c7b24bb85fbb26a5238635b71692245730db884671184"
+    }
+  },
+  "final_test_exit_code": 0,
+  "final_tool_chunk": "519eae",
+  "formal_exact8_can_progress": false,
+  "new_mock": {
+    "actual_os_evidence": false,
+    "after_pins": {
+      "test_watchdog_n1_serial_new_mock.py": "7b2c1978a002d33a94d41b3f86e03e030f3fd4091b34b01e76b0d2f4a213c7f8",
+      "watchdog_macos_backend.py": "1d47fd7718ced7772af2d8293192b6191b9239853e8ebe45bba16fe724520f2d",
+      "watchdog_trusted_launcher.py": "db5686e38392017425f0f4199c8905c1382ac4006bee9ed17ef81c0333bdac5c"
+    },
+    "backend_protocol_sha256": "8dcea5fc6f2e7ea806a154a657f129bc0945b5fe2d55921817a134ec04125466",
+    "before_pins": {
+      "watchdog_macos_backend.py": "72df041fe1b84318e4171b2202fe85229ecb4825500dbedef917536988559181",
+      "watchdog_trusted_launcher.py": "f554f257e600780c91fddb486102836c151f88330eb0c7f0661832ea54de4dba"
+    },
+    "errors": 0,
+    "failures": 0,
+    "kind": "ONLY_NEW_N1_SERIAL_PURE_MOCK",
+    "old_25_33_37_suites_rerun": false,
+    "tests_run": 19
+  },
+  "new_source": [
+    "test_watchdog_n1_serial_new_mock.py"
+  ],
+  "not_closed": [
+    "HARD1200_WATCHDOG_NOT_CLOSED",
+    "WATCHDOG_DEATH_KERNEL_FAILSTOP_NOT_CLOSED",
+    "ARBITRARY_FORK_SETSID_ESCAPE_CONTAINMENT_NOT_CLOSED",
+    "KERNEL_SYSCALL_AND_SCHEDULING_HARD_BOUND_NOT_CLOSED",
+    "FORK_RETURN_LEDGER_FATAL_INTERRUPT_NOT_CLOSED",
+    "TERMINAL_PUBLICATION_ATOMIC_DEADLINE_NOT_CLOSED",
+    "ACTUAL_OS_HARDKILL_ACCEPTANCE_NOT_PERFORMED",
+    "CONTROLLER_PACKET_PARSER_INTEGRATION_NOT_PERFORMED",
+    "TRUSTED_LAUNCHER_PREFORK_HARD_BOUND_NOT_CLOSED",
+    "INTERPRETER_DYLIB_STDLIB_CLOSURE_NOT_ATTESTED"
+  ],
+  "not_performed": [
+    "real fork/exec/subprocess",
+    "Go/PG/ps/query/signal/csops/kqueue/libproc/network",
+    "serial R3 controller/packet/parser integration",
+    "independent SOURCE acceptance",
+    "runtime authorization"
+  ],
+  "observed_exit": "Owned verified identity and SZOMB+pbi_xstatus produce command-exit-observed without wait/reap. observed_returncode is separate from reaped exitcode; invalid/missing status UNKNOWN/None. Complete post-exit negative census only reports observed_group_quiescent, never global descendant drain.",
+  "old_25_33_37_suites_rerun": false,
+  "root_decision": "UNKNOWN global_descendant_quiescence must block next heavy/resource phase. The event is informational, permits controller recording/heartbeat/cleanup, never implicit heavy admission. Fork UNKNOWN and retained anchor remain.",
+  "status": "N1_SERIAL_SOURCE_REVISED_PENDING_READER_RUNTIME_BLOCKED",
+  "unchanged": [
+    "watchdog_candidate.py",
+    "watchdog_protocol.py",
+    "test_watchdog_new_mock_branches.py",
+    "test_watchdog_macos_backend_mock.py",
+    "test_watchdog_s1_s5_new_mock.py",
+    "R3 capsule",
+    "main tree"
+  ]
+}

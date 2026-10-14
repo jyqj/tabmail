@@ -1,5 +1,11 @@
 # TabMail 版本与分支管理
 
+## 0. R5 阶段检查点（2026-09-30）
+
+截至 B01-U 的累计优化通过分支 `chore/company-mail-r5-checkpoint-20260930` 与注释标签 `baseline/company-mail-r5-b01u-20260930` 交付；详见 [R5 检查点说明](company-mail/R5-CHECKPOINT-20260930.md)。最后业务提交为 `7cfdfec01ae1bd71b6a06f6d8319a03c7ab68cf6`，其后仅追加版本说明、TODO 入口和文件尾空行整理。此前相对主线的 33 个提交保留原始历史，TODO 与验收报告/证据一并纳入阶段版本。
+
+这是开发源码检查点，不是正式 Release、R5 全量完成或生产部署；`main` 和既有 R4 标签不改变。活跃清单仍为 [R5-TODO](company-mail/R5-TODO.md)，统计维持 6/171。以下 R4 基线、历史分支处理和旧 CI 时间保持原有历史含义。
+
 ## 1. 已核验的源码基线
 
 核验日期：2026-09-28。下表是不可变的 **R4 业务源码检查点**，不是随主线自动变化的“当前版本号”；后续文档、CI 和业务提交可以继续推进 `main`。
@@ -30,6 +36,8 @@ PR #13 已于 2026-09-18 合入主线；PR #14 与 #15 已于 2026-09-25 合入�
 | 文档 | 含义 |
 |---|---|
 | [README](../README.md) | 产品入口与当前部署注意事项 |
+| [R5-TODO](company-mail/R5-TODO.md) | 下一完整优化版本的唯一活跃任务清单；规划已建档，实现初始为 0/171 |
+| [R5-DESIGN](company-mail/R5-DESIGN.md) | R5 目标架构、协议、边界与迁移原则；不是当前已实现能力 |
 | [ARCHITECTURE-R4](company-mail/ARCHITECTURE-R4.md) | R4 数据所有权、接口兼容变更和协调升级要求 |
 | [SAFETY-CONTRACTS](company-mail/SAFETY-CONTRACTS.md) | #14 的域名资产保护、授权 revision 和前后端操作契约 |
 | [CONTENT-BOUNDARIES](company-mail/CONTENT-BOUNDARIES.md) | #13 的内容访问与应用边界 |
@@ -38,6 +46,8 @@ PR #13 已于 2026-09-18 合入主线；PR #14 与 #15 已于 2026-09-25 合入�
 | P0 VALIDATION / R2 release-blockers | 对应旧基线的历史证据；不能冒充新提交的验收结果 |
 
 基线目录边界：`cmd/tabmail` 装配进程；`internal/api` 是 HTTP 接口；`internal/app` 是用例服务；`internal/store/postgres` 保存事务和迁移；`web` 是前端；`scripts`、`deploy` 和 `.github/workflows` 承载检查与运维。版本整理不改这些业务实现，也不宣称完成了新的全量代码安全审计。
+
+2026-09-28 在 `d6d512172fb6b874c3283d9df3f4d56758684a13` 上建立 R5 规划，按 12 阶段分批实施。R5 是工程迭代代号，不是 `v5.0.0` 或新的源码检查点标签；创建待办不改变 R4 的不可变基线，不提升前端私有包版本，不代表发布、部署或业务测试通过。R5 的实际完成情况以活跃清单中的任务和对应证据为准，旧 ROADMAP 继续保留作历史追溯。
 
 ## 3. 版本标识的唯一含义
 

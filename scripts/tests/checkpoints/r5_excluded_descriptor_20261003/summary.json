@@ -1,0 +1,15 @@
+{
+  "base": "64cd11816cfd94c9dc80e65578edb06b92725e84",
+  "counterexample": "30c25c57402a92f7126cb25ad77813fec811e470",
+  "helper_sha256": "4a583d967f3b078a13662561691291ac39a2a6388f6bebfc4f37fedf79d2e0f9",
+  "oracle_sha256": "e9d8c6f413754452227cb0df249f98ce571107088af0384a57d12f264d26bcca",
+  "passed_tests": {
+    "unchanged_independent": 9,
+    "descriptor_including_independent": 12,
+    "existing_source_inventory": 38,
+    "legacy_excluded_without_permission_change_test": 4
+  },
+  "additional_bounded_fault_subcases": 96,
+  "historical_fail_logs_preserved": true,
+  "qualification": "SOURCE metadata observation only; no Method19/SML/backend qualification"
+}

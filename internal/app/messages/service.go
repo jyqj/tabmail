@@ -3,14 +3,14 @@ package messageapp
 import (
 	"context"
 	"io"
-	"strings"
 
 	"github.com/google/uuid"
-	"github.com/jhillyerd/enmime/v2"
 	"github.com/rs/zerolog"
 	"tabmail/internal/app"
+	"tabmail/internal/app/credentials"
 	"tabmail/internal/authz"
 	"tabmail/internal/hooks"
+	"tabmail/internal/mailcontent"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
 	"tabmail/internal/rawobject"
@@ -40,16 +40,19 @@ type storeRepo interface {
 }
 
 type Viewer struct {
-	Tenant         *models.Tenant
-	IsSuperAdmin   bool
-	IsAdmin        bool
-	AuthMode       string
-	UserID         *uuid.UUID
-	OwnerUserID    *uuid.UUID
-	TenantWide     bool
-	BearerToken    string
-	PrincipalType  string
-	PrincipalID    *uuid.UUID
+	Tenant        *models.Tenant
+	IsSuperAdmin  bool
+	IsAdmin       bool
+	AuthMode      string
+	UserID        *uuid.UUID
+	OwnerUserID   *uuid.UUID
+	TenantWide    bool
+	BearerToken   string
+	PrincipalType string
+	PrincipalID   *uuid.UUID
+	// Permission preserves the canonical domain scope for authenticated viewers.
+	Permission *models.EffectivePermission
+	// AllowedZoneIDs is the legacy typed-caller fallback when Permission is nil.
 	AllowedZoneIDs []uuid.UUID
 }
 
@@ -129,11 +132,13 @@ func (s *Service) GetMessageDetail(ctx context.Context, address string, msgID uu
 	if msg.RawObjectKey != "" {
 		rc, err := s.obj.Get(ctx, msg.RawObjectKey)
 		if err != nil {
+			if rc != nil {
+				_ = rc.Close()
+			}
 			return nil, app.Internal(err)
 		}
 		if err == nil {
-			defer rc.Close()
-			env, parseErr := enmime.ReadEnvelope(rc)
+			env, parseErr := mailcontent.ParseBoundedReader(ctx, rc)
 			if parseErr != nil {
 				return nil, app.Internal(parseErr)
 			}
@@ -214,7 +219,7 @@ func (s *Service) DeleteMessage(ctx context.Context, address string, msgID uuid.
 	_, _ = s.objects.Release(ctx, msg.RawObjectKey)
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "message.delete", ResourceType: "message", ResourceID: app.UUIDPtr(msg.ID), Details: app.MustJSON(map[string]any{"mailbox": mb.FullAddress})})
 	if s.hub != nil {
-		s.hub.Publish(realtime.Event{Type: realtime.EventDelete, Mailbox: mb.FullAddress, MessageID: msg.ID.String(), Sender: msg.Sender, Subject: msg.Subject, Size: msg.Size})
+		s.hub.PublishContext(ctx, realtime.Event{Type: realtime.EventDelete, Mailbox: mb.FullAddress, MessageID: msg.ID.String(), Sender: msg.Sender, Subject: msg.Subject, Size: msg.Size})
 	}
 	if s.dispatcher != nil {
 		s.dispatcher.Publish(hooks.Event{Type: "message.deleted", Mailbox: mb.FullAddress, MessageID: msg.ID.String(), TenantID: mb.TenantID.String()})
@@ -248,7 +253,7 @@ func (s *Service) PurgeMailbox(ctx context.Context, address string, viewer Viewe
 	}
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "mailbox.purge", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "deleted_objects": len(keys)})})
 	if s.hub != nil {
-		s.hub.Publish(realtime.Event{Type: realtime.EventPurge, Mailbox: mb.FullAddress})
+		s.hub.PublishContext(ctx, realtime.Event{Type: realtime.EventPurge, Mailbox: mb.FullAddress})
 	}
 	if s.dispatcher != nil {
 		s.dispatcher.Publish(hooks.Event{Type: "mailbox.purged", Mailbox: mb.FullAddress, TenantID: mb.TenantID.String()})
@@ -262,8 +267,10 @@ func (s *Service) BreakGlassRead(ctx context.Context, address string, msgID uuid
 	if !viewer.IsTenantAdmin() {
 		return nil, app.Forbidden("break-glass is only available to admin users")
 	}
-	if strings.TrimSpace(reason) == "" {
-		return nil, app.BadRequest("reason is required for break-glass access")
+	var reasonErr error
+	reason, reasonErr = credentials.AuditReason(reason)
+	if reasonErr != nil {
+		return nil, app.BadRequest(reasonErr.Error())
 	}
 	mb, msg, err := s.lookupMessage(ctx, address, msgID, viewer)
 	if err != nil {
@@ -286,11 +293,13 @@ func (s *Service) BreakGlassRead(ctx context.Context, address string, msgID uuid
 	if msg.RawObjectKey != "" {
 		rc, err := s.obj.Get(ctx, msg.RawObjectKey)
 		if err != nil {
+			if rc != nil {
+				_ = rc.Close()
+			}
 			return nil, app.Internal(err)
 		}
 		{
-			defer rc.Close()
-			env, err := enmime.ReadEnvelope(rc)
+			env, err := mailcontent.ParseBoundedReader(ctx, rc)
 			if err != nil {
 				return nil, app.Internal(err)
 			}
@@ -315,8 +324,10 @@ func (s *Service) BreakGlassSource(ctx context.Context, address string, msgID uu
 	if !viewer.IsTenantAdmin() {
 		return nil, app.Forbidden("break-glass is only available to admin users")
 	}
-	if strings.TrimSpace(reason) == "" {
-		return nil, app.BadRequest("reason is required for break-glass access")
+	var reasonErr error
+	reason, reasonErr = credentials.AuditReason(reason)
+	if reasonErr != nil {
+		return nil, app.BadRequest(reasonErr.Error())
 	}
 	mb, msg, err := s.lookupMessage(ctx, address, msgID, viewer)
 	if err != nil {

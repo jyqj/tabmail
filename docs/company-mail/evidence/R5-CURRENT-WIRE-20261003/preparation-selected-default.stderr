@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "/workspace/r5-current-wire/scripts/r5_selected_source_binding_v2.py", line 370, in <module>
+    main()
+  File "/workspace/r5-current-wire/scripts/r5_selected_source_binding_v2.py", line 363, in main
+    result=capture(args.root,args.go,cache=args.cache,modulecache=args.modulecache,context=DEFAULT_CONTEXT if args.context=='default' else CONTEXT)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/r5-current-wire/scripts/r5_selected_source_binding_v2.py", line 271, in capture
+    before_go = topology(root)
+                ^^^^^^^^^^^^^^
+  File "/workspace/r5-current-wire/scripts/r5_selected_source_binding_v2.py", line 157, in topology
+    observed = boundary.check(root)
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/r5-current-wire/scripts/r5_archive_boundary.py", line 222, in check
+    raise ValueError('boundary topology changed during check')
+ValueError: boundary topology changed during check

@@ -1,0 +1,1526 @@
+{
+  "base_commit": "aeed47f0e1998d9925acb680992b051463821d69",
+  "added": 45,
+  "removed": 2,
+  "body_changed": 33,
+  "functions": [
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey",
+      "change": "body-changed",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "transaction-owner-write",
+      "trace": "Begin; authority key INSERT then usage INSERT; Commit, rollback on either failure; no current-actor reload in this low-level entry.",
+      "unverified": "Tenant/owner FKs and deletion/provision atomicity not executed; outer authorization required.",
+      "source_sha256": "f0c5e9e7b13cd7b9678bf22db651c5b0a01981025ed73fad26b624c828499c79",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:GetAPIKey",
+      "change": "body-changed",
+      "classification": {
+        "kind": "dynamic-sql-review",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "autocommit-metadata-reader",
+      "trace": "pool query uses apiKeyMetadataSelect LEFT JOIN usage; select whole timestamp/IP observation; legacy display fallback only if no usage row.",
+      "unverified": "Read is not current credential fence; NULL IP pairing/fallback and concurrent observation not executed.",
+      "source_sha256": "6485f66d77ec6f10a57fd7d017c626a1180f31cc32194fe22af4041a9a56b765",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:ListAPIKeys",
+      "change": "body-changed",
+      "classification": {
+        "kind": "dynamic-sql-review",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "autocommit-metadata-reader",
+      "trace": "pool query uses apiKeyMetadataSelect LEFT JOIN usage; select whole timestamp/IP observation; legacy display fallback only if no usage row.",
+      "unverified": "Read is not current credential fence; NULL IP pairing/fallback and concurrent observation not executed.",
+      "source_sha256": "0d161d2032eecbb1e0d51daabb67e57b22f0d7de523cc4dd6c77321e22043fb2",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:ListAPIKeysByOwner",
+      "change": "body-changed",
+      "classification": {
+        "kind": "dynamic-sql-review",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "autocommit-metadata-reader",
+      "trace": "pool query uses apiKeyMetadataSelect LEFT JOIN usage; select whole timestamp/IP observation; legacy display fallback only if no usage row.",
+      "unverified": "Read is not current credential fence; NULL IP pairing/fallback and concurrent observation not executed.",
+      "source_sha256": "9272161054b8e842c7c203ad9245d5d1240bfcd422b8ced3b97989119274fdeb",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:TouchAPIKey",
+      "change": "body-changed",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "autocommit-observation-wrapper",
+      "trace": "pool SELECT clock_timestamp once then touchAPIKeyObservation; separate statements; authority row never read/written.",
+      "unverified": "No whole-operation transaction; waiting update retains original sample; classification write closure misses constant-only write, manual effect is authoritative source review.",
+      "source_sha256": "a7e167c5e26aaf48a662cbc3a61bc6f6db9f0eef96b821dee74b00a0a2eb2391",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:touchAPIKeyObservation",
+      "change": "added",
+      "classification": {
+        "kind": "dynamic-sql-review",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "autocommit-observation-write",
+      "trace": "pool.Exec(apiKeyUsageUpdateSQL): UPDATE usage timestamp/IP as a whole only when newer; never INSERT or read authority; unchanged FK key. AST direct_write=false because SQL is a package constant.",
+      "unverified": "Usage wait, monotonic/tie/NULL-IP and deletion races not executed; constant bytes covered by file hash, not resolved SQL.",
+      "source_sha256": "67511e02dc86606847f5e36fa1cea9ba15ef2d9f1e51d0c88f03818ba19302a4",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/company_access_explanation.go:*PgStore:ExplainMailboxAccess",
+      "change": "body-changed",
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": true,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "authorized-transaction-explanation",
+      "trace": "companyTx; target user SHARE and applicable effectivePermissionSnapshot; mailbox fence; mailboxAccessWithSourceTx as target; management permission not target content grant.",
+      "unverified": "Time/role/profile/source explanation branches not executed; not runtime authority proof.",
+      "source_sha256": "902371fad30a9a0657a5469594ca374a1bc82e4888275037574db6f362c4b5d3",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/company_admin_events.go:*PgStore:ListCompanyAdminEvents",
+      "change": "added",
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "authorized-transaction-reader",
+      "trace": "companyReadTx(admin=true) reloads actor; bounded outbox invalidation projection by tenant; no delivery-state filter or content grant.",
+      "unverified": "SSE visibility after authority changes and dispatcher races not executed.",
+      "source_sha256": "b241509d61e768816b82fd03c347e39b2dd06263535c7935b8c568bd9a513076",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/company_admin_events.go:*PgStore:WithCompanyAdminEventAccess",
+      "change": "added",
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": true,
+        "dynamic_sql_expression": false
+      },
+      "role": "transaction-external-callback",
+      "trace": "companyReadTx(admin=true) holds current authority fences while checking context then emit(); emit is an external callback, not transactional delivery.",
+      "unverified": "Callback blocking, failed emit and commit-after-emit cannot be rolled back as transport effects; no runtime transport proof.",
+      "source_sha256": "95e5c0e37c3e2d9827ed113438d1a259232e1e81ca1c921b5d8418d2fad7a010",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/company_attachment_gc_scheduler.go:*PgStore:sweepCompanyAttachmentTenants",
+      "change": "added",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "session-lock-scheduler",
+      "trace": "Dedicated connection; pg_try_advisory_lock(1414350659,1); cursor read and bounded tail/head tenant scan; each cursor UPDATE autocommits before sweepCompanyAttachmentsWith on SAME connection; connection close releases session lock.",
+      "unverified": "No global round atomicity; busy lock skips round; lost cursor acknowledgement prevents GC entry; fairness/disconnect/statement-timeout not executed.",
+      "source_sha256": "03a6f5fd4e5a8dbd43070b87640d2294240e075a7f93b67160d1d3e150a9399a",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/company_mail.go:*PgStore:ListWorkMessages",
+      "change": "body-changed",
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "authorized-transaction-content-reader",
+      "trace": "companyReadTx; authorizeReceivedMailboxTx; folder/search filter plus receivedContentEligible; readReceivedPageTx shared count/page; final mailbox-live check.",
+      "unverified": "Deadline/relation-lock waiting and derived-search cache races not executed.",
+      "source_sha256": "f144c8fff1f8293ace727b39891b50c402cd137e828ea7242506f98ab14c0e4b",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/company_mail.go:*PgStore:MutateWorkMessage",
+      "change": "body-changed",
+      "classification": {
+        "kind": "write-call-closure",
+        "direct_write": false,
+        "write_closure": true,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "authorized-transaction-write",
+      "trace": "companyReferencedTx; mailbox fence/rights; personal seen/star branch or organize branch; restore guard; companyAudit then messageOutbox; restore deadline recheck after those waits.",
+      "unverified": "No changed production locks; original retention expiry retained; audit/outbox wait rollback not executed.",
+      "source_sha256": "e5622acd952e88ef455d269e869980d1a99de44e28dd2be324769f8d3dc7084a",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/company_mail.go:*capturedRestoreDeadline:check",
+      "change": "added",
+      "classification": {
+        "kind": "dynamic-sql-review",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "borrowed-transaction-deadline-check",
+      "trace": "capturedRestoreDeadline.check reads exact message/expiry equality plus receivedContentEligible and original purge deadline with clock_timestamp; no new row lock or commit.",
+      "unverified": "Deadline crossings after lock/audit/outbox waits and rollback not executed; only capturedRestoreDeadline receiver reviewed.",
+      "source_sha256": "cad01405afdd1ac342d76bc6c273bc6e4a6035a0d9d95db08f25c7c8aad2853a",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/company_mail.go::messageMutation",
+      "change": "body-changed",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "borrowed-transaction-write",
+      "trace": "restore delegates restoreMessageMutation; other actions pick SQL; message NO KEY UPDATE NOWAIT; execute action and require one affected row.",
+      "unverified": "Caller supplies tenant/mailbox/actor fences; generic helper does not perform outer restore post-audit check; not executed.",
+      "source_sha256": "42342cacbee51f13d337b430ff128672339222c2227fa6c389ec9c12f802f6e9",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/company_mail.go::restoreMessageMutation",
+      "change": "added",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "borrowed-transaction-write",
+      "trace": "message NO KEY UPDATE NOWAIT; require trashed; capture expires/purge; check original deadlines; clear deleted_at/purge_after while retaining expires_at; affected-row check; check again; return guard to outer caller.",
+      "unverified": "Outer MutateWorkMessage checks guard again after audit/outbox; standalone helper has no commit or outer final check; no PG wait proof.",
+      "source_sha256": "fc7c66e8fa1ed6e0fab1d9819de00df6e4be3b680fb0813eb469faa10a6e12a3",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/company_message_read.go:*PgStore:GetWorkMessage",
+      "change": "body-changed",
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "authorized-transaction-content-reader",
+      "trace": "companyReadTx; authorizeReceivedMailboxTx; exact workMessage projection with receivedContentEligible after mailbox fence.",
+      "unverified": "No proof of all lifecycle/concurrent delete branches; not executed.",
+      "source_sha256": "3b221e444bb73dd527d5d1c208acaabeaa218afbf1db7a0cd01d1988bb76448c",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/company_ops.go:*PgStore:SweepCompanyMetadata",
+      "change": "body-changed",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "autocommit-maintenance-orchestrator",
+      "trace": "Sequential pool.Exec deletes sent items/assets/runtime instances/mailbox events; then sweepCompanyAttachmentTenants session scheduler.",
+      "unverified": "Earlier deletes remain committed if later fails; no round-wide transaction; runtime maintenance not executed.",
+      "source_sha256": "182d7c85292e593f73a3078a1b0c217f294293f3cab3e56cb7e6e8d9a3d2d228",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/company_ops.go:*PgStore:sweepCompanyAttachments",
+      "change": "body-changed",
+      "classification": {
+        "kind": "write-call-closure",
+        "direct_write": false,
+        "write_closure": true,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "transaction-delegator",
+      "trace": "Calls sweepCompanyAttachmentsWith(ctx,s.pool,tenant); helper owns Begin/Commit and attachment/pin fences.",
+      "unverified": "Not itself a second transaction; standalone pool path differs from scheduler dedicated session; not executed.",
+      "source_sha256": "0492df21cc15309e1e329c9111cc25c7ed7d2c6eb1f0905a36d8f19d45186753",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/company_ops.go::sweepCompanyAttachmentsWith",
+      "change": "added",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "transaction-owner-gc",
+      "trace": "db.Begin; tenant lock; exclude outbound/sent/draft pins BEFORE LIMIT 100; attachment UPDATE SKIP LOCKED; recheck expiry/pins in DELETE CTE and register orphan_objects; Commit.",
+      "unverified": "Row bound is not physical query-work bound; draft/finish do not take tenant lock; pins/FKs/raw-object release and contention not executed.",
+      "source_sha256": "489d2050cd27485e63d3e03e72541241e0264e13ff1fe503ba799a29f93eeab7",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/content_eligibility.go:*PgStore:authorizeReceivedMailboxTx",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-transaction-authorization",
+      "trace": "lockMailboxAuthorization then requireReceivedMailboxLiveTx then mailboxAccessTx CanRead; outer companyReadTx must already fence actor/profile.",
+      "unverified": "Does not own transaction or independently reload actor; deadline/grant waits not executed.",
+      "source_sha256": "51fac8da192220bc06e70658eb6cf363d76a1e75e2c6ac6b1fc1d2b527aef6a0",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/content_eligibility.go::readReceivedPageTx",
+      "change": "added",
+      "classification": {
+        "kind": "dynamic-sql-review",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "borrowed-transaction-dynamic-reader",
+      "trace": "One materialized eligible CTE serves count and page; explicit JSON message projection and user states; fragments/placeholders supplied by caller, no write/commit.",
+      "unverified": "SQL fragments are not resolved by AST; callers must qualify scope/order and post-read deadline; PG relation-lock waits not executed.",
+      "source_sha256": "83ea724c6d290904a5e24c5d2bb9810b815b677ad45f154e9446b2e42ac5835a",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/content_eligibility.go::requireReceivedContentTx",
+      "change": "added",
+      "classification": {
+        "kind": "dynamic-sql-review",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "borrowed-transaction-eligibility-reader",
+      "trace": "tenant/mailbox/message SELECT with receivedContentEligible; no row lock; missing maps to NotFound; outer caller provides authority and fences.",
+      "unverified": "Not an authorization grant or atomic future-validity promise; lifecycle clock crossings not executed.",
+      "source_sha256": "56419e294346ec8f32ede0fd5b74fb8b9ccaa6cb087b746f090a9fbe7cf35e1b",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/content_eligibility.go::requireReceivedMailboxLiveTx",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-transaction-deadline-reader",
+      "trace": "tenant/mailbox SELECT checks recorded mailbox expires_at against clock_timestamp; no new row lock; absent/expired -> NotFound.",
+      "unverified": "Outer caller supplies mailbox fence; NULL is no recorded deadline, not perpetual authority; waits not executed.",
+      "source_sha256": "302d20042a15b5786053e5afdec78dc12c6861fad8f4a39c2e7c969823957349",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding",
+      "change": "body-changed",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "authorized-transaction-plan-executor",
+      "trace": "companyTx; exact plan UPDATE lock; executed replay qualifies subject and epoch only; pending path deadline/qualified target/fingerprint; applyOffboarding; final deadline then post-effects epoch and executed fingerprint UPDATE.",
+      "unverified": "Qualified replay not preview-expiry governed; side effects and rollback after waits not executed; no universal concurrency acceptance.",
+      "source_sha256": "615a8dfc3350368188853a9be4f0a0bcd630ae098089113bc276e51902f9ea4f",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding",
+      "change": "body-changed",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "authorized-transaction-plan-write",
+      "trace": "companyTx; formal target allows inactive; identity/assets fingerprint; lease clock sampled after waits; preview INSERT; companyAudit then deadline check.",
+      "unverified": "Plan FKs, profiles and worker/asset consistency not executed; no formal completion claim.",
+      "source_sha256": "d10a4b3f15e33dcfec344d47ca9596c8ef81e174b46b400a5a93dec570a1a7ec",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go:*PgStore:offboardingPlanTarget",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-transaction-plan-qualifier",
+      "trace": "Delegates offboardingQualifiedTarget(...,allowInactiveTarget=true); formal planner admits frozen target under identity/epoch qualification.",
+      "unverified": "No independent Begin/Commit or actor reload; legacy one-step policy differs; replay races not executed.",
+      "source_sha256": "c194a1376753bc7d5db6a0f157a0097c05d2d3e1af76fc1a3989bd0ddebe6bec",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go:*PgStore:offboardingQualifiedTarget",
+      "change": "added",
+      "classification": {
+        "kind": "lock-reader",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-transaction-locking-qualifier",
+      "trace": "offboardingSubjectsTx; target/successor epochs; reject executed target epoch; guardMemberRemoval; lock relevant outbound jobs ORDER BY id FOR UPDATE including uncertain ledger.",
+      "unverified": "Worker/ledger writes retain their own ownership; no claim of every asset fenced or no deadlocks; concurrency not executed.",
+      "source_sha256": "417153c4ad89ee6a1b990e9f70db18caaa92da419a97891577933b214676043c",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go:*PgStore:offboardingTarget",
+      "change": "body-changed",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-transaction-legacy-qualifier",
+      "trace": "Delegates offboardingQualifiedTarget(...,allowInactiveTarget=false); legacy one-step retains inactive guard.",
+      "unverified": "Formal planner uses different allowInactive policy; no new transaction or epoch-free replay grant.",
+      "source_sha256": "db3cdf03ca615ab8a9c8f7c6a6027520e630cd7e0805690b9f0afc201b2d9876",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go::offboardingAuthorityEpochTx",
+      "change": "added",
+      "classification": {
+        "kind": "lock-reader",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-transaction-epoch-reader",
+      "trace": "Read tenant/user identity tuple plus profile ID; assigned profile revision FOR SHARE NOWAIT; reject unavailable/busy profile; hash binding.",
+      "unverified": "Assumes caller user fence; identity hash is not runtime authorization; profile waits and ABA not executed.",
+      "source_sha256": "c585fdc2bfe92c58da85fe9ec9d1f798bfca3f958682116779a2d2ade1cec8be",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go::offboardingEpochsTx",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-transaction-epoch-composition",
+      "trace": "Read target epoch then successor epoch via offboardingAuthorityEpochTx in same borrowed transaction.",
+      "unverified": "Profile fence inherited, no Begin/Commit; multiple statements not universal serializable snapshot; not executed.",
+      "source_sha256": "a991498d83f6136d94e4861d27b7b5999e523bba9de6f58062064e3a11620ce8",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go::offboardingPreviewDeadlineTx",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-transaction-deadline-reader",
+      "trace": "SELECT clock_timestamp() >= preview expiresAt; Conflict when elapsed; invoked after potential waits by planner/executor.",
+      "unverified": "Statement checkpoint, not commit clock guarantee; expiry rollback not executed.",
+      "source_sha256": "6870bfd4bd5f12382f97fc7deee6fad324738915e3a2341e2dae976d9b7a6199",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go::offboardingSnapshot",
+      "change": "body-changed",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-transaction-fingerprint-reader",
+      "trace": "Read target/successor epochs then ordered resource ID/version aggregates and impact counts; hash both epochs plus asset JSON, no SQL writes.",
+      "unverified": "Multiple statements and worker ledger not all fenced by this helper; callers own subject/profile/job fences; same-count replacement/ABA not executed.",
+      "source_sha256": "15bb18f120372cd4e20c17ff30ee742f1f965946310b73aafe3a0e1d7e1548df",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/employee_disposition.go::offboardingSubjectsTx",
+      "change": "added",
+      "classification": {
+        "kind": "lock-reader",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "borrowed-transaction-locking-qualifier",
+      "trace": "Validate distinct IDs; target users FOR UPDATE; active policy branch and current actor role check; successor users FOR SHARE must be active.",
+      "unverified": "Caller must fence tenant/actor; target-before-successor lock order not a universal global order; contention not executed.",
+      "source_sha256": "92bd5d77aeb26607c35c9e8e4efc9116c08b848887160f66b9766cda7c5792f2",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/mail_content.go:*PgStore:ContentIndexStatus",
+      "change": "body-changed",
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "authorized-transaction-content-reader",
+      "trace": "companyReadTx; received-mailbox authorization; count eligible messages/cache/failed index jobs; final mailbox live check.",
+      "unverified": "Counts not per-resource runtime readiness proof; lifecycle wait branches not executed.",
+      "source_sha256": "fb5ef0e00ae7143956b6dc06f08e97475f9cbc1d92715427b89c343c9cd6035c",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/mail_content.go:*PgStore:GetParsedMessage",
+      "change": "body-changed",
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "authorized-transaction-cache-reader",
+      "trace": "companyReadTx; received-mailbox authorization/content check; source/parser-matched cache and lifecycle predicate; missing cache rechecks eligibility; success final content check.",
+      "unverified": "Eligible cache miss may trigger external fallback elsewhere; unavailable content must not; derived row/clock races not executed.",
+      "source_sha256": "aac61d8b2a64e8625da978f2b63acbbab575f30268819ed915f256ff3122ef89",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/mail_content.go:*PgStore:SaveParsedMessage",
+      "change": "body-changed",
+      "classification": {
+        "kind": "write-call-closure",
+        "direct_write": false,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "authorized-transaction-derived-write",
+      "trace": "companyReadTx; mailbox authorization; precise message SHARE NOWAIT; eligibility; saveParsed upsert; eligibility again after document conflict wait; no new ancestor tenant lock.",
+      "unverified": "Historical cache tests retain historical hashes; current lifecycle rechecks not executed against PG; source-only for this changed body.",
+      "source_sha256": "590e96642c515885f38cf652920b8f96bb0ba26a97054ab91eea29e91f1d95ab",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/mail_conversation.go:*PgStore:ListMessageConversation",
+      "change": "body-changed",
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "authorized-transaction-content-reader",
+      "trace": "companyReadTx; received-mailbox authorization; eligible root thread; shared count/page predicate; final root eligibility check.",
+      "unverified": "Returned members do not revive expired root; relation waits/clock crossing not executed.",
+      "source_sha256": "383e3d521b71a49c74a1da4cc84c71f9e799de6a496223087ac1af56dfed275d",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/member_guard.go:*PgStore:DeleteUserGuarded",
+      "change": "body-changed",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "transaction-owner-identity-delete",
+      "trace": "Begin; tenant then current actor and target user UPDATE; role/self/removal/mailbox/historical guards; delete owned keys then user; FK error mapper; member audit; map Commit FK error.",
+      "unverified": "Key deletion rolls back on failure; no cleanup of historical evidence; new references/deferred FK/audit failure not executed.",
+      "source_sha256": "b0ab6c14dc9ad4cd3e941279dd736e66af45c804949600a686f816cf559d483b",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/member_guard.go::guardMemberHistoricalIdentity",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-transaction-retention-reader",
+      "trace": "EXISTS retained plans/creation receipts/attachments/sealed drafts/outbound jobs; reject retained identity; final FK remains deletion fence.",
+      "unverified": "Plain reads do not fence all new references; runtime FK/deferred commit rejection not executed.",
+      "source_sha256": "70b37250e8ba262d3163de10a9928a19ae0a87f5ce4d4fa2c6e2142f1e5ddedc",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/member_guard.go::memberIdentityDeleteError",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "pure-error-mapper",
+      "trace": "Map pgconn.PgError 23503 to ErrMemberHasHistoricalIdentity; otherwise preserve error.",
+      "unverified": "No SQL, transaction or authorization; mapping insert/delete/commit errors is caller responsibility.",
+      "source_sha256": "3b71fb7973e75c79d19141ff796b7676841a7ca0f0049b95d206c1c9bbba2b1b",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/outbound.go:*PgStore:ListOutboundJobsScoped",
+      "change": "body-changed",
+      "classification": {
+        "kind": "dynamic-sql-review",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "autocommit-operation-reader",
+      "trace": "outboundJobsScopeSQL; invisible -> empty; separate pool count and page queries, raw jobs scanner.",
+      "unverified": "Outer filter/current authority required; not same-statement consistent count/page or safe receipt projection.",
+      "source_sha256": "6f90c3496dd9baafcb3710395131bcf7fc0f25477d149af944c032f1e946b20e",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/outbound.go::outboundJobsScopeSQL",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "pure-sql-builder",
+      "trace": "Tenant conjunct plus explicit owner branch; optional readable-mailbox OR and zone restriction; unknown principal returns visible=false.",
+      "unverified": "No DB execution or current-authority fence; caller-supplied filter and separate count/page remain independent.",
+      "source_sha256": "eeb22f3d1619aa1a7c84ea422b8878326e071a6238c0262e1da1af9e80ef5105",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/outbound_inspection.go:*PgStore:InspectOutboundRecovery",
+      "change": "added",
+      "classification": {
+        "kind": "write-call-closure",
+        "direct_write": false,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "transaction-owner-audited-inspection",
+      "trace": "Begin; recoveryReferencedActor tenant KEY SHARE/current actor SHARE; job SHARE NOWAIT then ordered bounded recipients SHARE NOWAIT; explicit DTO; companyAudit/outbox then Commit; busy/serialization -> Conflict.",
+      "unverified": "Recovery scope is not ordinary content grant; max recipient bound and audit rollback not executed; transport outside transaction.",
+      "source_sha256": "9f5786a03c40aff5c5f981a635087de3fccccbd07754fed70668d410e7ec8eff",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/outbound_receipts.go::readOutboundReceipts",
+      "change": "body-changed",
+      "classification": {
+        "kind": "dynamic-sql-review",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "borrowed-transaction-operation-reader",
+      "trace": "Intersect observed/current/key zone envelopes; owner OR eligible sent content; materialized visible/count/page plus recipient-state aggregate in one SQL; ContentAllowed tracked separately.",
+      "unverified": "Ordinary outcome receipt is not content grant; dynamic SQL/name matching not resolved dispatch; projection/wait behavior not executed.",
+      "source_sha256": "1df4e250b8f4bb89ff48a7b9b607b4260823eba4935b8d601241f794630b61c5",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/outbound_receipts.go:outboundReceiptRow:Scan",
+      "change": "body-changed",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "pure-row-adapter",
+      "trace": "outboundReceiptRow.Scan appends content_allowed, recipient_states,total destinations to underlying Row.Scan.",
+      "unverified": "No SQL execution/transaction/authority; same-name Scan closure is over-approximation, receiver matters.",
+      "source_sha256": "27fa8e5ddeff984e2e64298e4ec20202d10d3838b98ed4634eba6fab7de50e7d",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_assignment.go:*PgStore:AssignPermissionEditor",
+      "change": "added",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "authorized-transaction-cas-write",
+      "trace": "companyTx; writable member snapshot and expected revision; selected profile SHARE NOWAIT and revision; optional user assignment CAS; apply patch; reread snapshot; companyAudit; no-op emits no audit.",
+      "unverified": "Profile/member/domain/trigger/FK waits and stale confirmation rollback not executed.",
+      "source_sha256": "6a3497a25287d6369b1ee75d9b963b88d400303e9b9cdff0b89adaa5fc75c656",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_assignment.go::permissionAssignmentChangedFields",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "pure-audit-diff",
+      "trace": "Compare profile ID, override presence, nullable values and domain intent; synthesize inherited baseline when nil; return field names.",
+      "unverified": "No SQL/locks or CAS; diff is audit projection not authority.",
+      "source_sha256": "d0e5de58e4c447a92be8684903f2b811b5ec6daef39ba332f5e715d7640edb23",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_editor_patch.go:*PgStore:PatchPermissionEditor",
+      "change": "added",
+      "classification": {
+        "kind": "write-call-closure",
+        "direct_write": false,
+        "write_closure": true,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "authorized-transaction-cas-write",
+      "trace": "companyTx; writable permissionEditorSnapshotTx; expected tuple equality; empty patch returns snapshot; patch, reread, companyAudit in same transaction.",
+      "unverified": "Override trigger increments user revision; lost-update/domain NOWAIT/audit rollback not executed.",
+      "source_sha256": "586cade258d3c6676e9fd6acfad9715aa2d33e304dc853a4354b57dba302bef1",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_editor_patch.go::applyPermissionPatchTx",
+      "change": "added",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-transaction-write",
+      "trace": "Validate patch; empty no-op; listed domain KEY SHARE NOWAIT; one overrides upsert, omitted columns retained; explicit inherit/list/none/all parameters; trigger mutates users revision.",
+      "unverified": "Caller must fence user/actor; FK and trigger are indirect effects, not all AST writes; PG rollback/waits not executed.",
+      "source_sha256": "b934f4fc4706a190d4eaba16a19d2772424b4aa21ba39928d030b04695aea6ee",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_editor_patch.go::permissionDomainPatchParams",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "pure-parameter-builder",
+      "trace": "Absent -> nil/nil; inherit -> inherit/nil; list -> list/zone array; all/none -> mode/empty array.",
+      "unverified": "No SQL/authority; domain semantics validated by caller and database constraint, not executed.",
+      "source_sha256": "819cf2d90d17b595877632e1b7b4c047e0c5e5efba2e5e6f87bc6b9dd1a1bef4",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_editor_patch.go::permissionFieldParam",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "pure-parameter-builder",
+      "trace": "Generic nullable patch field: absent or inherit -> nil, explicit value -> value.",
+      "unverified": "No SQL/transaction; omitted-vs-inherit behavior depends on separate Present flags in upsert.",
+      "source_sha256": "fe312444f581b39d5af9d9e676f9eb1a9b3b536aa37786d67aed89c2366c0e83",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_editor_patch.go::permissionPatchFields",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "pure-audit-projection",
+      "trace": "Enumerate Present fields including domain_access; no value computation, DB call or lock.",
+      "unverified": "Audit field selection not mutation validation; no PG proof.",
+      "source_sha256": "b558d1f36e64527b73fd194afd4c184d911fbde3381c7e41cab607b2a4f372e8",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_editor_snapshot.go:*PgStore:GetPermissionEditorSnapshot",
+      "change": "added",
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "authorized-transaction-reader",
+      "trace": "companyReadTx(admin=true); permissionEditorSnapshotTx(write=false); returns only after helper transaction result.",
+      "unverified": "Read helper takes row fences, not SQL READ ONLY; waits and role/profile changes not executed.",
+      "source_sha256": "7611713ea900a925e277ed6b8db35413d2ed3b1e59f6908baf0453aeaa3d68c0",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_editor_snapshot.go::permissionEditorSnapshotTx",
+      "change": "added",
+      "classification": {
+        "kind": "lock-reader",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "borrowed-transaction-locking-reader",
+      "trace": "Target user SHARE or NO KEY UPDATE by write flag; CanManageTenantMember; user revision; assigned profile SHARE NOWAIT and revision; raw overrides plus effectivePermission projection.",
+      "unverified": "Relies on outer current actor fence; multiple reads not universal snapshot; overrides trigger writer discipline and busy profile not executed.",
+      "source_sha256": "c972e202f834b759e2f9411c460fd7a93a87240572ef097340bf832247fa4eea",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_profile_cas.go:*PgStore:DeletePermissionProfileCAS",
+      "change": "added",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "authorized-transaction-cas-delete",
+      "trace": "companyTx; mutable profile UPDATE NOWAIT and expected revision; affected members NOWAIT and exact confirmation set; DELETE CAS; FK conflict mapping; permissionProfileAudit.",
+      "unverified": "FK SET NULL assignment/revision triggers and audit/outbox atomicity need PG proof; not executed.",
+      "source_sha256": "4f21fe09ee04d4ac148f5e94972a2470ed7ba66103df38c791603ade2309ab22",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_profile_cas.go:*PgStore:GetPermissionProfileDeletionPreview",
+      "change": "added",
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": true,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "authorized-transaction-locking-reader",
+      "trace": "companyReadTx; profile UPDATE NOWAIT despite preview being read; system immutable; permissionProfileMembersTx; effective permissions before/without profile for every member.",
+      "unverified": "Locks are released after preview transaction; preview is not lasting reservation; no mutation except locks; races not executed.",
+      "source_sha256": "67d7d5195c4c0e273c3cc598b791b972db21d9c4140a8beb68a3a98e25b209a1",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_profile_cas.go:*PgStore:UpdatePermissionProfileCAS",
+      "change": "added",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "authorized-transaction-cas-write",
+      "trace": "companyTx; profile UPDATE NOWAIT/revision/scope; member locks; listed zones KEY SHARE NOWAIT; compute diff; no-op returns existing; UPDATE CAS then permissionProfileAudit.",
+      "unverified": "Revision trigger/FK/global member fanout/commit rollback not executed.",
+      "source_sha256": "a03fc14c520da9ded9cafb23f8d66408637239ec3c999dfa485dcd4641d95ade",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_profile_cas.go::permissionPositiveRevision",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "pure-input-validator",
+      "trace": "Parse positive base-10 int64 and require canonical decimal rendering.",
+      "unverified": "No transaction or DB; syntactic validity does not prove current revision.",
+      "source_sha256": "bf24bd2fb3be689c7c3ddb1161eb0456c75545ff7df3fcce81f61ca2bc05f241",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_profile_cas.go::permissionProfileAudit",
+      "change": "added",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-transaction-audit-write",
+      "trace": "Tenant-local -> companyAudit; global -> audit INSERT under actor tenant then distinct affected tenant IDs sorted, INSERT company.admin.changed outbox for each.",
+      "unverified": "Requires caller transaction/tenant fences; global create has empty audience; audit/outbox errors must rollback outer command; not executed.",
+      "source_sha256": "8809a8136ae4e501692fd66f4a41ef19d6e4ce047efa4af17cdbaa75c71f8344",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_profile_cas.go::permissionProfileChangedFields",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "pure-audit-diff",
+      "trace": "Reflect comparisons of mutable profile fields including allowed_zone_ids; returns changed field names.",
+      "unverified": "No DB/locks; ignores immutable scope as enforced by outer command; no authority proof.",
+      "source_sha256": "40d423c75c43d72379c2063f34b29e98bf4934baa933446abe83c420f420abd4",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_profile_cas.go::permissionProfileMembersTx",
+      "change": "added",
+      "classification": {
+        "kind": "lock-reader",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-transaction-locking-reader",
+      "trace": "Affected users ORDER BY id FOR NO KEY UPDATE NOWAIT; per-member manageable role check; tenant KEY SHARE NOWAIT; return confirmation tuples with profile revision.",
+      "unverified": "Profile-before-user-before-tenant order uses NOWAIT; not tenant-first blanket claim; global scope and contention not executed.",
+      "source_sha256": "c54ca717b5784936d88183b9db58fe0d55aeacc344d395fd06d90f8f2e0fa1dc",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_profile_cas.go::permissionProfileMutationTx",
+      "change": "added",
+      "classification": {
+        "kind": "lock-reader",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "borrowed-transaction-locking-reader",
+      "trace": "Scope-filtered profile SELECT with dynamic FOR UPDATE NOWAIT; reject absent/system immutable profile.",
+      "unverified": "No Begin/Commit or actor reload; caller must compare revision and current authority; not executed.",
+      "source_sha256": "a45cf346785760d84119ba801e41c7a06e48bdc15806f793674cc612880ca7da",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_profile_create.go:*PgStore:CreatePermissionProfileGuarded",
+      "change": "added",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "authorized-transaction-write",
+      "trace": "Validate requested profile; preliminary persistent home locator not authority; companyTx anchor and current actor; recheck home/super role; target tenant KEY SHARE NOWAIT, zones SHARE NOWAIT; INSERT RETURNING persisted row; permissionProfileAudit.",
+      "unverified": "Global create audits anchor without invented tenant audience; home/role/zone waits and failures not executed.",
+      "source_sha256": "dcf03ca841247046a038615fbd9d81e18d1c23ce86b534349e6d9b99dd8668d4",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permission_profile_visibility.go:*PgStore:ListVisiblePermissionProfiles",
+      "change": "added",
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "authorized-transaction-reader",
+      "trace": "companyReadTx(admin=true) current role; selected tenant existence; super sees global list, company admin local/global; ORDER BY name,id.",
+      "unverified": "Unpaginated API; list is management visibility not content access; current role after waits not executed.",
+      "source_sha256": "0353f19089c04e8f5ab01a78c45a58dcc54a6a8f80f4fda08355a9bd803aa421",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permissions.go:*PgStore:CreatePermissionProfile",
+      "change": "body-changed",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "autocommit-legacy-write",
+      "trace": "pool INSERT permission profile returns permission_revision text; low-level store entry without current actor fence or audited guarded create.",
+      "unverified": "Not interchangeable with CreatePermissionProfileGuarded; FK/outer authorization not tested here.",
+      "source_sha256": "da4347bebee7c4e1414070f3ae7ca8c3cff698d734d2b20c3ca98c5a31ce29d5",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permissions.go:*PgStore:UpsertUserPermissionOverride",
+      "change": "body-changed",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "transaction-delegator-write",
+      "trace": "permissionOverrideTx user fence; override upsert resets domain_access_mode NULL for legacy interpretation; RETURNING id/time; revision trigger indirect users update.",
+      "unverified": "No patch omitted-field semantics; trigger/FK/audit behavior not executed.",
+      "source_sha256": "64842680c5cd375876b6fa1826b947761081d2292227d3128ae5484860738ece",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permissions.go::effectivePermission",
+      "change": "body-changed",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-query-policy-delegator",
+      "trace": "effectivePermissionPolicy(...,withoutProfile=false); retains assigned profile plus override/default behavior.",
+      "unverified": "Querier can be pool or transaction; no independent user/profile fence.",
+      "source_sha256": "df2dc5a6445477970f05a560481d3ea70d0dbaf612cf74fdf741b48d7ef306b9",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permissions.go::effectivePermissionAfterProfileRemoval",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-query-policy-reader",
+      "trace": "effectivePermissionPolicy(...,withoutProfile=true) excludes assigned profile, keeps overrides/defaults; deletion preview simulation only.",
+      "unverified": "Does not delete anything or grant authority; nullable/domain interpretation not PG tested here.",
+      "source_sha256": "1c0da75fa5b49bc0cc4bd7ae1241349226b8c210208adfded23d2daebbd8dc00",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permissions.go::effectivePermissionPolicy",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-query-policy-reader",
+      "trace": "QueryRow users LEFT JOIN profile unless withoutProfile, overrides; COALESCE fallback and domain_access_mode projection; querier may be pool or transaction.",
+      "unverified": "No acquired row fences itself; AST treats interface signature as callback heuristic but it is a query interface, not callback; caller determines snapshot.",
+      "source_sha256": "273402e261ce17492aec93437fa6ff751ebba022f090d94b445ff22dce2c783e",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/permissions.go::scanPermProfile",
+      "change": "body-changed",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "pure-row-decoder",
+      "trace": "Scan profile fields including permission_revision string; ErrNoRows -> nil; preserve nullable AllowedZoneIDs as decoded.",
+      "unverified": "No SQL or locking; name-based closure must not be interpreted as runtime writes.",
+      "source_sha256": "e0a9b39a939970dd6e8e0c3004ef25a410a83297595bab78316b57b072b4c4cb",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/sent_content_selector.go::readSentContentTx",
+      "change": "added",
+      "classification": {
+        "kind": "dynamic-sql-review",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "borrowed-transaction-content-reader",
+      "trace": "Locate original sent asset mailbox; lockMailboxAuthorization; then original sentContentFrom/submissionContentScope projection; completeness controls BCC nil vs empty; safe display headers.",
+      "unverified": "Outer companyReadTx must fence actor/profile; original submitter/job/snapshot marker is not content grant; mailbox deadline waits not executed.",
+      "source_sha256": "717e6402952583844713dc862ef4241d550ebd1be131d67dbfc5346f72e7afe6",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/sent_recipient_snapshot.go:*PgStore:BackfillSentRecipientSnapshotsV1",
+      "change": "added",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "transaction-owner-maintenance-write",
+      "trace": "Validate tenant/limit 1..1000; Begin; keyset candidates legacy_unknown; reliable exact-source match jobs FOR SHARE; UPDATE still-unknown assets to COMPLETE; aggregate progress; Commit.",
+      "unverified": "No interactive actor authorization; explicit maintenance command only; trigger/provenance immutability, job cleanup race and cursor persistence not executed.",
+      "source_sha256": "db16967ea1fcf39e403bc0fc626aa863f693f2685e362ddea04a390bd5caf578",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/submission_receipt_privacy.go::loadSubmissionReceiptRecipients",
+      "change": "added",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "borrowed-transaction-outcome-reader",
+      "trace": "Empty IDs returns empty map; query tenant/job states ordered job/address; project only states, no recipient addresses/content; no commit/locks.",
+      "unverified": "Outcome evidence alone cannot grant content; ledger completeness/statement races not executed.",
+      "source_sha256": "b903b11cdd1478515735f8f5e9fd9d42ffd1af763dc15b506422011378d9a58a",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/submissions.go:*PgStore:GetSubmission",
+      "change": "body-changed",
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "authorized-transaction-outcome-reader",
+      "trace": "companyReadTx; submissionScope receipt authority; scan operation-only job; loadSubmissionReceiptRecipients states; ProjectOutboundReceipt.",
+      "unverified": "No ordinary addresses/BCC/body from receipts; separate statements not all-ledger consistency proof; not executed.",
+      "source_sha256": "1941d76df6dc003ae5054a51be28917f4980070df8d98a1773042e3c69f4c29b",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/submissions.go:*PgStore:GetSubmissionContent",
+      "change": "body-changed",
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "authorized-transaction-content-delegator",
+      "trace": "companyReadTx then readSentContentTx with current actor; only return after helper transaction result.",
+      "unverified": "Historical submitter/management scope not content grant; PG mailbox/content deadline waits not executed.",
+      "source_sha256": "fae02e0d5f535e2aeca2a1982388e092ff2ac11c60afd955ead2ed4cc1e6588e",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/submissions.go:*PgStore:ListSubmissions",
+      "change": "body-changed",
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "role": "authorized-transaction-outcome-reader",
+      "trace": "companyReadTx; scope; separate count/page; load outcome states; ProjectOutboundReceipt per job.",
+      "unverified": "READ COMMITTED count/page not universal snapshot; no content addresses; visibility/outcome races not executed.",
+      "source_sha256": "8e5a5f83a22434dccdf9a4fbf27bb31c90c1ebd91a657c77786187bd126fe047",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/submissions.go::scanSubmission",
+      "change": "body-changed",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "pure-receipt-decoder",
+      "trace": "Scan only operation job fields and boolean in-flight presence; use sentinel present instead of private domain.",
+      "unverified": "No DB execution/authority; no recipient content exposure; Row.Scan candidate closure not dispatch proof.",
+      "source_sha256": "e68a3246e261469d5835740473de04d11d4ed3c4e69048302319116db59c84d2",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    },
+    {
+      "id": "internal/store/postgres/submissions.go::submissionScopeFor",
+      "change": "body-changed",
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "role": "pure-sql-policy-builder",
+      "trace": "Always tenant conjunct; allowSubmitter selects receipt owner OR readable mailbox; content branch requires readable mailbox; API key receipt-only; unknown FALSE; zones narrow.",
+      "unverified": "No SQL evaluation/current actor reload; AST source is not runtime content authorization.",
+      "source_sha256": "17f9af2cbbc5b6cd3e03a2b36a4185c9bde3290e3ae978549b674bf15bfc43b5",
+      "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+    }
+  ],
+  "removed_functions": [
+    {
+      "id": "internal/store/postgres/submissions.go::applySubmissionOutcome",
+      "role": "removed-helper",
+      "review": "applySubmissionOutcome was receipt projection; now company.ProjectOutboundReceipt owns outcome projection. No production PostgreSQL function remains.",
+      "historical_syntax": {
+        "id": "internal/store/postgres/submissions.go::applySubmissionOutcome",
+        "file": "internal/store/postgres/submissions.go",
+        "name": "applySubmissionOutcome",
+        "receiver": "",
+        "line": 51,
+        "end": 61,
+        "sha256": "170e4f35135fcc08cafef336b4f27521125153cb4589400dd27cd1e4cac30063",
+        "calls": [
+          {
+            "line": 52,
+            "expr": "make",
+            "name": "make"
+          },
+          {
+            "line": 52,
+            "expr": "len",
+            "name": "len"
+          },
+          {
+            "line": 54,
+            "expr": "append",
+            "name": "append"
+          },
+          {
+            "line": 57,
+            "expr": "append",
+            "name": "append"
+          },
+          {
+            "line": 60,
+            "expr": "company.DeriveSubmissionStatus",
+            "name": "DeriveSubmissionStatus"
+          }
+        ],
+        "strings": [
+          {
+            "line": 57,
+            "value": "uncertain"
+          }
+        ],
+        "params": "func(v *company.Submission, state models.OutboundState, inFlight bool)"
+      },
+      "historical_role": "pure-outcome-projection-no-sql",
+      "historical_source": "aeed47f0e1998d9925acb680992b051463821d69:docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json (stale historical AST, not current implementation)"
+    },
+    {
+      "id": "internal/store/postgres/submissions.go::loadSubmissionRecipients",
+      "role": "removed-helper",
+      "review": "loadSubmissionRecipients removed address-bearing receipt helper; loadSubmissionReceiptRecipients now returns only ledger states. No alias/allowlist retained.",
+      "historical_syntax": {
+        "id": "internal/store/postgres/submissions.go::loadSubmissionRecipients",
+        "file": "internal/store/postgres/submissions.go",
+        "name": "loadSubmissionRecipients",
+        "receiver": "",
+        "line": 63,
+        "end": 82,
+        "sha256": "b50684f27b82726cfa14b9e5afb2fa9e22940580ee40df785092167e6cd3da79",
+        "calls": [
+          {
+            "line": 65,
+            "expr": "len",
+            "name": "len"
+          },
+          {
+            "line": 68,
+            "expr": "tx.Query",
+            "name": "Query",
+            "sql_expr": "`SELECT job_id,address,state FROM outbound_recipients WHERE tenant_id=$1 AND job_id=ANY($2) ORDER BY job_id,address`"
+          },
+          {
+            "line": 72,
+            "expr": "rows.Close",
+            "name": "Close"
+          },
+          {
+            "line": 73,
+            "expr": "rows.Next",
+            "name": "Next"
+          },
+          {
+            "line": 76,
+            "expr": "rows.Scan",
+            "name": "Scan"
+          },
+          {
+            "line": 79,
+            "expr": "append",
+            "name": "append"
+          },
+          {
+            "line": 81,
+            "expr": "rows.Err",
+            "name": "Err"
+          }
+        ],
+        "strings": [
+          {
+            "line": 68,
+            "value": "SELECT job_id,address,state FROM outbound_recipients WHERE tenant_id=$1 AND job_id=ANY($2) ORDER BY job_id,address"
+          }
+        ],
+        "params": "func(ctx context.Context, tx pgx.Tx, tenant uuid.UUID, ids []uuid.UUID) (map[uuid.UUID][]company.SubmissionRecipient, error)"
+      },
+      "historical_role": "borrowed-transaction-recipient-reader-no-commit",
+      "historical_source": "aeed47f0e1998d9925acb680992b051463821d69:docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json (stale historical AST, not current implementation)"
+    }
+  ],
+  "runtime_verified": false
+}

@@ -1,0 +1,392 @@
+{
+  "status": "PASS",
+  "base": "f875672dea2b68fdec9e0b986f4863724da5d7ba",
+  "accepted_sources": [
+    "46de5010b7dc79b841c52d6ff7245d070a846a76",
+    "9510bfd85264e92191cad277ef7187cd4fad8abf",
+    "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+    "648938a5baad2f35ba120da2cf5ae1001f8f3b4a",
+    "062c5bad63f2d37cedd0bfb1cdccf0fb7a195a8b",
+    "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74"
+  ],
+  "union": [
+    {
+      "path": "docs/company-mail/LF01-SELECTOR-REGRESSION-20261004.md",
+      "accepted_source": "648938a5baad2f35ba120da2cf5ae1001f8f3b4a",
+      "git_blob": "086ae7dacfa82163c633d271bb10aa7440045aac",
+      "sha256": "84b22ec58ccc927aab8883b0ab7895b8b9db61b3100b1b6d73c415754baf29d5",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/OFFBOARDING-SUCCESSOR-AUTHZ-20261004.md",
+      "accepted_source": "062c5bad63f2d37cedd0bfb1cdccf0fb7a195a8b",
+      "git_blob": "aa5efb99437df791130d0525b1532d2458d2b399",
+      "sha256": "2901cbd58ec37e8cdece95b4f91d65a9de358dce58b6e31c5285a4e3fc2c819f",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/PAIR-INDEPENDENT-REVIEW-20261004.md",
+      "accepted_source": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+      "git_blob": "0c798672594a4bb3d4717451d27e712abd9189a0",
+      "sha256": "b4d7bcaf7429d14c0835698a9f0cfb16afd5225ac09acea2f01714418a6a8d97",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/PE-INDEPENDENT-REVIEW-20261004.md",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "e63e27c145cc45030b8764342e9ed79973bfcc53",
+      "sha256": "6393185f24a49f5c9ca3a5994d5534acddbceaaf39ceb168e3abc1e76708a988",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/PE-SHARED-ADAPTER-MIGRATION-20261004.md",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "c8f43ab9837dff005ad01f672f91e80bca1b30ab",
+      "sha256": "3344dddc6f253aadd67201cd8f166daa22c50728e18e9358041737d93a2315d1",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/R5-EXTERNAL-BATCH-G1-CLEANUP-FIX-20261004.md",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "a8004125a126d395f52207675128c9d827205b51",
+      "sha256": "a2d02440922a50bdb68ad5914361459f168fa9ecb87e293f9efb37d6ffc25fec",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/R5-FORMAL-COMPONENTS-F875-20261004.md",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "f779975657624318d78b994b45a7284dae8e76c9",
+      "sha256": "8aa2662f2fc9985d32c544a47917d8fe40946e27ff1e1272ef87e40d88052c4c",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/R5-PE-SEED-FIX-20261004.md",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "c08b08fc7a017b8256c17a113bdd551f77b98020",
+      "sha256": "1252df6bc40ae9a035820c1bc7cc10893e4089d8ff00cf38f1e3f38a86e62961",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/R5-STREAMING-OBSERVER-INTEGRATION.patch",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "49f08debd3c53e86197bbffb69c15ee0accdb5c4",
+      "sha256": "21d6d0ec08c034ff64310e9fe46378bd3d28710b5ee0371c1fd0c9463992b463",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/LF01-SELECTOR-REGRESSION-20261004.json",
+      "accepted_source": "648938a5baad2f35ba120da2cf5ae1001f8f3b4a",
+      "git_blob": "381a9dac3ca053939c55a7d429966f7a731aad90",
+      "sha256": "71564e81f5dadd048856ed559600cc42610250c6514d67118f7141f56383e211",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/OFFBOARDING-SUCCESSOR-AUTHZ-20261004.json",
+      "accepted_source": "062c5bad63f2d37cedd0bfb1cdccf0fb7a195a8b",
+      "git_blob": "3c940fb8b51fb4225e1c928762d77bd2dfec52d0",
+      "sha256": "69a9e218c74cb6c45e0d8950855a4ecb14c8892a9466bfee030c4daaf482bd4e",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/baseline-http.log",
+      "accepted_source": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+      "git_blob": "f9d910557e1cb976e60e1042f8b450f9a5c9f7fc",
+      "sha256": "503b0a7c9e9d8462efbeec66ee4a9b9782206d6c9fb636307a7033dcd4f95b41",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/baseline-ui.log",
+      "accepted_source": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+      "git_blob": "75d46d8cb4ac770ac58975ae988d1644034a5d21",
+      "sha256": "f45557a2fdcaceda0b6011d2e2226cb46d7fe65d077f2c658648f841d9ea3990",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/cleanup.log",
+      "accepted_source": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+      "git_blob": "5de369c0f37bc7aa61cd56676dbc847a589730be",
+      "sha256": "e63479697088a6dd7c0fff4600ec7d9067121c7a861429f0e0264ac8d8437a9d",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/eslint.log",
+      "accepted_source": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+      "git_blob": "64720b515d43b03c7f4ddcfd13d669e106a834c2",
+      "sha256": "76162e465989f3f070a9de8db711fbf358e53b74d09ce1bbdb57c727e4c4a16d",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/exact-production-union.patch",
+      "accepted_source": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+      "git_blob": "97944afcc78a3362911f5221d7f51a6c07ac33ba",
+      "sha256": "188d4b85276d80418cb259b4eb965cbd649d53e3926481d67dd12a7e70aa14a3",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/final-fixed-race.log",
+      "accepted_source": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+      "git_blob": "878d180bfba2549409916820cb9611d4d2a353f6",
+      "sha256": "5cfec9ded0c52545236e8f502a269fe575f1026287c568b07fa07233a8ace63d",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/initial-fixed-race.log",
+      "accepted_source": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+      "git_blob": "442b845a728db24d6998ad9ac3eff8f61acd0d83",
+      "sha256": "8b46a61427db681d1dd32ac11c66ae1d8e05ddc479db177575cb51dd3dda1361",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/manifest.json",
+      "accepted_source": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+      "git_blob": "c81f2ef2be3f852fe1466633a448fcdf37f4e012",
+      "sha256": "56a21eafc93f584a2e648fb905e3a6b70e44bd965b617cb22781af2a2fce1de0",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/typescript.log",
+      "accepted_source": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+      "git_blob": "64720b515d43b03c7f4ddcfd13d669e106a834c2",
+      "sha256": "76162e465989f3f070a9de8db711fbf358e53b74d09ce1bbdb57c727e4c4a16d",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/vet.log",
+      "accepted_source": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/PE-INDEPENDENT-REVIEW-20261004/report.json",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "ba9d7f3b916e9c723c368e273ff8cbb193c15e9a",
+      "sha256": "9847012263294a6922914cf0e42694ffd694c2fcafe16d76487b93d68dac1d0b",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/PE-SHARED-ADAPTER-FOCUSED-20261004/report.json",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "dec4a28789fcfd6b413e165bae751dfe65ec54f7",
+      "sha256": "363a21c1e6ee5aae0002ba12bba5948b936d40be135ac7e0fdade804c91656a4",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-EXTERNAL-BATCH-G1-CLEANUP-FIX-20261004.json",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "cdda910ad787c54756a81992ee8a819317372724",
+      "sha256": "721f3fe60c8f0f7f4d0da3a4c7fcac5976e51aa9f0662a90100584f99b1c8f53",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-FORMAL-COMPONENTS-F875-20261004/report.json",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "5674a99b3db5c1a503ab2c4dddaf97d701ff85b8",
+      "sha256": "7dbcc94223f82606af4a646d79fb8231e677102ff71a33c7b96402c893d3c896",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-PE-SEED-PROBE-20261004/cleanup.raw.log",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "aa47d0d46d47a06090f436b0b851b76bb6f3b6e2",
+      "sha256": "52f96c26a39ed25108a6db43d6e11c6051eba8a498a5baab1891adfa7ac7c262",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-PE-SEED-PROBE-20261004/setup.raw.log",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "537e46fc9ef197ea296bc0a61c5b3d9d47a31a02",
+      "sha256": "b80a3b0c4adf0b9f8337bde4841e8c512b9135b85c08ee8650ba704c799b16da",
+      "exact": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-TRANSPORT-DIAGNOSTIC-20261004/report.json",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "75b8908018117a5f84c5f1bb202e9321b7d1fafd",
+      "sha256": "d61eb7e298919497458ecd59bc719c06d17e92f08b0027169299f60983dd1f6b",
+      "exact": true
+    },
+    {
+      "path": "internal/api/handlers/pe_independent_review_test.go",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "86606d2fad9e162b54cd18f50cd893a2f66d81c1",
+      "sha256": "b161d5a4a860d07629580708dc0f5b81930ec80fe83f80b410197d2068f848cc",
+      "exact": true
+    },
+    {
+      "path": "internal/api/handlers/pe_shared_adapter_focused_test.go",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "db85ca695bb117e1fb814c42b0ebeddf0a7a5f76",
+      "sha256": "c3b867fdb80ac0c5a59acd4cffa2e631317b36312b1117098e2a86fdbe284c7d",
+      "exact": true
+    },
+    {
+      "path": "internal/api/handlers/r5_protocol_component_observations_test.go",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "303813d799fb7be3ecb2dc7166e6995f5a2fae0e",
+      "sha256": "42deed5c10a1bcc510ea144e36ecac6af377a8fe8a08cea57bf3190eecb73757",
+      "exact": true
+    },
+    {
+      "path": "internal/api/handlers/r5_protocol_permission_seed_test.go",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "fa1905b2539ce46513463339a507435e50a6350e",
+      "sha256": "e5f593f950f617502efc8cd02c13858bb9725b7e24c51e9c2e4128f0fd12974a",
+      "exact": true
+    },
+    {
+      "path": "internal/api/handlers/r5_protocol_transport_test.go",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "dc5a90bf2614fe8ce373a9d428ad773a971eee78",
+      "sha256": "57169a39460424bc41a1d0bbfaf17342eef939360c8e2038f4464392d636b47e",
+      "exact": true
+    },
+    {
+      "path": "internal/store/postgres/employee_disposition.go",
+      "accepted_source": "062c5bad63f2d37cedd0bfb1cdccf0fb7a195a8b",
+      "git_blob": "619feb36f23f6f3039cbd8c8230a4bcd7b809fd7",
+      "sha256": "ac722af5f6cc24b25662bdc9098d466417fb701ceddf29373ac26e1b17aca42e",
+      "exact": true
+    },
+    {
+      "path": "internal/store/postgres/lf01_selector_regression_test.go",
+      "accepted_source": "648938a5baad2f35ba120da2cf5ae1001f8f3b4a",
+      "git_blob": "498765ebf87f6a538cc3f9cedfe2182bcf1875f2",
+      "sha256": "d271ed23865f406529ecb1a6e712d15068ded94e4b790ca26cafe2cc2319eb0b",
+      "exact": false
+    },
+    {
+      "path": "internal/store/postgres/offboarding_successor_authz_test.go",
+      "accepted_source": "062c5bad63f2d37cedd0bfb1cdccf0fb7a195a8b",
+      "git_blob": "5ce156816dc931da6c791546d073b83ff5081f74",
+      "sha256": "81b4e38669d98c6ae1732933f225f86f7231fb6cfcded6ff7fe6257fae068852",
+      "exact": true
+    },
+    {
+      "path": "internal/store/postgres/pair_independent_review_test.go",
+      "accepted_source": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+      "git_blob": "a20f1d5e5e02c9e401bba13118705ba9f0a23e96",
+      "sha256": "c27cf8ce30337aff31b8626a44acb50d616f44f18a0001141fe2ca848114b633",
+      "exact": true
+    },
+    {
+      "path": "scripts/reviews/pe_independent_mutations_20261004.py",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "f27cfa668c0c9ae6682f6e68be6da0ea2ebd0163",
+      "sha256": "abafce58b82a63def5e00030841eba899bf5ceb8c9b6e7f08ddd8b4af0fdc629",
+      "exact": true
+    },
+    {
+      "path": "web/components/company/pe-independent-review.test.ts",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "9edb82ba4e2dee4caf73d6e784dec7c56f840665",
+      "sha256": "d2006334495db050b108b4b7808fd834ee4c96032578be7e5a31c76f2413c95b",
+      "exact": true
+    },
+    {
+      "path": "web/components/company/pe-independent-unmount.probe.tsx",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "5ea5cea8fa83c6967d74085230d5461640cf07b9",
+      "sha256": "7f6c3ff47f1094d5c12ceb83b6c9fff87dfa34292e507c365b15f4e20d5468ba",
+      "exact": true
+    },
+    {
+      "path": "web/components/company/r5-permission-contract-oracle.test.ts",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "c97001f3768696f9a6d104ad10ba6c472e08ea1c",
+      "sha256": "a9d4d3bdcac7fb37471c08d8f21de82650c6b94fbf4ebff4231d5b0953cbb145",
+      "exact": true
+    },
+    {
+      "path": "web/components/company/r5-permission-contract-oracle.ts",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "e4e8b273bf2bcd0195798053bba47ad00b75590b",
+      "sha256": "08cee459b6d68f5e0ed3c03087a12288bfe85b1fec4f075953097c2b2273ca0b",
+      "exact": true
+    },
+    {
+      "path": "web/components/company/r5-protocol-shared-components.test.tsx",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "272fd52da7d499b6ff963f5e7ab720091194912b",
+      "sha256": "37028fb2d8eff1c59282ba045d7f8b3bf5bc7ad73276499d85597066358c21e0",
+      "exact": true
+    },
+    {
+      "path": "web/components/company/r5-streaming-fetch-observer.probe.ts",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "d64f3cffd8736aa5dc1157c7c50dfe4a9e53ad8b",
+      "sha256": "2a59a77009386912b6aa03bda149038cd725271b4c7aff8d3ea24f2a5ea3e666",
+      "exact": true
+    },
+    {
+      "path": "web/components/company/r5-streaming-fetch-observer.ts",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "b8c4b5b6deae414649ee3785cfc60f9b64940891",
+      "sha256": "54c273049173f6a9c3e8c6ad79f0c142e1720d6536ede62734f568eca6164997",
+      "exact": true
+    },
+    {
+      "path": "web/features/company/offboarding-panel.test.tsx",
+      "accepted_source": "648938a5baad2f35ba120da2cf5ae1001f8f3b4a",
+      "git_blob": "9668b53e61527c92bafbcb444dc12293f44a0f8a",
+      "sha256": "680aa98c227dd2fc47f2364716305fe73fc41e88038ea529e1ee82cc775ed58e",
+      "exact": true
+    },
+    {
+      "path": "web/features/company/offboarding-panel.tsx",
+      "accepted_source": "648938a5baad2f35ba120da2cf5ae1001f8f3b4a",
+      "git_blob": "52554e543a3aef7c9d28cebb149d3411e286a515",
+      "sha256": "aa0a593e9b7a4765e3b8803ea5d7f103b780aa2faebcdbadce41b56622234a14",
+      "exact": true
+    },
+    {
+      "path": "web/lf01-owned.probe.tsx",
+      "accepted_source": "648938a5baad2f35ba120da2cf5ae1001f8f3b4a",
+      "git_blob": "904fd0b0602e01296e616b6efbbe9f20bf16bde1",
+      "sha256": "14d92d3b4c9d4ce0bcae87d13b1c00633865e1d83edceaa3c98220cae86f7fee",
+      "exact": true
+    },
+    {
+      "path": "web/pair-review.probe.tsx",
+      "accepted_source": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+      "git_blob": "4b6e7914e4b24496e6e7cba50a2673511a67edf0",
+      "sha256": "82c973f59a4ccade3d20401d1ca71e6e5ac1c4dbfec30ca49522f874adb6cd05",
+      "exact": true
+    },
+    {
+      "path": "web/vitest.lf01.config.ts",
+      "accepted_source": "648938a5baad2f35ba120da2cf5ae1001f8f3b4a",
+      "git_blob": "0f8f3705b08750baa6747d1e598eb02e29d28d69",
+      "sha256": "385b574663e6c43953826b914d8217659bbe9cdf59e3754f1e0b49597de9cc95",
+      "exact": true
+    },
+    {
+      "path": "web/vitest.pair-review.config.ts",
+      "accepted_source": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+      "git_blob": "5b8551760b7e8df8873a70ba6aede2ba709865f8",
+      "sha256": "b37165ae1d0a5f71101fb4aedba2d353e49155ef4da7b9286de6b70a8733a0e8",
+      "exact": true
+    },
+    {
+      "path": "web/vitest.pe-independent.config.ts",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "51a336173e0508eaa494a06b0f61425d254dda77",
+      "sha256": "93f114358e327e882d4f8572576bae5cc429a6415488fb5f6ca5f7574b725bef",
+      "exact": true
+    },
+    {
+      "path": "web/vitest.r5transport.config.ts",
+      "accepted_source": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+      "git_blob": "e5b5e3d2c586b755f1ac1ab0c239590d61cc5f8d",
+      "sha256": "246041400c45913c0ce0442275b82aab2cc4b324a7683c995d3ee8d4dc8b00ec",
+      "exact": true
+    }
+  ],
+  "mechanical_conflict": {
+    "path": "internal/store/postgres/lf01_selector_regression_test.go",
+    "old": "peer-admin successor HTTP200",
+    "combined": "HTTP403 under accepted backend policy",
+    "policy_weakened": false
+  },
+  "protected": "All other tracked baseline bytes identical; all retained historical receipts exact"
+}

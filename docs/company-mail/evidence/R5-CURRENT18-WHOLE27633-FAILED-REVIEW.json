@@ -1,0 +1,1510 @@
+{
+  "actual_GOMAXPROCS": "1",
+  "actual_argv": [
+    "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go",
+    "test",
+    "-mod=readonly",
+    "-json",
+    "-race",
+    "-p",
+    "1",
+    "-count=1",
+    "-timeout=180s",
+    "./..."
+  ],
+  "actual_declared_top_count": 873,
+  "actual_source_closure_sha256": "ce40c0979d2a93deae5381b4f169a07bb736f84a09d2d02521c4574af7fcff17",
+  "all_packages_cont_count": 20,
+  "all_packages_pause_count": 39,
+  "authorized_GOMAXPROCS": "2",
+  "auto_retry": false,
+  "classifier_actual": {
+    "current-source-all-classifier": {
+      "allowed_skips_observed": [
+        {
+          "package": "tabmail/internal/store/postgres",
+          "reason": "Only documented shipping-image browser optin; unexecuted remains G0blocked, never fullCI.",
+          "test": "TestR3BrowserJourney"
+        }
+      ],
+      "default_expected_target_red": [],
+      "errors": [
+        "go test process exit was 1, not 0",
+        "test failed: tabmail/internal/store/postgres::TestR5LegacyContentKeyHTTPPreservesSafeReceipt",
+        "package tabmail/internal/store/postgres ended with unfinished tests",
+        "package failed: tabmail/internal/store/postgres",
+        "missing test completion: tabmail/internal/store/postgres::TestR5AccessExplanationWaitsForTargetWrites",
+        "missing test completion: tabmail/internal/store/postgres::TestR5AccessExplanationOrdersPermissionChanges",
+        "missing test completion: tabmail/internal/store/postgres::TestR5AccessExplanationFailureReturnsNoProjection",
+        "missing test completion: tabmail/internal/store/postgres::TestR5AccessExplanationPreservesCanonicalDecisions",
+        "missing test completion: tabmail/internal/store/postgres::TestR5ActivationExpiryAfterRealWaitRollsBack",
+        "missing test completion: tabmail/internal/store/postgres::TestR5AttachmentFinishUsesTimeAfterLockWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5AttachmentGCTenantLockTimeoutContinuesRound",
+        "missing test completion: tabmail/internal/store/postgres::TestR5SentMutationRejectsExpiryAfterItemWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5SentMutationRollsBackExpiryDuringAuditWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5SentReadUsesTimeAfterIdentityWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5EnqueueRechecksAuthorityAfterParentWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5EnqueueAuditWaitExpiryAndCancellation",
+        "missing test completion: tabmail/internal/store/postgres::TestR5GlobalProfileFanoutRecipients",
+        "missing test completion: tabmail/internal/store/postgres::TestR5GlobalProfileFanoutRequiredRollback",
+        "missing test completion: tabmail/internal/store/postgres::TestR5GlobalProfileFanoutAuthority",
+        "missing test completion: tabmail/internal/store/postgres::TestR5IndexCompleteRechecksAfterJobWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5IndexFailRechecksAfterJobWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5IndexCompleteRechecksAfterDocumentWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5IngressLeaseExpiryAfterTenantWaitRollsBack",
+        "missing test completion: tabmail/internal/store/postgres::TestR5LegacyContentKeyExpiryAfterMailboxWait",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestAR02ReadableMailboxQueryParity",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestAR04LegacyRecipientMigrationPreservesEvidence",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestAR09HandoverAndConvertClaimRevisionThroughHelper",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestAR09OffboardingLocksOwnedMailboxesInIdOrder",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestAdminVisibilityIsNotContentAccess",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureAdministrativeOutboxFailureRollsBack",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureConsoleUsesTenantAndCanonicalAuthority",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureDraftAuthorizationBeforePagination",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureDraftCreationReplayAndTombstone",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureExpiredArchiveCannotBeReopenedViaWorkspace",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureIndexCrashBudgetAndFailureFence",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureIndexLeaseSearchAndConversation",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureIndexRecoveryHTTPRequiresAdministratorAndReason",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureIndexRecoveryIsBoundedTenantScopedAndAtomic",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureNewHTTPViewsRespectContentAndAdminBoundaries",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureOffboardingDispositionAndQueueEvidence",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureOffboardingExpiryAndAuditRollback",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureOffboardingPreviewFencesChangesAndReplay",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureSentAssetCreationRollsBackWithJob",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureSentAssetsOutliveQueueAndRemainPrivate",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureUpgradeBackfillsExistingEmployeeAssets",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestBaselineMigrationContainsCurrentStateHardening",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestCompanyMessageDetailMatchesPersonalListStateAndImmutableScope",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestCompanyReadPathDoesNotSerializeOnTenantLock",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestCreateOutboundJobConsumeDraftSingleConsumption",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestDomainDeleteConcurrentMailboxInsertCannotCascade",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestDomainDeletePreservesFormerPrimaryAssets",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestDomainDeleteProtectsDurableIngressProvenance",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestDomainDeleteTenantScopeAndAtomicAudit",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestDomainNoneConsumerOutboundScope",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestDomainNoneConsumerReceiptEnvelope",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestDomainNoneConsumerSubmissionScope",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestDraftSubmitConcurrentWindowsProduceOneJob",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestDraftSubmitConsumesDraftAtomically",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestDraftSubmitRevisionMismatchKeepsDraft",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestDraftSubmitRevokedSendRightKeepsDraft",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestHashKeyDeterministic",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestInsertOutboundJobCoalescesNilRecipientArrays",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestMailboxAdministrationFollowsMemberHierarchy",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestMailboxAdministrationHTTPRequiresObservedVersion",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestMailboxGrantAndPolicyShareOneCAS",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestMailboxGrantStaleSnapshotCannotRestoreRevokedPermission",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestMigrateAppliesCleanly",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestP0BaselineDoesNotDropHistoricalGrants",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestP0GooseRestartAndHistoricalGrantSafety",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestP0PostgresOutboundDomainFencingAndUncertainty",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestP0PostgresOwnerGrantAndPermanentRetention",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestP4AttachmentCleanupRespectsSentJobReferences",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestP4SubmissionContentAndAttachmentsScope",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestPermissionEditorPatchParameterIntent",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestPersonalMailboxSeenBehaviorUnchanged",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestPersonalStateWritesStillEmitMailboxEvents",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestPinnedTemplateDraftRemainsUsableAfterNewPublication",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3AttachmentCleanupRespectsLiveDraftReferences",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3BootstrapIsAtomicAcrossRoles",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3CompanyHTTPJourney",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3CoordinatedSnapshotRestoresIntoEmptyTargets",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3DraftRevisionAndAttachmentAuthorization",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3DraftTemplateVersionEligibilityContract",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3EmployeeActivationSingleUseAndPrivateProvisioning",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3EmployeeInvitationRevocationExpiryAndAuditRollback",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3MessageMutationAuditRollback",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3OffboardingAndOptimisticHandover",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3PasswordChangeInvalidatesExistingAccess",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3RealSMTPRecipientIsolationAndUncertainRecovery",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3SharedMailboxRightsAndGrantAuditRollback",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3SoftDeleteRestoreRetentionAndEvents",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3SubmissionIdempotencyTemplateOnlyAndCodec",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3TemplateImmutableVersionsAndCurrentGrants",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3TemplateVersionRevocationStopsUndeliveredSends",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5APIKeyLastUsedIPRoundTrips",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationCancellationReleasesSnapshot",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationFailureReturnsNoProjection",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationNeverCombinesTargetGenerations",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationOrdersPermissionChanges",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationPreservesCanonicalDecisions"
+      ],
+      "events": 30290,
+      "mandatory_missing_or_not_passed": 388,
+      "mandatory_tests": 872,
+      "missing_required_packages": [],
+      "packages": 51,
+      "product_green": false,
+      "runtime_executed": true,
+      "source_identity_kind": "executor_frozen_dirty_tree_not_HEAD",
+      "source_sha": "27633d96f6bc93d226ce158d71dc215b19ae429a",
+      "status": "fail",
+      "task_complete": false,
+      "tests_failed": 1,
+      "tests_passed": 7373,
+      "tests_skipped": 1,
+      "tests_started": 7395,
+      "unknown_failures_allowed": 0
+    },
+    "original-backend247-classifier": {
+      "allowed_skips_observed": [
+        {
+          "package": "tabmail/internal/store/postgres",
+          "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+          "test": "TestR3BrowserJourney"
+        }
+      ],
+      "errors": [
+        "go test process exit was 1, not 0",
+        "test failed: tabmail/internal/store/postgres::TestR5LegacyContentKeyHTTPPreservesSafeReceipt",
+        "package tabmail/internal/store/postgres ended with unfinished tests",
+        "package failed: tabmail/internal/store/postgres",
+        "missing test completion: tabmail/internal/store/postgres::TestR5AccessExplanationWaitsForTargetWrites",
+        "missing test completion: tabmail/internal/store/postgres::TestR5AccessExplanationOrdersPermissionChanges",
+        "missing test completion: tabmail/internal/store/postgres::TestR5AccessExplanationFailureReturnsNoProjection",
+        "missing test completion: tabmail/internal/store/postgres::TestR5AccessExplanationPreservesCanonicalDecisions",
+        "missing test completion: tabmail/internal/store/postgres::TestR5ActivationExpiryAfterRealWaitRollsBack",
+        "missing test completion: tabmail/internal/store/postgres::TestR5AttachmentFinishUsesTimeAfterLockWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5AttachmentGCTenantLockTimeoutContinuesRound",
+        "missing test completion: tabmail/internal/store/postgres::TestR5SentMutationRejectsExpiryAfterItemWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5SentMutationRollsBackExpiryDuringAuditWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5SentReadUsesTimeAfterIdentityWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5EnqueueRechecksAuthorityAfterParentWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5EnqueueAuditWaitExpiryAndCancellation",
+        "missing test completion: tabmail/internal/store/postgres::TestR5GlobalProfileFanoutRecipients",
+        "missing test completion: tabmail/internal/store/postgres::TestR5GlobalProfileFanoutRequiredRollback",
+        "missing test completion: tabmail/internal/store/postgres::TestR5GlobalProfileFanoutAuthority",
+        "missing test completion: tabmail/internal/store/postgres::TestR5IndexCompleteRechecksAfterJobWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5IndexFailRechecksAfterJobWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5IndexCompleteRechecksAfterDocumentWait",
+        "missing test completion: tabmail/internal/store/postgres::TestR5IngressLeaseExpiryAfterTenantWaitRollsBack",
+        "missing test completion: tabmail/internal/store/postgres::TestR5LegacyContentKeyExpiryAfterMailboxWait",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureDraftCreationReplayAndTombstone",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureOffboardingExpiryAndAuditRollback",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureOffboardingPreviewFencesChangesAndReplay",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureSentAssetCreationRollsBackWithJob",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureSentAssetsOutliveQueueAndRemainPrivate",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestArchitectureUpgradeBackfillsExistingEmployeeAssets",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestMigrateAppliesCleanly",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestP0GooseRestartAndHistoricalGrantSafety",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestP0PostgresOutboundDomainFencingAndUncertainty",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestP0PostgresOwnerGrantAndPermanentRetention",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR3CoordinatedSnapshotRestoresIntoEmptyTargets",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5APIKeyLastUsedIPRoundTrips",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationCancellationReleasesSnapshot",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationFailureReturnsNoProjection",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationNeverCombinesTargetGenerations",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationOrdersPermissionChanges",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationPreservesCanonicalDecisions",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationRejectsBusyTargetProfile",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AccessExplanationWaitsForTargetWrites",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5ActivationBusyFinalDomainFenceRollsBackWithoutWait",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5ActivationCurrentSponsorAndDomainBoundary",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5ActivationDomainWithdrawalDuringAuditWaitRollsBack",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5ActivationDuplicateTokenCommandsCommitOnce",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5ActivationExpiryAfterRealWaitRollsBack",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5ActivationReadsCurrentProfileAfterTenantWait",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AtomicRetryAuditWaitExpiryAndCancellation",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AtomicRetryConcurrentCommands",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AtomicRetryKeyExpiryDuringJobWait",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AtomicRetryOrdersAuthorizationChanges",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AtomicRetryOutboxFailureAndAcceptedRecipients",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AtomicRetryRechecksLockedJobAndRecipientState",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AtomicRetryRequiredAuditRollsBack",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AtomicRetryTemplatesAndLegacyIdentity",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AttachmentFinishCancellationRollsBack",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AttachmentFinishCanonicalChecksumAndReplay",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AttachmentFinishOnlyOneChecksumWins",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AttachmentFinishOrdersMailboxRevocation",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AttachmentFinishRejectsConcurrentRemoval",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AttachmentFinishRejectsExpiryAfterWait",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AttachmentFinishRejectsNonHexChecksum",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AttachmentFinishUsesTimeAfterLockWait",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AuditedIndependentWritesShareParent",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AuditedWritesAuditFailureRollsBack",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AuditedWritesOrderMemberFreeze",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AuditedWritesParentPrecedesActor",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5AuditedWritesReloadActorAfterParentWait",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5CacheBusySourceRejectsBeforePhysicalDeleteCounterRelease",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5CacheConstraintFailureRollsBackDerivedWrite",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5CachePlainAndAuditedRecoveryParentClassification",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5CacheWriteAndIngressDoNotAcquireAncestorFK",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5CacheWriteVersusPhysicalDeleteLockOrder",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5ConcurrencyIndependentSubmissionsShareParentLock",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5ConcurrencyR01EnqueueOffboardNoAttachmentCycle",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5ConcurrencyR02DraftCannotCommitAfterCompletedRevoke",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5ConcurrencyR03EnqueueOffboardNoTenantFKCycle",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5ContentReadsFenceMailboxSnapshot",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5ConvertSharedRetentionCompleteCommands",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5ConvertSharedRetentionNormalAndAuditRollback",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5EnqueueAuditWaitExpiryAndCancellation",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5EnqueueAuthorizedIndependentSubmissionsShareParent",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5EnqueueProtectsAuthorityThroughInsert",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5EnqueueQuotaChangeOrdersThroughInsert",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5EnqueueQuotaUTCMidnightCountingBoundary",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5EnqueueQuotaUnlimitedToFiniteSharedUser",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5EnqueueQuotaUsesCurrentPermissionAfterParentWait",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5EnqueueRechecksAuthorityAfterParentWait",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5EnqueueRequiredAuditFailureRollsBack",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5IndexCancelledCompletionReleasesLocks",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5IndexCompleteRechecksAfterDocumentWait",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5IndexCompleteRechecksAfterJobWait",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5IndexDocumentFailureRollsBackCompletion",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5IndexFailRechecksAfterJobWait",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5IndexRejectsChangedSourceAndStaleToken",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5IndexSourceLockPrecedesJob",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5IngressAcceptanceRollsBackEarlierTarget",
+        "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5IngressAuditFailureRollsBackCheckpointAndQuota"
+      ],
+      "events": 30290,
+      "log_sha256": "ad42a61fa4ed34a973235de26a21a531a02bf007dba4520ab1cf29ab4fb84350",
+      "mandatory_missing_or_not_passed": 180,
+      "mandatory_tests": 247,
+      "manifest_sha256": "6b5e7fc0fc37b7098d5aa8aeace43f25f0f98f5c1f2e1f73ce4495a14e692682",
+      "packages": 51,
+      "process_exit_code": 1,
+      "source_sha": "27633d96f6bc93d226ce158d71dc215b19ae429a",
+      "status": "fail",
+      "suite": "backend",
+      "tests_failed": 1,
+      "tests_passed": 7373,
+      "tests_skipped": 1,
+      "tests_started": 7395
+    }
+  },
+  "cleanup": {
+    "base_database": "tm_whole_current_validation",
+    "elapsed_entire_job_through_nativecleanup": 342.68304896354675,
+    "job_absolute_deadline": 1790952150.6508338,
+    "job_origin_wall": 1790950950.6508338,
+    "jobbudget1200_initcleanupincluded": true,
+    "old_clusters_S_M_current17_18_short_not_touched": true,
+    "owned_pg_pid": 58695,
+    "owned_pid_observation": "absent",
+    "owned_pid_ps_exit": 1,
+    "owned_root": "/private/tmp/tm-r5whole-current-final.qr0c0h9c",
+    "pg_stop_exit": 0,
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "temporary_databases_and_connections": [
+      "tm_test_62338d4e07f746e1bebf019e0634b1f3|0"
+    ],
+    "test_database_query_exit": 0,
+    "utc": "2026-10-02T14:28:13.090556+00:00",
+    "within_original1200": true
+  },
+  "controller_review_original_unchanged": "current18-backend-runtime-review.json",
+  "currently_running_test_at_package_timeout_not_proven_individual_timeout": true,
+  "environment_mismatch_classification": "controller copied GOMAXPROCS=1 bootstrap default into whole runtime; cannot claim authorized GOMAXPROCS2 execution or attribute two-lane effectiveness",
+  "execution_contract_environment_mismatch": true,
+  "four_job_CI_pass": false,
+  "historical_stopped_test_database_preserved": [
+    "tm_test_62338d4e07f746e1bebf019e0634b1f3|0"
+  ],
+  "mandatory_count": 872,
+  "native_process_stopped_not_all_residual_databases_deleted": true,
+  "package_terminals": {
+    "tabmail/cmd/r5txinventory": {
+      "elapsed": 0,
+      "terminal": "skip"
+    },
+    "tabmail/cmd/tabmail": {
+      "elapsed": 0,
+      "terminal": "skip"
+    },
+    "tabmail/internal/api": {
+      "elapsed": 39.358,
+      "terminal": "pass"
+    },
+    "tabmail/internal/api/handlers": {
+      "elapsed": 2.141,
+      "terminal": "pass"
+    },
+    "tabmail/internal/api/middleware": {
+      "elapsed": 2.898,
+      "terminal": "pass"
+    },
+    "tabmail/internal/app": {
+      "elapsed": 1.393,
+      "terminal": "pass"
+    },
+    "tabmail/internal/app/admin": {
+      "elapsed": 1.521,
+      "terminal": "pass"
+    },
+    "tabmail/internal/app/companymail": {
+      "elapsed": 1.678,
+      "terminal": "pass"
+    },
+    "tabmail/internal/app/credentials": {
+      "elapsed": 1.621,
+      "terminal": "pass"
+    },
+    "tabmail/internal/app/domains": {
+      "elapsed": 1.736,
+      "terminal": "pass"
+    },
+    "tabmail/internal/app/drafts": {
+      "elapsed": 0,
+      "terminal": "skip"
+    },
+    "tabmail/internal/app/employees": {
+      "elapsed": 0,
+      "terminal": "skip"
+    },
+    "tabmail/internal/app/mailarchive": {
+      "elapsed": 0,
+      "terminal": "skip"
+    },
+    "tabmail/internal/app/mailboxes": {
+      "elapsed": 1.437,
+      "terminal": "pass"
+    },
+    "tabmail/internal/app/mailindex": {
+      "elapsed": 0,
+      "terminal": "skip"
+    },
+    "tabmail/internal/app/messages": {
+      "elapsed": 1.4969999999999999,
+      "terminal": "pass"
+    },
+    "tabmail/internal/app/permissions": {
+      "elapsed": 1.563,
+      "terminal": "pass"
+    },
+    "tabmail/internal/app/recovery": {
+      "elapsed": 0,
+      "terminal": "skip"
+    },
+    "tabmail/internal/app/submissions": {
+      "elapsed": 1.478,
+      "terminal": "pass"
+    },
+    "tabmail/internal/app/templates": {
+      "elapsed": 0,
+      "terminal": "skip"
+    },
+    "tabmail/internal/architecture": {
+      "elapsed": 1.597,
+      "terminal": "pass"
+    },
+    "tabmail/internal/authn": {
+      "elapsed": 1.401,
+      "terminal": "pass"
+    },
+    "tabmail/internal/authz": {
+      "elapsed": 1.3980000000000001,
+      "terminal": "pass"
+    },
+    "tabmail/internal/autocreate": {
+      "elapsed": 0,
+      "terminal": "skip"
+    },
+    "tabmail/internal/classify": {
+      "elapsed": 1.3980000000000001,
+      "terminal": "pass"
+    },
+    "tabmail/internal/company": {
+      "elapsed": 1.445,
+      "terminal": "pass"
+    },
+    "tabmail/internal/config": {
+      "elapsed": 1.463,
+      "terminal": "pass"
+    },
+    "tabmail/internal/configcache": {
+      "elapsed": 1.42,
+      "terminal": "pass"
+    },
+    "tabmail/internal/delivery": {
+      "elapsed": 1.696,
+      "terminal": "pass"
+    },
+    "tabmail/internal/dkim": {
+      "elapsed": 1.9769999999999999,
+      "terminal": "pass"
+    },
+    "tabmail/internal/hooks": {
+      "elapsed": 7.633,
+      "terminal": "pass"
+    },
+    "tabmail/internal/ingest": {
+      "elapsed": 5.866,
+      "terminal": "pass"
+    },
+    "tabmail/internal/mailcontent": {
+      "elapsed": 2.394,
+      "terminal": "pass"
+    },
+    "tabmail/internal/metrics": {
+      "elapsed": 1.522,
+      "terminal": "pass"
+    },
+    "tabmail/internal/models": {
+      "elapsed": 1.428,
+      "terminal": "pass"
+    },
+    "tabmail/internal/outbound": {
+      "elapsed": 2.407,
+      "terminal": "pass"
+    },
+    "tabmail/internal/policy": {
+      "elapsed": 1.408,
+      "terminal": "pass"
+    },
+    "tabmail/internal/rawobject": {
+      "elapsed": 1.41,
+      "terminal": "pass"
+    },
+    "tabmail/internal/realtime": {
+      "elapsed": 1.5270000000000001,
+      "terminal": "pass"
+    },
+    "tabmail/internal/resolver": {
+      "elapsed": 1.605,
+      "terminal": "pass"
+    },
+    "tabmail/internal/retention": {
+      "elapsed": 1.516,
+      "terminal": "pass"
+    },
+    "tabmail/internal/sanitize": {
+      "elapsed": 1.425,
+      "terminal": "pass"
+    },
+    "tabmail/internal/settings": {
+      "elapsed": 0,
+      "terminal": "skip"
+    },
+    "tabmail/internal/smtp": {
+      "elapsed": 1.8900000000000001,
+      "terminal": "pass"
+    },
+    "tabmail/internal/store": {
+      "elapsed": 0,
+      "terminal": "skip"
+    },
+    "tabmail/internal/store/fileobj": {
+      "elapsed": 3.35,
+      "terminal": "pass"
+    },
+    "tabmail/internal/store/postgres": {
+      "elapsed": 180.847,
+      "terminal": "fail"
+    },
+    "tabmail/internal/store/s3obj": {
+      "elapsed": 0,
+      "terminal": "skip"
+    },
+    "tabmail/internal/testpg": {
+      "elapsed": 1.541,
+      "terminal": "pass"
+    },
+    "tabmail/internal/testutil": {
+      "elapsed": 1.472,
+      "terminal": "pass"
+    },
+    "tabmail/internal/workqueue": {
+      "elapsed": 1.404,
+      "terminal": "pass"
+    }
+  },
+  "package_timeout_outputs": [
+    {
+      "excerpt": "=== RUN   TestR5LegacyContentKeyExpiryAfterMailboxWait\npanic: test timed out after 3m0s\n\trunning tests:\n\t\tTestR5LegacyContentKeyExpiryAfterMailboxWait (1s)\n\ngoroutine 19104 [running]:\ntesting.(*M).startAlarm.func1()\n\t/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/src/testing/testing.go:2682 +0x490\ncreated by time.goFunc\n\t/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/src/time/sleep.go:215 +0x44\n\ngoroutine 1 [chan receive]:\ntesting.(*T).Run(0xc000003c00, {0x101f76df5, 0x2c}, 0x102740970)\n\t/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/src/testing/testing.go:2005 +0x700\ntesting.runTests.func1(0xc000003c00)\n\t/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/src/testing/testing.go:2477 +0x78\ntesting.tRunner(0xc000003c00, 0xc0004a5a38)\n\t/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/src/testing/testing.go:1934 +0x168\ntesting.runTests(0xc00000e228, {0x103190fe0, 0x185, 0x185}, {0x100d68ac0?, 0x100dd6a6c?, 0x103196d40?})\n\t/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/src/testing/testing.go:2475 +0x738\ntesting.(*M).Run(0xc00048cb40)\n\t/Users/jin/.cache/go-mod/golang.org/toolchain@v",
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5LegacyContentKeyExpiryAfterMailboxWait"
+    }
+  ],
+  "paused_not_continued": [
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5AccessExplanationFailureReturnsNoProjection"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5AccessExplanationOrdersPermissionChanges"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5AccessExplanationPreservesCanonicalDecisions"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5AccessExplanationWaitsForTargetWrites"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ActivationExpiryAfterRealWaitRollsBack"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5AttachmentFinishUsesTimeAfterLockWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5AttachmentGCTenantLockTimeoutContinuesRound"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5EnqueueAuditWaitExpiryAndCancellation"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5EnqueueRechecksAuthorityAfterParentWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5GlobalProfileFanoutAuthority"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5GlobalProfileFanoutRecipients"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5GlobalProfileFanoutRequiredRollback"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5IndexCompleteRechecksAfterDocumentWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5IndexCompleteRechecksAfterJobWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5IndexFailRechecksAfterJobWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SentMutationRejectsExpiryAfterItemWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SentMutationRollsBackExpiryDuringAuditWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SentReadUsesTimeAfterIdentityWait"
+    ]
+  ],
+  "postgres_package_cont_count": 0,
+  "postgres_package_pause_count": 19,
+  "raw_test_counts": {
+    "fail": 1,
+    "pass": 7373,
+    "run": 7395,
+    "skip": 1,
+    "unfinished": 20
+  },
+  "schema_version": 1,
+  "scope": "current18 whole backend single captured failed attempt; no retry",
+  "source_declared_top_not_started": [
+    [
+      "tabmail/internal/store/postgres",
+      "TestAR04LegacyRecipientMigrationPreservesEvidence"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestP4SubmissionContentAndAttachmentsScope"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5APIKeyLastUsedIPRoundTrips"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5IngressDeliveryOrdersZoneRevocationAfterAuditWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5IngressDeliveryRejectsTargetExpiryAfterAuditWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5LegacyContentPropagatesStorageFailure"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5LegacyRecipientProjectionRechecksAfterLedgerWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5LockMapDraftAuthorizationWaitsForMailboxFence"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5LockMapDraftUserFenceOrdersSuspension"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5LockMapEnqueueParentAndUserBeforeAttachments"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5LockMapExistingDraftCASAvoidsTenantLock"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5LockMapRefreshFamilyThenUserThenToken"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5MessageCompanyClearPreservesExistingTombstones"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5MessageOrganizeAndRetentionCompleteCommandsLockOrder"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5MessageOwnerSeenAndRetentionCompleteCommandsLockOrder"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5MessageTrashAndRetentionCompleteCommandsLockOrder"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OffboardingLifecycleAssignedProfileContentABA"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OffboardingLifecycleAuditWaitExpiryRollsBack"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OffboardingLifecycleFreshReentryAndSuccessorEpoch"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OffboardingLifecycleFrozenTargetAndQualifiedReplay"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OffboardingLifecycleOldCompletionEpochDenied"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OffboardingLifecyclePlanWaitUsesDatabaseDeadline"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OffboardingLifecyclePreviewExpiryBeforeReleaseRollsBack"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OffboardingLifecycleProfileVersionFence"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OffboardingLifecycleSharedAndNullableProfileReceipt"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OffboardingLifecycleShippingHTTP"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundInspectionPGBusyJobAndLedger"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundInspectionPGCurrentAuthorityAfterWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundInspectionPGFaultZeroPayloadAndEffects"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundInspectionPGLedgerAndJobSnapshotFence"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundInspectionPGSafeCompleteProjection"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundReceiptKeyExpiryAfterQueryWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundReceiptListMatchesDetailScope"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundReceiptListOrdersMemberFreeze"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundReceiptOwnerlessKeyAndRetryScope"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundReceiptPrivacyHTTPAllReadSurfaces"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundReceiptPrivacyHTTPCommitVersusDisplayFailure"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundReceiptPrivacyHTTPFreshAndReplay"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundReceiptPrivacyHTTPRetry"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundReceiptPrivacyPGSnapshotAndUnknownLedger"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundReceiptRejectsStalePrincipal"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundReceiptStablePaginationAndEmptyPage"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5OutboundReceiptStorageErrorAndTenantIsolation"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PGAdmissionBoundedAndReusable"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PGAdmissionExactWhitelist"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PasswordAuditFailureRollsBackSessionAndRefresh"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PasswordAuditParentPrecedesUserUpdate"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PasswordChangeOrdersMemberFreeze"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionAuthorityMatrixEmptyCASAndNullableIntent"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionAuthorityMatrixHierarchy"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionAuthorityMatrixLockWaitRecheck"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionAuthorityMatrixNonInteractive"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorABARejectsOldCAS"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorAuditFailureRollsBackAll"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorAuthorityReload"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorBusyProfileFailsClosed"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorConcurrentCASSingleWinner"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorConcurrentSnapshotNeverMixes"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorDomainModesAndInvalidZone"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorFormalAssignmentCASAndABA"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorFormalBusyProfileConflict"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorFormalCommandsAuditRollback"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorFormalDeletionInvitationFKNoEffects"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorFormalDeletionRejectsPreviewDrift"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorFormalGlobalSuperAdminEffects"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorFormalPreviewAssignmentOverlap"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorFormalProfileCASLifecycle"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorFormalProfileScopeAndHierarchy"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorFormalSameUUIDRecreation"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorLegacyDomainIntent"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorNoProfileDefaults"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorPatchCASAndIntent"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorProfileIdentityRecreationABA"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorRawSources"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionEditorRevisionOwnersAndABA"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionProfileCreateAuthorityAndZoneFailures"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionProfileCreateFreshScopeAndRevision"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionProfileCreateGlobalAnchorIsPersistent"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionProfileCreateInvalidValuesAndMissingHome"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionProfileCreateLockWaitRechecksAuthority"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionProfileCreateRequiredAuditOutboxRollback"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionProfileCreateSuppressedInsertFailsClosed"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionProfileCreateZoneBusyAndShippingService"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionProfileVisibilityCredentialChanges"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionProfileVisibilityCurrentRole"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionProfileVisibilityLockWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionProfileVisibilityScope"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionSnapshotBusyProfileFailsClosed"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionSnapshotFailureReleasesLocks"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionSnapshotIndependentUsersShareProfile"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionSnapshotOrdersChanges"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionSnapshotOrdersContentScope"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionSnapshotOverrideFailureAndMissingUser"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionSnapshotPreservesEffectiveSemantics"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionSnapshotWriterFirstReloads"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionStageEffectiveSemanticComparison"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionStagePostgresAdminOwnedKeyBoundary"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionStagePostgresNoopProducesNoEvent"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionStagePostgresOwnerlessKeyScope"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionStagePostgresOwnerlessRetryPoliciesBlockSMTP"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionStagePostgresOwnerlessRetryRejections"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionStagePostgresOwnerlessRetryRetainsAcceptedRecipients"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionStagePostgresOwnerlessSenderProvenanceConsistency"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionStagePostgresRequiredOutbox"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionStagePostgresTruthTable"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PermissionStagePostgresWorkerRevocation"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5PersonalMessageStateAndRetentionCompleteCommands"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5QueueNullableDiagnosticsClaimAndRead"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReadAdminAndWrongMailboxDoNotOpenObject"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReadCachedContentRejectsNewRequestsAfterRevoke"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReadWaitingIdentityReloadRejectsFrozenActor"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReceivedContentEligibilityMatrix"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReceivedContentRechecksDeadlineAfterAuthorizationWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReceivedContentRechecksExpiryAtObjectBoundaries"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReceivedConversationMembersAndSearchAreEligible"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReceivedEligibilityAfterLaterWaits"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReceivedPersonalHistoricalExpiryIsExempt"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RecoveryAuditOrdersMemberFreeze"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RecoveryAuditParentPrecedesActor"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RecoveryAuditReloadsActorAfterParentWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RecoveryInspectRetainsUnavailableDestinationOriginal"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RecoveryReconcileDoesNotRequireLiveSender"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RecoveryRetryDoesNotRequireReadOrSendPolicy"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RecoveryRetryHTTPDestinationBusyConflict"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RecoveryRetryOrdersDestinationChanges"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RecoveryRetryRejectsExpiryAfterAuditWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReferenceGCKeepsSentPinAfterQueueCleanup"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReferenceGCRollsBackIfOrphanRegistrationFails"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReferenceObjectCallbackCancellationReleasesKey"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReferenceObjectGCWaitsForCommittedMessage"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReservationCancellationReleasesLocksAndBudget"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReservationConcurrentBudgetIsAtomic"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReservationOrdersMailboxRevocation"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReservationOtherUploaderRemainsIndependent"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ReservationWaitsForMailboxBeforeBudget"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RestoreAndRetentionSnapshotEligibility"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RestoreLifecycleCurrentProofVersusGC"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RestoreLifecyclePreservesRecordedDeadline"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RestoreLifecycleRechecksClockAfterWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RestoreLifecycleRejectsElapsedDeadlineWithoutEffects"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RestoreLifecycleSourceBusyAndDeleted"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RestoreRetentionEligibilityControls"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5RestoreRetentionExpiredSourceControl"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SchemaInventoryAndRestart"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SentRecipientSnapshotCompleteOutlivesJobAndLedger"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SentRecipientSnapshotImmutableAndAtomic"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SentRecipientSnapshotRejectsDeadlineAfterMailboxWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SentRecipientSnapshotUpgradeV16BoundedTrustedBackfill"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SentRecipientSnapshotUsesExistingCurrentReadAndLifecycle"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SessionVersionInFlightRouterAuthorization"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SubmissionCompanyPostRejectsAPIKeyReplay"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SubmissionConsumedReplayRechecksIdentity"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SubmissionInnerConcurrentReplayUsesSafeReceipt"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SubmissionReceiptPrivacyHTTPShippingProjection"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SubmissionReceiptPrivacyPGClassification"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SubmissionReceiptPrivacyPGCompleteLedger"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SubmissionReceiptPrivacyPGFailClosedReadError"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SubmissionReceiptPrivacyPGPrincipalAndLifetime"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SubmissionReceiptPrivacyPGTenantIsolation"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SubmissionReceiptPrivacyPGUnknownProvenance"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SubmissionReplayExpiresContentWithoutReenqueuing"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SubmissionReplayRejectsChangedIntent"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SuppressionAuthorityNormalContracts"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SuppressionJWTGuardedAuthorityAfterParentWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SuppressionJWTSessionVersionAfterSourceWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SuppressionKeyRevocationAfterSourceWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SuppressionScopesMigrationFreshUpgradeRepeat"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SuppressionTenantCompleteCommandsOrder"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SuppressionTenantNormalControls"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5TemplatePublishRevokeCompleteCommandsParentOrder"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5TemplateVersionAlreadyRevokedIsNoOp"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5TemplateVersionRequiredAuditFailureRollsBack"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5TenantDeleteNormalCatalogControls"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5UserProfileCompleteCommandsLockOrder"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5UserProfileNormalAssignmentAndDelete"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5UserProfileRequiredAuditFailureRollsBack"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5WebhookFanoutBatchFailureRollsBack"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5WebhookFanoutClaimReclaimAndUniqueReplay"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5WebhookFanoutCompleteCommandsURLLockOrder"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestReleasePostgresLastAdminConcurrent"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestReleasePostgresMemberAuditRollback"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestReleasePostgresMemberPatchAndRoleRecheck"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestReleasePostgresOwnedPrivateMailboxConstraint"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestReleasePostgresRefreshCleanupPreservesReplayEvidence"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestReleasePostgresRefreshConcurrentSingleConsumer"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestReleasePostgresRefreshDescendantAndLogoutRaces"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestReleasePostgresRefreshRollback"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestReleasePostgresSharedMailboxAndOutboundScope"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestSendPolicyAdminCompanyDefaultLifecycle"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestSendPolicyAdminHTTPJourney"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestSendPolicyAdminValidationAndGuards"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestSendPolicyBindsAdminGrant"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestSendPolicyDefaultsAndEffectiveResolution"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestSendPolicyGatesEnqueuedJobAtNextAttempt"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestSendPolicyMailboxOverrideAdminLifecycle"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestSubmissionListRejectsAPIKeyPrincipal"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestSubmissionProjectionScopeAndDTO"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestSubmissionScopeRejectsCrossTenantRows"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestSubmissionUncertaintyMapsToNeedsAttention"
+    ]
+  ],
+  "source_declared_top_not_started_count": 201,
+  "source_sha": "27633d96f6bc93d226ce158d71dc215b19ae429a",
+  "test_failure_and_package_timeout_are_separate": true,
+  "test_failures": [
+    {
+      "elapsed": 0.32,
+      "output": "=== RUN   TestR5LegacyContentKeyHTTPPreservesSafeReceipt\n    r5_legacy_content_test.go:233: valid owned key lost live content\n--- FAIL: TestR5LegacyContentKeyHTTPPreservesSafeReceipt (0.32s)\n",
+      "package": "tabmail/internal/store/postgres",
+      "test": "TestR5LegacyContentKeyHTTPPreservesSafeReceipt"
+    }
+  ],
+  "unfinished_tests": [
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5AccessExplanationFailureReturnsNoProjection"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5AccessExplanationOrdersPermissionChanges"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5AccessExplanationPreservesCanonicalDecisions"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5AccessExplanationWaitsForTargetWrites"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5ActivationExpiryAfterRealWaitRollsBack"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5AttachmentFinishUsesTimeAfterLockWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5AttachmentGCTenantLockTimeoutContinuesRound"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5EnqueueAuditWaitExpiryAndCancellation"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5EnqueueRechecksAuthorityAfterParentWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5GlobalProfileFanoutAuthority"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5GlobalProfileFanoutRecipients"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5GlobalProfileFanoutRequiredRollback"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5IndexCompleteRechecksAfterDocumentWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5IndexCompleteRechecksAfterJobWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5IndexFailRechecksAfterJobWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5LegacyContentKeyExpiryAfterMailboxWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SentMutationRejectsExpiryAfterItemWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SentMutationRollsBackExpiryDuringAuditWait"
+    ],
+    [
+      "tabmail/internal/store/postgres",
+      "TestR5SentReadUsesTimeAfterIdentityWait"
+    ]
+  ],
+  "utc": "2026-10-02T14:53:20.111332+00:00",
+  "whole_backend_pass": false
+}

@@ -1,0 +1,324 @@
+{
+  "schema_version": 1,
+  "date_utc": "2026-10-04",
+  "qualification": "bounded_synthetic_python_regression_only",
+  "repository": "jyqj/tabmail",
+  "base_commit": "c31076ab0c445f0fdb02da08f0fb3bbf79520271",
+  "base_tree": "b460a04c4a0e51bc981f3fef4e5eae4c0bef55c7",
+  "partial_source_extract": true,
+  "python_version": "3.12.14",
+  "verified_base_source_files": {
+    "docs/VERSIONING.md": {
+      "bytes": 9317,
+      "git_blob_sha": "66d77d543c68654c92a7e7167574291a3889f095",
+      "sha256": "ecf6d48ab958404148dca6328fe6246b21021338d2607adef774db02bf11fd29"
+    },
+    "scripts/contracts/r5-selected-binding-v3-producer.json": {
+      "bytes": 3786,
+      "git_blob_sha": "eb9b5926511aad4f1fc3349f3a82eb38c00e64a5",
+      "sha256": "cc80c215f1bf51f2a014ff5e6a37084f29f54a904c69ee58ba52febbd125df66"
+    },
+    "scripts/r5_archive_boundary.py": {
+      "bytes": 12437,
+      "git_blob_sha": "e0941e01f779fdf38bcbe97d928b2fcf90715ea5",
+      "sha256": "c02acc09dd0f49b28113f99b05ffc6ff996287fb015d60fa08d7de56d92b7f15"
+    },
+    "scripts/r5_private_diagnostics.py": {
+      "bytes": 5364,
+      "git_blob_sha": "65be7a3b123a37b86403bc799d50d241aecd15f0",
+      "sha256": "a4bf39ca060f3dced9d2ce14c0e6c7e776676b0382fbb6f8070a89a9008cd580"
+    },
+    "scripts/r5_selected_source_binding.py": {
+      "bytes": 18666,
+      "git_blob_sha": "f5c67257615a7c41543ad0e1447983e994bed45a",
+      "sha256": "15f5cdf4b13ee09558cc368e367091d4802804a7c9724065faf5c50605b8a873"
+    },
+    "scripts/r5_selected_source_binding_v2.py": {
+      "bytes": 26192,
+      "git_blob_sha": "9a43bdc161750505fa217ab96987ce60673b2df9",
+      "sha256": "4bafe6a0b146c69aaf76dfaa206a95ac581739e3c0efa4a52bf36613ae817d67"
+    },
+    "scripts/r5_selected_source_binding_v3.py": {
+      "bytes": 17737,
+      "git_blob_sha": "3a5c94f4b0c2a22b29636f1ccaa77e6ea597398a",
+      "sha256": "a20cb2fbafc697f7fa607512d47a50dbdb0b785a9f038a1caeeacd9cbd874d35"
+    },
+    "scripts/r5_source_inventory.py": {
+      "bytes": 40174,
+      "git_blob_sha": "4215c11019249e9647cd3c4188d7854d450fccf9",
+      "sha256": "306cfcae043925d656d13b08bd439015e23348df255b363ceb8c10b6890488b2"
+    },
+    "scripts/tests/r5_selected_source_binding_v3_checks.py": {
+      "bytes": 19608,
+      "git_blob_sha": "f4b80363e41b74c783a2226f582e15847eb3bc02",
+      "sha256": "632c5968163725d91c66b489dacd6284b74ac1e9a306c2cc1b817b77c895511f"
+    },
+    "scripts/tests/test_r5_archive_boundary.py": {
+      "bytes": 8942,
+      "git_blob_sha": "6e456a6ff2bbebea52fa3a2bad21863fac040f78",
+      "sha256": "ef5041fa2d803ead61f0e99f8b632d6e71ba7981f67db13ab88871632f9b6ce9"
+    },
+    "scripts/tests/test_r5_selected_source_binding_v2.py": {
+      "bytes": 10623,
+      "git_blob_sha": "e8659bdc08a750798097cc86cce60aa872eeed09",
+      "sha256": "4ec1405e5683d7153d345c4c85a82bcd5ba37470f929f14cb2a57c436281feea"
+    },
+    "scripts/tests/test_r5_smtp_owner_source_inventory.py": {
+      "bytes": 19692,
+      "git_blob_sha": "c3ca4133840bca73bb4d6b78c4c40ab6d2dc1a10",
+      "sha256": "de8f528a65ad9103f70e393f9fee03a020e055b486627a8040ca18eb0b81a99c"
+    }
+  },
+  "tested_code": {
+    "scripts/r5_selected_source_binding_v3.py": {
+      "bytes": 18220,
+      "git_blob_sha": "cd5aeca02d10c81802daec655e6ca913786d63c5",
+      "sha256": "c2682ae594c006e85ff860033766a25f920d35ab9a9113d22bf56232132936c2"
+    },
+    "scripts/tests/r5_selected_binding_v3_rejection_checks.py": {
+      "bytes": 4338,
+      "git_blob_sha": "f4c0a9a0e4bb0c9fadcbdaa377e382a8297309b5",
+      "sha256": "f19401c2d6c955d0b55660036c72143fd8a45c3d417fe3d96719a6a63074bbc2"
+    }
+  },
+  "environment": {
+    "PYTHONPATH": "scripts:scripts/tests",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "R5_DIAGNOSTIC_ROOT": "unset"
+  },
+  "baseline_command": [
+    "python",
+    "-m",
+    "unittest",
+    "-v",
+    "r5_selected_binding_v3_rejection_checks"
+  ],
+  "fixed_command": [
+    "python",
+    "-m",
+    "unittest",
+    "-v",
+    "r5_selected_binding_v3_rejection_checks",
+    "r5_selected_source_binding_v3_checks.ProjectionTests",
+    "r5_selected_source_binding_v3_checks.EnvelopeTests",
+    "r5_selected_source_binding_v3_checks.CaptureOrderingTests"
+  ],
+  "baseline_rerun": {
+    "total": 8,
+    "passed": 4,
+    "failures": 1,
+    "errors": 3,
+    "skipped": 0,
+    "expected_failures": 0,
+    "exit_code": 1,
+    "checks": [
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_altered_envelope_rejects_before_capture",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_capture_failure_object_is_unchanged",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_constructor_failure_keeps_binding_mismatch",
+        "result": "ERROR"
+      },
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_context_cleanup_failure_keeps_binding_mismatch",
+        "result": "ERROR"
+      },
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_disk_full_keeps_binding_mismatch",
+        "result": "ERROR"
+      },
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_matching_binding_keeps_normal_success",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_retention_limit_keeps_binding_mismatch",
+        "result": "FAIL"
+      },
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_successful_retention_records_observed_then_rejects",
+        "result": "ok"
+      }
+    ],
+    "private_log": {
+      "bytes": 8787,
+      "git_blob_sha": "9a836e8a02ab1383ffbb925108cb7ddaab9291b8",
+      "sha256": "f8a48b4a0b721995ef31179e302bd447555f50eabde4b1eeaef65e60b073c7fa"
+    }
+  },
+  "fixed_rerun": {
+    "total": 26,
+    "passed": 26,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "expected_failures": 0,
+    "exit_code": 0,
+    "checks": [
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_altered_envelope_rejects_before_capture",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_capture_failure_object_is_unchanged",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_constructor_failure_keeps_binding_mismatch",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_context_cleanup_failure_keeps_binding_mismatch",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_disk_full_keeps_binding_mismatch",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_matching_binding_keeps_normal_success",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_retention_limit_keeps_binding_mismatch",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_successful_retention_records_observed_then_rejects",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_diagnostic_values_and_presence_equal_binding_different_observation",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_duplicates_nonfinite_and_malformed_streams",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_error_serialization_requires_complete_records",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_every_retained_field_and_nested_leaf_is_bound",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_invalid_types_for_every_registry_field",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_order_arrays_multiplicity_and_presence_bound",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_recursive_module_field_presence_bound",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_registry_source_shape_and_time",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_unknown_fields_in_all_nested_domains_fail_closed",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.EnvelopeTests.test_external_pin_required_and_resigning_rejected",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.EnvelopeTests.test_observation_change_can_preserve_binding_and_stays_separately_pinned",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.EnvelopeTests.test_validation_fresh_binding_mismatch_and_external_pin_precedes_execution",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.EnvelopeTests.test_version_rejection_before_capture_no_fallback",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_all_package_roles_projected_including_hydration_and_repetitions",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_producer_failure_interface_and_timeout_preserved",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_retained_mutation_in_each_repeated_role_rejected",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_source_before_after_drift_rejected",
+        "result": "ok"
+      },
+      {
+        "id": "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_unknown_or_diagnostic_type_in_every_package_role_rejected",
+        "result": "ok"
+      }
+    ],
+    "private_log": {
+      "bytes": 4496,
+      "git_blob_sha": "e67721ef609f158d6434ce7e491c6b93ddc5f34c",
+      "sha256": "35133b521aa7e22f465630d1ec9bb6e30226f057de8a0ec205096e6c9bef8edf"
+    }
+  },
+  "original_review_logs": {
+    "baseline": {
+      "result": {
+        "total": 8,
+        "passed": 4,
+        "failures": 1,
+        "errors": 3
+      },
+      "bytes": 8382,
+      "git_blob_sha": "62c8211039a1a0dcd0751c88145522fd4a5b565d",
+      "sha256": "90c9acbd45fe8f58828fa3315bfa857d09633b1690423908a05aff9bc68f8273"
+    },
+    "fixed": {
+      "result": {
+        "total": 26,
+        "passed": 26,
+        "failures": 0,
+        "errors": 0
+      },
+      "bytes": 4496,
+      "git_blob_sha": "1026a9d27744c9e95c711ece785e2fede4e35ddd",
+      "sha256": "b58094aa812a3fe76a749cd86887490cf413566a9a08801e0f9c76a3d6e1fcc2"
+    }
+  },
+  "execution_boundary": {
+    "synthetic_receipts": true,
+    "mocked_retention_faults": true,
+    "full_repository_suite": false,
+    "go_execution": false,
+    "fresh_metadata_capture": false,
+    "compile_experiment": false,
+    "formal_consumer_execution": false,
+    "service_database_http_or_mail": false,
+    "raw_logs_published": false
+  },
+  "central_todo": {
+    "base_blob": "983b50460d2175690fa163a2e68c2fca021acc95",
+    "base_bytes": 282463,
+    "base_characters": 173808,
+    "change": "append_only",
+    "completion_count": "10/171 unchanged"
+  },
+  "not_qualified": [
+    "formal consumer migration",
+    "full source/archive authority checks",
+    "fresh Go metadata or compilation attestation",
+    "default/sharedDB/HTTP/components/wholePG",
+    "Method19/SML/wholeCI",
+    "release or deployment"
+  ]
+}
